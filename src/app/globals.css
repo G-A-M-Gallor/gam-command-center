@@ -1,8 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* ── Accent color tokens (default: purple) ── */
+  --cc-accent-300: #d8b4fe;
+  --cc-accent-400: #c084fc;
+  --cc-accent-500: #a855f7;
+  --cc-accent-600: #9333ea;
+  --cc-accent-600-20: rgba(147, 51, 234, 0.2);
+  --cc-accent-600-30: rgba(147, 51, 234, 0.3);
+  --cc-accent-500-15: rgba(168, 85, 247, 0.15);
+  --cc-accent-500-30: rgba(168, 85, 247, 0.3);
+  --cc-accent-500-50: rgba(168, 85, 247, 0.5);
+
+  /* ── Border radius tokens (default) ── */
+  --cc-radius: 6px;
+  --cc-radius-lg: 8px;
+
+  /* ── Density tokens (default) ── */
+  --cc-density-px: 0.75rem;
+  --cc-density-py: 0.5rem;
+  --cc-density-gap: 1rem;
+  --cc-density-content: 1.5rem;
+
+  /* ── Font family token ── */
+  --cc-font-family: var(--font-geist-sans);
 }
 
 @theme inline {
@@ -12,15 +36,170 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ── Accent color palettes ── */
+
+[data-accent="purple"] {
+  --cc-accent-300: #d8b4fe;
+  --cc-accent-400: #c084fc;
+  --cc-accent-500: #a855f7;
+  --cc-accent-600: #9333ea;
+  --cc-accent-600-20: rgba(147, 51, 234, 0.2);
+  --cc-accent-600-30: rgba(147, 51, 234, 0.3);
+  --cc-accent-500-15: rgba(168, 85, 247, 0.15);
+  --cc-accent-500-30: rgba(168, 85, 247, 0.3);
+  --cc-accent-500-50: rgba(168, 85, 247, 0.5);
+}
+
+[data-accent="blue"] {
+  --cc-accent-300: #93c5fd;
+  --cc-accent-400: #60a5fa;
+  --cc-accent-500: #3b82f6;
+  --cc-accent-600: #2563eb;
+  --cc-accent-600-20: rgba(37, 99, 235, 0.2);
+  --cc-accent-600-30: rgba(37, 99, 235, 0.3);
+  --cc-accent-500-15: rgba(59, 130, 246, 0.15);
+  --cc-accent-500-30: rgba(59, 130, 246, 0.3);
+  --cc-accent-500-50: rgba(59, 130, 246, 0.5);
+}
+
+[data-accent="emerald"] {
+  --cc-accent-300: #6ee7b7;
+  --cc-accent-400: #34d399;
+  --cc-accent-500: #10b981;
+  --cc-accent-600: #059669;
+  --cc-accent-600-20: rgba(5, 150, 105, 0.2);
+  --cc-accent-600-30: rgba(5, 150, 105, 0.3);
+  --cc-accent-500-15: rgba(16, 185, 129, 0.15);
+  --cc-accent-500-30: rgba(16, 185, 129, 0.3);
+  --cc-accent-500-50: rgba(16, 185, 129, 0.5);
+}
+
+[data-accent="amber"] {
+  --cc-accent-300: #fcd34d;
+  --cc-accent-400: #fbbf24;
+  --cc-accent-500: #f59e0b;
+  --cc-accent-600: #d97706;
+  --cc-accent-600-20: rgba(217, 119, 6, 0.2);
+  --cc-accent-600-30: rgba(217, 119, 6, 0.3);
+  --cc-accent-500-15: rgba(245, 158, 11, 0.15);
+  --cc-accent-500-30: rgba(245, 158, 11, 0.3);
+  --cc-accent-500-50: rgba(245, 158, 11, 0.5);
+}
+
+[data-accent="rose"] {
+  --cc-accent-300: #fda4af;
+  --cc-accent-400: #fb7185;
+  --cc-accent-500: #f43f5e;
+  --cc-accent-600: #e11d48;
+  --cc-accent-600-20: rgba(225, 29, 72, 0.2);
+  --cc-accent-600-30: rgba(225, 29, 72, 0.3);
+  --cc-accent-500-15: rgba(244, 63, 94, 0.15);
+  --cc-accent-500-30: rgba(244, 63, 94, 0.3);
+  --cc-accent-500-50: rgba(244, 63, 94, 0.5);
+}
+
+[data-accent="cyan"] {
+  --cc-accent-300: #67e8f9;
+  --cc-accent-400: #22d3ee;
+  --cc-accent-500: #06b6d4;
+  --cc-accent-600: #0891b2;
+  --cc-accent-600-20: rgba(8, 145, 178, 0.2);
+  --cc-accent-600-30: rgba(8, 145, 178, 0.3);
+  --cc-accent-500-15: rgba(6, 182, 212, 0.15);
+  --cc-accent-500-30: rgba(6, 182, 212, 0.3);
+  --cc-accent-500-50: rgba(6, 182, 212, 0.5);
+}
+
+[data-accent="brand"] {
+  --cc-accent-300: var(--cc-brand-300);
+  --cc-accent-400: var(--cc-brand-400);
+  --cc-accent-500: var(--cc-brand-500);
+  --cc-accent-600: var(--cc-brand-600);
+  --cc-accent-600-20: var(--cc-brand-600-20);
+  --cc-accent-600-30: var(--cc-brand-600-30);
+  --cc-accent-500-15: var(--cc-brand-500-15);
+  --cc-accent-500-30: var(--cc-brand-500-30);
+  --cc-accent-500-50: var(--cc-brand-500-50);
+}
+
+[data-accent="custom"] {
+  --cc-accent-300: var(--cc-custom-300);
+  --cc-accent-400: var(--cc-custom-400);
+  --cc-accent-500: var(--cc-custom-500);
+  --cc-accent-600: var(--cc-custom-600);
+  --cc-accent-600-20: var(--cc-custom-600-20);
+  --cc-accent-600-30: var(--cc-custom-600-30);
+  --cc-accent-500-15: var(--cc-custom-500-15);
+  --cc-accent-500-30: var(--cc-custom-500-30);
+  --cc-accent-500-50: var(--cc-custom-500-50);
+}
+
+/* ── Accent effect utilities (opt-in) ── */
+
+.accent-gradient-bg {
+  background: var(--cc-accent-gradient, var(--cc-accent-600));
+}
+
+.accent-glow {
+  box-shadow: var(--cc-accent-glow, none);
+}
+
+/* ── Border radius presets ── */
+
+[data-radius="sharp"] {
+  --cc-radius: 2px;
+  --cc-radius-lg: 4px;
+}
+
+[data-radius="default"] {
+  --cc-radius: 6px;
+  --cc-radius-lg: 8px;
+}
+
+[data-radius="round"] {
+  --cc-radius: 12px;
+  --cc-radius-lg: 16px;
+}
+
+/* ── Density presets ── */
+
+[data-density="compact"] {
+  --cc-density-px: 0.5rem;
+  --cc-density-py: 0.25rem;
+  --cc-density-gap: 0.5rem;
+  --cc-density-content: 1rem;
+}
+
+[data-density="default"] {
+  --cc-density-px: 0.75rem;
+  --cc-density-py: 0.5rem;
+  --cc-density-gap: 1rem;
+  --cc-density-content: 1.5rem;
+}
+
+[data-density="spacious"] {
+  --cc-density-px: 1rem;
+  --cc-density-py: 0.75rem;
+  --cc-density-gap: 1.5rem;
+  --cc-density-content: 2rem;
+}
+
+/* ── Font family presets ── */
+
+[data-font="geist"] {
+  --cc-font-family: var(--font-geist-sans);
+}
+
+[data-font="inter"] {
+  --cc-font-family: var(--font-inter), sans-serif;
+}
+
+[data-font="system"] {
+  --cc-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--cc-font-family), Arial, Helvetica, sans-serif;
 }

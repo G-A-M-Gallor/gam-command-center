@@ -1,0 +1,109 @@
+"use client";
+
+import {
+  ProjectCard,
+  type Project,
+} from "@/components/command-center/ProjectCard";
+import { getHealthStatus } from "@/components/command-center/HealthBadge";
+import { PageHeader } from "@/components/command-center/PageHeader";
+import { useSettings } from "@/contexts/SettingsContext";
+import { getTranslations } from "@/lib/i18n";
+
+const MOCK_PROJECTS_DATA: Omit<Project, "name">[] = [
+  {
+    id: "1",
+    status: "active",
+    health_score: 85,
+    layer: "product",
+    source: "claude",
+  },
+  {
+    id: "2",
+    status: "active",
+    health_score: 72,
+    layer: "infrastructure",
+    source: "claude",
+  },
+  {
+    id: "3",
+    status: "active",
+    health_score: 45,
+    layer: "client",
+    source: "manual",
+  },
+  {
+    id: "4",
+    status: "active",
+    health_score: 92,
+    layer: "infrastructure",
+    source: "trigger",
+  },
+  {
+    id: "5",
+    status: "active",
+    health_score: 28,
+    layer: "product",
+    source: "manual",
+  },
+];
+
+export default function LayersPage() {
+  const { language } = useSettings();
+  const t = getTranslations(language);
+
+  const projects: Project[] = MOCK_PROJECTS_DATA.map((p, i) => ({
+    ...p,
+    name: t.mockProjects[i],
+  }));
+
+  const { healthy, atRisk, critical } = projects.reduce(
+    (acc, p) => {
+      const status = getHealthStatus(p.health_score);
+      if (status === "green") acc.healthy++;
+      else if (status === "yellow") acc.atRisk++;
+      else acc.critical++;
+      return acc;
+    },
+    { healthy: 0, atRisk: 0, critical: 0 }
+  );
+
+  const isRtl = language === "he";
+
+  return (
+    <div className="flex min-h-full flex-col">
+      <PageHeader pageKey="layers" />
+
+      <div className="flex flex-1 flex-col gap-6 pt-6">
+        <div
+          className={`flex flex-wrap items-center gap-4 text-sm ${
+            isRtl ? "flex-row-reverse" : ""
+          }`}
+        >
+          <span className="font-medium text-slate-300">
+            {t.layers.summaryTotal}: {projects.length} {t.layers.summaryProjects}
+          </span>
+          <span className="text-slate-500">•</span>
+          <span className="text-emerald-400">
+            {t.health.healthy}: {healthy}
+          </span>
+          <span className="text-slate-500">•</span>
+          <span className="text-amber-400">
+            {t.health.atRisk}: {atRisk}
+          </span>
+          <span className="text-slate-500">•</span>
+          <span className="text-red-400">
+            {t.health.critical}: {critical}
+          </span>
+        </div>
+
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project) => (
+            <div key={project.id} className="min-w-0">
+              <ProjectCard project={project} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
