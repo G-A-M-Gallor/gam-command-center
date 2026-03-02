@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useMemo } from "react";
 
 interface DashboardModeState {
   editMode: boolean;
@@ -38,10 +38,13 @@ export function DashboardModeProvider({
     setGuideModeState(v);
   }, []);
 
+  const value = useMemo(
+    () => ({ editMode, setEditMode, guideMode, setGuideMode }),
+    [editMode, setEditMode, guideMode, setGuideMode]
+  );
+
   return (
-    <DashboardModeContext.Provider
-      value={{ editMode, setEditMode, guideMode, setGuideMode }}
-    >
+    <DashboardModeContext.Provider value={value}>
       {children}
     </DashboardModeContext.Provider>
   );

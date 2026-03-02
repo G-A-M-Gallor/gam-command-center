@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
 } from "react";
 import { generateAccentPalette, generateGlowShadow } from "@/lib/colorUtils";
 
@@ -360,35 +361,63 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.accentEffect, JSON.stringify(effect));
   }, []);
 
+  const value = useMemo<Settings>(
+    () => ({
+      language,
+      sidebarPosition,
+      sidebarVisibility,
+      accentColor,
+      fontFamily,
+      borderRadius,
+      density,
+      brandProfile,
+      customAccentHex,
+      savedColors,
+      archivedColors,
+      accentEffect,
+      setLanguage,
+      setSidebarPosition,
+      setSidebarVisibility,
+      setAccentColor,
+      setFontFamily,
+      setBorderRadius,
+      setDensity,
+      setBrandProfile,
+      setCustomAccentHex,
+      setSavedColors,
+      setArchivedColors,
+      setAccentEffect,
+    }),
+    [
+      language,
+      sidebarPosition,
+      sidebarVisibility,
+      accentColor,
+      fontFamily,
+      borderRadius,
+      density,
+      brandProfile,
+      customAccentHex,
+      savedColors,
+      archivedColors,
+      accentEffect,
+      setLanguage,
+      setSidebarPosition,
+      setSidebarVisibility,
+      setAccentColor,
+      setFontFamily,
+      setBorderRadius,
+      setDensity,
+      setBrandProfile,
+      setCustomAccentHex,
+      setSavedColors,
+      setArchivedColors,
+      setAccentEffect,
+    ]
+  );
+
   return (
-    <SettingsContext.Provider
-      value={{
-        language,
-        sidebarPosition,
-        sidebarVisibility,
-        accentColor,
-        fontFamily,
-        borderRadius,
-        density,
-        brandProfile,
-        customAccentHex,
-        savedColors,
-        archivedColors,
-        accentEffect,
-        setLanguage,
-        setSidebarPosition,
-        setSidebarVisibility,
-        setAccentColor,
-        setFontFamily,
-        setBorderRadius,
-        setDensity,
-        setBrandProfile,
-        setCustomAccentHex,
-        setSavedColors,
-        setArchivedColors,
-        setAccentEffect,
-      }}
-    >
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

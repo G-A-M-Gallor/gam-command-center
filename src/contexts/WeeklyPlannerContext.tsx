@@ -417,8 +417,6 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
     ]
   );
 
-  if (!mounted) return <>{children}</>;
-
   return (
     <WeeklyPlannerContext.Provider value={value}>
       {children}

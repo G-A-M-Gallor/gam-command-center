@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useMemo,
 } from "react";
 import type { WidgetSize } from "@/components/command-center/widgets/WidgetRegistry";
 import type { FolderDefinition } from "@/components/command-center/widgets/FolderRegistry";
@@ -193,24 +194,41 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const value = useMemo<WidgetState>(
+    () => ({
+      widgetPositions,
+      widgetSizes,
+      hiddenWidgets,
+      hoverDelay,
+      folders,
+      setWidgetPosition,
+      setWidgetPositions,
+      setWidgetSize,
+      toggleWidget,
+      setHoverDelay,
+      addFolder,
+      updateFolder,
+      removeFolder,
+    }),
+    [
+      widgetPositions,
+      widgetSizes,
+      hiddenWidgets,
+      hoverDelay,
+      folders,
+      setWidgetPosition,
+      setWidgetPositions,
+      setWidgetSize,
+      toggleWidget,
+      setHoverDelay,
+      addFolder,
+      updateFolder,
+      removeFolder,
+    ]
+  );
+
   return (
-    <WidgetContext.Provider
-      value={{
-        widgetPositions,
-        widgetSizes,
-        hiddenWidgets,
-        hoverDelay,
-        folders,
-        setWidgetPosition,
-        setWidgetPositions,
-        setWidgetSize,
-        toggleWidget,
-        setHoverDelay,
-        addFolder,
-        updateFolder,
-        removeFolder,
-      }}
-    >
+    <WidgetContext.Provider value={value}>
       {children}
     </WidgetContext.Provider>
   );
