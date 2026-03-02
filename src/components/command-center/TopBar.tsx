@@ -10,11 +10,16 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Plus, Pencil, HelpCircle } from "lucide-react";
-import { widgetRegistry, type WidgetSize } from "./widgets/WidgetRegistry";
+import { Store, Pencil, HelpCircle } from "lucide-react";
+import {
+  widgetRegistry,
+  getEffectivePlacement,
+  type WidgetSize,
+} from "./widgets/WidgetRegistry";
 import { WidgetWrapper } from "./widgets/WidgetWrapper";
 import { WidgetSettings } from "./widgets/WidgetSettings";
-import { WidgetLibrary } from "./widgets/WidgetLibrary";
+import { WidgetStore } from "./widgets/WidgetStore";
+import { AppsDrawer } from "./widgets/AppsDrawer";
 import { FolderWrapper } from "./widgets/FolderWrapper";
 import { FolderSettings } from "./widgets/FolderSettings";
 import { SearchPanel } from "./widgets/SearchWidget";
@@ -61,7 +66,7 @@ export function TopBar() {
   const {
     widgetPositions,
     widgetSizes,
-    hiddenWidgets,
+    widgetPlacements,
     folders,
     setWidgetPosition,
     setWidgetPositions,
@@ -73,7 +78,7 @@ export function TopBar() {
   const [mounted, setMounted] = useState(false);
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [storeOpen, setStoreOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [plannerOpen, setPlannerOpen] = useState(false);
@@ -148,7 +153,6 @@ export function TopBar() {
     const handleOpenShortcuts = () => setShortcutsOpen((prev) => !prev);
     const handleToggleEditMode = () => setEditMode(!editMode);
     const handleToggleSidebar = () => {
-      // Dispatch to settings — cycle visibility
       window.dispatchEvent(new CustomEvent("cc-cycle-sidebar-visibility"));
     };
     window.addEventListener("cc-open-search", handleOpenSearch);
@@ -188,6 +192,17 @@ export function TopBar() {
     "weekly-planner": handlePlannerOpen,
   }), [handleSearchOpen, handleShortcutsOpen, handlePlannerOpen]);
 
+  // Handle opening a widget from the Apps Drawer
+  const handleOpenFromApps = useCallback((widgetId: string) => {
+    if (widgetId === "ai-assistant") {
+      setAiPanelOpen(true);
+      return;
+    }
+    if (modalHandlers[widgetId]) {
+      modalHandlers[widgetId]();
+    }
+  }, [modalHandlers]);
+
   // Sidebar offset
   const sidebarOffset =
     sidebarVisibility === "visible"
@@ -201,17 +216,21 @@ export function TopBar() {
     [sidebarPosition === "right" ? "left" : "right"]: 0,
   };
 
-  // Visible widgets (not hidden)
+  // Visible widgets (placement === "toolbar")
   const visibleWidgets = useMemo(() => {
-    return widgetRegistry.filter(
-      (w) => w.status === "active" && !hiddenWidgets.includes(w.id)
-    );
-  }, [hiddenWidgets]);
+    return widgetRegistry.filter((w) => {
+      if (w.status !== "active") return false;
+      return getEffectivePlacement(w.id, widgetPlacements, w.isRemovable) === "toolbar";
+    });
+  }, [widgetPlacements]);
 
-  // Visible folders (not hidden)
+  // Visible folders (placement === "toolbar" or default)
   const visibleFolders = useMemo(() => {
-    return folders.filter((f) => !hiddenWidgets.includes(f.id));
-  }, [folders, hiddenWidgets]);
+    return folders.filter((f) => {
+      const p = widgetPlacements[f.id] ?? "toolbar";
+      return p === "toolbar";
+    });
+  }, [folders, widgetPlacements]);
 
   // Combined list of all top bar items for position/overlap calculations
   const allTopBarDefs = useMemo(() => {
@@ -481,6 +500,9 @@ export function TopBar() {
           )}
         </div>
 
+        {/* Apps Drawer */}
+        <AppsDrawer onOpenWidget={handleOpenFromApps} />
+
         {/* Edit Mode toggle */}
         <button
           type="button"
@@ -509,14 +531,14 @@ export function TopBar() {
           <HelpCircle className="h-4 w-4" />
         </button>
 
-        {/* Add widgets button */}
+        {/* Widget Store button */}
         <button
           type="button"
-          onClick={() => setLibraryOpen(true)}
+          onClick={() => setStoreOpen(true)}
           className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
-          title={t.widgets.addWidgets}
+          title={t.widgets.store}
         >
-          <Plus className="h-4 w-4" />
+          <Store className="h-4 w-4" />
         </button>
       </div>
 
@@ -525,7 +547,7 @@ export function TopBar() {
         <WidgetSettings
           widgetId={editingWidgetId}
           onClose={() => setEditingWidgetId(null)}
-          onOpenLibrary={() => setLibraryOpen(true)}
+          onOpenLibrary={() => setStoreOpen(true)}
         />
       )}
 
@@ -537,8 +559,8 @@ export function TopBar() {
         />
       )}
 
-      {/* Library panel */}
-      {libraryOpen && <WidgetLibrary onClose={() => setLibraryOpen(false)} />}
+      {/* Widget Store */}
+      {storeOpen && <WidgetStore onClose={() => setStoreOpen(false)} />}
 
       {/* Search modal */}
       {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}

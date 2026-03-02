@@ -15,6 +15,18 @@ import { WeeklyPlannerPanel, WeeklyPlannerBarContent } from "./WeeklyPlannerWidg
 
 export type WidgetSize = 1 | 2 | 3 | 4;
 
+export type WidgetCategory =
+  | "basics"
+  | "productivity"
+  | "ai_comms"
+  | "team"
+  | "analytics"
+  | "integrations";
+
+export type WidgetTier = "free" | "pro" | "business";
+
+export type WidgetPlacement = "toolbar" | "apps" | "disabled";
+
 export interface WidgetDefinition {
   id: string;
   icon: LucideIcon;
@@ -22,12 +34,26 @@ export interface WidgetDefinition {
   description: { he: string; en: string };
   defaultSize: WidgetSize;
   status: "active" | "coming-soon";
+  category: WidgetCategory;
+  tier: WidgetTier;
+  /** false = system widget (Settings, Search) — always toolbar, cannot disable */
+  isRemovable: boolean;
   /** Content rendered inside the dropdown panel (not required for coming-soon) */
   component?: ComponentType;
   /** Inline content rendered in the top bar when size >= 2 */
   renderBar?: ComponentType<{ size: WidgetSize }>;
   /** "modal" = centered overlay, "side-panel" = sliding side panel */
   panelMode?: "dropdown" | "modal" | "side-panel";
+}
+
+/** Resolve effective placement for a widget, enforcing system widget invariant */
+export function getEffectivePlacement(
+  id: string,
+  placements: Record<string, WidgetPlacement>,
+  isRemovable: boolean
+): WidgetPlacement {
+  if (!isRemovable) return "toolbar";
+  return placements[id] ?? "toolbar";
 }
 
 /** All registered widgets. Add new widgets here. */
@@ -42,6 +68,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "active",
+    category: "basics",
+    tier: "free",
+    isRemovable: false,
     component: SearchPanel as ComponentType,
     renderBar: SearchBarContent,
     panelMode: "modal",
@@ -56,6 +85,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 1,
     status: "active",
+    category: "ai_comms",
+    tier: "free",
+    isRemovable: true,
     component: AIPanel as ComponentType,
     renderBar: AIBarContent,
     panelMode: "side-panel",
@@ -70,6 +102,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "active",
+    category: "basics",
+    tier: "free",
+    isRemovable: true,
     component: QuickCreatePanel,
     renderBar: QuickCreateBarContent,
   },
@@ -83,6 +118,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 1,
     status: "active",
+    category: "basics",
+    tier: "free",
+    isRemovable: true,
     component: FavoritesPanel,
     renderBar: FavoritesBarContent,
   },
@@ -96,6 +134,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "active",
+    category: "productivity",
+    tier: "free",
+    isRemovable: true,
     component: TodayPanel,
     renderBar: TodayBarContent,
   },
@@ -109,6 +150,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 1,
     status: "active",
+    category: "basics",
+    tier: "free",
+    isRemovable: true,
     component: NotificationsPanel,
     renderBar: NotificationsBarContent,
   },
@@ -122,6 +166,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "active",
+    category: "productivity",
+    tier: "free",
+    isRemovable: true,
     component: TimerPanel,
     renderBar: TimerBarContent,
   },
@@ -135,6 +182,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 1,
     status: "active",
+    category: "productivity",
+    tier: "free",
+    isRemovable: true,
     component: ClipboardPanel,
     renderBar: ClipboardBarContent,
   },
@@ -148,6 +198,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 1,
     status: "active",
+    category: "basics",
+    tier: "free",
+    isRemovable: false,
     component: SettingsPanel,
     renderBar: SettingsBarContent,
   },
@@ -161,6 +214,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 1,
     status: "active",
+    category: "basics",
+    tier: "free",
+    isRemovable: true,
     component: ShortcutsPanel as ComponentType,
     renderBar: ShortcutsBarContent,
     panelMode: "modal",
@@ -175,6 +231,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "active",
+    category: "productivity",
+    tier: "pro",
+    isRemovable: true,
     component: WeeklyPlannerPanel as ComponentType,
     renderBar: WeeklyPlannerBarContent,
     panelMode: "modal",
@@ -190,6 +249,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "coming-soon",
+    category: "ai_comms",
+    tier: "pro",
+    isRemovable: true,
   },
   {
     id: "team",
@@ -201,6 +263,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "coming-soon",
+    category: "team",
+    tier: "business",
+    isRemovable: true,
   },
   {
     id: "kpi",
@@ -212,6 +277,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "coming-soon",
+    category: "analytics",
+    tier: "pro",
+    isRemovable: true,
   },
   {
     id: "shortcuts",
@@ -223,6 +291,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     },
     defaultSize: 2,
     status: "coming-soon",
+    category: "integrations",
+    tier: "free",
+    isRemovable: true,
   },
 ];
 

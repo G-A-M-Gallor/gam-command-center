@@ -23,7 +23,7 @@ interface FolderSettingsProps {
 }
 
 export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
-  const { folders, updateFolder, removeFolder, widgetSizes, setWidgetSize, toggleWidget } =
+  const { folders, updateFolder, removeFolder, widgetSizes, setWidgetSize, setWidgetPlacement } =
     useWidgets();
   const { language } = useSettings();
   const t = getTranslations(language);
@@ -57,7 +57,7 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
 
   const handleDelete = () => {
     removeFolder(folderId);
-    toggleWidget(folderId); // remove from hidden if present
+    setWidgetPlacement(folderId, "disabled");
     onClose();
   };
 

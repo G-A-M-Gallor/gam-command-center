@@ -9,28 +9,32 @@ import {
   useMemo,
 } from "react";
 import type { WidgetSize } from "@/components/command-center/widgets/WidgetRegistry";
+import type { WidgetPlacement } from "@/components/command-center/widgets/WidgetRegistry";
 import type { FolderDefinition } from "@/components/command-center/widgets/FolderRegistry";
 
 const STORAGE_KEYS = {
   positions: "cc-widget-positions",
   sizes: "cc-widget-sizes",
-  hidden: "cc-hidden-widgets",
+  placements: "cc-widget-placements",
   hoverDelay: "cc-widget-hover-delay",
   folders: "cc-folders",
 } as const;
+
+/** Legacy key — read once for migration, then removed */
+const LEGACY_HIDDEN_KEY = "cc-hidden-widgets";
 
 export type HoverDelay = number | "none";
 
 interface WidgetState {
   widgetPositions: Record<string, number>;
   widgetSizes: Record<string, WidgetSize>;
-  hiddenWidgets: string[];
+  widgetPlacements: Record<string, WidgetPlacement>;
   hoverDelay: HoverDelay;
   folders: FolderDefinition[];
   setWidgetPosition: (id: string, col: number) => void;
   setWidgetPositions: (positions: Record<string, number>) => void;
   setWidgetSize: (id: string, size: WidgetSize) => void;
-  toggleWidget: (id: string) => void;
+  setWidgetPlacement: (id: string, placement: WidgetPlacement) => void;
   setHoverDelay: (delay: HoverDelay) => void;
   addFolder: (folder: FolderDefinition) => void;
   updateFolder: (id: string, patch: Partial<FolderDefinition>) => void;
@@ -40,13 +44,13 @@ interface WidgetState {
 const defaultState: WidgetState = {
   widgetPositions: {},
   widgetSizes: {},
-  hiddenWidgets: [],
+  widgetPlacements: {},
   hoverDelay: 0.5,
   folders: [],
   setWidgetPosition: () => {},
   setWidgetPositions: () => {},
   setWidgetSize: () => {},
-  toggleWidget: () => {},
+  setWidgetPlacement: () => {},
   setHoverDelay: () => {},
   addFolder: () => {},
   updateFolder: () => {},
@@ -78,6 +82,29 @@ function parseHoverDelay(raw: string | null): HoverDelay {
   return 0.5;
 }
 
+/**
+ * Migrate from legacy `cc-hidden-widgets` (string[]) to `cc-widget-placements` (Record).
+ * Items in the old hidden array → "disabled". Everything else defaults to "toolbar".
+ */
+function migratePlacements(): Record<string, WidgetPlacement> {
+  const newRaw = localStorage.getItem(STORAGE_KEYS.placements);
+  if (newRaw) return parseJson<Record<string, WidgetPlacement>>(newRaw, {});
+
+  const legacyRaw = localStorage.getItem(LEGACY_HIDDEN_KEY);
+  if (legacyRaw) {
+    const hidden = parseJson<string[]>(legacyRaw, []);
+    const placements: Record<string, WidgetPlacement> = {};
+    for (const id of hidden) {
+      placements[id] = "disabled";
+    }
+    localStorage.setItem(STORAGE_KEYS.placements, JSON.stringify(placements));
+    localStorage.removeItem(LEGACY_HIDDEN_KEY);
+    return placements;
+  }
+
+  return {};
+}
+
 export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const [widgetPositions, setWidgetPositionsState] = useState<
     Record<string, number>
@@ -85,7 +112,9 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const [widgetSizes, setWidgetSizesState] = useState<
     Record<string, WidgetSize>
   >({});
-  const [hiddenWidgets, setHiddenWidgetsState] = useState<string[]>([]);
+  const [widgetPlacements, setWidgetPlacementsState] = useState<
+    Record<string, WidgetPlacement>
+  >({});
   const [hoverDelay, setHoverDelayState] = useState<HoverDelay>(0.5);
   const [folders, setFoldersState] = useState<FolderDefinition[]>([]);
 
@@ -102,9 +131,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
         {}
       )
     );
-    setHiddenWidgetsState(
-      parseJson<string[]>(localStorage.getItem(STORAGE_KEYS.hidden), [])
-    );
+    setWidgetPlacementsState(migratePlacements());
     setHoverDelayState(
       parseHoverDelay(localStorage.getItem(STORAGE_KEYS.hoverDelay))
     );
@@ -146,13 +173,11 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const toggleWidget = useCallback(
-    (id: string) => {
-      setHiddenWidgetsState((prev) => {
-        const next = prev.includes(id)
-          ? prev.filter((w) => w !== id)
-          : [...prev, id];
-        localStorage.setItem(STORAGE_KEYS.hidden, JSON.stringify(next));
+  const setWidgetPlacement = useCallback(
+    (id: string, placement: WidgetPlacement) => {
+      setWidgetPlacementsState((prev) => {
+        const next = { ...prev, [id]: placement };
+        localStorage.setItem(STORAGE_KEYS.placements, JSON.stringify(next));
         return next;
       });
     },
@@ -198,13 +223,13 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     () => ({
       widgetPositions,
       widgetSizes,
-      hiddenWidgets,
+      widgetPlacements,
       hoverDelay,
       folders,
       setWidgetPosition,
       setWidgetPositions,
       setWidgetSize,
-      toggleWidget,
+      setWidgetPlacement,
       setHoverDelay,
       addFolder,
       updateFolder,
@@ -213,13 +238,13 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     [
       widgetPositions,
       widgetSizes,
-      hiddenWidgets,
+      widgetPlacements,
       hoverDelay,
       folders,
       setWidgetPosition,
       setWidgetPositions,
       setWidgetSize,
-      toggleWidget,
+      setWidgetPlacement,
       setHoverDelay,
       addFolder,
       updateFolder,

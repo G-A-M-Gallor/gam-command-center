@@ -1,10 +1,15 @@
 "use client";
 
-import { X } from "lucide-react";
+import { X, Pin, Grid3X3, Power } from "lucide-react";
 import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
-import { getWidgetById, type WidgetSize } from "./WidgetRegistry";
+import {
+  getWidgetById,
+  getEffectivePlacement,
+  type WidgetSize,
+  type WidgetPlacement,
+} from "./WidgetRegistry";
 
 const SIZE_OPTIONS: WidgetSize[] = [1, 2, 3, 4];
 const DELAY_OPTIONS: { value: HoverDelay; label: string }[] = [
@@ -15,6 +20,15 @@ const DELAY_OPTIONS: { value: HoverDelay; label: string }[] = [
   { value: 1, label: "1" },
   { value: 2, label: "2" },
   { value: 3, label: "3" },
+];
+
+const PLACEMENT_OPTIONS: {
+  value: WidgetPlacement;
+  icon: typeof Pin;
+}[] = [
+  { value: "toolbar", icon: Pin },
+  { value: "apps", icon: Grid3X3 },
+  { value: "disabled", icon: Power },
 ];
 
 interface WidgetSettingsProps {
@@ -28,8 +42,14 @@ export function WidgetSettings({
   onClose,
   onOpenLibrary,
 }: WidgetSettingsProps) {
-  const { widgetSizes, hiddenWidgets, hoverDelay, setWidgetSize, toggleWidget, setHoverDelay } =
-    useWidgets();
+  const {
+    widgetSizes,
+    widgetPlacements,
+    hoverDelay,
+    setWidgetSize,
+    setWidgetPlacement,
+    setHoverDelay,
+  } = useWidgets();
   const { language } = useSettings();
   const t = getTranslations(language);
 
@@ -37,7 +57,11 @@ export function WidgetSettings({
   if (!widget) return null;
 
   const currentSize = widgetSizes[widgetId] ?? widget.defaultSize;
-  const isHidden = hiddenWidgets.includes(widgetId);
+  const currentPlacement = getEffectivePlacement(
+    widgetId,
+    widgetPlacements,
+    widget.isRemovable
+  );
   const label = widget.label[language];
 
   return (
@@ -48,7 +72,10 @@ export function WidgetSettings({
         className="absolute inset-0 bg-black/30"
         aria-label={t.widgets.close}
       />
-      <div className="relative z-10 flex w-80 max-h-[calc(100vh-5rem)] flex-col border border-slate-700 bg-slate-800 shadow-xl" style={{ borderRadius: "var(--cc-radius-lg)" }}>
+      <div
+        className="relative z-10 flex w-80 max-h-[calc(100vh-5rem)] flex-col border border-slate-700 bg-slate-800 shadow-xl"
+        style={{ borderRadius: "var(--cc-radius-lg)" }}
+      >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-slate-700 px-4 py-3">
           <div className="flex items-center gap-2">
@@ -65,28 +92,40 @@ export function WidgetSettings({
         </div>
 
         <div className="space-y-4 overflow-y-auto p-4">
-          {/* Visibility toggle */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-300">
-              {isHidden ? t.widgets.showWidget : t.widgets.hideWidget}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                toggleWidget(widgetId);
-                if (!isHidden) onClose();
-              }}
-              className={`relative h-6 w-11 rounded-full transition-colors ${
-                !isHidden ? "bg-[var(--cc-accent-600)]" : "bg-slate-600"
-              }`}
-            >
-              <span
-                className={`absolute left-0 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-                  !isHidden ? "translate-x-5" : "translate-x-0.5"
-                }`}
-              />
-            </button>
-          </div>
+          {/* Placement selector */}
+          {widget.isRemovable ? (
+            <div>
+              <label className="mb-2 block text-sm text-slate-300">
+                {t.widgets.storePlacement}
+              </label>
+              <div className="flex flex-col gap-1">
+                {PLACEMENT_OPTIONS.map(({ value: p, icon: Icon }) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => {
+                      setWidgetPlacement(widgetId, p);
+                      if (p === "disabled") onClose();
+                    }}
+                    className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                      currentPlacement === p
+                        ? "bg-[var(--cc-accent-600-30)] text-[var(--cc-accent-300)]"
+                        : "text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {t.widgets[
+                      `placement${p.charAt(0).toUpperCase() + p.slice(1)}` as keyof typeof t.widgets
+                    ]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-500">
+              {t.widgets.storeSystemWidget}
+            </div>
+          )}
 
           {/* Size selector */}
           <div>
@@ -140,7 +179,7 @@ export function WidgetSettings({
             </div>
           </div>
 
-          {/* Open library button */}
+          {/* Open store button */}
           <button
             type="button"
             onClick={() => {
@@ -149,7 +188,7 @@ export function WidgetSettings({
             }}
             className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
           >
-            {t.widgets.library}
+            {t.widgets.store}
           </button>
         </div>
       </div>

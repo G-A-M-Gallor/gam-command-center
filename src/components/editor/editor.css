@@ -1,0 +1,861 @@
+/* ===================================================
+   GAM Command Center — Tiptap Editor Styles
+   Phase 1: RTL-first, all block types + toolbars
+   =================================================== */
+
+/* ─── Editor Wrapper ─────────────────────────────── */
+.gam-editor-wrapper {
+  position: relative;
+  width: 100%;
+  direction: rtl;
+}
+
+/* ─── Editor Core ────────────────────────────────── */
+.gam-editor {
+  min-height: 200px;
+  padding: 1rem 1.25rem;
+  font-family: 'Rubik', 'Heebo', 'Assistant', system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--editor-text, #1a1a2e);
+  direction: rtl;
+  text-align: right;
+  outline: none;
+  border: 1px solid var(--editor-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--editor-bg, #ffffff);
+  transition: border-color 0.2s ease;
+}
+
+.gam-editor:focus-within {
+  border-color: var(--editor-focus, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+/* ─── Placeholder ────────────────────────────────── */
+.gam-editor--empty::before {
+  content: attr(data-placeholder);
+  float: right;
+  color: var(--editor-placeholder, #94a3b8);
+  pointer-events: none;
+  height: 0;
+  font-style: normal;
+}
+
+.gam-editor__node--empty:first-child::before {
+  content: attr(data-placeholder);
+  float: right;
+  color: var(--editor-placeholder, #94a3b8);
+  pointer-events: none;
+  height: 0;
+}
+
+/* ─── Headings ───────────────────────────────────── */
+.gam-editor h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+  line-height: 1.3;
+  color: var(--editor-heading, #0f172a);
+}
+
+.gam-editor h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.375rem;
+  line-height: 1.35;
+  color: var(--editor-heading, #0f172a);
+}
+
+.gam-editor h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 1rem 0 0.25rem;
+  line-height: 1.4;
+  color: var(--editor-heading, #1e293b);
+}
+
+/* ─── Paragraph ──────────────────────────────────── */
+.gam-editor p {
+  margin: 0.25rem 0;
+}
+
+/* ─── Lists ──────────────────────────────────────── */
+.gam-editor ul,
+.gam-editor ol {
+  padding-right: 1.5rem;
+  padding-left: 0;
+  margin: 0.25rem 0;
+}
+
+.gam-editor ul {
+  list-style-type: disc;
+}
+
+.gam-editor ol {
+  list-style-type: decimal;
+}
+
+.gam-editor li {
+  margin: 0.125rem 0;
+}
+
+.gam-editor li p {
+  margin: 0;
+}
+
+/* ─── Task List (Checklist) ──────────────────────── */
+.gam-tasklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0;
+}
+
+.gam-taskitem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+  direction: rtl;
+}
+
+.gam-taskitem > label {
+  display: flex;
+  align-items: center;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.gam-taskitem > label input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--editor-checkbox-border, #cbd5e1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  background: var(--editor-bg, #ffffff);
+}
+
+.gam-taskitem > label input[type='checkbox']:checked {
+  background: var(--editor-checkbox-checked, #6366f1);
+  border-color: var(--editor-checkbox-checked, #6366f1);
+}
+
+.gam-taskitem > label input[type='checkbox']:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -1px;
+  left: 2px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gam-taskitem[data-checked='true'] > div {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+/* ─── Blockquote ─────────────────────────────────── */
+.gam-editor blockquote {
+  border-right: 4px solid var(--editor-quote-border, #6366f1);
+  border-left: none;
+  padding: 0.5rem 1rem 0.5rem 0;
+  margin: 0.5rem 0;
+  color: var(--editor-quote-text, #475569);
+  background: var(--editor-quote-bg, #f8fafc);
+  border-radius: 0 6px 6px 0;
+  font-style: italic;
+}
+
+/* ─── Horizontal Rule ────────────────────────────── */
+.gam-editor hr {
+  border: none;
+  border-top: 2px solid var(--editor-hr, #e2e8f0);
+  margin: 1rem 0;
+}
+
+/* ─── Links ──────────────────────────────────────── */
+.gam-link {
+  color: var(--editor-link, #6366f1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.gam-link:hover {
+  color: var(--editor-link-hover, #4f46e5);
+}
+
+/* ─── Highlight ──────────────────────────────────── */
+.gam-highlight {
+  background-color: var(--editor-highlight, #fef08a);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* ─── Floating Toolbar ───────────────────────────── */
+.gam-floating-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px;
+  background: var(--editor-toolbar-bg, #1e293b);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.gam-floating-toolbar__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--editor-toolbar-text, #e2e8f0);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.gam-floating-toolbar__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.gam-floating-toolbar__btn--active {
+  background: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+.gam-floating-toolbar__icon--bold {
+  font-weight: 800;
+}
+
+.gam-floating-toolbar__icon--italic {
+  font-style: italic;
+}
+
+.gam-floating-toolbar__icon--underline {
+  text-decoration: underline;
+}
+
+.gam-floating-toolbar__icon--strike {
+  text-decoration: line-through;
+}
+
+/* ─── Slash Command Menu ─────────────────────────── */
+.gam-slash-menu {
+  background: var(--editor-menu-bg, #ffffff);
+  border: 1px solid var(--editor-menu-border, #e2e8f0);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  direction: rtl;
+}
+
+.gam-slash-menu__header {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--editor-menu-header, #94a3b8);
+  padding: 6px 10px 4px;
+}
+
+.gam-slash-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  text-align: right;
+  transition: background 0.1s;
+  direction: rtl;
+}
+
+.gam-slash-menu__item:hover,
+.gam-slash-menu__item--active {
+  background: var(--editor-menu-hover, #f1f5f9);
+}
+
+.gam-slash-menu__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--editor-menu-icon-bg, #f1f5f9);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--editor-menu-icon-text, #475569);
+  flex-shrink: 0;
+}
+
+.gam-slash-menu__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.gam-slash-menu__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--editor-menu-title, #1e293b);
+}
+
+.gam-slash-menu__desc {
+  font-size: 0.75rem;
+  color: var(--editor-menu-desc, #94a3b8);
+}
+
+.gam-slash-menu--empty {
+  background: var(--editor-menu-bg, #ffffff);
+  border: 1px solid var(--editor-menu-border, #e2e8f0);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 12px 16px;
+  direction: rtl;
+}
+
+.gam-slash-menu__empty {
+  font-size: 0.8125rem;
+  color: var(--editor-menu-desc, #94a3b8);
+  text-align: center;
+}
+
+/* ─── Status Bar ─────────────────────────────────── */
+.gam-editor-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  color: var(--editor-status-text, #94a3b8);
+  direction: rtl;
+}
+
+.gam-editor-statusbar kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  font-size: 0.6875rem;
+  font-family: monospace;
+  background: var(--editor-kbd-bg, #f1f5f9);
+  border: 1px solid var(--editor-kbd-border, #e2e8f0);
+  border-radius: 3px;
+  margin: 0 2px;
+}
+
+/* ─── Dark Mode Support ──────────────────────────── */
+[data-theme='dark'] .gam-editor,
+.dark .gam-editor {
+  --editor-text: #e2e8f0;
+  --editor-bg: #1e293b;
+  --editor-border: #334155;
+  --editor-focus: #818cf8;
+  --editor-placeholder: #475569;
+  --editor-heading: #f1f5f9;
+  --editor-quote-border: #818cf8;
+  --editor-quote-text: #94a3b8;
+  --editor-quote-bg: #0f172a;
+  --editor-hr: #334155;
+  --editor-link: #818cf8;
+  --editor-link-hover: #a5b4fc;
+  --editor-highlight: #854d0e;
+  --editor-checkbox-border: #475569;
+  --editor-checkbox-checked: #818cf8;
+}
+
+[data-theme='dark'] .gam-slash-menu,
+.dark .gam-slash-menu {
+  --editor-menu-bg: #1e293b;
+  --editor-menu-border: #334155;
+  --editor-menu-hover: #334155;
+  --editor-menu-icon-bg: #0f172a;
+  --editor-menu-icon-text: #94a3b8;
+  --editor-menu-title: #e2e8f0;
+}
+
+[data-theme='dark'] .gam-floating-toolbar,
+.dark .gam-floating-toolbar {
+  --editor-toolbar-bg: #0f172a;
+}
+
+/* ─── Tippy.js Reset (for slash menu popup) ──────── */
+.tippy-box {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.tippy-content {
+  padding: 0 !important;
+}
+
+.tippy-arrow {
+  display: none !important;
+}
+/* ===================================================
+   GAM Command Center — Editor Styles V2.1 Additions
+   Color Menu + Code Block + Updated Toolbar
+   
+   ADD THESE RULES to the existing editor.css
+   =================================================== */
+
+/* ─── Color Menu ─────────────────────────────────── */
+.gam-color-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 6px;
+  background: var(--editor-menu-bg, #ffffff);
+  border: 1px solid var(--editor-menu-border, #e2e8f0);
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  padding: 10px;
+  min-width: 200px;
+  direction: rtl;
+  z-index: 60;
+  animation: gam-menu-in 0.12s ease-out;
+}
+
+.gam-color-menu__label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--editor-menu-header, #94a3b8);
+  padding: 0 2px 6px;
+}
+
+.gam-color-menu__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.gam-color-menu__swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.12s ease;
+}
+
+.gam-color-menu__swatch:hover {
+  transform: scale(1.15);
+  border-color: var(--editor-focus, #6366f1);
+}
+
+.gam-color-menu__swatch--reset {
+  background: var(--editor-menu-icon-bg, #f1f5f9);
+  color: var(--editor-menu-desc, #94a3b8);
+}
+
+.gam-color-menu__swatch--reset:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* ─── Toolbar Separator ──────────────────────────── */
+.gam-floating-toolbar__sep {
+  display: inline-block;
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 4px;
+  vertical-align: middle;
+}
+
+/* ─── Toolbar Color Button Tweaks ────────────────── */
+.gam-floating-toolbar__btn--color {
+  gap: 1px;
+  padding: 0 2px;
+}
+
+.gam-floating-toolbar__dropdown-arrow {
+  font-size: 8px;
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.gam-floating-toolbar__icon--textcolor {
+  background: linear-gradient(to bottom, transparent 70%, #e11d48 70%);
+  -webkit-background-clip: text;
+  padding-bottom: 2px;
+}
+
+/* ─── Code Block ─────────────────────────────────── */
+.gam-codeblock {
+  position: relative;
+  background: var(--editor-code-bg, #0f172a);
+  color: var(--editor-code-text, #e2e8f0);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin: 0.5rem 0;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Menlo', monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.gam-codeblock::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--editor-code-label, #475569);
+  font-family: system-ui, sans-serif;
+}
+
+.gam-codeblock code {
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+}
+
+/* Code block placeholder */
+.gam-codeblock.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--editor-code-label, #475569);
+  position: static;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8125rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+/* ─── Highlight with Colors (multicolor) ─────────── */
+.gam-editor mark,
+.gam-editor .gam-highlight {
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Default highlight (no custom color) */
+.gam-editor mark:not([style]),
+.gam-highlight:not([style]) {
+  background-color: var(--editor-highlight, #fef08a);
+}
+
+/* ─── Colored Text ───────────────────────────────── */
+.gam-editor span[style*="color"] {
+  /* Ensure colored text is visible */
+  text-decoration-color: currentColor;
+}
+
+/* ─── Code Block — Dark Mode ─────────────────────── */
+[data-theme='dark'] .gam-codeblock,
+.dark .gam-codeblock {
+  --editor-code-bg: #020617;
+  --editor-code-text: #e2e8f0;
+  --editor-code-label: #334155;
+}
+
+[data-theme='dark'] .gam-color-menu,
+.dark .gam-color-menu {
+  --editor-menu-bg: #1e293b;
+  --editor-menu-border: #334155;
+}
+/* ===================================================
+   GAM Command Center — Editor Styles Phase 2
+   Image, File, Embed, Callout, Table
+   
+   APPEND to existing editor.css
+   =================================================== */
+
+/* ─── Image Block ────────────────────────────────── */
+.gam-image {
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.gam-image--center { text-align: center; }
+.gam-image--left { text-align: right; }
+.gam-image--right { text-align: left; }
+
+.gam-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: inline-block;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.gam-image img:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.gam-image__caption {
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--editor-caption, #64748b);
+  text-align: center;
+  font-style: italic;
+}
+
+/* ─── File Block ─────────────────────────────────── */
+.gam-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 0.5rem 0;
+  background: var(--editor-file-bg, #f8fafc);
+  border: 1px solid var(--editor-file-border, #e2e8f0);
+  border-radius: 8px;
+  direction: rtl;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.gam-file:hover {
+  background: var(--editor-file-hover, #f1f5f9);
+  border-color: var(--editor-file-hover-border, #cbd5e1);
+}
+
+.gam-file__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.gam-file__name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--editor-link, #6366f1);
+  text-decoration: none;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gam-file__name:hover {
+  text-decoration: underline;
+}
+
+.gam-file__size {
+  font-size: 0.75rem;
+  color: var(--editor-caption, #64748b);
+  flex-shrink: 0;
+}
+
+/* ─── Embed Block ────────────────────────────────── */
+.gam-embed {
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--editor-embed-border, #e2e8f0);
+}
+
+.gam-embed__wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.gam-embed__iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+}
+
+/* ─── Callout Block ──────────────────────────────── */
+.gam-callout {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  direction: rtl;
+}
+
+.gam-callout__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  line-height: 1.5;
+  user-select: none;
+}
+
+.gam-callout__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.gam-callout__content > p {
+  margin: 0;
+}
+
+/* Callout variants — using GAM accent colors */
+.gam-callout--info {
+  background: #2563eb1a;
+  border-right: 4px solid #2563eb;
+  border-left: none;
+}
+
+.gam-callout--warning {
+  background: #d977061a;
+  border-right: 4px solid #d97706;
+  border-left: none;
+}
+
+.gam-callout--tip {
+  background: #0596691a;
+  border-right: 4px solid #059669;
+  border-left: none;
+}
+
+.gam-callout--error {
+  background: #e11d481a;
+  border-right: 4px solid #e11d48;
+  border-left: none;
+}
+
+.gam-callout--note {
+  background: #9333ea1a;
+  border-right: 4px solid #9333ea;
+  border-left: none;
+}
+
+/* ─── Table ──────────────────────────────────────── */
+.gam-table {
+  width: 100%;
+  margin: 0.75rem 0;
+  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--editor-table-border, #e2e8f0);
+  direction: rtl;
+}
+
+.gam-table__header {
+  background: var(--editor-table-header-bg, #f1f5f9);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  color: var(--editor-table-header-text, #1e293b);
+  text-align: right;
+  padding: 10px 14px;
+  border: 1px solid var(--editor-table-border, #e2e8f0);
+}
+
+.gam-table__cell {
+  padding: 8px 14px;
+  border: 1px solid var(--editor-table-border, #e2e8f0);
+  font-size: 0.875rem;
+  vertical-align: top;
+  min-width: 80px;
+}
+
+.gam-table__cell > p,
+.gam-table__header > p {
+  margin: 0;
+}
+
+/* Table resize handle */
+.gam-table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--editor-focus, #6366f1);
+  pointer-events: none;
+}
+
+.gam-table .tableWrapper {
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+/* Selected cell */
+.gam-table .selectedCell::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(99, 102, 241, 0.1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ─── Dark Mode — Phase 2 ────────────────────────── */
+[data-theme='dark'] .gam-file,
+.dark .gam-file {
+  --editor-file-bg: #1e293b;
+  --editor-file-border: #334155;
+  --editor-file-hover: #334155;
+  --editor-file-hover-border: #475569;
+}
+
+[data-theme='dark'] .gam-embed,
+.dark .gam-embed {
+  --editor-embed-border: #334155;
+}
+
+[data-theme='dark'] .gam-table,
+.dark .gam-table {
+  --editor-table-border: #334155;
+  --editor-table-header-bg: #0f172a;
+  --editor-table-header-text: #e2e8f0;
+}
+
+[data-theme='dark'] .gam-callout--info,
+.dark .gam-callout--info {
+  background: #2563eb26;
+}
+
+[data-theme='dark'] .gam-callout--warning,
+.dark .gam-callout--warning {
+  background: #d9770626;
+}
+
+[data-theme='dark'] .gam-callout--tip,
+.dark .gam-callout--tip {
+  background: #05966926;
+}
+
+[data-theme='dark'] .gam-callout--error,
+.dark .gam-callout--error {
+  background: #e11d4826;
+}
+
+[data-theme='dark'] .gam-callout--note,
+.dark .gam-callout--note {
+  background: #9333ea26;
+}
