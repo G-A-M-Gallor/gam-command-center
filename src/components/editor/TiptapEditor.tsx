@@ -31,6 +31,7 @@ import { tableExtensions } from './extensions/TableSetup';
 import { FloatingToolbar } from './FloatingToolbar';
 import { BlockHandle } from './BlockHandle';
 import type { TiptapEditorProps } from './types';
+import './editor.css';
 
 // ─── Default empty content ───────────────────────────
 const DEFAULT_CONTENT: JSONContent = {
