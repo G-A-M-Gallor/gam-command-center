@@ -1,18 +1,421 @@
-"use client";
+'use client';
 
-import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
-import { PageHeader } from "@/components/command-center/PageHeader";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
+import { PageHeader } from '@/components/command-center/PageHeader';
+import { StoryBoard } from '@/components/command-center/StoryBoard';
+import { supabase } from '@/lib/supabaseClient';
+import {
+  fetchStoryCards,
+  createStoryCard,
+  updateStoryCard,
+  deleteStoryCard,
+  deleteColumn as deleteColumnDb,
+  batchUpdatePositions,
+} from '@/lib/supabase/storyCardQueries';
+import type { StoryCard } from '@/lib/supabase/storyCardQueries';
 
+// ─── Demo cards with 3-tier structure ───────────────
+function makeDemoCards(): StoryCard[] {
+  const now = new Date().toISOString();
+  const epics = ['תכנון', 'פיתוח', 'בדיקות', 'הפצה'];
+  const epicColors = ['purple', 'blue', 'emerald', 'amber'];
+
+  // Per-column: features and their stories (stories grouped by feature index)
+  const columnData: { features: string[]; stories: [string, number][] }[] = [
+    {
+      features: ['ניתוח'],
+      stories: [['הגדרת דרישות', 0], ['תכנון ארכיטקטורה', 0]],
+    },
+    {
+      features: ['Frontend', 'Backend'],
+      stories: [['קומפוננטות UI', 0], ['ניתוב עמודים', 0], ['חיבור API', 1], ['אוטנטיקציה', 1]],
+    },
+    {
+      features: ['אוטומטי', 'ידני'],
+      stories: [['בדיקות יחידה', 0], ['בדיקות E2E', 0], ['בדיקות קבלה', 1]],
+    },
+    {
+      features: ['DevOps'],
+      stories: [['CI/CD', 0], ['תיעוד', 0], ['הדרכת משתמשים', 0]],
+    },
+  ];
+
+  const cards: StoryCard[] = [];
+
+  epics.forEach((text, col) => {
+    cards.push({
+      id: `demo-epic-${col}`,
+      project_id: 'demo',
+      col,
+      row: 0,
+      text,
+      type: 'epic',
+      color: epicColors[col],
+      subs: [],
+      sort_order: 0,
+      created_at: now,
+    });
+  });
+
+  columnData.forEach(({ features, stories }, col) => {
+    let sortOrder = 0;
+
+    features.forEach((featureText, fi) => {
+      // Feature card
+      cards.push({
+        id: `demo-feature-${col}-${fi}`,
+        project_id: 'demo',
+        col,
+        row: 1,
+        text: featureText,
+        type: 'feature',
+        color: null,
+        subs: [],
+        sort_order: sortOrder++,
+        created_at: now,
+      });
+
+      // Stories belonging to this feature
+      stories
+        .filter(([, featureIdx]) => featureIdx === fi)
+        .forEach(([storyText]) => {
+          cards.push({
+            id: `demo-story-${col}-${sortOrder}`,
+            project_id: 'demo',
+            col,
+            row: 1,
+            text: storyText,
+            type: 'story',
+            color: null,
+            subs: [],
+            sort_order: sortOrder++,
+            created_at: now,
+          });
+        });
+    });
+  });
+
+  return cards;
+}
+
+// ─── Page ───────────────────────────────────────────
 export default function StoryMapPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
+  const isRtl = language === 'he';
+
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
+  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [cards, setCards] = useState<StoryCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
+  const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  // ── Load projects ──────────────────────────────────
+  useEffect(() => {
+    async function loadProjects() {
+      const { data } = await supabase
+        .from('projects')
+        .select('id, name')
+        .order('name');
+
+      if (data && data.length > 0) {
+        setProjects(data);
+      }
+      setLoading(false);
+    }
+    loadProjects();
+  }, []);
+
+  // ── Load cards when project changes ────────────────
+  useEffect(() => {
+    if (!selectedProject) {
+      setCards(makeDemoCards());
+      setIsDemo(true);
+      return;
+    }
+
+    setIsDemo(false);
+    setLoading(true);
+    fetchStoryCards(selectedProject).then((data) => {
+      setCards(data);
+      setLoading(false);
+    });
+  }, [selectedProject]);
+
+  // ── Card operations ────────────────────────────────
+  const handleUpdateCard = useCallback(
+    (id: string, updates: Partial<StoryCard>) => {
+      setCards((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+      );
+
+      if (isDemo) return;
+
+      const existing = debounceTimers.current.get(id);
+      if (existing) clearTimeout(existing);
+      debounceTimers.current.set(
+        id,
+        setTimeout(() => {
+          const { text, col, row, color, subs, sort_order } = { ...updates } as Partial<StoryCard>;
+          updateStoryCard(id, { text, col, row, color, subs, sort_order });
+          debounceTimers.current.delete(id);
+        }, 500)
+      );
+    },
+    [isDemo]
+  );
+
+  const handleDeleteCard = useCallback(
+    (id: string) => {
+      setCards((prev) => prev.filter((c) => c.id !== id));
+      if (!isDemo) deleteStoryCard(id);
+    },
+    [isDemo]
+  );
+
+  const handleAddEpic = useCallback(() => {
+    const maxCol = cards.reduce((max, c) => Math.max(max, c.col), -1);
+    const newCol = maxCol + 1;
+    const epicText = language === 'he' ? `אפיק ${newCol + 1}` : `Epic ${newCol + 1}`;
+
+    const newCard: StoryCard = {
+      id: isDemo ? `demo-epic-${Date.now()}` : crypto.randomUUID(),
+      project_id: selectedProject || 'demo',
+      col: newCol,
+      row: 0,
+      text: epicText,
+      type: 'epic',
+      color: null,
+      subs: [],
+      sort_order: 0,
+      created_at: new Date().toISOString(),
+    };
+
+    setCards((prev) => [...prev, newCard]);
+
+    if (!isDemo && selectedProject) {
+      createStoryCard({
+        project_id: selectedProject,
+        col: newCol,
+        row: 0,
+        text: epicText,
+        type: 'epic',
+        color: null,
+        subs: [],
+        sort_order: 0,
+      }).then((saved) => {
+        if (saved) {
+          setCards((prev) =>
+            prev.map((c) => (c.id === newCard.id ? { ...c, id: saved.id } : c))
+          );
+        }
+      });
+    }
+  }, [cards, isDemo, selectedProject, language]);
+
+  // ── Add Feature (B layer) ─────────────────────────
+  const handleAddFeature = useCallback(
+    (col: number) => {
+      const colNonEpics = cards.filter((c) => c.col === col && c.type !== 'epic');
+      const nextOrder = colNonEpics.length;
+      const featureText = language === 'he' ? 'פיצ׳ר חדש' : 'New Feature';
+
+      const newCard: StoryCard = {
+        id: isDemo ? `demo-feature-${Date.now()}` : crypto.randomUUID(),
+        project_id: selectedProject || 'demo',
+        col,
+        row: 1,
+        text: featureText,
+        type: 'feature',
+        color: null,
+        subs: [],
+        sort_order: nextOrder,
+        created_at: new Date().toISOString(),
+      };
+
+      setCards((prev) => [...prev, newCard]);
+
+      if (!isDemo && selectedProject) {
+        createStoryCard({
+          project_id: selectedProject,
+          col,
+          row: 1,
+          text: featureText,
+          type: 'feature',
+          color: null,
+          subs: [],
+          sort_order: nextOrder,
+        }).then((saved) => {
+          if (saved) {
+            setCards((prev) =>
+              prev.map((c) => (c.id === newCard.id ? { ...c, id: saved.id } : c))
+            );
+          }
+        });
+      }
+    },
+    [cards, isDemo, selectedProject, language]
+  );
+
+  // ── Add Story (with featureId for positional insert) ──
+  const handleAddStory = useCallback(
+    (col: number, featureId: string | null) => {
+      const colNonEpics = cards
+        .filter((c) => c.col === col && c.type !== 'epic')
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+      let insertAt: number;
+
+      if (featureId === null) {
+        // Ungrouped — append at end
+        insertAt = colNonEpics.length;
+      } else {
+        // Find the feature, walk forward past its stories
+        const featureIdx = colNonEpics.findIndex((c) => c.id === featureId);
+        if (featureIdx === -1) {
+          insertAt = colNonEpics.length;
+        } else {
+          let endIdx = featureIdx + 1;
+          while (endIdx < colNonEpics.length && colNonEpics[endIdx].type === 'story') {
+            endIdx++;
+          }
+          insertAt = endIdx;
+        }
+      }
+
+      const storyText = language === 'he' ? 'סיפור חדש' : 'New story';
+
+      // Shift cards at >= insertAt up by 1
+      setCards((prev) => {
+        const updated = prev.map((c) => {
+          if (c.col === col && c.type !== 'epic' && c.sort_order >= insertAt) {
+            return { ...c, sort_order: c.sort_order + 1 };
+          }
+          return c;
+        });
+
+        const newCard: StoryCard = {
+          id: isDemo ? `demo-story-${Date.now()}` : crypto.randomUUID(),
+          project_id: selectedProject || 'demo',
+          col,
+          row: 1,
+          text: storyText,
+          type: 'story',
+          color: null,
+          subs: [],
+          sort_order: insertAt,
+          created_at: new Date().toISOString(),
+        };
+
+        if (!isDemo && selectedProject) {
+          // Persist shifted cards
+          const shifted = colNonEpics
+            .filter((c) => c.sort_order >= insertAt)
+            .map((c) => ({ id: c.id, col, sort_order: c.sort_order + 1 }));
+          if (shifted.length > 0) batchUpdatePositions(shifted);
+
+          // Create new card
+          createStoryCard({
+            project_id: selectedProject,
+            col,
+            row: 1,
+            text: storyText,
+            type: 'story',
+            color: null,
+            subs: [],
+            sort_order: insertAt,
+          }).then((saved) => {
+            if (saved) {
+              setCards((p) =>
+                p.map((c) => (c.id === newCard.id ? { ...c, id: saved.id } : c))
+              );
+            }
+          });
+        }
+
+        return [...updated, newCard];
+      });
+    },
+    [cards, isDemo, selectedProject, language]
+  );
+
+  const handleDeleteColumn = useCallback(
+    (col: number) => {
+      setCards((prev) => {
+        return prev
+          .filter((c) => c.col !== col)
+          .map((c) => (c.col > col ? { ...c, col: c.col - 1 } : c));
+      });
+
+      if (!isDemo && selectedProject) {
+        deleteColumnDb(selectedProject, col);
+        const higherCards = cards.filter((c) => c.col > col);
+        if (higherCards.length > 0) {
+          batchUpdatePositions(
+            higherCards.map((c) => ({ id: c.id, col: c.col - 1, sort_order: c.sort_order }))
+          );
+        }
+      }
+    },
+    [cards, isDemo, selectedProject]
+  );
+
+  const handleBatchUpdate = useCallback(
+    (updates: { id: string; col: number; sort_order: number }[]) => {
+      if (!isDemo) {
+        batchUpdatePositions(updates);
+      }
+    },
+    [isDemo]
+  );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="storyMap" />
-      <div className="p-8">
-        <p className="text-slate-400">{t.comingSoon} 3.</p>
+
+      <div className="px-6 pb-6">
+        {/* Project selector + demo badge */}
+        <div className="mb-4 flex items-center gap-3">
+          <select
+            value={selectedProject}
+            onChange={(e) => setSelectedProject(e.target.value)}
+            className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 outline-none focus:border-purple-500/50"
+          >
+            <option value="">{t.storyMap.selectProject}</option>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+
+          {isDemo && (
+            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
+              {t.storyMap.demoMode}
+            </span>
+          )}
+
+          {loading && (
+            <span className="text-xs text-slate-500">...</span>
+          )}
+        </div>
+
+        {/* Board */}
+        <StoryBoard
+          cards={cards}
+          setCards={setCards}
+          onAddEpic={handleAddEpic}
+          onAddStory={handleAddStory}
+          onAddFeature={handleAddFeature}
+          onUpdateCard={handleUpdateCard}
+          onDeleteCard={handleDeleteCard}
+          onDeleteColumn={handleDeleteColumn}
+          onBatchUpdate={handleBatchUpdate}
+          t={t.storyMap}
+        />
       </div>
     </div>
   );

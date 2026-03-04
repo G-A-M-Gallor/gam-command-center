@@ -71,7 +71,7 @@ export function TopBar() {
     setWidgetPosition,
     setWidgetPositions,
   } = useWidgets();
-  const { sidebarPosition, sidebarVisibility, language } = useSettings();
+  const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language } = useSettings();
   const { editMode, setEditMode, guideMode, setGuideMode } = useDashboardMode();
   const t = getTranslations(language);
 
@@ -146,6 +146,10 @@ export function TopBar() {
     }
   }, []);
 
+  // Ref for sidebar visibility so the event listener always reads the latest value
+  const sidebarVisibilityRef = useRef(sidebarVisibility);
+  sidebarVisibilityRef.current = sidebarVisibility;
+
   // Custom event listeners
   useEffect(() => {
     const handleOpenSearch = () => setSearchOpen(true);
@@ -153,7 +157,8 @@ export function TopBar() {
     const handleOpenShortcuts = () => setShortcutsOpen((prev) => !prev);
     const handleToggleEditMode = () => setEditMode(!editMode);
     const handleToggleSidebar = () => {
-      window.dispatchEvent(new CustomEvent("cc-cycle-sidebar-visibility"));
+      const cycle = { visible: "float", float: "hidden", hidden: "visible" } as const;
+      setSidebarVisibility(cycle[sidebarVisibilityRef.current] || "visible");
     };
     window.addEventListener("cc-open-search", handleOpenSearch);
     window.addEventListener("cc-open-ai", handleOpenAI);
@@ -167,7 +172,7 @@ export function TopBar() {
       window.removeEventListener("cc-toggle-edit-mode", handleToggleEditMode);
       window.removeEventListener("cc-toggle-sidebar", handleToggleSidebar);
     };
-  }, [editMode, setEditMode]);
+  }, [editMode, setEditMode, setSidebarVisibility]);
 
   const handleSearchOpen = useCallback(() => {
     setSearchOpen(true);

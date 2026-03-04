@@ -13,6 +13,7 @@ import {
   FormInput,
   Network,
   Calendar,
+  Settings,
   X,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -208,6 +209,52 @@ export function Sidebar({
             );
           })}
         </nav>
+
+        {/* Settings link */}
+        <div className="shrink-0 border-t border-slate-700/50 p-2">
+          {(() => {
+            const isActive = pathname === "/dashboard/settings";
+            const settingsLabel = t.tabs.settings;
+
+            if (isCollapsed) {
+              return (
+                <Link
+                  href="/dashboard/settings"
+                  className={`relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
+                    isActive
+                      ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                  }`}
+                  title={settingsLabel}
+                >
+                  <Settings className="h-4 w-4 shrink-0" />
+                </Link>
+              );
+            }
+
+            const linkClass = `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              isActive
+                ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            }`;
+
+            if (onRight) {
+              return (
+                <Link href="/dashboard/settings" className={linkClass}>
+                  <span data-cc-text="true" className="flex-1 text-right">{settingsLabel}</span>
+                  <Settings className="h-4 w-4 shrink-0" />
+                </Link>
+              );
+            }
+
+            return (
+              <Link href="/dashboard/settings" className={linkClass}>
+                <Settings className="h-4 w-4 shrink-0" />
+                <span data-cc-text="true" className="flex-1 text-left">{settingsLabel}</span>
+              </Link>
+            );
+          })()}
+        </div>
 
         {/* Footer — version label */}
         {!isCollapsed && (

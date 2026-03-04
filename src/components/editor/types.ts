@@ -40,6 +40,8 @@ export interface TiptapEditorProps {
   className?: string;
   /** Record ID (for future block-level storage) */
   recordId?: string;
+  /** Save status from parent — displayed in status bar */
+  saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
 }
 
 export interface FloatingToolbarProps {

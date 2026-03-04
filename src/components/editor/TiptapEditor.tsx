@@ -19,6 +19,7 @@ import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
 import { useCallback, useEffect } from 'react';
 import type { JSONContent } from '@tiptap/react';
+import { useDebouncedCallback } from 'use-debounce';
 
 import { SlashCommands } from './extensions/SlashCommands';
 import { ToggleDetails, DetailsSummary, DetailsContent } from './extensions/Toggle';
@@ -28,6 +29,7 @@ import { FileBlock } from './extensions/FileBlock';
 import { EmbedBlock } from './extensions/EmbedBlock';
 import { CalloutBlock } from './extensions/CalloutBlock';
 import { tableExtensions } from './extensions/TableSetup';
+import { FieldBlock } from './extensions/FieldBlock';
 import { FloatingToolbar } from './FloatingToolbar';
 import { BlockHandle } from './BlockHandle';
 import type { TiptapEditorProps } from './types';
@@ -70,7 +72,13 @@ export function TiptapEditor({
   autoFocus = false,
   className = '',
   recordId,
+  saveStatus = 'idle',
 }: TiptapEditorProps) {
+  // ─── Auto-save: 1s debounce after every change ───
+  const debouncedSave = useDebouncedCallback((json: JSONContent) => {
+    if (onSave) onSave(json);
+  }, 1000);
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -128,6 +136,8 @@ export function TiptapEditor({
       CalloutBlock,
       // Table
       ...tableExtensions,
+      // Field blocks
+      FieldBlock,
       // Slash commands
       SlashCommands,
     ],
@@ -155,13 +165,33 @@ export function TiptapEditor({
       },
     },
     onUpdate: ({ editor: e }) => {
-      onChange?.(e.getJSON());
+      const json = e.getJSON();
+      onChange?.(json);
+      debouncedSave(json);
     },
   });
 
   useEffect(() => {
     if (editor) editor.setEditable(editable);
   }, [editor, editable]);
+
+  // Listen for field save events to insert field blocks
+  useEffect(() => {
+    if (!editor) return;
+    const handleFieldSaved = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.fieldType) {
+        editor.chain().focus().setFieldBlock({
+          fieldType: detail.fieldType,
+          fieldId: detail.fieldId || '',
+          label: detail.label || detail.fieldType,
+          config: detail.config || {},
+        }).run();
+      }
+    };
+    window.addEventListener('cc-field-saved', handleFieldSaved);
+    return () => window.removeEventListener('cc-field-saved', handleFieldSaved);
+  }, [editor]);
 
   useEffect(() => {
     if (editor && content && JSON.stringify(editor.getJSON()) !== JSON.stringify(content)) {
@@ -173,10 +203,11 @@ export function TiptapEditor({
     (e: React.KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
+        debouncedSave.cancel();
         if (onSave && editor) onSave(editor.getJSON());
       }
     },
-    [editor, onSave]
+    [editor, onSave, debouncedSave]
   );
 
   if (!editor) return null;
@@ -187,13 +218,18 @@ export function TiptapEditor({
       {editable && <FloatingToolbar editor={editor} />}
       <EditorContent editor={editor} />
       <div className="gam-editor-statusbar">
+        <span className="gam-editor-statusbar__save">
+          {saveStatus === 'saving' && '💾 שומר...'}
+          {saveStatus === 'saved' && '✅ נשמר'}
+          {saveStatus === 'error' && '❌ שגיאה בשמירה'}
+        </span>
         <span className="gam-editor-statusbar__chars">
           {editor.storage.characterCount?.characters?.() ??
             editor.getText().length}{' '}
           תווים
         </span>
         <span className="gam-editor-statusbar__hint">
-          הקלד <kbd>/</kbd> לתפריט &nbsp;|&nbsp; <kbd>Ctrl+S</kbd> שמירה
+          הקלד <kbd>/</kbd> לתפריט &nbsp;|&nbsp; שמירה אוטומטית &nbsp;|&nbsp; <kbd>Ctrl+S</kbd> שמירה
         </span>
       </div>
     </div>

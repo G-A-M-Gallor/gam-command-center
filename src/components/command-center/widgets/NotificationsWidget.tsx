@@ -24,65 +24,12 @@ interface NotificationItem {
   read: boolean;
 }
 
-const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: "n1",
-    type: "status",
-    title: {
-      he: "vBrain.io ירד לסטטוס 'בסיכון'",
-      en: "vBrain.io dropped to 'At Risk'",
-    },
-    timestamp: Date.now() - 5 * 60 * 1000,
-    read: false,
-  },
-  {
-    id: "n2",
-    type: "mention",
-    title: {
-      he: "הוזכרת בסקירת ספרינט",
-      en: "You were mentioned in Sprint Review",
-    },
-    timestamp: Date.now() - 30 * 60 * 1000,
-    read: false,
-  },
-  {
-    id: "n3",
-    type: "deadline",
-    title: {
-      he: "דוח חודשי — מחר בסוף היום",
-      en: "Monthly Report — due tomorrow EOD",
-    },
-    timestamp: Date.now() - 2 * 60 * 60 * 1000,
-    read: false,
-  },
-  {
-    id: "n4",
-    type: "ai",
-    title: {
-      he: "תובנה חדשה מניתוח AI",
-      en: "New AI analysis insight available",
-    },
-    timestamp: Date.now() - 4 * 60 * 60 * 1000,
-    read: true,
-  },
-  {
-    id: "n5",
-    type: "status",
-    title: {
-      he: "מרכז הפיקוד GAM עודכן ל'בריא'",
-      en: "GAM Command Center updated to 'Healthy'",
-    },
-    timestamp: Date.now() - 24 * 60 * 60 * 1000,
-    read: true,
-  },
-];
-
 function loadNotifications(): NotificationItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : MOCK_NOTIFICATIONS;
+    return raw ? JSON.parse(raw) : [];
   } catch {
-    return MOCK_NOTIFICATIONS;
+    return [];
   }
 }
 

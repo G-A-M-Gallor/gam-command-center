@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   ProjectCard,
   type Project,
@@ -8,53 +9,44 @@ import { getHealthStatus } from "@/components/command-center/HealthBadge";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { supabase } from "@/lib/supabaseClient";
 
-const MOCK_PROJECTS_DATA: Omit<Project, "name">[] = [
-  {
-    id: "1",
-    status: "active",
-    health_score: 85,
-    layer: "product",
-    source: "claude",
-  },
-  {
-    id: "2",
-    status: "active",
-    health_score: 72,
-    layer: "infrastructure",
-    source: "claude",
-  },
-  {
-    id: "3",
-    status: "active",
-    health_score: 45,
-    layer: "client",
-    source: "manual",
-  },
-  {
-    id: "4",
-    status: "active",
-    health_score: 92,
-    layer: "infrastructure",
-    source: "trigger",
-  },
-  {
-    id: "5",
-    status: "active",
-    health_score: 28,
-    layer: "product",
-    source: "manual",
-  },
+const FALLBACK_PROJECTS: Project[] = [
+  { id: "1", name: "vBrain.io Platform", status: "active", health_score: 85, layer: "product", source: "claude" },
+  { id: "2", name: "GAM Command Center", status: "active", health_score: 72, layer: "infrastructure", source: "claude" },
+  { id: "3", name: "Client Portal", status: "active", health_score: 45, layer: "client", source: "manual" },
+  { id: "4", name: "Origami Sync Pipeline", status: "active", health_score: 92, layer: "infrastructure", source: "trigger" },
+  { id: "5", name: "WATI Integration", status: "active", health_score: 28, layer: "product", source: "manual" },
 ];
 
 export default function LayersPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const projects: Project[] = MOCK_PROJECTS_DATA.map((p, i) => ({
-    ...p,
-    name: t.mockProjects[i],
-  }));
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('id, name, status, health_score, layer, source')
+          .eq('status', 'active')
+          .order('updated_at', { ascending: false });
+
+        if (error || !data || data.length === 0) {
+          // Fallback to demo data if table empty or missing
+          setProjects(FALLBACK_PROJECTS);
+        } else {
+          setProjects(data);
+        }
+      } catch {
+        setProjects(FALLBACK_PROJECTS);
+      }
+      setLoading(false);
+    }
+    loadProjects();
+  }, []);
 
   const { healthy, atRisk, critical } = projects.reduce(
     (acc, p) => {
@@ -68,6 +60,17 @@ export default function LayersPage() {
   );
 
   const isRtl = language === "he";
+
+  if (loading) {
+    return (
+      <div className="flex min-h-full flex-col">
+        <PageHeader pageKey="layers" />
+        <div className="flex flex-1 items-center justify-center text-slate-500">
+          {language === "he" ? "טוען פרויקטים..." : "Loading projects..."}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-full flex-col">

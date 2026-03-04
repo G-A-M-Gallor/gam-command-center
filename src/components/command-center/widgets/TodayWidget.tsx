@@ -11,46 +11,8 @@ interface EventItem {
   project?: { he: string; en: string };
 }
 
-const mockMeetings: EventItem[] = [
-  {
-    time: "10:00",
-    title: { he: "סנכרון צוות פיתוח", en: "Dev Team Sync" },
-    project: { he: "vBrain.io", en: "vBrain.io" },
-  },
-  {
-    time: "14:30",
-    title: { he: "סקירת ספרינט", en: "Sprint Review" },
-    project: { he: "מרכז הפיקוד", en: "Command Center" },
-  },
-  {
-    time: "16:00",
-    title: { he: "פגישת לקוח - ABC", en: "Client Meeting - ABC" },
-    project: { he: "ABC בניין", en: "ABC Construction" },
-  },
-];
-
-const mockDeadlines: EventItem[] = [
-  {
-    time: "EOD",
-    title: { he: "הגשת אפיון טכני", en: "Submit Technical Spec" },
-    project: { he: "vBrain.io", en: "vBrain.io" },
-  },
-  {
-    time: "מחר",
-    title: { he: "עדכון דוח חודשי", en: "Monthly Report Update" },
-  },
-];
-
-const mockReminders: EventItem[] = [
-  {
-    time: "12:00",
-    title: { he: "בדוק סטטוס סנכרון Origami", en: "Check Origami Sync Status" },
-  },
-  {
-    time: "17:00",
-    title: { he: "שלח סיכום יומי", en: "Send Daily Summary" },
-  },
-];
+// Events will come from calendar integration (Google Calendar / Supabase)
+// For now, show real date + empty state
 
 function getHebrewDate(): string {
   const days = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
@@ -121,29 +83,11 @@ export function TodayPanel() {
         <p className="text-sm font-medium text-slate-100">{dateStr}</p>
       </div>
 
-      <Section
-        title={t.widgets.meetings}
-        icon={CalendarDays}
-        items={mockMeetings}
-        lang={language}
-        iconColor="text-blue-400"
-      />
-
-      <Section
-        title={t.widgets.deadlines}
-        icon={Clock}
-        items={mockDeadlines}
-        lang={language}
-        iconColor="text-amber-400"
-      />
-
-      <Section
-        title={t.widgets.reminders}
-        icon={Bell}
-        items={mockReminders}
-        lang={language}
-        iconColor="text-emerald-400"
-      />
+      <div className="py-4 text-center text-sm text-slate-500">
+        {language === "he"
+          ? "אין אירועים להיום. חבר יומן כדי לראות פגישות ודדליינים."
+          : "No events today. Connect a calendar to see meetings and deadlines."}
+      </div>
     </div>
   );
 }
@@ -153,34 +97,15 @@ export function TodayBarContent({ size }: { size: WidgetSize }) {
 
   if (size < 2) return null;
 
-  const nextEvent = mockMeetings[0];
+  // Show today's date in the bar
+  const now = new Date();
+  const short = now.toLocaleDateString(language === "he" ? "he-IL" : "en-US", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
 
-  if (size === 2) {
-    return (
-      <span className="truncate text-xs text-slate-400">{nextEvent.time}</span>
-    );
-  }
-
-  if (size === 3) {
-    return (
-      <span className="truncate text-xs text-slate-400">
-        {nextEvent.time} {nextEvent.title[language]}
-      </span>
-    );
-  }
-
-  // Size 4: next 2 events
-  const second = mockMeetings[1];
   return (
-    <div className="flex min-w-0 flex-col">
-      <span className="truncate text-[10px] text-slate-400">
-        {nextEvent.time} {nextEvent.title[language]}
-      </span>
-      {second && (
-        <span className="truncate text-[10px] text-slate-500">
-          {second.time} {second.title[language]}
-        </span>
-      )}
-    </div>
+    <span className="truncate text-xs text-slate-400">{short}</span>
   );
 }

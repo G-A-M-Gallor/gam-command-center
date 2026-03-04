@@ -264,6 +264,67 @@ export const slashCommandCategories: SlashCommandCategory[] = [
       },
     ],
   },
+  {
+    name: 'Fields',
+    nameHe: 'שדות',
+    items: [
+      {
+        title: 'Text Field',
+        titleHe: 'שדה טקסט',
+        description: 'שדה טקסט חופשי',
+        icon: '📝',
+        aliases: ['field', 'text', 'input', 'שדה', 'טקסט'],
+        command: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).run();
+          window.dispatchEvent(new CustomEvent('cc-insert-field', { detail: { fieldType: 'short-text' } }));
+        },
+      },
+      {
+        title: 'Checkbox Field',
+        titleHe: "צ'קבוקס",
+        description: 'תיבת סימון כן/לא',
+        icon: '☑️',
+        aliases: ['checkbox', 'check', "צ'קבוקס", 'סימון'],
+        command: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).run();
+          window.dispatchEvent(new CustomEvent('cc-insert-field', { detail: { fieldType: 'checkbox' } }));
+        },
+      },
+      {
+        title: 'Dropdown Field',
+        titleHe: 'רשימה נפתחת',
+        description: 'בחירה מרשימת אפשרויות',
+        icon: '📋',
+        aliases: ['dropdown', 'select', 'רשימה', 'נפתחת'],
+        command: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).run();
+          window.dispatchEvent(new CustomEvent('cc-insert-field', { detail: { fieldType: 'dropdown' } }));
+        },
+      },
+      {
+        title: 'Date Field',
+        titleHe: 'שדה תאריך',
+        description: 'בורר תאריך',
+        icon: '📅',
+        aliases: ['date', 'calendar', 'תאריך', 'לוח שנה'],
+        command: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).run();
+          window.dispatchEvent(new CustomEvent('cc-insert-field', { detail: { fieldType: 'date' } }));
+        },
+      },
+      {
+        title: 'Tags Field',
+        titleHe: 'תגיות',
+        description: 'תגיות עם צבעים',
+        icon: '🏷️',
+        aliases: ['tags', 'תגיות', 'labels'],
+        command: ({ editor, range }) => {
+          editor.chain().focus().deleteRange(range).run();
+          window.dispatchEvent(new CustomEvent('cc-insert-field', { detail: { fieldType: 'tags' } }));
+        },
+      },
+    ],
+  },
 ];
 
 // Flat list for backward compatibility

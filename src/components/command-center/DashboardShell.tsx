@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+// EditToolbar moved into CanvasEditor — FieldLibrary opens from canvas toolbar
 import { ContextMenuProvider } from "./ContextMenu";
 import { GuideOverlay } from "./GuideOverlay";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -120,6 +121,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Top Bar */}
       <TopBar />
+
+      {/* Edit Mode Toolbar removed — FieldLibrary opens from CanvasEditor toolbar */}
 
       {/* Hamburger: only for hidden mode, pinned to screen edge */}
       {showHamburger && (

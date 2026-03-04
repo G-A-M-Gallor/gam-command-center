@@ -348,6 +348,11 @@
   direction: rtl;
 }
 
+.gam-editor-statusbar__save {
+  font-weight: 500;
+  min-width: 80px;
+}
+
 .gam-editor-statusbar kbd {
   display: inline-block;
   padding: 1px 5px;
@@ -858,4 +863,422 @@
 [data-theme='dark'] .gam-callout--note,
 .dark .gam-callout--note {
   background: #9333ea26;
+}
+
+/* ─── Block Handles ─────────────────────────────── */
+.gam-editor-wrapper {
+  position: relative;
+}
+
+.gam-block-handle {
+  position: absolute;
+  right: calc(100%);
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 2px;
+  padding-right: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.gam-editor-wrapper:hover .gam-block-handle,
+.gam-block-handle:hover {
+  opacity: 1;
+}
+
+.gam-block-handle__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+}
+
+.gam-block-handle__btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+}
+
+.gam-block-handle__drag {
+  cursor: grab;
+}
+
+.gam-block-handle__drag:active {
+  cursor: grabbing;
+}
+
+/* ─── Block Menu (on ⠿ click) ───────────────────── */
+.gam-block-menu {
+  position: absolute;
+  z-index: 50;
+  min-width: 180px;
+  padding: 6px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+.gam-block-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  margin: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-align: right;
+  direction: rtl;
+  width: 100%;
+  transition: background 0.1s;
+}
+
+.gam-block-menu__item:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.gam-block-menu__icon {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.gam-block-menu__arrow {
+  margin-right: auto;
+  opacity: 0.5;
+}
+
+.gam-block-menu__separator {
+  height: 1px;
+  margin: 4px 6px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.gam-block-menu__sub {
+  padding: 4px 0 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 2px;
+}
+
+/* ─── Field Block ────────────────────────────────── */
+.gam-field-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  margin: 4px 0;
+  background: var(--editor-field-bg, #f0f0ff);
+  border: 1px dashed var(--editor-field-border, #8b8bf5);
+  border-radius: 8px;
+  direction: rtl;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  user-select: none;
+  width: 100%;
+}
+
+.gam-field-block:hover {
+  background: var(--editor-field-hover, #e8e8ff);
+  border-color: var(--editor-field-hover-border, #6366f1);
+}
+
+.gam-field-block__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.gam-field-block__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--editor-field-label, #1e293b);
+  flex: 1;
+}
+
+.gam-field-block__type {
+  font-size: 0.6875rem;
+  color: var(--editor-field-type, #94a3b8);
+  background: var(--editor-field-type-bg, #f1f5f9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* Field Block — Dark Mode */
+[data-theme='dark'] .gam-field-block,
+.dark .gam-field-block {
+  --editor-field-bg: rgba(99, 102, 241, 0.08);
+  --editor-field-border: rgba(99, 102, 241, 0.3);
+  --editor-field-hover: rgba(99, 102, 241, 0.15);
+  --editor-field-hover-border: #818cf8;
+  --editor-field-label: #e2e8f0;
+  --editor-field-type: #64748b;
+  --editor-field-type-bg: #1e293b;
+}
+
+/* ===================================================
+   GAM Command Center — Canvas Editor Styles
+   2D Grid, Field Placements, EditorZone
+   =================================================== */
+
+/* ─── Canvas Container ──────────────────────────── */
+.gam-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #0f172a;
+}
+
+/* ─── Canvas Grid ───────────────────────────────── */
+.gam-canvas-grid {
+  position: relative;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+/* Grid dot pattern */
+.gam-canvas-grid--dots {
+  background-image:
+    radial-gradient(circle, rgba(148, 163, 184, 0.15) 1px, transparent 1px);
+  background-size: var(--grid-cell-size, 80px) var(--grid-cell-size, 80px);
+}
+
+/* ─── Grid Drop Highlight ───────────────────────── */
+.gam-canvas-grid__drop-highlight {
+  position: absolute;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 5;
+  transition: all 0.1s ease;
+}
+
+.gam-canvas-grid__drop-highlight--valid {
+  background: rgba(99, 102, 241, 0.12);
+  border: 2px dashed rgba(99, 102, 241, 0.5);
+}
+
+.gam-canvas-grid__drop-highlight--invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px dashed rgba(239, 68, 68, 0.5);
+}
+
+/* ─── Canvas Field Item ─────────────────────────── */
+.gam-canvas-field {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 10px;
+  cursor: grab;
+  user-select: none;
+  direction: rtl;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.gam-canvas-field:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.gam-canvas-field--selected {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.25);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.gam-canvas-field--dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+  z-index: 50;
+}
+
+.gam-canvas-field__icon {
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.gam-canvas-field__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #e2e8f0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gam-canvas-field__type-badge {
+  font-size: 0.625rem;
+  color: #64748b;
+  background: rgba(30, 41, 59, 0.6);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.gam-canvas-field__delete {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.15);
+  border: none;
+  border-radius: 4px;
+  color: #f87171;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.gam-canvas-field--selected .gam-canvas-field__delete,
+.gam-canvas-field:hover .gam-canvas-field__delete {
+  opacity: 1;
+}
+
+.gam-canvas-field__delete:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* ─── Editor Zone (Tiptap wrapper on canvas) ───── */
+.gam-canvas-editor-zone {
+  position: absolute;
+  z-index: 2;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+  background: rgba(15, 23, 42, 0.4);
+  overflow: hidden;
+}
+
+.gam-canvas-editor-zone .gam-editor {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-height: 100%;
+}
+
+.gam-canvas-editor-zone .gam-editor:focus-within {
+  box-shadow: none;
+}
+
+/* ─── Canvas Toolbar ────────────────────────────── */
+.gam-canvas-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  background: rgba(30, 41, 59, 0.95);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+
+.gam-canvas-toolbar__back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.gam-canvas-toolbar__back:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #e2e8f0;
+}
+
+.gam-canvas-toolbar__title {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.gam-canvas-toolbar__title::placeholder {
+  color: #475569;
+}
+
+.gam-canvas-toolbar__sep {
+  width: 1px;
+  height: 16px;
+  background: #334155;
+  margin: 0 4px;
+}
+
+.gam-canvas-toolbar__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.gam-canvas-toolbar__btn:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: #e2e8f0;
+}
+
+.gam-canvas-toolbar__btn--active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+}
+
+.gam-canvas-toolbar__zoom {
+  min-width: 36px;
+  text-align: center;
+  font-size: 0.6875rem;
+  color: #64748b;
+}
+
+.gam-canvas-toolbar__status {
+  font-size: 0.6875rem;
+  color: #64748b;
 }

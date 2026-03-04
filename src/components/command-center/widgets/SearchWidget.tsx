@@ -16,6 +16,7 @@ import {
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
@@ -28,30 +29,15 @@ interface RecentPage {
   timestamp: number;
 }
 
-// Mock data for search results
-const mockProjects = [
-  { id: "1", name: { he: "פלטפורמת vBrain.io", en: "vBrain.io Platform" }, type: "project" },
-  { id: "2", name: { he: "מרכז הפיקוד GAM", en: "GAM Command Center" }, type: "project" },
-  { id: "3", name: { he: "פורטל לקוח - ABC בניין", en: "Client Portal - ABC Construction" }, type: "project" },
-  { id: "4", name: { he: "צינור סנכרון Origami", en: "Origami Sync Pipeline" }, type: "project" },
-  { id: "5", name: { he: "אינטגרציית WATI", en: "WATI Integration" }, type: "project" },
-];
-
-const mockDocuments = [
-  { id: "d1", name: { he: "מסמך אפיון - vBrain", en: "Spec Document - vBrain" }, type: "document" },
-  { id: "d2", name: { he: "פרוטוקול ישיבה 12/02", en: "Meeting Notes 12/02" }, type: "document" },
-  { id: "d3", name: { he: "תהליך עבודה - סנכרון", en: "Workflow - Sync" }, type: "document" },
-];
-
-const mockConversations = [
-  { id: "c1", name: { he: "ניתוח ארכיטקטורה", en: "Architecture Analysis" }, type: "conversation" },
-  { id: "c2", name: { he: "כתיבת אפיון טכני", en: "Technical Spec Writing" }, type: "conversation" },
-];
+interface DbDocument {
+  id: string;
+  title: string;
+}
 
 interface SearchItem {
   id: string;
   label: string;
-  type: "page" | "project" | "document" | "conversation" | "action";
+  type: "page" | "document" | "action";
   href?: string;
   icon: typeof Search;
 }
@@ -107,12 +93,26 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [dbDocuments, setDbDocuments] = useState<DbDocument[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Focus input on mount
+  // Focus input on mount + load documents from Supabase
   useEffect(() => {
     inputRef.current?.focus();
+    async function loadDocs() {
+      try {
+        const { data } = await supabase
+          .from('vb_records')
+          .select('id, title')
+          .eq('record_type', 'document')
+          .eq('is_deleted', false)
+          .order('last_edited_at', { ascending: false })
+          .limit(50);
+        if (data) setDbDocuments(data);
+      } catch { /* silent — search still works with pages */ }
+    }
+    loadDocs();
   }, []);
 
   // Build items list
@@ -137,63 +137,53 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         icon: Clock,
       }));
 
-      return [...pageItems, ...searchItems];
-    }
-
-    // Search state: filter mock data + quick actions
-    const q = query.toLowerCase();
-    const lang = language;
-
-    const projects: SearchItem[] = mockProjects
-      .filter(
-        (p) =>
-          p.name[lang].toLowerCase().includes(q) ||
-          p.name.he.toLowerCase().includes(q) ||
-          p.name.en.toLowerCase().includes(q)
-      )
-      .map((p) => ({
-        id: p.id,
-        label: p.name[lang],
-        type: "project" as const,
-        icon: Layers,
-      }));
-
-    const documents: SearchItem[] = mockDocuments
-      .filter(
-        (d) =>
-          d.name[lang].toLowerCase().includes(q) ||
-          d.name.he.toLowerCase().includes(q) ||
-          d.name.en.toLowerCase().includes(q)
-      )
-      .map((d) => ({
-        id: d.id,
-        label: d.name[lang],
+      // Show recent documents too
+      const docItems: SearchItem[] = dbDocuments.slice(0, 5).map((d) => ({
+        id: `doc-${d.id}`,
+        label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
         type: "document" as const,
+        href: `/dashboard/editor?id=${d.id}`,
         icon: FileText,
       }));
 
-    const conversations: SearchItem[] = mockConversations
-      .filter(
-        (c) =>
-          c.name[lang].toLowerCase().includes(q) ||
-          c.name.he.toLowerCase().includes(q) ||
-          c.name.en.toLowerCase().includes(q)
-      )
-      .map((c) => ({
-        id: c.id,
-        label: c.name[lang],
-        type: "conversation" as const,
-        icon: Bot,
+      return [...pageItems, ...docItems, ...searchItems];
+    }
+
+    // Search state: filter real documents + pages + actions
+    const q = query.toLowerCase();
+
+    const documents: SearchItem[] = dbDocuments
+      .filter((d) => (d.title || '').toLowerCase().includes(q))
+      .map((d) => ({
+        id: `doc-${d.id}`,
+        label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
+        type: "document" as const,
+        href: `/dashboard/editor?id=${d.id}`,
+        icon: FileText,
+      }));
+
+    // Dashboard pages as searchable items
+    const pageEntries = Object.entries(routeIcons);
+    const pages: SearchItem[] = pageEntries
+      .filter(([href]) => {
+        const labels = tabLabels[href];
+        if (!labels) return false;
+        return labels.he.toLowerCase().includes(q) || labels.en.toLowerCase().includes(q);
+      })
+      .map(([href, icon]) => ({
+        id: `page-${href}`,
+        label: tabLabels[href]?.[language] || href,
+        type: "page" as const,
+        href,
+        icon,
       }));
 
     const actions: SearchItem[] = [
-      { id: "action-project", label: t.widgets.newProject, type: "action" as const, icon: Plus },
-      { id: "action-document", label: t.widgets.newDocument, type: "action" as const, icon: Plus },
-      { id: "action-task", label: t.widgets.newTask, type: "action" as const, icon: Plus },
+      { id: "action-document", label: t.widgets.newDocument, type: "action" as const, href: "__new-doc__", icon: Plus },
     ];
 
-    return [...projects, ...documents, ...conversations, ...actions];
-  }, [query, language, t]);
+    return [...pages, ...documents, ...actions];
+  }, [query, language, t, dbDocuments]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -208,23 +198,59 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   }, [selectedIndex]);
 
   const handleSelect = useCallback(
-    (item: SearchItem) => {
+    async (item: SearchItem) => {
+      if (query.trim()) {
+        saveRecentSearch(query.trim());
+      }
+
+      // Create new document
+      if (item.href === "__new-doc__") {
+        try {
+          const { data: existing } = await supabase
+            .from('vb_records')
+            .select('workspace_id, entity_id, created_by')
+            .eq('record_type', 'document')
+            .limit(1)
+            .single();
+          if (existing) {
+            const { data } = await supabase
+              .from('vb_records')
+              .insert({
+                workspace_id: existing.workspace_id,
+                entity_id: existing.entity_id,
+                created_by: existing.created_by,
+                title: language === 'he' ? 'מסמך חדש' : 'New Document',
+                content: { type: 'doc', content: [{ type: 'paragraph' }] },
+                record_type: 'document',
+                source: 'manual',
+                status: 'active',
+              })
+              .select('id')
+              .single();
+            if (data) {
+              router.push(`/dashboard/editor?id=${data.id}`);
+              onClose();
+              return;
+            }
+          }
+        } catch { /* fall through */ }
+        onClose();
+        return;
+      }
+
+      // Navigate to href
       if (item.href) {
         router.push(item.href);
         onClose();
-      } else if (item.type === "page" && !item.href) {
-        // Recent search — fill the input
+        return;
+      }
+
+      // Recent search without href — fill the input
+      if (item.type === "page" && !item.href) {
         setQuery(item.label);
       }
-      // For mock items, just close for now
-      if (item.type === "project" || item.type === "document" || item.type === "conversation" || item.type === "action") {
-        if (query.trim()) {
-          saveRecentSearch(query.trim());
-        }
-        onClose();
-      }
     },
-    [router, onClose, query]
+    [router, onClose, query, language]
   );
 
   const handleKeyDown = useCallback(
@@ -251,18 +277,36 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     [items, selectedIndex, handleSelect, query, onClose]
   );
 
+  // Tab labels for page search
+  const tabLabels: Record<string, { he: string; en: string }> = {
+    "/dashboard/layers": { he: "שכבות", en: "Layers" },
+    "/dashboard/editor": { he: "עורך", en: "Editor" },
+    "/dashboard/story-map": { he: "מפת סיפור", en: "Story Map" },
+    "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map" },
+    "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub" },
+    "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System" },
+    "/dashboard/formily": { he: "טפסים", en: "Formily" },
+    "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture" },
+    "/dashboard/plan": { he: "תוכנית", en: "Plan" },
+    "/dashboard/settings": { he: "הגדרות", en: "Settings" },
+  };
+
   // Group items by type for display
   const groupedSections = useMemo(() => {
     if (!query.trim()) {
       const recentPages = items.filter(
         (i) => i.type === "page" && i.icon !== Clock
       );
+      const docItems = items.filter((i) => i.type === "document");
       const recentSearches = items.filter(
         (i) => i.type === "page" && i.icon === Clock
       );
       const sections: { title: string; items: SearchItem[] }[] = [];
       if (recentPages.length > 0) {
         sections.push({ title: t.widgets.recent, items: recentPages });
+      }
+      if (docItems.length > 0) {
+        sections.push({ title: t.widgets.documents, items: docItems });
       }
       if (recentSearches.length > 0) {
         sections.push({
@@ -273,15 +317,13 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       return sections;
     }
 
-    const projects = items.filter((i) => i.type === "project");
+    const pages = items.filter((i) => i.type === "page");
     const documents = items.filter((i) => i.type === "document");
-    const conversations = items.filter((i) => i.type === "conversation");
     const actions = items.filter((i) => i.type === "action");
 
     const sections: { title: string; items: SearchItem[] }[] = [];
-    if (projects.length > 0) sections.push({ title: t.widgets.projects, items: projects });
+    if (pages.length > 0) sections.push({ title: t.widgets.recent, items: pages });
     if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
-    if (conversations.length > 0) sections.push({ title: t.widgets.conversations, items: conversations });
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
     return sections;
   }, [items, query, t]);

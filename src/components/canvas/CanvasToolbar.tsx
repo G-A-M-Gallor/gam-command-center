@@ -1,0 +1,126 @@
+'use client';
+
+import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, Plus } from 'lucide-react';
+import { useCanvas } from '@/contexts/CanvasContext';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
+
+interface CanvasToolbarProps {
+  title: string;
+  onTitleChange: (title: string) => void;
+  onTitleBlur: () => void;
+  onBack: () => void;
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+  showFieldLibrary: boolean;
+  onToggleFieldLibrary: () => void;
+}
+
+export function CanvasToolbar({
+  title,
+  onTitleChange,
+  onTitleBlur,
+  onBack,
+  saveStatus,
+  showFieldLibrary,
+  onToggleFieldLibrary,
+}: CanvasToolbarProps) {
+  const { layout, toggleGrid, toggleSnap, setZoom } = useCanvas();
+  const { language } = useSettings();
+  const t = getTranslations(language);
+  const ct = t.canvas;
+
+  return (
+    <div className="flex h-10 shrink-0 items-center gap-2 border-b border-slate-700/50 bg-slate-800/95 px-3 backdrop-blur-sm">
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+      >
+        <ArrowRight className="h-3.5 w-3.5" />
+        <span>{language === 'he' ? 'מסמכים' : 'Documents'}</span>
+      </button>
+
+      {/* Add fields button */}
+      <button
+        onClick={onToggleFieldLibrary}
+        className={`flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+          showFieldLibrary
+            ? 'bg-purple-500/20 text-purple-300'
+            : 'text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+        }`}
+      >
+        <Plus className="h-3.5 w-3.5" />
+        <span>{language === 'he' ? 'שדות' : 'Fields'}</span>
+      </button>
+
+      <div className="mx-1 h-4 w-px bg-slate-700" />
+
+      {/* Title */}
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => onTitleChange(e.target.value)}
+        onBlur={onTitleBlur}
+        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+        placeholder={language === 'he' ? 'כותרת המסמך' : 'Document title'}
+        dir="auto"
+        className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-200 outline-none placeholder:text-slate-600"
+      />
+
+      {/* Save status */}
+      <span className="text-[11px] text-slate-500">
+        {saveStatus === 'saving' && (language === 'he' ? 'שומר...' : 'Saving...')}
+        {saveStatus === 'saved' && (language === 'he' ? 'נשמר' : 'Saved')}
+        {saveStatus === 'error' && (language === 'he' ? 'שגיאה' : 'Error')}
+      </span>
+
+      <div className="mx-1 h-4 w-px bg-slate-700" />
+
+      {/* Grid toggle */}
+      <button
+        onClick={toggleGrid}
+        className={`rounded p-1.5 text-xs transition-colors ${
+          layout.show_grid
+            ? 'bg-purple-500/15 text-purple-400'
+            : 'text-slate-500 hover:bg-slate-700 hover:text-slate-300'
+        }`}
+        title={ct?.showGrid || 'Show Grid'}
+      >
+        <Grid3X3 className="h-3.5 w-3.5" />
+      </button>
+
+      {/* Snap toggle */}
+      <button
+        onClick={toggleSnap}
+        className={`rounded p-1.5 text-xs transition-colors ${
+          layout.snap_to_grid
+            ? 'bg-purple-500/15 text-purple-400'
+            : 'text-slate-500 hover:bg-slate-700 hover:text-slate-300'
+        }`}
+        title={ct?.snapToGrid || 'Snap to Grid'}
+      >
+        <Magnet className="h-3.5 w-3.5" />
+      </button>
+
+      <div className="mx-1 h-4 w-px bg-slate-700" />
+
+      {/* Zoom controls */}
+      <button
+        onClick={() => setZoom(layout.zoom - 0.1)}
+        className="rounded p-1.5 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+        title={ct?.zoom || 'Zoom'}
+      >
+        <ZoomOut className="h-3.5 w-3.5" />
+      </button>
+      <span className="min-w-[36px] text-center text-[11px] text-slate-500">
+        {Math.round(layout.zoom * 100)}%
+      </span>
+      <button
+        onClick={() => setZoom(layout.zoom + 0.1)}
+        className="rounded p-1.5 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+      >
+        <ZoomIn className="h-3.5 w-3.5" />
+      </button>
+    </div>
+  );
+}

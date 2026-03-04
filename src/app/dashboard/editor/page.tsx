@@ -1,14 +1,10 @@
 'use client';
 
 import { Suspense } from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import type { JSONContent } from '@tiptap/react';
 import { supabase } from '@/lib/supabaseClient';
-import { TiptapEditor } from '@/components/editor';
-
-// ─── Types ───────────────────────────────────────
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+import { CanvasEditor } from '@/components/canvas/CanvasEditor';
 
 interface DocRecord {
   id: string;
@@ -187,158 +183,17 @@ function DocumentList() {
   );
 }
 
-// ─── Editor View (with ?id=) ─────────────────────
-function EditorView({ recordId }: { recordId: string }) {
-  const router = useRouter();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState<JSONContent | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    async function loadRecord() {
-      setLoading(true);
-      const { data, error: err } = await supabase
-        .from('vb_records')
-        .select('id, title, content')
-        .eq('id', recordId)
-        .single();
-
-      if (err || !data) {
-        setError(`שגיאה בטעינה: ${err?.message || 'רשומה לא נמצאה'}`);
-        setLoading(false);
-        return;
-      }
-
-      setTitle(data.title || 'ללא כותרת');
-      setContent(data.content || { type: 'doc', content: [{ type: 'paragraph' }] });
-      setLoading(false);
-    }
-    loadRecord();
-  }, [recordId]);
-
-  const handleSave = useCallback(
-    async (json: JSONContent) => {
-      if (!recordId) return;
-      setSaveStatus('saving');
-      const { error: err } = await supabase
-        .from('vb_records')
-        .update({ content: json, last_edited_at: new Date().toISOString() })
-        .eq('id', recordId);
-
-      if (err) {
-        setSaveStatus('error');
-        console.error('Save failed:', err);
-        return;
-      }
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
-    },
-    [recordId]
-  );
-
-  const handleTitleBlur = useCallback(
-    async (e: React.FocusEvent<HTMLInputElement>) => {
-      if (!recordId) return;
-      const newTitle = e.target.value.trim();
-      if (newTitle === title) return;
-      setTitle(newTitle);
-      await supabase
-        .from('vb_records')
-        .update({ title: newTitle, last_edited_at: new Date().toISOString() })
-        .eq('id', recordId);
-    },
-    [recordId, title]
-  );
-
-  if (loading) {
-    return <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>⏳ טוען...</div>;
-  }
-
-  if (error) {
-    return (
-      <div dir="rtl" style={{ padding: '2rem' }}>
-        <div style={{ padding: '1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#991b1b' }}>
-          {error}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div dir="rtl" style={{ maxWidth: 900, margin: '0 auto', padding: '1rem 1.5rem' }}>
-      {/* Back button + status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '0.75rem' }}>
-        <button
-          onClick={() => router.push('/dashboard/editor')}
-          style={{
-            padding: '4px 10px',
-            fontSize: '0.8125rem',
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            color: '#94a3b8',
-          }}
-        >
-          ← חזרה למסמכים
-        </button>
-        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-          {saveStatus === 'saving' && '💾 שומר...'}
-          {saveStatus === 'saved' && '✅ נשמר'}
-          {saveStatus === 'error' && '❌ שגיאה'}
-          {saveStatus === 'idle' && 'Ctrl+S לשמירה'}
-        </span>
-        <span style={{ marginRight: 'auto', opacity: 0.4, direction: 'ltr', fontSize: '0.6875rem' }}>
-          {recordId.slice(0, 8)}...
-        </span>
-      </div>
-
-      {/* Title */}
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={handleTitleBlur}
-        onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-        placeholder="כותרת המסמך"
-        style={{
-          width: '100%',
-          fontSize: '1.75rem',
-          fontWeight: 700,
-          border: 'none',
-          outline: 'none',
-          background: 'transparent',
-          color: 'inherit',
-          padding: '0.5rem 0',
-          marginBottom: '0.5rem',
-          direction: 'rtl',
-          fontFamily: 'Rubik, system-ui, sans-serif',
-        }}
-      />
-
-      {/* Editor */}
-      {content && (
-        <TiptapEditor
-          content={content}
-          onChange={() => {}}
-          onSave={handleSave}
-          autoFocus
-          recordId={recordId}
-        />
-      )}
-    </div>
-  );
-}
-
-// ─── Router (decides list vs editor) ─────────────
+// ─── Router (decides list vs canvas editor) ──────
 function EditorRouter() {
   const searchParams = useSearchParams();
   const recordId = searchParams.get('id');
 
   if (recordId) {
-    return <EditorView recordId={recordId} />;
+    return (
+      <div className="h-[calc(100vh-88px)]">
+        <CanvasEditor recordId={recordId} />
+      </div>
+    );
   }
 
   return <DocumentList />;
