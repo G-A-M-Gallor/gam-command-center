@@ -87,7 +87,7 @@ export function CanvasFieldItem({ placement, cellSize }: CanvasFieldItemProps) {
         <div className="truncate text-xs font-medium text-slate-200">
           {placement.label || placement.field_type || 'Field'}
         </div>
-        {typeDef && (
+        {typeDef?.label && (
           <div className="truncate text-[10px] text-slate-500">
             {typeDef.label.he}
           </div>

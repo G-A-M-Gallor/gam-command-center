@@ -56,8 +56,8 @@ export const CanvasGrid = forwardRef<HTMLDivElement, CanvasGridProps>(
               style={{
                 left: dragOverCell.col * cellSize,
                 top: dragOverCell.row * cellSize,
-                width: cellSize - 2,
-                height: cellSize - 2,
+                width: cellSize - 4,
+                height: cellSize - 4,
               }}
             />
           )}

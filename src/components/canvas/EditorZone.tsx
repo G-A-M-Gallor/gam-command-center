@@ -8,7 +8,7 @@ interface EditorZoneProps {
   editorZone: GridRect;
   cellSize: number;
   content: JSONContent;
-  onChange: () => void;
+  onChange: (json: JSONContent) => void;
   onSave: (json: JSONContent) => void;
   recordId: string;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';

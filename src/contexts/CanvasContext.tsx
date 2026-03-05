@@ -214,6 +214,8 @@ export function CanvasProvider({
       movePlacement,
       removePlacement,
       selectPlacement,
+      setIsDragging,
+      setDragOverCell,
     ]
   );
 

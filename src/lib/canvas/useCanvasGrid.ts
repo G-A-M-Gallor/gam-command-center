@@ -9,6 +9,7 @@ import { DEFAULT_COLUMNS, DEFAULT_CELL_SIZE, MIN_ROWS } from './types';
 interface UseCanvasGridOptions {
   cellSize?: number;
   columns?: number;
+  zoom?: number;
   placements: FieldPlacement[];
   editorZone?: GridRect;
 }
@@ -16,6 +17,7 @@ interface UseCanvasGridOptions {
 export function useCanvasGrid({
   cellSize = DEFAULT_CELL_SIZE,
   columns = DEFAULT_COLUMNS,
+  zoom = 1,
   placements,
   editorZone,
 }: UseCanvasGridOptions) {
@@ -106,23 +108,24 @@ export function useCanvasGrid({
       if (!el) return { col: 0, row: 0 };
 
       const rect = el.getBoundingClientRect();
-      const x = clientX - rect.left + el.scrollLeft;
-      const y = clientY - rect.top + el.scrollTop;
+      const z = zoom || 1;
+      const x = (clientX - rect.left) / z + el.scrollLeft;
+      const y = (clientY - rect.top) / z + el.scrollTop;
 
       return {
         col: Math.max(0, Math.floor(x / cellSize)),
         row: Math.max(0, Math.floor(y / cellSize)),
       };
     },
-    [cellSize]
+    [cellSize, zoom]
   );
 
   // Check bounds
   const isInBounds = useCallback(
     (col: number, row: number, colSpan: number, rowSpan: number): boolean => {
-      return col >= 0 && row >= 0 && col + colSpan <= visibleColumns;
+      return col >= 0 && row >= 0 && col + colSpan <= visibleColumns && row + rowSpan <= visibleRows;
     },
-    [visibleColumns]
+    [visibleColumns, visibleRows]
   );
 
   return {

@@ -72,6 +72,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   } = useCanvasGrid({
     cellSize: layout.cell_size,
     columns: layout.grid_columns,
+    zoom: layout.zoom,
     placements,
     editorZone: layout.editor_zone,
   });
@@ -172,6 +173,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
 
       if (err) {
         setSaveStatus('error');
+        setTimeout(() => setSaveStatus('idle'), 3000);
         return;
       }
       setSaveStatus('saved');
@@ -271,8 +273,11 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   // ── Render ────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center text-slate-500">
-        {/* Loading */}
+      <div className="flex h-full items-center justify-center text-slate-500" dir="rtl">
+        <div className="flex items-center gap-2">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+          <span className="text-sm">טוען...</span>
+        </div>
       </div>
     );
   }
@@ -322,7 +327,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
               editorZone={layout.editor_zone}
               cellSize={layout.cell_size}
               content={content}
-              onChange={() => {}}
+              onChange={setContent}
               onSave={handleSave}
               recordId={recordId}
               saveStatus={saveStatus}
