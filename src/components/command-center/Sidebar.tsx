@@ -13,6 +13,7 @@ import {
   FormInput,
   Network,
   Calendar,
+  Zap,
   Settings,
   X,
 } from "lucide-react";
@@ -44,6 +45,7 @@ const tabRoutes = [
     icon: Network,
   },
   { href: "/dashboard/plan", key: "plan" as const, icon: Calendar },
+  { href: "/dashboard/automations", key: "automations" as const, icon: Zap },
 ] as const;
 
 interface SidebarProps {

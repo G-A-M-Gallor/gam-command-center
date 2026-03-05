@@ -33,6 +33,7 @@ const tabLabels: Record<string, { he: string; en: string }> = {
   "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture" },
   "/dashboard/plan": { he: "תוכנית", en: "Plan" },
   "/dashboard/settings": { he: "הגדרות", en: "Settings" },
+  "/dashboard/automations": { he: "אוטומציות", en: "Automations" },
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

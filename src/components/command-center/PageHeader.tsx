@@ -20,7 +20,8 @@ type PageKey =
   | "formily"
   | "architecture"
   | "plan"
-  | "settings";
+  | "settings"
+  | "automations";
 
 const pageRoutes: Record<PageKey, string> = {
   layers: "/dashboard/layers",
@@ -33,6 +34,7 @@ const pageRoutes: Record<PageKey, string> = {
   architecture: "/dashboard/architecture",
   plan: "/dashboard/plan",
   settings: "/dashboard/settings",
+  automations: "/dashboard/automations",
 };
 
 interface PageHeaderProps {
