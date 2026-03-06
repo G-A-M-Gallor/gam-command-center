@@ -244,6 +244,22 @@ contexts/
 - **Custom events** for cross-component sync: `timer-state-change`, `notifications-change`, `clipboard-change`
 - **AI panel** always opens on the opposite side of the sidebar
 
+## ✅ Dev Checklist — Mandatory Per Feature
+
+Every changelog entry in `/dashboard/admin` must complete 5 items:
+
+| # | Item | What to do |
+|---|------|------------|
+| 1 | **Guide Content** | Add `data-cc-id` + `styleOverrideRegistry` + i18n for the feature's UI elements |
+| 2 | **Usage Doc** | Fill `purpose` + `notes` fields comprehensively in the changelog entry |
+| 3 | **Diagram** | Populate `connectedTo` array — feature must appear in the Mermaid architecture diagram |
+| 4 | **AI Source of Truth** | Write comprehensive `purpose` field; add reference in CLAUDE.md if architectural |
+| 5 | **Conflict Review** | Check dependencies, contexts, localStorage keys, custom events for conflicts |
+
+**Checklist data** lives in `CHANGELOG_CHECKLISTS` in `src/app/dashboard/admin/page.tsx`. When adding a new feature, add its checklist entry with honest assessment.
+
+**Scoring:** Each feature gets 0-5. Overall percentage shown in the stats row and the collapsible summary panel in the Changelog tab.
+
 ## ⚠️ What NOT to Build
 
 - ❌ Form Builder from scratch — use Origami native + Jotform

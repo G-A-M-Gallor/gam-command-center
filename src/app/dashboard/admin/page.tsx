@@ -8,16 +8,22 @@ import {
   Network, Calendar, Zap, Settings, Search, X,
   LayoutDashboard, Component, Database, Globe, Code2, Shield,
   Eye, EyeOff, GitCommit, FileCode, Hash, ExternalLink, Tag,
-  ClipboardCheck, Rocket, Loader2, RefreshCw,
+  ClipboardCheck, Rocket, Loader2, RefreshCw, HelpCircle, BookOpen, Brain,
+  Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
+  ArrowUpDown,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { getOverallScore } from '@/lib/audit/checks';
+import ChangelogToolbar from './ChangelogToolbar';
 
 // ─── Types ───────────────────────────────────────────────
 type Status = 'active' | 'placeholder' | 'coming-soon' | 'deprecated';
 type Phase = 1 | 2 | 3 | 4 | 5;
+type WorkflowStatus = 'inbox' | 'wishlist' | 'todo' | 'next' | 'inProgress' | 'hold' | 'stuck' | 'freeze' | 'complete' | 'cancelled';
+type SortField = 'date' | 'name' | 'phase' | 'workflow' | 'fileCount';
+type GroupField = 'none' | 'workflow' | 'phase' | 'date' | 'fileDir';
 
 interface FieldEntry {
   name: string;
@@ -72,6 +78,23 @@ interface ContextEntry {
   status: Status;
   version: string;
 }
+
+// ─── Workflow Config ─────────────────────────────────────
+
+const WORKFLOW_CONFIG: Record<WorkflowStatus, { color: string; bg: string; text: string; icon: React.ElementType; heLabel: string; enLabel: string; order: number }> = {
+  inbox:      { color: '#94a3b8', bg: 'bg-slate-500/10',   text: 'text-slate-400',   icon: Inbox,          heLabel: 'נכנס',            enLabel: 'Inbox',       order: 0 },
+  wishlist:   { color: '#c084fc', bg: 'bg-purple-500/10',  text: 'text-purple-400',  icon: Star,           heLabel: 'רשימת משאלות',    enLabel: 'Wishlist',    order: 1 },
+  todo:       { color: '#60a5fa', bg: 'bg-blue-500/10',    text: 'text-blue-400',    icon: Circle,         heLabel: 'לביצוע',          enLabel: 'To Do',       order: 2 },
+  next:       { color: '#818cf8', bg: 'bg-indigo-500/10',  text: 'text-indigo-400',  icon: ArrowRight,     heLabel: 'הבא',             enLabel: 'Next',        order: 3 },
+  inProgress: { color: '#f472b6', bg: 'bg-pink-500/10',    text: 'text-pink-400',    icon: Loader2,        heLabel: 'בביצוע',          enLabel: 'In Progress', order: 4 },
+  hold:       { color: '#fbbf24', bg: 'bg-amber-500/10',   text: 'text-amber-400',   icon: PauseCircle,    heLabel: 'המתנה',           enLabel: 'On Hold',     order: 5 },
+  stuck:      { color: '#fb923c', bg: 'bg-orange-500/10',  text: 'text-orange-400',  icon: AlertTriangle,  heLabel: 'תקוע',            enLabel: 'Stuck',       order: 6 },
+  freeze:     { color: '#38bdf8', bg: 'bg-sky-500/10',     text: 'text-sky-400',     icon: Snowflake,      heLabel: 'קפוא',            enLabel: 'Frozen',      order: 7 },
+  complete:   { color: '#34d399', bg: 'bg-emerald-500/10', text: 'text-emerald-400', icon: CheckCircle2,   heLabel: 'הושלם',           enLabel: 'Complete',    order: 8 },
+  cancelled:  { color: '#ef4444', bg: 'bg-red-500/10',     text: 'text-red-400',     icon: XCircle,        heLabel: 'בוטל',            enLabel: 'Cancelled',   order: 9 },
+};
+
+const WORKFLOW_ORDER: WorkflowStatus[] = ['inbox', 'wishlist', 'todo', 'next', 'inProgress', 'hold', 'stuck', 'freeze', 'complete', 'cancelled'];
 
 // ─── Data ────────────────────────────────────────────────
 
@@ -251,6 +274,7 @@ interface ChangelogEntry {
   featureHe: string;
   status: FeatureStatus;
   commitStatus: CommitStatus;
+  workflowStatus: WorkflowStatus;
   commitHash?: string;
   date: string;
   phase?: Phase;
@@ -278,6 +302,110 @@ interface GitStatusData {
   untracked: string[];
   commits: { hash: string; message: string }[];
   isDirty: boolean;
+}
+
+// ─── Dev Checklist Types & Data ──────────────────────────
+
+type DevChecklistKey = 'guideContent' | 'usageDoc' | 'diagram' | 'aiSourceOfTruth' | 'conflictReview';
+
+interface DevChecklistItem {
+  key: DevChecklistKey;
+  done: boolean;
+  note?: string;
+  noteHe?: string;
+}
+
+interface DevChecklist {
+  items: DevChecklistItem[];
+  reviewedBy?: string;
+  reviewedDate?: string;
+}
+
+const DEV_CHECKLIST_KEYS: { key: DevChecklistKey; icon: React.ElementType }[] = [
+  { key: 'guideContent', icon: HelpCircle },
+  { key: 'usageDoc', icon: BookOpen },
+  { key: 'diagram', icon: Network },
+  { key: 'aiSourceOfTruth', icon: Brain },
+  { key: 'conflictReview', icon: Shield },
+];
+
+function makeChecklist(guide: boolean, usage: boolean, diagram: boolean, aiSot: boolean, conflict: boolean): DevChecklist {
+  return {
+    items: [
+      { key: 'guideContent', done: guide },
+      { key: 'usageDoc', done: usage },
+      { key: 'diagram', done: diagram },
+      { key: 'aiSourceOfTruth', done: aiSot },
+      { key: 'conflictReview', done: conflict },
+    ],
+    reviewedBy: 'claude',
+    reviewedDate: '2026-03-06',
+  };
+}
+
+// Auto-assessed: guideContent=has data-cc-id, usageDoc=has purpose+notes, diagram=has connectedTo,
+// aiSourceOfTruth=comprehensive purpose, conflictReview=complete workflow status
+const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
+  'nextjs-scaffold':         makeChecklist(false, true, false, true, true),
+  'dashboard-shell':         makeChecklist(true,  true, true,  true, true),
+  'sidebar':                 makeChecklist(true,  true, true,  true, true),
+  'topbar-widgets':          makeChecklist(true,  true, true,  true, true),
+  'settings-context':        makeChecklist(false, true, true,  true, true),
+  'widget-context':          makeChecklist(false, true, true,  true, true),
+  'style-override-context':  makeChecklist(false, true, true,  true, true),
+  'data-cc-id-system':       makeChecklist(true,  true, true,  true, true),
+  'i18n-system':             makeChecklist(false, true, true,  true, true),
+  'layers-page':             makeChecklist(true,  true, true,  true, true),
+  'settings-page':           makeChecklist(false, true, true,  true, true),
+  'search-widget':           makeChecklist(false, true, true,  true, true),
+  'ai-widget':               makeChecklist(false, true, true,  true, false),
+  'favorites-widget':        makeChecklist(false, true, true,  true, true),
+  'timer-widget':            makeChecklist(false, true, true,  true, true),
+  'notifications-widget':    makeChecklist(false, true, true,  true, true),
+  'shortcuts-context-widget': makeChecklist(false, true, true, true, true),
+  'weekly-planner':          makeChecklist(false, true, true,  true, true),
+  'other-widgets':           makeChecklist(false, true, true,  true, true),
+  'dashboard-mode-context':  makeChecklist(false, true, true,  true, true),
+  'placeholder-pages':       makeChecklist(false, true, true,  true, false),
+  'context-memoization-fix': makeChecklist(false, true, true,  true, true),
+  'tiptap-editor':           makeChecklist(false, true, true,  true, true),
+  'tiptap-extensions':       makeChecklist(false, true, true,  true, true),
+  'supabase-client':         makeChecklist(false, true, true,  true, true),
+  'widget-store':            makeChecklist(false, true, true,  true, true),
+  'editor-css-fix':          makeChecklist(false, true, true,  true, true),
+  'document-list':           makeChecklist(false, true, true,  true, true),
+  'story-map':               makeChecklist(false, true, true,  true, true),
+  'canvas-editor':           makeChecklist(false, true, true,  true, true),
+  'field-system':            makeChecklist(false, true, true,  true, true),
+  'supabase-migrations':     makeChecklist(false, true, true,  true, true),
+  'canvas-polish':           makeChecklist(false, true, true,  true, true),
+  'automations-page':        makeChecklist(false, true, true,  true, true),
+  'workspace-hub':           makeChecklist(false, true, true,  true, false),
+  'admin-page':              makeChecklist(false, true, true,  true, false),
+  'video-prompt':            makeChecklist(false, true, true,  true, false),
+  'sidebar-nav-home':        makeChecklist(false, true, true,  true, false),
+  'widget-context-fix':      makeChecklist(false, true, true,  true, false),
+  'skins-system':            makeChecklist(false, true, true,  true, false),
+  'design-gallery':          makeChecklist(false, true, true,  true, false),
+  'i18n-extensions':         makeChecklist(false, true, true,  true, false),
+};
+
+function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
+  if (!checklist) return { done: 0, total: 5, pct: 0 };
+  const done = checklist.items.filter(i => i.done).length;
+  return { done, total: 5, pct: Math.round((done / 5) * 100) };
+}
+
+function getOverallChecklistScoreFromEntries(entries: ChangelogEntry[]): { done: number; total: number; pct: number } {
+  let done = 0;
+  let total = 0;
+  for (const entry of entries) {
+    const cl = CHANGELOG_CHECKLISTS[entry.id];
+    const score = getChecklistScore(cl);
+    done += score.done;
+    total += score.total;
+  }
+  return { done, total, pct: total > 0 ? Math.round((done / total) * 100) : 0 };
 }
 
 const dataCcIds: DataCcIdEntry[] = [
@@ -311,6 +439,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'הקמת פרויקט Next.js 15',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '013a198',
     date: '2026-02-28',
     files: ['package.json', 'tsconfig.json', 'next.config.ts', 'tailwind.config.ts'],
@@ -325,6 +454,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'DashboardShell — מעטפת פריסה ראשית',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -342,6 +472,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'סיידבר — ניווט 11 לשוניות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -358,6 +489,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'סרגל עליון — רשת ווידג׳טים נגררת',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -374,6 +506,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'SettingsContext — מרכז העדפות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -390,6 +523,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'WidgetContext — ניהול מצב ווידג׳טים',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -406,6 +540,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'StyleOverrideContext — CSS דינמי דרך data-cc-id',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -422,6 +557,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מערכת מזהי data-cc-id',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -438,6 +574,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מערכת תרגום i18n (עברית + אנגלית)',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -454,6 +591,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'דף שכבות — רשימת פרויקטים עם ציוני בריאות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -471,6 +609,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'דף הגדרות — מרכז התאמה אישית מלא',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -488,6 +627,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳ט חיפוש — ספוטלייט Cmd+K',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -504,6 +644,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳ט עוזר AI — פאנל צ׳אט Claude',
     status: 'not-verified',
     commitStatus: 'committed',
+    workflowStatus: 'hold',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -520,6 +661,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳ט מועדפים — דפים מוצמדים',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -536,6 +678,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳ט טיימר — פומודורו',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -552,6 +695,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳ט התראות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -568,6 +712,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מערכת קיצורי מקלדת',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -584,6 +729,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳ט מתכנן שבועי',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -600,6 +746,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'ווידג׳טים: יצירה מהירה, היום, לוח הדבקות, הגדרות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -616,6 +763,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'DashboardModeContext — מצבי עריכה/מדריך',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 1,
@@ -632,6 +780,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: '6 דפים ריקים (מפה פונקציונלית, מרכז AI, טפסים, ארכיטקטורה, תוכנית, מערכת עיצוב)',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'todo',
     commitHash: '7c562f4',
     date: '2026-03-02',
     phase: 5,
@@ -651,6 +800,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'תיקון: מימואיזציית Provider של Context (React #310)',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '2f3e2b4',
     date: '2026-03-02',
     files: ['src/contexts/SettingsContext.tsx', 'src/contexts/WidgetContext.tsx', 'src/contexts/DashboardModeContext.tsx', 'src/contexts/WeeklyPlannerContext.tsx'],
@@ -669,6 +819,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'עורך בלוקים Tiptap — 18 סוגי בלוק, 9 הרחבות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '4ed4482',
     date: '2026-03-02',
     phase: 2,
@@ -686,6 +837,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: '9 הרחבות Tiptap מותאמות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '4ed4482',
     date: '2026-03-02',
     phase: 2,
@@ -702,6 +854,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'הקמת לקוח Supabase',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '4ed4482',
     date: '2026-03-02',
     phase: 2,
@@ -718,6 +871,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'חנות ווידג׳טים — התקנה/הסרה/הגדרה',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '4ed4482',
     date: '2026-03-02',
     phase: 2,
@@ -734,6 +888,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'תיקון: ייבוא editor.css + עדכון TiptapEditor',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '32d63ca',
     date: '2026-03-02',
     phase: 2,
@@ -750,6 +905,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'דף רשימת מסמכים בעורך',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '662b1ef',
     date: '2026-03-02',
     phase: 2,
@@ -770,6 +926,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מפת סיפורים — לוח גרור-ושחרר 3 שכבות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '17907a2',
     date: '2026-03-05',
     phase: 3,
@@ -787,6 +944,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'עורך רשת Canvas — בונה טפסים ויזואלי',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '17907a2',
     date: '2026-03-05',
     phase: 3,
@@ -804,6 +962,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מערכת שדות — ספרייה, הגדרה, שאילתות',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '17907a2',
     date: '2026-03-05',
     phase: 3,
@@ -820,6 +979,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: '6 מיגרציות Supabase (טבלאות בסיס נתונים)',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '17907a2',
     date: '2026-03-05',
     phase: 3,
@@ -839,6 +999,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'תיקון: מערכת Canvas — 8 תיקוני באגים',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: 'db6c188',
     date: '2026-03-05',
     files: ['src/components/canvas/CanvasEditor.tsx', 'src/components/canvas/CanvasFieldItem.tsx', 'src/components/canvas/CanvasGrid.tsx', 'src/components/canvas/EditorZone.tsx', 'src/contexts/CanvasContext.tsx', 'src/lib/canvas/useCanvasGrid.ts'],
@@ -857,6 +1018,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'דף אוטומציות — n8n + 3 סוגי Supabase',
     status: 'working',
     commitStatus: 'committed',
+    workflowStatus: 'complete',
     commitHash: '37def02',
     date: '2026-03-05',
     phase: 1,
@@ -877,6 +1039,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מרכז סביבת עבודה — דף ראשי עם כרטיסי אזורים',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/app/page.tsx'],
     route: '/',
@@ -892,6 +1055,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'עמוד לוג פיתוח ואדמין — רישום מערכת מלא',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/app/dashboard/admin/page.tsx'],
     route: '/dashboard/admin',
@@ -907,6 +1071,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מחולל פרומפטים לווידאו Veo 3',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/app/embeds/video-prompt/page.tsx'],
     route: '/embeds/video-prompt',
@@ -922,6 +1087,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'לוגו סיידבר → קישור למרכז סביבת העבודה',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/components/command-center/Sidebar.tsx'],
     notes: 'Logo and company name in sidebar header wrapped in <Link href="/">. Provides navigation back to Workspace Hub from any dashboard page.',
@@ -936,6 +1102,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'תיקון: לולאה אינסופית ב-WidgetContext',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/contexts/WidgetContext.tsx'],
     notes: 'Added shallow equality check in setWidgetPositions callback. Two useEffects in TopBar (auto-init + clamp-overflow) both watched widgetPositions and called setWidgetPositions, creating infinite loop when new object references were created.',
@@ -950,6 +1117,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'מערכת סקינים — פריסטי ערכת נושא בלחיצה',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/lib/skins.ts', 'src/app/dashboard/settings/page.tsx', 'src/contexts/SettingsContext.tsx'],
     route: '/dashboard/settings',
@@ -965,6 +1133,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'גלריית מערכת עיצוב — מבוססת רישום',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/app/dashboard/design-system/page.tsx', 'src/app/designs/registry.ts'],
     route: '/dashboard/design-system',
@@ -980,6 +1149,7 @@ const changelogEntries: ChangelogEntry[] = [
     featureHe: 'הרחבות i18n — אדמין + בית + יומן שינויים',
     status: 'working',
     commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
     date: '2026-03-06',
     files: ['src/lib/i18n.ts'],
     notes: 'Added ~80 new translation keys: home section (workspace hub labels), admin section (35 keys for dev log), changelog section (25 keys). Both Hebrew and English.',
@@ -1121,10 +1291,10 @@ function RouteCard({ route, isHe }: { route: RouteEntry; isHe: boolean }) {
   );
 }
 
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+function StatCard({ label, value, color, suffix }: { label: string; value: number; color: string; suffix?: string }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
-      <div className="text-2xl font-bold" style={{ color }}>{value}</div>
+      <div className="text-2xl font-bold" style={{ color }}>{value}{suffix}</div>
       <div className="mt-0.5 text-[11px] text-slate-500">{label}</div>
     </div>
   );
@@ -1298,6 +1468,137 @@ function MermaidDiagram({ definition, ta }: { definition: string; ta: ReturnType
   );
 }
 
+function ChecklistDots({ entryId, isHe, ta }: { entryId: string; isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+  const [expanded, setExpanded] = useState(false);
+  const checklist = CHANGELOG_CHECKLISTS[entryId];
+  const score = getChecklistScore(checklist);
+
+  const clLabels: Record<DevChecklistKey, string> = {
+    guideContent: ta.clGuideContent,
+    usageDoc: ta.clUsageDoc,
+    diagram: ta.clDiagram,
+    aiSourceOfTruth: ta.clAiSourceOfTruth,
+    conflictReview: ta.clConflictReview,
+  };
+
+  if (!checklist) {
+    return <span className="text-[10px] text-slate-600">{ta.noChecklist}</span>;
+  }
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] transition-colors hover:bg-white/5"
+      >
+        <span className="flex items-center gap-0.5">
+          {checklist.items.map(item => (
+            <span
+              key={item.key}
+              className={`inline-block h-2 w-2 rounded-full ${item.done ? 'bg-emerald-400' : 'bg-slate-700'}`}
+            />
+          ))}
+        </span>
+        <span className={`font-medium ${score.pct === 100 ? 'text-emerald-400' : score.pct >= 60 ? 'text-slate-400' : 'text-amber-400'}`}>
+          {score.done}/{score.total}
+        </span>
+      </button>
+      {expanded && (
+        <div className="mt-2 space-y-1 rounded-lg border border-white/[0.04] bg-white/[0.01] p-3">
+          {checklist.items.map(item => {
+            const cfg = DEV_CHECKLIST_KEYS.find(c => c.key === item.key)!;
+            const Icon = cfg.icon;
+            return (
+              <div key={item.key} className="flex items-center gap-2 text-[11px]">
+                <Icon size={12} className={item.done ? 'text-emerald-400' : 'text-slate-600'} />
+                <span className={item.done ? 'text-slate-300' : 'text-slate-600'}>
+                  {clLabels[item.key]}
+                </span>
+                {item.done ? (
+                  <CheckCircle2 size={10} className="text-emerald-400" />
+                ) : (
+                  <Circle size={10} className="text-slate-700" />
+                )}
+              </div>
+            );
+          })}
+          {checklist.reviewedBy && (
+            <div className="mt-1.5 border-t border-white/[0.04] pt-1.5 text-[10px] text-slate-600">
+              {ta.reviewedBy} {checklist.reviewedBy} · {checklist.reviewedDate}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ChecklistSummary({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+  const [open, setOpen] = useState(false);
+  const overall = getOverallChecklistScoreFromEntries(changelogEntries);
+
+  const clLabels: Record<DevChecklistKey, string> = {
+    guideContent: ta.clGuideContent,
+    usageDoc: ta.clUsageDoc,
+    diagram: ta.clDiagram,
+    aiSourceOfTruth: ta.clAiSourceOfTruth,
+    conflictReview: ta.clConflictReview,
+  };
+
+  const perItem = DEV_CHECKLIST_KEYS.map(cfg => {
+    const done = changelogEntries.filter(e => {
+      const cl = CHANGELOG_CHECKLISTS[e.id];
+      return cl?.items.find(i => i.key === cfg.key)?.done;
+    }).length;
+    return { ...cfg, done, total: changelogEntries.length, label: clLabels[cfg.key] };
+  });
+
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <ClipboardCheck size={16} className="text-purple-400" />
+          <span className="text-sm font-medium text-slate-200">{ta.devChecklistTitle}</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className={`text-lg font-bold ${overall.pct >= 80 ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {overall.pct}%
+          </span>
+          {open ? <ChevronDown size={14} className="text-slate-500" /> : (isHe ? <ChevronLeft size={14} className="text-slate-500" /> : <ChevronRight size={14} className="text-slate-500" />)}
+        </div>
+      </button>
+      {open && (
+        <div className="mt-4 space-y-2.5">
+          {perItem.map(item => {
+            const Icon = item.icon;
+            const pct = Math.round((item.done / item.total) * 100);
+            return (
+              <div key={item.key} className="flex items-center gap-3">
+                <Icon size={14} className="shrink-0 text-slate-500" />
+                <span className="w-32 shrink-0 text-xs text-slate-400">{item.label}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{ width: `${pct}%`, background: pct === 100 ? '#34d399' : pct >= 70 ? '#60a5fa' : '#fbbf24' }}
+                  />
+                </div>
+                <span className="w-16 shrink-0 text-[11px] text-slate-500" dir="ltr" style={{ textAlign: isHe ? 'left' : 'right' }}>
+                  {item.done}/{item.total}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const statusColors: Record<FeatureStatus, { bg: string; text: string; label: string; icon: React.ElementType }> = {
     working: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: ta.working, icon: CheckCircle2 },
@@ -1308,6 +1609,8 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
   const StatusIcon = sc.icon;
   const commitLabel = entry.commitStatus === 'committed' ? ta.committed : ta.uncommitted;
   const commitColor = entry.commitStatus === 'committed' ? 'text-emerald-400 bg-emerald-500/10' : 'text-amber-400 bg-amber-500/10';
+  const wf = WORKFLOW_CONFIG[entry.workflowStatus];
+  const WfIcon = wf.icon;
 
   return (
     <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4">
@@ -1315,6 +1618,10 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-sm text-slate-200">{isHe ? entry.featureHe : entry.feature}</span>
           {entry.phase && <PhaseBadge phase={entry.phase} />}
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${wf.bg} ${wf.text}`}>
+            <WfIcon size={10} />
+            {isHe ? wf.heLabel : wf.enLabel}
+          </span>
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${sc.bg} ${sc.text}`}>
             <StatusIcon size={10} />
             {sc.label}
@@ -1358,6 +1665,9 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
           <span className="text-[10px] text-slate-600">+{entry.files.length - 4} {isHe ? 'קבצים' : 'files'}</span>
         )}
       </div>
+      <div className="mt-2 border-t border-white/[0.04] pt-2">
+        <ChecklistDots entryId={entry.id} isHe={isHe} ta={ta} />
+      </div>
     </div>
   );
 }
@@ -1373,6 +1683,14 @@ export default function AdminDevLogPage() {
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
   const [activeSection, setActiveSection] = useState<'routes' | 'widgets' | 'contexts' | 'changelog'>('routes');
   const [changelogSearch, setChangelogSearch] = useState('');
+
+  // Changelog sort/group/filter state
+  const [clSortBy, setClSortBy] = useState<SortField>('date');
+  const [clSortDir, setClSortDir] = useState<'asc' | 'desc'>('desc');
+  const [clGroupBy, setClGroupBy] = useState<GroupField>('none');
+  const [clFilterWorkflow, setClFilterWorkflow] = useState<WorkflowStatus[]>([]);
+  const [clFilterPhase, setClFilterPhase] = useState<Phase | 'all'>('all');
+  const [clFilterTechStatus, setClFilterTechStatus] = useState<FeatureStatus | 'all'>('all');
 
   // Live git state
   const [gitData, setGitData] = useState<GitStatusData | null>(null);
@@ -1452,16 +1770,42 @@ export default function AdminDevLogPage() {
 
   const allRoutes = [...routes, ...standalonePages];
 
-  // 2-layer changelog search
+  // Filter → Sort → Search pipeline for changelog
+  const filteredSortedEntries = useMemo(() => {
+    // Step 1: Filter
+    let entries = changelogEntries.filter(entry => {
+      if (clFilterWorkflow.length > 0 && !clFilterWorkflow.includes(entry.workflowStatus)) return false;
+      if (clFilterPhase !== 'all' && entry.phase !== clFilterPhase) return false;
+      if (clFilterTechStatus !== 'all' && entry.status !== clFilterTechStatus) return false;
+      return true;
+    });
+
+    // Step 2: Sort
+    entries = [...entries].sort((a, b) => {
+      let cmp = 0;
+      switch (clSortBy) {
+        case 'date': cmp = a.date.localeCompare(b.date); break;
+        case 'name': cmp = a.feature.localeCompare(b.feature); break;
+        case 'phase': cmp = (a.phase || 0) - (b.phase || 0); break;
+        case 'workflow': cmp = WORKFLOW_CONFIG[a.workflowStatus].order - WORKFLOW_CONFIG[b.workflowStatus].order; break;
+        case 'fileCount': cmp = a.files.length - b.files.length; break;
+      }
+      return clSortDir === 'desc' ? -cmp : cmp;
+    });
+
+    return entries;
+  }, [clFilterWorkflow, clFilterPhase, clFilterTechStatus, clSortBy, clSortDir]);
+
+  // 2-layer changelog search (operates on filtered+sorted set)
   const { directMatches, relatedMatches } = useMemo(() => {
     const q = changelogSearch.trim().toLowerCase();
-    if (!q) return { directMatches: changelogEntries, relatedMatches: [] as ChangelogEntry[] };
+    if (!q) return { directMatches: filteredSortedEntries, relatedMatches: [] as ChangelogEntry[] };
 
     // Layer 1: direct keyword matches across all text fields
-    const layer1 = changelogEntries.filter(entry => {
+    const layer1 = filteredSortedEntries.filter(entry => {
       const searchable = [
         entry.feature, entry.featureHe, entry.notes, entry.notesHe,
-        entry.purpose, entry.purposeHe, entry.id,
+        entry.purpose, entry.purposeHe, entry.id, entry.workflowStatus,
         entry.route || '', entry.commitHash || '', entry.date,
         ...entry.files, ...(entry.connectedTo || []),
       ].join(' ').toLowerCase();
@@ -1470,18 +1814,9 @@ export default function AdminDevLogPage() {
 
     const layer1Ids = new Set(layer1.map(e => e.id));
 
-    // Collect all identifiers from Layer 1 entries for relationship matching
-    const layer1Identifiers = new Set<string>();
-    layer1.forEach(entry => {
-      layer1Identifiers.add(entry.id);
-      entry.files.forEach(f => layer1Identifiers.add(f.toLowerCase()));
-      (entry.connectedTo || []).forEach(c => layer1Identifiers.add(c.toLowerCase()));
-    });
-
     // Layer 2: entries connected to Layer 1 via connectedTo graph
-    const layer2 = changelogEntries.filter(entry => {
+    const layer2 = filteredSortedEntries.filter(entry => {
       if (layer1Ids.has(entry.id)) return false;
-      // Check if this entry's connectedTo references anything from Layer 1
       const connected = (entry.connectedTo || []).some(c =>
         layer1.some(l1 =>
           l1.id === c.toLowerCase() ||
@@ -1490,7 +1825,6 @@ export default function AdminDevLogPage() {
           c.toLowerCase().includes(l1.id)
         )
       );
-      // Check if any Layer 1 entry's connectedTo references this entry
       const referencedBy = layer1.some(l1 =>
         (l1.connectedTo || []).some(c =>
           entry.id === c.toLowerCase() ||
@@ -1502,7 +1836,61 @@ export default function AdminDevLogPage() {
     });
 
     return { directMatches: layer1, relatedMatches: layer2 };
-  }, [changelogSearch]);
+  }, [changelogSearch, filteredSortedEntries]);
+
+  // Group entries helper
+  const groupedEntries = useMemo(() => {
+    if (clGroupBy === 'none' || changelogSearch.trim()) return null;
+    const entries = directMatches;
+    const groups: { label: string; color: string; entries: ChangelogEntry[] }[] = [];
+    const groupMap: Record<string, { label: string; color: string; entries: ChangelogEntry[] }> = {};
+
+    for (const entry of entries) {
+      let key: string;
+      let label: string;
+      let color = '#94a3b8';
+
+      switch (clGroupBy) {
+        case 'workflow': {
+          key = entry.workflowStatus;
+          const wf = WORKFLOW_CONFIG[entry.workflowStatus];
+          label = isHe ? wf.heLabel : wf.enLabel;
+          color = wf.color;
+          break;
+        }
+        case 'phase': {
+          key = entry.phase ? `P${entry.phase}` : 'none';
+          label = entry.phase ? `${isHe ? 'שלב' : 'Phase'} ${entry.phase}` : (isHe ? 'ללא שלב' : 'No Phase');
+          const phaseColors: Record<string, string> = { P1: '#34d399', P2: '#60a5fa', P3: '#c084fc', P4: '#f472b6', P5: '#94a3b8', none: '#64748b' };
+          color = phaseColors[key] || '#64748b';
+          break;
+        }
+        case 'date': {
+          key = entry.date;
+          label = entry.date;
+          color = '#60a5fa';
+          break;
+        }
+        case 'fileDir': {
+          const firstFile = entry.files[0] || '';
+          const parts = firstFile.split('/');
+          key = parts.length > 2 ? parts.slice(0, -1).join('/') : parts[0] || 'root';
+          label = key;
+          color = '#c084fc';
+          break;
+        }
+      }
+
+      if (!groupMap[key]) {
+        const group = { label, color, entries: [] as ChangelogEntry[] };
+        groupMap[key] = group;
+        groups.push(group);
+      }
+      groupMap[key].entries.push(entry);
+    }
+
+    return groups;
+  }, [clGroupBy, directMatches, changelogSearch, isHe]);
 
   const filteredRoutes = useMemo(() => {
     return allRoutes.filter(r => {
@@ -1517,7 +1905,8 @@ export default function AdminDevLogPage() {
     const placeholderRoutes = allRoutes.filter(r => r.status === 'placeholder').length;
     const totalComponents = allRoutes.reduce((sum, r) => sum + r.components.length, 0);
     const totalFields = allRoutes.reduce((sum, r) => sum + r.components.reduce((s, c) => s + (c.fields?.length || 0), 0), 0);
-    return { activeRoutes, placeholderRoutes, totalComponents, totalFields, totalWidgets: widgets.length, totalContexts: contexts.length };
+    const clScore = getOverallChecklistScoreFromEntries(changelogEntries);
+    return { activeRoutes, placeholderRoutes, totalComponents, totalFields, totalWidgets: widgets.length, totalContexts: contexts.length, checklistPct: clScore.pct };
   }, [allRoutes]);
 
   const phaseProgress = useMemo(() => {
@@ -1541,13 +1930,14 @@ export default function AdminDevLogPage() {
 
       <div className="mx-auto max-w-6xl px-6 py-6 space-y-6">
         {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+        <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
           <StatCard label={ta.activePages} value={stats.activeRoutes} color="#34d399" />
           <StatCard label={ta.placeholderPages} value={stats.placeholderRoutes} color="#fbbf24" />
           <StatCard label={ta.components} value={stats.totalComponents} color="#60a5fa" />
           <StatCard label={ta.fieldsMapped} value={stats.totalFields} color="#c084fc" />
           <StatCard label={ta.widgetsLabel} value={stats.totalWidgets} color="#f472b6" />
           <StatCard label={ta.contextsLabel} value={stats.totalContexts} color="#fb923c" />
+          <StatCard label={ta.checklistDone} value={stats.checklistPct} color={stats.checklistPct >= 80 ? '#34d399' : '#fbbf24'} suffix="%" />
         </div>
 
         {/* Audit Link */}
@@ -1712,6 +2102,9 @@ export default function AdminDevLogPage() {
         {/* CHANGELOG TAB */}
         {activeSection === 'changelog' && (
           <div className="space-y-6">
+            {/* Checklist Summary */}
+            <ChecklistSummary isHe={isHe} ta={ta} />
+
             {/* Search Input */}
             <div className="relative">
               <Search size={16} className="absolute top-1/2 -translate-y-1/2 text-slate-500" style={{ [isHe ? 'right' : 'left']: 12 }} />
@@ -1732,6 +2125,26 @@ export default function AdminDevLogPage() {
                 </button>
               )}
             </div>
+
+            {/* Sort / Group / Filter Toolbar */}
+            <ChangelogToolbar
+              sortBy={clSortBy}
+              sortDir={clSortDir}
+              groupBy={clGroupBy}
+              clFilterWorkflow={clFilterWorkflow}
+              clFilterPhase={clFilterPhase}
+              clFilterTechStatus={clFilterTechStatus}
+              onSortChange={(field) => { setClSortBy(field); setClSortDir(field === 'name' ? 'asc' : 'desc'); }}
+              onSortDirToggle={() => setClSortDir(d => d === 'asc' ? 'desc' : 'asc')}
+              onGroupChange={setClGroupBy}
+              onWorkflowToggle={(ws) => setClFilterWorkflow(prev =>
+                prev.includes(ws) ? prev.filter(s => s !== ws) : [...prev, ws]
+              )}
+              onPhaseChange={setClFilterPhase}
+              onTechStatusChange={setClFilterTechStatus}
+              isHe={isHe}
+              ta={ta}
+            />
 
             {/* data-cc-id System */}
             <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
@@ -1778,44 +2191,73 @@ export default function AdminDevLogPage() {
               <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-200">
                 <FileCode size={15} className="text-blue-400" />
                 {ta.featureStatus}
-                {changelogSearch && (
-                  <span className="text-xs font-normal text-slate-500">
-                    — {directMatches.length + relatedMatches.length} {isHe ? 'תוצאות' : 'results'}
-                  </span>
-                )}
+                <span className="text-xs font-normal text-slate-500">
+                  — {changelogSearch
+                    ? `${directMatches.length + relatedMatches.length} ${isHe ? 'תוצאות' : 'results'}`
+                    : `${directMatches.length} / ${changelogEntries.length}`
+                  }
+                </span>
               </h3>
 
-              {changelogSearch && directMatches.length === 0 && relatedMatches.length === 0 && (
+              {directMatches.length === 0 && relatedMatches.length === 0 && (
                 <div className="py-8 text-center text-sm text-slate-600">{ta.noSearchResults}</div>
               )}
 
-              {/* Layer 1: Direct Matches */}
-              {changelogSearch && directMatches.length > 0 && (
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-emerald-400">
-                  <CheckCircle2 size={12} />
-                  {ta.directMatches} ({directMatches.length})
+              {/* Grouped view (no search active) */}
+              {groupedEntries && !changelogSearch.trim() ? (
+                <div className="space-y-4">
+                  {groupedEntries.map(group => (
+                    <CollapsibleRow
+                      key={group.label}
+                      isHe={isHe}
+                      defaultOpen
+                      count={group.entries.length}
+                      title={
+                        <span className="flex items-center gap-2">
+                          <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: group.color }} />
+                          <span>{group.label}</span>
+                        </span>
+                      }
+                    >
+                      <div className="space-y-3">
+                        {group.entries.map(entry => (
+                          <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
+                        ))}
+                      </div>
+                    </CollapsibleRow>
+                  ))}
                 </div>
-              )}
-
-              <div className="space-y-3">
-                {directMatches.map(entry => (
-                  <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
-                ))}
-              </div>
-
-              {/* Layer 2: Related & Connected */}
-              {changelogSearch && relatedMatches.length > 0 && (
+              ) : (
                 <>
-                  <div className="my-4 border-t border-white/[0.06]" />
-                  <div className="mb-2 flex items-center gap-2 text-xs font-medium text-blue-400">
-                    <Network size={12} />
-                    {ta.relatedConnected} ({relatedMatches.length})
-                  </div>
+                  {/* Layer 1: Direct Matches */}
+                  {changelogSearch && directMatches.length > 0 && (
+                    <div className="mb-2 flex items-center gap-2 text-xs font-medium text-emerald-400">
+                      <CheckCircle2 size={12} />
+                      {ta.directMatches} ({directMatches.length})
+                    </div>
+                  )}
+
                   <div className="space-y-3">
-                    {relatedMatches.map(entry => (
+                    {directMatches.map(entry => (
                       <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
                     ))}
                   </div>
+
+                  {/* Layer 2: Related & Connected */}
+                  {changelogSearch && relatedMatches.length > 0 && (
+                    <>
+                      <div className="my-4 border-t border-white/[0.06]" />
+                      <div className="mb-2 flex items-center gap-2 text-xs font-medium text-blue-400">
+                        <Network size={12} />
+                        {ta.relatedConnected} ({relatedMatches.length})
+                      </div>
+                      <div className="space-y-3">
+                        {relatedMatches.map(entry => (
+                          <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>
