@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Layers, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Layers, Mail, Lock, Eye, EyeOff, Github } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -167,6 +167,28 @@ function LoginForm() {
             {t.auth.signIn}
           </Button>
         </form>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-800" />
+          <span className="text-xs text-slate-600">{language === "he" ? "או" : "or"}</span>
+          <div className="h-px flex-1 bg-slate-800" />
+        </div>
+
+        {/* GitHub login */}
+        <button
+          type="button"
+          onClick={async () => {
+            await supabase.auth.signInWithOAuth({
+              provider: "github",
+              options: { redirectTo: `${window.location.origin}/auth/callback` },
+            });
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-700"
+        >
+          <Github className="h-4 w-4" />
+          {language === "he" ? "התחבר עם GitHub" : "Sign in with GitHub"}
+        </button>
 
         {/* Footer links */}
         <div className="flex items-center justify-between">
