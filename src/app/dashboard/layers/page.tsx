@@ -25,6 +25,7 @@ export default function LayersPage() {
   const t = getTranslations(language);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
 
   useEffect(() => {
     async function loadProjects() {
@@ -36,13 +37,15 @@ export default function LayersPage() {
           .order('updated_at', { ascending: false });
 
         if (error || !data || data.length === 0) {
-          // Fallback to demo data if table empty or missing
           setProjects(FALLBACK_PROJECTS);
+          setIsDemo(true);
         } else {
           setProjects(data);
+          setIsDemo(false);
         }
       } catch {
         setProjects(FALLBACK_PROJECTS);
+        setIsDemo(true);
       }
       setLoading(false);
     }
@@ -80,6 +83,12 @@ export default function LayersPage() {
       <PageHeader pageKey="layers" />
 
       <div className="flex flex-1 flex-col gap-6 pt-6">
+        {isDemo && (
+          <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-300">
+            <span>⚠️</span>
+            <span>{language === 'he' ? 'נתוני הדגמה — אין חיבור ל-Origami. הנתונים אינם אמיתיים.' : 'Demo data — no Origami connection. Data is not real.'}</span>
+          </div>
+        )}
         <div
           className={`flex flex-wrap items-center gap-4 text-sm ${
             isRtl ? "flex-row-reverse" : ""
