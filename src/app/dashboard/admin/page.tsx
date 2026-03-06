@@ -14,6 +14,7 @@ import {
 } from './data';
 import { RoutesSection, WidgetsSection, ContextsSection } from './RoutesTab';
 import ChangelogTab from './ChangelogTab';
+import StoryMapTab from './StoryMapTab';
 
 // ─── Stat Card ───────────────────────────────────────────
 
@@ -34,7 +35,7 @@ export default function AdminDevLogPage() {
   const isHe = language === 'he';
   const ta = t.admin;
 
-  const [activeSection, setActiveSection] = useState<'routes' | 'widgets' | 'contexts' | 'changelog'>('routes');
+  const [activeSection, setActiveSection] = useState<'routes' | 'widgets' | 'contexts' | 'changelog' | 'storymap'>('routes');
 
   const allRoutes = [...routes, ...standalonePages];
 
@@ -119,7 +120,7 @@ export default function AdminDevLogPage() {
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-1 border-b border-white/[0.06] pb-px">
-          {(['routes', 'widgets', 'contexts', 'changelog'] as const).map(section => (
+          {(['routes', 'widgets', 'contexts', 'changelog', 'storymap'] as const).map(section => (
             <button key={section} onClick={() => setActiveSection(section)}
               className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${
                 activeSection === section ? 'bg-white/5 text-white border-b-2 border-purple-400' : 'text-slate-500 hover:text-slate-300'
@@ -127,7 +128,8 @@ export default function AdminDevLogPage() {
               {section === 'routes' ? `${ta.tabRoutes} (${allRoutes.length})` :
                section === 'widgets' ? `${ta.tabWidgets} (${widgets.length})` :
                section === 'contexts' ? `${ta.tabContexts} (${contexts.length})` :
-               `${ta.tabChangelog} (${changelogEntries.length})`}
+               section === 'changelog' ? `${ta.tabChangelog} (${changelogEntries.length})` :
+               ta.tabStoryMap}
             </button>
           ))}
         </div>
@@ -137,6 +139,7 @@ export default function AdminDevLogPage() {
         {activeSection === 'widgets' && <WidgetsSection isHe={isHe} />}
         {activeSection === 'contexts' && <ContextsSection isHe={isHe} />}
         {activeSection === 'changelog' && <ChangelogTab isHe={isHe} ta={ta} />}
+        {activeSection === 'storymap' && <StoryMapTab isHe={isHe} ta={ta} />}
 
         {/* Architecture Summary */}
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">

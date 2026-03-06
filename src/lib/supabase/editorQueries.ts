@@ -42,22 +42,27 @@ export async function fetchDocument(id: string): Promise<DocRecord | null> {
 export async function createDocument(title: string): Promise<DocRecord | null> {
   const supabase = createClient();
 
-  // Get workspace context from existing record
+  // Get authenticated user
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Try to get workspace context from an existing record
   const { data: existing } = await supabase
     .from("vb_records")
-    .select("workspace_id, entity_id, created_by")
+    .select("workspace_id, entity_id")
     .eq("record_type", "document")
     .limit(1)
-    .single();
+    .maybeSingle();
 
-  if (!existing) return null;
+  const workspaceId = existing?.workspace_id || "3ecaf990-43ef-4b91-9956-904a8b97b851";
+  const entityId = existing?.entity_id || "a43c212b-44dd-487d-b450-480a269d19cc";
+  const createdBy = user?.id || "a0000000-0000-0000-0000-000000000001";
 
   const { data, error } = await supabase
     .from("vb_records")
     .insert({
-      workspace_id: existing.workspace_id,
-      entity_id: existing.entity_id,
-      created_by: existing.created_by,
+      workspace_id: workspaceId,
+      entity_id: entityId,
+      created_by: createdBy,
       title,
       content: { type: "doc", content: [{ type: "paragraph" }] },
       record_type: "document",
@@ -67,7 +72,10 @@ export async function createDocument(title: string): Promise<DocRecord | null> {
     .select("*")
     .single();
 
-  if (error) return null;
+  if (error) {
+    console.error("createDocument error:", JSON.stringify(error, null, 2), "code:", error.code, "message:", error.message, "details:", error.details, "hint:", error.hint);
+    return null;
+  }
   return data as DocRecord;
 }
 

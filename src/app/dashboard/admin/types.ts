@@ -118,3 +118,86 @@ export interface DevChecklist {
   reviewedBy?: string;
   reviewedDate?: string;
 }
+
+// ─── Value-Driven Story Map Types ─────────────────────
+
+export type StoryStatus = 'done' | 'broken' | 'missing' | 'untested';
+export type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
+export type Effort = 'S' | 'M' | 'L';
+
+export interface UserStory {
+  name: string;
+  nameHe: string;
+  status: StoryStatus;
+  risk: RiskLevel;
+  keyFile?: string;
+  note?: string;
+  noteHe?: string;
+}
+
+export interface UserJourneyStep {
+  id: string;
+  step: number;
+  name: string;
+  nameHe: string;
+  primaryPages: string[];
+  currentStatus: string;
+  currentStatusHe: string;
+  emotion: string;
+  emotionHe: string;
+  friction: string;
+  frictionHe: string;
+  ahamoment?: string;
+  ahamomentHe?: string;
+  stories: UserStory[];
+  unhappyPaths: string[];
+  unhappyPathsHe: string[];
+  kpis: string[];
+  kpisHe: string[];
+}
+
+export interface ReleaseTierTask {
+  name: string;
+  nameHe: string;
+  status: string;
+  statusHe: string;
+  effort: string;
+  risk: RiskLevel;
+}
+
+export interface ReleaseTier {
+  id: string;
+  name: string;
+  nameHe: string;
+  goal: string;
+  goalHe: string;
+  tasks: ReleaseTierTask[];
+  kpis: string[];
+  kpisHe: string[];
+}
+
+export interface MLPFeature {
+  name: string;
+  nameHe: string;
+  why: string;
+  whyHe: string;
+  effort: Effort;
+  risk: RiskLevel;
+}
+
+export interface MLPTier {
+  id: string;
+  name: string;
+  nameHe: string;
+  features: MLPFeature[];
+}
+
+export interface RiskEntry {
+  risk: string;
+  riskHe: string;
+  type: string;
+  typeHe: string;
+  level: RiskLevel;
+  mitigation: string;
+  mitigationHe: string;
+}
