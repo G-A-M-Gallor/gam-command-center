@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Wifi, WifiOff } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
@@ -14,7 +15,12 @@ import {
   deleteColumn as deleteColumnDb,
   batchUpdatePositions,
 } from '@/lib/supabase/storyCardQueries';
+import {
+  subscribeToStoryCards,
+  unsubscribeFromStoryCards,
+} from '@/lib/supabase/storyCardRealtime';
 import type { StoryCard } from '@/lib/supabase/storyCardQueries';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 // ─── Demo cards with 3-tier structure ───────────────
 function makeDemoCards(): StoryCard[] {
@@ -111,7 +117,10 @@ export default function StoryMapPage() {
   const [cards, setCards] = useState<StoryCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
   const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const pendingIds = useRef<Set<string>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   // ── Load projects ──────────────────────────────────
   useEffect(() => {
@@ -134,6 +143,7 @@ export default function StoryMapPage() {
     if (!selectedProject) {
       setCards(makeDemoCards());
       setIsDemo(true);
+      setRealtimeStatus('disconnected');
       return;
     }
 
@@ -145,6 +155,73 @@ export default function StoryMapPage() {
     });
   }, [selectedProject]);
 
+  // ── Realtime subscription ───────────────────────────
+  useEffect(() => {
+    if (!selectedProject || isDemo) {
+      if (channelRef.current) {
+        unsubscribeFromStoryCards(channelRef.current);
+        channelRef.current = null;
+        setRealtimeStatus('disconnected');
+      }
+      return;
+    }
+
+    setRealtimeStatus('connecting');
+
+    const channel = subscribeToStoryCards(selectedProject, {
+      onInsert: (card) => {
+        // Skip if we initiated this insert
+        if (pendingIds.current.has(card.id)) {
+          pendingIds.current.delete(card.id);
+          return;
+        }
+        setCards((prev) => {
+          if (prev.some((c) => c.id === card.id)) return prev;
+          return [...prev, card];
+        });
+      },
+      onUpdate: (card) => {
+        if (pendingIds.current.has(card.id)) {
+          pendingIds.current.delete(card.id);
+          return;
+        }
+        setCards((prev) =>
+          prev.map((c) => (c.id === card.id ? { ...c, ...card } : c))
+        );
+      },
+      onDelete: (id) => {
+        if (pendingIds.current.has(id)) {
+          pendingIds.current.delete(id);
+          return;
+        }
+        setCards((prev) => prev.filter((c) => c.id !== id));
+      },
+    });
+
+    channelRef.current = channel;
+
+    // Track connection status
+    channel.on('system', {}, (payload) => {
+      if ('status' in payload) {
+        if (payload.status === 'ok') setRealtimeStatus('connected');
+        else setRealtimeStatus('disconnected');
+      }
+    });
+
+    // Set connected after short delay (subscription setup)
+    const timer = setTimeout(() => setRealtimeStatus('connected'), 1000);
+
+    return () => {
+      clearTimeout(timer);
+      // Clear pending debounce timers to prevent stale writes after project switch
+      debounceTimers.current.forEach((t) => clearTimeout(t));
+      debounceTimers.current.clear();
+      unsubscribeFromStoryCards(channel);
+      channelRef.current = null;
+      setRealtimeStatus('disconnected');
+    };
+  }, [selectedProject, isDemo]);
+
   // ── Card operations ────────────────────────────────
   const handleUpdateCard = useCallback(
     (id: string, updates: Partial<StoryCard>) => {
@@ -154,6 +231,7 @@ export default function StoryMapPage() {
 
       if (isDemo) return;
 
+      pendingIds.current.add(id);
       const existing = debounceTimers.current.get(id);
       if (existing) clearTimeout(existing);
       debounceTimers.current.set(
@@ -171,7 +249,10 @@ export default function StoryMapPage() {
   const handleDeleteCard = useCallback(
     (id: string) => {
       setCards((prev) => prev.filter((c) => c.id !== id));
-      if (!isDemo) deleteStoryCard(id);
+      if (!isDemo) {
+        pendingIds.current.add(id);
+        deleteStoryCard(id);
+      }
     },
     [isDemo]
   );
@@ -208,6 +289,7 @@ export default function StoryMapPage() {
         sort_order: 0,
       }).then((saved) => {
         if (saved) {
+          pendingIds.current.add(saved.id);
           setCards((prev) =>
             prev.map((c) => (c.id === newCard.id ? { ...c, id: saved.id } : c))
           );
@@ -250,6 +332,7 @@ export default function StoryMapPage() {
           sort_order: nextOrder,
         }).then((saved) => {
           if (saved) {
+            pendingIds.current.add(saved.id);
             setCards((prev) =>
               prev.map((c) => (c.id === newCard.id ? { ...c, id: saved.id } : c))
             );
@@ -366,6 +449,7 @@ export default function StoryMapPage() {
   const handleBatchUpdate = useCallback(
     (updates: { id: string; col: number; sort_order: number }[]) => {
       if (!isDemo) {
+        updates.forEach((u) => pendingIds.current.add(u.id));
         batchUpdatePositions(updates);
       }
     },
@@ -395,6 +479,23 @@ export default function StoryMapPage() {
           {isDemo && (
             <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
               {t.storyMap.demoMode}
+            </span>
+          )}
+
+          {!isDemo && selectedProject && (
+            <span data-cc-id="storymap.realtime-status" className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
+              realtimeStatus === 'connected'
+                ? 'bg-emerald-500/10 text-emerald-400'
+                : realtimeStatus === 'connecting'
+                  ? 'bg-amber-500/10 text-amber-400'
+                  : 'bg-red-500/10 text-red-400'
+            }`}>
+              {realtimeStatus === 'connected'
+                ? <><Wifi size={11} /> {t.storyMap.realtimeConnected}</>
+                : realtimeStatus === 'connecting'
+                  ? <><Wifi size={11} /> {t.storyMap.realtimeConnecting}</>
+                  : <><WifiOff size={11} /> {t.storyMap.realtimeDisconnected}</>
+              }
             </span>
           )}
 

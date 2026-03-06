@@ -22,6 +22,9 @@ import { CanvasFieldItem } from './CanvasFieldItem';
 import { EditorZone } from './EditorZone';
 import { FieldConfigModal } from '@/components/command-center/fields/FieldConfigModal';
 import { FieldLibrary } from '@/components/command-center/fields/FieldLibrary';
+import { ShareDialog } from '@/components/editor/ShareDialog';
+import { VersionHistory } from '@/components/editor/VersionHistory';
+import { duplicateDocument, saveVersion, createTemplate } from '@/lib/supabase/editorQueries';
 import type { FieldTypeId, FieldConfig } from '@/components/command-center/fields/fieldTypes';
 
 // ─── Types ───────────────────────────────────────────
@@ -54,11 +57,17 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [error, setError] = useState('');
   const [showFieldLibrary, setShowFieldLibrary] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [fieldModal, setFieldModal] = useState<{
     fieldType: FieldTypeId;
     fieldId?: string;
     config?: FieldConfig;
   } | null>(null);
+
+  // Version auto-save refs
+  const lastVersionSaveRef = useRef<number>(Date.now());
+  const versionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Grid helpers
   const {
@@ -223,6 +232,60 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       .eq('id', recordId);
   }, [recordId, title]);
 
+  // ── Version auto-save (every 5 min) ────────────────
+  useEffect(() => {
+    versionIntervalRef.current = setInterval(() => {
+      if (content && title) {
+        saveVersion(recordId, title, content);
+        lastVersionSaveRef.current = Date.now();
+      }
+    }, 5 * 60 * 1000);
+    return () => {
+      if (versionIntervalRef.current) clearInterval(versionIntervalRef.current);
+    };
+  }, [recordId, content, title]);
+
+  // Ctrl+S → save content + version snapshot
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        if (content) {
+          handleSave(content);
+          // Save version if >1 min since last
+          if (Date.now() - lastVersionSaveRef.current > 60_000) {
+            saveVersion(recordId, title, content);
+            lastVersionSaveRef.current = Date.now();
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [content, handleSave, recordId, title]);
+
+  // ── New toolbar handlers ────────────────────────────
+  const handleDuplicate = useCallback(async () => {
+    const dup = await duplicateDocument(recordId);
+    if (dup) {
+      router.push(`/dashboard/editor?id=${dup.id}`);
+    }
+  }, [recordId, router]);
+
+  const handleSaveAsTemplate = useCallback(async () => {
+    if (!content) return;
+    await createTemplate({
+      name: title || 'Untitled Template',
+      name_he: title || 'תבנית ללא שם',
+      content,
+    });
+  }, [content, title]);
+
+  const handleVersionRestore = useCallback(() => {
+    // Reload document after version restore
+    window.location.reload();
+  }, []);
+
   // ── Drag handlers ─────────────────────────────────
   const handleDragStart = useCallback(
     (_event: DragStartEvent) => {
@@ -302,6 +365,11 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
         saveStatus={saveStatus}
         showFieldLibrary={showFieldLibrary}
         onToggleFieldLibrary={() => setShowFieldLibrary((v) => !v)}
+        content={content ?? undefined}
+        onShare={() => setShowShare(true)}
+        onVersionHistory={() => setShowVersionHistory((v) => !v)}
+        onDuplicate={handleDuplicate}
+        onSaveAsTemplate={handleSaveAsTemplate}
       />
 
       <DndContext
@@ -369,6 +437,21 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
           }}
         />
       )}
+
+      {/* Share Dialog */}
+      <ShareDialog
+        documentId={recordId}
+        open={showShare}
+        onClose={() => setShowShare(false)}
+      />
+
+      {/* Version History Panel */}
+      <VersionHistory
+        documentId={recordId}
+        open={showVersionHistory}
+        onClose={() => setShowVersionHistory(false)}
+        onRestore={handleVersionRestore}
+      />
     </div>
   );
 }

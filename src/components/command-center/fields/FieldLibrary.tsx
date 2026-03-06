@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
+import { Input } from '@/components/ui/Input';
 import {
   fieldTypes,
   fieldCategories,
@@ -398,15 +399,14 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
       {tabBar}
 
       {/* Search */}
-      <div className="relative px-3 py-2">
-        <Search className="absolute start-5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-        <input
-          type="text"
+      <div className="px-3 py-2">
+        <Input
+          inputSize="sm"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={language === 'he' ? 'חיפוש שדה...' : 'Search fields...'}
-          className="w-full rounded-md border border-slate-700 bg-slate-800 py-1.5 pe-3 ps-8 text-xs text-slate-200 placeholder-slate-500 outline-none focus:border-purple-500/50"
           dir="auto"
+          iconStart={<Search className="h-3.5 w-3.5" />}
         />
       </div>
 

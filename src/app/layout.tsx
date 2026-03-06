@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Inter } from "next/font/google";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { WidgetProvider } from "@/contexts/WidgetContext";
+import { ToastProvider } from "@/contexts/ToastContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -67,7 +69,11 @@ try{var vm=localStorage.getItem('cc-style-view-mode');if(vm!=='system'){var so=J
           }}
         />
         <SettingsProvider>
-          <WidgetProvider>{children}</WidgetProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <WidgetProvider>{children}</WidgetProvider>
+            </AuthProvider>
+          </ToastProvider>
         </SettingsProvider>
       </body>
     </html>

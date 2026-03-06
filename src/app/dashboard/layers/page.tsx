@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/command-center/PageHeader";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
+import { Badge, SkeletonCard } from "@/components/ui";
 
 const FALLBACK_PROJECTS: Project[] = [
   { id: "1", name: "vBrain.io Platform", status: "active", health_score: 85, layer: "product", source: "claude" },
@@ -65,8 +66,10 @@ export default function LayersPage() {
     return (
       <div className="flex min-h-full flex-col">
         <PageHeader pageKey="layers" />
-        <div className="flex flex-1 items-center justify-center text-slate-500">
-          {language === "he" ? "טוען פרויקטים..." : "Loading projects..."}
+        <div className="grid grid-cols-1 gap-4 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} lines={2} />
+          ))}
         </div>
       </div>
     );
@@ -85,18 +88,9 @@ export default function LayersPage() {
           <span className="font-medium text-slate-300">
             {t.layers.summaryTotal}: {projects.length} {t.layers.summaryProjects}
           </span>
-          <span className="text-slate-500">•</span>
-          <span className="text-emerald-400">
-            {t.health.healthy}: {healthy}
-          </span>
-          <span className="text-slate-500">•</span>
-          <span className="text-amber-400">
-            {t.health.atRisk}: {atRisk}
-          </span>
-          <span className="text-slate-500">•</span>
-          <span className="text-red-400">
-            {t.health.critical}: {critical}
-          </span>
+          <Badge intent="success" dot>{t.health.healthy}: {healthy}</Badge>
+          <Badge intent="warning" dot>{t.health.atRisk}: {atRisk}</Badge>
+          <Badge intent="danger" dot>{t.health.critical}: {critical}</Badge>
         </div>
 
         <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

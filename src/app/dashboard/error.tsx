@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui';
 
 export default function DashboardError({
   error,
@@ -24,13 +25,9 @@ export default function DashboardError({
         <p className="mb-6 text-sm text-slate-500">
           {error.message || 'An unexpected error occurred in the dashboard.'}
         </p>
-        <button
-          onClick={reset}
-          className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-        >
-          <RefreshCw size={14} />
+        <Button variant="primary" size="lg" icon={RefreshCw} onClick={reset}>
           Try again
-        </button>
+        </Button>
         {error.digest && (
           <p className="mt-4 text-[10px] text-slate-700" dir="ltr">
             Error ID: {error.digest}

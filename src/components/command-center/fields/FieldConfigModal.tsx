@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { X, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { useSettings } from '@/contexts/SettingsContext';
 import {
   getFieldType,
@@ -173,21 +174,12 @@ export function FieldConfigModal({
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 border-t border-slate-700/50 px-4 py-3">
-          <button
-            onClick={onClose}
-            className="rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
-          >
+          <Button variant="ghost" size="sm" onClick={onClose}>
             {language === 'he' ? 'ביטול' : 'Cancel'}
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="rounded-lg bg-purple-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-purple-500 disabled:opacity-50"
-          >
-            {saving
-              ? language === 'he' ? 'שומר...' : 'Saving...'
-              : language === 'he' ? 'שמור' : 'Save'}
-          </button>
+          </Button>
+          <Button variant="primary" size="sm" onClick={handleSave} loading={saving}>
+            {language === 'he' ? 'שמור' : 'Save'}
+          </Button>
         </div>
       </div>
     </div>

@@ -1,16 +1,9 @@
 // ===================================================
-// GAM Command Center — Supabase Client
+// GAM Command Center — Supabase Client (Legacy Re-export)
 // ===================================================
+// All existing imports of `supabase` from this file now use
+// the cookie-aware browser client from @supabase/ssr.
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@/lib/supabase/client";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    '⚠️ Supabase credentials missing. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local'
-  );
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient();

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui';
 
 export default function GlobalError({
   error,
@@ -26,19 +27,13 @@ export default function GlobalError({
           {error.message || 'An unexpected error occurred.'}
         </p>
         <div className="flex items-center justify-center gap-3">
-          <button
-            onClick={reset}
-            className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-purple-500"
-          >
-            <RefreshCw size={14} />
+          <Button variant="primary" size="lg" icon={RefreshCw} onClick={reset}>
             Try again
-          </button>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-lg bg-white/5 px-5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10"
-          >
-            <Home size={14} />
-            Home
+          </Button>
+          <Link href="/">
+            <Button variant="secondary" size="lg" icon={Home}>
+              Home
+            </Button>
           </Link>
         </div>
         {error.digest && (

@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Pin, GitCommit, Rocket, Loader2, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import {
@@ -147,25 +149,29 @@ function GitButtons({ language }: { language: 'he' | 'en' }) {
             )}
           </div>
 
-          <input
-            type="text"
-            value={commitMsg}
-            onChange={e => setCommitMsg(e.target.value)}
-            placeholder={ta.commitPlaceholder}
-            className="mb-2 w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 text-xs text-slate-200 placeholder-slate-600 outline-none focus:border-purple-500/30"
-            dir={isHe ? 'rtl' : 'ltr'}
-            onKeyDown={e => { if (e.key === 'Enter' && commitMsg.trim()) handleCommit(); }}
-          />
+          <div className="mb-2">
+            <Input
+              inputSize="sm"
+              value={commitMsg}
+              onChange={e => setCommitMsg(e.target.value)}
+              placeholder={ta.commitPlaceholder}
+              dir={isHe ? 'rtl' : 'ltr'}
+              onKeyDown={e => { if (e.key === 'Enter' && commitMsg.trim()) handleCommit(); }}
+            />
+          </div>
 
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="primary"
+              size="sm"
+              icon={GitCommit}
+              loading={commitLoading}
+              disabled={!commitMsg.trim()}
               onClick={handleCommit}
-              disabled={commitLoading || !commitMsg.trim()}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1"
             >
-              {commitLoading ? <Loader2 size={12} className="animate-spin" /> : <GitCommit size={12} />}
               {ta.commitButton}
-            </button>
+            </Button>
             <button
               onClick={handleDeploy}
               disabled={deployLoading}

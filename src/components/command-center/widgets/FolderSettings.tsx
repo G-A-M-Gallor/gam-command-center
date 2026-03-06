@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { X, Trash2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { widgetRegistry, type WidgetSize } from "./WidgetRegistry";
 import {
   EMOJI_OPTIONS,
@@ -97,21 +99,21 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
               {ft?.folderName}
             </label>
             <div className="flex gap-2">
-              <input
-                type="text"
+              <Input
+                inputSize="sm"
                 value={folder.label.he}
                 onChange={(e) => handleNameChange("he", e.target.value)}
                 placeholder="עברית"
-                className="flex-1 rounded bg-slate-700 px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
                 dir="rtl"
+                className="flex-1"
               />
-              <input
-                type="text"
+              <Input
+                inputSize="sm"
                 value={folder.label.en}
                 onChange={(e) => handleNameChange("en", e.target.value)}
                 placeholder="English"
-                className="flex-1 rounded bg-slate-700 px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
                 dir="ltr"
+                className="flex-1"
               />
             </div>
           </div>
@@ -339,14 +341,9 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
 
         {/* Footer — Delete */}
         <div className="border-t border-slate-700 px-4 py-3">
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="flex items-center gap-1.5 rounded bg-red-900/20 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-900/40"
-          >
-            <Trash2 className="h-3 w-3" />
+          <Button variant="danger" size="sm" icon={Trash2} onClick={handleDelete}>
             {ft?.deleteFolder}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

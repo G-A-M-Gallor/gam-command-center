@@ -17,8 +17,10 @@ import {
   Settings,
   Shield,
   X,
+  LogOut,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 
 const FULL_WIDTH = 240;
@@ -66,6 +68,7 @@ export function Sidebar({
 }: SidebarProps = {}) {
   const pathname = usePathname();
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
+  const { user, signOut } = useAuth();
   const t = getTranslations(language);
   const [hovered, setHovered] = useState(false);
 
@@ -263,6 +266,38 @@ export function Sidebar({
             );
           })()}
         </div>
+
+        {/* Sign out */}
+        {user && (
+          <div className="shrink-0 border-t border-slate-700/50 p-2">
+            {isCollapsed ? (
+              <button
+                type="button"
+                onClick={signOut}
+                className="flex w-full items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                title={t.auth.signOut}
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            ) : (
+              <div className="space-y-1">
+                <p className={`truncate px-3 text-[11px] text-slate-500 ${onRight ? "text-right" : "text-left"}`}>
+                  {user.email}
+                </p>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400 ${onRight ? "flex-row-reverse" : ""}`}
+                >
+                  <LogOut className="h-4 w-4 shrink-0" />
+                  <span className={`flex-1 ${onRight ? "text-right" : "text-left"}`}>
+                    {t.auth.signOut}
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer — version label */}
         {!isCollapsed && (

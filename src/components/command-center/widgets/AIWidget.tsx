@@ -19,6 +19,8 @@ import {
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { streamChat } from "@/lib/ai/client";
+import { addUsage, isOverBudget } from "@/lib/ai/tokenTracker";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const CONVERSATIONS_KEY = "cc-ai-conversations";
@@ -102,21 +104,6 @@ function saveMessages(messages: ChatMessage[]) {
   localStorage.setItem(CONVERSATIONS_KEY, JSON.stringify(messages));
 }
 
-function generateMockResponse(
-  userMessage: string,
-  contexts: string[]
-): string {
-  const contextStr =
-    contexts.length > 0 ? contexts.join(", ") : "Dashboard";
-  const responses = [
-    `בהתבסס על ההקשר של ${contextStr}, הנה מה שמצאתי: המערכת פועלת כרגיל. 3 פרויקטים פעילים, 2 דורשים תשומת לב.`,
-    `I analyzed the ${contextStr} context. Here's a summary: All systems operational. Consider reviewing the pending items in your queue.`,
-    `לגבי "${userMessage}" — אני ממליץ לבדוק את הנתונים העדכניים ב-${contextStr}. יש כמה פריטים שדורשים טיפול.`,
-    `Based on your question about "${userMessage}", I'd suggest checking the latest data. There are a few items that need attention in ${contextStr}.`,
-  ];
-  return responses[Math.floor(Math.random() * responses.length)];
-}
-
 // ─── Shared Chat Content ─────────────────────────────────────────────
 
 interface ChatContentProps {
@@ -130,11 +117,13 @@ function ChatContent({ compact = false }: ChatContentProps) {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
   const [contexts, setContexts] = useState<string[]>([]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setMessages(loadMessages());
@@ -144,10 +133,14 @@ function ChatContent({ compact = false }: ChatContentProps) {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
+  }, [messages, isStreaming, streamingContent]);
 
   useEffect(() => {
     textareaRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
   }, []);
 
   const currentPageLabel = getPageLabel(pathname, t);
@@ -166,7 +159,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
   const handleSend = useCallback(
     (text?: string) => {
       const msg = (text || input).trim();
-      if (!msg || isTyping) return;
+      if (!msg || isStreaming || isOverBudget()) return;
 
       const userMsg: ChatMessage = {
         role: "user",
@@ -178,22 +171,81 @@ function ChatContent({ compact = false }: ChatContentProps) {
       setMessages(newMessages);
       saveMessages(newMessages);
       setInput("");
-      setIsTyping(true);
+      setIsStreaming(true);
+      setStreamingContent("");
 
-      setTimeout(() => {
-        const aiMsg: ChatMessage = {
-          role: "assistant",
-          content: generateMockResponse(msg, contexts),
-          timestamp: Date.now(),
-        };
-        const updated = [...newMessages, aiMsg];
-        setMessages(updated);
-        saveMessages(updated);
-        setIsTyping(false);
-      }, 500);
+      const apiMessages = newMessages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      streamChat({
+        messages: apiMessages,
+        mode: "chat",
+        contexts,
+        signal: controller.signal,
+        onToken: (token) => {
+          setStreamingContent((prev) => prev + token);
+        },
+        onDone: (usage) => {
+          addUsage(usage.input_tokens, usage.output_tokens);
+          setStreamingContent((prev) => {
+            const aiMsg: ChatMessage = {
+              role: "assistant",
+              content: prev,
+              timestamp: Date.now(),
+            };
+            setMessages((prevMsgs) => {
+              const updated = [...prevMsgs, aiMsg];
+              saveMessages(updated);
+              return updated;
+            });
+            return "";
+          });
+          setIsStreaming(false);
+          abortRef.current = null;
+        },
+        onError: (error) => {
+          setStreamingContent((prev) => {
+            if (prev && !controller.signal.aborted) {
+              const aiMsg: ChatMessage = {
+                role: "assistant",
+                content: prev + `\n\n⚠️ ${error}`,
+                timestamp: Date.now(),
+              };
+              setMessages((prevMsgs) => {
+                const updated = [...prevMsgs, aiMsg];
+                saveMessages(updated);
+                return updated;
+              });
+            } else if (!controller.signal.aborted) {
+              const errMsg: ChatMessage = {
+                role: "assistant",
+                content: `⚠️ ${error}`,
+                timestamp: Date.now(),
+              };
+              setMessages((prevMsgs) => {
+                const updated = [...prevMsgs, errMsg];
+                saveMessages(updated);
+                return updated;
+              });
+            }
+            return "";
+          });
+          setIsStreaming(false);
+          abortRef.current = null;
+        },
+      });
     },
-    [input, messages, isTyping, contexts]
+    [input, messages, isStreaming, contexts]
   );
+
+  const stopGeneration = useCallback(() => {
+    abortRef.current?.abort();
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -243,7 +295,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
       </div>
 
       {/* Quick suggestions */}
-      {messages.length === 0 && (
+      {messages.length === 0 && !isStreaming && (
         <div
           className={`flex flex-wrap gap-1.5 border-b border-slate-700/50 ${px} ${py}`}
         >
@@ -262,7 +314,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
 
       {/* Messages */}
       <div className={`flex-1 overflow-y-auto ${px} py-3`}>
-        {messages.length === 0 && (
+        {messages.length === 0 && !isStreaming && (
           <div className="flex h-full items-center justify-center">
             <p className="text-center text-sm text-slate-500">
               {t.widgets.typePlaceholder}
@@ -280,12 +332,24 @@ function ChatContent({ compact = false }: ChatContentProps) {
                   ? "bg-[var(--cc-accent-600-30)] text-slate-100"
                   : "bg-slate-700/50 text-slate-300"
               }`}
+              style={{ whiteSpace: "pre-wrap" }}
             >
               {msg.content}
             </div>
           </div>
         ))}
-        {isTyping && (
+        {isStreaming && streamingContent && (
+          <div className="mb-3">
+            <div
+              className="max-w-[85%] rounded-lg bg-slate-700/50 px-3 py-2 text-sm text-slate-300"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
+              {streamingContent}
+              <span className="inline-block w-0.5 h-3.5 bg-slate-300 animate-pulse ms-0.5 align-text-bottom" />
+            </div>
+          </div>
+        )}
+        {isStreaming && !streamingContent && (
           <div className="mb-3">
             <div className="inline-flex gap-1 rounded-lg bg-slate-700/50 px-3 py-2">
               <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
@@ -310,15 +374,25 @@ function ChatContent({ compact = false }: ChatContentProps) {
             className="flex-1 resize-none rounded-lg border border-slate-600 bg-slate-700/50 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[var(--cc-accent-500)]"
             style={{ maxHeight: compact ? 80 : 120 }}
           />
-          <button
-            type="button"
-            onClick={() => handleSend()}
-            disabled={!input.trim() || isTyping}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--cc-accent-600)]text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40 disabled:hover:bg-[var(--cc-accent-600)]"
-            title={t.widgets.sendMessage}
-          >
-            <Send className="h-4 w-4" />
-          </button>
+          {isStreaming ? (
+            <button
+              type="button"
+              onClick={stopGeneration}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white transition-colors hover:bg-red-500"
+            >
+              <Square className="h-3 w-3" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isOverBudget()}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--cc-accent-600)] text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40 disabled:hover:bg-[var(--cc-accent-600)]"
+              title={t.widgets.sendMessage}
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
     </>

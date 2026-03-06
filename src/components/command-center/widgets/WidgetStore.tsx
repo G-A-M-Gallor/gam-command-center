@@ -14,6 +14,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { Input } from "@/components/ui/Input";
 import {
   widgetRegistry,
   getWidgetById,
@@ -827,15 +828,13 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
           </div>
           <div className="flex items-center gap-3">
             {/* Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
-              <input
-                type="text"
+            <div className="flex-1">
+              <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t.widgets.storeSearch}
-                className="w-full rounded-md border border-slate-600 bg-slate-700 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-[var(--cc-accent-500)]"
                 dir="ltr"
+                iconStart={<Search className="h-4 w-4" />}
               />
             </div>
             {/* View toggle */}

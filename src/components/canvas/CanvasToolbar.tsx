@@ -1,9 +1,11 @@
 'use client';
 
-import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, Plus } from 'lucide-react';
+import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, Plus, Copy, Share2, Clock, LayoutTemplate } from 'lucide-react';
 import { useCanvas } from '@/contexts/CanvasContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
+import { ExportMenu } from '@/components/editor/ExportMenu';
+import type { JSONContent } from '@tiptap/react';
 
 interface CanvasToolbarProps {
   title: string;
@@ -13,6 +15,11 @@ interface CanvasToolbarProps {
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
   showFieldLibrary: boolean;
   onToggleFieldLibrary: () => void;
+  content?: JSONContent;
+  onShare?: () => void;
+  onVersionHistory?: () => void;
+  onDuplicate?: () => void;
+  onSaveAsTemplate?: () => void;
 }
 
 export function CanvasToolbar({
@@ -23,11 +30,17 @@ export function CanvasToolbar({
   saveStatus,
   showFieldLibrary,
   onToggleFieldLibrary,
+  content,
+  onShare,
+  onVersionHistory,
+  onDuplicate,
+  onSaveAsTemplate,
 }: CanvasToolbarProps) {
   const { layout, toggleGrid, toggleSnap, setZoom } = useCanvas();
   const { language } = useSettings();
   const t = getTranslations(language);
   const ct = t.canvas;
+  const et = t.editor;
 
   return (
     <div className="flex h-10 shrink-0 items-center gap-2 border-b border-slate-700/50 bg-slate-800/95 px-3 backdrop-blur-sm">
@@ -73,6 +86,59 @@ export function CanvasToolbar({
         {saveStatus === 'saved' && (language === 'he' ? 'נשמר' : 'Saved')}
         {saveStatus === 'error' && (language === 'he' ? 'שגיאה' : 'Error')}
       </span>
+
+      <div className="mx-1 h-4 w-px bg-slate-700" />
+
+      {/* Export menu */}
+      {content && <ExportMenu content={content} title={title} />}
+
+      {/* Share */}
+      {onShare && (
+        <button
+          data-cc-id="editor.toolbar.share"
+          onClick={onShare}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+          title={et.share}
+        >
+          <Share2 className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {/* Version history */}
+      {onVersionHistory && (
+        <button
+          data-cc-id="editor.toolbar.version-history"
+          onClick={onVersionHistory}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+          title={et.versionHistory}
+        >
+          <Clock className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {/* Duplicate */}
+      {onDuplicate && (
+        <button
+          data-cc-id="editor.toolbar.duplicate"
+          onClick={onDuplicate}
+          className="rounded-md p-1.5 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+          title={et.duplicate}
+        >
+          <Copy className="h-3.5 w-3.5" />
+        </button>
+      )}
+
+      {/* Save as template */}
+      {onSaveAsTemplate && (
+        <button
+          data-cc-id="editor.toolbar.save-template"
+          onClick={onSaveAsTemplate}
+          className="rounded-md p-1.5 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+          title={et.saveAsTemplate}
+        >
+          <LayoutTemplate className="h-3.5 w-3.5" />
+        </button>
+      )}
 
       <div className="mx-1 h-4 w-px bg-slate-700" />
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Pin, Grid3X3, Power } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -180,16 +181,16 @@ export function WidgetSettings({
           </div>
 
           {/* Open store button */}
-          <button
-            type="button"
+          <Button
+            variant="secondary"
+            className="w-full"
             onClick={() => {
               onClose();
               onOpenLibrary();
             }}
-            className="w-full rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-600"
           >
             {t.widgets.store}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
