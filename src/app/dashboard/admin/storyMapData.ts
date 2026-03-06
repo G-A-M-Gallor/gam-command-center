@@ -24,7 +24,7 @@ export const userJourneySteps: UserJourneyStep[] = [
       { name: 'Email allowlist enforcement', nameHe: 'אכיפת רשימת מיילים מורשים', status: 'done', risk: 'low', keyFile: 'src/app/auth/callback/route.ts' },
       { name: 'Show/hide password toggle', nameHe: 'מתג הצג/הסתר סיסמה', status: 'done', risk: 'low', keyFile: 'src/app/login/page.tsx' },
       { name: 'Forgot password flow', nameHe: 'זרימת שכחתי סיסמה', status: 'untested', risk: 'medium', keyFile: 'src/app/login/page.tsx' },
-      { name: 'Auth guard middleware', nameHe: 'Middleware הגנת אותנטיקציה', status: 'broken', risk: 'critical', keyFile: 'src/proxy.ts', note: 'File named wrong + exports proxy() not middleware()', noteHe: 'שם קובץ שגוי + מייצא proxy() ולא middleware()' },
+      { name: 'Auth guard proxy', nameHe: 'Proxy הגנת אותנטיקציה', status: 'done', risk: 'low', keyFile: 'src/proxy.ts', note: 'Next.js 16 uses proxy.ts convention (not middleware.ts)', noteHe: 'Next.js 16 משתמש ב-proxy.ts (לא middleware.ts)' },
       { name: 'Session listener (onAuthStateChange)', nameHe: 'מאזין סשן (onAuthStateChange)', status: 'done', risk: 'low', keyFile: 'src/contexts/AuthContext.tsx' },
       { name: 'Sign out (sidebar)', nameHe: 'יציאה (סיידבר)', status: 'done', risk: 'low', keyFile: 'src/components/command-center/Sidebar.tsx' },
     ],
@@ -275,7 +275,7 @@ export const walkingSkeleton: ReleaseTier = {
   goal: 'End-to-end flow proves the architecture works.',
   goalHe: 'זרימה מקצה לקצה מוכיחה שהארכיטקטורה עובדת.',
   tasks: [
-    { name: 'Fix src/proxy.ts → rename to src/middleware.ts, export middleware()', nameHe: 'תקן src/proxy.ts → שנה שם ל-src/middleware.ts, ייצא middleware()', status: 'CRITICAL', statusHe: 'קריטי', effort: '5 min', risk: 'low' },
+    { name: 'Verify src/proxy.ts exports proxy() (Next.js 16 convention)', nameHe: 'אמת ש-src/proxy.ts מייצא proxy() (קונבנציית Next.js 16)', status: 'DONE', statusHe: 'הושלם', effort: '5 min', risk: 'low' },
     { name: 'Verify projects table exists in Supabase', nameHe: 'אמת שטבלת projects קיימת ב-Supabase', status: 'Verify', statusHe: 'לאמת', effort: '5 min', risk: 'low' },
     { name: 'Test: login → dashboard → see projects', nameHe: 'בדיקה: כניסה → דשבורד → ראה פרויקטים', status: 'Test', statusHe: 'לבדוק', effort: '15 min', risk: 'low' },
   ],
@@ -377,7 +377,7 @@ export const mlpTiers: MLPTier[] = [
 // ─── Risk Matrix ────────────────────────────────────────
 
 export const riskMatrix: RiskEntry[] = [
-  { risk: 'proxy.ts middleware naming', riskHe: 'שם קובץ proxy.ts middleware', type: 'Technical', typeHe: 'טכני', level: 'critical', mitigation: 'Rename file + export', mitigationHe: 'שנה שם קובץ + ייצוא' },
+  { risk: 'proxy.ts auth guard', riskHe: 'proxy.ts הגנת אותנטיקציה', type: 'Technical', typeHe: 'טכני', level: 'low', mitigation: 'RESOLVED — proxy.ts with proxy() is correct for Next.js 16', mitigationHe: 'טופל — proxy.ts עם proxy() הוא הנכון ל-Next.js 16' },
   { risk: 'Missing Supabase tables', riskHe: 'טבלאות Supabase חסרות', type: 'Technical', typeHe: 'טכני', level: 'high', mitigation: 'Run migrations', mitigationHe: 'הרץ מיגרציות' },
   { risk: 'Missing ANTHROPIC_API_KEY', riskHe: 'ANTHROPIC_API_KEY חסר', type: 'Dependency', typeHe: 'תלות', level: 'high', mitigation: 'Set env var', mitigationHe: 'הגדר משתנה סביבה' },
   { risk: 'n8n Origami sync', riskHe: 'סנכרון n8n Origami', type: 'Dependency', typeHe: 'תלות', level: 'high', mitigation: 'Requires Origami API access', mitigationHe: 'דורש גישה ל-Origami API' },
