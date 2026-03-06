@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@supabase/supabase-js";
 import {
   SYSTEM_PROMPTS,
   MODE_MODELS,
@@ -8,6 +9,52 @@ import {
 } from "@/lib/ai/prompts";
 
 const VALID_MODES: AIMode[] = ["chat", "analyze", "write", "decompose"];
+const DAILY_TOKEN_LIMIT = 100_000;
+
+async function checkAndUpdateBudget(
+  userId: string,
+  tokensUsed: { input: number; output: number }
+): Promise<{ allowed: boolean; remaining: number }> {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data } = await supabase
+    .from("ai_usage")
+    .select("tokens_input, tokens_output, request_count")
+    .eq("user_id", userId)
+    .eq("date", today)
+    .single();
+
+  const currentInput = data?.tokens_input || 0;
+  const currentOutput = data?.tokens_output || 0;
+  const currentCount = data?.request_count || 0;
+  const totalUsed = currentInput + currentOutput;
+
+  // Pre-check: if already over budget, reject
+  if (tokensUsed.input === 0 && tokensUsed.output === 0) {
+    return { allowed: totalUsed < DAILY_TOKEN_LIMIT, remaining: Math.max(DAILY_TOKEN_LIMIT - totalUsed, 0) };
+  }
+
+  // Post-use: record actual usage
+  await supabase.from("ai_usage").upsert(
+    {
+      user_id: userId,
+      date: today,
+      tokens_input: currentInput + tokensUsed.input,
+      tokens_output: currentOutput + tokensUsed.output,
+      request_count: currentCount + 1,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id,date" }
+  );
+
+  const newTotal = totalUsed + tokensUsed.input + tokensUsed.output;
+  return { allowed: true, remaining: Math.max(DAILY_TOKEN_LIMIT - newTotal, 0) };
+}
 
 interface RequestBody {
   messages: { role: "user" | "assistant"; content: string }[];
@@ -48,6 +95,19 @@ export async function POST(request: Request) {
       JSON.stringify({ error: "Messages array is required" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // Server-side token budget check (DECISION-004)
+  const authHeader = request.headers.get("authorization");
+  const userId = authHeader?.replace("Bearer ", "") || "";
+  if (userId) {
+    const budget = await checkAndUpdateBudget(userId, { input: 0, output: 0 });
+    if (!budget.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Daily token budget exceeded", remaining: 0 }),
+        { status: 429, headers: { "Content-Type": "application/json" } }
+      );
+    }
   }
 
   // Build system prompt with contexts
@@ -103,14 +163,24 @@ export async function POST(request: Request) {
 
           // Get final message for usage stats
           const finalMessage = await stream.finalMessage();
+          const usageData = {
+            input_tokens: finalMessage.usage.input_tokens,
+            output_tokens: finalMessage.usage.output_tokens,
+          };
+
+          // Record server-side usage (DECISION-004)
+          if (userId) {
+            await checkAndUpdateBudget(userId, {
+              input: usageData.input_tokens,
+              output: usageData.output_tokens,
+            });
+          }
+
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
                 type: "done",
-                usage: {
-                  input_tokens: finalMessage.usage.input_tokens,
-                  output_tokens: finalMessage.usage.output_tokens,
-                },
+                usage: usageData,
               })}\n\n`
             )
           );

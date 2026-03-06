@@ -6,8 +6,8 @@
 
 **GAM Command Center (CC)** — Internal project management dashboard for G.A.M, a business services company in Israel's construction industry.
 
-- **Repo:** `G-A-M-Gallor/vBrain.io` — Next.js 15.5.1 on Vercel
-- **Branch:** `feature/command-center`
+- **Repo:** `G-A-M-Gallor/vBrain.io` — Next.js 16.1.6 (Turbopack) on Vercel
+- **Branch:** `main`
 - **Route:** `/dashboard` (new route group)
 - **Prototype:** V8 Step 4 — React single-file, 92K, 9 working tabs
 
@@ -151,7 +151,8 @@ CREATE TABLE ai_conversations (
 ## 🔧 Coding Conventions
 
 - **Language:** TypeScript strict mode
-- **Framework:** Next.js 15 App Router (server components by default)
+- **Framework:** Next.js 16 App Router (server components by default)
+- **Middleware:** Uses `src/proxy.ts` with `export function proxy()` (Next.js 16 convention, NOT `middleware.ts`)
 - **State:** Supabase Realtime for live data, React state for UI
 - **API:** Route handlers in `app/api/` — no external API framework
 - **Naming:** PascalCase components, camelCase functions, kebab-case files
