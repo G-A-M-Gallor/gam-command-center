@@ -110,10 +110,11 @@ export async function POST(request: Request) {
     }
   }
 
-  // Build system prompt with contexts
+  // Build system prompt with contexts (rich data from pages)
   let systemPrompt = SYSTEM_PROMPTS[mode];
   if (contexts.length > 0) {
-    systemPrompt += `\n\nCurrent dashboard context: ${contexts.join(", ")}`;
+    const contextBlock = contexts.join("\n\n").slice(0, 1500);
+    systemPrompt += `\n\n--- Dashboard Data ---\n${contextBlock}`;
   }
 
   // Sliding window: keep first user message + last N exchanges

@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/command-center/PageHeader";
 import { streamChat } from "@/lib/ai/client";
 import { addUsage, getUsagePercent, isOverBudget, isNearBudget } from "@/lib/ai/tokenTracker";
 import { MODE_MODELS, MAX_CONVERSATION_MESSAGES, type AIMode } from "@/lib/ai/prompts";
+import { usePageContext } from "@/lib/ai/usePageContext";
 import {
   saveConversation as saveToSupabase,
   loadConversations as loadFromSupabase,
@@ -320,6 +321,7 @@ export default function AIHubPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [contexts, setContexts] = useState<string[]>([]);
+  const { buildRichContexts } = usePageContext();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [cloudStatus, setCloudStatus] = useState<"idle" | "saving" | "saved" | "offline">("idle");
 
@@ -493,7 +495,7 @@ export default function AIHubPage() {
     abortRef.current?.abort();
   }, []);
 
-  const handleSend = useCallback((text?: string) => {
+  const handleSend = useCallback(async (text?: string) => {
     const msg = (text || input).trim();
     if (!msg || isStreaming) return;
 
@@ -552,10 +554,13 @@ export default function AIHubPage() {
 
     const finalId = targetId;
 
+    // Build rich contexts with actual page data
+    const richContexts = await buildRichContexts(contexts);
+
     streamChat({
       messages: apiMessages,
       mode,
-      contexts,
+      contexts: richContexts,
       signal: controller.signal,
       onToken: (token) => {
         setStreamingContent((prev) => prev + token);
