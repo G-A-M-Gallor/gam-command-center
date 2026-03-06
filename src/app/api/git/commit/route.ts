@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
-function sanitizeMessage(msg: string): string {
-  // Strip shell metacharacters, keep safe chars
-  return msg.replace(/[`$\\!;|&<>(){}[\]'"]/g, '').trim();
-}
-
-function run(cmd: string): string {
-  return execSync(cmd, { cwd: process.cwd(), timeout: 15000 }).toString().trim();
+function run(cmd: string, args: string[]): string {
+  return execFileSync(cmd, args, { cwd: process.cwd(), timeout: 15000 }).toString().trim();
 }
 
 export async function POST(request: Request) {
@@ -23,13 +18,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Commit message is required' }, { status: 400 });
     }
 
-    const message = sanitizeMessage(rawMessage);
-    if (message.length === 0) {
-      return NextResponse.json({ error: 'Commit message contains only invalid characters' }, { status: 400 });
-    }
+    const message = rawMessage.trim();
 
-    run('git add -A');
-    const result = run(`git commit -m "${message}"`);
+    run('git', ['add', '-A']);
+    const result = run('git', ['commit', '-m', message]);
 
     // Extract commit hash from output
     const hashMatch = result.match(/\[[\w/.-]+ ([a-f0-9]+)\]/);

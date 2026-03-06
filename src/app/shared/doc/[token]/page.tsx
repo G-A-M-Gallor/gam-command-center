@@ -60,7 +60,13 @@ function renderTiptapToHtml(node: any): string {
           case "italic": text = `<em>${text}</em>`; break;
           case "underline": text = `<u>${text}</u>`; break;
           case "code": text = `<code>${text}</code>`; break;
-          case "link": text = `<a href="${escapeHtml(mark.attrs?.href || "")}" target="_blank" rel="noopener">${text}</a>`; break;
+          case "link": {
+            const href = sanitizeUrl(mark.attrs?.href || "");
+            text = href
+              ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${text}</a>`
+              : text;
+            break;
+          }
           case "highlight": text = `<mark>${text}</mark>`; break;
         }
       }
@@ -87,6 +93,16 @@ function renderTiptapToHtml(node: any): string {
     case "hardBreak": return "<br>";
     case "horizontalRule": return "<hr>";
     default: return children;
+  }
+}
+
+function sanitizeUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url, "https://placeholder.com");
+    if (["http:", "https:", "mailto:"].includes(parsed.protocol)) return url;
+    return null;
+  } catch {
+    return null;
   }
 }
 

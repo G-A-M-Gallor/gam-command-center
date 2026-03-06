@@ -350,7 +350,7 @@ function MermaidDiagram({ definition, ta }: { definition: string; ta: ReturnType
             secondaryColor: '#0f172a', tertiaryColor: '#1e1b4b', fontSize: '12px',
           },
           flowchart: { curve: 'basis', padding: 12 },
-          securityLevel: 'loose',
+          securityLevel: 'strict',
         });
         if (cancelled || !containerRef.current) return;
         const id = `mermaid-${Date.now()}`;

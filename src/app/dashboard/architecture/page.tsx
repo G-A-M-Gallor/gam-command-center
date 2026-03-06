@@ -139,6 +139,7 @@ function MermaidDiagram({ definition }: { definition: string }) {
             titleColor: "#e2e8f0",
             edgeLabelBackground: "#1e293b",
           },
+          securityLevel: "strict",
           flowchart: { curve: "basis", padding: 16 },
         });
         if (cancelled || !containerRef.current) return;
