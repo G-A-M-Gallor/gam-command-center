@@ -156,8 +156,17 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
 
   const setWidgetPositions = useCallback(
     (positions: Record<string, number>) => {
-      setWidgetPositionsState(positions);
-      localStorage.setItem(STORAGE_KEYS.positions, JSON.stringify(positions));
+      setWidgetPositionsState((prev) => {
+        const keys = Object.keys(positions);
+        if (
+          keys.length === Object.keys(prev).length &&
+          keys.every((k) => prev[k] === positions[k])
+        ) {
+          return prev;
+        }
+        localStorage.setItem(STORAGE_KEYS.positions, JSON.stringify(positions));
+        return positions;
+      });
     },
     []
   );

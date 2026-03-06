@@ -40,7 +40,7 @@ function calcPosition(
   panelW: number,
   panelH: number,
   sidebar: { left: number; right: number }
-): { top: number; left: number } {
+): { top: number; left: number; maxWidth: number; maxHeight: number } {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
@@ -48,18 +48,22 @@ function calcPosition(
   const zoneRight = vw - sidebar.right - MARGIN;
   const zoneBottom = vh - MARGIN;
   const zoneTop = MARGIN;
+  const zoneWidth = zoneRight - zoneLeft;
+
+  const clampedW = Math.min(panelW, zoneWidth);
+  const clampedH = Math.min(panelH, zoneBottom - zoneTop);
 
   let left = btnRect.left;
-  if (left + panelW > zoneRight) left = btnRect.right - panelW;
-  if (left + panelW > zoneRight) left = zoneRight - panelW;
+  if (left + clampedW > zoneRight) left = btnRect.right - clampedW;
+  if (left + clampedW > zoneRight) left = zoneRight - clampedW;
   if (left < zoneLeft) left = zoneLeft;
 
   let top = btnRect.bottom + 4;
-  if (top + panelH > zoneBottom) top = btnRect.top - panelH - 4;
-  if (top + panelH > zoneBottom) top = zoneBottom - panelH;
+  if (top + clampedH > zoneBottom) top = btnRect.top - clampedH - 4;
+  if (top + clampedH > zoneBottom) top = zoneBottom - clampedH;
   if (top < zoneTop) top = zoneTop;
 
-  return { top, left };
+  return { top, left, maxWidth: zoneWidth, maxHeight: zoneBottom - top };
 }
 
 interface FolderWrapperProps {
@@ -86,6 +90,8 @@ export function FolderWrapper({
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelPos, setPanelPos] = useState<{ top: number; left: number } | null>(null);
+  const [panelMaxW, setPanelMaxW] = useState(9999);
+  const [panelMaxH, setPanelMaxH] = useState(9999);
 
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -134,7 +140,10 @@ export function FolderWrapper({
       left: sidebar.left + (aiPanelOffset?.left ?? 0),
       right: sidebar.right + (aiPanelOffset?.right ?? 0),
     };
-    setPanelPos(calcPosition(rect, DEFAULT_PANEL_W, DEFAULT_PANEL_H, totalOffset));
+    const result = calcPosition(rect, DEFAULT_PANEL_W, DEFAULT_PANEL_H, totalOffset);
+    setPanelPos({ top: result.top, left: result.left });
+    setPanelMaxW(result.maxWidth);
+    setPanelMaxH(result.maxHeight);
   }, [panelOpen, sidebarPosition, sidebarVisibility, aiPanelOffset]);
 
   const clearTimer = useCallback(() => {
@@ -305,8 +314,10 @@ export function FolderWrapper({
           style={{
             top: panelPos.top,
             left: panelPos.left,
-            width: DEFAULT_PANEL_W,
-            minWidth: 240,
+            width: Math.min(DEFAULT_PANEL_W, panelMaxW),
+            minWidth: Math.min(240, panelMaxW),
+            maxWidth: panelMaxW,
+            maxHeight: panelMaxH,
             resize: "both",
             overflow: "auto",
             borderRadius: "var(--cc-radius-lg)",

@@ -45,12 +45,20 @@ function getSidebarOffset(
   };
 }
 
+interface CalcResult {
+  pos: PanelPos;
+  /** Max width the panel can use without exceeding the available zone */
+  maxWidth: number;
+  /** Max height the panel can use without exceeding the available zone */
+  maxHeight: number;
+}
+
 function calcPosition(
   btnRect: DOMRect,
   panelW: number,
   panelH: number,
   sidebar: { left: number; right: number }
-): PanelPos {
+): CalcResult {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
@@ -58,22 +66,32 @@ function calcPosition(
   const zoneRight = vw - sidebar.right - MARGIN;
   const zoneBottom = vh - MARGIN;
   const zoneTop = MARGIN;
+  const zoneWidth = zoneRight - zoneLeft;
+  const zoneHeight = zoneBottom - zoneTop;
+
+  // Clamp panel dimensions to available zone
+  const clampedW = Math.min(panelW, zoneWidth);
+  const clampedH = Math.min(panelH, zoneHeight);
 
   let left = btnRect.left;
-  if (left + panelW > zoneRight) {
-    left = btnRect.right - panelW;
+  if (left + clampedW > zoneRight) {
+    left = btnRect.right - clampedW;
   }
-  if (left + panelW > zoneRight) left = zoneRight - panelW;
+  if (left + clampedW > zoneRight) left = zoneRight - clampedW;
   if (left < zoneLeft) left = zoneLeft;
 
   let top = btnRect.bottom + 4;
-  if (top + panelH > zoneBottom) {
-    top = btnRect.top - panelH - 4;
+  if (top + clampedH > zoneBottom) {
+    top = btnRect.top - clampedH - 4;
   }
-  if (top + panelH > zoneBottom) top = zoneBottom - panelH;
+  if (top + clampedH > zoneBottom) top = zoneBottom - clampedH;
   if (top < zoneTop) top = zoneTop;
 
-  return { top, left };
+  return {
+    pos: { top, left },
+    maxWidth: zoneWidth,
+    maxHeight: zoneBottom - top,
+  };
 }
 
 interface WidgetWrapperProps {
@@ -103,6 +121,8 @@ export function WidgetWrapper({
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelPos, setPanelPos] = useState<PanelPos | null>(null);
+  const [panelMaxW, setPanelMaxW] = useState(9999);
+  const [panelMaxH, setPanelMaxH] = useState(9999);
   const [panelSize, setPanelSize] = useState<PanelSize | null>(null);
 
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -167,7 +187,10 @@ export function WidgetWrapper({
     };
     const pw = panelSize?.width ?? DEFAULT_PANEL_W;
     const ph = panelSize?.height ?? DEFAULT_PANEL_H;
-    setPanelPos(calcPosition(rect, pw, ph, totalOffset));
+    const result = calcPosition(rect, pw, ph, totalOffset);
+    setPanelPos(result.pos);
+    setPanelMaxW(result.maxWidth);
+    setPanelMaxH(result.maxHeight);
   }, [panelOpen, sidebarPosition, sidebarVisibility, panelSize, aiPanelOffset]);
 
   const clearTimer = useCallback(() => {
@@ -318,10 +341,11 @@ export function WidgetWrapper({
           style={{
             top: panelPos.top,
             left: panelPos.left,
-            width: panelSize?.width ?? DEFAULT_PANEL_W,
-            minWidth: MIN_PANEL_W,
+            width: Math.min(panelSize?.width ?? DEFAULT_PANEL_W, panelMaxW),
+            minWidth: Math.min(MIN_PANEL_W, panelMaxW),
             minHeight: MIN_PANEL_H,
-            maxHeight: `calc(100vh - ${panelPos.top + MARGIN}px)`,
+            maxWidth: panelMaxW,
+            maxHeight: Math.min(panelMaxH, window.innerHeight - panelPos.top - MARGIN),
             resize: "both",
             overflow: "hidden",
             borderRadius: "var(--cc-radius-lg)",

@@ -15,6 +15,7 @@ import {
   Calendar,
   Zap,
   Settings,
+  Shield,
   X,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -46,6 +47,7 @@ const tabRoutes = [
   },
   { href: "/dashboard/plan", key: "plan" as const, icon: Calendar },
   { href: "/dashboard/automations", key: "automations" as const, icon: Zap },
+  { href: "/dashboard/admin", key: "admin" as const, icon: Shield },
 ] as const;
 
 interface SidebarProps {
@@ -122,7 +124,7 @@ export function Sidebar({
             );
             const nameText = brandProfile.companyName || t.appName;
 
-            if (isCollapsed) return logoEl;
+            if (isCollapsed) return <Link href="/" title="Workspace Hub">{logoEl}</Link>;
 
             if (onRight) return (
               <>
@@ -131,15 +133,19 @@ export function Sidebar({
                     <X className="h-4 w-4" />
                   </button>
                 )}
-                <span data-cc-id="sidebar.header.name" data-cc-text="true" className="flex-1 text-right font-semibold text-slate-100">{nameText}</span>
-                {logoEl}
+                <Link href="/" className="flex flex-1 items-center justify-end gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
+                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-right font-semibold text-slate-100">{nameText}</span>
+                  {logoEl}
+                </Link>
               </>
             );
 
             return (
               <>
-                {logoEl}
-                <span data-cc-id="sidebar.header.name" data-cc-text="true" className="flex-1 text-left font-semibold text-slate-100">{nameText}</span>
+                <Link href="/" className="flex flex-1 items-center gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
+                  {logoEl}
+                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-left font-semibold text-slate-100">{nameText}</span>
+                </Link>
                 {isFloating && !isFloat && onClose && (
                   <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
                     <X className="h-4 w-4" />

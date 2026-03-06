@@ -9,6 +9,7 @@ import {
   useMemo,
 } from "react";
 import { generateAccentPalette, generateGlowShadow } from "@/lib/colorUtils";
+import { type SkinName, getSkinById } from "@/lib/skins";
 
 const STORAGE_KEYS = {
   language: "cc-language",
@@ -23,6 +24,7 @@ const STORAGE_KEYS = {
   savedColors: "cc-saved-colors",
   accentEffect: "cc-accent-effect",
   archivedColors: "cc-archived-colors",
+  skin: "cc-skin",
 } as const;
 
 export type Language = "he" | "en";
@@ -58,6 +60,7 @@ export interface BrandProfile {
   brandSecondary: string;
   brandTertiary: string;
 }
+export type { SkinName } from "@/lib/skins";
 export type FontFamily = "geist" | "inter" | "system";
 export type BorderRadius = "sharp" | "default" | "round";
 export type Density = "compact" | "default" | "spacious";
@@ -75,6 +78,7 @@ interface Settings {
   savedColors: SavedColor[];
   archivedColors: SavedColor[];
   accentEffect: AccentEffect;
+  skin: SkinName;
   setLanguage: (lang: Language) => void;
   setSidebarPosition: (pos: SidebarPosition) => void;
   setSidebarVisibility: (mode: SidebarVisibility) => void;
@@ -87,6 +91,7 @@ interface Settings {
   setSavedColors: (colors: SavedColor[]) => void;
   setArchivedColors: (colors: SavedColor[]) => void;
   setAccentEffect: (effect: AccentEffect) => void;
+  setSkin: (skin: SkinName) => void;
 }
 
 const defaultBrandProfile: BrandProfile = {
@@ -125,6 +130,7 @@ const defaultSettings: Settings = {
   savedColors: [],
   archivedColors: [],
   accentEffect: defaultAccentEffect,
+  skin: "dark" as SkinName,
   setLanguage: () => {},
   setSidebarPosition: () => {},
   setSidebarVisibility: () => {},
@@ -137,6 +143,7 @@ const defaultSettings: Settings = {
   setSavedColors: () => {},
   setArchivedColors: () => {},
   setAccentEffect: () => {},
+  setSkin: () => {},
 };
 
 const ACCENT_COLORS: AccentColor[] = ["purple", "blue", "emerald", "amber", "rose", "cyan", "brand", "custom"];
@@ -165,6 +172,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [savedColors, setSavedColorsState] = useState<SavedColor[]>([]);
   const [archivedColors, setArchivedColorsState] = useState<SavedColor[]>([]);
   const [accentEffect, setAccentEffectState] = useState<AccentEffect>(defaultAccentEffect);
+  const [skin, setSkinState] = useState<SkinName>("dark");
   const [mounted, setMounted] = useState(false);
 
   // Load all settings from localStorage on mount
@@ -214,6 +222,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
     } catch { /* ignore */ }
 
+    const storedSkin = localStorage.getItem(STORAGE_KEYS.skin) as SkinName | null;
+    if (storedSkin && ["dark", "light", "midnight", "forest", "royal"].includes(storedSkin)) {
+      setSkinState(storedSkin);
+    }
+
     setMounted(true);
   }, []);
 
@@ -232,6 +245,17 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dataset.radius = borderRadius;
     document.documentElement.dataset.density = density;
   }, [accentColor, fontFamily, borderRadius, density, mounted]);
+
+  // Apply skin CSS variables
+  useEffect(() => {
+    if (!mounted) return;
+    const root = document.documentElement;
+    const skinDef = getSkinById(skin);
+    root.dataset.skin = skin;
+    Object.entries(skinDef.vars).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+  }, [skin, mounted]);
 
   // Apply brand color CSS vars when brand colors change
   useEffect(() => {
@@ -361,6 +385,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.accentEffect, JSON.stringify(effect));
   }, []);
 
+  const setSkin = useCallback((s: SkinName) => {
+    setSkinState(s);
+    localStorage.setItem(STORAGE_KEYS.skin, s);
+  }, []);
+
   const value = useMemo<Settings>(
     () => ({
       language,
@@ -375,6 +404,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       savedColors,
       archivedColors,
       accentEffect,
+      skin,
       setLanguage,
       setSidebarPosition,
       setSidebarVisibility,
@@ -387,6 +417,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSavedColors,
       setArchivedColors,
       setAccentEffect,
+      setSkin,
     }),
     [
       language,
@@ -401,6 +432,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       savedColors,
       archivedColors,
       accentEffect,
+      skin,
       setLanguage,
       setSidebarPosition,
       setSidebarVisibility,
@@ -413,6 +445,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSavedColors,
       setArchivedColors,
       setAccentEffect,
+      setSkin,
     ]
   );
 

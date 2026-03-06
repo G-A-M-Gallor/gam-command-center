@@ -13,7 +13,9 @@ import {
   type Density,
   type BrandProfile,
   type GlowIntensity,
+  type SkinName,
 } from "@/contexts/SettingsContext";
+import { SKINS } from "@/lib/skins";
 import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
 import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
 import { getTranslations } from "@/lib/i18n";
@@ -251,6 +253,7 @@ function ThemeTab() {
     savedColors,
     archivedColors,
     accentEffect,
+    skin,
     setAccentColor,
     setFontFamily,
     setBorderRadius,
@@ -260,6 +263,7 @@ function ThemeTab() {
     setSavedColors,
     setArchivedColors,
     setAccentEffect,
+    setSkin,
   } = useSettings();
   const t = getTranslations(language);
   const [pickerColor, setPickerColor] = useState(customAccentHex || "#9333ea");
@@ -336,6 +340,50 @@ function ThemeTab() {
 
   return (
     <div className="max-w-2xl space-y-4">
+      {/* 0. Skin Selector */}
+      <Section label={language === "he" ? "עיצוב כללי" : "Skin"}>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {SKINS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSkin(s.id)}
+              className={`flex items-center gap-3 rounded-lg border p-3 text-right transition-all ${
+                skin === s.id
+                  ? "border-[var(--cc-accent-500)] bg-[var(--cc-accent-600-20)] ring-1 ring-[var(--cc-accent-500-30)]"
+                  : "border-slate-700 bg-slate-800/40 hover:border-slate-500 hover:bg-slate-700/50"
+              }`}
+            >
+              <div className="flex shrink-0 gap-1">
+                {s.preview.map((c, i) => (
+                  <div
+                    key={i}
+                    className="rounded-full border border-white/10"
+                    style={{
+                      width: i === 0 ? 16 : 12,
+                      height: i === 0 ? 16 : 12,
+                      backgroundColor: c,
+                      marginTop: i === 0 ? 0 : 2,
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-bold text-slate-200">
+                  {language === "he" ? s.nameHe : s.name}
+                </div>
+                <div className="truncate text-[10px] text-slate-500">
+                  {language === "he" ? s.descHe : s.desc}
+                </div>
+              </div>
+              {skin === s.id && (
+                <span className="text-xs text-[var(--cc-accent-300)]">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </Section>
+
       {/* 1. Accent Color Presets */}
       <Section label={t.settings.accentColor}>
         <div className="flex flex-wrap gap-3">

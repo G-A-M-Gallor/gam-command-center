@@ -1,0 +1,284 @@
+/* ═══════════════════════════════════════════
+   GAM Landing Page — Styles
+   CSS Custom Properties set by the component
+   per skin selection.
+   ═══════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ── Reset ── */
+.gam-landing *, .gam-landing *::before, .gam-landing *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.gam-landing {
+  font-family: 'Heebo', sans-serif;
+  color: var(--ds-text);
+  direction: rtl;
+  overflow-x: hidden;
+  background: var(--ds-bg);
+  transition: background .4s, color .4s;
+  min-height: 100vh;
+}
+
+/* ── Scrollbar ── */
+.gam-landing ::-webkit-scrollbar { width: 5px; }
+.gam-landing ::-webkit-scrollbar-thumb {
+  background: var(--ds-border);
+  border-radius: 3px;
+}
+
+/* ── Keyframes ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+@keyframes glow {
+  0%, 100% { opacity: .4; }
+  50%      { opacity: 1; }
+}
+@keyframes orb {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-22px) scale(1.04); }
+}
+@keyframes shimmer {
+  from { background-position: 200% center; }
+  to   { background-position: -200% center; }
+}
+@keyframes ring {
+  0%   { box-shadow: 0 0 0 0 var(--ds-accent-glow); }
+  70%  { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@keyframes popUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: .6; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10%      { transform: translate(-5%, -10%); }
+  30%      { transform: translate(3%, -15%); }
+  50%      { transform: translate(12%, 9%); }
+  70%      { transform: translate(9%, 4%); }
+  90%      { transform: translate(-1%, 7%); }
+}
+
+/* ── Orbs (floating blurred circles) ── */
+.gam-landing .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  animation: orb ease-in-out infinite;
+}
+
+/* ── Noise Texture Overlay ── */
+.gam-landing .noise-overlay::after {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  animation: grain 8s steps(10) infinite;
+}
+
+/* ── Hero Title ── */
+.gam-landing .hero-title {
+  font-size: clamp(34px, 6vw, 70px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -2px;
+  background: var(--ds-hero-grad);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fadeUp .8s ease both;
+}
+
+/* ── Shimmer Text ── */
+.gam-landing .shimmer-text {
+  background: linear-gradient(90deg, var(--ds-accent), var(--ds-blue), var(--ds-accent), var(--ds-blue));
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ── Glass Card ── */
+.gam-landing .glass-card {
+  background: var(--ds-bg-card);
+  backdrop-filter: var(--ds-blur);
+  -webkit-backdrop-filter: var(--ds-blur);
+  border: 1px solid var(--ds-card-border);
+  border-radius: var(--ds-radius);
+  position: relative;
+  overflow: hidden;
+  transition: all .3s;
+}
+.gam-landing .glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ds-glass-line), transparent);
+}
+
+/* ── Service Card ── */
+.gam-landing .service-card {
+  border-radius: var(--ds-radius);
+  padding: 22px;
+  cursor: pointer;
+  transition: all .3s cubic-bezier(.4, 0, .2, 1);
+  border: 1px solid var(--ds-card-border);
+  background: var(--ds-card-bg);
+  position: relative;
+  overflow: hidden;
+}
+.gam-landing .service-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 20px 50px var(--ds-card-shadow-hover), 0 0 30px var(--ds-accent-glow);
+}
+
+/* ── Testimonial Card ── */
+.gam-landing .testimonial-card {
+  border-radius: var(--ds-radius);
+  padding: 20px;
+  background: var(--ds-card-bg);
+  border: 1px solid var(--ds-card-border);
+  transition: all .3s;
+}
+.gam-landing .testimonial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px var(--ds-testimonial-shadow);
+}
+
+/* ── Nav Link ── */
+.gam-landing .nav-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all .15s;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+}
+.gam-landing .nav-link:hover {
+  color: var(--ds-text);
+  background: var(--ds-nav-hover-bg);
+}
+
+/* ── CTA Button ── */
+.gam-landing .cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ds-accent);
+  border: none;
+  border-radius: var(--ds-radius-btn);
+  padding: 13px 26px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: 'Heebo', sans-serif;
+  box-shadow: 0 0 0 0 var(--ds-accent-glow);
+  transition: all .2s;
+  animation: ring 2.5s infinite;
+}
+.gam-landing .cta-btn:hover {
+  transform: scale(1.04) translateY(-1px);
+  box-shadow: 0 8px 28px var(--ds-accent-glow);
+}
+
+/* ── Secondary Button ── */
+.gam-landing .secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1.5px solid var(--ds-secondary-border);
+  border-radius: var(--ds-radius-btn);
+  padding: 13px 26px;
+  color: var(--ds-text);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Heebo', sans-serif;
+  transition: all .2s;
+}
+.gam-landing .secondary-btn:hover {
+  background: var(--ds-secondary-hover-bg);
+}
+
+/* ── Input Field ── */
+.gam-landing .input-field {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-input-bg);
+  border: 1.5px solid var(--ds-input-border);
+  color: var(--ds-text);
+  font-size: 14px;
+  font-family: 'Heebo', sans-serif;
+  outline: none;
+  direction: rtl;
+  transition: all .2s;
+}
+.gam-landing .input-field:focus {
+  border-color: var(--ds-accent);
+  box-shadow: 0 0 0 3px var(--ds-accent-soft);
+}
+.gam-landing .input-field::placeholder {
+  color: var(--ds-text-muted);
+}
+.gam-landing select.input-field option {
+  background: var(--ds-select-option-bg);
+  color: var(--ds-text);
+}
+
+/* ── Stat Badge ── */
+.gam-landing .stat-badge {
+  background: var(--ds-accent-soft);
+  border: 1px solid var(--ds-accent-glow-40);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ds-accent);
+}
+
+/* ── Section ── */
+.gam-landing section {
+  position: relative;
+  overflow: hidden;
+}
+
+.gam-landing button,
+.gam-landing input,
+.gam-landing select {
+  font-family: 'Heebo', sans-serif;
+}

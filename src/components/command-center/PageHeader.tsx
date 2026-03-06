@@ -21,7 +21,8 @@ type PageKey =
   | "architecture"
   | "plan"
   | "settings"
-  | "automations";
+  | "automations"
+  | "admin";
 
 const pageRoutes: Record<PageKey, string> = {
   layers: "/dashboard/layers",
@@ -35,6 +36,7 @@ const pageRoutes: Record<PageKey, string> = {
   plan: "/dashboard/plan",
   settings: "/dashboard/settings",
   automations: "/dashboard/automations",
+  admin: "/dashboard/admin",
 };
 
 interface PageHeaderProps {

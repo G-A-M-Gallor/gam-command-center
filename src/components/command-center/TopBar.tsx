@@ -255,26 +255,36 @@ export function TopBar() {
     );
     if (!needsInit) return;
 
-    const newPositions = { ...widgetPositions };
-    let nextCol = 0;
-
-    // Find the end of already-positioned items
+    // Build occupied ranges from already-positioned items
+    const occupied: { start: number; end: number }[] = [];
     for (const item of allTopBarDefs) {
-      if (newPositions[item.id] !== undefined) {
+      if (widgetPositions[item.id] !== undefined) {
         const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
-        const end = newPositions[item.id] + size;
-        if (end > nextCol) nextCol = end;
+        occupied.push({ start: widgetPositions[item.id], end: widgetPositions[item.id] + size });
       }
     }
+    occupied.sort((a, b) => a.start - b.start);
 
-    // Place unpositioned items in the first available slot
+    // Find first gap that fits the given size
+    const findSlot = (size: number): number | null => {
+      let candidate = 0;
+      for (const range of occupied) {
+        if (candidate + size <= range.start) return candidate;
+        candidate = Math.max(candidate, range.end);
+      }
+      return candidate + size <= totalColumns ? candidate : null;
+    };
+
+    const newPositions = { ...widgetPositions };
     let changed = false;
     for (const item of allTopBarDefs) {
       if (newPositions[item.id] !== undefined) continue;
       const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
-      if (nextCol + size <= totalColumns) {
-        newPositions[item.id] = nextCol;
-        nextCol += size;
+      const slot = findSlot(size);
+      if (slot !== null) {
+        newPositions[item.id] = slot;
+        occupied.push({ start: slot, end: slot + size });
+        occupied.sort((a, b) => a.start - b.start);
         changed = true;
       }
     }
@@ -291,26 +301,44 @@ export function TopBar() {
     setWidgetPositions,
   ]);
 
-  // Clamp items that overflow after window resize
+  // Clamp items that overflow after window resize — re-layout to avoid overlaps
   useEffect(() => {
     if (!mounted || totalColumns === 0) return;
 
-    let needsUpdate = false;
-    const updated = { ...widgetPositions };
-
-    for (const item of allTopBarDefs) {
-      const pos = updated[item.id];
-      if (pos === undefined) continue;
+    // Check if any item overflows
+    const hasOverflow = allTopBarDefs.some((item) => {
+      const pos = widgetPositions[item.id];
+      if (pos === undefined) return false;
       const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
-      if (pos + size > totalColumns) {
-        updated[item.id] = Math.max(0, totalColumns - size);
-        needsUpdate = true;
+      return pos + size > totalColumns;
+    });
+
+    if (!hasOverflow) return;
+
+    // Sort items by their current position to preserve relative order
+    const positioned = allTopBarDefs
+      .filter((item) => widgetPositions[item.id] !== undefined)
+      .sort((a, b) => (widgetPositions[a.id] ?? 0) - (widgetPositions[b.id] ?? 0));
+
+    const updated: Record<string, number> = { ...widgetPositions };
+    let nextCol = 0;
+
+    for (const item of positioned) {
+      const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
+      // Place at the max of its current position or the next available slot
+      const idealCol = Math.max(widgetPositions[item.id] ?? 0, nextCol);
+      if (idealCol + size <= totalColumns) {
+        updated[item.id] = idealCol;
+        nextCol = idealCol + size;
+      } else if (nextCol + size <= totalColumns) {
+        // Compact: place at next available slot
+        updated[item.id] = nextCol;
+        nextCol += size;
       }
+      // else: doesn't fit — keep original position, render will hide it via bounds check
     }
 
-    if (needsUpdate) {
-      setWidgetPositions(updated);
-    }
+    setWidgetPositions(updated);
   }, [totalColumns, mounted, allTopBarDefs, widgetPositions, widgetSizes, setWidgetPositions]);
 
   // DnD sensors
@@ -463,10 +491,12 @@ export function TopBar() {
                 />
               )}
 
-              {/* Widgets */}
+              {/* Widgets — hide any that overflow the available columns */}
               {visibleWidgets.map((widget) => {
                 const col = widgetPositions[widget.id];
                 if (col === undefined) return null;
+                const wSize = widgetSizes[widget.id] ?? widget.defaultSize;
+                if (col + wSize > totalColumns) return null;
                 return (
                   <WidgetWrapper
                     key={widget.id}
@@ -483,10 +513,12 @@ export function TopBar() {
                 );
               })}
 
-              {/* Folders */}
+              {/* Folders — hide any that overflow the available columns */}
               {visibleFolders.map((folder) => {
                 const col = widgetPositions[folder.id];
                 if (col === undefined) return null;
+                const fSize = widgetSizes[folder.id] ?? folder.defaultSize;
+                if (col + fSize > totalColumns) return null;
                 return (
                   <FolderWrapper
                     key={folder.id}
