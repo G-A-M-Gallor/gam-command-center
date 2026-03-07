@@ -160,6 +160,11 @@ export const translations = {
       restoreColor: "שחזר",
       deletePermanently: "מחק לצמיתות",
     },
+    sidebar: {
+      groupCore: "ליבה",
+      groupTools: "כלים",
+      groupSystem: "מערכת",
+    },
     brand: {
       brandProfile: "פרופיל מותג",
       companyName: "שם החברה",
@@ -1119,6 +1124,11 @@ export const translations = {
       noArchivedColors: "No archived colors",
       restoreColor: "Restore",
       deletePermanently: "Delete Permanently",
+    },
+    sidebar: {
+      groupCore: "Core",
+      groupTools: "Tools",
+      groupSystem: "System",
     },
     brand: {
       brandProfile: "Brand Profile",

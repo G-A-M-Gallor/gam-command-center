@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -26,38 +26,58 @@ import { getTranslations } from "@/lib/i18n";
 const FULL_WIDTH = 240;
 const STRIP_WIDTH = 48;
 
-const tabRoutes = [
-  { href: "/dashboard/layers", key: "layers" as const, icon: Layers },
-  { href: "/dashboard/editor", key: "editor" as const, icon: FileEdit },
-  { href: "/dashboard/story-map", key: "storyMap" as const, icon: Map },
+// ─── Grouped Navigation ─────────────────────────────────
+
+interface NavItem {
+  href: string;
+  key: string;
+  icon: React.ElementType;
+}
+
+interface NavGroup {
+  id: string;
+  labelKey: "groupCore" | "groupTools" | "groupSystem";
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
   {
-    href: "/dashboard/functional-map",
-    key: "functionalMap" as const,
-    icon: Grid3X3,
+    id: "core",
+    labelKey: "groupCore",
+    items: [
+      { href: "/dashboard/layers", key: "layers", icon: Layers },
+      { href: "/dashboard/editor", key: "editor", icon: FileEdit },
+      { href: "/dashboard/story-map", key: "storyMap", icon: Map },
+      { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot },
+    ],
   },
-  { href: "/dashboard/ai-hub", key: "aiHub" as const, icon: Bot },
   {
-    href: "/dashboard/design-system",
-    key: "designSystem" as const,
-    icon: Palette,
+    id: "tools",
+    labelKey: "groupTools",
+    items: [
+      { href: "/dashboard/functional-map", key: "functionalMap", icon: Grid3X3 },
+      { href: "/dashboard/design-system", key: "designSystem", icon: Palette },
+      { href: "/dashboard/architecture", key: "architecture", icon: Network },
+      { href: "/dashboard/plan", key: "plan", icon: Calendar },
+    ],
   },
-  { href: "/dashboard/formily", key: "formily" as const, icon: FormInput },
   {
-    href: "/dashboard/architecture",
-    key: "architecture" as const,
-    icon: Network,
+    id: "system",
+    labelKey: "groupSystem",
+    items: [
+      { href: "/dashboard/automations", key: "automations", icon: Zap },
+      { href: "/dashboard/formily", key: "formily", icon: FormInput },
+      { href: "/dashboard/admin", key: "admin", icon: Shield },
+      { href: "/dashboard/settings", key: "settings", icon: Settings },
+    ],
   },
-  { href: "/dashboard/plan", key: "plan" as const, icon: Calendar },
-  { href: "/dashboard/automations", key: "automations" as const, icon: Zap },
-  { href: "/dashboard/admin", key: "admin" as const, icon: Shield },
-] as const;
+];
+
+// ─── Component ───────────────────────────────────────────
 
 interface SidebarProps {
-  /** When true, sidebar floats over content and can be closed */
   isFloating?: boolean;
-  /** When floating, whether the sidebar is currently open */
   isOpen?: boolean;
-  /** When floating and open, called to close (e.g. backdrop click) */
   onClose?: () => void;
 }
 
@@ -71,12 +91,13 @@ export function Sidebar({
   const { user, signOut } = useAuth();
   const t = getTranslations(language);
   const [hovered, setHovered] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
   const isFloat = sidebarVisibility === "float";
   const isCollapsed = isFloat && !hovered;
   const onRight = sidebarPosition === "right";
 
-  // Hidden mode: translate off-screen when closed
   const isHidden = sidebarVisibility === "hidden";
   const isTranslatedOff = isHidden && isFloating && !isOpen;
   const translateClass =
@@ -85,6 +106,28 @@ export function Sidebar({
       : isTranslatedOff && !onRight
         ? "-translate-x-full"
         : "translate-x-0";
+
+  // ── Sliding active indicator measurement ─────────────
+  useEffect(() => {
+    if (isCollapsed || !navRef.current) {
+      setIndicatorStyle(null);
+      return;
+    }
+    requestAnimationFrame(() => {
+      if (!navRef.current) return;
+      const activeEl = navRef.current.querySelector('[data-active="true"]') as HTMLElement | null;
+      if (activeEl) {
+        const navRect = navRef.current.getBoundingClientRect();
+        const elRect = activeEl.getBoundingClientRect();
+        setIndicatorStyle({
+          top: elRect.top - navRect.top + navRef.current.scrollTop,
+          height: elRect.height,
+        });
+      } else {
+        setIndicatorStyle(null);
+      }
+    });
+  }, [pathname, isCollapsed]);
 
   return (
     <aside
@@ -98,11 +141,7 @@ export function Sidebar({
       }`}
       style={{
         width: isCollapsed ? STRIP_WIDTH : FULL_WIDTH,
-        transition: isFloat
-          ? "width 300ms ease"
-          : isHidden
-            ? undefined
-            : undefined,
+        transition: isFloat ? "width 300ms ease" : undefined,
         backgroundColor: isCollapsed
           ? "rgba(15, 23, 42, 0.8)"
           : "rgb(15, 23, 42)",
@@ -112,9 +151,21 @@ export function Sidebar({
     >
       <div className="flex h-full flex-col">
         {/* Header */}
-        <header data-cc-id="sidebar.header" className="flex h-16 shrink-0 items-center border-b border-slate-700/50"
-          style={{ padding: isCollapsed ? "0" : "0 16px", justifyContent: isCollapsed ? "center" : "flex-start", gap: isCollapsed ? 0 : 8 }}
+        <header
+          data-cc-id="sidebar.header"
+          className="relative flex h-16 shrink-0 items-center border-b border-slate-700/50 overflow-hidden"
+          style={{
+            padding: isCollapsed ? "0" : "0 16px",
+            justifyContent: isCollapsed ? "center" : "flex-start",
+            gap: isCollapsed ? 0 : 8,
+          }}
         >
+          {/* Subtle gradient overlay */}
+          <div
+            className="absolute inset-0 bg-gradient-to-b from-[var(--cc-accent-500)]/[0.03] to-transparent pointer-events-none"
+            aria-hidden
+          />
+
           {(() => {
             const logoEl = brandProfile.logoDataUrl ? (
               <div data-cc-id="sidebar.header.logo" className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[var(--cc-accent-600-20)]">
@@ -137,7 +188,7 @@ export function Sidebar({
                   </button>
                 )}
                 <Link href="/" className="flex flex-1 items-center justify-end gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
-                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-right font-semibold text-slate-100">{nameText}</span>
+                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-right text-[15px] font-semibold text-slate-100">{nameText}</span>
                   {logoEl}
                 </Link>
               </>
@@ -147,7 +198,7 @@ export function Sidebar({
               <>
                 <Link href="/" className="flex flex-1 items-center gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
                   {logoEl}
-                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-left font-semibold text-slate-100">{nameText}</span>
+                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-left text-[15px] font-semibold text-slate-100">{nameText}</span>
                 </Link>
                 {isFloating && !isFloat && onClose && (
                   <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
@@ -159,147 +210,158 @@ export function Sidebar({
           })()}
         </header>
 
-        {/* Nav */}
-        <nav data-cc-id="sidebar.nav" className="min-h-0 flex-1 space-y-0.5 overflow-y-auto p-2">
-          {tabRoutes.map(({ href, key, icon: Icon }) => {
-            const isActive =
-              pathname === href || pathname.startsWith(href + "/");
-            const label = t.tabs[key];
+        {/* Nav with grouped items */}
+        <nav
+          ref={navRef}
+          data-cc-id="sidebar.nav"
+          className="relative min-h-0 flex-1 overflow-y-auto p-2"
+        >
+          {/* Sliding active indicator */}
+          {!isCollapsed && indicatorStyle && (
+            <div
+              className="absolute inset-x-2 rounded-lg bg-[var(--cc-accent-600-20)] border border-[var(--cc-accent-500)]/20 pointer-events-none transition-all duration-300 ease-out"
+              style={{
+                top: indicatorStyle.top,
+                height: indicatorStyle.height,
+              }}
+            />
+          )}
 
-            if (isCollapsed) {
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
-                    isActive
-                      ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                  }`}
-                  title={label}
-                >
-                  {isActive && (
-                    <span
-                      className={`absolute inset-y-0 w-0.5 bg-[var(--cc-accent-500)] ${
-                        onRight ? "right-0 rounded-r" : "left-0 rounded-l"
+          {NAV_GROUPS.map((group, gi) => (
+            <div key={group.id}>
+              {/* Group label / divider */}
+              {gi > 0 && isCollapsed && (
+                <div className="mx-2 my-2 border-t border-slate-700/30" />
+              )}
+              {!isCollapsed && (
+                <div className={gi === 0 ? "pt-1 pb-1 px-3" : "pt-4 pb-1 px-3"}>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
+                    {(t.sidebar as Record<string, string>)[group.labelKey]}
+                  </span>
+                </div>
+              )}
+
+              {/* Items */}
+              <div className="space-y-0.5">
+                {group.items.map(({ href, key, icon: Icon }) => {
+                  const isActive = pathname === href || pathname.startsWith(href + "/");
+                  const label = (t.tabs as Record<string, string>)[key];
+
+                  // ── Collapsed item ──
+                  if (isCollapsed) {
+                    return (
+                      <Link
+                        key={href}
+                        href={href}
+                        data-active={isActive || undefined}
+                        className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
+                          isActive
+                            ? "text-[var(--cc-accent-300)]"
+                            : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                        }`}
+                      >
+                        {isActive && (
+                          <span
+                            className={`absolute top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-[var(--cc-accent-500)] ${
+                              onRight ? "right-0" : "left-0"
+                            }`}
+                            aria-hidden
+                          />
+                        )}
+                        <Icon className={`h-4 w-4 shrink-0 transition-transform duration-150 ${
+                          !isActive ? "group-hover:scale-110" : ""
+                        }`} />
+                        {/* Tooltip */}
+                        <span
+                          className={`absolute ${
+                            onRight ? "right-full mr-2" : "left-full ml-2"
+                          } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                        >
+                          {label}
+                        </span>
+                      </Link>
+                    );
+                  }
+
+                  // ── Expanded item ──
+                  const content = onRight ? (
+                    <>
+                      <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-right truncate">{label}</span>
+                      <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                        !isActive ? "group-hover:scale-105" : ""
+                      }`} />
+                    </>
+                  ) : (
+                    <>
+                      <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                        !isActive ? "group-hover:scale-105" : ""
+                      }`} />
+                      <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-left truncate">{label}</span>
+                    </>
+                  );
+
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      data-cc-id="sidebar.nav.link"
+                      data-active={isActive || undefined}
+                      className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
+                        isActive
+                          ? "text-[var(--cc-accent-300)] font-medium"
+                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
                       }`}
-                      aria-hidden
-                    />
-                  )}
-                  <Icon className="h-4 w-4 shrink-0" />
-                </Link>
-              );
-            }
-
-            const linkClass = `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              isActive
-                ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-            }`;
-
-            if (onRight) {
-              return (
-                <Link key={href} href={href} data-cc-id="sidebar.nav.link" className={linkClass}>
-                  {isActive && (
-                    <span className="absolute inset-y-0 right-0 w-0.5 rounded-r bg-[var(--cc-accent-500)]" aria-hidden />
-                  )}
-                  <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-right">{label}</span>
-                  <Icon className="h-4 w-4 shrink-0" />
-                </Link>
-              );
-            }
-
-            return (
-              <Link key={href} href={href} data-cc-id="sidebar.nav.link" className={linkClass}>
-                {isActive && (
-                  <span className="absolute inset-y-0 left-0 w-0.5 rounded-l bg-[var(--cc-accent-500)]" aria-hidden />
-                )}
-                <Icon className="h-4 w-4 shrink-0" />
-                <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-left">{label}</span>
-              </Link>
-            );
-          })}
+                    >
+                      {content}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
-        {/* Settings link */}
-        <div className="shrink-0 border-t border-slate-700/50 p-2">
-          {(() => {
-            const isActive = pathname === "/dashboard/settings";
-            const settingsLabel = t.tabs.settings;
-
-            if (isCollapsed) {
-              return (
-                <Link
-                  href="/dashboard/settings"
-                  className={`relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
-                    isActive
-                      ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                  }`}
-                  title={settingsLabel}
-                >
-                  <Settings className="h-4 w-4 shrink-0" />
-                </Link>
-              );
-            }
-
-            const linkClass = `relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-              isActive
-                ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-            }`;
-
-            if (onRight) {
-              return (
-                <Link href="/dashboard/settings" className={linkClass}>
-                  <span data-cc-text="true" className="flex-1 text-right">{settingsLabel}</span>
-                  <Settings className="h-4 w-4 shrink-0" />
-                </Link>
-              );
-            }
-
-            return (
-              <Link href="/dashboard/settings" className={linkClass}>
-                <Settings className="h-4 w-4 shrink-0" />
-                <span data-cc-text="true" className="flex-1 text-left">{settingsLabel}</span>
-              </Link>
-            );
-          })()}
-        </div>
-
-        {/* Sign out */}
+        {/* User section */}
         {user && (
           <div className="shrink-0 border-t border-slate-700/50 p-2">
             {isCollapsed ? (
               <button
                 type="button"
                 onClick={signOut}
-                className="flex w-full items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                className="group relative flex w-full items-center justify-center rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400"
                 title={t.auth.signOut}
               >
                 <LogOut className="h-4 w-4" />
+                <span
+                  className={`absolute ${
+                    onRight ? "right-full mr-2" : "left-full ml-2"
+                  } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                >
+                  {t.auth.signOut}
+                </span>
               </button>
             ) : (
-              <div className="space-y-1">
-                <p className={`truncate px-3 text-[11px] text-slate-500 ${onRight ? "text-right" : "text-left"}`}>
+              <div className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${onRight ? "flex-row-reverse" : ""}`}>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-400)] text-xs font-medium">
+                  {(user.email?.[0] || "?").toUpperCase()}
+                </div>
+                <span className={`flex-1 truncate text-[11px] text-slate-500 ${onRight ? "text-right" : "text-left"}`}>
                   {user.email}
-                </p>
+                </span>
                 <button
                   type="button"
                   onClick={signOut}
-                  className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition-colors hover:bg-red-500/10 hover:text-red-400 ${onRight ? "flex-row-reverse" : ""}`}
+                  className="rounded p-1 text-slate-600 transition-colors hover:text-red-400 hover:bg-red-500/10"
+                  title={t.auth.signOut}
                 >
-                  <LogOut className="h-4 w-4 shrink-0" />
-                  <span className={`flex-1 ${onRight ? "text-right" : "text-left"}`}>
-                    {t.auth.signOut}
-                  </span>
+                  <LogOut className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}
           </div>
         )}
 
-        {/* Footer — version label */}
+        {/* Footer */}
         {!isCollapsed && (
           <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-3 py-2">
             <span data-cc-id="sidebar.footer.tagline" data-cc-text="true" className="text-[10px] text-slate-600">{brandProfile.tagline || "GAM v1.0"}</span>
