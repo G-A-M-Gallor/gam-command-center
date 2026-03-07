@@ -53,6 +53,8 @@ export function FieldConfigModal({
   );
   const [saving, setSaving] = useState(false);
 
+  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose, enabled: !!typeDef });
+
   const update = useCallback((key: string, value: unknown) => {
     setConfig((prev) => ({ ...prev, [key]: value } as FieldConfig));
   }, []);
@@ -122,8 +124,6 @@ export function FieldConfigModal({
     setSaving(false);
     onClose();
   };
-
-  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
 
   if (!typeDef) return null;
   const Icon = typeDef.icon;

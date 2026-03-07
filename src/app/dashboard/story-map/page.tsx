@@ -125,6 +125,8 @@ function StoryMapContent() {
   const { language } = useSettings();
   const { setCurrentScope } = useShortcuts();
   const t = getTranslations(language);
+  // Memoize storyMap translations so StoryBoard memo works effectively
+  const storyMapT = useMemo(() => t.storyMap, [language]);
   const isRtl = language === 'he';
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -676,7 +678,7 @@ function StoryMapContent() {
             onDeleteCard={handleDeleteCard}
             onDeleteColumn={handleDeleteColumn}
             onBatchUpdate={handleBatchUpdate}
-            t={t.storyMap}
+            t={storyMapT}
           />
         </div>
       </div>

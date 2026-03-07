@@ -43,9 +43,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
       data-cc-id="card.project"
       role="button"
       tabIndex={0}
-      onClick={() => router.push(`/dashboard/layers/${project.id}`)}
-      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(`/dashboard/layers/${project.id}`); }}
-      className="cursor-pointer rounded-lg border border-slate-700/50 bg-slate-800/50 p-4 transition-colors hover:border-slate-600 hover:bg-slate-800/80"
+      onClick={() => router.push(`/dashboard/layers`)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); router.push(`/dashboard/layers`); } }}
+      className="cursor-pointer rounded-lg border border-slate-700/50 bg-slate-800/50 p-4 transition-colors hover:border-slate-600 hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-purple-500/50"
     >
       <div
         className={`flex items-start justify-between gap-3 ${

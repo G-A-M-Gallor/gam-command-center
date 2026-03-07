@@ -403,9 +403,6 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         isMobile ? "items-stretch" : "items-start justify-center pt-[15vh]"
       }`}
       onClick={onClose}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") onClose();
-      }}
     >
       {/* Backdrop */}
       {!isMobile && <div className="absolute inset-0 bg-black/40" />}
