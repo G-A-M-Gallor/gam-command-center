@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import {
   getFieldType,
   defaultConfigs,
@@ -122,11 +123,13 @@ export function FieldConfigModal({
     onClose();
   };
 
+  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
+
   if (!typeDef) return null;
   const Icon = typeDef.icon;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-start justify-center pt-20">
+    <div className="fixed inset-0 z-[70] flex items-start justify-center pt-20" role="dialog" aria-modal="true" aria-label={typeDef.label[language]}>
       {/* Backdrop */}
       <button
         onClick={onClose}
@@ -136,6 +139,7 @@ export function FieldConfigModal({
 
       {/* Modal */}
       <div
+        ref={trapRef}
         className="relative z-10 w-full max-w-md rounded-xl border border-slate-700 bg-slate-800 shadow-2xl"
         dir="auto"
       >

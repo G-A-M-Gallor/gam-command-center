@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   X,
   Search,
@@ -29,6 +29,7 @@ import { FolderCreator } from "./FolderCreator";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import type { Language } from "@/contexts/SettingsContext";
 
 // ─── Category config ────────────────────────────────
@@ -760,6 +761,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
   const { language } = useSettings();
   const { widgetPlacements, setWidgetPlacement } = useWidgets();
   const t = getTranslations(language);
+  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
 
   const [activeTab, setActiveTab] = useState<StoreTab>("installed");
   const [searchQuery, setSearchQuery] = useState("");
@@ -802,7 +804,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-10">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-10" role="dialog" aria-modal="true" aria-label={t.widgets.store}>
       {/* Backdrop */}
       <button
         type="button"
@@ -812,6 +814,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
       />
       {/* Modal */}
       <div
+        ref={trapRef}
         className="relative z-10 flex w-[min(900px,calc(100vw-2rem))] max-h-[calc(100vh-5rem)] flex-col border border-slate-700 bg-slate-800 shadow-2xl"
         style={{ borderRadius: "var(--cc-radius-lg)" }}
       >

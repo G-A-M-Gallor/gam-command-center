@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X, Trash2, Plus } from "lucide-react";
+import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { widgetRegistry, type WidgetSize } from "./WidgetRegistry";
@@ -30,6 +31,8 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
   const ft = (t as unknown as Record<string, Record<string, string>>).folders;
+
+  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
 
   const folder = folders.find((f) => f.id === folderId);
   if (!folder) return null;
@@ -64,7 +67,7 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-16">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-16" role="dialog" aria-modal="true" aria-label={ft?.editFolder}>
       <button
         type="button"
         onClick={onClose}
@@ -72,6 +75,7 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
         aria-label="Close"
       />
       <div
+        ref={trapRef}
         className="relative z-10 w-[420px] border border-slate-700 bg-slate-800 shadow-xl"
         style={{ borderRadius: "var(--cc-radius-lg)" }}
       >

@@ -124,7 +124,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-label={wt.weeklyPlanner || "Weekly Planner"}>
       {/* Backdrop */}
       <button
         type="button"

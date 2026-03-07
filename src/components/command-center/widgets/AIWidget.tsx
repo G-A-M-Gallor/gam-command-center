@@ -553,8 +553,19 @@ function SidePanelContainer({
     }
   }, [panelWidth]);
 
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.stopPropagation(); onClose(); }
+    };
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
+  }, [onClose]);
+
   return (
     <div
+      role="dialog"
+      aria-label="AI Assistant"
       className={`fixed z-[55] flex flex-col bg-slate-800 shadow-2xl ${
         isMobile
           ? "inset-0 border-0"
@@ -640,9 +651,20 @@ function DropdownContainer({
     };
   }, [onClose]);
 
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.stopPropagation(); onClose(); }
+    };
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
+  }, [onClose]);
+
   return (
     <div
       ref={panelRef}
+      role="dialog"
+      aria-label="AI Assistant"
       className="fixed z-[60] flex flex-col rounded-lg border border-slate-700 bg-slate-800 shadow-xl"
       style={{
         top: TOP_BAR_H + 4,
@@ -747,8 +769,19 @@ function FloatingContainer({
     [pos]
   );
 
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.stopPropagation(); onClose(); }
+    };
+    window.addEventListener("keydown", handler, true);
+    return () => window.removeEventListener("keydown", handler, true);
+  }, [onClose]);
+
   return (
     <div
+      role="dialog"
+      aria-label="AI Assistant"
       className="fixed z-[60] flex flex-col rounded-xl border border-slate-700 bg-slate-800 shadow-2xl"
       style={{
         left: pos.x,

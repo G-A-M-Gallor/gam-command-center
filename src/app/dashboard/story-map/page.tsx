@@ -617,8 +617,11 @@ function StoryMapContent() {
           </select>
 
           {isDemo && (
-            <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400">
-              {t.storyMap.demoMode}
+            <span
+              className="cursor-help rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400"
+              title={t.storyMap.demoModeHint}
+            >
+              ⚠️ {t.storyMap.demoMode}
             </span>
           )}
 

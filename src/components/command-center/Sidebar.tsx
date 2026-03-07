@@ -185,7 +185,7 @@ export function Sidebar({
             );
             const nameText = brandProfile.companyName || t.appName;
 
-            if (isCollapsed) return <Link href="/" title="Workspace Hub">{logoEl}</Link>;
+            if (isCollapsed) return <Link href="/" title="Workspace Hub" aria-label="Workspace Hub">{logoEl}</Link>;
 
             if (onRight) return (
               <>
@@ -262,6 +262,7 @@ export function Sidebar({
                         href={href}
                         onClick={shouldCloseOnNav ? onClose : undefined}
                         data-active={isActive || undefined}
+                        aria-label={label}
                         className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
                           isActive
                             ? "text-[var(--cc-accent-300)]"

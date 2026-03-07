@@ -101,11 +101,13 @@ export function StoryMapFilterBar({
       </div>
 
       {/* Color dots */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1" role="group" aria-label="Color filter">
         {COLORS.map((c) => (
           <button
             key={c.id}
             onClick={() => toggleColor(c.id)}
+            aria-label={`Filter by ${c.id}`}
+            aria-pressed={colorFilter.has(c.id)}
             className={`h-4 w-4 rounded-full transition-all ${c.dot} ${
               colorFilter.has(c.id)
                 ? 'ring-2 ring-white/40 scale-110'

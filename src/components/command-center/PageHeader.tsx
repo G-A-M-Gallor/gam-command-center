@@ -224,6 +224,7 @@ export function PageHeader({ pageKey, children }: PageHeaderProps) {
                 : "text-slate-600 hover:text-slate-400"
             }`}
             title={pinLabel}
+            aria-label={pinLabel}
           >
             <Pin
               className="h-4 w-4"

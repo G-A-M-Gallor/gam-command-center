@@ -282,6 +282,8 @@ export default function PlanPage() {
                       <button
                         onClick={() => setExpandedPhase(isExpanded ? null : phase.phase)}
                         className="text-slate-500 hover:text-slate-300 transition-colors"
+                        aria-label={isExpanded ? "Collapse" : "Expand"}
+                        aria-expanded={isExpanded}
                       >
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </button>

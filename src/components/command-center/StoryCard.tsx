@@ -175,6 +175,7 @@ function DiagramModal({
             type="button"
             onClick={onCancel}
             className="text-slate-500 hover:text-slate-300"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -295,6 +296,7 @@ export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
           onClick={() => setShowColor((v) => !v)}
           className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-slate-200"
           title={t.colorPicker}
+          aria-label={t.colorPicker}
         >
           <div className={`h-3 w-3 rounded-full ${colorClasses?.dot ?? 'bg-slate-500'}`} />
         </button>
@@ -304,6 +306,7 @@ export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
           onClick={() => onDelete(card.id)}
           className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-red-400"
           title={t.deleteCard}
+          aria-label={t.deleteCard}
         >
           <Trash2 className="h-3 w-3" />
         </button>
@@ -311,16 +314,19 @@ export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
 
       {/* Color picker dropdown */}
       {showColor && (
-        <div className="mt-1.5 flex flex-wrap gap-1">
+        <div className="mt-1.5 flex flex-wrap gap-1" role="listbox" aria-label={t.colorPicker}>
           {/* No color option */}
           <button
             type="button"
+            role="option"
+            aria-selected={!card.color}
             onClick={() => {
               onUpdate(card.id, { color: null });
               setShowColor(false);
             }}
             className={`h-4 w-4 rounded-full border border-slate-500 ${!card.color ? 'ring-2 ring-purple-400' : ''}`}
             title={t.noColor}
+            aria-label={t.noColor}
           >
             <X className="h-3 w-3 text-slate-500 mx-auto" />
           </button>
@@ -328,11 +334,14 @@ export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
             <button
               key={c.id}
               type="button"
+              role="option"
+              aria-selected={card.color === c.id}
               onClick={() => {
                 onUpdate(card.id, { color: c.id });
                 setShowColor(false);
               }}
               className={`h-4 w-4 rounded-full ${c.dot} ${card.color === c.id ? 'ring-2 ring-purple-400' : ''}`}
+              aria-label={c.id}
             />
           ))}
         </div>
@@ -411,6 +420,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
         <button
           type="button"
           className="shrink-0 cursor-grab text-slate-600 hover:text-slate-400 active:cursor-grabbing"
+          aria-label="Drag to reorder"
           {...attributes}
           {...listeners}
         >
@@ -422,6 +432,8 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
           type="button"
           onClick={onToggle}
           className="shrink-0 text-slate-500 transition-colors hover:text-slate-300"
+          aria-label={expanded ? "Collapse" : "Expand"}
+          aria-expanded={expanded}
         >
           {expanded ? (
             <ChevronDown className="h-3.5 w-3.5" />
@@ -482,6 +494,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
           onClick={() => setShowColor((v) => !v)}
           className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-slate-200"
           title={t.colorPicker}
+          aria-label={t.colorPicker}
         >
           <div className={`h-3 w-3 rounded-full ${colorClasses?.dot ?? 'bg-slate-500'}`} />
         </button>
@@ -490,6 +503,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
           onClick={() => onDelete(card.id)}
           className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-red-400"
           title={t.deleteCard}
+          aria-label={t.deleteCard}
         >
           <Trash2 className="h-3 w-3" />
         </button>
@@ -497,14 +511,17 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 
       {/* Estimation picker */}
       {showEstimation && (
-        <div className="mt-1 flex flex-wrap items-center gap-1 ps-6">
+        <div className="mt-1 flex flex-wrap items-center gap-1 ps-6" role="listbox" aria-label={t.estimation}>
           <button
             type="button"
+            role="option"
+            aria-selected={!card.estimation}
             onClick={() => {
               onUpdate(card.id, { estimation: null });
               setShowEstimation(false);
             }}
             className={`rounded px-1.5 py-0.5 text-[10px] ${!card.estimation ? 'bg-slate-600 text-slate-200' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+            aria-label="Clear estimation"
           >
             <X className="inline h-2.5 w-2.5" />
           </button>
@@ -530,15 +547,18 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 
       {/* Color picker */}
       {showColor && (
-        <div className="mt-1 flex flex-wrap gap-1 ps-6">
+        <div className="mt-1 flex flex-wrap gap-1 ps-6" role="listbox" aria-label={t.colorPicker}>
           <button
             type="button"
+            role="option"
+            aria-selected={!card.color}
             onClick={() => {
               onUpdate(card.id, { color: null });
               setShowColor(false);
             }}
             className={`h-4 w-4 rounded-full border border-slate-500 ${!card.color ? 'ring-2 ring-purple-400' : ''}`}
             title={t.noColor}
+            aria-label={t.noColor}
           >
             <X className="h-3 w-3 text-slate-500 mx-auto" />
           </button>
@@ -546,11 +566,14 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
             <button
               key={c.id}
               type="button"
+              role="option"
+              aria-selected={card.color === c.id}
               onClick={() => {
                 onUpdate(card.id, { color: c.id });
                 setShowColor(false);
               }}
               className={`h-4 w-4 rounded-full ${c.dot} ${card.color === c.id ? 'ring-2 ring-purple-400' : ''}`}
+              aria-label={c.id}
             />
           ))}
         </div>
@@ -667,6 +690,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
           <button
             type="button"
             className="mt-0.5 shrink-0 cursor-grab text-slate-600 hover:text-slate-400 active:cursor-grabbing"
+            aria-label="Drag to reorder"
             {...attributes}
             {...listeners}
           >
@@ -750,6 +774,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
                           ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
                           : 'border-slate-600 text-transparent hover:border-slate-500'
                       }`}
+                      aria-label={sub.done ? "Mark incomplete" : "Mark complete"}
                     >
                       <Check className="h-2.5 w-2.5" />
                     </button>
@@ -760,6 +785,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
                       type="button"
                       onClick={() => deleteSub(sub.id)}
                       className="ms-auto text-transparent group-hover/sub:text-slate-500 hover:!text-red-400"
+                      aria-label="Delete sub-story"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -780,6 +806,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
                     type="button"
                     onClick={addSub}
                     className="text-slate-500 hover:text-slate-300"
+                    aria-label={t.addSub}
                   >
                     <Plus className="h-3 w-3" />
                   </button>
@@ -832,6 +859,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
             onClick={() => setShowColor((v) => !v)}
             className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-slate-200"
             title={t.colorPicker}
+            aria-label={t.colorPicker}
           >
             <div className={`h-3 w-3 rounded-full ${colorClasses?.dot ?? 'bg-slate-500'}`} />
           </button>
@@ -842,6 +870,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
             }}
             className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-slate-200"
             title={t.addSub}
+            aria-label={t.addSub}
           >
             <Plus className="h-3 w-3" />
           </button>
@@ -853,6 +882,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
               hasNotes ? 'text-amber-400' : 'text-slate-400'
             }`}
             title={showNotes ? t.notes : t.addNote}
+            aria-label={showNotes ? t.notes : t.addNote}
           >
             <StickyNote className="h-3 w-3" />
           </button>
@@ -864,6 +894,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
               hasDiagram ? 'text-purple-400' : 'text-slate-400'
             }`}
             title={t.editDiagram}
+            aria-label={t.editDiagram}
           >
             <GitBranch className="h-3 w-3" />
           </button>
@@ -872,6 +903,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
             onClick={() => onDelete(card.id)}
             className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-red-400"
             title={t.deleteCard}
+            aria-label={t.deleteCard}
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -879,15 +911,18 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
 
         {/* Color picker */}
         {showColor && (
-          <div className="mt-1.5 flex flex-wrap gap-1 px-5">
+          <div className="mt-1.5 flex flex-wrap gap-1 px-5" role="listbox" aria-label={t.colorPicker}>
             <button
               type="button"
+              role="option"
+              aria-selected={!card.color}
               onClick={() => {
                 onUpdate(card.id, { color: null });
                 setShowColor(false);
               }}
               className={`h-4 w-4 rounded-full border border-slate-500 ${!card.color ? 'ring-2 ring-purple-400' : ''}`}
               title={t.noColor}
+              aria-label={t.noColor}
             >
               <X className="h-3 w-3 text-slate-500 mx-auto" />
             </button>
@@ -895,11 +930,14 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
               <button
                 key={c.id}
                 type="button"
+                role="option"
+                aria-selected={card.color === c.id}
                 onClick={() => {
                   onUpdate(card.id, { color: c.id });
                   setShowColor(false);
                 }}
                 className={`h-4 w-4 rounded-full ${c.dot} ${card.color === c.id ? 'ring-2 ring-purple-400' : ''}`}
+                aria-label={c.id}
               />
             ))}
           </div>
@@ -907,14 +945,17 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
 
         {/* Estimation picker */}
         {showEstimation && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-1 px-5">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1 px-5" role="listbox" aria-label={t.estimation}>
             <button
               type="button"
+              role="option"
+              aria-selected={!card.estimation}
               onClick={() => {
                 onUpdate(card.id, { estimation: null });
                 setShowEstimation(false);
               }}
               className={`rounded px-1.5 py-0.5 text-[10px] ${!card.estimation ? 'bg-slate-600 text-slate-200' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+              aria-label="Clear estimation"
             >
               <X className="inline h-2.5 w-2.5" />
             </button>

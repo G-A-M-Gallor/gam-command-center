@@ -396,6 +396,9 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Search"
       className={`fixed inset-0 z-[60] flex ${
         isMobile ? "items-stretch" : "items-start justify-center pt-[15vh]"
       }`}

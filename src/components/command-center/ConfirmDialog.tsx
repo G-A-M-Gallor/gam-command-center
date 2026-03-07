@@ -2,6 +2,7 @@
 
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -28,14 +29,17 @@ export function ConfirmDialog({
   const t = getTranslations(language);
   const isHe = language === "he";
 
+  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onCancel, enabled: open });
+
   if (!open) return null;
 
   const confirmText = confirmLabel || t.common.confirm;
   const cancelText = cancelLabel || t.common.cancel;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={title}>
       <div
+        ref={trapRef}
         className="w-full max-w-sm rounded-xl border border-slate-700 bg-slate-800 shadow-2xl"
         dir={isHe ? "rtl" : "ltr"}
       >

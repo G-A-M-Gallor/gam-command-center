@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { X, Search, ChevronDown, ChevronUp, Trash2, Bot, Loader2 } from "lucide-react";
 import { useShortcuts, type ResolvedShortcut } from "@/contexts/ShortcutsContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -131,7 +132,7 @@ export function ShortcutsPanel({ onClose }: { onClose: () => void }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-start justify-center pt-16">
+    <div className="fixed inset-0 z-[70] flex items-start justify-center pt-16" role="dialog" aria-modal="true" aria-label={wt.keyboardShortcuts || "Keyboard Shortcuts"}>
       {/* Backdrop */}
       <button
         type="button"

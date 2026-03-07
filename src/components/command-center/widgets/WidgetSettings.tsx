@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import {
   getWidgetById,
   getEffectivePlacement,
@@ -54,6 +55,8 @@ export function WidgetSettings({
   const { language } = useSettings();
   const t = getTranslations(language);
 
+  const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
+
   const widget = getWidgetById(widgetId);
   if (!widget) return null;
 
@@ -66,7 +69,7 @@ export function WidgetSettings({
   const label = widget.label[language];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-16">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-16" role="dialog" aria-modal="true" aria-label={label}>
       <button
         type="button"
         onClick={onClose}
@@ -74,6 +77,7 @@ export function WidgetSettings({
         aria-label={t.widgets.close}
       />
       <div
+        ref={trapRef}
         className="relative z-10 flex w-80 max-h-[calc(100vh-5rem)] flex-col border border-slate-700 bg-slate-800 shadow-xl"
         style={{ borderRadius: "var(--cc-radius-lg)" }}
       >
