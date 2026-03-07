@@ -183,6 +183,7 @@ export interface MLPFeature {
   whyHe: string;
   effort: Effort;
   risk: RiskLevel;
+  status?: 'done' | 'pending';
 }
 
 export interface MLPTier {

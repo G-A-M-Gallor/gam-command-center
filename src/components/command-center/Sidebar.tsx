@@ -22,8 +22,10 @@ import {
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
+import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 
 const FULL_WIDTH = 240;
+const MOBILE_WIDTH = 280;
 const STRIP_WIDTH = 48;
 
 // ─── Grouped Navigation ─────────────────────────────────
@@ -90,6 +92,8 @@ export function Sidebar({
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
   const { user, signOut } = useAuth();
   const t = getTranslations(language);
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === "mobile";
   const [hovered, setHovered] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
@@ -97,8 +101,10 @@ export function Sidebar({
   const isFloat = sidebarVisibility === "float";
   const isCollapsed = isFloat && !hovered;
   const onRight = sidebarPosition === "right";
+  const expandedWidth = isMobile ? MOBILE_WIDTH : FULL_WIDTH;
 
   const isHidden = sidebarVisibility === "hidden";
+  const shouldCloseOnNav = isHidden && isFloating && onClose;
   const isTranslatedOff = isHidden && isFloating && !isOpen;
   const translateClass =
     isTranslatedOff && onRight
@@ -140,7 +146,8 @@ export function Sidebar({
         isHidden ? `transition-transform duration-200 ease-out ${translateClass}` : ""
       }`}
       style={{
-        width: isCollapsed ? STRIP_WIDTH : FULL_WIDTH,
+        width: isCollapsed ? STRIP_WIDTH : expandedWidth,
+        maxWidth: isMobile ? "calc(100vw - 56px)" : undefined,
         transition: isFloat ? "width 300ms ease" : undefined,
         backgroundColor: isCollapsed
           ? "rgba(15, 23, 42, 0.8)"
@@ -253,6 +260,7 @@ export function Sidebar({
                       <Link
                         key={href}
                         href={href}
+                        onClick={shouldCloseOnNav ? onClose : undefined}
                         data-active={isActive || undefined}
                         className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
                           isActive
@@ -304,6 +312,7 @@ export function Sidebar({
                     <Link
                       key={href}
                       href={href}
+                      onClick={shouldCloseOnNav ? onClose : undefined}
                       data-cc-id="sidebar.nav.link"
                       data-active={isActive || undefined}
                       className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${

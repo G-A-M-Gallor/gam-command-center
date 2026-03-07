@@ -608,7 +608,7 @@ export default function DesignSystemPage() {
     <div className="min-h-screen">
       <PageHeader pageKey="designSystem" />
 
-      <div className="p-6">
+      <div className="px-3 py-4 sm:p-6">
         {/* Tab bar */}
         <div className="mb-5 flex items-center gap-1 rounded-lg bg-slate-800/40 p-1">
           {tabs.map((tab) => (
@@ -669,13 +669,47 @@ export default function DesignSystemPage() {
         {/* Tab: Components */}
         {activeTab === "components" && (
           <div className="flex gap-5">
-            <CategorySidebar
-              selectedCategory={selectedCategory}
-              onSelect={setSelectedCategory}
-              counts={categoryCounts}
-              td={td}
-            />
+            {/* Desktop category sidebar */}
+            <div className="hidden lg:block">
+              <CategorySidebar
+                selectedCategory={selectedCategory}
+                onSelect={setSelectedCategory}
+                counts={categoryCounts}
+                td={td}
+              />
+            </div>
+
+            {/* Mobile/tablet category pills */}
             <div className="min-w-0 flex-1">
+              <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1 lg:hidden">
+                <button
+                  onClick={() => setSelectedCategory("all")}
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                    selectedCategory === "all"
+                      ? "bg-purple-500/20 text-purple-300"
+                      : "bg-slate-800 text-slate-500 hover:text-slate-400"
+                  }`}
+                >
+                  {td.allCategories}
+                </button>
+                {ALL_CATEGORIES.map((cat) => {
+                  const count = categoryCounts[cat] || 0;
+                  if (count === 0) return null;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                        selectedCategory === cat
+                          ? "bg-purple-500/20 text-purple-300"
+                          : "bg-slate-800 text-slate-500 hover:text-slate-400"
+                      }`}
+                    >
+                      {(td as Record<string, string>)[CATEGORY_LABEL_KEYS[cat]]}
+                    </button>
+                  );
+                })}
+              </div>
               {/* Search */}
               <div className="mb-4">
                 <Input

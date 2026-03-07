@@ -187,7 +187,7 @@ export default function PlanPage() {
   return (
     <div className="min-h-screen">
       <PageHeader pageKey="plan" />
-      <div className="p-6 space-y-6">
+      <div className="px-3 py-4 sm:p-6 space-y-6">
         {/* Overall Progress */}
         <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3">
           <div className="flex items-center justify-between mb-2">
@@ -235,7 +235,7 @@ export default function PlanPage() {
               const phaseDesc = pp[phase.descKey as keyof typeof pp] as string;
 
               return (
-                <div key={phase.phase} data-cc-id="plan.phase" className="relative ps-14">
+                <div key={phase.phase} data-cc-id="plan.phase" className="relative ps-10 sm:ps-14">
                   {/* Timeline dot */}
                   <div className={`absolute start-3 top-4 w-7 h-7 rounded-full flex items-center justify-center ${config.bg} border ${config.border} z-10`}>
                     <StatusIcon className={`w-3.5 h-3.5 ${config.color}`} />

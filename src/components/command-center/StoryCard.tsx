@@ -254,6 +254,7 @@ export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
 
   return (
     <div
+      data-card-id={card.id}
       className={`group relative rounded-lg border px-3 py-2 ${
         colorClasses
           ? `${colorClasses.bg}/20 border-${colorClasses.id}-500/30`
@@ -397,6 +398,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
   return (
     <div
       ref={setNodeRef}
+      data-card-id={card.id}
       style={style}
       className={`group relative rounded-md border px-2 py-1.5 ${
         colorClasses
@@ -654,6 +656,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
     <>
       <div
         ref={setNodeRef}
+        data-card-id={card.id}
         style={style}
         className={`group relative rounded-lg border border-slate-700/50 bg-slate-800/50 p-2 transition-colors hover:border-slate-600 hover:bg-slate-800/80 ${
           isDragging ? 'shadow-lg shadow-purple-500/10' : ''

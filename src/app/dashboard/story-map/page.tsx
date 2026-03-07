@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'rea
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Wifi, WifiOff } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useShortcuts } from '@/contexts/ShortcutsContext';
 import { getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { StoryBoard } from '@/components/command-center/StoryBoard';
@@ -122,6 +123,7 @@ function makeDemoCards(): StoryCard[] {
 // ─── Inner content (needs Suspense for useSearchParams) ─
 function StoryMapContent() {
   const { language } = useSettings();
+  const { setCurrentScope } = useShortcuts();
   const t = getTranslations(language);
   const isRtl = language === 'he';
   const searchParams = useSearchParams();
@@ -148,9 +150,17 @@ function StoryMapContent() {
   const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set(['epic', 'feature', 'story']));
   const [colorFilter, setColorFilter] = useState<Set<string>>(new Set());
   const boardRef = useRef<HTMLDivElement>(null);
+  const filterInputRef = useRef<HTMLInputElement>(null);
   const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const pendingIds = useRef<Set<string>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+
+  // ── Scope management — activate card_browser on mount ──
+  useEffect(() => {
+    setCurrentScope('card_browser');
+    return () => setCurrentScope('global');
+  }, [setCurrentScope]);
 
   // ── Load projects ──────────────────────────────────
   useEffect(() => {
@@ -515,6 +525,77 @@ function StoryMapContent() {
     });
   }, [cards, searchQuery, typeFilter, colorFilter]);
 
+  // ── Card navigation + filter shortcut listeners ────
+  useEffect(() => {
+    const handleCardNext = () => {
+      setSelectedCardId((prev) => {
+        const ids = filteredCards.map((c) => c.id);
+        if (ids.length === 0) return null;
+        if (!prev) return ids[0];
+        const idx = ids.indexOf(prev);
+        return ids[(idx + 1) % ids.length];
+      });
+    };
+    const handleCardPrev = () => {
+      setSelectedCardId((prev) => {
+        const ids = filteredCards.map((c) => c.id);
+        if (ids.length === 0) return null;
+        if (!prev) return ids[ids.length - 1];
+        const idx = ids.indexOf(prev);
+        return ids[(idx - 1 + ids.length) % ids.length];
+      });
+    };
+    const handleCardOpen = () => {
+      if (!selectedCardId) return;
+      const el = document.querySelector<HTMLElement>(`[data-card-id="${selectedCardId}"]`);
+      if (el) el.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    };
+    const handleCardExpand = () => {
+      if (!selectedCardId) return;
+      const el = document.querySelector<HTMLElement>(`[data-card-id="${selectedCardId}"]`);
+      if (el) {
+        const notesBtn = el.querySelector<HTMLButtonElement>('button[title]');
+        if (notesBtn) notesBtn.click();
+      }
+    };
+    const handleFilterToggle = () => {
+      filterInputRef.current?.focus();
+    };
+    const handleFilterClear = () => {
+      setSearchQuery('');
+      setTypeFilter(new Set(['epic', 'feature', 'story']));
+      setColorFilter(new Set());
+    };
+
+    window.addEventListener('cc-card-next', handleCardNext);
+    window.addEventListener('cc-card-prev', handleCardPrev);
+    window.addEventListener('cc-card-open', handleCardOpen);
+    window.addEventListener('cc-card-expand', handleCardExpand);
+    window.addEventListener('cc-filter-toggle', handleFilterToggle);
+    window.addEventListener('cc-filter-clear', handleFilterClear);
+    return () => {
+      window.removeEventListener('cc-card-next', handleCardNext);
+      window.removeEventListener('cc-card-prev', handleCardPrev);
+      window.removeEventListener('cc-card-open', handleCardOpen);
+      window.removeEventListener('cc-card-expand', handleCardExpand);
+      window.removeEventListener('cc-filter-toggle', handleFilterToggle);
+      window.removeEventListener('cc-filter-clear', handleFilterClear);
+    };
+  }, [filteredCards, selectedCardId]);
+
+  // ── Highlight + scroll selected card ───────────────
+  useEffect(() => {
+    document.querySelectorAll('[data-card-id].ring-2').forEach((el) => {
+      el.classList.remove('ring-2', 'ring-purple-500/70');
+    });
+    if (!selectedCardId) return;
+    const el = document.querySelector<HTMLElement>(`[data-card-id="${selectedCardId}"]`);
+    if (el) {
+      el.classList.add('ring-2', 'ring-purple-500/70');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedCardId]);
+
   return (
     <div className="min-h-screen" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="storyMap" />
@@ -575,6 +656,7 @@ function StoryMapContent() {
           setTypeFilter={setTypeFilter}
           colorFilter={colorFilter}
           setColorFilter={setColorFilter}
+          searchInputRef={filterInputRef}
           t={t.storyMap}
         />
         <StoryMapStats cards={filteredCards} t={t.storyMap} />

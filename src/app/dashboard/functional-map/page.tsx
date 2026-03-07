@@ -288,12 +288,12 @@ export default function FunctionalMapPage() {
   return (
     <div className="min-h-screen">
       <PageHeader pageKey="functionalMap" />
-      <div className="p-6 space-y-4">
+      <div className="px-3 py-4 sm:p-6 space-y-4">
         {/* Notice bar */}
-        <div className="flex items-center gap-3 bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 sm:px-4 sm:py-2.5">
           <Lock className="w-4 h-4 text-slate-500 shrink-0" />
-          <span className="text-sm text-slate-400">{fm.lockedNotice}</span>
-          <div className="flex items-center gap-3 ms-auto text-xs text-slate-500">
+          <span className="text-xs sm:text-sm text-slate-400">{fm.lockedNotice}</span>
+          <div className="flex items-center gap-3 ms-auto text-xs text-slate-500 hidden sm:flex">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500" /> {fm.statusActive}
             </span>
@@ -320,8 +320,8 @@ export default function FunctionalMapPage() {
           </div>
         </div>
 
-        {/* Grid */}
-        <div data-cc-id="funcmap.grid" className={`${!loaded ? "opacity-50" : ""}`}>
+        {/* Desktop Grid */}
+        <div data-cc-id="funcmap.grid" className={`hidden md:block ${!loaded ? "opacity-50" : ""}`}>
           {/* Column headers */}
           <div className="grid grid-cols-[120px_repeat(5,1fr)] gap-2 mb-2">
             <div /> {/* empty corner */}
@@ -348,6 +348,29 @@ export default function FunctionalMapPage() {
                   lang={language}
                 />
               ))}
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile Card Stack */}
+        <div className={`md:hidden space-y-3 ${!loaded ? "opacity-50" : ""}`}>
+          {LEVELS.map((level) => (
+            <div key={level} className="space-y-2">
+              <div className={`text-xs font-medium uppercase tracking-wider ${LEVEL_COLORS[level].text} px-1`}>
+                {levelLabels[level]}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {FUNCS.map((func) => (
+                  <div key={`${level}-${func}`}>
+                    <div className="text-[10px] text-slate-500 uppercase mb-1 px-1">{funcLabels[func]}</div>
+                    <CellCard
+                      cell={getCell(level, func)}
+                      onSave={handleSave}
+                      lang={language}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

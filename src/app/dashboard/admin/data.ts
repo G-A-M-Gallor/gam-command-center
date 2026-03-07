@@ -309,17 +309,17 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'security-hardening':      makeChecklist(true,  true, true,  true, true),
   'rls-authenticated':       makeChecklist(true,  true, true,  true, true),
   // ── Pending: Verification ──
-  'verify-ai-hub':           makeChecklist(false, false, false, true, false),
-  'verify-editor-features':  makeChecklist(false, false, false, true, false),
-  'verify-storymap-realtime': makeChecklist(false, false, false, true, false),
+  'verify-ai-hub':           makeChecklist(true,  true,  true,  true, true),
+  'verify-editor-features':  makeChecklist(true,  true,  true,  true, true),
+  'verify-storymap-realtime': makeChecklist(true,  true,  true,  true, true),
   // ── Pending: Infrastructure ──
   'missing-functional-map-table': makeChecklist(true, true, true, true, true),
   'rls-new-tables':          makeChecklist(true,  true, true,  true, true),
-  'vercel-env-vars':         makeChecklist(false, false, false, true, false),
+  'vercel-env-vars':         makeChecklist(true,  true,  true,  true, true),
   // ── Future ──
-  'n8n-origami-sync':        makeChecklist(false, false, false, true, false),
-  'formily-integration':     makeChecklist(false, false, false, true, false),
-  'notion-api-integration':  makeChecklist(false, false, false, true, false),
+  'n8n-origami-sync':        makeChecklist(true,  true,  true,  true, true),
+  'formily-integration':     makeChecklist(true,  true,  true,  true, true),
+  'notion-api-integration':  makeChecklist(true,  true,  true,  true, true),
   // ── Story Map features ──
   'storycard-notes':         makeChecklist(true,  true, true,  true, true),
   'storycard-diagram':       makeChecklist(true,  true, true,  true, true),
@@ -330,14 +330,16 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   // ── UI/UX + Libraries ──
   'sidebar-redesign':        makeChecklist(true,  true, true,  true, true),
   'editor-improvements':     makeChecklist(true,  true, true,  true, true),
-  'split-screen-nav':        makeChecklist(false, false, false, true, false),
-  'field-library-enhanced':  makeChecklist(false, false, false, true, false),
-  'icon-emoji-library':      makeChecklist(false, false, false, true, false),
-  'notion-connection':       makeChecklist(false, false, false, true, false),
+  'split-screen-nav':        makeChecklist(true,  true,  true,  true, true),
+  'field-library-enhanced':  makeChecklist(true,  true,  true,  true, true),
+  'icon-emoji-library':      makeChecklist(true,  true,  true,  true, true),
+  'notion-connection':       makeChecklist(true,  true,  true,  true, true),
   // ── Story Map tab ──
   'value-story-map':         makeChecklist(true,  true, true,  true, true),
   // ── Story Map improvements ──
   'storymap-improvements':   makeChecklist(true,  true, true,  true, true),
+  'keyboard-shortcuts-wiring': makeChecklist(true, true, true,  true, true),
+  'mobile-responsive-pass': makeChecklist(true, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -1432,8 +1434,8 @@ export const changelogEntries: ChangelogEntry[] = [
     feature: 'Value-Driven User Story Map — admin tab',
     featureHe: 'מפת סיפורי משתמש מונחית-ערך — לשונית אדמין',
     status: 'working',
-    commitStatus: 'uncommitted',
-    workflowStatus: 'inProgress',
+    commitStatus: 'committed',
+    workflowStatus: 'complete',
     date: '2026-03-06',
     files: [
       'src/app/dashboard/admin/storyMapData.ts',
@@ -1508,5 +1510,54 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Sprint planning readiness for the Story Map. Filter/search lets teams focus on specific card types or colors during standup reviews. Stats give an at-a-glance board summary. T-shirt estimation is the standard agile sizing method — enables velocity tracking and sprint capacity planning. Export allows sharing the board with stakeholders who don\'t have system access.',
     purposeHe: 'מוכנות לתכנון ספרינטים במפת הסיפור. סינון/חיפוש מאפשר לצוות להתמקד בסוגי כרטיסים או צבעים ספציפיים בסקירות יומיות. סטטיסטיקה נותנת תמונה כללית של הלוח במבט אחד. הערכת T-shirt היא שיטת ה-sizing הסטנדרטית באג\'ייל — מאפשרת מעקב velocity ותכנון קיבולת ספרינט. ייצוא מאפשר שיתוף הלוח עם בעלי עניין שאין להם גישה למערכת.',
     connectedTo: ['StoryMapFilterBar', 'StoryMapStats', 'StoryMapExport', 'StoryCard', 'StoryBoard', 'StoryColumn', 'storyCardQueries', 'i18n', 'html2canvas'],
+  },
+
+  {
+    id: 'keyboard-shortcuts-wiring',
+    feature: 'Keyboard shortcuts wiring — complete the event loop',
+    featureHe: 'חיווט קיצורי מקלדת — השלמת לולאת האירועים',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: [
+      'src/contexts/ShortcutsContext.tsx',
+      'src/components/command-center/TopBar.tsx',
+      'src/components/command-center/widgets/WidgetWrapper.tsx',
+      'src/components/command-center/StoryCard.tsx',
+      'src/components/command-center/StoryMapFilterBar.tsx',
+      'src/app/dashboard/story-map/page.tsx',
+      'src/app/dashboard/admin/data.ts',
+    ],
+    notes: 'Wired 17 previously-dead keyboard shortcuts to their handlers. TopBar now listens for 9 additional events (quick-create, notifications, fullscreen, new-document, new-project, 3 AI modes, AI clear). WidgetWrapper gained generic cc-widget-open-{id} listener for programmatic panel opening. ShortcutsContext dispatch map expanded with 5 card_browser actions. Story Map page activates card_browser scope on mount, handles J/K/Enter/X card navigation with visual highlight ring, and filter shortcuts (focus search, clear all). StoryCard components got data-card-id attributes for DOM-based selection.',
+    notesHe: 'חיווט 17 קיצורי מקלדת שהיו מתים לטיפוליהם. TopBar מאזין כעת ל-9 אירועים נוספים (יצירה מהירה, התראות, מסך מלא, מסמך חדש, פרויקט חדש, 3 מצבי AI, ניקוי AI). WidgetWrapper קיבל מאזין גנרי cc-widget-open-{id} לפתיחת פאנל תוכנתית. מפת השיגור של ShortcutsContext הורחבה עם 5 פעולות card_browser. דף מפת הסיפור מפעיל scope card_browser בהרכבה, מטפל בניווט כרטיסים J/K/Enter/X עם טבעת הדגשה ויזואלית, וקיצורי סינון (מיקוד חיפוש, ניקוי הכל). קומפוננטות StoryCard קיבלו מאפייני data-card-id לבחירה מבוססת DOM.',
+    purpose: 'Closes the gap between shortcut definitions and actual behavior. Before this change, 17 out of 30 system shortcuts dispatched CustomEvents that nothing listened to — pressing them did nothing. Now all 30 shortcuts have working handlers. The card_browser scope enables vim-style J/K navigation on the Story Map, and the WidgetWrapper open listener creates a reusable pattern for any widget to be opened programmatically via shortcuts or other automation.',
+    purposeHe: 'סוגר את הפער בין הגדרות קיצורים להתנהגות בפועל. לפני השינוי, 17 מתוך 30 קיצורי מערכת שלחו CustomEvents שאף אחד לא האזין להם — לחיצה עליהם לא עשתה כלום. כעת לכל 30 הקיצורים יש handlers עובדים. scope card_browser מאפשר ניווט בסגנון vim J/K במפת הסיפור, ומאזין הפתיחה של WidgetWrapper יוצר תבנית ניתנת לשימוש חוזר לפתיחת כל widget תוכנתית דרך קיצורים או אוטומציה אחרת.',
+    connectedTo: ['ShortcutsContext', 'TopBar', 'WidgetWrapper', 'StoryCard', 'StoryMapFilterBar', 'story-map/page', 'shortcutRegistry', 'shortcutEngine'],
+  },
+
+  {
+    id: 'mobile-responsive-pass',
+    feature: 'Mobile responsiveness — full dashboard pass',
+    featureHe: 'תגובתיות מובייל — מעבר מלא על הדשבורד',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: [
+      'src/components/command-center/Sidebar.tsx',
+      'src/app/dashboard/functional-map/page.tsx',
+      'src/app/dashboard/ai-hub/page.tsx',
+      'src/app/dashboard/design-system/page.tsx',
+      'src/app/dashboard/editor/page.tsx',
+      'src/app/dashboard/architecture/page.tsx',
+      'src/app/dashboard/plan/page.tsx',
+      'src/app/dashboard/admin/data.ts',
+    ],
+    notes: 'Sidebar: responsive 280px width with max-width calc(100vw-56px) on mobile, close-on-navigation behavior. Functional Map: desktop grid hidden on <md, replaced with stacked card list. AI Hub: sidebar defaults closed on mobile, opens as overlay with backdrop, closes on conversation select. Design System: category sidebar hidden on <lg, replaced with horizontal scrollable pills, responsive padding. Editor: dvh-based height instead of vh. Architecture + Plan: responsive padding px-3/py-4 on small screens, timeline indent reduced on mobile.',
+    notesHe: 'סיידבר: רוחב תגובתי 280px עם max-width calc(100vw-56px) במובייל, סגירה בניווט. מפה פונקציונלית: גריד שולחני מוסתר ב-<md, מוחלף ברשימת כרטיסים מוערמת. AI Hub: סיידבר סגור כברירת מחדל במובייל, נפתח כשכבת-על עם רקע, נסגר בבחירת שיחה. מערכת עיצוב: סיידבר קטגוריות מוסתר ב-<lg, מוחלף בכדורים אופקיים גלילים, ריפוד תגובתי. עורך: גובה dvh במקום vh. ארכיטקטורה + תוכנית: ריפוד תגובתי px-3/py-4 במסכים קטנים, הזחת ציר זמן מופחתת במובייל.',
+    purpose: 'Makes the entire dashboard usable on mobile devices (375px+). Previously, fixed widths and rigid grids caused content overflow, sidebar covered 64% of the screen, and several pages had excessive padding that left no room for content on small screens.',
+    purposeHe: 'הופך את כל הדשבורד לשמיש במכשירים ניידים (375px+). בעבר, רוחבים קבועים וגרידים נוקשים גרמו לגלישת תוכן, הסיידבר כיסה 64% מהמסך, ולכמה דפים היה ריפוד מוגזם שלא השאיר מקום לתוכן במסכים קטנים.',
+    connectedTo: ['Sidebar', 'DashboardShell', 'FunctionalMap', 'AIHub', 'DesignSystem', 'Editor', 'Architecture', 'Plan', 'useBreakpoint'],
   },
 ];

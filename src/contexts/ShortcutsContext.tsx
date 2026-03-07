@@ -217,6 +217,11 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
       fullscreen: "cc-fullscreen",
       new_document: "cc-new-document",
       new_project: "cc-new-project",
+      card_next: "cc-card-next",
+      card_prev: "cc-card-prev",
+      card_open: "cc-card-open",
+      card_expand: "cc-card-expand",
+      card_archive: "cc-card-archive",
     };
 
     const eventName = EVENTS[actionSlug];

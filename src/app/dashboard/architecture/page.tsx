@@ -176,7 +176,7 @@ export default function ArchitecturePage() {
   return (
     <div className="min-h-screen">
       <PageHeader pageKey="architecture" />
-      <div className="p-6 space-y-6">
+      <div className="px-3 py-4 sm:p-6 space-y-6">
         {/* Read-only notice */}
         <div className="flex items-center gap-2 text-xs text-slate-500">
           <Lock className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export default function ArchitecturePage() {
         {/* Mermaid Diagram */}
         <div
           data-cc-id="arch.diagram"
-          className="bg-slate-800/50 border border-slate-700 rounded-lg p-6"
+          className="bg-slate-800/50 border border-slate-700 rounded-lg p-3 sm:p-6"
         >
           <h2 className="text-sm font-medium text-slate-300 mb-4">{ap.diagramTitle}</h2>
           <MermaidDiagram definition={MERMAID_DEFINITION} />

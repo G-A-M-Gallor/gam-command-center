@@ -13,7 +13,7 @@ function EditorRouter() {
 
   if (recordId) {
     return (
-      <div className="h-[calc(100vh-88px)]">
+      <div className="h-[calc(100dvh-48px)]">
         <CanvasEditor recordId={recordId} />
       </div>
     );

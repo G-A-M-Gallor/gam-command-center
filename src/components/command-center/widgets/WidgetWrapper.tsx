@@ -160,6 +160,14 @@ export function WidgetWrapper({
     }
   }, [isDragging, panelOpen]);
 
+  // Listen for programmatic open events (e.g. from keyboard shortcuts)
+  useEffect(() => {
+    const eventName = `cc-widget-open-${widget.id}`;
+    const handler = () => setPanelOpen(true);
+    window.addEventListener(eventName, handler);
+    return () => window.removeEventListener(eventName, handler);
+  }, [widget.id]);
+
   // Load saved panel size on mount
   useEffect(() => {
     const raw = localStorage.getItem(savedSizeKey);

@@ -1,5 +1,6 @@
 'use client';
 
+import { type Ref } from 'react';
 import { Search, X } from 'lucide-react';
 
 const COLORS = [
@@ -22,6 +23,7 @@ interface StoryMapFilterBarProps {
   setTypeFilter: (f: Set<string>) => void;
   colorFilter: Set<string>;
   setColorFilter: (f: Set<string>) => void;
+  searchInputRef?: Ref<HTMLInputElement>;
   t: {
     filterSearch: string;
     clearFilters: string;
@@ -38,6 +40,7 @@ export function StoryMapFilterBar({
   setTypeFilter,
   colorFilter,
   setColorFilter,
+  searchInputRef,
   t,
 }: StoryMapFilterBarProps) {
   const hasFilters = searchQuery || typeFilter.size < 3 || colorFilter.size > 0;
@@ -71,6 +74,7 @@ export function StoryMapFilterBar({
       <div className="relative">
         <Search size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
         <input
+          ref={searchInputRef}
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   DndContext,
   PointerSensor,
@@ -73,6 +74,7 @@ export function TopBar() {
   } = useWidgets();
   const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language } = useSettings();
   const { editMode, setEditMode, guideMode, setGuideMode } = useDashboardMode();
+  const router = useRouter();
   const t = getTranslations(language);
 
   const [mounted, setMounted] = useState(false);
@@ -160,19 +162,71 @@ export function TopBar() {
       const cycle = { visible: "float", float: "hidden", hidden: "visible" } as const;
       setSidebarVisibility(cycle[sidebarVisibilityRef.current] || "visible");
     };
+    const handleOpenQuickCreate = () => {
+      window.dispatchEvent(new CustomEvent("cc-widget-open-quick-create"));
+    };
+    const handleOpenNotifications = () => {
+      window.dispatchEvent(new CustomEvent("cc-widget-open-notifications"));
+    };
+    const handleFullscreen = () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        document.documentElement.requestFullscreen();
+      }
+    };
+    const handleNewDocument = () => router.push("/dashboard/editor");
+    const handleNewProject = () => {
+      window.dispatchEvent(new CustomEvent("cc-widget-open-quick-create"));
+    };
+    const handleAiModeChat = () => {
+      setAiPanelOpen(true);
+      window.dispatchEvent(new CustomEvent("cc-ai-set-mode", { detail: "chat" }));
+    };
+    const handleAiModeAnalyze = () => {
+      setAiPanelOpen(true);
+      window.dispatchEvent(new CustomEvent("cc-ai-set-mode", { detail: "analyze" }));
+    };
+    const handleAiModeWrite = () => {
+      setAiPanelOpen(true);
+      window.dispatchEvent(new CustomEvent("cc-ai-set-mode", { detail: "write" }));
+    };
+    const handleAiClear = () => {
+      setAiPanelOpen(true);
+      window.dispatchEvent(new CustomEvent("cc-ai-clear-chat"));
+    };
+
     window.addEventListener("cc-open-search", handleOpenSearch);
     window.addEventListener("cc-open-ai", handleOpenAI);
     window.addEventListener("cc-open-shortcuts", handleOpenShortcuts);
     window.addEventListener("cc-toggle-edit-mode", handleToggleEditMode);
     window.addEventListener("cc-toggle-sidebar", handleToggleSidebar);
+    window.addEventListener("cc-open-quick-create", handleOpenQuickCreate);
+    window.addEventListener("cc-open-notifications", handleOpenNotifications);
+    window.addEventListener("cc-fullscreen", handleFullscreen);
+    window.addEventListener("cc-new-document", handleNewDocument);
+    window.addEventListener("cc-new-project", handleNewProject);
+    window.addEventListener("cc-ai-mode-chat", handleAiModeChat);
+    window.addEventListener("cc-ai-mode-analyze", handleAiModeAnalyze);
+    window.addEventListener("cc-ai-mode-write", handleAiModeWrite);
+    window.addEventListener("cc-ai-clear", handleAiClear);
     return () => {
       window.removeEventListener("cc-open-search", handleOpenSearch);
       window.removeEventListener("cc-open-ai", handleOpenAI);
       window.removeEventListener("cc-open-shortcuts", handleOpenShortcuts);
       window.removeEventListener("cc-toggle-edit-mode", handleToggleEditMode);
       window.removeEventListener("cc-toggle-sidebar", handleToggleSidebar);
+      window.removeEventListener("cc-open-quick-create", handleOpenQuickCreate);
+      window.removeEventListener("cc-open-notifications", handleOpenNotifications);
+      window.removeEventListener("cc-fullscreen", handleFullscreen);
+      window.removeEventListener("cc-new-document", handleNewDocument);
+      window.removeEventListener("cc-new-project", handleNewProject);
+      window.removeEventListener("cc-ai-mode-chat", handleAiModeChat);
+      window.removeEventListener("cc-ai-mode-analyze", handleAiModeAnalyze);
+      window.removeEventListener("cc-ai-mode-write", handleAiModeWrite);
+      window.removeEventListener("cc-ai-clear", handleAiClear);
     };
-  }, [editMode, setEditMode, setSidebarVisibility]);
+  }, [editMode, setEditMode, setSidebarVisibility, router]);
 
   const handleSearchOpen = useCallback(() => {
     setSearchOpen(true);

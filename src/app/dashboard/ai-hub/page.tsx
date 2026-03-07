@@ -8,6 +8,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { streamChat } from "@/lib/ai/client";
@@ -322,13 +323,25 @@ export default function AIHubPage() {
   const [streamingContent, setStreamingContent] = useState("");
   const [contexts, setContexts] = useState<string[]>([]);
   const { buildRichContexts } = usePageContext();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === "mobile";
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<"idle" | "saving" | "saved" | "offline">("idle");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Open sidebar by default on non-mobile
+  useEffect(() => {
+    if (!isMobile) setSidebarOpen(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close sidebar when switching to mobile
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [isMobile]);
 
   // Load conversations on mount
   useEffect(() => {
@@ -460,7 +473,8 @@ export default function AIHubPage() {
     const convo = conversations.find((c) => c.id === id);
     if (convo) setMode(convo.mode);
     setInput("");
-  }, [conversations]);
+    if (isMobile) setSidebarOpen(false);
+  }, [conversations, isMobile]);
 
   const handleDeleteConversation = useCallback((id: string) => {
     const updated = conversations.filter((c) => c.id !== id);
@@ -674,9 +688,16 @@ export default function AIHubPage() {
 
       {/* Main 2-column layout */}
       <div className="mt-6 flex flex-1 gap-0 overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30">
-        {/* Left sidebar */}
+        {/* Left sidebar — overlay on mobile, inline on desktop */}
+        {sidebarOpen && isMobile && (
+          <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)} />
+        )}
         {sidebarOpen && (
-          <div data-cc-id="aihub.sidebar" className="flex w-[280px] shrink-0 flex-col border-e border-slate-700/50 bg-slate-800/50">
+          <div data-cc-id="aihub.sidebar" className={`flex shrink-0 flex-col border-e border-slate-700/50 bg-slate-800/50 ${
+            isMobile
+              ? "fixed inset-y-0 start-0 z-50 w-[280px] max-w-[calc(100vw-56px)] shadow-xl bg-slate-900"
+              : "w-[280px]"
+          }`}>
             {/* Mode selector */}
             <div className="border-b border-slate-700/50 p-3">
               <ModeSelector mode={mode} onModeChange={handleModeChange} t={t} />
