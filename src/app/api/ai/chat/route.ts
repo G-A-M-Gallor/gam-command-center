@@ -20,6 +20,22 @@ async function checkAndUpdateBudget(
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  try {
+    // Atomic budget check via RPC — prevents race conditions
+    const { data, error } = await supabase.rpc("check_ai_budget", {
+      p_user_id: userId,
+      p_tokens_in: tokensUsed.input,
+      p_tokens_out: tokensUsed.output,
+    });
+
+    if (!error && data && data.length > 0) {
+      return { allowed: data[0].allowed, remaining: data[0].remaining };
+    }
+  } catch {
+    // Fallback if RPC not deployed yet
+  }
+
+  // Fallback: direct query (non-atomic)
   const today = new Date().toISOString().split("T")[0];
 
   const { data } = await supabase
@@ -34,12 +50,10 @@ async function checkAndUpdateBudget(
   const currentCount = data?.request_count || 0;
   const totalUsed = currentInput + currentOutput;
 
-  // Pre-check: if already over budget, reject
   if (tokensUsed.input === 0 && tokensUsed.output === 0) {
     return { allowed: totalUsed < DAILY_TOKEN_LIMIT, remaining: Math.max(DAILY_TOKEN_LIMIT - totalUsed, 0) };
   }
 
-  // Post-use: record actual usage
   await supabase.from("ai_usage").upsert(
     {
       user_id: userId,
@@ -47,7 +61,6 @@ async function checkAndUpdateBudget(
       tokens_input: currentInput + tokensUsed.input,
       tokens_output: currentOutput + tokensUsed.output,
       request_count: currentCount + 1,
-      updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id,date" }
   );

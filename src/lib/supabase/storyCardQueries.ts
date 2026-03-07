@@ -103,6 +103,14 @@ export async function batchUpdatePositions(
   updates: { id: string; col: number; sort_order: number }[]
 ): Promise<boolean> {
   try {
+    // Atomic batch update via RPC — single query instead of N
+    const { error } = await supabase.rpc('batch_update_card_positions', {
+      updates,
+    });
+
+    if (!error) return true;
+
+    // Fallback: individual updates if RPC not available
     const results = await Promise.all(
       updates.map(({ id, col, sort_order }) =>
         supabase

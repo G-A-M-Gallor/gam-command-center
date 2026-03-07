@@ -75,7 +75,6 @@ serve(async (req) => {
       origami_id: project_id,
       name,
       status,
-      updated_at: new Date().toISOString(),
     }, { onConflict: "origami_id" });
 
   return new Response(

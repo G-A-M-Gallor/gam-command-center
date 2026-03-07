@@ -124,7 +124,6 @@ export async function POST(request: Request) {
       layer: mapLayer(clientType),
       source: "origami",
       health_score: healthScore,
-      updated_at: new Date().toISOString(),
     };
 
     const { error } = await supabase

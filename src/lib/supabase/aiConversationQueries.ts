@@ -32,7 +32,6 @@ export async function saveConversation(conversation: {
         title: conversation.title || null,
         total_tokens_input: conversation.total_tokens_input || 0,
         total_tokens_output: conversation.total_tokens_output || 0,
-        updated_at: new Date().toISOString(),
       }, { onConflict: "id" });
 
     return !error;
@@ -81,7 +80,6 @@ export async function updateConversation(
       .from("ai_conversations")
       .update({
         ...updates,
-        updated_at: new Date().toISOString(),
       })
       .eq("id", id);
 

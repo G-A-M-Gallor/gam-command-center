@@ -86,7 +86,7 @@ export async function updateDocument(
   const supabase = createClient();
   const { error } = await supabase
     .from("vb_records")
-    .update({ ...updates, last_edited_at: new Date().toISOString() })
+    .update(updates)
     .eq("id", id);
   return !error;
 }
@@ -239,7 +239,20 @@ export interface DocVersion {
 export async function saveVersion(documentId: string, title: string, content: unknown): Promise<boolean> {
   const supabase = createClient();
 
-  // Get next version number
+  try {
+    // Atomic version save via RPC — prevents race condition
+    const { error } = await supabase.rpc("save_document_version", {
+      p_doc_id: documentId,
+      p_title: title,
+      p_content: content,
+    });
+
+    if (!error) return true;
+  } catch {
+    // Fallback if RPC not available
+  }
+
+  // Fallback: manual version numbering
   const { data: latest } = await supabase
     .from("doc_versions")
     .select("version_number")

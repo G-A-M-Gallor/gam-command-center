@@ -177,7 +177,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       setSaveStatus('saving');
       const { error: err } = await supabase
         .from('vb_records')
-        .update({ content: json, last_edited_at: new Date().toISOString() })
+        .update({ content: json })
         .eq('id', recordId);
 
       if (err) {
@@ -228,7 +228,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     savedTitleRef.current = newTitle;
     await supabase
       .from('vb_records')
-      .update({ title: newTitle, last_edited_at: new Date().toISOString() })
+      .update({ title: newTitle })
       .eq('id', recordId);
   }, [recordId, title]);
 

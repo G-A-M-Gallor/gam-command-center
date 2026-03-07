@@ -57,7 +57,6 @@ export async function saveCanvasLayout(
           show_grid: layout.show_grid,
           snap_to_grid: layout.snap_to_grid,
           zoom: layout.zoom,
-          updated_at: new Date().toISOString(),
         },
         { onConflict: 'document_id' }
       );
@@ -134,7 +133,6 @@ export async function createFieldPlacement(
       ...placement,
       is_deleted: false,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     } as unknown as FieldPlacement;
   }
 
@@ -148,7 +146,7 @@ export async function updateFieldPlacement(
   try {
     await supabase
       .from('field_placements')
-      .update({ ...patch, updated_at: new Date().toISOString() })
+      .update(patch)
       .eq('id', id);
   } catch {
     // Table may not exist yet
@@ -159,7 +157,7 @@ export async function deleteFieldPlacement(id: string): Promise<void> {
   try {
     await supabase
       .from('field_placements')
-      .update({ is_deleted: true, updated_at: new Date().toISOString() })
+      .update({ is_deleted: true })
       .eq('id', id);
   } catch {
     // Table may not exist yet

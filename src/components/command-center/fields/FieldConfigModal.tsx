@@ -73,7 +73,7 @@ export function FieldConfigModal({
         // Update existing
         await supabase
           .from('field_definitions')
-          .update({ label, config: typedConfig, last_edited_at: new Date().toISOString() })
+          .update({ label, config: typedConfig })
           .eq('id', fieldId);
         onSave(fieldId, fieldType, config);
       } else {

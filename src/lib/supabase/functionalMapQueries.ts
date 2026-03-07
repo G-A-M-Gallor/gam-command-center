@@ -30,7 +30,7 @@ export async function updateFunctionalMapCell(
   const supabase = createClient();
   const { data, error } = await supabase
     .from('functional_map_cells')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update(updates)
     .eq('id', id)
     .select()
     .single();

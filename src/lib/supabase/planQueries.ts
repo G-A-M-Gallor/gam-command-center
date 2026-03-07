@@ -26,7 +26,7 @@ export async function updatePlanPhase(
   const supabase = createClient();
   const { data, error } = await supabase
     .from('plan_phases')
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update(updates)
     .eq('phase', phase)
     .select()
     .single();

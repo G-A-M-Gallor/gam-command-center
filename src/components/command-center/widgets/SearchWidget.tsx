@@ -94,10 +94,12 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dbDocuments, setDbDocuments] = useState<DbDocument[]>([]);
+  const [searchResults, setSearchResults] = useState<DbDocument[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Focus input on mount + load documents from Supabase
+  // Focus input on mount + load recent documents
   useEffect(() => {
     inputRef.current?.focus();
     async function loadDocs() {
@@ -108,12 +110,39 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
           .eq('record_type', 'document')
           .eq('is_deleted', false)
           .order('last_edited_at', { ascending: false })
-          .limit(50);
+          .limit(20);
         if (data) setDbDocuments(data);
       } catch { /* silent — search still works with pages */ }
     }
     loadDocs();
   }, []);
+
+  // Server-side search via RPC (debounced)
+  useEffect(() => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const { data } = await supabase.rpc('search_documents', {
+          query: query.trim(),
+          max_results: 20,
+        });
+        if (data) setSearchResults(data as DbDocument[]);
+      } catch {
+        // Fallback: client-side filter if RPC not available yet
+        const q = query.toLowerCase();
+        setSearchResults(
+          dbDocuments.filter((d) => (d.title || '').toLowerCase().includes(q))
+        );
+      }
+    }, 200);
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, [query, dbDocuments]);
 
   // Build items list
   const items = useMemo((): SearchItem[] => {
@@ -149,11 +178,9 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       return [...pageItems, ...docItems, ...searchItems];
     }
 
-    // Search state: filter real documents + pages + actions
+    // Search state: use server-side results + pages + actions
     const q = query.toLowerCase();
-
-    const documents: SearchItem[] = dbDocuments
-      .filter((d) => (d.title || '').toLowerCase().includes(q))
+    const documents: SearchItem[] = searchResults
       .map((d) => ({
         id: `doc-${d.id}`,
         label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
@@ -183,7 +210,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     ];
 
     return [...pages, ...documents, ...actions];
-  }, [query, language, t, dbDocuments]);
+  }, [query, language, t, dbDocuments, searchResults]);
 
   // Reset selection when items change
   useEffect(() => {
