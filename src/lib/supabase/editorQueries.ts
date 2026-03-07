@@ -42,8 +42,12 @@ export async function fetchDocument(id: string): Promise<DocRecord | null> {
 export async function createDocument(title: string): Promise<DocRecord | null> {
   const supabase = createClient();
 
-  // Get authenticated user
+  // Get authenticated user — refuse to create with a fake ID
   const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) {
+    console.error("createDocument: no authenticated user — cannot create document without a real user ID");
+    return null;
+  }
 
   // Try to get workspace context from an existing record
   const { data: existing } = await supabase
@@ -53,16 +57,17 @@ export async function createDocument(title: string): Promise<DocRecord | null> {
     .limit(1)
     .maybeSingle();
 
-  const workspaceId = existing?.workspace_id || "3ecaf990-43ef-4b91-9956-904a8b97b851";
-  const entityId = existing?.entity_id || "a43c212b-44dd-487d-b450-480a269d19cc";
-  const createdBy = user?.id || "a0000000-0000-0000-0000-000000000001";
+  if (!existing?.workspace_id || !existing?.entity_id) {
+    console.error("createDocument: no existing records found to derive workspace_id/entity_id — cannot create document without workspace context");
+    return null;
+  }
 
   const { data, error } = await supabase
     .from("vb_records")
     .insert({
-      workspace_id: workspaceId,
-      entity_id: entityId,
-      created_by: createdBy,
+      workspace_id: existing.workspace_id,
+      entity_id: existing.entity_id,
+      created_by: user.id,
       title,
       content: { type: "doc", content: [{ type: "paragraph" }] },
       record_type: "document",
