@@ -45,6 +45,8 @@ export interface TiptapEditorProps {
   saveStatus?: SaveState;
   /** Timestamp of last successful save */
   lastSavedAt?: Date;
+  /** Callback when user wants to reload after a conflict */
+  onConflictReload?: () => void;
 }
 
 export interface FloatingToolbarProps {

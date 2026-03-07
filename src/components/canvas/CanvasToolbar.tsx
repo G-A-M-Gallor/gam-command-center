@@ -87,6 +87,9 @@ export function CanvasToolbar({
         {saveStatus === 'saved' && (language === 'he' ? '✓ נשמר' : '✓ Saved')}
         {saveStatus === 'retrying' && (language === 'he' ? 'מנסה שוב...' : 'Retrying...')}
         {saveStatus === 'error' && (language === 'he' ? '⚠ שגיאה בשמירה' : '⚠ Save error')}
+        {saveStatus === 'conflict' && (
+          <span className="text-amber-400">{language === 'he' ? '⚠ המסמך עודכן בטאב אחר' : '⚠ Conflict'}</span>
+        )}
         {saveStatus === 'offline' && (language === 'he' ? '☁ אופליין — נשמר מקומית' : '☁ Offline — saved locally')}
       </span>
 

@@ -9,9 +9,13 @@ import type { JSONContent } from '@tiptap/react';
 
 // ----- Mock Supabase -----
 const mockSelect = vi.fn();
-const mockEq = vi.fn(() => ({ select: mockSelect }));
+const mockSingle = vi.fn();
+// mockEq returns an object with both eq (for chaining) and select
+const mockQueryBuilder = { eq: null as any, select: mockSelect };
+const mockEq = vi.fn(() => mockQueryBuilder);
+mockQueryBuilder.eq = mockEq;
 const mockUpdate = vi.fn(() => ({ eq: mockEq }));
-const mockFrom = vi.fn(() => ({ update: mockUpdate }));
+const mockFrom = vi.fn(() => ({ update: mockUpdate, select: vi.fn(() => ({ eq: vi.fn(() => ({ single: mockSingle })) })) }));
 
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: { from: mockFrom },
@@ -29,8 +33,8 @@ vi.mock('../offlineQueue', () => ({
 }));
 
 // ----- Helpers -----
-function setupSupabaseSuccess() {
-  mockSelect.mockResolvedValue({ data: [{ id: 'test-id' }], error: null });
+function setupSupabaseSuccess(lastEditedAt = '2026-03-07T10:00:00.000Z') {
+  mockSelect.mockResolvedValue({ data: [{ id: 'test-id', last_edited_at: lastEditedAt }], error: null });
 }
 
 function setupSupabaseError(message = 'Network error', code = 'NETWORK') {
@@ -38,6 +42,12 @@ function setupSupabaseError(message = 'Network error', code = 'NETWORK') {
 }
 
 function setupSupabaseRLSBlock() {
+  // 0 rows returned with no error — on first save (no lock) this is RLS block
+  mockSelect.mockResolvedValue({ data: [], error: null });
+}
+
+/** Simulate a conflict: 0 rows returned because last_edited_at didn't match */
+function setupSupabaseConflict() {
   mockSelect.mockResolvedValue({ data: [], error: null });
 }
 
@@ -451,6 +461,167 @@ describe('useAutoSave', () => {
 
       // mockFrom should not have been called again
       expect(mockFrom).not.toHaveBeenCalled();
+    });
+  });
+
+  // ----- Optimistic Locking -----
+  describe('optimistic locking', () => {
+    it('does not include last_edited_at check on first save', async () => {
+      setupSupabaseSuccess('2026-03-07T10:00:00.000Z');
+      const useAutoSave = await importHook();
+      const { result } = renderHook(() =>
+        useAutoSave({ recordId: 'rec-1' }),
+      );
+
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      // First save: .eq('id', 'rec-1') is called but NOT .eq('last_edited_at', ...)
+      // mockEq is called only once with ('id', 'rec-1')
+      expect(mockEq).toHaveBeenCalledWith('id', 'rec-1');
+      // Should NOT have been called with last_edited_at
+      const lastEditedAtCalls = mockEq.mock.calls.filter(
+        (call: unknown[]) => call[0] === 'last_edited_at'
+      );
+      expect(lastEditedAtCalls).toHaveLength(0);
+
+      expect(result.current.saveState).toBe('saved');
+    });
+
+    it('includes last_edited_at check on second save', async () => {
+      setupSupabaseSuccess('2026-03-07T10:00:00.000Z');
+      const useAutoSave = await importHook();
+      const { result } = renderHook(() =>
+        useAutoSave({ recordId: 'rec-1' }),
+      );
+
+      // First save — captures timestamp
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.saveState).toBe('saved');
+      mockEq.mockClear();
+      setupSupabaseSuccess('2026-03-07T10:05:00.000Z');
+
+      // Second save — should include optimistic lock
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      // Should have called .eq('id', ...) and .eq('last_edited_at', ...)
+      expect(mockEq).toHaveBeenCalledWith('id', 'rec-1');
+      expect(mockEq).toHaveBeenCalledWith('last_edited_at', '2026-03-07T10:00:00.000Z');
+      expect(result.current.saveState).toBe('saved');
+    });
+
+    it('detects conflict when update returns 0 rows after first save', async () => {
+      // First save succeeds and captures timestamp
+      setupSupabaseSuccess('2026-03-07T10:00:00.000Z');
+      const useAutoSave = await importHook();
+      const { result } = renderHook(() =>
+        useAutoSave({ recordId: 'rec-1' }),
+      );
+
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.saveState).toBe('saved');
+
+      // Second save: 0 rows (conflict — someone else updated)
+      setupSupabaseConflict();
+
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      // Should be in conflict state, NOT retrying
+      expect(result.current.saveState).toBe('conflict');
+      expect(result.current.retryCount).toBe(0);
+    });
+
+    it('does not retry on conflict — surfaces immediately', async () => {
+      // First save succeeds
+      setupSupabaseSuccess('2026-03-07T10:00:00.000Z');
+      const useAutoSave = await importHook();
+      const { result } = renderHook(() =>
+        useAutoSave({ recordId: 'rec-1', maxRetries: 3 }),
+      );
+
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      // Second save: conflict
+      setupSupabaseConflict();
+
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(result.current.saveState).toBe('conflict');
+
+      // Advance time — should NOT trigger retries
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10000);
+      });
+
+      expect(result.current.saveState).toBe('conflict');
+      expect(result.current.retryCount).toBe(0);
+    });
+
+    it('updates lastKnownTimestamp after each successful save', async () => {
+      setupSupabaseSuccess('2026-03-07T10:00:00.000Z');
+      const useAutoSave = await importHook();
+      const { result } = renderHook(() =>
+        useAutoSave({ recordId: 'rec-1' }),
+      );
+
+      // First save
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      mockEq.mockClear();
+      setupSupabaseSuccess('2026-03-07T10:05:00.000Z');
+
+      // Second save — uses timestamp from first save
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(mockEq).toHaveBeenCalledWith('last_edited_at', '2026-03-07T10:00:00.000Z');
+
+      mockEq.mockClear();
+      setupSupabaseSuccess('2026-03-07T10:10:00.000Z');
+
+      // Third save — uses timestamp from second save
+      await act(async () => {
+        result.current.saveNow(sampleContent);
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      expect(mockEq).toHaveBeenCalledWith('last_edited_at', '2026-03-07T10:05:00.000Z');
+    });
+
+    it('provides resolveConflict function', async () => {
+      const useAutoSave = await importHook();
+      const { result } = renderHook(() =>
+        useAutoSave({ recordId: 'rec-1' }),
+      );
+
+      expect(typeof result.current.resolveConflict).toBe('function');
     });
   });
 });

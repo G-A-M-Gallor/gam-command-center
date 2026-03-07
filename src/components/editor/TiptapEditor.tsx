@@ -76,6 +76,7 @@ export function TiptapEditor({
   recordId,
   saveStatus = 'idle',
   lastSavedAt,
+  onConflictReload,
 }: TiptapEditorProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
@@ -222,7 +223,7 @@ export function TiptapEditor({
       {editable && <BlockHandle editor={editor} />}
       {editable && <FloatingToolbar editor={editor} />}
       <EditorContent editor={editor} />
-      <StatusBar editor={editor} saveStatus={saveStatus} lastSavedAt={lastSavedAt} isHe={isHe} et={et} />
+      <StatusBar editor={editor} saveStatus={saveStatus} lastSavedAt={lastSavedAt} isHe={isHe} et={et} onConflictReload={onConflictReload} />
     </div>
   );
 }
@@ -234,12 +235,14 @@ function StatusBar({
   lastSavedAt,
   isHe,
   et,
+  onConflictReload,
 }: {
   editor: ReturnType<typeof useEditor>;
   saveStatus: string;
   lastSavedAt?: Date;
   isHe: boolean;
   et: Record<string, string>;
+  onConflictReload?: () => void;
 }) {
   const text = editor?.getText() || '';
   const wordCount = useMemo(() => text.split(/\s+/).filter(Boolean).length, [text]);
@@ -264,6 +267,17 @@ function StatusBar({
         {saveStatus === 'saved' && <span className="text-emerald-400">{isHe ? '✓ נשמר' : '✓ Saved'}</span>}
         {saveStatus === 'retrying' && <span className="text-amber-400">{isHe ? 'מנסה שוב...' : 'Retrying...'}</span>}
         {saveStatus === 'error' && <span className="text-red-400">{isHe ? '⚠ שגיאה בשמירה' : '⚠ Save error'}</span>}
+        {saveStatus === 'conflict' && (
+          <span className="flex items-center gap-2 text-amber-400">
+            <span>{isHe ? '⚠ המסמך עודכן בטאב אחר' : '⚠ Document updated in another tab'}</span>
+            <button
+              onClick={() => onConflictReload ? onConflictReload() : window.location.reload()}
+              className="rounded bg-amber-500/20 px-2 py-0.5 text-[11px] font-medium text-amber-300 hover:bg-amber-500/30 transition-colors"
+            >
+              {isHe ? 'טען מחדש' : 'Reload'}
+            </button>
+          </span>
+        )}
         {saveStatus === 'offline' && <span className="text-orange-400">{isHe ? '☁ אופליין — נשמר מקומית' : '☁ Offline — saved locally'}</span>}
         {saveStatus === 'idle' && relativeTime && (
           <span className="text-slate-500">{et.lastSaved}: {relativeTime}</span>

@@ -1,23 +1,22 @@
 -- ============================================================
--- pgTAP Test: projects RLS policies
--- Verifies: anon blocked, authenticated can read/insert/update,
---           delete blocked (no delete policy — managed via Origami sync)
+-- pgTAP Test: story_cards RLS policies
+-- Verifies: anon blocked, authenticated can CRUD
 -- ============================================================
 BEGIN;
 
-SELECT plan(9);
+SELECT plan(8);
 
 -- ──────────────────────────────────────────────────────────────
 -- 1. Table exists
 -- ──────────────────────────────────────────────────────────────
-SELECT has_table('public', 'projects', 'projects table exists');
+SELECT has_table('public', 'story_cards', 'story_cards table exists');
 
 -- ──────────────────────────────────────────────────────────────
 -- 2. RLS is enabled
 -- ──────────────────────────────────────────────────────────────
 SELECT ok(
-  (SELECT relrowsecurity FROM pg_class WHERE relname = 'projects'),
-  'RLS is enabled on projects'
+  (SELECT relrowsecurity FROM pg_class WHERE relname = 'story_cards'),
+  'RLS is enabled on story_cards'
 );
 
 -- ──────────────────────────────────────────────────────────────
@@ -25,19 +24,19 @@ SELECT ok(
 -- ──────────────────────────────────────────────────────────────
 SET LOCAL ROLE anon;
 SELECT is_empty(
-  $$SELECT id FROM projects LIMIT 1$$,
-  'anon role cannot read projects'
+  $$SELECT id FROM story_cards LIMIT 1$$,
+  'anon role cannot read story_cards'
 );
 
 -- ──────────────────────────────────────────────────────────────
 -- 4. Anon role cannot INSERT
 -- ──────────────────────────────────────────────────────────────
 SELECT throws_ok(
-  $$INSERT INTO projects (name, status, layer, source)
-    VALUES ('anon-project', 'active', 'infrastructure', 'manual')$$,
+  $$INSERT INTO story_cards (col, row, text, type, color, sort_order)
+    VALUES (0, 0, 'anon-card', 'story', '#ff0000', 0)$$,
   42501,
   NULL,
-  'anon role cannot insert into projects'
+  'anon role cannot insert into story_cards'
 );
 
 -- ──────────────────────────────────────────────────────────────
@@ -48,44 +47,33 @@ SET LOCAL ROLE authenticated;
 SET LOCAL request.jwt.claims = '{"sub": "a1111111-1111-1111-1111-111111111111", "role": "authenticated"}';
 
 SELECT lives_ok(
-  $$SELECT id FROM projects LIMIT 1$$,
-  'authenticated role can select from projects'
+  $$SELECT id FROM story_cards LIMIT 1$$,
+  'authenticated role can select from story_cards'
 );
 
 -- ──────────────────────────────────────────────────────────────
 -- 6. Authenticated role can INSERT
 -- ──────────────────────────────────────────────────────────────
 SELECT lives_ok(
-  $$INSERT INTO projects (name, status, health_score, layer, source)
-    VALUES ('rls-test-project', 'active', 50, 'product', 'manual')$$,
-  'authenticated role can insert into projects'
+  $$INSERT INTO story_cards (col, row, text, type, color, sort_order)
+    VALUES (1, 1, 'rls-test-card', 'story', '#00ff00', 0)$$,
+  'authenticated role can insert into story_cards'
 );
 
 -- ──────────────────────────────────────────────────────────────
 -- 7. Authenticated role can UPDATE
 -- ──────────────────────────────────────────────────────────────
 SELECT lives_ok(
-  $$UPDATE projects SET health_score = 75 WHERE name = 'rls-test-project'$$,
-  'authenticated role can update projects'
+  $$UPDATE story_cards SET text = 'rls-test-card-updated' WHERE text = 'rls-test-card'$$,
+  'authenticated role can update story_cards'
 );
 
 -- ──────────────────────────────────────────────────────────────
--- 8. Inserted data is readable
+-- 8. Authenticated role can DELETE
 -- ──────────────────────────────────────────────────────────────
-SELECT isnt_empty(
-  $$SELECT id FROM projects WHERE name = 'rls-test-project'$$,
-  'authenticated role sees inserted project data'
-);
-
--- ──────────────────────────────────────────────────────────────
--- 9. Authenticated role CANNOT delete (no delete policy exists)
--- ──────────────────────────────────────────────────────────────
--- With RLS enabled and no DELETE policy for authenticated,
--- a delete will silently affect 0 rows (not throw an error).
--- We verify the row still exists after the delete attempt.
 SELECT lives_ok(
-  $$DELETE FROM projects WHERE name = 'rls-test-project'$$,
-  'delete does not throw (but has no matching policy)'
+  $$DELETE FROM story_cards WHERE text = 'rls-test-card-updated'$$,
+  'authenticated role can delete from story_cards'
 );
 
 SELECT * FROM finish();
