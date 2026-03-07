@@ -178,12 +178,12 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       setSaveStatus('saving');
       const { error: err } = await supabase
         .from('vb_records')
-        .update({ content: json })
+        .update({ content: json, last_edited_at: new Date().toISOString() })
         .eq('id', recordId);
 
       if (err) {
+        console.error('Editor save failed:', err.message, err.code);
         setSaveStatus('error');
-        setTimeout(() => setSaveStatus('idle'), 3000);
         return;
       }
       setSaveStatus('saved');
@@ -247,24 +247,20 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     };
   }, [recordId, content, title]);
 
-  // Ctrl+S → save content + version snapshot
+  // Ctrl+S / ⌘S → version snapshot (content save is handled by TiptapEditor's onSave)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
-        if (content) {
-          handleSave(content);
-          // Save version if >1 min since last
-          if (Date.now() - lastVersionSaveRef.current > 60_000) {
-            saveVersion(recordId, title, content);
-            lastVersionSaveRef.current = Date.now();
-          }
+        if (content && title && Date.now() - lastVersionSaveRef.current > 60_000) {
+          saveVersion(recordId, title, content);
+          lastVersionSaveRef.current = Date.now();
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [content, handleSave, recordId, title]);
+  }, [content, recordId, title]);
 
   // ── New toolbar handlers ────────────────────────────
   const handleDuplicate = useCallback(async () => {

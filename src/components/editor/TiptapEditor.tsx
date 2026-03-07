@@ -158,18 +158,6 @@ export function TiptapEditor({
         spellcheck: 'true',
         'data-record-id': recordId || '',
       },
-      handleDOMEvents: {
-        keydown: (_view, event) => {
-          if ((event.metaKey || event.ctrlKey) && event.key === 's') {
-            event.preventDefault();
-            if (onSave && editor) {
-              onSave(editor.getJSON());
-            }
-            return true;
-          }
-          return false;
-        },
-      },
     },
     onUpdate: ({ editor: e }) => {
       const json = e.getJSON();
@@ -274,7 +262,7 @@ function StatusBar({
         {readingTime > 0 && ` · ${readingTime} ${et.minRead}`}
       </span>
       <span className="gam-editor-statusbar__hint">
-        <kbd>/</kbd> {isHe ? 'תפריט' : 'menu'} · <kbd>Ctrl+S</kbd>
+        <kbd>/</kbd> {isHe ? 'תפריט' : 'menu'} · <kbd>{typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl'}+S</kbd>
       </span>
     </div>
   );
