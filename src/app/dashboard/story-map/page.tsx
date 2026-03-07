@@ -6,11 +6,31 @@ import { Wifi, WifiOff } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useShortcuts } from '@/contexts/ShortcutsContext';
 import { getTranslations } from '@/lib/i18n';
+import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/command-center/PageHeader';
-import { StoryBoard } from '@/components/command-center/StoryBoard';
-import { StoryMapFilterBar } from '@/components/command-center/StoryMapFilterBar';
-import { StoryMapStats } from '@/components/command-center/StoryMapStats';
-import { StoryMapExport } from '@/components/command-center/StoryMapExport';
+
+const StoryBoard = dynamic(
+  () => import('@/components/command-center/StoryBoard').then((m) => ({ default: m.StoryBoard })),
+  {
+    ssr: false,
+    loading: () => <div className="animate-pulse h-96 bg-slate-800/50 rounded-lg" />,
+  }
+);
+
+const StoryMapFilterBar = dynamic(
+  () => import('@/components/command-center/StoryMapFilterBar').then((m) => ({ default: m.StoryMapFilterBar })),
+  { ssr: false }
+);
+
+const StoryMapStats = dynamic(
+  () => import('@/components/command-center/StoryMapStats').then((m) => ({ default: m.StoryMapStats })),
+  { ssr: false }
+);
+
+const StoryMapExport = dynamic(
+  () => import('@/components/command-center/StoryMapExport').then((m) => ({ default: m.StoryMapExport })),
+  { ssr: false }
+);
 import { supabase } from '@/lib/supabaseClient';
 import {
   fetchStoryCards,

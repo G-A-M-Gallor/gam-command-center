@@ -1,17 +1,41 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard } from "lucide-react";
-import { SettingsPanel, SettingsBarContent } from "./SettingsWidget";
-import { SearchPanel, SearchBarContent } from "./SearchWidget";
-import { AIPanel, AIBarContent } from "./AIWidget";
-import { QuickCreatePanel, QuickCreateBarContent } from "./QuickCreateWidget";
-import { FavoritesPanel, FavoritesBarContent } from "./FavoritesWidget";
-import { TodayPanel, TodayBarContent } from "./TodayWidget";
-import { NotificationsPanel, NotificationsBarContent } from "./NotificationsWidget";
-import { TimerPanel, TimerBarContent } from "./TimerWidget";
-import { ClipboardPanel, ClipboardBarContent } from "./ClipboardWidget";
-import { ShortcutsPanel, ShortcutsBarContent } from "./ShortcutsWidget";
-import { WeeklyPlannerPanel, WeeklyPlannerBarContent } from "./WeeklyPlannerWidget";
+import dynamic from "next/dynamic";
+
+// ─── Lazy-loaded widget panels (code-split per widget) ──────
+const SearchPanel = dynamic(() => import("./SearchWidget").then((m) => ({ default: m.SearchPanel })), { ssr: false }) as ComponentType<any>;
+const SearchBarContent = dynamic(() => import("./SearchWidget").then((m) => ({ default: m.SearchBarContent })), { ssr: false }) as ComponentType<any>;
+
+const AIPanel = dynamic(() => import("./AIWidget").then((m) => ({ default: m.AIPanel })), { ssr: false }) as ComponentType<any>;
+const AIBarContent = dynamic(() => import("./AIWidget").then((m) => ({ default: m.AIBarContent })), { ssr: false }) as ComponentType<any>;
+
+const QuickCreatePanel = dynamic(() => import("./QuickCreateWidget").then((m) => ({ default: m.QuickCreatePanel })), { ssr: false }) as ComponentType<any>;
+const QuickCreateBarContent = dynamic(() => import("./QuickCreateWidget").then((m) => ({ default: m.QuickCreateBarContent })), { ssr: false }) as ComponentType<any>;
+
+const FavoritesPanel = dynamic(() => import("./FavoritesWidget").then((m) => ({ default: m.FavoritesPanel })), { ssr: false }) as ComponentType<any>;
+const FavoritesBarContent = dynamic(() => import("./FavoritesWidget").then((m) => ({ default: m.FavoritesBarContent })), { ssr: false }) as ComponentType<any>;
+
+const TodayPanel = dynamic(() => import("./TodayWidget").then((m) => ({ default: m.TodayPanel })), { ssr: false }) as ComponentType<any>;
+const TodayBarContent = dynamic(() => import("./TodayWidget").then((m) => ({ default: m.TodayBarContent })), { ssr: false }) as ComponentType<any>;
+
+const NotificationsPanel = dynamic(() => import("./NotificationsWidget").then((m) => ({ default: m.NotificationsPanel })), { ssr: false }) as ComponentType<any>;
+const NotificationsBarContent = dynamic(() => import("./NotificationsWidget").then((m) => ({ default: m.NotificationsBarContent })), { ssr: false }) as ComponentType<any>;
+
+const TimerPanel = dynamic(() => import("./TimerWidget").then((m) => ({ default: m.TimerPanel })), { ssr: false }) as ComponentType<any>;
+const TimerBarContent = dynamic(() => import("./TimerWidget").then((m) => ({ default: m.TimerBarContent })), { ssr: false }) as ComponentType<any>;
+
+const ClipboardPanel = dynamic(() => import("./ClipboardWidget").then((m) => ({ default: m.ClipboardPanel })), { ssr: false }) as ComponentType<any>;
+const ClipboardBarContent = dynamic(() => import("./ClipboardWidget").then((m) => ({ default: m.ClipboardBarContent })), { ssr: false }) as ComponentType<any>;
+
+const SettingsPanel = dynamic(() => import("./SettingsWidget").then((m) => ({ default: m.SettingsPanel })), { ssr: false }) as ComponentType<any>;
+const SettingsBarContent = dynamic(() => import("./SettingsWidget").then((m) => ({ default: m.SettingsBarContent })), { ssr: false }) as ComponentType<any>;
+
+const ShortcutsPanel = dynamic(() => import("./ShortcutsWidget").then((m) => ({ default: m.ShortcutsPanel })), { ssr: false }) as ComponentType<any>;
+const ShortcutsBarContent = dynamic(() => import("./ShortcutsWidget").then((m) => ({ default: m.ShortcutsBarContent })), { ssr: false }) as ComponentType<any>;
+
+const WeeklyPlannerPanel = dynamic(() => import("./WeeklyPlannerWidget").then((m) => ({ default: m.WeeklyPlannerPanel })), { ssr: false }) as ComponentType<any>;
+const WeeklyPlannerBarContent = dynamic(() => import("./WeeklyPlannerWidget").then((m) => ({ default: m.WeeklyPlannerBarContent })), { ssr: false }) as ComponentType<any>;
 
 export type WidgetSize = 1 | 2 | 3 | 4;
 
@@ -72,7 +96,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     category: "basics",
     tier: "free",
     isRemovable: false,
-    component: SearchPanel as ComponentType,
+    component: SearchPanel,
     renderBar: SearchBarContent,
     panelMode: "modal",
   },
@@ -90,7 +114,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     category: "ai_comms",
     tier: "free",
     isRemovable: true,
-    component: AIPanel as ComponentType,
+    component: AIPanel,
     renderBar: AIBarContent,
     panelMode: "side-panel",
   },
@@ -227,7 +251,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     category: "basics",
     tier: "free",
     isRemovable: true,
-    component: ShortcutsPanel as ComponentType,
+    component: ShortcutsPanel,
     renderBar: ShortcutsBarContent,
     panelMode: "modal",
   },
@@ -245,7 +269,7 @@ export const widgetRegistry: WidgetDefinition[] = [
     category: "productivity",
     tier: "pro",
     isRemovable: true,
-    component: WeeklyPlannerPanel as ComponentType,
+    component: WeeklyPlannerPanel,
     renderBar: WeeklyPlannerBarContent,
     panelMode: "modal",
   },
