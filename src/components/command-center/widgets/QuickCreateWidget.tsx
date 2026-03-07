@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, FolderPlus, CheckSquare, X } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useToast } from "@/contexts/ToastContext";
 import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
@@ -41,6 +42,7 @@ export function QuickCreatePanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const router = useRouter();
+  const { toast } = useToast();
 
   const [creating, setCreating] = useState<"project" | "task" | null>(null);
   const [title, setTitle] = useState("");
@@ -48,9 +50,11 @@ export function QuickCreatePanel() {
   const handleCreate = useCallback(() => {
     if (!title.trim() || !creating) return;
     saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
+    const label = creating === "project" ? t.widgets.newProjectAction : t.widgets.newTaskAction;
+    toast({ message: `${label}: ${title.trim()}`, type: "success" });
     setTitle("");
     setCreating(null);
-  }, [title, creating]);
+  }, [title, creating, t, toast]);
 
   const todayCount = getCreatedTodayCount();
 
@@ -118,7 +122,7 @@ export function QuickCreatePanel() {
               type="button"
               onClick={handleCreate}
               disabled={!title.trim()}
-              className="rounded bg-[var(--cc-accent-600)]px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40"
+              className="rounded bg-[var(--cc-accent-600)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40"
             >
               {t.widgets.create}
             </button>

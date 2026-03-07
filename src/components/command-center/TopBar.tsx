@@ -148,16 +148,18 @@ export function TopBar() {
     }
   }, []);
 
-  // Ref for sidebar visibility so the event listener always reads the latest value
+  // Refs so event listeners always read the latest values
   const sidebarVisibilityRef = useRef(sidebarVisibility);
   sidebarVisibilityRef.current = sidebarVisibility;
+  const editModeRef = useRef(editMode);
+  editModeRef.current = editMode;
 
   // Custom event listeners
   useEffect(() => {
     const handleOpenSearch = () => setSearchOpen(true);
     const handleOpenAI = () => setAiPanelOpen((prev) => !prev);
     const handleOpenShortcuts = () => setShortcutsOpen((prev) => !prev);
-    const handleToggleEditMode = () => setEditMode(!editMode);
+    const handleToggleEditMode = () => setEditMode(!editModeRef.current);
     const handleToggleSidebar = () => {
       const cycle = { visible: "float", float: "hidden", hidden: "visible" } as const;
       setSidebarVisibility(cycle[sidebarVisibilityRef.current] || "visible");
@@ -226,7 +228,7 @@ export function TopBar() {
       window.removeEventListener("cc-ai-mode-write", handleAiModeWrite);
       window.removeEventListener("cc-ai-clear", handleAiClear);
     };
-  }, [editMode, setEditMode, setSidebarVisibility, router]);
+  }, [setEditMode, setSidebarVisibility, router]);
 
   const handleSearchOpen = useCallback(() => {
     setSearchOpen(true);
@@ -598,6 +600,8 @@ export function TopBar() {
         <button
           type="button"
           onClick={() => setEditMode(!editMode)}
+          aria-label={t.widgets.editMode}
+          aria-pressed={editMode}
           className={`mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors ${
             editMode
               ? "bg-[var(--cc-accent-600)] text-white"
@@ -612,6 +616,8 @@ export function TopBar() {
         <button
           type="button"
           onClick={() => setGuideMode(!guideMode)}
+          aria-label={t.widgets.guideMode || "Guide"}
+          aria-pressed={guideMode}
           className={`mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors ${
             guideMode
               ? "bg-[var(--cc-accent-600)] text-white"
@@ -626,6 +632,7 @@ export function TopBar() {
         <button
           type="button"
           onClick={() => setStoreOpen(true)}
+          aria-label={t.widgets.store}
           className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
           title={t.widgets.store}
         >

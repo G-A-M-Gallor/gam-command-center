@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -60,7 +60,7 @@ interface StoryBoardProps {
   };
 }
 
-export function StoryBoard({
+export const StoryBoard = memo(function StoryBoard({
   cards,
   setCards,
   onAddEpic,
@@ -278,4 +278,4 @@ export function StoryBoard({
       </DragOverlay>
     </DndContext>
   );
-}
+});

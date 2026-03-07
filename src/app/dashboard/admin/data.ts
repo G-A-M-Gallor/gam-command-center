@@ -343,6 +343,7 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'mobile-responsive-pass-2': makeChecklist(true, true, true, true, true),
   'ds-app-preview': makeChecklist(true, true, true, true, true),
   'pwa-foundation': makeChecklist(true, true, true, true, true),
+  'ux-bugfix-pass': makeChecklist(true, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -1610,5 +1611,26 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'First step toward making vBrain.io installable as a mobile app. PWA manifest + icons + metadata enable "Add to Home Screen" on both iOS and Android. This is the foundation for the planned Capacitor wrapper that will bring the app to App Store and Google Play.',
     purposeHe: 'צעד ראשון להפיכת vBrain.io לאפליקציה מותקנת. מניפסט PWA + אייקונים + מטא-דאטה מאפשרים "הוספה למסך הבית" ב-iOS וב-Android. זו התשתית ל-Capacitor שיביא את האפליקציה ל-App Store ו-Google Play.',
     connectedTo: ['layout.tsx', 'manifest.json'],
+  },
+  {
+    id: 'ux-bugfix-pass',
+    feature: 'UX bug fixes — toast, click, aria, memo, i18n',
+    featureHe: 'תיקוני UX — טוסט, קליק, נגישות, ביצועים, תרגום',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: [
+      'src/components/command-center/widgets/QuickCreateWidget.tsx',
+      'src/components/command-center/ProjectCard.tsx',
+      'src/components/command-center/TopBar.tsx',
+      'src/components/command-center/StoryBoard.tsx',
+      'src/lib/i18n.ts',
+    ],
+    notes: 'QuickCreate: fixed broken Tailwind class (missing space), added toast feedback on create. ProjectCard: added click handler with keyboard navigation. TopBar: fixed stale closure via ref pattern, added aria-label + aria-pressed to icon buttons. StoryBoard: wrapped in React.memo. Russian i18n: liveMode "Живой" → "Онлайн".',
+    notesHe: 'QuickCreate: תיקון קלאס Tailwind שבור (רווח חסר), הוספת טוסט ביצירה. ProjectCard: הוספת הנדלר קליק עם ניווט מקלדת. TopBar: תיקון stale closure דרך ref, הוספת aria-label ו-aria-pressed. StoryBoard: עטיפה ב-React.memo. רוסית: liveMode "Живой" → "Онлайн".',
+    purpose: 'Audit-driven quality pass fixing dead-end UX (QuickCreate saves to localStorage silently, ProjectCard looks clickable but does nothing), accessibility gaps (no aria-labels on TopBar buttons), performance (StoryBoard re-renders), a stale closure bug, and an incorrect Russian translation.',
+    purposeHe: 'מעבר איכות מבוסס אודיט — תיקון UX עיוור (QuickCreate שומר ללוקל בשקט, ProjectCard נראה לחיץ אך לא עושה כלום), פערי נגישות (אין aria-labels בכפתורי TopBar), ביצועים (StoryBoard מרנדר מיותר), באג stale closure, ותרגום רוסי שגוי.',
+    connectedTo: ['QuickCreateWidget.tsx', 'ProjectCard.tsx', 'TopBar.tsx', 'StoryBoard.tsx', 'i18n.ts'],
   },
 ];

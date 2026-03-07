@@ -2995,7 +2995,7 @@ export const translations = {
       tokenUsage: "Дневное потребление токенов",
       tokenBudgetWarning: "80% дневного бюджета использовано",
       tokenBudgetExceeded: "Дневной бюджет исчерпан — попробуйте завтра",
-      liveMode: "Живой",
+      liveMode: "Онлайн",
       modelLabel: "Модель",
       conversationLimit: "Лимит 50 сообщений — начните новый чат",
       savingToCloud: "Сохранение...",
