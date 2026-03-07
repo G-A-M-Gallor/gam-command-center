@@ -40,41 +40,35 @@ test.describe('Editor — Authenticated', () => {
 
   test('can create and type in editor', async ({ page }) => {
     await page.goto('/dashboard/editor');
-    // Wait for document list to load
-    await page.waitForTimeout(2000);
 
-    // Look for a "new document" button
+    // Wait for the document list to render (new document button must appear)
     const newBtn = page.locator('button:has-text("חדש"), button:has-text("New")');
-    if (await newBtn.isVisible()) {
-      await newBtn.click();
-      await page.waitForSelector('[contenteditable="true"]', { timeout: 10000 });
+    await expect(newBtn).toBeVisible({ timeout: 10000 });
 
-      const editor = page.locator('.ProseMirror, [contenteditable="true"]');
-      await editor.click();
-      await editor.pressSequentially('בדיקת שמירה אוטומטית');
+    await newBtn.click();
 
-      await expect(editor).toContainText('בדיקת שמירה אוטומטית');
-    }
+    // Wait for editor to appear
+    const editor = page.locator('.ProseMirror, [contenteditable="true"]');
+    await expect(editor).toBeVisible({ timeout: 10000 });
+
+    await editor.click();
+    await editor.pressSequentially('בדיקת שמירה אוטומטית');
+
+    await expect(editor).toContainText('בדיקת שמירה אוטומטית');
   });
 
   test('autosave shows status indicator', async ({ page }) => {
     await page.goto('/dashboard/editor');
-    await page.waitForTimeout(2000);
 
-    // If we can find an editor, type and verify save status appears
+    // Wait for editor to appear
     const editor = page.locator('.ProseMirror, [contenteditable="true"]');
-    if (await editor.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await editor.click();
-      await editor.pressSequentially('test autosave');
+    await expect(editor).toBeVisible({ timeout: 10000 });
 
-      // Wait for debounced save (1s) + save time
-      await page.waitForTimeout(3000);
+    await editor.click();
+    await editor.pressSequentially('test autosave');
 
-      // Look for save status indicator
-      const statusBar = page.locator('.gam-editor-statusbar');
-      if (await statusBar.isVisible()) {
-        await expect(statusBar).toBeVisible();
-      }
-    }
+    // Wait for the status bar to reflect a save cycle (debounce 1s + save time)
+    const statusBar = page.locator('.gam-editor-statusbar');
+    await expect(statusBar).toBeVisible({ timeout: 10000 });
   });
 });
