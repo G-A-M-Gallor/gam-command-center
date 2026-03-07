@@ -6,13 +6,14 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { ExportMenu } from '@/components/editor/ExportMenu';
 import type { JSONContent } from '@tiptap/react';
+import type { SaveState } from '@/lib/editor/useAutoSave';
 
 interface CanvasToolbarProps {
   title: string;
   onTitleChange: (title: string) => void;
   onTitleBlur: () => void;
   onBack: () => void;
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'retrying' | 'offline';
+  saveStatus: SaveState;
   showFieldLibrary: boolean;
   onToggleFieldLibrary: () => void;
   content?: JSONContent;

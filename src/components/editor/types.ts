@@ -4,6 +4,7 @@
 // ===================================================
 
 import type { JSONContent } from '@tiptap/react';
+import type { SaveState } from '@/lib/editor/useAutoSave';
 
 export type BlockType =
   | 'paragraph'
@@ -41,7 +42,7 @@ export interface TiptapEditorProps {
   /** Record ID (for future block-level storage) */
   recordId?: string;
   /** Save status from parent — displayed in status bar */
-  saveStatus?: 'idle' | 'saving' | 'saved' | 'error' | 'retrying' | 'offline';
+  saveStatus?: SaveState;
   /** Timestamp of last successful save */
   lastSavedAt?: Date;
 }

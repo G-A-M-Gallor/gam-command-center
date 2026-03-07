@@ -1,21 +1,10 @@
 import { createClient } from "@/lib/supabase/client";
+import type { DocRecord, DocTemplate, DocVersion, DocShare } from "./schema";
+
+// Re-export types so existing consumers can keep importing from here
+export type { DocRecord, DocTemplate, DocVersion, DocShare };
 
 // ─── Document CRUD ──────────────────────────────────────────
-
-export interface DocRecord {
-  id: string;
-  title: string;
-  content: unknown;
-  status: string | null;
-  record_type: string;
-  workspace_id: string;
-  entity_id: string;
-  created_by: string;
-  source: string;
-  created_at: string;
-  last_edited_at: string;
-  updated_at: string;
-}
 
 export async function fetchDocuments(limit = 50): Promise<DocRecord[]> {
   const supabase = createClient();
@@ -192,21 +181,6 @@ export async function duplicateDocument(sourceId: string): Promise<DocRecord | n
 
 // ─── Template CRUD ──────────────────────────────────────────
 
-export interface DocTemplate {
-  id: string;
-  name: string;
-  name_he: string | null;
-  icon: string;
-  description: string | null;
-  description_he: string | null;
-  category: string;
-  content: unknown;
-  canvas_layout: unknown | null;
-  field_placements: unknown[];
-  created_by: string | null;
-  created_at: string;
-}
-
 export async function fetchTemplates(): Promise<DocTemplate[]> {
   const supabase = createClient();
   const { data } = await supabase
@@ -269,15 +243,6 @@ export async function deleteTemplate(id: string): Promise<boolean> {
 }
 
 // ─── Version CRUD ───────────────────────────────────────────
-
-export interface DocVersion {
-  id: string;
-  document_id: string;
-  title: string;
-  content: unknown;
-  version_number: number;
-  created_at: string;
-}
 
 export async function saveVersion(documentId: string, title: string, content: unknown): Promise<boolean> {
   const supabase = createClient();
@@ -346,15 +311,6 @@ export async function restoreVersion(documentId: string, versionId: string): Pro
 }
 
 // ─── Share CRUD ─────────────────────────────────────────────
-
-export interface DocShare {
-  id: string;
-  document_id: string;
-  share_token: string;
-  is_active: boolean;
-  created_at: string;
-  expires_at: string | null;
-}
 
 export async function createShareLink(documentId: string, expiresInDays?: number): Promise<DocShare | null> {
   const supabase = createClient();

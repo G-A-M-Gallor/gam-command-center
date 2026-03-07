@@ -3,6 +3,7 @@
 import type { JSONContent } from '@tiptap/react';
 import { TiptapEditor } from '@/components/editor';
 import type { GridRect } from '@/lib/canvas/types';
+import type { SaveState } from '@/lib/editor/useAutoSave';
 
 interface EditorZoneProps {
   editorZone: GridRect;
@@ -11,7 +12,7 @@ interface EditorZoneProps {
   onChange: (json: JSONContent) => void;
   onSave: (json: JSONContent) => void;
   recordId: string;
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'retrying' | 'offline';
+  saveStatus: SaveState;
   lastSavedAt?: Date;
 }
 
