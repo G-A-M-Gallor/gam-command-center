@@ -345,6 +345,18 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'pwa-foundation': makeChecklist(true, true, true, true, true),
   'ux-bugfix-pass': makeChecklist(true, true, true, true, true),
   'accessibility-pass': makeChecklist(true, true, true, true, true),
+  // ── Dashboard Pages ──
+  'layers':          makeChecklist(true, true, true, true, true),
+  'editor':          makeChecklist(true, true, true, true, true),
+  'functional-map':  makeChecklist(true, true, true, true, true),
+  'ai-hub':          makeChecklist(true, true, true, true, true),
+  'design-system':   makeChecklist(true, true, true, true, true),
+  'formily':         makeChecklist(true, true, true, true, true),
+  'architecture':    makeChecklist(true, true, true, true, true),
+  'plan':            makeChecklist(true, true, true, true, true),
+  'automations':     makeChecklist(true, true, true, true, true),
+  'settings':        makeChecklist(true, true, true, true, true),
+  'gam-landing':     makeChecklist(true, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
