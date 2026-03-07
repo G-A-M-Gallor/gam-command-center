@@ -13,6 +13,7 @@ import {
   FormInput,
   Network,
   Calendar,
+  Compass,
   Zap,
   Settings,
   Shield,
@@ -61,6 +62,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/design-system", key: "designSystem", icon: Palette },
       { href: "/dashboard/architecture", key: "architecture", icon: Network },
       { href: "/dashboard/plan", key: "plan", icon: Calendar },
+      { href: "/roadmap", key: "roadmap", icon: Compass },
     ],
   },
   {
