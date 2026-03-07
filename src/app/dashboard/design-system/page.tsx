@@ -11,6 +11,8 @@ import {
   type ComponentEntry,
   type ComponentCategory,
 } from "./componentRegistry";
+import { libraryRegistry } from "./libraryRegistry";
+import { LibraryTab } from "./LibraryTab";
 import {
   Eye,
   ExternalLink,
@@ -37,7 +39,7 @@ import {
 import { Badge, Input, Tooltip, Button } from "@/components/ui";
 import { routes } from "@/app/dashboard/admin/data";
 
-type TabId = "gallery" | "components" | "handbook" | "app-preview";
+type TabId = "gallery" | "components" | "handbook" | "app-preview" | "library";
 
 // ─── Gallery Card (preserved from original) ──────────────────────
 
@@ -771,6 +773,7 @@ export default function DesignSystemPage() {
     { id: "components", label: td.components, count: componentRegistry.length },
     { id: "handbook", label: td.handbook, count: HANDBOOK_SECTIONS.length + 1 },
     { id: "app-preview", label: `📱 ${td.appPreview}`, count: DEVICE_PRESETS.length },
+    { id: "library", label: td.library, count: libraryRegistry.length },
   ];
 
   return (
@@ -940,6 +943,11 @@ export default function DesignSystemPage() {
         {/* Tab: App Preview */}
         {activeTab === "app-preview" && (
           <AppPreviewTab isHe={isHe} td={td as Record<string, string>} />
+        )}
+
+        {/* Tab: Library */}
+        {activeTab === "library" && (
+          <LibraryTab isHe={isHe} td={td as Record<string, string>} />
         )}
       </div>
 
