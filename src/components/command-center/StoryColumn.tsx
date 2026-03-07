@@ -48,6 +48,8 @@ interface StoryColumnProps {
     diagramPlaceholder: string;
     preview: string;
     save: string;
+    estimation: string;
+    noEstimation: string;
   };
 }
 

@@ -32,6 +32,28 @@ function getColorClasses(colorId: string | null) {
   return COLORS.find((c) => c.id === colorId) ?? null;
 }
 
+// ─── Estimation sizes ──────────────────────────────
+const ESTIMATIONS = [
+  { id: 'XS', bg: 'bg-emerald-500/20', text: 'text-emerald-400', points: 1 },
+  { id: 'S', bg: 'bg-sky-500/20', text: 'text-sky-400', points: 2 },
+  { id: 'M', bg: 'bg-amber-500/20', text: 'text-amber-400', points: 3 },
+  { id: 'L', bg: 'bg-orange-500/20', text: 'text-orange-400', points: 5 },
+  { id: 'XL', bg: 'bg-red-500/20', text: 'text-red-400', points: 8 },
+] as const;
+
+export { ESTIMATIONS };
+
+function EstimationBadge({ estimation }: { estimation: string | null }) {
+  if (!estimation) return null;
+  const est = ESTIMATIONS.find((e) => e.id === estimation);
+  if (!est) return null;
+  return (
+    <span className={`shrink-0 rounded px-1 py-px text-[9px] font-bold ${est.bg} ${est.text}`}>
+      {est.id}
+    </span>
+  );
+}
+
 // ─── Props ──────────────────────────────────────────
 interface StoryCardProps {
   card: StoryCardType;
@@ -54,6 +76,8 @@ interface StoryCardProps {
     diagramPlaceholder: string;
     preview: string;
     save: string;
+    estimation: string;
+    noEstimation: string;
   };
 }
 
@@ -328,6 +352,8 @@ interface FeatureCardProps {
     deleteCard: string;
     colorPicker: string;
     noColor: string;
+    estimation: string;
+    noEstimation: string;
   };
 }
 
@@ -350,6 +376,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(card.text);
   const [showColor, setShowColor] = useState(false);
+  const [showEstimation, setShowEstimation] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const colorClasses = getColorClasses(card.color);
 
@@ -431,10 +458,23 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
             {card.text}
           </span>
         )}
+
+        {/* Estimation badge */}
+        <EstimationBadge estimation={card.estimation} />
       </div>
 
       {/* Hover actions */}
       <div className="absolute -top-2 end-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <button
+          type="button"
+          onClick={() => setShowEstimation((v) => !v)}
+          className={`rounded bg-slate-700 px-1 py-0.5 text-[9px] font-bold ${
+            card.estimation ? 'text-amber-400' : 'text-slate-400'
+          } hover:text-slate-200`}
+          title={t.estimation}
+        >
+          Est
+        </button>
         <button
           type="button"
           onClick={() => setShowColor((v) => !v)}
@@ -452,6 +492,39 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
           <Trash2 className="h-3 w-3" />
         </button>
       </div>
+
+      {/* Estimation picker */}
+      {showEstimation && (
+        <div className="mt-1 flex flex-wrap items-center gap-1 ps-6">
+          <button
+            type="button"
+            onClick={() => {
+              onUpdate(card.id, { estimation: null });
+              setShowEstimation(false);
+            }}
+            className={`rounded px-1.5 py-0.5 text-[10px] ${!card.estimation ? 'bg-slate-600 text-slate-200' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+          >
+            <X className="inline h-2.5 w-2.5" />
+          </button>
+          {ESTIMATIONS.map((e) => (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => {
+                onUpdate(card.id, { estimation: e.id });
+                setShowEstimation(false);
+              }}
+              className={`rounded px-1.5 py-0.5 text-[10px] font-bold transition-colors ${
+                card.estimation === e.id
+                  ? `${e.bg} ${e.text} ring-1 ring-current`
+                  : 'bg-slate-800 text-slate-500 hover:text-slate-300'
+              }`}
+            >
+              {e.id}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Color picker */}
       {showColor && (
@@ -507,6 +580,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
   const [newSub, setNewSub] = useState('');
   const [showColor, setShowColor] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showEstimation, setShowEstimation] = useState(false);
   const [notesText, setNotesText] = useState(card.notes || '');
   const [showDiagramModal, setShowDiagramModal] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -628,6 +702,9 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
                 </span>
               )}
 
+              {/* Estimation badge */}
+              <EstimationBadge estimation={card.estimation} />
+
               {/* Indicators for notes/diagram */}
               {(hasNotes || hasDiagram) && (
                 <div className="flex shrink-0 items-center gap-0.5">
@@ -739,6 +816,16 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
         <div className="absolute -top-2 end-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             type="button"
+            onClick={() => setShowEstimation((v) => !v)}
+            className={`rounded bg-slate-700 px-1 py-0.5 text-[9px] font-bold ${
+              card.estimation ? 'text-amber-400' : 'text-slate-400'
+            } hover:text-slate-200`}
+            title={t.estimation}
+          >
+            Est
+          </button>
+          <button
+            type="button"
             onClick={() => setShowColor((v) => !v)}
             className="rounded bg-slate-700 p-0.5 text-slate-400 hover:text-slate-200"
             title={t.colorPicker}
@@ -811,6 +898,39 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
                 }}
                 className={`h-4 w-4 rounded-full ${c.dot} ${card.color === c.id ? 'ring-2 ring-purple-400' : ''}`}
               />
+            ))}
+          </div>
+        )}
+
+        {/* Estimation picker */}
+        {showEstimation && (
+          <div className="mt-1.5 flex flex-wrap items-center gap-1 px-5">
+            <button
+              type="button"
+              onClick={() => {
+                onUpdate(card.id, { estimation: null });
+                setShowEstimation(false);
+              }}
+              className={`rounded px-1.5 py-0.5 text-[10px] ${!card.estimation ? 'bg-slate-600 text-slate-200' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+            >
+              <X className="inline h-2.5 w-2.5" />
+            </button>
+            {ESTIMATIONS.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                onClick={() => {
+                  onUpdate(card.id, { estimation: e.id });
+                  setShowEstimation(false);
+                }}
+                className={`rounded px-1.5 py-0.5 text-[10px] font-bold transition-colors ${
+                  card.estimation === e.id
+                    ? `${e.bg} ${e.text} ring-1 ring-current`
+                    : 'bg-slate-800 text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {e.id}
+              </button>
             ))}
           </div>
         )}

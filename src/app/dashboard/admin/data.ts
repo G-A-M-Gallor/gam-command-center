@@ -336,6 +336,8 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'notion-connection':       makeChecklist(false, false, false, true, false),
   // ── Story Map tab ──
   'value-story-map':         makeChecklist(true,  true, true,  true, true),
+  // ── Story Map improvements ──
+  'storymap-improvements':   makeChecklist(true,  true, true,  true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -1478,5 +1480,33 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Production-readiness improvements for the document editor. ConfirmDialog prevents accidental deletions (critical for GAM evidence culture). Template management closes the CRUD gap — users can now edit/delete custom templates. StatusBar gives writers real-time feedback on document stats and save state. Share expiry adds time-limited links with visual indicators.',
     purposeHe: 'שיפורי מוכנות לייצור לעורך המסמכים. ConfirmDialog מונע מחיקות בטעות (קריטי לתרבות הראיות של GAM). ניהול תבניות סוגר את פער ה-CRUD — משתמשים יכולים כעת לערוך/למחוק תבניות מותאמות. StatusBar נותן לכותבים משוב בזמן אמת על סטטיסטיקות מסמך ומצב שמירה. תוקף שיתוף מוסיף קישורים מוגבלים בזמן עם אינדיקטורים ויזואליים.',
     connectedTo: ['ConfirmDialog (reusable)', 'DocumentListView', 'TemplateGallery', 'TiptapEditor', 'ShareDialog', 'CanvasEditor', 'EditorZone', 'shared/doc page', 'editorQueries', 'i18n'],
+  },
+
+  {
+    id: 'storymap-improvements',
+    feature: 'Story Map UX — filter bar, stats, T-shirt estimation, board export',
+    featureHe: 'שיפורי מפת סיפור — סינון, סטטיסטיקה, הערכת מאמץ, ייצוא לוח',
+    status: 'working',
+    commitStatus: 'committed',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: [
+      'src/components/command-center/StoryMapFilterBar.tsx',
+      'src/components/command-center/StoryMapStats.tsx',
+      'src/components/command-center/StoryMapExport.tsx',
+      'src/components/command-center/StoryCard.tsx',
+      'src/components/command-center/StoryBoard.tsx',
+      'src/components/command-center/StoryColumn.tsx',
+      'src/app/dashboard/story-map/page.tsx',
+      'src/lib/supabase/storyCardQueries.ts',
+      'src/lib/i18n.ts',
+      'supabase/migrations/20260333_story_cards_estimation.sql',
+    ],
+    route: '/dashboard/story-map',
+    notes: '4-area Story Map improvement: (1) FilterBar — search input + type pills (epic/feature/story) + color dot toggles + clear all, (2) Stats summary — card counts by type, sub-story completion with progress bar, total points, (3) T-shirt estimation — XS/S/M/L/XL picker on Feature+Story cards with colored badges + point mapping (1/2/3/5/8), (4) Board export — dropdown with JSON, Markdown (with estimation + sub-story checklists), PNG (html2canvas). All i18n HE+EN+RU.',
+    notesHe: 'שיפורי מפת סיפור ב-4 תחומים: (1) שורת סינון — חיפוש + pills לפי סוג + נקודות צבע + ניקוי, (2) סיכום סטטיסטי — ספירות לפי סוג, השלמת תתי-סיפורים עם progress bar, סך נקודות, (3) הערכת T-shirt — בורר XS/S/M/L/XL בכרטיסי Feature+Story עם badges צבעוניים + מיפוי נקודות (1/2/3/5/8), (4) ייצוא לוח — dropdown עם JSON, Markdown (כולל הערכות + תתי-סיפורים כ-checklist), PNG (html2canvas). כל i18n עברית+אנגלית+רוסית.',
+    purpose: 'Sprint planning readiness for the Story Map. Filter/search lets teams focus on specific card types or colors during standup reviews. Stats give an at-a-glance board summary. T-shirt estimation is the standard agile sizing method — enables velocity tracking and sprint capacity planning. Export allows sharing the board with stakeholders who don\'t have system access.',
+    purposeHe: 'מוכנות לתכנון ספרינטים במפת הסיפור. סינון/חיפוש מאפשר לצוות להתמקד בסוגי כרטיסים או צבעים ספציפיים בסקירות יומיות. סטטיסטיקה נותנת תמונה כללית של הלוח במבט אחד. הערכת T-shirt היא שיטת ה-sizing הסטנדרטית באג\'ייל — מאפשרת מעקב velocity ותכנון קיבולת ספרינט. ייצוא מאפשר שיתוף הלוח עם בעלי עניין שאין להם גישה למערכת.',
+    connectedTo: ['StoryMapFilterBar', 'StoryMapStats', 'StoryMapExport', 'StoryCard', 'StoryBoard', 'StoryColumn', 'storyCardQueries', 'i18n', 'html2canvas'],
   },
 ];

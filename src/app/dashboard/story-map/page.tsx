@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Wifi, WifiOff } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { StoryBoard } from '@/components/command-center/StoryBoard';
+import { StoryMapFilterBar } from '@/components/command-center/StoryMapFilterBar';
+import { StoryMapStats } from '@/components/command-center/StoryMapStats';
+import { StoryMapExport } from '@/components/command-center/StoryMapExport';
 import { supabase } from '@/lib/supabaseClient';
 import {
   fetchStoryCards,
@@ -64,6 +67,7 @@ function makeDemoCards(): StoryCard[] {
       sort_order: 0,
       notes: '',
       diagram: '',
+      estimation: null,
       created_at: now,
     });
   });
@@ -85,6 +89,7 @@ function makeDemoCards(): StoryCard[] {
         sort_order: sortOrder++,
         notes: '',
         diagram: '',
+        estimation: 'M',
         created_at: now,
       });
 
@@ -104,6 +109,7 @@ function makeDemoCards(): StoryCard[] {
             sort_order: sortOrder++,
             notes: '',
             diagram: '',
+            estimation: ['XS', 'S', 'M', 'L', null][Math.floor(Math.random() * 5)],
             created_at: now,
           });
         });
@@ -138,6 +144,10 @@ function StoryMapContent() {
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<Set<string>>(new Set(['epic', 'feature', 'story']));
+  const [colorFilter, setColorFilter] = useState<Set<string>>(new Set());
+  const boardRef = useRef<HTMLDivElement>(null);
   const debounceTimers = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const pendingIds = useRef<Set<string>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -257,8 +267,8 @@ function StoryMapContent() {
       debounceTimers.current.set(
         id,
         setTimeout(() => {
-          const { text, col, row, color, subs, sort_order, notes, diagram } = { ...updates } as Partial<StoryCard>;
-          updateStoryCard(id, { text, col, row, color, subs, sort_order, notes, diagram });
+          const { text, col, row, color, subs, sort_order, notes, diagram, estimation } = { ...updates } as Partial<StoryCard>;
+          updateStoryCard(id, { text, col, row, color, subs, sort_order, notes, diagram, estimation });
           debounceTimers.current.delete(id);
         }, 500)
       );
@@ -294,6 +304,7 @@ function StoryMapContent() {
       sort_order: 0,
       notes: '',
       diagram: '',
+      estimation: null,
       created_at: new Date().toISOString(),
     };
 
@@ -339,6 +350,7 @@ function StoryMapContent() {
         sort_order: nextOrder,
         notes: '',
         diagram: '',
+        estimation: null,
         created_at: new Date().toISOString(),
       };
 
@@ -416,6 +428,7 @@ function StoryMapContent() {
           sort_order: insertAt,
           notes: '',
           diagram: '',
+          estimation: null,
           created_at: new Date().toISOString(),
         };
 
@@ -482,6 +495,26 @@ function StoryMapContent() {
     [isDemo]
   );
 
+  // ── Filtered cards (visual only) ──────────────────
+  const filteredCards = useMemo(() => {
+    return cards.filter((card) => {
+      // Type filter
+      if (!typeFilter.has(card.type)) return false;
+      // Color filter (if any selected, only show matching; uncolored cards pass when no color filter)
+      if (colorFilter.size > 0) {
+        if (!card.color || !colorFilter.has(card.color)) return false;
+      }
+      // Search query
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchText = card.text.toLowerCase().includes(q);
+        const matchSubs = (card.subs || []).some((s) => s.text.toLowerCase().includes(q));
+        if (!matchText && !matchSubs) return false;
+      }
+      return true;
+    });
+  }, [cards, searchQuery, typeFilter, colorFilter]);
+
   return (
     <div className="min-h-screen" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="storyMap" />
@@ -528,21 +561,39 @@ function StoryMapContent() {
           {loading && (
             <span className="text-xs text-slate-500">...</span>
           )}
+
+          <div className="ms-auto">
+            <StoryMapExport cards={filteredCards} boardRef={boardRef} t={t.storyMap} />
+          </div>
         </div>
 
-        {/* Board */}
-        <StoryBoard
-          cards={cards}
-          setCards={setCards}
-          onAddEpic={handleAddEpic}
-          onAddStory={handleAddStory}
-          onAddFeature={handleAddFeature}
-          onUpdateCard={handleUpdateCard}
-          onDeleteCard={handleDeleteCard}
-          onDeleteColumn={handleDeleteColumn}
-          onBatchUpdate={handleBatchUpdate}
+        {/* Filter bar + Stats */}
+        <StoryMapFilterBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          colorFilter={colorFilter}
+          setColorFilter={setColorFilter}
           t={t.storyMap}
         />
+        <StoryMapStats cards={filteredCards} t={t.storyMap} />
+
+        {/* Board */}
+        <div ref={boardRef}>
+          <StoryBoard
+            cards={filteredCards}
+            setCards={setCards}
+            onAddEpic={handleAddEpic}
+            onAddStory={handleAddStory}
+            onAddFeature={handleAddFeature}
+            onUpdateCard={handleUpdateCard}
+            onDeleteCard={handleDeleteCard}
+            onDeleteColumn={handleDeleteColumn}
+            onBatchUpdate={handleBatchUpdate}
+            t={t.storyMap}
+          />
+        </div>
       </div>
     </div>
   );

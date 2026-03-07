@@ -54,6 +54,9 @@ interface StoryBoardProps {
     diagramPlaceholder: string;
     preview: string;
     save: string;
+    estimation: string;
+    noEstimation: string;
+    totalPoints: string;
   };
 }
 
