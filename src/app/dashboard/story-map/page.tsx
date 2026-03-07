@@ -61,6 +61,8 @@ function makeDemoCards(): StoryCard[] {
       color: epicColors[col],
       subs: [],
       sort_order: 0,
+      notes: '',
+      diagram: '',
       created_at: now,
     });
   });
@@ -80,6 +82,8 @@ function makeDemoCards(): StoryCard[] {
         color: null,
         subs: [],
         sort_order: sortOrder++,
+        notes: '',
+        diagram: '',
         created_at: now,
       });
 
@@ -97,6 +101,8 @@ function makeDemoCards(): StoryCard[] {
             color: null,
             subs: [],
             sort_order: sortOrder++,
+            notes: '',
+            diagram: '',
             created_at: now,
           });
         });
@@ -237,8 +243,8 @@ export default function StoryMapPage() {
       debounceTimers.current.set(
         id,
         setTimeout(() => {
-          const { text, col, row, color, subs, sort_order } = { ...updates } as Partial<StoryCard>;
-          updateStoryCard(id, { text, col, row, color, subs, sort_order });
+          const { text, col, row, color, subs, sort_order, notes, diagram } = { ...updates } as Partial<StoryCard>;
+          updateStoryCard(id, { text, col, row, color, subs, sort_order, notes, diagram });
           debounceTimers.current.delete(id);
         }, 500)
       );
@@ -272,6 +278,8 @@ export default function StoryMapPage() {
       color: null,
       subs: [],
       sort_order: 0,
+      notes: '',
+      diagram: '',
       created_at: new Date().toISOString(),
     };
 
@@ -315,6 +323,8 @@ export default function StoryMapPage() {
         color: null,
         subs: [],
         sort_order: nextOrder,
+        notes: '',
+        diagram: '',
         created_at: new Date().toISOString(),
       };
 
@@ -390,6 +400,8 @@ export default function StoryMapPage() {
           color: null,
           subs: [],
           sort_order: insertAt,
+          notes: '',
+          diagram: '',
           created_at: new Date().toISOString(),
         };
 

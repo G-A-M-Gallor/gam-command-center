@@ -336,9 +336,14 @@ export async function createShareLink(documentId: string): Promise<DocShare | nu
 
   if (existing) return existing as DocShare;
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("doc_shares")
-    .insert({ document_id: documentId })
+    .insert({
+      document_id: documentId,
+      created_by: user?.id || null,
+    })
     .select("*")
     .single();
 

@@ -40,6 +40,14 @@ interface StoryColumnProps {
     colorPicker: string;
     noColor: string;
     cardCount: string;
+    notes: string;
+    addNote: string;
+    notePlaceholder: string;
+    diagram: string;
+    editDiagram: string;
+    diagramPlaceholder: string;
+    preview: string;
+    save: string;
   };
 }
 

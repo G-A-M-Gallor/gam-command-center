@@ -17,6 +17,8 @@ export interface StoryCard {
   color: string | null;
   subs: SubStory[];
   sort_order: number;
+  notes: string;
+  diagram: string;
   created_at: string;
 }
 
@@ -39,7 +41,7 @@ export async function fetchStoryCards(projectId: string): Promise<StoryCard[]> {
 
 // ─── Create a card ────────────────────────────────────
 export async function createStoryCard(
-  card: Omit<StoryCard, 'id' | 'created_at'>
+  card: Omit<StoryCard, 'id' | 'created_at' | 'notes' | 'diagram'> & { notes?: string; diagram?: string }
 ): Promise<StoryCard | null> {
   try {
     const { data, error } = await supabase
@@ -58,7 +60,7 @@ export async function createStoryCard(
 // ─── Update a card ────────────────────────────────────
 export async function updateStoryCard(
   id: string,
-  updates: Partial<Pick<StoryCard, 'text' | 'col' | 'row' | 'color' | 'subs' | 'sort_order'>>
+  updates: Partial<Pick<StoryCard, 'text' | 'col' | 'row' | 'color' | 'subs' | 'sort_order' | 'notes' | 'diagram'>>
 ): Promise<boolean> {
   try {
     const { error } = await supabase
