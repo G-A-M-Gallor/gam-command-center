@@ -4,7 +4,7 @@
 -- If on Free plan, this migration is safely skipped.
 -- =============================================
 
-DO $$
+DO $outer$
 BEGIN
   -- Enable pg_cron extension (Pro plan only)
   CREATE EXTENSION IF NOT EXISTS pg_cron;
@@ -36,4 +36,4 @@ BEGIN
 
 EXCEPTION WHEN OTHERS THEN
   RAISE NOTICE 'pg_cron not available (requires Pro plan). Skipping scheduled jobs. Use n8n/external cron instead.';
-END $$;
+END $outer$;
