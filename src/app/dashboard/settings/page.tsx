@@ -89,12 +89,14 @@ function ToggleButton({
 function Section({
   label,
   children,
+  ccId,
 }: {
   label: string;
   children: React.ReactNode;
+  ccId?: string;
 }) {
   return (
-    <div className="rounded-lg bg-slate-800/50 p-4">
+    <div className="rounded-lg bg-slate-800/50 p-4" data-cc-id={ccId}>
       <label className="mb-3 block text-sm font-medium text-slate-300">
         {label}
       </label>
@@ -129,7 +131,7 @@ function GeneralTab() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <Section label={t.settings.language}>
+      <Section label={t.settings.language} ccId="settings.language">
         <div className="flex gap-2">
           <ToggleButton active={language === "he"} onClick={() => setLanguage("he")}>
             {t.settings.hebrew}
@@ -143,7 +145,7 @@ function GeneralTab() {
         </div>
       </Section>
 
-      <Section label={t.settings.sidebarPosition}>
+      <Section label={t.settings.sidebarPosition} ccId="settings.sidebarPosition">
         <div className="flex gap-2">
           <ToggleButton active={sidebarPosition === "right"} onClick={() => setSidebarPosition("right")}>
             {t.settings.right}
@@ -154,7 +156,7 @@ function GeneralTab() {
         </div>
       </Section>
 
-      <Section label={t.settings.sidebarVisibility}>
+      <Section label={t.settings.sidebarVisibility} ccId="settings.sidebarVisibility">
         <div className="flex gap-2">
           {(["visible", "float", "hidden"] as const).map((mode) => (
             <ToggleButton
@@ -168,7 +170,7 @@ function GeneralTab() {
         </div>
       </Section>
 
-      <Section label={t.widgets.hoverDelay}>
+      <Section label={t.widgets.hoverDelay} ccId="settings.hoverDelay">
         <div className="flex flex-wrap gap-2">
           {DELAY_OPTIONS.map((opt) => (
             <button
@@ -198,7 +200,7 @@ function OverridesSection() {
   const overrideCount = Object.keys(personalOverrides).length;
 
   return (
-    <Section label={cm.overridesSection}>
+    <Section label={cm.overridesSection} ccId="settings.overrides">
       <p className="mb-3 text-xs text-slate-500">{cm.overridesHint}</p>
       <div className="flex items-center gap-2">
         <ToggleButton active={viewMode === "system"} onClick={() => setViewMode("system")}>
@@ -341,7 +343,7 @@ function ThemeTab() {
   return (
     <div className="max-w-2xl space-y-4">
       {/* 0. Skin Selector */}
-      <Section label={language === "he" ? "עיצוב כללי" : "Skin"}>
+      <Section label={language === "he" ? "עיצוב כללי" : "Skin"} ccId="settings.skin">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {SKINS.map((s) => (
             <button
@@ -385,7 +387,7 @@ function ThemeTab() {
       </Section>
 
       {/* 1. Accent Color Presets */}
-      <Section label={t.settings.accentColor}>
+      <Section label={t.settings.accentColor} ccId="settings.accentColor">
         <div className="flex flex-wrap gap-3">
           {ACCENT_OPTIONS.map((opt) => (
             <button
@@ -431,7 +433,7 @@ function ThemeTab() {
       </Section>
 
       {/* 2. Color Picker */}
-      <Section label={t.settings.colorPicker}>
+      <Section label={t.settings.colorPicker} ccId="settings.colorPicker">
         <ColorPicker
           value={pickerColor}
           onChange={setPickerColor}
@@ -443,7 +445,7 @@ function ThemeTab() {
       </Section>
 
       {/* 3. My Palette */}
-      <Section label={t.settings.myPalette}>
+      <Section label={t.settings.myPalette} ccId="settings.myPalette">
         {savedColors.length === 0 ? (
           <p className="text-xs text-slate-500">{t.settings.noSavedColors}</p>
         ) : (
@@ -499,7 +501,7 @@ function ThemeTab() {
       </Section>
 
       {/* 3.5 Color Archive */}
-      <Section label={t.settings.colorArchive}>
+      <Section label={t.settings.colorArchive} ccId="settings.colorArchive">
         {archivedColors.length === 0 ? (
           <p className="text-xs text-slate-500">{t.settings.noArchivedColors}</p>
         ) : (
@@ -537,7 +539,7 @@ function ThemeTab() {
       </Section>
 
       {/* 4. Color Combos */}
-      <Section label={t.settings.colorCombos}>
+      <Section label={t.settings.colorCombos} ccId="settings.colorCombos">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {COLOR_COMBOS.map((combo) => (
             <button
@@ -556,7 +558,7 @@ function ThemeTab() {
       </Section>
 
       {/* 5. Effects */}
-      <Section label={t.settings.effects}>
+      <Section label={t.settings.effects} ccId="settings.effects">
         <div className="space-y-4">
           {/* Gradient */}
           <div className="space-y-2">
@@ -651,7 +653,7 @@ function ThemeTab() {
       </Section>
 
       {/* 6. Font Family */}
-      <Section label={t.settings.fontFamily}>
+      <Section label={t.settings.fontFamily} ccId="settings.fontFamily">
         <div className="flex gap-2">
           {FONT_OPTIONS.map((opt) => (
             <ToggleButton
@@ -666,7 +668,7 @@ function ThemeTab() {
       </Section>
 
       {/* 7. Corners */}
-      <Section label={t.settings.borderRadius}>
+      <Section label={t.settings.borderRadius} ccId="settings.borderRadius">
         <div className="flex gap-2">
           {RADIUS_OPTIONS.map((opt) => (
             <ToggleButton
@@ -681,7 +683,7 @@ function ThemeTab() {
       </Section>
 
       {/* 8. Density */}
-      <Section label={t.settings.density}>
+      <Section label={t.settings.density} ccId="settings.density">
         <div className="flex gap-2">
           {DENSITY_OPTIONS.map((opt) => (
             <ToggleButton
@@ -729,7 +731,7 @@ function BrandTab() {
   return (
     <div className="max-w-2xl space-y-4">
       {/* Logo + Company Name */}
-      <Section label={t.brand.companyName}>
+      <Section label={t.brand.companyName} ccId="settings.brandLogo">
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -770,7 +772,7 @@ function BrandTab() {
       </Section>
 
       {/* Tagline */}
-      <Section label={t.brand.tagline}>
+      <Section label={t.brand.tagline} ccId="settings.brandTagline">
         <Input
           value={brandProfile.tagline}
           onChange={(e) => updateBrand({ tagline: e.target.value })}
@@ -779,7 +781,7 @@ function BrandTab() {
       </Section>
 
       {/* Brand Colors */}
-      <Section label={t.brand.brandColors}>
+      <Section label={t.brand.brandColors} ccId="settings.brandColors">
         <div className="space-y-3">
           {([
             { key: "brandPrimary" as const, label: t.brand.primary },
@@ -826,7 +828,7 @@ export default function SettingsPage() {
       <PageHeader pageKey="settings" />
 
       {/* Internal tab bar */}
-      <div className="mt-6 flex gap-1 border-b border-slate-700/50 pb-0 overflow-x-auto">
+      <div className="mt-6 flex gap-1 border-b border-slate-700/50 pb-0 overflow-x-auto" data-cc-id="settings.tabs">
         {TAB_KEYS.map(({ tab, tKey }) => (
           <button
             key={tab}

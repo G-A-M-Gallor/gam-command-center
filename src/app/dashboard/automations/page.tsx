@@ -205,7 +205,7 @@ export default function AutomationsPage() {
         </div>
 
         {/* ── Three Automation Cards ──────────── */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3" data-cc-id="automations.cards">
           <AutomationCard
             icon={<Database className="h-6 w-6" />}
             iconColor="text-blue-400"
@@ -291,7 +291,7 @@ function N8nSection({ a, isHe }: { a: ReturnType<typeof getTranslations>['automa
   const [showIframe, setShowIframe] = useState(false);
 
   return (
-    <div className="rounded-xl border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent p-6">
+    <div className="rounded-xl border border-orange-500/20 bg-gradient-to-br from-orange-500/5 to-transparent p-6" data-cc-id="automations.n8n">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500/15">
@@ -504,6 +504,7 @@ function CodeBlock({ code }: { code: string }) {
       <button
         onClick={handleCopy}
         className="absolute right-2 top-2 rounded p-1 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+        data-cc-id="automations.copyCode"
         title="Copy"
       >
         {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -557,7 +558,7 @@ function ComparisonTable({ a, isHe }: { a: ReturnType<typeof getTranslations>['a
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-700/50">
+    <div className="overflow-hidden rounded-xl border border-slate-700/50" data-cc-id="automations.comparison">
       <div className="border-b border-slate-700/50 bg-slate-800/50 px-5 py-3">
         <h3 className="text-sm font-semibold text-slate-200">
           {isHe ? 'השוואה — מתי להשתמש במה?' : 'Comparison — When to use what?'}

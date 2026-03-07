@@ -113,7 +113,7 @@ export default function LayersPage() {
 
       <div className="flex flex-1 flex-col gap-6 pt-6">
         {isDemo && (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-300">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-300" data-cc-id="layers.demoBanner">
             <div className="flex items-center gap-2">
               <span>⚠️</span>
               <span>{language === 'he' ? 'נתוני הדגמה — אין חיבור ל-Origami. הנתונים אינם אמיתיים.' : 'Demo data — no Origami connection. Data is not real.'}</span>
@@ -133,6 +133,7 @@ export default function LayersPage() {
             <button
               onClick={handleSync}
               disabled={syncing}
+              data-cc-id="layers.syncButton"
               className="flex items-center gap-1.5 rounded-md bg-slate-700/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-700 disabled:opacity-50"
             >
               <RefreshCw size={12} className={syncing ? "animate-spin" : ""} />
@@ -153,6 +154,7 @@ export default function LayersPage() {
           className={`flex flex-wrap items-center gap-4 text-sm ${
             isRtl ? "flex-row-reverse" : ""
           }`}
+          data-cc-id="layers.summary"
         >
           <span className="font-medium text-slate-300">
             {t.layers.summaryTotal}: {projects.length} {t.layers.summaryProjects}
