@@ -43,7 +43,7 @@ export default function FormilyPage() {
   return (
     <div className="min-h-screen">
       <PageHeader pageKey="formily" />
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         {/* Info Banner */}
         <div
           data-cc-id="formily.banner"

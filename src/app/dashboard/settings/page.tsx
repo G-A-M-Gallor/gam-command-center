@@ -538,7 +538,7 @@ function ThemeTab() {
 
       {/* 4. Color Combos */}
       <Section label={t.settings.colorCombos}>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {COLOR_COMBOS.map((combo) => (
             <button
               key={combo.key}
@@ -826,7 +826,7 @@ export default function SettingsPage() {
       <PageHeader pageKey="settings" />
 
       {/* Internal tab bar */}
-      <div className="mt-6 flex gap-1 border-b border-slate-700/50 pb-0">
+      <div className="mt-6 flex gap-1 border-b border-slate-700/50 pb-0 overflow-x-auto">
         {TAB_KEYS.map(({ tab, tKey }) => (
           <button
             key={tab}

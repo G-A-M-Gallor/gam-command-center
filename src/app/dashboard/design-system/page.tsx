@@ -32,10 +32,12 @@ import {
   MapPin,
   Globe2,
   Palette,
+  Smartphone,
 } from "lucide-react";
 import { Badge, Input, Tooltip, Button } from "@/components/ui";
+import { routes } from "@/app/dashboard/admin/data";
 
-type TabId = "gallery" | "components" | "handbook";
+type TabId = "gallery" | "components" | "handbook" | "app-preview";
 
 // ─── Gallery Card (preserved from original) ──────────────────────
 
@@ -552,6 +554,172 @@ function HandbookTab({
   );
 }
 
+// ─── Device Presets ──────────────────────────────────────────────
+
+const DEVICE_PRESETS = [
+  { id: "iphone15pro", label: "iPhone 15 Pro", width: 393, height: 852, notch: "dynamic-island" as const, cornerRadius: 44, frameColor: "#1a1a1a", frameBorder: "#333" },
+  { id: "iphonese",    label: "iPhone SE",     width: 375, height: 667, notch: "notch" as const,           cornerRadius: 18, frameColor: "#1a1a1a", frameBorder: "#333" },
+  { id: "galaxys24",   label: "Galaxy S24",    width: 360, height: 780, notch: "punch-hole" as const,      cornerRadius: 36, frameColor: "#0d0d0d", frameBorder: "#2a2a2a" },
+  { id: "ipadmini",    label: "iPad Mini",     width: 744, height: 1133, notch: "none" as const,           cornerRadius: 20, frameColor: "#1a1a1a", frameBorder: "#333" },
+] as const;
+
+type DevicePresetId = typeof DEVICE_PRESETS[number]["id"];
+
+// ─── App Preview Tab ────────────────────────────────────────────
+
+function AppPreviewTab({ isHe, td }: { isHe: boolean; td: Record<string, string> }) {
+  const [selectedDevice, setSelectedDevice] = useState<DevicePresetId>("iphone15pro");
+  const [selectedPage, setSelectedPage] = useState("/dashboard/layers");
+
+  const device = DEVICE_PRESETS.find((d) => d.id === selectedDevice)!;
+  const TARGET_H = 600;
+  const scale = Math.min(TARGET_H / device.height, 1);
+  const frameW = Math.round(device.width * scale);
+  const frameH = Math.round(device.height * scale);
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Controls */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Smartphone size={14} className="text-slate-500" />
+          <span className="text-xs text-slate-500">{td.previewDevice}:</span>
+          <div className="flex flex-wrap gap-1">
+            {DEVICE_PRESETS.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setSelectedDevice(d.id)}
+                className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                  selectedDevice === d.id
+                    ? "bg-purple-500/20 text-purple-300"
+                    : "bg-slate-800 text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500">{td.previewPage}:</span>
+          <select
+            value={selectedPage}
+            onChange={(e) => setSelectedPage(e.target.value)}
+            className="rounded-lg border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-200 outline-none focus:border-purple-500/50"
+          >
+            {routes
+              .filter((r) => r.visible && r.sidebarTab)
+              .map((r) => (
+                <option key={r.id} value={r.path}>
+                  {isHe ? r.nameHe : r.name}
+                </option>
+              ))}
+          </select>
+        </div>
+
+        <span className="rounded-full bg-slate-800 px-2 py-0.5 font-mono text-[10px] text-slate-500">
+          {device.width}×{device.height} · {Math.round(scale * 100)}%
+        </span>
+
+        <a
+          href={selectedPage}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ms-auto flex items-center gap-1 rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+        >
+          <ExternalLink size={12} />
+          {isHe ? "פתח בחלון" : "Open in tab"}
+        </a>
+      </div>
+
+      {/* Device Frame */}
+      <div className="flex justify-center overflow-x-auto py-4">
+        <div
+          style={{
+            width: frameW + 16,
+            height: frameH + 28,
+            borderRadius: Math.round(device.cornerRadius * scale) + 4,
+            backgroundColor: device.frameColor,
+            border: `2px solid ${device.frameBorder}`,
+            padding: "12px 8px 16px",
+            position: "relative",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)",
+            flexShrink: 0,
+          }}
+        >
+          {/* Dynamic Island */}
+          {device.notch === "dynamic-island" && (
+            <div style={{ position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)", width: Math.round(120 * scale), height: Math.round(32 * scale), backgroundColor: "#000", borderRadius: 999, zIndex: 10 }} />
+          )}
+          {/* Notch */}
+          {device.notch === "notch" && (
+            <div style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: Math.round(150 * scale), height: Math.round(28 * scale), backgroundColor: device.frameColor, borderRadius: "0 0 12px 12px", zIndex: 10 }} />
+          )}
+          {/* Punch-hole */}
+          {device.notch === "punch-hole" && (
+            <div style={{ position: "absolute", top: 8, left: "50%", transform: "translateX(-50%)", width: Math.round(12 * scale), height: Math.round(12 * scale), backgroundColor: "#000", borderRadius: "50%", zIndex: 10 }} />
+          )}
+
+          {/* Screen */}
+          <div
+            style={{
+              width: frameW,
+              height: frameH,
+              borderRadius: Math.round(device.cornerRadius * scale) - 2,
+              overflow: "hidden",
+              backgroundColor: "#0f172a",
+              position: "relative",
+            }}
+          >
+            {/* Decorative status bar */}
+            <div
+              style={{
+                height: Math.round(28 * scale),
+                backgroundColor: "#0f172a",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: `0 ${Math.round(16 * scale)}px`,
+                fontSize: Math.round(10 * scale),
+                color: "#94a3b8",
+                position: "relative",
+                zIndex: 5,
+              }}
+            >
+              <span>9:41</span>
+              <span style={{ letterSpacing: 2 }}>●●●</span>
+            </div>
+
+            {/* Scaled iframe */}
+            <div
+              style={{
+                width: device.width,
+                height: device.height - 28,
+                transform: `scale(${scale})`,
+                transformOrigin: "top left",
+                pointerEvents: "none",
+              }}
+            >
+              <iframe
+                key={`${selectedDevice}-${selectedPage}`}
+                src={selectedPage}
+                title="App preview"
+                style={{ width: device.width, height: device.height - 28, border: "none", display: "block" }}
+                loading="lazy"
+                tabIndex={-1}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Note */}
+      <p className="text-center text-[11px] text-slate-600">{td.previewNote}</p>
+    </div>
+  );
+}
+
 // ─── Main Page ───────────────────────────────────────────────────
 
 export default function DesignSystemPage() {
@@ -602,6 +770,7 @@ export default function DesignSystemPage() {
     { id: "gallery", label: td.gallery, count: DESIGNS.length },
     { id: "components", label: td.components, count: componentRegistry.length },
     { id: "handbook", label: td.handbook, count: HANDBOOK_SECTIONS.length + 1 },
+    { id: "app-preview", label: `📱 ${td.appPreview}`, count: DEVICE_PRESETS.length },
   ];
 
   return (
@@ -766,6 +935,11 @@ export default function DesignSystemPage() {
         {/* Tab: Handbook */}
         {activeTab === "handbook" && (
           <HandbookTab isHe={isHe} td={td} />
+        )}
+
+        {/* Tab: App Preview */}
+        {activeTab === "app-preview" && (
+          <AppPreviewTab isHe={isHe} td={td as Record<string, string>} />
         )}
       </div>
 

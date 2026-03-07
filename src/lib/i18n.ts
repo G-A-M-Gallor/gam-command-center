@@ -781,6 +781,10 @@ export const translations = {
       optional: "אופציונלי",
       expandDetails: "הרחב פרטים",
       collapseDetails: "כווץ פרטים",
+      appPreview: "תצוגת אפליקציה",
+      previewDevice: "מכשיר",
+      previewPage: "עמוד",
+      previewNote: "תצוגה מקדימה במצב mobile. אינטראקציה לא פעילה.",
     },
     functionalMap: {
       gridTitle: "מפה פונקציונלית של GAM",
@@ -1783,6 +1787,10 @@ export const translations = {
       optional: "Optional",
       expandDetails: "Expand details",
       collapseDetails: "Collapse details",
+      appPreview: "App Preview",
+      previewDevice: "Device",
+      previewPage: "Page",
+      previewNote: "Read-only mobile preview. Interactive elements are disabled.",
     },
     functionalMap: {
       gridTitle: "GAM Functional Map",
@@ -2770,6 +2778,10 @@ export const translations = {
       optional: "Необязательно",
       expandDetails: "Развернуть детали",
       collapseDetails: "Свернуть детали",
+      appPreview: "Превью приложения",
+      previewDevice: "Устройство",
+      previewPage: "Страница",
+      previewNote: "Превью мобильного макета. Интерактивные элементы отключены.",
     },
     functionalMap: {
       gridTitle: "Функциональная карта GAM",

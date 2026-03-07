@@ -67,7 +67,7 @@ export default function AdminDevLogPage() {
 
       <div className="mx-auto max-w-6xl px-6 py-6 space-y-6">
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
           <StatCard label={ta.activePages} value={stats.activeRoutes} color="#34d399" />
           <StatCard label={ta.placeholderPages} value={stats.placeholderRoutes} color="#fbbf24" />
           <StatCard label={ta.components} value={stats.totalComponents} color="#60a5fa" />
@@ -105,7 +105,7 @@ export default function AdminDevLogPage() {
           <div className="space-y-2">
             {phaseProgress.map(p => (
               <div key={p.phase} className="flex items-center gap-3">
-                <span className="w-44 text-xs text-slate-500">{phaseLabelsMap[p.phase]}</span>
+                <span className="w-24 sm:w-44 text-xs text-slate-500">{phaseLabelsMap[p.phase]}</span>
                 <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
                   <div className="h-full rounded-full transition-all"
                     style={{ width: `${p.pct}%`, background: p.pct === 100 ? '#34d399' : p.pct > 0 ? '#60a5fa' : '#374151' }} />
@@ -119,7 +119,7 @@ export default function AdminDevLogPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-1 border-b border-white/[0.06] pb-px">
+        <div className="flex items-center gap-1 border-b border-white/[0.06] pb-px overflow-x-auto">
           {(['routes', 'widgets', 'contexts', 'changelog', 'storymap'] as const).map(section => (
             <button key={section} onClick={() => setActiveSection(section)}
               className={`rounded-t-lg px-4 py-2 text-sm font-medium transition-colors ${

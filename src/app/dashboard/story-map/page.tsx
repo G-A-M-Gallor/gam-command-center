@@ -600,9 +600,9 @@ function StoryMapContent() {
     <div className="min-h-screen" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="storyMap" />
 
-      <div className="px-6 pb-6">
+      <div className="px-4 pb-6 sm:px-6">
         {/* Project selector + demo badge */}
-        <div className="mb-4 flex items-center gap-3">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
@@ -643,7 +643,7 @@ function StoryMapContent() {
             <span className="text-xs text-slate-500">...</span>
           )}
 
-          <div className="ms-auto">
+          <div className="ms-auto shrink-0">
             <StoryMapExport cards={filteredCards} boardRef={boardRef} t={t.storyMap} />
           </div>
         </div>

@@ -71,7 +71,7 @@ export function StoryMapFilterBar({
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2">
       {/* Search */}
-      <div className="relative">
+      <div className="relative w-full sm:w-auto">
         <Search size={14} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
         <input
           ref={searchInputRef}
@@ -79,7 +79,7 @@ export function StoryMapFilterBar({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder={t.filterSearch}
-          className="h-8 w-48 rounded-lg border border-slate-700 bg-slate-800/60 ps-8 pe-2 text-xs text-slate-200 placeholder:text-slate-500 outline-none focus:border-purple-500/50"
+          className="h-8 w-full sm:w-48 rounded-lg border border-slate-700 bg-slate-800/60 ps-8 pe-2 text-xs text-slate-200 placeholder:text-slate-500 outline-none focus:border-purple-500/50"
         />
       </div>
 

@@ -340,6 +340,9 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'storymap-improvements':   makeChecklist(true,  true, true,  true, true),
   'keyboard-shortcuts-wiring': makeChecklist(true, true, true,  true, true),
   'mobile-responsive-pass': makeChecklist(true, true, true, true, true),
+  'mobile-responsive-pass-2': makeChecklist(true, true, true, true, true),
+  'ds-app-preview': makeChecklist(true, true, true, true, true),
+  'pwa-foundation': makeChecklist(true, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -1559,5 +1562,53 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Makes the entire dashboard usable on mobile devices (375px+). Previously, fixed widths and rigid grids caused content overflow, sidebar covered 64% of the screen, and several pages had excessive padding that left no room for content on small screens.',
     purposeHe: 'הופך את כל הדשבורד לשמיש במכשירים ניידים (375px+). בעבר, רוחבים קבועים וגרידים נוקשים גרמו לגלישת תוכן, הסיידבר כיסה 64% מהמסך, ולכמה דפים היה ריפוד מוגזם שלא השאיר מקום לתוכן במסכים קטנים.',
     connectedTo: ['Sidebar', 'DashboardShell', 'FunctionalMap', 'AIHub', 'DesignSystem', 'Editor', 'Architecture', 'Plan', 'useBreakpoint'],
+  },
+
+  {
+    id: 'mobile-responsive-pass-2',
+    feature: 'Mobile responsive pass #2 — remaining pages',
+    featureHe: 'מעבר תגובתיות מובייל #2 — דפים שנותרו',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: ['src/app/dashboard/admin/page.tsx', 'src/app/dashboard/settings/page.tsx', 'src/app/dashboard/story-map/page.tsx', 'src/components/command-center/StoryMapFilterBar.tsx', 'src/app/dashboard/formily/page.tsx', 'src/app/dashboard/layers/page.tsx'],
+    notes: 'Admin: stats grid 2→4→7 cols, phase label w-24/w-44, tab bar overflow-x-auto. Settings: color combos 2→3 cols, tab bar overflow. Story Map: px-4/px-6, flex-wrap selector, shrink-0 export. Filter bar: w-full/w-48 search. Formily: p-4/p-6. Layers: demo banner flex-wrap.',
+    notesHe: 'אדמין: גריד סטטיסטיקות 2→4→7 עמודות, תווית שלב w-24/w-44, סרגל טאבים overflow. הגדרות: קומבו צבעים 2→3 עמודות. Story Map: ריפוד תגובתי, flex-wrap. Formily: ריפוד. Layers: banner flex-wrap.',
+    purpose: 'Completes the mobile responsive coverage. After pass #1 covered 7 pages, this pass fixes the remaining 6 pages/components that had mobile overflow issues.',
+    purposeHe: 'משלים את הכיסוי התגובתי למובייל. אחרי מעבר #1 שכיסה 7 דפים, מעבר זה מתקן את 6 הדפים/קומפוננטות שנותרו עם בעיות גלישה במובייל.',
+    connectedTo: ['admin', 'settings', 'story-map', 'StoryMapFilterBar', 'formily', 'layers'],
+  },
+
+  {
+    id: 'ds-app-preview',
+    feature: 'Design System: App Preview tab',
+    featureHe: 'מערכת עיצוב: טאב תצוגת אפליקציה',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: ['src/app/dashboard/design-system/page.tsx', 'src/lib/i18n.ts', 'next.config.ts'],
+    notes: 'New tab in Design System showing live dashboard pages inside CSS-only device frames. 4 presets: iPhone 15 Pro (Dynamic Island), iPhone SE (notch), Galaxy S24 (punch-hole), iPad Mini. Page selector from routes registry. Scale computed dynamically. X-Frame-Options changed from DENY to SAMEORIGIN.',
+    notesHe: 'טאב חדש במערכת העיצוב המציג דפי דשבורד חיים בתוך מסגרות מכשיר CSS. 4 פריסטים: iPhone 15 Pro, iPhone SE, Galaxy S24, iPad Mini. בורר עמודים מ-registry. X-Frame-Options שונה מ-DENY ל-SAMEORIGIN.',
+    purpose: 'Allows previewing how the dashboard looks as a mobile app in various device frames without leaving the dashboard. Prepares the visual ground for the upcoming PWA + Capacitor native app wrapper.',
+    purposeHe: 'מאפשר תצוגה מקדימה של איך הדשבורד נראה כאפליקציית מובייל במסגרות מכשיר שונות בלי לצאת מהדשבורד. מכין את הקרקע הוויזואלית ל-PWA + Capacitor.',
+    connectedTo: ['design-system', 'admin/data.routes', 'i18n'],
+  },
+
+  {
+    id: 'pwa-foundation',
+    feature: 'PWA foundation — manifest, icons, metadata',
+    featureHe: 'תשתית PWA — מניפסט, אייקונים, מטא-דאטה',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: ['public/manifest.json', 'public/icons/icon-192.png', 'public/icons/icon-512.png', 'public/icons/apple-touch-icon.png', 'src/app/layout.tsx'],
+    notes: 'Web app manifest with standalone display, slate-900 theme, app icons at 192/512/180px. Layout metadata: manifest link, apple-web-app capable, theme-color, viewport with viewportFit cover. Enables Add to Home Screen on mobile browsers. Service worker and Capacitor wrapper deferred to next phase.',
+    notesHe: 'מניפסט אפליקציית ווב עם תצוגת standalone, ערכת נושא slate-900, אייקונים ב-192/512/180px. מטא-דאטה: קישור מניפסט, apple-web-app, theme-color, viewport עם viewportFit cover. מאפשר הוספה למסך הבית. Service worker ו-Capacitor נדחו לשלב הבא.',
+    purpose: 'First step toward making vBrain.io installable as a mobile app. PWA manifest + icons + metadata enable "Add to Home Screen" on both iOS and Android. This is the foundation for the planned Capacitor wrapper that will bring the app to App Store and Google Play.',
+    purposeHe: 'צעד ראשון להפיכת vBrain.io לאפליקציה מותקנת. מניפסט PWA + אייקונים + מטא-דאטה מאפשרים "הוספה למסך הבית" ב-iOS וב-Android. זו התשתית ל-Capacitor שיביא את האפליקציה ל-App Store ו-Google Play.',
+    connectedTo: ['layout.tsx', 'manifest.json'],
   },
 ];
