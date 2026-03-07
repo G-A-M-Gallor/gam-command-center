@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { embedQuery } from "@/lib/ai/embeddings";
 import { requireAuth } from "@/lib/api/auth";
+import { embeddingsSearchSchema } from "@/lib/api/schemas";
 
 function getServiceClient() {
   return createClient(
@@ -18,11 +19,17 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { query, max_results = 10, match_threshold = 0.3 } = await request.json();
+    const rawBody = await request.json();
 
-    if (!query || typeof query !== "string") {
-      return NextResponse.json({ error: "query is required" }, { status: 400 });
+    const parsed = embeddingsSearchSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { query, max_results, match_threshold } = parsed.data;
 
     const queryEmbedding = await embedQuery(query);
     const supabase = getServiceClient();

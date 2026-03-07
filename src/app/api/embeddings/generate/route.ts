@@ -4,6 +4,7 @@ import { embedText } from "@/lib/ai/embeddings";
 import { extractPlainText } from "@/lib/utils/textExtract";
 import { createHash } from "crypto";
 import { requireAuth } from "@/lib/api/auth";
+import { embeddingsGenerateSchema } from "@/lib/api/schemas";
 
 function getServiceClient() {
   return createClient(
@@ -69,17 +70,27 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
+
+    const parsed = embeddingsGenerateSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { document_id, batch } = parsed.data;
     const supabase = getServiceClient();
 
     // Single document
-    if (body.document_id) {
-      const result = await embedDocument(supabase, body.document_id);
+    if (document_id) {
+      const result = await embedDocument(supabase, document_id);
       return NextResponse.json(result);
     }
 
     // Batch: embed all un-embedded documents
-    if (body.batch) {
+    if (batch) {
       const { data: docs } = await supabase
         .from("vb_records")
         .select("id")
@@ -109,6 +120,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // This shouldn't be reachable due to the .refine() in the schema,
+    // but TypeScript doesn't know that
     return NextResponse.json({ error: "Provide document_id or batch: true" }, { status: 400 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

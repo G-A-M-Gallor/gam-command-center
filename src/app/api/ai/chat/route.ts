@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from "next/server";
 import {
   SYSTEM_PROMPTS,
   MODE_MODELS,
@@ -8,8 +9,8 @@ import {
   type AIMode,
 } from "@/lib/ai/prompts";
 import { requireAuth } from "@/lib/api/auth";
+import { aiChatSchema } from "@/lib/api/schemas";
 
-const VALID_MODES: AIMode[] = ["chat", "analyze", "write", "decompose"];
 const DAILY_TOKEN_LIMIT = 100_000;
 
 async function checkAndUpdateBudget(
@@ -70,12 +71,6 @@ async function checkAndUpdateBudget(
   return { allowed: true, remaining: Math.max(DAILY_TOKEN_LIMIT - newTotal, 0) };
 }
 
-interface RequestBody {
-  messages: { role: "user" | "assistant"; content: string }[];
-  mode: AIMode;
-  contexts?: string[];
-}
-
 export async function POST(request: Request) {
   // Authenticate the request
   const authResult = await requireAuth(request);
@@ -96,9 +91,9 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: RequestBody;
+  let rawBody: unknown;
   try {
-    body = await request.json();
+    rawBody = await request.json();
   } catch {
     return new Response(
       JSON.stringify({ error: "Invalid JSON body" }),
@@ -106,21 +101,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const { messages, mode, contexts = [] } = body;
-
-  if (!VALID_MODES.includes(mode)) {
-    return new Response(
-      JSON.stringify({ error: `Invalid mode: ${mode}` }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
+  const parsed = aiChatSchema.safeParse(rawBody);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid request", details: parsed.error.flatten() },
+      { status: 400 }
     );
   }
 
-  if (!Array.isArray(messages) || messages.length === 0) {
-    return new Response(
-      JSON.stringify({ error: "Messages array is required" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  const { messages, mode, contexts } = parsed.data;
 
   // Server-side token budget check (DECISION-004)
   const budget = await checkAndUpdateBudget(userId, { input: 0, output: 0 });
