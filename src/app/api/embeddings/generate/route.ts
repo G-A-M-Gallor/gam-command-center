@@ -3,6 +3,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { embedText } from "@/lib/ai/embeddings";
 import { extractPlainText } from "@/lib/utils/textExtract";
 import { createHash } from "crypto";
+import { requireAuth } from "@/lib/api/auth";
 
 function getServiceClient() {
   return createClient(
@@ -61,6 +62,12 @@ async function embedDocument(supabase: SupabaseClient<any>, docId: string) {
 }
 
 export async function POST(request: NextRequest) {
+  // Authenticate the request
+  const { error: authError } = await requireAuth(request);
+  if (authError) {
+    return NextResponse.json({ error: authError }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const supabase = getServiceClient();

@@ -7,6 +7,7 @@ import {
   SLIDING_WINDOW_SIZE,
   type AIMode,
 } from "@/lib/ai/prompts";
+import { requireAuth } from "@/lib/api/auth";
 
 const VALID_MODES: AIMode[] = ["chat", "analyze", "write", "decompose"];
 const DAILY_TOKEN_LIMIT = 100_000;
@@ -76,6 +77,17 @@ interface RequestBody {
 }
 
 export async function POST(request: Request) {
+  // Authenticate the request
+  const authResult = await requireAuth(request);
+  if (authResult.error !== null) {
+    return new Response(
+      JSON.stringify({ error: authResult.error }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const userId = authResult.user.id;
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return new Response(
@@ -111,16 +123,12 @@ export async function POST(request: Request) {
   }
 
   // Server-side token budget check (DECISION-004)
-  const authHeader = request.headers.get("authorization");
-  const userId = authHeader?.replace("Bearer ", "") || "";
-  if (userId) {
-    const budget = await checkAndUpdateBudget(userId, { input: 0, output: 0 });
-    if (!budget.allowed) {
-      return new Response(
-        JSON.stringify({ error: "Daily token budget exceeded", remaining: 0 }),
-        { status: 429, headers: { "Content-Type": "application/json" } }
-      );
-    }
+  const budget = await checkAndUpdateBudget(userId, { input: 0, output: 0 });
+  if (!budget.allowed) {
+    return new Response(
+      JSON.stringify({ error: "Daily token budget exceeded", remaining: 0 }),
+      { status: 429, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   // Build system prompt with contexts (rich data from pages)

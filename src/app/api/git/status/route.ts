@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { execSync } from 'child_process';
+import { requireAuth } from '@/lib/api/auth';
 
 function run(cmd: string): string {
   try {
@@ -9,9 +10,14 @@ function run(cmd: string): string {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Blocked in production' }, { status: 403 });
+  }
+
+  const { error: authError } = await requireAuth(request);
+  if (authError) {
+    return NextResponse.json({ error: authError }, { status: 401 });
   }
 
   const branch = run('git branch --show-current');

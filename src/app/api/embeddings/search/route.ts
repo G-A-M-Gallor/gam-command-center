@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { embedQuery } from "@/lib/ai/embeddings";
+import { requireAuth } from "@/lib/api/auth";
 
 function getServiceClient() {
   return createClient(
@@ -10,6 +11,12 @@ function getServiceClient() {
 }
 
 export async function POST(request: NextRequest) {
+  // Authenticate the request
+  const { error: authError } = await requireAuth(request);
+  if (authError) {
+    return NextResponse.json({ error: authError }, { status: 401 });
+  }
+
   try {
     const { query, max_results = 10, match_threshold = 0.3 } = await request.json();
 

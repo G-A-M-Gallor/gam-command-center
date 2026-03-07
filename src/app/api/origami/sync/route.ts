@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { calculateHealthScore } from "@/lib/utils/health";
+import { requireAuth } from "@/lib/api/auth";
 
 const ORIGAMI_API_URL = "https://gallorgam.origami.ms/entities/api/instance_data/format/json";
 
@@ -51,6 +52,12 @@ function extractField(instance: OrigamiInstance, fieldName: string): string {
 }
 
 export async function POST(request: Request) {
+  // Authenticate the request
+  const { error: authError } = await requireAuth(request);
+  if (authError) {
+    return Response.json({ error: authError }, { status: 401 });
+  }
+
   const username = process.env.ORIGAMI_USERNAME;
   const apiSecret = process.env.ORIGAMI_API_SECRET;
 
@@ -61,8 +68,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Optional: simple auth check
-  const authHeader = request.headers.get("authorization");
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
