@@ -42,6 +42,8 @@ export interface TiptapEditorProps {
   recordId?: string;
   /** Save status from parent — displayed in status bar */
   saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  /** Timestamp of last successful save */
+  lastSavedAt?: Date;
 }
 
 export interface FloatingToolbarProps {

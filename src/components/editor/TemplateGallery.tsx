@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, FileText, Briefcase, Code2, BarChart3, ClipboardList, Users, Rocket, File } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, FileText, Briefcase, Code2, BarChart3, File, Pencil, Trash2, Check } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
-import { fetchTemplates, createTemplate, type DocTemplate } from "@/lib/supabase/editorQueries";
+import { fetchTemplates, createTemplate, updateTemplate, deleteTemplate, type DocTemplate } from "@/lib/supabase/editorQueries";
+import { ConfirmDialog } from "@/components/command-center/ConfirmDialog";
 import type { JSONContent } from "@tiptap/react";
 
 // ─── Built-in templates ─────────────────────────────────────
@@ -326,6 +327,24 @@ const CATEGORY_ICONS: Record<string, typeof FileText> = {
   general: File,
 };
 
+// Extract preview text from Tiptap JSON content
+function extractPreview(content: JSONContent, maxLines = 4): string {
+  const lines: string[] = [];
+  const nodes = content.content || [];
+  for (const node of nodes) {
+    if (lines.length >= maxLines) break;
+    const text = extractNodeText(node).trim();
+    if (text) lines.push(text);
+  }
+  return lines.join("\n");
+}
+
+function extractNodeText(node: JSONContent): string {
+  if (node.text) return node.text;
+  if (node.content) return node.content.map(extractNodeText).join("");
+  return "";
+}
+
 // ─── Component ──────────────────────────────────────────────
 
 interface TemplateGalleryProps {
@@ -350,10 +369,19 @@ export function TemplateGallery({
 
   const [customTemplates, setCustomTemplates] = useState<DocTemplate[]>([]);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) {
       fetchTemplates().then(setCustomTemplates).catch(() => {});
+    } else {
+      setEditingId(null);
+      setDeleteTarget(null);
+      setHoveredId(null);
     }
   }, [open]);
 
@@ -370,6 +398,36 @@ export function TemplateGallery({
       setCustomTemplates((prev) => [result, ...prev]);
     }
     setSaving(false);
+  };
+
+  const handleEditSave = async (id: string) => {
+    if (!editName.trim()) return;
+    const ok = await updateTemplate(id, { name: editName, name_he: editName });
+    if (ok) {
+      setCustomTemplates((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, name: editName, name_he: editName } : t))
+      );
+    }
+    setEditingId(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    const ok = await deleteTemplate(deleteTarget);
+    if (ok) {
+      setCustomTemplates((prev) => prev.filter((t) => t.id !== deleteTarget));
+    }
+    setDeleteTarget(null);
+  };
+
+  const handleHoverEnter = (id: string) => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => setHoveredId(id), 300);
+  };
+
+  const handleHoverLeave = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setHoveredId(null);
   };
 
   if (!open) return null;
@@ -437,29 +495,112 @@ export function TemplateGallery({
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {catTemplates.map((tmpl) => (
-                    <button
-                      key={tmpl.id}
-                      onClick={() => {
-                        onSelect(tmpl.content, isHe ? tmpl.name_he : tmpl.name);
-                        onClose();
-                      }}
-                      className="flex flex-col items-start rounded-lg border border-slate-700 bg-slate-800/50 p-3 text-start transition-colors hover:border-purple-500/40 hover:bg-purple-500/5"
-                    >
-                      <span className="text-lg">{tmpl.icon}</span>
-                      <span className="mt-1 text-sm font-medium text-slate-200">
-                        {isHe ? tmpl.name_he : tmpl.name}
-                      </span>
-                      <span className="mt-0.5 text-[11px] text-slate-500 line-clamp-2">
-                        {isHe ? tmpl.description_he : tmpl.description}
-                      </span>
-                    </button>
-                  ))}
+                  {catTemplates.map((tmpl) => {
+                    const isEditing = editingId === tmpl.id;
+                    const isHovered = hoveredId === tmpl.id;
+                    const preview = isHovered ? extractPreview(tmpl.content) : "";
+
+                    return (
+                      <div
+                        key={tmpl.id}
+                        className="group relative"
+                        onMouseEnter={() => handleHoverEnter(tmpl.id)}
+                        onMouseLeave={handleHoverLeave}
+                      >
+                        {isEditing ? (
+                          <div className="flex flex-col rounded-lg border border-purple-500/40 bg-slate-800/50 p-3 space-y-2">
+                            <input
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === "Enter") handleEditSave(tmpl.id); }}
+                              className="w-full bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-slate-200 focus:outline-none focus:border-purple-500"
+                              autoFocus
+                            />
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleEditSave(tmpl.id)}
+                                className="flex-1 flex items-center justify-center gap-1 rounded bg-purple-600 px-2 py-1 text-xs text-white hover:bg-purple-500"
+                              >
+                                <Check size={12} />
+                              </button>
+                              <button
+                                onClick={() => setEditingId(null)}
+                                className="flex-1 rounded bg-slate-700 px-2 py-1 text-xs text-slate-300 hover:bg-slate-600"
+                              >
+                                {t.common.cancel}
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              onSelect(tmpl.content, isHe ? tmpl.name_he : tmpl.name);
+                              onClose();
+                            }}
+                            className="flex w-full flex-col items-start rounded-lg border border-slate-700 bg-slate-800/50 p-3 text-start transition-colors hover:border-purple-500/40 hover:bg-purple-500/5"
+                          >
+                            <span className="text-lg">{tmpl.icon}</span>
+                            <span className="mt-1 text-sm font-medium text-slate-200">
+                              {isHe ? tmpl.name_he : tmpl.name}
+                            </span>
+                            <span className="mt-0.5 text-[11px] text-slate-500 line-clamp-2">
+                              {isHe ? tmpl.description_he : tmpl.description}
+                            </span>
+                          </button>
+                        )}
+
+                        {/* Edit/Delete for custom templates */}
+                        {!tmpl.isBuiltin && !isEditing && (
+                          <div className="absolute top-1.5 end-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditName(isHe ? tmpl.name_he : tmpl.name);
+                                setEditingId(tmpl.id);
+                              }}
+                              className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                              title={et.editTemplate}
+                            >
+                              <Pencil size={11} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteTarget(tmpl.id);
+                              }}
+                              className="rounded p-1 text-slate-500 hover:bg-red-500/10 hover:text-red-400"
+                              title={et.deleteTemplate}
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Preview tooltip */}
+                        {isHovered && preview && !isEditing && (
+                          <div className="absolute z-20 top-full mt-1 start-0 w-64 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 shadow-xl pointer-events-none">
+                            <pre className="whitespace-pre-wrap text-[11px] text-slate-400 line-clamp-4 font-sans">{preview}</pre>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* Delete confirmation */}
+        <ConfirmDialog
+          open={deleteTarget !== null}
+          title={et.confirmDeleteTemplate}
+          message={et.confirmDeleteTemplateMessage}
+          confirmLabel={et.deleteTemplate}
+          variant="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDeleteTarget(null)}
+        />
       </div>
     </div>
   );

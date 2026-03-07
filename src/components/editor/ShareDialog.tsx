@@ -10,6 +10,13 @@ import {
   type DocShare,
 } from "@/lib/supabase/editorQueries";
 
+const EXPIRY_OPTIONS = [
+  { key: "noExpiry", days: undefined },
+  { key: "expires24h", days: 1 },
+  { key: "expires7d", days: 7 },
+  { key: "expires30d", days: 30 },
+] as const;
+
 interface ShareDialogProps {
   documentId: string;
   open: boolean;
@@ -25,17 +32,19 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
   const [share, setShare] = useState<DocShare | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [expiryDays, setExpiryDays] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     if (!open) {
       setShare(null);
       setCopied(false);
+      setExpiryDays(undefined);
     }
   }, [open]);
 
   const handleCreateLink = async () => {
     setLoading(true);
-    const result = await createShareLink(documentId);
+    const result = await createShareLink(documentId, expiryDays);
     setShare(result);
     setLoading(false);
   };
@@ -82,8 +91,29 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
         {/* Content */}
         <div className="p-5 space-y-4">
           {!share ? (
-            <div className="text-center space-y-3">
-              <p className="text-sm text-slate-400">{et.shareDescription}</p>
+            <div className="space-y-4">
+              <p className="text-center text-sm text-slate-400">{et.shareDescription}</p>
+
+              {/* Expiry selector */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] uppercase tracking-wider text-slate-500">{et.shareExpiry}</label>
+                <div className="flex gap-1.5">
+                  {EXPIRY_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => setExpiryDays(opt.days)}
+                      className={`flex-1 rounded-md px-2 py-1.5 text-xs transition-colors ${
+                        expiryDays === opt.days
+                          ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                          : "bg-slate-700/50 text-slate-400 border border-slate-700 hover:bg-slate-700"
+                      }`}
+                    >
+                      {(et as Record<string, string>)[opt.key]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <button
                 onClick={handleCreateLink}
                 disabled={loading}
@@ -106,6 +136,11 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
                   {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
                 </button>
               </div>
+              {share.expires_at && (
+                <p className="text-[11px] text-slate-500">
+                  {et.shareExpiry}: {new Date(share.expires_at).toLocaleDateString(isHe ? "he-IL" : "en-US")}
+                </p>
+              )}
               <button
                 onClick={handleRevoke}
                 disabled={loading}

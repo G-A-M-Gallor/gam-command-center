@@ -226,6 +226,18 @@ export async function createTemplate(template: {
   return data as DocTemplate;
 }
 
+export async function updateTemplate(
+  id: string,
+  updates: Partial<Pick<DocTemplate, "name" | "name_he" | "icon" | "description" | "description_he" | "category">>
+): Promise<boolean> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("doc_templates")
+    .update(updates)
+    .eq("id", id);
+  return !error;
+}
+
 export async function deleteTemplate(id: string): Promise<boolean> {
   const supabase = createClient();
   const { error } = await supabase
@@ -323,7 +335,7 @@ export interface DocShare {
   expires_at: string | null;
 }
 
-export async function createShareLink(documentId: string): Promise<DocShare | null> {
+export async function createShareLink(documentId: string, expiresInDays?: number): Promise<DocShare | null> {
   const supabase = createClient();
 
   // Check if active share exists
@@ -338,11 +350,16 @@ export async function createShareLink(documentId: string): Promise<DocShare | nu
 
   const { data: { user } } = await supabase.auth.getUser();
 
+  const expiresAt = expiresInDays
+    ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
+    : null;
+
   const { data, error } = await supabase
     .from("doc_shares")
     .insert({
       document_id: documentId,
       created_by: user?.id || null,
+      expires_at: expiresAt,
     })
     .select("*")
     .single();
@@ -358,6 +375,15 @@ export async function revokeShareLink(shareId: string): Promise<boolean> {
     .update({ is_active: false })
     .eq("id", shareId);
   return !error;
+}
+
+export async function fetchActiveShareDocIds(): Promise<Set<string>> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("doc_shares")
+    .select("document_id")
+    .eq("is_active", true);
+  return new Set((data || []).map((d: { document_id: string }) => d.document_id));
 }
 
 export async function fetchSharedDocument(token: string): Promise<DocRecord | null> {

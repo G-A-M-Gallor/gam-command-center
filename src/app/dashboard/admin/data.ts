@@ -329,6 +329,7 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'storymap-url-persist':    makeChecklist(true,  true, true,  true, true),
   // ── UI/UX + Libraries ──
   'sidebar-redesign':        makeChecklist(true,  true, true,  true, true),
+  'editor-improvements':     makeChecklist(true,  true, true,  true, true),
   'split-screen-nav':        makeChecklist(false, false, false, true, false),
   'field-library-enhanced':  makeChecklist(false, false, false, true, false),
   'icon-emoji-library':      makeChecklist(false, false, false, true, false),
@@ -1446,5 +1447,36 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'A comprehensive planning document that maps the entire vBrain.io user journey using Value-Driven Architecture principles. Serves as the strategic reference for development prioritization — showing what exists, what\'s broken, what\'s missing, and what to build next. The 3-tier release structure (WS → MVP → MLP) provides clear milestones.',
     purposeHe: 'מסמך תכנון מקיף שממפה את כל מסע המשתמש של vBrain.io באמצעות עקרונות ארכיטקטורה מונחית-ערך. משמש כמקור עזר אסטרטגי לתיעדוף פיתוח — מראה מה קיים, מה שבור, מה חסר ומה לבנות הבא. מבנה 3 שכבות השחרור (WS → MVP → MLP) מספק אבני דרך ברורות.',
     connectedTo: ['admin page (5th tab)', 'All 12 dashboard routes', 'Supabase tables', 'CLAUDE.md (architecture reference)'],
+  },
+
+  // ── Editor Improvements ── 2026-03-07
+
+  {
+    id: 'editor-improvements',
+    feature: 'Editor UX — confirm delete, template management, statusbar, sharing expiry',
+    featureHe: 'שיפורי עורך — אישור מחיקה, ניהול תבניות, סטטוס בר, תוקף שיתוף',
+    status: 'working',
+    commitStatus: 'committed',
+    workflowStatus: 'complete',
+    date: '2026-03-07',
+    files: [
+      'src/components/command-center/ConfirmDialog.tsx',
+      'src/components/editor/DocumentListView.tsx',
+      'src/lib/supabase/editorQueries.ts',
+      'src/components/editor/TemplateGallery.tsx',
+      'src/components/editor/TiptapEditor.tsx',
+      'src/components/editor/types.ts',
+      'src/components/canvas/CanvasEditor.tsx',
+      'src/components/canvas/EditorZone.tsx',
+      'src/components/editor/ShareDialog.tsx',
+      'src/app/shared/doc/[token]/page.tsx',
+      'src/lib/i18n.ts',
+    ],
+    route: '/dashboard/editor',
+    notes: '4-area editor improvement: (1) ConfirmDialog component + delete safety for documents, (2) Template management — edit/delete/preview on hover for custom templates, (3) StatusBar enrichment — word count, char count, reading time, relative last-saved time, (4) Sharing — expiry selector (none/24h/7d/30d), Link2 indicator on shared docs, expired link handling. All i18n HE+EN.',
+    notesHe: 'שיפורי עורך ב-4 תחומים: (1) ConfirmDialog + אבטחת מחיקה למסמכים, (2) ניהול תבניות — עריכה/מחיקה/תצוגה מקדימה על hover לתבניות מותאמות, (3) סטטוס בר מועשר — ספירת מילים, תווים, זמן קריאה, זמן שמירה אחרונה יחסי, (4) שיתוף — בורר תוקף (ללא/24ש/7י/30י), אינדיקטור Link2 למסמכים משותפים, טיפול בקישור שפג תוקפו. כל i18n עברית+אנגלית.',
+    purpose: 'Production-readiness improvements for the document editor. ConfirmDialog prevents accidental deletions (critical for GAM evidence culture). Template management closes the CRUD gap — users can now edit/delete custom templates. StatusBar gives writers real-time feedback on document stats and save state. Share expiry adds time-limited links with visual indicators.',
+    purposeHe: 'שיפורי מוכנות לייצור לעורך המסמכים. ConfirmDialog מונע מחיקות בטעות (קריטי לתרבות הראיות של GAM). ניהול תבניות סוגר את פער ה-CRUD — משתמשים יכולים כעת לערוך/למחוק תבניות מותאמות. StatusBar נותן לכותבים משוב בזמן אמת על סטטיסטיקות מסמך ומצב שמירה. תוקף שיתוף מוסיף קישורים מוגבלים בזמן עם אינדיקטורים ויזואליים.',
+    connectedTo: ['ConfirmDialog (reusable)', 'DocumentListView', 'TemplateGallery', 'TiptapEditor', 'ShareDialog', 'CanvasEditor', 'EditorZone', 'shared/doc page', 'editorQueries', 'i18n'],
   },
 ];

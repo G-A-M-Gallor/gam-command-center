@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Plus, Search, Grid3X3, List, FileText, Copy, Trash2, Upload,
-  LayoutTemplate, SortAsc, SortDesc,
+  LayoutTemplate, SortAsc, SortDesc, Link2,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -13,10 +13,12 @@ import {
   createDocument,
   deleteDocument,
   duplicateDocument,
+  fetchActiveShareDocIds,
   type DocRecord,
 } from "@/lib/supabase/editorQueries";
 import { importDocument } from "@/lib/editor/importDocument";
 import { TemplateGallery } from "./TemplateGallery";
+import { ConfirmDialog } from "@/components/command-center/ConfirmDialog";
 import type { JSONContent } from "@tiptap/react";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -42,6 +44,8 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [sortAsc, setSortAsc] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [sharedDocIds, setSharedDocIds] = useState<Set<string>>(new Set());
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,6 +58,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
 
   useEffect(() => {
     loadDocs();
+    fetchActiveShareDocIds().then(setSharedDocIds).catch(() => {});
   }, [loadDocs]);
 
   const openDoc = (id: string) => {
@@ -95,12 +100,18 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
     }
   };
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteClick = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const ok = await deleteDocument(id);
+    setDeleteTarget(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    const ok = await deleteDocument(deleteTarget);
     if (ok) {
-      setDocs((prev) => prev.filter((d) => d.id !== id));
+      setDocs((prev) => prev.filter((d) => d.id !== deleteTarget));
     }
+    setDeleteTarget(null);
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,8 +277,9 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
             >
               <FileText size={16} className="shrink-0 text-slate-500" />
               <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-medium text-slate-200">
+                <div className="flex items-center gap-1.5 truncate text-sm font-medium text-slate-200">
                   {doc.title || (isHe ? "ללא כותרת" : "Untitled")}
+                  {sharedDocIds.has(doc.id) && <Link2 size={11} className="shrink-0 text-purple-400" />}
                 </div>
                 <div className="text-[11px] text-slate-500">
                   {formatDate(doc.last_edited_at)}
@@ -282,7 +294,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
                   <Copy size={13} />
                 </button>
                 <button
-                  onClick={(e) => handleDelete(doc.id, e)}
+                  onClick={(e) => handleDeleteClick(doc.id, e)}
                   className="rounded p-1.5 text-slate-500 hover:bg-red-500/10 hover:text-red-400"
                   title={et.delete}
                 >
@@ -303,7 +315,10 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
               onClick={() => openDoc(doc.id)}
               className="group cursor-pointer rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 transition-colors hover:border-indigo-500/30 hover:bg-indigo-500/5"
             >
-              <FileText size={20} className="mb-2 text-slate-500" />
+              <div className="flex items-center justify-between mb-2">
+                <FileText size={20} className="text-slate-500" />
+                {sharedDocIds.has(doc.id) && <Link2 size={12} className="text-purple-400" />}
+              </div>
               <div className="truncate text-sm font-medium text-slate-200">
                 {doc.title || (isHe ? "ללא כותרת" : "Untitled")}
               </div>
@@ -318,7 +333,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
                   <Copy size={12} />
                 </button>
                 <button
-                  onClick={(e) => handleDelete(doc.id, e)}
+                  onClick={(e) => handleDeleteClick(doc.id, e)}
                   className="rounded p-1 text-slate-500 hover:bg-red-500/10 hover:text-red-400"
                 >
                   <Trash2 size={12} />
@@ -334,6 +349,17 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
         open={showTemplates}
         onClose={() => setShowTemplates(false)}
         onSelect={handleCreateFromTemplate}
+      />
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={et.confirmDeleteDoc}
+        message={et.confirmDeleteDocMessage}
+        confirmLabel={et.delete}
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteTarget(null)}
       />
     </div>
   );

@@ -59,6 +59,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   const [showFieldLibrary, setShowFieldLibrary] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | undefined>(undefined);
   const [fieldModal, setFieldModal] = useState<{
     fieldType: FieldTypeId;
     fieldId?: string;
@@ -186,6 +187,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
         return;
       }
       setSaveStatus('saved');
+      setLastSavedAt(new Date());
       setTimeout(() => setSaveStatus('idle'), 2000);
     },
     [recordId]
@@ -399,6 +401,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
               onSave={handleSave}
               recordId={recordId}
               saveStatus={saveStatus}
+              lastSavedAt={lastSavedAt}
             />
           )}
 

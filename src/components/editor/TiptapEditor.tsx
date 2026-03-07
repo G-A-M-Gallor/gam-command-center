@@ -17,9 +17,11 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import type { JSONContent } from '@tiptap/react';
 import { useDebouncedCallback } from 'use-debounce';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
 
 import { SlashCommands } from './extensions/SlashCommands';
 import { ToggleDetails, DetailsSummary, DetailsContent } from './extensions/Toggle';
@@ -73,7 +75,12 @@ export function TiptapEditor({
   className = '',
   recordId,
   saveStatus = 'idle',
+  lastSavedAt,
 }: TiptapEditorProps) {
+  const { language } = useSettings();
+  const t = getTranslations(language);
+  const isHe = language === 'he';
+  const et = t.editor;
   // ─── Auto-save: 1s debounce after every change ───
   const debouncedSave = useDebouncedCallback((json: JSONContent) => {
     if (onSave) onSave(json);
@@ -217,21 +224,58 @@ export function TiptapEditor({
       {editable && <BlockHandle editor={editor} />}
       {editable && <FloatingToolbar editor={editor} />}
       <EditorContent editor={editor} />
-      <div className="gam-editor-statusbar">
-        <span className="gam-editor-statusbar__save">
-          {saveStatus === 'saving' && '💾 שומר...'}
-          {saveStatus === 'saved' && '✅ נשמר'}
-          {saveStatus === 'error' && '❌ שגיאה בשמירה'}
-        </span>
-        <span className="gam-editor-statusbar__chars">
-          {editor.storage.characterCount?.characters?.() ??
-            editor.getText().length}{' '}
-          תווים
-        </span>
-        <span className="gam-editor-statusbar__hint">
-          הקלד <kbd>/</kbd> לתפריט &nbsp;|&nbsp; שמירה אוטומטית &nbsp;|&nbsp; <kbd>Ctrl+S</kbd> שמירה
-        </span>
-      </div>
+      <StatusBar editor={editor} saveStatus={saveStatus} lastSavedAt={lastSavedAt} isHe={isHe} et={et} />
+    </div>
+  );
+}
+
+// ─── Status Bar ────────────────────────────────────────
+function StatusBar({
+  editor,
+  saveStatus,
+  lastSavedAt,
+  isHe,
+  et,
+}: {
+  editor: ReturnType<typeof useEditor>;
+  saveStatus: string;
+  lastSavedAt?: Date;
+  isHe: boolean;
+  et: Record<string, string>;
+}) {
+  const text = editor?.getText() || '';
+  const wordCount = useMemo(() => text.split(/\s+/).filter(Boolean).length, [text]);
+  const charCount = text.length;
+  const readingTime = Math.ceil(wordCount / 200);
+
+  const relativeTime = useMemo(() => {
+    if (!lastSavedAt) return '';
+    const diff = Math.round((Date.now() - lastSavedAt.getTime()) / 1000);
+    if (diff < 10) return isHe ? 'עכשיו' : 'just now';
+    if (diff < 60) return isHe ? `לפני ${diff} שנ'` : `${diff}s ago`;
+    const mins = Math.round(diff / 60);
+    if (mins < 60) return isHe ? `לפני ${mins} דק'` : `${mins}m ago`;
+    const hrs = Math.round(mins / 60);
+    return isHe ? `לפני ${hrs} שע'` : `${hrs}h ago`;
+  }, [lastSavedAt, isHe]);
+
+  return (
+    <div className="gam-editor-statusbar">
+      <span className="gam-editor-statusbar__save">
+        {saveStatus === 'saving' && (isHe ? 'שומר...' : 'Saving...')}
+        {saveStatus === 'saved' && (isHe ? 'נשמר' : 'Saved')}
+        {saveStatus === 'error' && (isHe ? 'שגיאה בשמירה' : 'Save error')}
+        {saveStatus === 'idle' && relativeTime && (
+          <span className="text-slate-500">{et.lastSaved}: {relativeTime}</span>
+        )}
+      </span>
+      <span className="gam-editor-statusbar__chars">
+        {wordCount} {et.words} · {charCount} {et.chars}
+        {readingTime > 0 && ` · ${readingTime} ${et.minRead}`}
+      </span>
+      <span className="gam-editor-statusbar__hint">
+        <kbd>/</kbd> {isHe ? 'תפריט' : 'menu'} · <kbd>Ctrl+S</kbd>
+      </span>
     </div>
   );
 }

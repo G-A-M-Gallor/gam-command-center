@@ -12,6 +12,7 @@ interface EditorZoneProps {
   onSave: (json: JSONContent) => void;
   recordId: string;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+  lastSavedAt?: Date;
 }
 
 export function EditorZone({
@@ -22,6 +23,7 @@ export function EditorZone({
   onSave,
   recordId,
   saveStatus,
+  lastSavedAt,
 }: EditorZoneProps) {
   const style = {
     position: 'absolute' as const,
@@ -44,6 +46,7 @@ export function EditorZone({
         autoFocus
         recordId={recordId}
         saveStatus={saveStatus}
+        lastSavedAt={lastSavedAt}
       />
     </div>
   );

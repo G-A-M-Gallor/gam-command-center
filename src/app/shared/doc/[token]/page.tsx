@@ -12,12 +12,24 @@ export default async function SharedDocPage({
   // Fetch share record
   const { data: share } = await supabase
     .from("doc_shares")
-    .select("document_id, is_active")
+    .select("document_id, is_active, expires_at")
     .eq("share_token", token)
     .eq("is_active", true)
     .single();
 
   if (!share) notFound();
+
+  // Check expiry
+  if (share.expires_at && new Date(share.expires_at) < new Date()) {
+    return (
+      <div dir="rtl" className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-slate-400">קישור זה פג תוקף</p>
+          <p className="mt-1 text-sm text-slate-600">This link has expired</p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch document
   const { data: doc } = await supabase
