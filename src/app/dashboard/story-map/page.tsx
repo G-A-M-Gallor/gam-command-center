@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Wifi, WifiOff } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
@@ -112,14 +113,27 @@ function makeDemoCards(): StoryCard[] {
   return cards;
 }
 
-// ─── Page ───────────────────────────────────────────
-export default function StoryMapPage() {
+// ─── Inner content (needs Suspense for useSearchParams) ─
+function StoryMapContent() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const isRtl = language === 'he';
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>('');
+  const [selectedProject, setSelectedProjectState] = useState<string>(
+    searchParams.get('project') || ''
+  );
+
+  const setSelectedProject = useCallback((projectId: string) => {
+    setSelectedProjectState(projectId);
+    if (projectId) {
+      router.replace(`/dashboard/story-map?project=${projectId}`, { scroll: false });
+    } else {
+      router.replace('/dashboard/story-map', { scroll: false });
+    }
+  }, [router]);
   const [cards, setCards] = useState<StoryCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemo, setIsDemo] = useState(false);
@@ -531,5 +545,14 @@ export default function StoryMapPage() {
         />
       </div>
     </div>
+  );
+}
+
+// ─── Page Export ──────────────────────────────────────
+export default function StoryMapPage() {
+  return (
+    <Suspense fallback={<div dir="rtl" style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>...</div>}>
+      <StoryMapContent />
+    </Suspense>
   );
 }

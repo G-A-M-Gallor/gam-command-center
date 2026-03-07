@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
-import { Lock, Check, Loader2 } from "lucide-react";
+import { Lock, Check, Loader2, Wifi, WifiOff } from "lucide-react";
 import {
   getFunctionalMapCells,
   updateFunctionalMapCell,
   type FunctionalMapCell,
 } from "@/lib/supabase/functionalMapQueries";
+import {
+  subscribeFunctionalMap,
+  unsubscribeFromFunctionalMap,
+} from "@/lib/supabase/functionalMapRealtime";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -205,6 +210,9 @@ export default function FunctionalMapPage() {
   const fm = t.functionalMap;
   const [cells, setCells] = useState<FunctionalMapCell[]>(DEMO_CELLS);
   const [loaded, setLoaded] = useState(false);
+  const [realtimeStatus, setRealtimeStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
+  const pendingIds = useRef<Set<string>>(new Set());
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   const levelLabels: Record<Level, string> = {
     strategy: fm.levelStrategy,
@@ -231,12 +239,42 @@ export default function FunctionalMapPage() {
       .finally(() => setLoaded(true));
   }, []);
 
+  // ── Realtime subscription ───────────────────────────
+  useEffect(() => {
+    if (!loaded) return;
+
+    setRealtimeStatus('connecting');
+
+    const channel = subscribeFunctionalMap({
+      onUpdate: (cell) => {
+        if (pendingIds.current.has(cell.id)) {
+          pendingIds.current.delete(cell.id);
+          return;
+        }
+        setCells((prev) =>
+          prev.map((c) => (c.id === cell.id ? { ...c, ...cell } : c))
+        );
+      },
+    });
+
+    channelRef.current = channel;
+    const timer = setTimeout(() => setRealtimeStatus('connected'), 1000);
+
+    return () => {
+      clearTimeout(timer);
+      unsubscribeFromFunctionalMap(channel);
+      channelRef.current = null;
+      setRealtimeStatus('disconnected');
+    };
+  }, [loaded]);
+
   const handleSave = useCallback(async (id: string, updates: Partial<FunctionalMapCell>) => {
+    pendingIds.current.add(id);
     try {
       const updated = await updateFunctionalMapCell(id, updates);
       setCells((prev) => prev.map((c) => (c.id === id ? { ...c, ...updated } : c)));
     } catch {
-      // update locally even if Supabase fails (no table yet)
+      pendingIds.current.delete(id);
       setCells((prev) =>
         prev.map((c) => (c.id === id ? { ...c, ...updates, updated_at: new Date().toISOString() } : c))
       );
@@ -264,6 +302,20 @@ export default function FunctionalMapPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-slate-500" /> {fm.statusPlanned}
+            </span>
+            <span data-cc-id="funcmap.realtime-status" className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${
+              realtimeStatus === 'connected'
+                ? 'bg-emerald-500/10 text-emerald-400'
+                : realtimeStatus === 'connecting'
+                  ? 'bg-amber-500/10 text-amber-400'
+                  : 'bg-red-500/10 text-red-400'
+            }`}>
+              {realtimeStatus === 'connected'
+                ? <><Wifi size={11} /> {fm.realtimeConnected}</>
+                : realtimeStatus === 'connecting'
+                  ? <><Wifi size={11} /> {fm.realtimeConnecting}</>
+                  : <><WifiOff size={11} /> {fm.realtimeDisconnected}</>
+              }
             </span>
           </div>
         </div>

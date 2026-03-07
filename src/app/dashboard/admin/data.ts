@@ -323,6 +323,10 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   // ── Story Map features ──
   'storycard-notes':         makeChecklist(true,  true, true,  true, true),
   'storycard-diagram':       makeChecklist(true,  true, true,  true, true),
+  // ── Realtime + Polish Sprint ──
+  'funcmap-realtime':        makeChecklist(true,  true, true,  true, true),
+  'plan-notes-realtime':     makeChecklist(true,  true, true,  true, true),
+  'storymap-url-persist':    makeChecklist(true,  true, true,  true, true),
   // ── UI/UX + Libraries ──
   'sidebar-redesign':        makeChecklist(false, false, false, true, false),
   'split-screen-nav':        makeChecklist(false, false, false, true, false),
@@ -1296,6 +1300,51 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Visual diagrams help explain story architecture — data flow, component relationships, state machines. Having diagrams directly on story cards keeps technical context where it belongs: next to the story.',
     purposeHe: 'דיאגרמות חזותיות עוזרות להסביר ארכיטקטורת סיפורים — זרימת נתונים, קשרי רכיבים, מכונות מצב. דיאגרמות ישירות על כרטיסי סיפור שומרות הקשר טכני במקום הנכון: ליד הסיפור.',
     connectedTo: ['StoryCard.tsx', 'storycard-notes', 'Mermaid library'],
+  },
+
+  // ── Realtime + Polish Sprint ──
+
+  {
+    id: 'funcmap-realtime',
+    feature: 'Functional Map — Supabase Realtime subscription',
+    featureHe: 'מפה פונקציונלית — מנוי Realtime מ-Supabase',
+    status: 'working', commitStatus: 'uncommitted', workflowStatus: 'complete',
+    date: '2026-03-07', phase: 5,
+    files: ['src/lib/supabase/functionalMapRealtime.ts', 'src/app/dashboard/functional-map/page.tsx', 'src/lib/i18n.ts'],
+    route: '/dashboard/functional-map',
+    notes: 'Adds live Supabase Realtime subscription to functional map grid. Edits in one browser tab instantly appear in another. Uses pendingIds pattern to skip self-initiated changes. Connection status indicator in notice bar.',
+    notesHe: 'מוסיף מנוי Supabase Realtime חי לגריד מפה פונקציונלית. עריכות בטאב דפדפן אחד מופיעות מיידית בטאב אחר. משתמש בתבנית pendingIds לדילוג על שינויים עצמיים. מחוון מצב חיבור בסרגל ההודעות.',
+    purpose: 'Multi-user editing requires realtime sync. The functional map is a shared resource — all 15 cells should reflect the latest state across all open sessions.',
+    purposeHe: 'עריכה מרובת משתמשים דורשת סנכרון בזמן אמת. המפה הפונקציונלית היא משאב משותף — כל 15 התאים צריכים לשקף את המצב האחרון בכל הסשנים הפתוחים.',
+    connectedTo: ['functionalMapQueries.ts', 'functionalMapRealtime.ts', 'functional_map_cells table', 'supabase_realtime publication'],
+  },
+  {
+    id: 'plan-notes-realtime',
+    feature: 'Plan Page — phase notes editing + Realtime',
+    featureHe: 'דף תוכנית — עריכת הערות שלב + Realtime',
+    status: 'working', commitStatus: 'uncommitted', workflowStatus: 'complete',
+    date: '2026-03-07', phase: 5,
+    files: ['src/lib/supabase/planRealtime.ts', 'src/app/dashboard/plan/page.tsx', 'src/lib/i18n.ts'],
+    route: '/dashboard/plan',
+    notes: 'Adds notes textarea per phase (language-aware: notes vs notes_he). Debounced auto-save at 500ms. Supabase Realtime subscription for phase status and notes changes. Connection status indicator.',
+    notesHe: 'מוסיף textarea להערות לכל שלב (מודע שפה: notes לעומת notes_he). שמירה אוטומטית מושהית ב-500ms. מנוי Supabase Realtime לשינויי סטטוס והערות שלב. מחוון מצב חיבור.',
+    purpose: 'Phase notes (summary, risks, goals) existed in DB but had no UI. Teams need to annotate roadmap phases with context. Realtime ensures multiple users see the same phase state.',
+    purposeHe: 'הערות שלב (סיכום, סיכונים, יעדים) היו קיימות ב-DB אך ללא ממשק. צוותים צריכים להוסיף הערות עם הקשר לשלבי מפת הדרכים. Realtime מבטיח שמספר משתמשים רואים אותו מצב שלב.',
+    connectedTo: ['planQueries.ts', 'planRealtime.ts', 'plan_phases table', 'supabase_realtime publication'],
+  },
+  {
+    id: 'storymap-url-persist',
+    feature: 'Story Map — URL-based project persistence',
+    featureHe: 'מפת סיפורים — שימור פרויקט בURL',
+    status: 'working', commitStatus: 'uncommitted', workflowStatus: 'complete',
+    date: '2026-03-07', phase: 3,
+    files: ['src/app/dashboard/story-map/page.tsx'],
+    route: '/dashboard/story-map',
+    notes: 'Project selection now persists in URL as ?project=<id>. Uses useSearchParams + router.replace. Wrapped in Suspense (Next.js requirement). Deep linking works: sharing a URL with ?project=X opens that project directly.',
+    notesHe: 'בחירת פרויקט נשמרת כעת בURL כ-?project=<id>. משתמש ב-useSearchParams + router.replace. עטוף ב-Suspense (דרישת Next.js). Deep linking עובד: שיתוף URL עם ?project=X פותח את הפרויקט ישירות.',
+    purpose: 'Previously, navigating away from Story Map reset the project selection to demo mode. URL persistence enables deep linking, bookmarking, and tab restoration.',
+    purposeHe: 'בעבר, ניווט מחוץ למפת סיפורים איפס את בחירת הפרויקט למצב דמו. שימור URL מאפשר deep linking, סימניות ושחזור טאבים.',
+    connectedTo: ['story-map/page.tsx', 'useSearchParams', 'Suspense boundary'],
   },
 
   // ── UI/UX Enhancements ──
