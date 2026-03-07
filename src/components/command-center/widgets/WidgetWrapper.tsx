@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { Pencil, RotateCcw, X } from "lucide-react";
@@ -92,6 +92,40 @@ function calcPosition(
     maxWidth: zoneWidth,
     maxHeight: zoneBottom - top,
   };
+}
+
+// ─── Per-widget error boundary ──────────────────────────────
+class WidgetErrorBoundary extends React.Component<
+  { children: React.ReactNode; widgetId: string },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error(`[WidgetErrorBoundary] Widget "${this.props.widgetId}" crashed:`, error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-2 p-4 text-center">
+          <p className="text-xs text-red-400">Widget error</p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false })}
+            className="rounded px-2 py-1 text-[10px] text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 interface WidgetWrapperProps {
@@ -337,7 +371,9 @@ export function WidgetWrapper({
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
-            {WidgetContent && <WidgetContent />}
+            <WidgetErrorBoundary widgetId={widget.id}>
+              {WidgetContent && <WidgetContent />}
+            </WidgetErrorBoundary>
           </div>
         </div>
       )}
@@ -403,7 +439,9 @@ export function WidgetWrapper({
           </div>
           {/* Panel content — scrollable */}
           <div className="flex-1 overflow-y-auto p-4">
-            {WidgetContent && <WidgetContent />}
+            <WidgetErrorBoundary widgetId={widget.id}>
+              {WidgetContent && <WidgetContent />}
+            </WidgetErrorBoundary>
           </div>
         </div>
       )}

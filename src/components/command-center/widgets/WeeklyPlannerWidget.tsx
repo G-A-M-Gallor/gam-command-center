@@ -27,7 +27,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useWeeklyPlanner } from "@/contexts/WeeklyPlannerContext";
+import { useWeeklyPlanner, WeeklyPlannerProvider } from "@/contexts/WeeklyPlannerContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import type { WeeklyItem, ItemPriority, TeamMember } from "@/lib/weeklyPlanner/types";
@@ -53,6 +53,14 @@ import type { WidgetSize } from "./WidgetRegistry";
 // ─── Full-Screen Panel ──────────────────────────────────────
 
 export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
+  return (
+    <WeeklyPlannerProvider>
+      <WeeklyPlannerPanelInner onClose={onClose} />
+    </WeeklyPlannerProvider>
+  );
+}
+
+function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
   const { language } = useSettings();
   const t = getTranslations(language);
   const wt = t.widgets as Record<string, string>;
@@ -967,6 +975,14 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
 // ─── Bar Content ────────────────────────────────────────────
 
 export function WeeklyPlannerBarContent({ size }: { size: WidgetSize }) {
+  return (
+    <WeeklyPlannerProvider>
+      <WeeklyPlannerBarContentInner size={size} />
+    </WeeklyPlannerProvider>
+  );
+}
+
+function WeeklyPlannerBarContentInner({ size }: { size: WidgetSize }) {
   const { items, currentUserId } = useWeeklyPlanner();
   const today = toDateString(new Date());
   const todayCount = items.filter(

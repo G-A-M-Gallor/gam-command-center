@@ -12,7 +12,6 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
 import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
-import { WeeklyPlannerProvider } from "@/contexts/WeeklyPlannerContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 
@@ -99,7 +98,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <DashboardModeProvider>
     <ShortcutsProvider>
-    <WeeklyPlannerProvider>
     <StyleOverrideProvider>
     <ContextMenuProvider>
     <div data-cc-id="shell.root" className="min-h-screen bg-slate-900 text-slate-100">
@@ -154,7 +152,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     </div>
     </ContextMenuProvider>
     </StyleOverrideProvider>
-    </WeeklyPlannerProvider>
     </ShortcutsProvider>
     </DashboardModeProvider>
   );
