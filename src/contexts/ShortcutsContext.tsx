@@ -52,7 +52,7 @@ export interface ResolvedShortcut {
   keyCombo: string;
   actionSlug: string;
   category: ShortcutDefinition["category"];
-  displayName: { he: string; en: string };
+  displayName: { he: string; en: string; ru: string };
   isSystem: boolean;
   isCustom: boolean;
   isActive: boolean;
@@ -72,7 +72,7 @@ interface ShortcutsState {
     keyCombo: string;
     actionSlug: string;
     category: ShortcutDefinition["category"];
-    displayName: { he: string; en: string };
+    displayName: { he: string; en: string; ru: string };
   }) => void;
   deleteCustomShortcut: (id: string) => void;
   checkConflict: (keyCombo: string, excludeId?: string) => ConflictResult;
@@ -316,7 +316,7 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
       keyCombo: string;
       actionSlug: string;
       category: ShortcutDefinition["category"];
-      displayName: { he: string; en: string };
+      displayName: { he: string; en: string; ru: string };
     }) => {
       const next: UserShortcutOverride[] = [
         ...overrides,

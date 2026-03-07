@@ -193,7 +193,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       // Show recent documents too
       const docItems: SearchItem[] = dbDocuments.slice(0, 5).map((d) => ({
         id: `doc-${d.id}`,
-        label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
+        label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
         type: "document" as const,
         href: `/dashboard/editor?id=${d.id}`,
         icon: FileText,
@@ -207,7 +207,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     const documents: SearchItem[] = searchResults
       .map((d) => ({
         id: `doc-${d.id}`,
-        label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
+        label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
         type: "document" as const,
         href: `/dashboard/editor?id=${d.id}`,
         icon: FileText,
@@ -232,7 +232,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     // Semantic results (shown when FTS has no matches)
     const semantic: SearchItem[] = semanticResults.map((d) => ({
       id: `sem-${d.id}`,
-      label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
+      label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
       type: "semantic" as const,
       href: `/dashboard/editor?id=${d.id}`,
       icon: Sparkles,
@@ -280,7 +280,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                 workspace_id: existing.workspace_id,
                 entity_id: existing.entity_id,
                 created_by: existing.created_by,
-                title: language === 'he' ? 'מסמך חדש' : 'New Document',
+                title: language === 'he' ? 'מסמך חדש' : language === 'ru' ? 'Новый документ' : 'New Document',
                 content: { type: 'doc', content: [{ type: 'paragraph' }] },
                 record_type: 'document',
                 source: 'manual',
@@ -339,17 +339,17 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   );
 
   // Tab labels for page search
-  const tabLabels: Record<string, { he: string; en: string }> = {
-    "/dashboard/layers": { he: "שכבות", en: "Layers" },
-    "/dashboard/editor": { he: "עורך", en: "Editor" },
-    "/dashboard/story-map": { he: "מפת סיפור", en: "Story Map" },
-    "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map" },
-    "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub" },
-    "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System" },
-    "/dashboard/formily": { he: "טפסים", en: "Formily" },
-    "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture" },
-    "/dashboard/plan": { he: "תוכנית", en: "Plan" },
-    "/dashboard/settings": { he: "הגדרות", en: "Settings" },
+  const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
+    "/dashboard/layers": { he: "שכבות", en: "Layers", ru: "Слои" },
+    "/dashboard/editor": { he: "עורך", en: "Editor", ru: "Редактор" },
+    "/dashboard/story-map": { he: "מפת סיפור", en: "Story Map", ru: "Карта историй" },
+    "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" },
+    "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub", ru: "AI Центр" },
+    "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" },
+    "/dashboard/formily": { he: "טפסים", en: "Formily", ru: "Формы" },
+    "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" },
+    "/dashboard/plan": { he: "תוכנית", en: "Plan", ru: "План" },
+    "/dashboard/settings": { he: "הגדרות", en: "Settings", ru: "Настройки" },
   };
 
   // Group items by type for display
@@ -386,7 +386,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     const sections: { title: string; items: SearchItem[] }[] = [];
     if (pages.length > 0) sections.push({ title: t.widgets.recent, items: pages });
     if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
-    if (semanticItems.length > 0) sections.push({ title: language === 'he' ? 'תוצאות סמנטיות' : 'Semantic Results', items: semanticItems });
+    if (semanticItems.length > 0) sections.push({ title: language === 'he' ? 'תוצאות סמנטיות' : language === 'ru' ? 'Семантические результаты' : 'Semantic Results', items: semanticItems });
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
     return sections;
   }, [items, query, t]);
@@ -484,15 +484,15 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
           <span className="flex items-center gap-1">
             <ArrowUp className="h-3 w-3" />
             <ArrowDown className="h-3 w-3" />
-            {language === "he" ? "ניווט" : "Navigate"}
+            {language === "he" ? "ניווט" : language === "ru" ? "Навигация" : "Navigate"}
           </span>
           <span className="flex items-center gap-1">
             <CornerDownLeft className="h-3 w-3" />
-            {language === "he" ? "בחירה" : "Select"}
+            {language === "he" ? "בחירה" : language === "ru" ? "Выбрать" : "Select"}
           </span>
           <span className="flex items-center gap-1">
             <kbd className="rounded border border-slate-600 px-1 text-[10px]">ESC</kbd>
-            {language === "he" ? "סגירה" : "Close"}
+            {language === "he" ? "סגירה" : language === "ru" ? "Закрыть" : "Close"}
           </span>
         </div>
       </div>

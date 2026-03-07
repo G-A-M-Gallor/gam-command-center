@@ -27,7 +27,7 @@ export function FolderCreator({ onClose }: FolderCreatorProps) {
     const name = nameHe.trim() || nameEn.trim() || "Folder";
     const folder: FolderDefinition = {
       id: `folder-${Date.now()}`,
-      label: { he: nameHe.trim() || name, en: nameEn.trim() || name },
+      label: { he: nameHe.trim() || name, en: nameEn.trim() || name, ru: name },
       icon,
       defaultSize: 2,
       gridCols,

@@ -50,7 +50,7 @@ export type FolderItem =
 
 export interface FolderDefinition {
   id: string;
-  label: { he: string; en: string };
+  label: { he: string; en: string; ru: string };
   icon: string;
   defaultSize: WidgetSize;
   gridCols: number;
@@ -64,49 +64,49 @@ export interface FolderDefinition {
 export interface ActionConfig {
   icon: LucideIcon;
   color: string;
-  label: { he: string; en: string };
+  label: { he: string; en: string; ru: string };
 }
 
 export const ACTION_CONFIG: Record<QuickActionId, ActionConfig> = {
   "create-document": {
     icon: FileText,
     color: "text-blue-400",
-    label: { he: "מסמך חדש", en: "New Document" },
+    label: { he: "מסמך חדש", en: "New Document", ru: "Новый документ" },
   },
   "create-project": {
     icon: FolderPlus,
     color: "text-emerald-400",
-    label: { he: "פרויקט חדש", en: "New Project" },
+    label: { he: "פרויקט חדש", en: "New Project", ru: "Новый проект" },
   },
   "create-task": {
     icon: CheckSquare,
     color: "text-amber-400",
-    label: { he: "משימה חדשה", en: "New Task" },
+    label: { he: "משימה חדשה", en: "New Task", ru: "Новая задача" },
   },
   "open-search": {
     icon: Search,
     color: "text-slate-300",
-    label: { he: "חיפוש", en: "Search" },
+    label: { he: "חיפוש", en: "Search", ru: "Поиск" },
   },
   "open-ai": {
     icon: Bot,
     color: "text-purple-400",
-    label: { he: "עוזר AI", en: "AI Assistant" },
+    label: { he: "עוזר AI", en: "AI Assistant", ru: "AI Ассистент" },
   },
   "navigate-layers": {
     icon: Layers,
     color: "text-cyan-400",
-    label: { he: "שכבות", en: "Layers" },
+    label: { he: "שכבות", en: "Layers", ru: "Слои" },
   },
   "navigate-editor": {
     icon: PenTool,
     color: "text-indigo-400",
-    label: { he: "עורך", en: "Editor" },
+    label: { he: "עורך", en: "Editor", ru: "Редактор" },
   },
   "navigate-settings": {
     icon: Settings,
     color: "text-slate-400",
-    label: { he: "הגדרות", en: "Settings" },
+    label: { he: "הגדרות", en: "Settings", ru: "Настройки" },
   },
 };
 

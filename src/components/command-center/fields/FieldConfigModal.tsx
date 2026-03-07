@@ -175,10 +175,10 @@ export function FieldConfigModal({
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 border-t border-slate-700/50 px-4 py-3">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            {language === 'he' ? 'ביטול' : 'Cancel'}
+            {language === 'he' ? 'ביטול' : language === 'ru' ? 'Отмена' : 'Cancel'}
           </Button>
           <Button variant="primary" size="sm" onClick={handleSave} loading={saving}>
-            {language === 'he' ? 'שמור' : 'Save'}
+            {language === 'he' ? 'שמור' : language === 'ru' ? 'Сохранить' : 'Save'}
           </Button>
         </div>
       </div>
@@ -196,9 +196,9 @@ function FieldConfigForm({
   fieldType: FieldTypeId;
   config: FieldConfig;
   update: (key: string, value: unknown) => void;
-  language: 'he' | 'en';
+  language: 'he' | 'en' | 'ru';
 }) {
-  const l = (he: string, en: string) => (language === 'he' ? he : en);
+  const l = (he: string, en: string, ru?: string) => (language === 'he' ? he : language === 'ru' ? (ru || en) : en);
 
   switch (fieldType) {
     case 'short-text': {
@@ -435,7 +435,7 @@ function OptionsList({
 }: {
   options: string[];
   onChange: (v: string[]) => void;
-  language: 'he' | 'en';
+  language: 'he' | 'en' | 'ru';
   addLabel?: string;
 }) {
   const [newOption, setNewOption] = useState('');
@@ -455,7 +455,7 @@ function OptionsList({
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-[11px] font-medium text-slate-400">
-        {language === 'he' ? 'אפשרויות' : 'Options'}
+        {language === 'he' ? 'אפשרויות' : language === 'ru' ? 'Варианты' : 'Options'}
       </label>
       <div className="flex flex-col gap-1 rounded-lg border border-slate-700/50 bg-slate-900/50 p-2">
         {options.map((opt, i) => (
@@ -486,7 +486,7 @@ function OptionsList({
             value={newOption}
             onChange={(e) => setNewOption(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(); } }}
-            placeholder={addLabel || (language === 'he' ? 'הוסף אפשרות' : 'Add option')}
+            placeholder={addLabel || (language === 'he' ? 'הוסף אפשרות' : language === 'ru' ? 'Добавить вариант' : 'Add option')}
             dir="auto"
             className="flex-1 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 placeholder-slate-600 outline-none"
           />

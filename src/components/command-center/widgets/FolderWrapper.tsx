@@ -398,7 +398,7 @@ function FolderGrid({
   onRemove,
 }: {
   folder: FolderDefinition;
-  language: "he" | "en";
+  language: "he" | "en" | "ru";
   ft: Record<string, string>;
   onDragStart: (i: number) => void;
   onDragEnter: (i: number) => void;

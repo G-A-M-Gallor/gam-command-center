@@ -46,7 +46,7 @@ interface PageHeaderProps {
   children?: React.ReactNode;
 }
 
-function GitButtons({ language }: { language: 'he' | 'en' }) {
+function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
   const t = getTranslations(language);
   const ta = t.admin;
   const isHe = language === 'he';

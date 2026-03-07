@@ -272,7 +272,7 @@ function CategorySection({
   onToggleCollapse: () => void;
   onToggleShortcut: (id: string) => void;
   onDelete: (id: string) => void;
-  language: "he" | "en";
+  language: "he" | "en" | "ru";
   focusedId?: string | null;
 }) {
   const Icon = category.icon;
@@ -332,7 +332,7 @@ function ShortcutRow({
   shortcut: ResolvedShortcut;
   onToggle: () => void;
   onDelete?: () => void;
-  language: "he" | "en";
+  language: "he" | "en" | "ru";
   isFocused?: boolean;
 }) {
   return (
@@ -353,7 +353,7 @@ function ShortcutRow({
       {/* Reserved badge */}
       {shortcut.isReserved && (
         <span className="shrink-0 rounded bg-amber-900/40 px-1.5 py-0.5 text-[9px] text-amber-400/80">
-          {language === "he" ? "שמור למערכת" : "System"}
+          {language === "he" ? "שמור למערכת" : language === "ru" ? "Системная" : "System"}
         </span>
       )}
 
@@ -402,14 +402,14 @@ function ShortcutRow({
 
 // ─── AI Suggestion Bar ──────────────────────────────────────
 
-const AI_STUB_RESPONSES: Record<string, { combo: string; label: { he: string; en: string } }[]> = {
-  save: [{ combo: "Cmd+S", label: { he: "שמור מסמך", en: "Save Document" } }],
-  search: [{ combo: "Cmd+K", label: { he: "חיפוש", en: "Search" } }],
-  undo: [{ combo: "Cmd+Z", label: { he: "בטל", en: "Undo" } }],
-  create: [{ combo: "Cmd+Shift+N", label: { he: "יצירה מהירה", en: "Quick Create" } }],
+const AI_STUB_RESPONSES: Record<string, { combo: string; label: { he: string; en: string; ru: string } }[]> = {
+  save: [{ combo: "Cmd+S", label: { he: "שמור מסמך", en: "Save Document", ru: "Сохранить документ" } }],
+  search: [{ combo: "Cmd+K", label: { he: "חיפוש", en: "Search", ru: "Поиск" } }],
+  undo: [{ combo: "Cmd+Z", label: { he: "בטל", en: "Undo", ru: "Отменить" } }],
+  create: [{ combo: "Cmd+Shift+N", label: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" } }],
 };
 
-function AiSuggestionBar({ language }: { language: "he" | "en" }) {
+function AiSuggestionBar({ language }: { language: "he" | "en" | "ru" }) {
   const t = getTranslations(language);
   const wt = t.widgets;
   const [input, setInput] = useState("");
@@ -429,12 +429,14 @@ function AiSuggestionBar({ language }: { language: "he" | "en" }) {
       const match = Object.keys(AI_STUB_RESPONSES).find((k) => q.includes(k));
       const result = match
         ? AI_STUB_RESPONSES[match]
-        : [{ combo: "Cmd+Shift+?", label: { he: "פעולה מותאמת", en: "Custom Action" } }];
+        : [{ combo: "Cmd+Shift+?", label: { he: "פעולה מותאמת", en: "Custom Action", ru: "Пользовательское действие" } }];
 
       const text =
         language === "he"
           ? `💡 נסה ${result[0].combo} — ${result[0].label.he}`
-          : `💡 Try ${result[0].combo} — ${result[0].label.en}`;
+          : language === "ru"
+            ? `💡 Попробуйте ${result[0].combo} — ${result[0].label.ru}`
+            : `💡 Try ${result[0].combo} — ${result[0].label.en}`;
 
       // Typing animation
       let i = 0;

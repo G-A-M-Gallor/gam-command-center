@@ -27,7 +27,7 @@ const STORAGE_KEYS = {
   skin: "cc-skin",
 } as const;
 
-export type Language = "he" | "en";
+export type Language = "he" | "en" | "ru";
 export type SidebarPosition = "right" | "left";
 export type SidebarVisibility = "visible" | "float" | "hidden";
 export type AccentColor = "purple" | "blue" | "emerald" | "amber" | "rose" | "cyan" | "brand" | "custom";
@@ -185,7 +185,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const storedRadius = localStorage.getItem(STORAGE_KEYS.borderRadius) as BorderRadius | null;
     const storedDensity = localStorage.getItem(STORAGE_KEYS.density) as Density | null;
 
-    if (storedLang === "he" || storedLang === "en") setLanguageState(storedLang);
+    if (storedLang === "he" || storedLang === "en" || storedLang === "ru") setLanguageState(storedLang);
     if (storedPos === "right" || storedPos === "left") setSidebarPositionState(storedPos);
     if (storedVis === "visible" || storedVis === "float" || storedVis === "hidden") setSidebarVisibilityState(storedVis);
     if (storedAccent && ACCENT_COLORS.includes(storedAccent)) setAccentColorState(storedAccent);
@@ -234,7 +234,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.dir = language === "he" ? "rtl" : "ltr";
-    document.documentElement.lang = language === "he" ? "he" : "en";
+    document.documentElement.lang = language;
   }, [language, mounted]);
 
   // Apply theme data attributes

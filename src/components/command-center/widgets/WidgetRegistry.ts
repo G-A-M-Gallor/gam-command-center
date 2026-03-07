@@ -30,8 +30,8 @@ export type WidgetPlacement = "toolbar" | "apps" | "disabled";
 export interface WidgetDefinition {
   id: string;
   icon: LucideIcon;
-  label: { he: string; en: string };
-  description: { he: string; en: string };
+  label: { he: string; en: string; ru: string };
+  description: { he: string; en: string; ru: string };
   defaultSize: WidgetSize;
   status: "active" | "coming-soon";
   category: WidgetCategory;
@@ -61,10 +61,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "search",
     icon: Search,
-    label: { he: "חיפוש", en: "Search" },
+    label: { he: "חיפוש", en: "Search", ru: "Поиск" },
     description: {
       he: "חיפוש פרויקטים, מסמכים ושיחות",
       en: "Search projects, documents & conversations",
+      ru: "Поиск проектов, документов и разговоров",
     },
     defaultSize: 2,
     status: "active",
@@ -78,10 +79,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "ai-assistant",
     icon: Bot,
-    label: { he: "עוזר AI", en: "AI Assistant" },
+    label: { he: "עוזר AI", en: "AI Assistant", ru: "AI Ассистент" },
     description: {
       he: "עוזר AI מהיר עם הקשר לעמוד",
       en: "Quick AI assistant with page context",
+      ru: "Быстрый AI-ассистент с контекстом страницы",
     },
     defaultSize: 1,
     status: "active",
@@ -95,10 +97,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "quick-create",
     icon: Plus,
-    label: { he: "יצירה מהירה", en: "Quick Create" },
+    label: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" },
     description: {
       he: "צור מסמך, פרויקט או משימה",
       en: "Create a document, project or task",
+      ru: "Создать документ, проект или задачу",
     },
     defaultSize: 2,
     status: "active",
@@ -111,10 +114,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "favorites",
     icon: Pin,
-    label: { he: "מועדפים", en: "Favorites" },
+    label: { he: "מועדפים", en: "Favorites", ru: "Избранное" },
     description: {
       he: "דפים וקישורים שנשמרו",
       en: "Saved pages and links",
+      ru: "Сохранённые страницы и ссылки",
     },
     defaultSize: 1,
     status: "active",
@@ -127,10 +131,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "today",
     icon: Calendar,
-    label: { he: "היום", en: "Today" },
+    label: { he: "היום", en: "Today", ru: "Сегодня" },
     description: {
       he: "פגישות, דדליינים ותזכורות",
       en: "Meetings, deadlines & reminders",
+      ru: "Встречи, дедлайны и напоминания",
     },
     defaultSize: 2,
     status: "active",
@@ -143,10 +148,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "notifications",
     icon: Bell,
-    label: { he: "התראות", en: "Notifications" },
+    label: { he: "התראות", en: "Notifications", ru: "Уведомления" },
     description: {
       he: "התראות מפרויקטים, מסמכים ו-AI",
       en: "Notifications from projects, documents & AI",
+      ru: "Уведомления от проектов, документов и AI",
     },
     defaultSize: 1,
     status: "active",
@@ -159,10 +165,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "timer",
     icon: Clock,
-    label: { he: "טיימר", en: "Timer" },
+    label: { he: "טיימר", en: "Timer", ru: "Таймер" },
     description: {
       he: "טיימר פומודורו לניהול זמן",
       en: "Pomodoro timer for time management",
+      ru: "Таймер Помодоро для управления временем",
     },
     defaultSize: 2,
     status: "active",
@@ -175,10 +182,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "clipboard",
     icon: ClipboardList,
-    label: { he: "לוח הדבקות", en: "Clipboard" },
+    label: { he: "לוח הדבקות", en: "Clipboard", ru: "Буфер обмена" },
     description: {
       he: "פריטים שהועתקו לאחרונה",
       en: "Recently copied items",
+      ru: "Недавно скопированные элементы",
     },
     defaultSize: 1,
     status: "active",
@@ -191,10 +199,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "settings",
     icon: Settings,
-    label: { he: "הגדרות", en: "Settings" },
+    label: { he: "הגדרות", en: "Settings", ru: "Настройки" },
     description: {
       he: "השהיית ריחוף + גישה מהירה להגדרות",
       en: "Hover delay + quick access to settings",
+      ru: "Задержка наведения + быстрый доступ к настройкам",
     },
     defaultSize: 1,
     status: "active",
@@ -207,10 +216,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "keyboard-shortcuts",
     icon: Keyboard,
-    label: { he: "קיצורי מקלדת", en: "Keyboard Shortcuts" },
+    label: { he: "קיצורי מקלדת", en: "Keyboard Shortcuts", ru: "Горячие клавиши" },
     description: {
       he: "קיצורי מקלדת וניהול פעולות",
       en: "Keyboard shortcuts & action management",
+      ru: "Горячие клавиши и управление действиями",
     },
     defaultSize: 1,
     status: "active",
@@ -224,10 +234,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "weekly-planner",
     icon: CalendarDays,
-    label: { he: "סדר שבועי", en: "Weekly Planner" },
+    label: { he: "סדר שבועי", en: "Weekly Planner", ru: "Еженедельный план" },
     description: {
       he: "תכנון שבועי, משימות יומיות ותבניות חוזרות",
       en: "Weekly planning, daily tasks & recurring templates",
+      ru: "Еженедельное планирование, ежедневные задачи и повторяющиеся шаблоны",
     },
     defaultSize: 2,
     status: "active",
@@ -242,10 +253,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "wati",
     icon: MessageCircle,
-    label: { he: "הודעות WATI", en: "WATI Messages" },
+    label: { he: "הודעות WATI", en: "WATI Messages", ru: "Сообщения WATI" },
     description: {
       he: "הודעות WhatsApp אחרונות שצריכות תשומת לב",
       en: "Recent WhatsApp messages needing attention",
+      ru: "Последние сообщения WhatsApp, требующие внимания",
     },
     defaultSize: 2,
     status: "coming-soon",
@@ -256,10 +268,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "team",
     icon: Users,
-    label: { he: "צוות", en: "Team" },
+    label: { he: "צוות", en: "Team", ru: "Команда" },
     description: {
       he: "מי online, מי עובד על מה",
       en: "Who's online, who's working on what",
+      ru: "Кто онлайн, кто над чем работает",
     },
     defaultSize: 2,
     status: "coming-soon",
@@ -270,10 +283,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "kpi",
     icon: BarChart3,
-    label: { he: "מדדים", en: "KPIs" },
+    label: { he: "מדדים", en: "KPIs", ru: "Показатели" },
     description: {
       he: "מדדים מהירים — פרויקטים פתוחים, לידים, הכנסה חודשית",
       en: "Quick metrics — open projects, leads, monthly revenue",
+      ru: "Быстрые метрики — открытые проекты, лиды, месячный доход",
     },
     defaultSize: 2,
     status: "coming-soon",
@@ -284,10 +298,11 @@ export const widgetRegistry: WidgetDefinition[] = [
   {
     id: "shortcuts",
     icon: ExternalLink,
-    label: { he: "קיצורים", en: "Shortcuts" },
+    label: { he: "קיצורים", en: "Shortcuts", ru: "Ссылки" },
     description: {
       he: "לינקים מהירים לאוריגמי, Notion, WATI, n8n",
       en: "Quick links to Origami, Notion, WATI, n8n",
+      ru: "Быстрые ссылки на Origami, Notion, WATI, n8n",
     },
     defaultSize: 2,
     status: "coming-soon",

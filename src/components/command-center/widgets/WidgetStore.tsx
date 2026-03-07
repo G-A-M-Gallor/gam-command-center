@@ -51,33 +51,36 @@ const CATEGORY_EMOJI: Record<WidgetCategory, string> = {
   integrations: "🔗",
 };
 
-const CATEGORY_LABELS: Record<WidgetCategory, { he: string; en: string }> = {
-  basics: { he: "בסיסיים", en: "Basics" },
-  productivity: { he: "פרודוקטיביות", en: "Productivity" },
-  ai_comms: { he: "AI ותקשורת", en: "AI & Communications" },
-  team: { he: "צוות", en: "Team" },
-  analytics: { he: "אנליטיקס", en: "Analytics" },
-  integrations: { he: "אינטגרציות", en: "Integrations" },
+const CATEGORY_LABELS: Record<WidgetCategory, { he: string; en: string; ru: string }> = {
+  basics: { he: "בסיסיים", en: "Basics", ru: "Основные" },
+  productivity: { he: "פרודוקטיביות", en: "Productivity", ru: "Продуктивность" },
+  ai_comms: { he: "AI ותקשורת", en: "AI & Communications", ru: "AI и коммуникации" },
+  team: { he: "צוות", en: "Team", ru: "Команда" },
+  analytics: { he: "אנליטיקס", en: "Analytics", ru: "Аналитика" },
+  integrations: { he: "אינטגרציות", en: "Integrations", ru: "Интеграции" },
 };
 
-const PLACEMENT_LABELS: Record<WidgetPlacement, { he: string; en: string }> = {
-  toolbar: { he: "סרגל עליון", en: "Toolbar" },
-  apps: { he: "אפליקציות", en: "Apps" },
-  disabled: { he: "מושבת", en: "Disabled" },
+const PLACEMENT_LABELS: Record<WidgetPlacement, { he: string; en: string; ru: string }> = {
+  toolbar: { he: "סרגל עליון", en: "Toolbar", ru: "Панель" },
+  apps: { he: "אפליקציות", en: "Apps", ru: "Приложения" },
+  disabled: { he: "מושבת", en: "Disabled", ru: "Отключено" },
 };
 
-const PLACEMENT_DESC: Record<WidgetPlacement, { he: string; en: string }> = {
+const PLACEMENT_DESC: Record<WidgetPlacement, { he: string; en: string; ru: string }> = {
   toolbar: {
     he: "הווידג'ט מוצג בסרגל העליון ותמיד נגיש.",
     en: "Widget appears in the top bar and is always accessible.",
+    ru: "Виджет отображается в верхней панели и всегда доступен.",
   },
   apps: {
     he: "הווידג'ט פעיל אבל נגיש רק דרך מגירת האפליקציות.",
     en: "Widget is active but only accessible through the Apps drawer.",
+    ru: "Виджет активен, но доступен только через панель приложений.",
   },
   disabled: {
     he: "הווידג'ט כבוי לחלוטין. ללא שימוש במשאבים.",
     en: "Widget is completely off. No resources used.",
+    ru: "Виджет полностью отключён. Ресурсы не используются.",
   },
 };
 
@@ -247,7 +250,7 @@ function WidgetRow({
         </button>
       ) : (
         <span className="shrink-0 text-[10px] text-slate-600">
-          {language === "he" ? "מערכת" : "System"}
+          {language === "he" ? "מערכת" : language === "ru" ? "Системный" : "System"}
         </span>
       )}
     </div>
@@ -551,7 +554,7 @@ function InstalledTab({
       {folders.length > 0 && (
         <div className="mb-6">
           <h3 className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-            📁 {language === "he" ? "תיקיות" : "Folders"}
+            📁 {language === "he" ? "תיקיות" : language === "ru" ? "Папки" : "Folders"}
             <span className="text-slate-600">({folders.length})</span>
           </h3>
           {viewMode === "grid" ? (
@@ -645,7 +648,7 @@ function InstalledTab({
         className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-600 py-3 text-sm text-slate-500 transition-colors hover:border-slate-400 hover:text-slate-300"
       >
         <Plus className="h-3.5 w-3.5" />
-        {ft?.createFolder || (language === "he" ? "צור תיקיה" : "Create Folder")}
+        {ft?.createFolder || (language === "he" ? "צור תיקיה" : language === "ru" ? "Создать папку" : "Create Folder")}
       </button>
 
       {showFolderCreator && (
@@ -847,7 +850,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
                     ? "bg-slate-700 text-slate-100"
                     : "text-slate-500 hover:text-slate-300"
                 }`}
-                title={language === "he" ? "תצוגת רשימה" : "List view"}
+                title={language === "he" ? "תצוגת רשימה" : language === "ru" ? "Список" : "List view"}
               >
                 <List className="h-4 w-4" />
               </button>
@@ -859,7 +862,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
                     ? "bg-slate-700 text-slate-100"
                     : "text-slate-500 hover:text-slate-300"
                 }`}
-                title={language === "he" ? "תצוגת כרטיסים" : "Grid view"}
+                title={language === "he" ? "תצוגת כרטיסים" : language === "ru" ? "Карточки" : "Grid view"}
               >
                 <LayoutGrid className="h-4 w-4" />
               </button>

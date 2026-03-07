@@ -137,6 +137,9 @@ function GeneralTab() {
           <ToggleButton active={language === "en"} onClick={() => setLanguage("en")}>
             {t.settings.english}
           </ToggleButton>
+          <ToggleButton active={language === "ru"} onClick={() => setLanguage("ru")}>
+            {t.settings.russian}
+          </ToggleButton>
         </div>
       </Section>
 

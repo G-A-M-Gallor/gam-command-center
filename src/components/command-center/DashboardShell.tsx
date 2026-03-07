@@ -22,18 +22,18 @@ const STRIP_WIDTH = "48px";
 const RECENT_PAGES_KEY = "cc-recent-pages";
 const MAX_RECENT_PAGES = 10;
 
-const tabLabels: Record<string, { he: string; en: string }> = {
-  "/dashboard/layers": { he: "שכבות", en: "Layers" },
-  "/dashboard/editor": { he: "עורך", en: "Editor" },
-  "/dashboard/story-map": { he: "מפת סיפור", en: "Story Map" },
-  "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map" },
-  "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub" },
-  "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System" },
-  "/dashboard/formily": { he: "טפסים", en: "Formily" },
-  "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture" },
-  "/dashboard/plan": { he: "תוכנית", en: "Plan" },
-  "/dashboard/settings": { he: "הגדרות", en: "Settings" },
-  "/dashboard/automations": { he: "אוטומציות", en: "Automations" },
+const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
+  "/dashboard/layers": { he: "שכבות", en: "Layers", ru: "Слои" },
+  "/dashboard/editor": { he: "עורך", en: "Editor", ru: "Редактор" },
+  "/dashboard/story-map": { he: "מפת סיפור", en: "Story Map", ru: "Карта историй" },
+  "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" },
+  "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub", ru: "Центр AI" },
+  "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" },
+  "/dashboard/formily": { he: "טפסים", en: "Formily", ru: "Формы" },
+  "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" },
+  "/dashboard/plan": { he: "תוכנית", en: "Plan", ru: "План" },
+  "/dashboard/settings": { he: "הגדרות", en: "Settings", ru: "Настройки" },
+  "/dashboard/automations": { he: "אוטומציות", en: "Automations", ru: "Автоматизация" },
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

@@ -39,7 +39,7 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
 
   const activeWidgets = widgetRegistry.filter((w) => w.status === "active");
 
-  const handleNameChange = (lang: "he" | "en", value: string) => {
+  const handleNameChange = (lang: "he" | "en" | "ru", value: string) => {
     updateFolder(folderId, {
       label: { ...folder.label, [lang]: value },
     });
@@ -112,6 +112,14 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
                 value={folder.label.en}
                 onChange={(e) => handleNameChange("en", e.target.value)}
                 placeholder="English"
+                dir="ltr"
+                className="flex-1"
+              />
+              <Input
+                inputSize="sm"
+                value={folder.label.ru}
+                onChange={(e) => handleNameChange("ru", e.target.value)}
+                placeholder="Русский"
                 dir="ltr"
                 className="flex-1"
               />
@@ -358,7 +366,7 @@ function ItemRow({
   onRemove,
 }: {
   item: FolderItem;
-  language: "he" | "en";
+  language: "he" | "en" | "ru";
   onRemove: () => void;
 }) {
   let label = "";

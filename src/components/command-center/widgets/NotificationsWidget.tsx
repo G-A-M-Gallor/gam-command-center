@@ -19,7 +19,7 @@ const EVENT_NAME = "notifications-change";
 interface NotificationItem {
   id: string;
   type: "status" | "mention" | "deadline" | "ai";
-  title: { he: string; en: string };
+  title: { he: string; en: string; ru: string };
   timestamp: number;
   read: boolean;
 }
@@ -38,18 +38,18 @@ function saveNotifications(items: NotificationItem[]) {
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
-function timeAgo(timestamp: number, lang: "he" | "en"): string {
+function timeAgo(timestamp: number, lang: "he" | "en" | "ru"): string {
   const diff = Date.now() - timestamp;
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (minutes < 1) return lang === "he" ? "עכשיו" : "Just now";
+  if (minutes < 1) return lang === "he" ? "עכשיו" : lang === "ru" ? "Сейчас" : "Just now";
   if (minutes < 60)
-    return lang === "he" ? `לפני ${minutes} דק'` : `${minutes}m ago`;
+    return lang === "he" ? `לפני ${minutes} דק'` : lang === "ru" ? `${minutes} мин. назад` : `${minutes}m ago`;
   if (hours < 24)
-    return lang === "he" ? `לפני ${hours} שע'` : `${hours}h ago`;
-  return lang === "he" ? `לפני ${days} ימים` : `${days}d ago`;
+    return lang === "he" ? `לפני ${hours} שע'` : lang === "ru" ? `${hours} ч. назад` : `${hours}h ago`;
+  return lang === "he" ? `לפני ${days} ימים` : lang === "ru" ? `${days} дн. назад` : `${days}d ago`;
 }
 
 const typeIcons = {
@@ -211,7 +211,7 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
   if (top2.length === 0) {
     return (
       <span className="truncate text-xs text-slate-500">
-        {language === "he" ? "אין חדשות" : "All clear"}
+        {language === "he" ? "אין חדשות" : language === "ru" ? "Всё в порядке" : "All clear"}
       </span>
     );
   }

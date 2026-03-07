@@ -60,13 +60,15 @@ export function isPast(dateStr: string): boolean {
 const HE_DAYS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
 const EN_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const EN_DAYS_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const RU_DAYS = ["Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"];
+const RU_DAYS_SHORT = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
-export function getDayName(dayIndex: number, language: "he" | "en"): string {
-  return language === "he" ? HE_DAYS[dayIndex] : EN_DAYS[dayIndex];
+export function getDayName(dayIndex: number, language: "he" | "en" | "ru"): string {
+  return language === "he" ? HE_DAYS[dayIndex] : language === "ru" ? RU_DAYS[dayIndex] : EN_DAYS[dayIndex];
 }
 
-export function getDayNameShort(dayIndex: number, language: "he" | "en"): string {
-  return language === "he" ? HE_DAYS[dayIndex] : EN_DAYS_SHORT[dayIndex];
+export function getDayNameShort(dayIndex: number, language: "he" | "en" | "ru"): string {
+  return language === "he" ? HE_DAYS[dayIndex] : language === "ru" ? RU_DAYS_SHORT[dayIndex] : EN_DAYS_SHORT[dayIndex];
 }
 
 /** Format date as "DD/MM" */

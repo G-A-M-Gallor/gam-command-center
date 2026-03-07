@@ -61,7 +61,7 @@ function CellCard({
 }: {
   cell: FunctionalMapCell;
   onSave: (id: string, updates: Partial<FunctionalMapCell>) => Promise<void>;
-  lang: "he" | "en";
+  lang: "he" | "en" | "ru";
 }) {
   const t = getTranslations(lang);
   const fm = t.functionalMap;

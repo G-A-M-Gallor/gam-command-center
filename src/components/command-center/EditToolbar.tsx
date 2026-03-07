@@ -17,10 +17,10 @@ export function EditToolbar() {
 
   if (!editMode) return null;
 
-  const tabs: { id: LibraryTab; icon: typeof FormInput; label: { he: string; en: string }; enabled: boolean }[] = [
-    { id: 'fields', icon: FormInput, label: t.fieldLibrary?.fields ? { he: t.fieldLibrary.fields, en: 'Fields' } : { he: 'שדות', en: 'Fields' }, enabled: true },
-    { id: 'templates', icon: Layout, label: { he: 'תבניות', en: 'Templates' }, enabled: false },
-    { id: 'styles', icon: Palette, label: { he: 'סגנונות', en: 'Styles' }, enabled: false },
+  const tabs: { id: LibraryTab; icon: typeof FormInput; label: { he: string; en: string; ru: string }; enabled: boolean }[] = [
+    { id: 'fields', icon: FormInput, label: t.fieldLibrary?.fields ? { he: t.fieldLibrary.fields, en: 'Fields', ru: 'Поля' } : { he: 'שדות', en: 'Fields', ru: 'Поля' }, enabled: true },
+    { id: 'templates', icon: Layout, label: { he: 'תבניות', en: 'Templates', ru: 'Шаблоны' }, enabled: false },
+    { id: 'styles', icon: Palette, label: { he: 'סגנונות', en: 'Styles', ru: 'Стили' }, enabled: false },
   ];
 
   return (
@@ -54,7 +54,7 @@ export function EditToolbar() {
                 <span>{tab.label[language]}</span>
                 {!tab.enabled && (
                   <span className="rounded bg-slate-700 px-1 py-0.5 text-[10px] text-slate-500">
-                    {language === 'he' ? 'בקרוב' : 'Soon'}
+                    {language === 'he' ? 'בקרוב' : language === 'ru' ? 'Скоро' : 'Soon'}
                   </span>
                 )}
               </button>

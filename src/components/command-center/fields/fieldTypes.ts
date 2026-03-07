@@ -20,11 +20,11 @@ export type FieldCategory = 'text' | 'selection' | 'time';
 
 export const fieldCategories: {
   id: FieldCategory;
-  label: { he: string; en: string };
+  label: { he: string; en: string; ru: string };
 }[] = [
-  { id: 'text', label: { he: 'טקסט', en: 'Text' } },
-  { id: 'selection', label: { he: 'בחירה', en: 'Selection' } },
-  { id: 'time', label: { he: 'זמן', en: 'Time' } },
+  { id: 'text', label: { he: 'טקסט', en: 'Text', ru: 'Текст' } },
+  { id: 'selection', label: { he: 'בחירה', en: 'Selection', ru: 'Выбор' } },
+  { id: 'time', label: { he: 'זמן', en: 'Time', ru: 'Время' } },
 ];
 
 // ─── Field Type IDs ──────────────────────────────────
@@ -165,8 +165,8 @@ export const defaultConfigs: Record<FieldTypeId, FieldConfig> = {
 export interface FieldTypeDefinition {
   id: FieldTypeId;
   icon: LucideIcon;
-  label: { he: string; en: string };
-  description: { he: string; en: string };
+  label: { he: string; en: string; ru: string };
+  description: { he: string; en: string; ru: string };
   category: FieldCategory;
   defaultConfig: FieldConfig;
 }
@@ -176,64 +176,64 @@ export const fieldTypes: FieldTypeDefinition[] = [
   {
     id: 'short-text',
     icon: Type,
-    label: { he: 'טקסט קצר', en: 'Short Text' },
-    description: { he: 'שדה טקסט חופשי', en: 'Free text input field' },
+    label: { he: 'טקסט קצר', en: 'Short Text', ru: 'Короткий текст' },
+    description: { he: 'שדה טקסט חופשי', en: 'Free text input field', ru: 'Поле свободного ввода текста' },
     category: 'text',
     defaultConfig: defaultConfigs['short-text'],
   },
   {
     id: 'checkbox',
     icon: CheckSquare,
-    label: { he: "צ'קבוקס", en: 'Checkbox' },
-    description: { he: 'תיבת סימון כן/לא', en: 'Yes/No toggle' },
+    label: { he: "צ'קבוקס", en: 'Checkbox', ru: 'Флажок' },
+    description: { he: 'תיבת סימון כן/לא', en: 'Yes/No toggle', ru: 'Переключатель да/нет' },
     category: 'selection',
     defaultConfig: defaultConfigs.checkbox,
   },
   {
     id: 'dropdown',
     icon: ChevronDown,
-    label: { he: 'רשימה נפתחת', en: 'Dropdown' },
-    description: { he: 'בחירה מרשימת אפשרויות', en: 'Select from options' },
+    label: { he: 'רשימה נפתחת', en: 'Dropdown', ru: 'Выпадающий список' },
+    description: { he: 'בחירה מרשימת אפשרויות', en: 'Select from options', ru: 'Выбор из вариантов' },
     category: 'selection',
     defaultConfig: defaultConfigs.dropdown,
   },
   {
     id: 'multi-select',
     icon: ListChecks,
-    label: { he: 'בחירה מרובה', en: 'Multi Select' },
-    description: { he: 'בחירה מרובה מרשימה', en: 'Select multiple options' },
+    label: { he: 'בחירה מרובה', en: 'Multi Select', ru: 'Множественный выбор' },
+    description: { he: 'בחירה מרובה מרשימה', en: 'Select multiple options', ru: 'Выбор нескольких вариантов' },
     category: 'selection',
     defaultConfig: defaultConfigs['multi-select'],
   },
   {
     id: 'date',
     icon: Calendar,
-    label: { he: 'תאריך', en: 'Date' },
-    description: { he: 'בורר תאריך', en: 'Date picker' },
+    label: { he: 'תאריך', en: 'Date', ru: 'Дата' },
+    description: { he: 'בורר תאריך', en: 'Date picker', ru: 'Выбор даты' },
     category: 'time',
     defaultConfig: defaultConfigs.date,
   },
   {
     id: 'datetime',
     icon: CalendarClock,
-    label: { he: 'תאריך ושעה', en: 'Date & Time' },
-    description: { he: 'בורר תאריך ושעה', en: 'Date and time picker' },
+    label: { he: 'תאריך ושעה', en: 'Date & Time', ru: 'Дата и время' },
+    description: { he: 'בורר תאריך ושעה', en: 'Date and time picker', ru: 'Выбор даты и времени' },
     category: 'time',
     defaultConfig: defaultConfigs.datetime,
   },
   {
     id: 'time',
     icon: Clock,
-    label: { he: 'שעה', en: 'Time' },
-    description: { he: 'בורר שעה', en: 'Time picker' },
+    label: { he: 'שעה', en: 'Time', ru: 'Время' },
+    description: { he: 'בורר שעה', en: 'Time picker', ru: 'Выбор времени' },
     category: 'time',
     defaultConfig: defaultConfigs.time,
   },
   {
     id: 'tags',
     icon: Tags,
-    label: { he: 'תגיות', en: 'Tags' },
-    description: { he: 'תגיות עם צבעים', en: 'Colored tag labels' },
+    label: { he: 'תגיות', en: 'Tags', ru: 'Теги' },
+    description: { he: 'תגיות עם צבעים', en: 'Colored tag labels', ru: 'Цветные метки' },
     category: 'selection',
     defaultConfig: defaultConfigs.tags,
   },
