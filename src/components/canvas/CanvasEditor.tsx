@@ -176,13 +176,19 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     async (json: JSONContent) => {
       if (!recordId) return;
       setSaveStatus('saving');
-      const { error: err } = await supabase
+      const { data, error: err } = await supabase
         .from('vb_records')
         .update({ content: json, last_edited_at: new Date().toISOString() })
-        .eq('id', recordId);
+        .eq('id', recordId)
+        .select('id');
 
       if (err) {
         console.error('Editor save failed:', err.message, err.code);
+        setSaveStatus('error');
+        return;
+      }
+      if (!data || data.length === 0) {
+        console.error('Editor save: 0 rows updated — RLS may be blocking. recordId:', recordId);
         setSaveStatus('error');
         return;
       }

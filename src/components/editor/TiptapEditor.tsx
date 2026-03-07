@@ -17,7 +17,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import TextAlign from '@tiptap/extension-text-align';
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { JSONContent } from '@tiptap/react';
 import { useDebouncedCallback } from 'use-debounce';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -81,6 +81,9 @@ export function TiptapEditor({
   const t = getTranslations(language);
   const isHe = language === 'he';
   const et = t.editor;
+  // Track internal changes to prevent content sync from resetting the editor
+  const isInternalChange = useRef(false);
+
   // ─── Auto-save: 1s debounce after every change ───
   const debouncedSave = useDebouncedCallback((json: JSONContent) => {
     if (onSave) onSave(json);
@@ -161,6 +164,7 @@ export function TiptapEditor({
     },
     onUpdate: ({ editor: e }) => {
       const json = e.getJSON();
+      isInternalChange.current = true;
       onChange?.(json);
       debouncedSave(json);
     },
@@ -188,8 +192,14 @@ export function TiptapEditor({
     return () => window.removeEventListener('cc-field-saved', handleFieldSaved);
   }, [editor]);
 
+  // Sync external content changes (e.g., version restore) — skip internal edits
   useEffect(() => {
-    if (editor && content && JSON.stringify(editor.getJSON()) !== JSON.stringify(content)) {
+    if (!editor || !content) return;
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+    if (JSON.stringify(editor.getJSON()) !== JSON.stringify(content)) {
       editor.commands.setContent(content);
     }
   }, [editor, content]);

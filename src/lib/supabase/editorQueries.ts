@@ -84,12 +84,22 @@ export async function updateDocument(
   updates: Partial<Pick<DocRecord, "title" | "content" | "status">>
 ): Promise<boolean> {
   const supabase = createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("vb_records")
     .update(updates)
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
-  if (!error && (updates.content || updates.title)) {
+  if (error) {
+    console.error("updateDocument error:", error.message, error.code);
+    return false;
+  }
+  if (!data || data.length === 0) {
+    console.error("updateDocument: 0 rows updated — RLS may be blocking. id:", id);
+    return false;
+  }
+
+  if (updates.content || updates.title) {
     // Fire-and-forget: trigger background embedding generation
     fetch("/api/embeddings/generate", {
       method: "POST",
@@ -98,16 +108,18 @@ export async function updateDocument(
     }).catch(() => {});
   }
 
-  return !error;
+  return true;
 }
 
 export async function deleteDocument(id: string): Promise<boolean> {
   const supabase = createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("vb_records")
     .update({ is_deleted: true })
-    .eq("id", id);
-  return !error;
+    .eq("id", id)
+    .select("id");
+  if (error || !data || data.length === 0) return false;
+  return true;
 }
 
 export async function duplicateDocument(sourceId: string): Promise<DocRecord | null> {
@@ -116,13 +128,17 @@ export async function duplicateDocument(sourceId: string): Promise<DocRecord | n
   const source = await fetchDocument(sourceId);
   if (!source) return null;
 
+  // Use current user as owner of the duplicate
+  const { data: { user } } = await supabase.auth.getUser();
+  const createdBy = user?.id || source.created_by;
+
   // Create duplicate record
   const { data: newDoc, error } = await supabase
     .from("vb_records")
     .insert({
       workspace_id: source.workspace_id,
       entity_id: source.entity_id,
-      created_by: source.created_by,
+      created_by: createdBy,
       title: `${source.title} (עותק)`,
       content: source.content,
       record_type: "document",
