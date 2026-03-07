@@ -331,6 +331,7 @@ export function WidgetWrapper({
               type="button"
               onClick={() => setPanelOpen(false)}
               className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+              aria-label="Close"
             >
               <X className="h-5 w-5" />
             </button>
@@ -379,6 +380,7 @@ export function WidgetWrapper({
                     handleResetSize();
                   }}
                   className="rounded p-1.5 text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+                  aria-label={t.widgets.resetSize}
                   title={t.widgets.resetSize}
                 >
                   <RotateCcw className="h-3 w-3" />
@@ -392,6 +394,7 @@ export function WidgetWrapper({
                   onEditOpen(widget.id);
                 }}
                 className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+                aria-label={t.widgets.editMode}
                 title={t.widgets.editMode}
               >
                 <Pencil className="h-3.5 w-3.5" />

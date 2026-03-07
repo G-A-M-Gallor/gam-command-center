@@ -82,6 +82,7 @@ export function FolderItemCell({
               type="button"
               onClick={() => onRemove?.(item.id)}
               className="rounded p-0.5 text-slate-600 hover:text-red-400"
+              aria-label="Remove"
             >
               <X className="h-3 w-3" />
             </button>
@@ -128,6 +129,7 @@ export function FolderItemCell({
               type="button"
               onClick={() => onRemove?.(item.id)}
               className="rounded p-0.5 text-slate-600 hover:text-red-400"
+              aria-label="Remove"
             >
               <X className="h-3 w-3" />
             </button>

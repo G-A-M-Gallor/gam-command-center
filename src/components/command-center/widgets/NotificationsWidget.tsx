@@ -144,6 +144,7 @@ export function NotificationsPanel() {
                     type="button"
                     onClick={() => markRead(n.id)}
                     className="shrink-0 rounded p-1 text-slate-600 transition-colors hover:bg-slate-700 hover:text-slate-400"
+                    aria-label={t.widgets.markAllRead}
                     title={t.widgets.markAllRead}
                   >
                     <Check className="h-3 w-3" />

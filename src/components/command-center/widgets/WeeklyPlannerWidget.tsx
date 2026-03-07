@@ -152,6 +152,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => shiftWeekBy(-1)}
                 className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-600 hover:text-white"
+                aria-label="Previous week"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
@@ -166,6 +167,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
                 type="button"
                 onClick={() => shiftWeekBy(1)}
                 className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-600 hover:text-white"
+                aria-label="Next week"
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
@@ -208,6 +210,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
                   ? "bg-[var(--cc-accent-600)] text-white"
                   : "text-slate-400 hover:bg-slate-700 hover:text-white"
               }`}
+              aria-label={wt.plannerTemplates || "Templates"}
               title={wt.plannerTemplates || "Templates"}
             >
               <Settings className="h-4 w-4" />
@@ -218,6 +221,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={onClose}
               className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
@@ -848,6 +852,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
                 type="button"
                 onClick={() => deleteTemplate(tpl.id)}
                 className="rounded p-1 text-slate-600 transition-colors hover:text-red-400"
+                aria-label="Delete template"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -878,6 +883,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
                       type="button"
                       onClick={() => removeTemplateItem(tpl.id, ti.id)}
                       className="text-slate-600 hover:text-red-400"
+                      aria-label="Remove item"
                     >
                       <X className="h-3 w-3" />
                     </button>

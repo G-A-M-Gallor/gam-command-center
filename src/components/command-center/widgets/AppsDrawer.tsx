@@ -141,6 +141,7 @@ export function AppsDrawer({ onOpenWidget }: AppsDrawerProps) {
                 setSelectedAppId(null);
               }}
               className="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
@@ -190,6 +191,7 @@ export function AppsDrawer({ onOpenWidget }: AppsDrawerProps) {
                     type="button"
                     onClick={() => setSelectedAppId(null)}
                     className="ml-auto text-slate-500 hover:text-slate-300"
+                    aria-label="Close"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>

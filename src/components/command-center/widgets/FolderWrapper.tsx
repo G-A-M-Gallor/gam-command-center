@@ -288,6 +288,7 @@ export function FolderWrapper({
               type="button"
               onClick={() => setPanelOpen(false)}
               className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+              aria-label="Close"
             >
               <X className="h-5 w-5" />
             </button>
@@ -336,6 +337,7 @@ export function FolderWrapper({
                 type="button"
                 onClick={(e) => { e.stopPropagation(); togglePin(); }}
                 className="rounded p-1 transition-colors hover:bg-slate-700"
+                aria-label={folder.pinned ? ft?.unpin : ft?.pin}
                 title={folder.pinned ? ft?.unpin : ft?.pin}
               >
                 <Pin
@@ -354,6 +356,7 @@ export function FolderWrapper({
                   onEditOpen(folder.id);
                 }}
                 className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+                aria-label={ft?.editFolder}
                 title={ft?.editFolder}
               >
                 <Pencil className="h-3.5 w-3.5" />
@@ -362,6 +365,7 @@ export function FolderWrapper({
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setPanelOpen(false); }}
                 className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+                aria-label="Close"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

@@ -573,6 +573,7 @@ function InstalledTab({
                         type="button"
                         onClick={() => removeFolder(f.id)}
                         className="rounded p-1 text-slate-600 transition-colors hover:bg-slate-700 hover:text-red-400"
+                        aria-label={`Remove ${f.label[language]}`}
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -631,6 +632,7 @@ function InstalledTab({
                       type="button"
                       onClick={() => removeFolder(f.id)}
                       className="text-slate-600 transition-colors hover:text-red-400"
+                      aria-label={`Remove ${f.label[language]}`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -828,6 +830,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
               type="button"
               onClick={onClose}
               className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+              aria-label="Close"
             >
               <X className="h-4 w-4" />
             </button>
@@ -853,6 +856,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
                     ? "bg-slate-700 text-slate-100"
                     : "text-slate-500 hover:text-slate-300"
                 }`}
+                aria-label={language === "he" ? "תצוגת רשימה" : language === "ru" ? "Список" : "List view"}
                 title={language === "he" ? "תצוגת רשימה" : language === "ru" ? "Список" : "List view"}
               >
                 <List className="h-4 w-4" />
@@ -865,6 +869,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
                     ? "bg-slate-700 text-slate-100"
                     : "text-slate-500 hover:text-slate-300"
                 }`}
+                aria-label={language === "he" ? "תצוגת כרטיסים" : language === "ru" ? "Карточки" : "Grid view"}
                 title={language === "he" ? "תצוגת כרטיסים" : language === "ru" ? "Карточки" : "Grid view"}
               >
                 <LayoutGrid className="h-4 w-4" />

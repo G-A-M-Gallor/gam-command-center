@@ -109,6 +109,7 @@ export function ClipboardPanel() {
                   type="button"
                   onClick={() => copyToClipboard(item)}
                   className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-600 hover:text-slate-300"
+                  aria-label="Copy"
                   title={t.widgets.copied}
                 >
                   {copiedId === item.id ? (
@@ -123,6 +124,7 @@ export function ClipboardPanel() {
                   type="button"
                   onClick={() => removeItem(item.id)}
                   className="rounded p-1 text-slate-600 transition-colors hover:bg-slate-600 hover:text-slate-400"
+                  aria-label="Remove"
                 >
                   <X className="h-3 w-3" />
                 </button>

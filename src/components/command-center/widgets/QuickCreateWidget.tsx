@@ -104,6 +104,7 @@ export function QuickCreatePanel() {
                 setTitle("");
               }}
               className="text-slate-500 hover:text-slate-300"
+              aria-label="Close"
             >
               <X className="h-3.5 w-3.5" />
             </button>

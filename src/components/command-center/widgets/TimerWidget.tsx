@@ -295,6 +295,7 @@ export function TimerPanel() {
           type="button"
           onClick={handleReset}
           className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-700 text-slate-400 transition-colors hover:bg-slate-600 hover:text-slate-200"
+          aria-label="Reset timer"
         >
           <RotateCcw className="h-3.5 w-3.5" />
         </button>

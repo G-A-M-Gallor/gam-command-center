@@ -91,6 +91,7 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
             type="button"
             onClick={onClose}
             className="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -396,6 +397,7 @@ function ItemRow({
         type="button"
         onClick={onRemove}
         className="text-slate-600 transition-colors hover:text-red-400"
+        aria-label={`Remove ${label}`}
       >
         <X className="h-3 w-3" />
       </button>

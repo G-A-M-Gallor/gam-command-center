@@ -279,6 +279,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
               type="button"
               onClick={() => removeContext(ctx)}
               className="ml-0.5 text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)]"
+              aria-label={`Remove ${ctx}`}
             >
               <X className="h-2.5 w-2.5" />
             </button>
@@ -294,7 +295,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
         </button>
       </div>
 
-      {/* Quick suggestions */}
+      {/* Quick suggestions — text labels serve as accessible names */}
       {messages.length === 0 && !isStreaming && (
         <div
           className={`flex flex-wrap gap-1.5 border-b border-slate-700/50 ${px} ${py}`}
@@ -379,6 +380,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
               type="button"
               onClick={stopGeneration}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white transition-colors hover:bg-red-500"
+              aria-label="Stop generation"
             >
               <Square className="h-3 w-3" />
             </button>
@@ -388,6 +390,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
               onClick={() => handleSend()}
               disabled={!input.trim() || isOverBudget()}
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--cc-accent-600)] text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40 disabled:hover:bg-[var(--cc-accent-600)]"
+              aria-label={t.widgets.sendMessage}
               title={t.widgets.sendMessage}
             >
               <Send className="h-4 w-4" />
@@ -447,6 +450,7 @@ function PanelHeader({
                 ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
                 : "text-slate-500 hover:bg-slate-700 hover:text-slate-300"
             }`}
+            aria-label={title}
             title={title}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -457,6 +461,7 @@ function PanelHeader({
           type="button"
           onClick={onClose}
           className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+          aria-label="Close"
         >
           <X className="h-4 w-4" />
         </button>

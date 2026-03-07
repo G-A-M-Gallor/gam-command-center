@@ -178,6 +178,7 @@ export function FavoritesPanel() {
                   type="button"
                   onClick={() => removeFavorite(fav.id)}
                   className="shrink-0 text-slate-600 hover:text-slate-400"
+                  aria-label={`Remove ${fav.label}`}
                 >
                   <X className="h-3 w-3" />
                 </button>
