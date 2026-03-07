@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { CanvasEditor } from '@/components/canvas/CanvasEditor';
 import { DocumentListView } from '@/components/editor/DocumentListView';
+import { PageHeader } from '@/components/command-center/PageHeader';
 
 // ─── Router (decides list vs canvas editor) ──────
 function EditorRouter() {
@@ -18,7 +19,12 @@ function EditorRouter() {
     );
   }
 
-  return <DocumentListView />;
+  return (
+    <>
+      <PageHeader pageKey="editor" />
+      <DocumentListView />
+    </>
+  );
 }
 
 // ─── Page Export ──────────────────────────────────
