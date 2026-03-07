@@ -14,6 +14,7 @@ import {
 } from '@dnd-kit/core';
 import { supabase } from '@/lib/supabaseClient';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useAutoSave } from '@/lib/editor/useAutoSave';
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { useCanvasGrid } from '@/lib/canvas/useCanvasGrid';
 import { CanvasToolbar } from './CanvasToolbar';
@@ -26,9 +27,6 @@ import { ShareDialog } from '@/components/editor/ShareDialog';
 import { VersionHistory } from '@/components/editor/VersionHistory';
 import { duplicateDocument, saveVersion, createTemplate } from '@/lib/supabase/editorQueries';
 import type { FieldTypeId, FieldConfig } from '@/components/command-center/fields/fieldTypes';
-
-// ─── Types ───────────────────────────────────────────
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface CanvasEditorProps {
   recordId: string;
@@ -54,17 +52,18 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   const savedTitleRef = useRef('');
   const [content, setContent] = useState<JSONContent | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [error, setError] = useState('');
   const [showFieldLibrary, setShowFieldLibrary] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | undefined>(undefined);
   const [fieldModal, setFieldModal] = useState<{
     fieldType: FieldTypeId;
     fieldId?: string;
     config?: FieldConfig;
   } | null>(null);
+
+  // ── Auto-save with retry + offline fallback ─────
+  const { saveState, lastSavedAt, saveNow, queueSave } = useAutoSave({ recordId });
 
   // Version auto-save refs
   const lastVersionSaveRef = useRef<number>(Date.now());
@@ -171,32 +170,10 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     };
   }, [findNextAvailableCell, addPlacement, recordId]);
 
-  // ── Save handlers ─────────────────────────────────
+  // ── Save handler (uses useAutoSave) ──────────────
   const handleSave = useCallback(
-    async (json: JSONContent) => {
-      if (!recordId) return;
-      setSaveStatus('saving');
-      const { data, error: err } = await supabase
-        .from('vb_records')
-        .update({ content: json, last_edited_at: new Date().toISOString() })
-        .eq('id', recordId)
-        .select('id');
-
-      if (err) {
-        console.error('Editor save failed:', err.message, err.code);
-        setSaveStatus('error');
-        return;
-      }
-      if (!data || data.length === 0) {
-        console.error('Editor save: 0 rows updated — RLS may be blocking. recordId:', recordId);
-        setSaveStatus('error');
-        return;
-      }
-      setSaveStatus('saved');
-      setLastSavedAt(new Date());
-      setTimeout(() => setSaveStatus('idle'), 2000);
-    },
-    [recordId]
+    (json: JSONContent) => { queueSave(json); },
+    [queueSave]
   );
 
   const handleFieldSave = useCallback(
@@ -253,11 +230,14 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     };
   }, [recordId, content, title]);
 
-  // Ctrl+S / ⌘S → version snapshot (content save is handled by TiptapEditor's onSave)
+  // Ctrl+S / ⌘S → immediate save + version snapshot
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault();
+        // Immediate content save
+        if (content) saveNow(content);
+        // Version snapshot (throttled to 1 per minute)
         if (content && title && Date.now() - lastVersionSaveRef.current > 60_000) {
           saveVersion(recordId, title, content);
           lastVersionSaveRef.current = Date.now();
@@ -266,7 +246,18 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [content, recordId, title]);
+  }, [content, recordId, title, saveNow]);
+
+  // ── Warn before leaving with unsaved changes ────────
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (saveState === 'saving' || saveState === 'retrying') {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [saveState]);
 
   // ── New toolbar handlers ────────────────────────────
   const handleDuplicate = useCallback(async () => {
@@ -366,7 +357,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
         onTitleChange={setTitle}
         onTitleBlur={handleTitleBlur}
         onBack={() => router.push('/dashboard/editor')}
-        saveStatus={saveStatus}
+        saveStatus={saveState}
         showFieldLibrary={showFieldLibrary}
         onToggleFieldLibrary={() => setShowFieldLibrary((v) => !v)}
         content={content ?? undefined}
@@ -402,7 +393,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
               onChange={setContent}
               onSave={handleSave}
               recordId={recordId}
-              saveStatus={saveStatus}
+              saveStatus={saveState}
               lastSavedAt={lastSavedAt}
             />
           )}

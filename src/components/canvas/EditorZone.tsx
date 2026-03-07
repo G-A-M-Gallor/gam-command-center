@@ -11,7 +11,7 @@ interface EditorZoneProps {
   onChange: (json: JSONContent) => void;
   onSave: (json: JSONContent) => void;
   recordId: string;
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'retrying' | 'offline';
   lastSavedAt?: Date;
 }
 

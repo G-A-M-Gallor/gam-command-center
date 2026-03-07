@@ -12,7 +12,7 @@ interface CanvasToolbarProps {
   onTitleChange: (title: string) => void;
   onTitleBlur: () => void;
   onBack: () => void;
-  saveStatus: 'idle' | 'saving' | 'saved' | 'error';
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error' | 'retrying' | 'offline';
   showFieldLibrary: boolean;
   onToggleFieldLibrary: () => void;
   content?: JSONContent;
@@ -83,8 +83,10 @@ export function CanvasToolbar({
       {/* Save status */}
       <span className="text-[11px] text-slate-500">
         {saveStatus === 'saving' && (language === 'he' ? 'שומר...' : 'Saving...')}
-        {saveStatus === 'saved' && (language === 'he' ? 'נשמר' : 'Saved')}
-        {saveStatus === 'error' && (language === 'he' ? 'שגיאה' : 'Error')}
+        {saveStatus === 'saved' && (language === 'he' ? '✓ נשמר' : '✓ Saved')}
+        {saveStatus === 'retrying' && (language === 'he' ? 'מנסה שוב...' : 'Retrying...')}
+        {saveStatus === 'error' && (language === 'he' ? '⚠ שגיאה בשמירה' : '⚠ Save error')}
+        {saveStatus === 'offline' && (language === 'he' ? '☁ אופליין — נשמר מקומית' : '☁ Offline — saved locally')}
       </span>
 
       <div className="mx-1 h-4 w-px bg-slate-700" />

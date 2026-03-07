@@ -41,7 +41,7 @@ export interface TiptapEditorProps {
   /** Record ID (for future block-level storage) */
   recordId?: string;
   /** Save status from parent — displayed in status bar */
-  saveStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  saveStatus?: 'idle' | 'saving' | 'saved' | 'error' | 'retrying' | 'offline';
   /** Timestamp of last successful save */
   lastSavedAt?: Date;
 }

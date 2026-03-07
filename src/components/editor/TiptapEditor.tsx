@@ -260,9 +260,11 @@ function StatusBar({
   return (
     <div className="gam-editor-statusbar">
       <span className="gam-editor-statusbar__save">
-        {saveStatus === 'saving' && (isHe ? 'שומר...' : 'Saving...')}
-        {saveStatus === 'saved' && (isHe ? 'נשמר' : 'Saved')}
-        {saveStatus === 'error' && (isHe ? 'שגיאה בשמירה' : 'Save error')}
+        {saveStatus === 'saving' && <span className="text-blue-400">{isHe ? 'שומר...' : 'Saving...'}</span>}
+        {saveStatus === 'saved' && <span className="text-emerald-400">{isHe ? '✓ נשמר' : '✓ Saved'}</span>}
+        {saveStatus === 'retrying' && <span className="text-amber-400">{isHe ? 'מנסה שוב...' : 'Retrying...'}</span>}
+        {saveStatus === 'error' && <span className="text-red-400">{isHe ? '⚠ שגיאה בשמירה' : '⚠ Save error'}</span>}
+        {saveStatus === 'offline' && <span className="text-orange-400">{isHe ? '☁ אופליין — נשמר מקומית' : '☁ Offline — saved locally'}</span>}
         {saveStatus === 'idle' && relativeTime && (
           <span className="text-slate-500">{et.lastSaved}: {relativeTime}</span>
         )}
