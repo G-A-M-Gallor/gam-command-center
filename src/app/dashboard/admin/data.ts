@@ -407,6 +407,38 @@ export const dataCcIds: DataCcIdEntry[] = [
   { ccId: 'editor.toolbar.save-template', file: 'components/canvas/CanvasToolbar.tsx', line: 131, textEditable: false, description: 'Save as template button in canvas toolbar', descriptionHe: 'כפתור שמירה כתבנית בסרגל קנבס' },
   // ── Phase K: Story Map ──
   { ccId: 'storymap.realtime-status', file: 'app/dashboard/story-map/page.tsx', line: 483, textEditable: false, description: 'Realtime connection status indicator', descriptionHe: 'מחוון סטטוס חיבור Realtime' },
+  // ── Settings Page ──
+  { ccId: 'settings.tabs', file: 'app/dashboard/settings/page.tsx', line: 831, textEditable: false, description: 'Settings tab bar (General / Theme / Brand)', descriptionHe: 'סרגל טאבים הגדרות (כללי / ערכת נושא / מותג)' },
+  { ccId: 'settings.language', file: 'app/dashboard/settings/page.tsx', line: 133, textEditable: false, description: 'Language selector section (HE / EN / RU)', descriptionHe: 'אזור בחירת שפה' },
+  { ccId: 'settings.sidebarPosition', file: 'app/dashboard/settings/page.tsx', line: 147, textEditable: false, description: 'Sidebar position toggle (right / left)', descriptionHe: 'מיקום סיידבר (ימין / שמאל)' },
+  { ccId: 'settings.sidebarVisibility', file: 'app/dashboard/settings/page.tsx', line: 158, textEditable: false, description: 'Sidebar visibility mode (visible / float / hidden)', descriptionHe: 'מצב נראות סיידבר (גלוי / צף / מוסתר)' },
+  { ccId: 'settings.hoverDelay', file: 'app/dashboard/settings/page.tsx', line: 172, textEditable: false, description: 'Widget hover delay selector', descriptionHe: 'בורר השהיית ריחוף ווידג׳ט' },
+  { ccId: 'settings.overrides', file: 'app/dashboard/settings/page.tsx', line: 202, textEditable: false, description: 'Style overrides section (system / custom)', descriptionHe: 'אזור עקיפות עיצוב (מערכת / מותאם)' },
+  { ccId: 'settings.skin', file: 'app/dashboard/settings/page.tsx', line: 345, textEditable: false, description: 'Skin/theme selector grid', descriptionHe: 'רשת בחירת עיצוב כללי' },
+  { ccId: 'settings.accentColor', file: 'app/dashboard/settings/page.tsx', line: 389, textEditable: false, description: 'Accent color preset swatches', descriptionHe: 'דוגמיות צבע מבטא מוגדרות מראש' },
+  { ccId: 'settings.colorPicker', file: 'app/dashboard/settings/page.tsx', line: 435, textEditable: false, description: 'Custom color picker with apply/save', descriptionHe: 'בורר צבע מותאם עם שמירה/החלה' },
+  { ccId: 'settings.myPalette', file: 'app/dashboard/settings/page.tsx', line: 447, textEditable: false, description: 'Saved colors palette with lock/brand/remove', descriptionHe: 'פלטת צבעים שמורים עם נעילה/מותג/הסרה' },
+  { ccId: 'settings.colorArchive', file: 'app/dashboard/settings/page.tsx', line: 503, textEditable: false, description: 'Archived colors with restore/delete', descriptionHe: 'צבעים מאורכבים עם שחזור/מחיקה' },
+  { ccId: 'settings.colorCombos', file: 'app/dashboard/settings/page.tsx', line: 541, textEditable: false, description: 'Color combination presets grid', descriptionHe: 'רשת שילובי צבעים מוגדרים מראש' },
+  { ccId: 'settings.effects', file: 'app/dashboard/settings/page.tsx', line: 560, textEditable: false, description: 'Accent effects (gradient + glow controls)', descriptionHe: 'אפקטי מבטא (שיפוע + זוהר)' },
+  { ccId: 'settings.fontFamily', file: 'app/dashboard/settings/page.tsx', line: 655, textEditable: false, description: 'Font family selector (Geist / Inter / System)', descriptionHe: 'בורר גופן (Geist / Inter / מערכת)' },
+  { ccId: 'settings.borderRadius', file: 'app/dashboard/settings/page.tsx', line: 670, textEditable: false, description: 'Border radius selector (sharp / default / round)', descriptionHe: 'בורר רדיוס פינות (חד / ברירת מחדל / מעוגל)' },
+  { ccId: 'settings.density', file: 'app/dashboard/settings/page.tsx', line: 685, textEditable: false, description: 'UI density selector (compact / default / spacious)', descriptionHe: 'בורר צפיפות (צפוף / ברירת מחדל / מרווח)' },
+  { ccId: 'settings.brandLogo', file: 'app/dashboard/settings/page.tsx', line: 733, textEditable: false, description: 'Brand logo upload + company name input', descriptionHe: 'העלאת לוגו מותג + שדה שם חברה' },
+  { ccId: 'settings.brandTagline', file: 'app/dashboard/settings/page.tsx', line: 774, textEditable: false, description: 'Brand tagline input field', descriptionHe: 'שדה סלוגן מותג' },
+  { ccId: 'settings.brandColors', file: 'app/dashboard/settings/page.tsx', line: 783, textEditable: false, description: 'Brand color pickers (primary / secondary / tertiary)', descriptionHe: 'בוררי צבע מותג (ראשי / משני / שלישוני)' },
+  // ── Automations Page ──
+  { ccId: 'automations.n8n', file: 'app/dashboard/automations/page.tsx', line: 294, textEditable: false, description: 'n8n integration section with iframe', descriptionHe: 'אזור אינטגרציית n8n עם iframe' },
+  { ccId: 'automations.cards', file: 'app/dashboard/automations/page.tsx', line: 208, textEditable: false, description: 'Automation cards grid (DB Triggers / Edge Functions / pg_cron)', descriptionHe: 'רשת כרטיסי אוטומציה (טריגרים / Edge Functions / pg_cron)' },
+  { ccId: 'automations.comparison', file: 'app/dashboard/automations/page.tsx', line: 560, textEditable: false, description: 'Comparison table — when to use what', descriptionHe: 'טבלת השוואה — מתי להשתמש במה' },
+  { ccId: 'automations.copyCode', file: 'app/dashboard/automations/page.tsx', line: 505, textEditable: false, description: 'Code block copy button', descriptionHe: 'כפתור העתקת קוד' },
+  // ── Layers Page ──
+  { ccId: 'layers.demoBanner', file: 'app/dashboard/layers/page.tsx', line: 116, textEditable: false, description: 'Demo data warning banner', descriptionHe: 'באנר אזהרת נתוני הדגמה' },
+  { ccId: 'layers.syncButton', file: 'app/dashboard/layers/page.tsx', line: 134, textEditable: false, description: 'Sync from Origami button', descriptionHe: 'כפתור סנכרון מ-Origami' },
+  { ccId: 'layers.summary', file: 'app/dashboard/layers/page.tsx', line: 153, textEditable: false, description: 'Project summary stats (total / healthy / at-risk / critical)', descriptionHe: 'סיכום סטטיסטיקות פרויקטים (סה״כ / בריא / בסיכון / קריטי)' },
+  // ── Formily Page ──
+  { ccId: 'formily.banner', file: 'app/dashboard/formily/page.tsx', line: 49, textEditable: false, description: 'Origami integration info banner', descriptionHe: 'באנר מידע אינטגרציית Origami' },
+  { ccId: 'formily.card', file: 'app/dashboard/formily/page.tsx', line: 74, textEditable: false, description: 'Form card (client intake, report, etc.)', descriptionHe: 'כרטיס טופס (קליטת לקוח, דו״ח וכו׳)' },
 ];
 
 // ─── Changelog Entries ───────────────────────────────────
