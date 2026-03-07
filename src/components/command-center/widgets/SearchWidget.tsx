@@ -12,6 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
   CornerDownLeft,
+  Sparkles,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -32,14 +33,16 @@ interface RecentPage {
 interface DbDocument {
   id: string;
   title: string;
+  similarity?: number;
 }
 
 interface SearchItem {
   id: string;
   label: string;
-  type: "page" | "document" | "action";
+  type: "page" | "document" | "action" | "semantic";
   href?: string;
   icon: typeof Search;
+  similarity?: number;
 }
 
 function getRecentPages(): RecentPage[] {
@@ -95,6 +98,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dbDocuments, setDbDocuments] = useState<DbDocument[]>([]);
   const [searchResults, setSearchResults] = useState<DbDocument[]>([]);
+  const [semanticResults, setSemanticResults] = useState<DbDocument[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -117,20 +121,40 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     loadDocs();
   }, []);
 
-  // Server-side search via RPC (debounced)
+  // Server-side search via RPC (debounced) + semantic fallback
   useEffect(() => {
     if (!query.trim()) {
       setSearchResults([]);
+      setSemanticResults([]);
       return;
     }
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(async () => {
+      setSemanticResults([]);
       try {
         const { data } = await supabase.rpc('search_documents', {
           query: query.trim(),
           max_results: 20,
         });
-        if (data) setSearchResults(data as DbDocument[]);
+        const ftsResults = (data as DbDocument[]) || [];
+        setSearchResults(ftsResults);
+
+        // Semantic fallback when FTS returns no results
+        if (ftsResults.length === 0 && query.trim().length >= 3) {
+          try {
+            const res = await fetch('/api/embeddings/search', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ query: query.trim(), max_results: 10 }),
+            });
+            if (res.ok) {
+              const { results } = await res.json();
+              if (results?.length) {
+                setSemanticResults(results as DbDocument[]);
+              }
+            }
+          } catch { /* semantic search unavailable — silent */ }
+        }
       } catch {
         // Fallback: client-side filter if RPC not available yet
         const q = query.toLowerCase();
@@ -205,12 +229,22 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         icon,
       }));
 
+    // Semantic results (shown when FTS has no matches)
+    const semantic: SearchItem[] = semanticResults.map((d) => ({
+      id: `sem-${d.id}`,
+      label: d.title || (language === 'he' ? 'ללא כותרת' : 'Untitled'),
+      type: "semantic" as const,
+      href: `/dashboard/editor?id=${d.id}`,
+      icon: Sparkles,
+      similarity: d.similarity,
+    }));
+
     const actions: SearchItem[] = [
       { id: "action-document", label: t.widgets.newDocument, type: "action" as const, href: "__new-doc__", icon: Plus },
     ];
 
-    return [...pages, ...documents, ...actions];
-  }, [query, language, t, dbDocuments, searchResults]);
+    return [...pages, ...documents, ...semantic, ...actions];
+  }, [query, language, t, dbDocuments, searchResults, semanticResults]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -346,11 +380,13 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
     const pages = items.filter((i) => i.type === "page");
     const documents = items.filter((i) => i.type === "document");
+    const semanticItems = items.filter((i) => i.type === "semantic");
     const actions = items.filter((i) => i.type === "action");
 
     const sections: { title: string; items: SearchItem[] }[] = [];
     if (pages.length > 0) sections.push({ title: t.widgets.recent, items: pages });
     if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
+    if (semanticItems.length > 0) sections.push({ title: language === 'he' ? 'תוצאות סמנטיות' : 'Semantic Results', items: semanticItems });
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
     return sections;
   }, [items, query, t]);
@@ -425,8 +461,13 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                           : "text-slate-300 hover:bg-slate-700/50"
                       }`}
                     >
-                      <Icon className="h-4 w-4 shrink-0 text-slate-400" />
+                      <Icon className={`h-4 w-4 shrink-0 ${item.type === 'semantic' ? 'text-purple-400' : 'text-slate-400'}`} />
                       <span className="flex-1 truncate text-left">{item.label}</span>
+                      {item.similarity != null && (
+                        <span className="shrink-0 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
+                          {Math.round(item.similarity * 100)}%
+                        </span>
+                      )}
                       {idx === selectedIndex && (
                         <CornerDownLeft className="h-3 w-3 shrink-0 text-slate-500" />
                       )}

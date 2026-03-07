@@ -88,6 +88,16 @@ export async function updateDocument(
     .from("vb_records")
     .update(updates)
     .eq("id", id);
+
+  if (!error && (updates.content || updates.title)) {
+    // Fire-and-forget: trigger background embedding generation
+    fetch("/api/embeddings/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ document_id: id }),
+    }).catch(() => {});
+  }
+
   return !error;
 }
 

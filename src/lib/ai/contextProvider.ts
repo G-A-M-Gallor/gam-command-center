@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
+import { extractPlainText } from "@/lib/utils/textExtract";
 
 /**
  * Context providers for AI — fetch real page data to inject into AI prompts.
@@ -69,17 +70,3 @@ export async function getFunctionalMapContext(): Promise<string> {
   return `Functional map (${data.length} cells):\n${lines.join("\n")}`;
 }
 
-/** Extract plain text from Tiptap JSON content */
-function extractPlainText(content: unknown): string {
-  if (!content || typeof content !== "object") return "";
-  const node = content as {
-    type?: string;
-    text?: string;
-    content?: unknown[];
-  };
-  if (node.text) return node.text;
-  if (Array.isArray(node.content)) {
-    return node.content.map(extractPlainText).join(" ");
-  }
-  return "";
-}
