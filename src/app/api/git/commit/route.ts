@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { execFileSync } from 'child_process';
 import { requireAuth } from '@/lib/api/auth';
+import { gitCommitSchema } from '@/lib/api/schemas';
 
 function run(cmd: string, args: string[]): string {
   return execFileSync(cmd, args, { cwd: process.cwd(), timeout: 15000 }).toString().trim();
@@ -18,13 +19,12 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const rawMessage = body.message;
-
-    if (!rawMessage || typeof rawMessage !== 'string' || rawMessage.trim().length === 0) {
-      return NextResponse.json({ error: 'Commit message is required' }, { status: 400 });
+    const parsed = gitCommitSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const message = rawMessage.trim();
+    const message = parsed.data.message;
 
     run('git', ['add', '-A']);
     const result = run('git', ['commit', '-m', message]);

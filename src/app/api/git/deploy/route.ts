@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { execFileSync } from 'child_process';
 import { requireAuth } from '@/lib/api/auth';
+import { gitDeploySchema } from '@/lib/api/schemas';
 
 function run(cmd: string, args: string[]): string {
   return execFileSync(cmd, args, { cwd: process.cwd(), timeout: 30000 }).toString().trim();
@@ -18,7 +19,12 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const rawMessage = (body.message || 'deploy: push to production').trim();
+    const parsed = gitDeploySchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    }
+
+    const rawMessage = parsed.data.message || 'deploy: push to production';
 
     // Check if there are changes to commit
     const status = run('git', ['status', '--porcelain']);

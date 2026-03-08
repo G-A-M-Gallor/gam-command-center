@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
 /** Returns today's events from dashboard_events table + upcoming deadlines from projects */
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
+
+  // Verify user session via cookie — return empty when unauthenticated
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ events: [] });
+  }
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);

@@ -96,13 +96,11 @@ export default function FormilyPage() {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className={`text-sm font-medium mb-1 ${origamiConnected ? "text-emerald-300" : "text-amber-300"}`}>
-              {origamiConnected
-                ? (isHe ? "מחובר ל-Origami" : "Connected to Origami")
-                : fp.bannerTitle}
+              {origamiConnected ? fp.connectedTitle : fp.bannerTitle}
             </h3>
             <p className="text-sm text-slate-400 leading-relaxed">
               {origamiConnected
-                ? (isHe ? `נמצאו ${origamiEntities.length} ישויות ב-Origami CRM` : `Found ${origamiEntities.length} entities in Origami CRM`)
+                ? `${origamiEntities.length} ${fp.connectedDesc}`
                 : fp.bannerDescription}
             </p>
             {!origamiConnected && (
@@ -118,7 +116,7 @@ export default function FormilyPage() {
         {loading && (
           <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-500">
             <Loader2 className="h-4 w-4 animate-spin" />
-            {isHe ? "בודק חיבור Origami..." : "Checking Origami connection..."}
+            {fp.checkingConnection}
           </div>
         )}
 

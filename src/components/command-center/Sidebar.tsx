@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  LayoutDashboard,
   Layers,
   FileEdit,
   Map,
@@ -19,15 +20,29 @@ import {
   Shield,
   X,
   LogOut,
+  List,
+  LayoutGrid,
+  AlignJustify,
+  Star,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
+import type { FavoriteItem } from "./widgets/FavoritesWidget";
 
 const FULL_WIDTH = 240;
 const MOBILE_WIDTH = 280;
 const STRIP_WIDTH = 48;
+
+const FILTER_KEY = "cc-sidebar-filter";
+const VIEW_MODE_KEY = "cc-sidebar-view-mode";
+
+// ─── Types ──────────────────────────────────────────────
+
+type SidebarFilter = "all" | "active" | "coming-soon" | "favorites";
+type ViewMode = "list" | "grid" | "compact";
 
 // ─── Grouped Navigation ─────────────────────────────────
 
@@ -35,6 +50,7 @@ interface NavItem {
   href: string;
   key: string;
   icon: React.ElementType;
+  status: "active" | "coming-soon";
 }
 
 interface NavGroup {
@@ -48,34 +64,53 @@ const NAV_GROUPS: NavGroup[] = [
     id: "core",
     labelKey: "groupCore",
     items: [
-      { href: "/dashboard/layers", key: "layers", icon: Layers },
-      { href: "/dashboard/editor", key: "editor", icon: FileEdit },
-      { href: "/dashboard/story-map", key: "storyMap", icon: Map },
-      { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot },
+      { href: "/dashboard", key: "dashboard", icon: LayoutDashboard, status: "active" },
+      { href: "/dashboard/layers", key: "layers", icon: Layers, status: "active" },
+      { href: "/dashboard/editor", key: "editor", icon: FileEdit, status: "active" },
+      { href: "/dashboard/story-map", key: "storyMap", icon: Map, status: "active" },
+      { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot, status: "active" },
     ],
   },
   {
     id: "tools",
     labelKey: "groupTools",
     items: [
-      { href: "/dashboard/functional-map", key: "functionalMap", icon: Grid3X3 },
-      { href: "/dashboard/design-system", key: "designSystem", icon: Palette },
-      { href: "/dashboard/architecture", key: "architecture", icon: Network },
-      { href: "/dashboard/plan", key: "plan", icon: Calendar },
-      { href: "/roadmap", key: "roadmap", icon: Compass },
+      { href: "/dashboard/functional-map", key: "functionalMap", icon: Grid3X3, status: "active" },
+      { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
+      { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
+      { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
+      { href: "/roadmap", key: "roadmap", icon: Compass, status: "active" },
     ],
   },
   {
     id: "system",
     labelKey: "groupSystem",
     items: [
-      { href: "/dashboard/automations", key: "automations", icon: Zap },
-      { href: "/dashboard/formily", key: "formily", icon: FormInput },
-      { href: "/dashboard/admin", key: "admin", icon: Shield },
-      { href: "/dashboard/settings", key: "settings", icon: Settings },
+      { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
+      { href: "/dashboard/formily", key: "formily", icon: FormInput, status: "coming-soon" },
+      { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
+      { href: "/dashboard/settings", key: "settings", icon: Settings, status: "active" },
     ],
   },
 ];
+
+// ─── Helpers ─────────────────────────────────────────────
+
+function loadFilter(): SidebarFilter {
+  try {
+    const v = localStorage.getItem(FILTER_KEY);
+    if (v === "active" || v === "coming-soon" || v === "favorites") return v;
+  } catch {}
+  return "all";
+}
+
+function loadViewMode(): ViewMode {
+  try {
+    const v = localStorage.getItem(VIEW_MODE_KEY);
+    if (v === "grid" || v === "compact") return v;
+  } catch {}
+  return "list";
+}
 
 // ─── Component ───────────────────────────────────────────
 
@@ -100,6 +135,34 @@ export function Sidebar({
   const navRef = useRef<HTMLElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
+  const [filter, setFilter] = useState<SidebarFilter>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [favHrefs, setFavHrefs] = useState<Set<string>>(new Set());
+
+  // Hydrate from localStorage + listen for cross-component favorites sync
+  useEffect(() => {
+    setFilter(loadFilter());
+    setViewMode(loadViewMode());
+    setFavHrefs(new Set(loadFavorites().map((f) => f.href)));
+
+    const syncFavs = () => setFavHrefs(new Set(loadFavorites().map((f) => f.href)));
+    window.addEventListener("cc-favorites-change", syncFavs);
+    return () => window.removeEventListener("cc-favorites-change", syncFavs);
+  }, []);
+
+  const handleToggleFav = useCallback((href: string, label: string) => {
+    const favs = loadFavorites();
+    const idx = favs.findIndex((f) => f.href === href);
+    if (idx >= 0) {
+      favs.splice(idx, 1);
+    } else {
+      favs.push({ id: `fav-${Date.now()}`, href, label });
+    }
+    saveFavorites(favs);
+    setFavHrefs(new Set(favs.map((f) => f.href)));
+    window.dispatchEvent(new Event("cc-favorites-change"));
+  }, []);
+
   const isFloat = sidebarVisibility === "float";
   const isCollapsed = isFloat && !hovered;
   const onRight = sidebarPosition === "right";
@@ -114,6 +177,29 @@ export function Sidebar({
       : isTranslatedOff && !onRight
         ? "-translate-x-full"
         : "translate-x-0";
+
+  // ── Filter + view handlers ────────────────────────────
+  const handleFilterChange = (f: SidebarFilter) => {
+    setFilter(f);
+    try { localStorage.setItem(FILTER_KEY, f); } catch {}
+  };
+
+  const handleViewModeChange = (v: ViewMode) => {
+    setViewMode(v);
+    try { localStorage.setItem(VIEW_MODE_KEY, v); } catch {}
+  };
+
+  // ── Compute filtered groups ───────────────────────────
+  const filteredGroups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => {
+      if (filter === "all") return true;
+      if (filter === "active") return item.status === "active";
+      if (filter === "coming-soon") return item.status === "coming-soon";
+      if (filter === "favorites") return favHrefs.has(item.href);
+      return true;
+    }),
+  })).filter((group) => group.items.length > 0);
 
   // ── Sliding active indicator measurement ─────────────
   useEffect(() => {
@@ -135,7 +221,22 @@ export function Sidebar({
         setIndicatorStyle(null);
       }
     });
-  }, [pathname, isCollapsed]);
+  }, [pathname, isCollapsed, filter, viewMode]);
+
+  // ── Filter tab definitions ────────────────────────────
+  const sidebarT = t.sidebar as Record<string, string>;
+  const filterTabs: { id: SidebarFilter; label: string }[] = [
+    { id: "all", label: sidebarT.filterAll },
+    { id: "active", label: sidebarT.filterActive },
+    { id: "coming-soon", label: sidebarT.filterComingSoon },
+    { id: "favorites", label: sidebarT.filterFavorites },
+  ];
+
+  const viewModes: { id: ViewMode; icon: React.ElementType; label: string }[] = [
+    { id: "list", icon: List, label: sidebarT.viewList },
+    { id: "grid", icon: LayoutGrid, label: sidebarT.viewGrid },
+    { id: "compact", icon: AlignJustify, label: sidebarT.viewCompact },
+  ];
 
   return (
     <aside
@@ -219,14 +320,56 @@ export function Sidebar({
           })()}
         </header>
 
+        {/* Filter tabs + View mode (hidden when collapsed) */}
+        {!isCollapsed && (
+          <div className="shrink-0 border-b border-slate-700/50 px-2 pt-2 pb-1.5 space-y-1.5">
+            {/* Filter tabs */}
+            <div data-cc-id="sidebar.filter-tabs" className="flex gap-0.5 rounded-lg bg-slate-800/50 p-0.5">
+              {filterTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => handleFilterChange(tab.id)}
+                  className={`flex-1 rounded-md px-1 py-1 text-[10px] font-medium transition-colors truncate ${
+                    filter === tab.id
+                      ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                      : "text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* View mode toggle */}
+            <div data-cc-id="sidebar.view-mode" className="flex items-center justify-center gap-0.5">
+              {viewModes.map(({ id, icon: ModeIcon, label }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => handleViewModeChange(id)}
+                  title={label}
+                  className={`rounded p-1 transition-colors ${
+                    viewMode === id
+                      ? "text-[var(--cc-accent-300)] bg-[var(--cc-accent-600-20)]"
+                      : "text-slate-600 hover:text-slate-400"
+                  }`}
+                >
+                  <ModeIcon className="h-3.5 w-3.5" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Nav with grouped items */}
         <nav
           ref={navRef}
           data-cc-id="sidebar.nav"
           className="relative min-h-0 flex-1 overflow-y-auto p-2"
         >
-          {/* Sliding active indicator */}
-          {!isCollapsed && indicatorStyle && (
+          {/* Sliding active indicator (list mode only) */}
+          {!isCollapsed && viewMode === "list" && indicatorStyle && (
             <div
               className="absolute inset-x-2 rounded-lg bg-[var(--cc-accent-600-20)] border border-[var(--cc-accent-500)]/20 pointer-events-none transition-all duration-300 ease-out"
               style={{
@@ -236,99 +379,197 @@ export function Sidebar({
             />
           )}
 
-          {NAV_GROUPS.map((group, gi) => (
+          {filteredGroups.map((group, gi) => (
             <div key={group.id}>
               {/* Group label / divider */}
               {gi > 0 && isCollapsed && (
                 <div className="mx-2 my-2 border-t border-slate-700/30" />
               )}
-              {!isCollapsed && (
+              {!isCollapsed && viewMode === "list" && (
                 <div className={gi === 0 ? "pt-1 pb-1 px-3" : "pt-4 pb-1 px-3"}>
                   <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
-                    {(t.sidebar as Record<string, string>)[group.labelKey]}
+                    {sidebarT[group.labelKey]}
+                  </span>
+                </div>
+              )}
+              {!isCollapsed && viewMode === "compact" && gi > 0 && (
+                <div className="mx-2 my-1.5 border-t border-slate-700/30" />
+              )}
+              {!isCollapsed && viewMode === "grid" && (
+                <div className={gi === 0 ? "pt-1 pb-1 px-1" : "pt-3 pb-1 px-1"}>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
+                    {sidebarT[group.labelKey]}
                   </span>
                 </div>
               )}
 
-              {/* Items */}
-              <div className="space-y-0.5">
-                {group.items.map(({ href, key, icon: Icon }) => {
-                  const isActive = pathname === href || pathname.startsWith(href + "/");
-                  const label = (t.tabs as Record<string, string>)[key];
-
-                  // ── Collapsed item ──
-                  if (isCollapsed) {
+              {/* Items — Grid view */}
+              {!isCollapsed && viewMode === "grid" ? (
+                <div className="grid grid-cols-3 gap-1 px-1">
+                  {group.items.map(({ href, key, icon: Icon }) => {
+                    const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
+                    const label = (t.tabs as Record<string, string>)[key];
+                    const isFav = favHrefs.has(href);
                     return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={shouldCloseOnNav ? onClose : undefined}
-                        data-active={isActive || undefined}
-                        aria-label={label}
-                        className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
-                          isActive
-                            ? "text-[var(--cc-accent-300)]"
-                            : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-                        }`}
-                      >
-                        {isActive && (
-                          <span
-                            className={`absolute top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-[var(--cc-accent-500)] ${
-                              onRight ? "right-0" : "left-0"
-                            }`}
-                            aria-hidden
-                          />
-                        )}
-                        <Icon className={`h-4 w-4 shrink-0 transition-transform duration-150 ${
-                          !isActive ? "group-hover:scale-110" : ""
-                        }`} />
-                        {/* Tooltip */}
-                        <span
-                          className={`absolute ${
-                            onRight ? "right-full mr-2" : "left-full ml-2"
-                          } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                      <div key={href} className="group/grid relative">
+                        <Link
+                          href={href}
+                          onClick={shouldCloseOnNav ? onClose : undefined}
+                          data-active={isActive || undefined}
+                          className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-colors ${
+                            isActive
+                              ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                              : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                          }`}
                         >
-                          {label}
-                        </span>
-                      </Link>
+                          <Icon className="h-4 w-4 shrink-0" />
+                          <span className="text-[9px] leading-tight truncate w-full">{label}</span>
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleToggleFav(href, label); }}
+                          className={`absolute top-0.5 right-0.5 rounded p-0.5 transition-all ${
+                            isFav
+                              ? "text-amber-400 opacity-100"
+                              : "text-slate-600 opacity-0 group-hover/grid:opacity-100 hover:text-amber-400"
+                          }`}
+                          aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
+                        </button>
+                      </div>
                     );
-                  }
+                  })}
+                </div>
+              ) : (
+                /* Items — List & Compact views */
+                <div className={viewMode === "compact" && !isCollapsed ? "space-y-0" : "space-y-0.5"}>
+                  {group.items.map(({ href, key, icon: Icon }) => {
+                    const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
+                    const label = (t.tabs as Record<string, string>)[key];
 
-                  // ── Expanded item ──
-                  const content = onRight ? (
-                    <>
-                      <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-right truncate">{label}</span>
-                      <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
-                        !isActive ? "group-hover:scale-105" : ""
-                      }`} />
-                    </>
-                  ) : (
-                    <>
-                      <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
-                        !isActive ? "group-hover:scale-105" : ""
-                      }`} />
-                      <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-left truncate">{label}</span>
-                    </>
-                  );
+                    // ── Collapsed item ──
+                    if (isCollapsed) {
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={shouldCloseOnNav ? onClose : undefined}
+                          data-active={isActive || undefined}
+                          aria-label={label}
+                          className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
+                            isActive
+                              ? "text-[var(--cc-accent-300)]"
+                              : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                          }`}
+                        >
+                          {isActive && (
+                            <span
+                              className={`absolute top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-[var(--cc-accent-500)] ${
+                                onRight ? "right-0" : "left-0"
+                              }`}
+                              aria-hidden
+                            />
+                          )}
+                          <Icon className={`h-4 w-4 shrink-0 transition-transform duration-150 ${
+                            !isActive ? "group-hover:scale-110" : ""
+                          }`} />
+                          {/* Tooltip */}
+                          <span
+                            className={`absolute ${
+                              onRight ? "right-full mr-2" : "left-full ml-2"
+                            } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                          >
+                            {label}
+                          </span>
+                        </Link>
+                      );
+                    }
 
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={shouldCloseOnNav ? onClose : undefined}
-                      data-cc-id="sidebar.nav.link"
-                      data-active={isActive || undefined}
-                      className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
-                        isActive
-                          ? "text-[var(--cc-accent-300)] font-medium"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
-                      }`}
-                    >
-                      {content}
-                    </Link>
-                  );
-                })}
-              </div>
+                    // ── Compact item ──
+                    if (viewMode === "compact") {
+                      const isFav = favHrefs.has(href);
+                      return (
+                        <div key={href} className="group/item relative">
+                          <Link
+                            href={href}
+                            onClick={shouldCloseOnNav ? onClose : undefined}
+                            data-active={isActive || undefined}
+                            className={`relative z-10 flex items-center gap-2 rounded px-2.5 py-1 text-xs transition-colors ${
+                              onRight ? "flex-row-reverse" : ""
+                            } ${
+                              isActive
+                                ? "text-[var(--cc-accent-300)] font-medium"
+                                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
+                            }`}
+                          >
+                            <Icon className="h-3.5 w-3.5 shrink-0" />
+                            <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{label}</span>
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFav(href, label)}
+                            className={`absolute ${onRight ? "left-1" : "right-1"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all ${
+                              isFav
+                                ? "text-amber-400 opacity-100"
+                                : "text-slate-600 opacity-0 group-hover/item:opacity-100 hover:text-amber-400"
+                            }`}
+                            aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    // ── Expanded list item ──
+                    const isFav = favHrefs.has(href);
+                    return (
+                      <div key={href} className="group/item relative">
+                        <Link
+                          href={href}
+                          onClick={shouldCloseOnNav ? onClose : undefined}
+                          data-cc-id="sidebar.nav.link"
+                          data-active={isActive || undefined}
+                          className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
+                            isActive
+                              ? "text-[var(--cc-accent-300)] font-medium"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
+                          }`}
+                        >
+                          {onRight ? (
+                            <>
+                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-right truncate">{label}</span>
+                              <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                                !isActive ? "group-hover:scale-105" : ""
+                              }`} />
+                            </>
+                          ) : (
+                            <>
+                              <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                                !isActive ? "group-hover:scale-105" : ""
+                              }`} />
+                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-left truncate">{label}</span>
+                            </>
+                          )}
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleFav(href, label)}
+                          className={`absolute ${onRight ? "left-2" : "right-2"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all ${
+                            isFav
+                              ? "text-amber-400 opacity-100"
+                              : "text-slate-600 opacity-0 group-hover/item:opacity-100 hover:text-amber-400"
+                          }`}
+                          aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Star className="h-3 w-3" fill={isFav ? "currentColor" : "none"} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ))}
         </nav>

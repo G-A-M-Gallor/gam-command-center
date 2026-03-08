@@ -38,6 +38,7 @@ export default function ProjectDetailPage() {
   const router = useRouter();
   const { language } = useSettings();
   const t = getTranslations(language);
+  const pd = t.projectDetail;
   const isHe = language === "he";
 
   const [project, setProject] = useState<Project | null>(null);
@@ -98,14 +99,14 @@ export default function ProjectDetailPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <p className="text-slate-400">
-          {isHe ? "פרויקט לא נמצא" : "Project not found"}
+          {pd.notFound}
         </p>
         <button
           onClick={() => router.push("/dashboard/layers")}
           className="flex items-center gap-2 rounded-lg bg-slate-700/50 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700"
         >
           {isHe ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
-          {isHe ? "חזרה לשכבות" : "Back to Layers"}
+          {pd.backToLayers}
         </button>
       </div>
     );
@@ -138,7 +139,7 @@ export default function ProjectDetailPage() {
           className="flex items-center gap-1.5 rounded-lg bg-slate-800/60 px-3 py-1.5 text-sm text-slate-400 transition-colors hover:text-slate-200"
         >
           {isHe ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
-          {isHe ? "שכבות" : "Layers"}
+          {pd.layers}
         </button>
         <div className="h-4 w-px bg-slate-700" />
         <h1 className="text-lg font-semibold text-slate-100">{project.name}</h1>
@@ -148,15 +149,15 @@ export default function ProjectDetailPage() {
       {/* Info cards */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-700/40 bg-slate-800/30 p-4">
-          <p className="text-[11px] text-slate-500">{isHe ? "שכבה" : "Layer"}</p>
+          <p className="text-[11px] text-slate-500">{pd.layer}</p>
           <p className="mt-1 text-sm font-medium text-slate-200">{layerLabel}</p>
         </div>
         <div className="rounded-xl border border-slate-700/40 bg-slate-800/30 p-4">
-          <p className="text-[11px] text-slate-500">{isHe ? "מקור" : "Source"}</p>
+          <p className="text-[11px] text-slate-500">{pd.source}</p>
           <p className="mt-1 text-sm font-medium text-slate-200">{sourceLabel}</p>
         </div>
         <div className="rounded-xl border border-slate-700/40 bg-slate-800/30 p-4">
-          <p className="text-[11px] text-slate-500">{isHe ? "בריאות" : "Health"}</p>
+          <p className="text-[11px] text-slate-500">{pd.health}</p>
           <p className={`mt-1 text-sm font-medium ${
             healthStatus === "green" ? "text-emerald-400" : healthStatus === "yellow" ? "text-amber-400" : "text-red-400"
           }`}>
@@ -164,7 +165,7 @@ export default function ProjectDetailPage() {
           </p>
         </div>
         <div className="rounded-xl border border-slate-700/40 bg-slate-800/30 p-4">
-          <p className="text-[11px] text-slate-500">{isHe ? "סטטוס" : "Status"}</p>
+          <p className="text-[11px] text-slate-500">{pd.status}</p>
           <p className="mt-1 text-sm font-medium text-emerald-400">{t.layers.active}</p>
         </div>
       </div>
@@ -177,7 +178,7 @@ export default function ProjectDetailPage() {
             <div className="flex items-center gap-2">
               <FileText size={16} className="text-blue-400" />
               <h2 className="text-sm font-medium text-slate-200">
-                {isHe ? "מסמכים" : "Documents"}
+                {pd.documents}
               </h2>
               <Badge intent="neutral" size="md">{documents.length}</Badge>
             </div>
@@ -185,13 +186,13 @@ export default function ProjectDetailPage() {
               onClick={() => router.push("/dashboard/editor")}
               className="flex items-center gap-1 text-[11px] text-purple-400 hover:text-purple-300"
             >
-              {isHe ? "צור מסמך" : "New doc"}
+              {pd.newDoc}
               <ExternalLink size={10} />
             </button>
           </div>
           {documents.length === 0 ? (
             <p className="py-6 text-center text-sm text-slate-600">
-              {isHe ? "אין מסמכים עדיין" : "No documents yet"}
+              {pd.noDocuments}
             </p>
           ) : (
             <div className="space-y-1.5">
@@ -217,7 +218,7 @@ export default function ProjectDetailPage() {
             <div className="flex items-center gap-2">
               <Map size={16} className="text-emerald-400" />
               <h2 className="text-sm font-medium text-slate-200">
-                {isHe ? "מפת סיפור" : "Story Map"}
+                {pd.storyMap}
               </h2>
               <Badge intent="neutral" size="md">
                 {epicCount}E / {storyCount}S
@@ -227,13 +228,13 @@ export default function ProjectDetailPage() {
               onClick={() => router.push(`/dashboard/story-map?project=${id}`)}
               className="flex items-center gap-1 text-[11px] text-purple-400 hover:text-purple-300"
             >
-              {isHe ? "פתח מפה" : "Open map"}
+              {pd.openMap}
               <ExternalLink size={10} />
             </button>
           </div>
           {storyCards.length === 0 ? (
             <p className="py-6 text-center text-sm text-slate-600">
-              {isHe ? "אין כרטיסים עדיין" : "No story cards yet"}
+              {pd.noStoryCards}
             </p>
           ) : (
             <div className="space-y-1.5">
@@ -255,7 +256,7 @@ export default function ProjectDetailPage() {
               ))}
               {storyCards.length > 8 && (
                 <p className="text-center text-[11px] text-slate-600">
-                  +{storyCards.length - 8} {isHe ? "נוספים" : "more"}
+                  +{storyCards.length - 8} {pd.more}
                 </p>
               )}
             </div>

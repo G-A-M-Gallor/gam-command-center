@@ -14,6 +14,7 @@ import {
   FormInput,
   Network,
   Calendar,
+  Compass,
   GripVertical,
   Pin,
 } from "lucide-react";
@@ -39,6 +40,7 @@ const routeIcons: Record<string, typeof Layers> = {
   "/dashboard/formily": FormInput,
   "/dashboard/architecture": Network,
   "/dashboard/plan": Calendar,
+  "/roadmap": Compass,
 };
 
 export function loadFavorites(): FavoriteItem[] {
@@ -67,6 +69,7 @@ export function toggleFavorite(href: string, label: string) {
     favs.push({ id: `fav-${Date.now()}`, href, label });
   }
   saveFavorites(favs);
+  window.dispatchEvent(new Event("cc-favorites-change"));
 }
 
 export function FavoritesPanel() {
@@ -81,6 +84,9 @@ export function FavoritesPanel() {
 
   useEffect(() => {
     setFavorites(loadFavorites());
+    const sync = () => setFavorites(loadFavorites());
+    window.addEventListener("cc-favorites-change", sync);
+    return () => window.removeEventListener("cc-favorites-change", sync);
   }, []);
 
   const removeFavorite = useCallback(

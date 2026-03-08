@@ -213,7 +213,7 @@ export function LibraryTab({ isHe, td }: LibraryTabProps) {
               }, 150);
             }}
             className="flex items-center gap-1 rounded-md bg-slate-800/60 px-2 py-1 text-[11px] text-slate-500 transition-colors hover:text-slate-300"
-            title={isHe ? "רענן קטלוג דרך AI" : "Refresh catalog via AI"}
+            title={td.libraryRefreshTitle}
           >
             <RefreshCw size={11} />
             {td.librarySync}

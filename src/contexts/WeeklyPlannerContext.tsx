@@ -47,6 +47,23 @@ function saveJson<T>(key: string, value: T) {
   }
 }
 
+// ─── Supabase Sync (fire-and-forget) ────────────────────────
+
+let _syncTimer: ReturnType<typeof setTimeout> | null = null;
+
+function debouncedSyncToServer() {
+  if (_syncTimer) clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(() => {
+    const items = loadJson<unknown[]>(ITEMS_KEY, []);
+    const templates = loadJson<unknown[]>(TEMPLATES_KEY, []);
+    fetch("/api/weekly-planner", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items, templates }),
+    }).catch(() => { /* localStorage is fine as fallback */ });
+  }, 2000);
+}
+
 // ─── Demo Team Members ──────────────────────────────────────
 
 const DEMO_TEAM: TeamMember[] = [
@@ -123,23 +140,54 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
   const [showSaturday, setShowSaturday] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Load from localStorage
+  // Load from localStorage first (instant), then merge server data
   useEffect(() => {
-    setItems(loadJson<WeeklyItem[]>(ITEMS_KEY, []));
-    setTemplates(loadJson<WeeklyTemplate[]>(TEMPLATES_KEY, []));
+    const localItems = loadJson<WeeklyItem[]>(ITEMS_KEY, []);
+    const localTemplates = loadJson<WeeklyTemplate[]>(TEMPLATES_KEY, []);
+    setItems(localItems);
+    setTemplates(localTemplates);
     setMounted(true);
+
+    // Try loading from server and merge
+    fetch("/api/weekly-planner")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.persisted) {
+          const serverItems: WeeklyItem[] = data.items || [];
+          const serverTemplates: WeeklyTemplate[] = data.templates || [];
+
+          // Merge: server items that don't exist locally
+          if (serverItems.length > 0) {
+            const localIds = new Set(localItems.map((i) => i.id));
+            const newFromServer = serverItems.filter((i) => !localIds.has(i.id));
+            if (newFromServer.length > 0 || localItems.length === 0) {
+              const merged = localItems.length === 0 ? serverItems : [...localItems, ...newFromServer];
+              setItems(merged);
+              saveJson(ITEMS_KEY, merged);
+            }
+          }
+
+          if (serverTemplates.length > 0 && localTemplates.length === 0) {
+            setTemplates(serverTemplates);
+            saveJson(TEMPLATES_KEY, serverTemplates);
+          }
+        }
+      })
+      .catch(() => { /* localStorage data is fine */ });
   }, []);
 
-  // Persist items
+  // Persist items (localStorage + debounced Supabase sync)
   const persistItems = useCallback((next: WeeklyItem[]) => {
     setItems(next);
     saveJson(ITEMS_KEY, next);
+    debouncedSyncToServer();
   }, []);
 
-  // Persist templates
+  // Persist templates (localStorage + debounced Supabase sync)
   const persistTemplates = useCallback((next: WeeklyTemplate[]) => {
     setTemplates(next);
     saveJson(TEMPLATES_KEY, next);
+    debouncedSyncToServer();
   }, []);
 
   // ── Navigation ─────────────────────────────────────────

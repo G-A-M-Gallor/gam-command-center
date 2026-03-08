@@ -48,6 +48,22 @@ export const embeddingsSearchSchema = z.object({
 
 export type EmbeddingsSearchInput = z.infer<typeof embeddingsSearchSchema>;
 
+// ─── Git Commit ─────────────────────────────────────────────
+
+export const gitCommitSchema = z.object({
+  message: z.string().min(1, "Commit message is required").max(500, "Commit message exceeds 500 character limit").transform((s) => s.trim()),
+});
+
+export type GitCommitInput = z.infer<typeof gitCommitSchema>;
+
+// ─── Git Deploy ─────────────────────────────────────────────
+
+export const gitDeploySchema = z.object({
+  message: z.string().max(500, "Commit message exceeds 500 character limit").optional().transform((s) => s?.trim() || undefined),
+});
+
+export type GitDeployInput = z.infer<typeof gitDeploySchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

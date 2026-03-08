@@ -285,7 +285,7 @@ export function TimerPanel() {
           <button
             type="button"
             onClick={handleStart}
-            className="flex h-9 items-center gap-1.5 rounded-lg bg-[var(--cc-accent-600)]px-4 text-sm text-white transition-colors hover:bg-[var(--cc-accent-500)]"
+            className="flex h-9 items-center gap-1.5 rounded-lg bg-[var(--cc-accent-600)] px-4 text-sm text-white transition-colors hover:bg-[var(--cc-accent-500)]"
           >
             <Play className="h-3.5 w-3.5" />
             {t.widgets.timerStart}

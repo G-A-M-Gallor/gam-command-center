@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { requireAuth } from '@/lib/api/auth';
 
-function run(cmd: string): string {
+function run(cmd: string, args: string[]): string {
   try {
-    return execSync(cmd, { cwd: process.cwd(), timeout: 5000 }).toString().trim();
+    return execFileSync(cmd, args, { cwd: process.cwd(), timeout: 5000 }).toString().trim();
   } catch {
     return '';
   }
@@ -20,9 +20,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
 
-  const branch = run('git branch --show-current');
-  const statusRaw = run('git status --porcelain');
-  const logRaw = run('git log --oneline -10');
+  const branch = run('git', ['branch', '--show-current']);
+  const statusRaw = run('git', ['status', '--porcelain']);
+  const logRaw = run('git', ['log', '--oneline', '-10']);
 
   const modified: string[] = [];
   const untracked: string[] = [];

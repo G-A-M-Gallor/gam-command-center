@@ -13,6 +13,7 @@ import {
 } from "./widgets/FavoritesWidget";
 
 type PageKey =
+  | "dashboard"
   | "layers"
   | "editor"
   | "storyMap"
@@ -27,6 +28,7 @@ type PageKey =
   | "admin";
 
 const pageRoutes: Record<PageKey, string> = {
+  dashboard: "/dashboard",
   layers: "/dashboard/layers",
   editor: "/dashboard/editor",
   storyMap: "/dashboard/story-map",
@@ -201,10 +203,13 @@ export function PageHeader({ pageKey, children }: PageHeaderProps) {
 
   useEffect(() => {
     setPinned(isFavorite(href));
+    const sync = () => setPinned(isFavorite(href));
+    window.addEventListener("cc-favorites-change", sync);
+    return () => window.removeEventListener("cc-favorites-change", sync);
   }, [href]);
 
   const handleTogglePin = useCallback(() => {
-    toggleFavorite(href, title);
+    toggleFavorite(href, title); // dispatches cc-favorites-change internally
     setPinned((prev) => !prev);
   }, [href, title]);
 

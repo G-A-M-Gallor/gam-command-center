@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { getHatScore, getOverallScore } from '@/lib/audit/checks';
 import type { AuditHat } from '@/lib/audit/checks';
 import { requireAuth } from '@/lib/api/auth';
 
-function run(cmd: string): string {
+/** Shell-free execution for simple commands (no pipes) */
+function runSafe(cmd: string, args: string[]): string {
+  try {
+    return execFileSync(cmd, args, { cwd: process.cwd(), timeout: 10000 }).toString().trim();
+  } catch {
+    return '';
+  }
+}
+
+/** Shell execution for piped commands — only used with hardcoded paths, never user input */
+function runShell(cmd: string): string {
   try {
     return execSync(cmd, { cwd: process.cwd(), timeout: 10000 }).toString().trim();
   } catch {
@@ -13,9 +23,9 @@ function run(cmd: string): string {
 }
 
 function getGitInfo() {
-  const branch = run('git branch --show-current');
-  const statusRaw = run('git status --porcelain');
-  const lastLogLine = run('git log --oneline -1');
+  const branch = runSafe('git', ['branch', '--show-current']);
+  const statusRaw = runSafe('git', ['status', '--porcelain']);
+  const lastLogLine = runSafe('git', ['log', '--oneline', '-1']);
 
   const modified: string[] = [];
   const untracked: string[] = [];
@@ -46,15 +56,15 @@ function getCodebaseStats() {
   const srcDir = 'src';
 
   // Count files by type using find
-  const allFiles = run(`find ${srcDir} -type f -name '*.ts' -o -name '*.tsx' | wc -l`);
-  const pageFiles = run(`find ${srcDir}/app -name 'page.tsx' | wc -l`);
-  const componentFiles = run(`find ${srcDir}/components -type f -name '*.tsx' | wc -l`);
-  const contextFiles = run(`find ${srcDir}/contexts -type f -name '*.tsx' | wc -l`);
-  const widgetFiles = run(`find ${srcDir}/components/command-center/widgets -type f -name '*.tsx' | wc -l`);
-  const testFiles = run(`find ${srcDir} -type f -name '*.test.*' -o -name '*.spec.*' | wc -l`);
+  const allFiles = runShell(`find ${srcDir} -type f -name '*.ts' -o -name '*.tsx' | wc -l`);
+  const pageFiles = runShell(`find ${srcDir}/app -name 'page.tsx' | wc -l`);
+  const componentFiles = runShell(`find ${srcDir}/components -type f -name '*.tsx' | wc -l`);
+  const contextFiles = runShell(`find ${srcDir}/contexts -type f -name '*.tsx' | wc -l`);
+  const widgetFiles = runShell(`find ${srcDir}/components/command-center/widgets -type f -name '*.tsx' | wc -l`);
+  const testFiles = runShell(`find ${srcDir} -type f -name '*.test.*' -o -name '*.spec.*' | wc -l`);
 
   // Total lines
-  const totalLines = run(`find ${srcDir} -type f \\( -name '*.ts' -o -name '*.tsx' \\) -exec cat {} + | wc -l`);
+  const totalLines = runShell(`find ${srcDir} -type f \\( -name '*.ts' -o -name '*.tsx' \\) -exec cat {} + | wc -l`);
 
   return {
     totalFiles: parseInt(allFiles) || 0,
@@ -84,7 +94,7 @@ function getAuditInfo() {
 
 function getLargeFiles() {
   // Find files with most lines in src/
-  const result = run(
+  const result = runShell(
     `find src -type f \\( -name '*.ts' -o -name '*.tsx' \\) -exec wc -l {} + | sort -rn | head -11`
   );
 

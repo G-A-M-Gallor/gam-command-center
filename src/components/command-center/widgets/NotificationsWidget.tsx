@@ -38,6 +38,15 @@ function saveNotifications(items: NotificationItem[]) {
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
+/** Try to persist to Supabase (fire-and-forget) */
+function persistToServer(detail: { type: string; titleHe: string; titleEn: string; titleRu?: string }) {
+  fetch("/api/notifications", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(detail),
+  }).catch(() => { /* localStorage fallback is fine */ });
+}
+
 /** Push a notification from anywhere: window.dispatchEvent(new CustomEvent("cc-notify", { detail })) */
 function pushNotification(detail: { type: NotificationItem["type"]; titleHe: string; titleEn: string; titleRu?: string }) {
   const items = loadNotifications();
@@ -48,20 +57,17 @@ function pushNotification(detail: { type: NotificationItem["type"]; titleHe: str
     timestamp: Date.now(),
     read: false,
   };
-  // Keep max 50 notifications
   const updated = [newItem, ...items].slice(0, 50);
   saveNotifications(updated);
+  persistToServer(detail);
 }
 
-// Global listener — install once
-if (typeof window !== "undefined") {
-  let _installed = false;
-  if (!_installed) {
-    window.addEventListener("cc-notify", ((e: CustomEvent) => {
-      if (e.detail) pushNotification(e.detail);
-    }) as EventListener);
-    _installed = true;
-  }
+// Global listener — install once (flag on window to survive HMR)
+if (typeof window !== "undefined" && !(window as unknown as Record<string, unknown>).__ccNotifyInstalled) {
+  window.addEventListener("cc-notify", ((e: CustomEvent) => {
+    if (e.detail) pushNotification(e.detail);
+  }) as EventListener);
+  (window as unknown as Record<string, unknown>).__ccNotifyInstalled = true;
 }
 
 function timeAgo(timestamp: number, lang: "he" | "en" | "ru"): string {
@@ -98,7 +104,30 @@ export function NotificationsPanel() {
   const [items, setItems] = useState<NotificationItem[]>([]);
 
   useEffect(() => {
+    // Load from localStorage first (instant)
     setItems(loadNotifications());
+
+    // Then try to load from server and merge
+    fetch("/api/notifications")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.persisted && data.notifications?.length > 0) {
+          const local = loadNotifications();
+          const localIds = new Set(local.map((n) => n.id));
+          const serverItems: NotificationItem[] = data.notifications.filter(
+            (n: NotificationItem) => !localIds.has(n.id)
+          );
+          if (serverItems.length > 0) {
+            const merged = [...local, ...serverItems]
+              .sort((a, b) => b.timestamp - a.timestamp)
+              .slice(0, 50);
+            saveNotifications(merged);
+            setItems(merged);
+          }
+        }
+      })
+      .catch(() => { /* localStorage data is fine */ });
+
     const sync = () => setItems(loadNotifications());
     window.addEventListener(EVENT_NAME, sync);
     return () => window.removeEventListener(EVENT_NAME, sync);
@@ -111,6 +140,11 @@ export function NotificationsPanel() {
       );
       setItems(updated);
       saveNotifications(updated);
+      fetch("/api/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      }).catch(() => {});
     },
     [items]
   );
@@ -119,13 +153,17 @@ export function NotificationsPanel() {
     const updated = items.map((n) => ({ ...n, read: true }));
     setItems(updated);
     saveNotifications(updated);
+    fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ markAllRead: true }),
+    }).catch(() => {});
   }, [items]);
 
   const unreadCount = items.filter((n) => !n.read).length;
 
   return (
     <div className="space-y-2">
-      {/* Mark all read */}
       {unreadCount > 0 && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500">
@@ -203,7 +241,6 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
   const items = loadNotifications();
   const unread = items.filter((n) => !n.read).length;
 
-  // Size 1: red dot badge (rendered inside icon wrapper)
   if (size < 2) {
     if (unread === 0) return null;
     return (
@@ -211,7 +248,6 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
     );
   }
 
-  // Size 2: unread count
   if (size === 2) {
     if (unread === 0) return null;
     return (
@@ -221,7 +257,6 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
     );
   }
 
-  // Size 3: count + latest title
   if (size === 3) {
     const latest = items.find((n) => !n.read);
     return (
@@ -236,7 +271,6 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
     );
   }
 
-  // Size 4: last 2 notifications
   const top2 = items.filter((n) => !n.read).slice(0, 2);
   if (top2.length === 0) {
     return (
