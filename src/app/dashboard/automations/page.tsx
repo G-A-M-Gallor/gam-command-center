@@ -330,24 +330,33 @@ function N8nSection({ a, isHe }: { a: ReturnType<typeof getTranslations>['automa
             </button>
           </div>
           <div className="relative bg-slate-900" style={{ height: '600px' }}>
-            {/* Replace YOUR_N8N_URL with actual n8n instance URL */}
-            <iframe
-              src="about:blank"
-              className="h-full w-full border-0"
-              title="n8n"
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-            />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/95">
-              <RefreshCw className="h-10 w-10 text-orange-400/50" />
-              <p className="text-sm text-slate-500">
-                {isHe
-                  ? 'הגדר כתובת n8n ב-environment variables'
-                  : 'Configure n8n URL in environment variables'}
-              </p>
-              <code className="rounded bg-slate-800 px-3 py-1.5 text-xs text-orange-300">
-                NEXT_PUBLIC_N8N_URL=https://your-n8n.example.com
-              </code>
-            </div>
+            {process.env.NEXT_PUBLIC_N8N_URL ? (
+              <iframe
+                src={process.env.NEXT_PUBLIC_N8N_URL}
+                className="h-full w-full border-0"
+                title="n8n"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+              />
+            ) : (
+              <>
+                <iframe
+                  src="about:blank"
+                  className="h-full w-full border-0"
+                  title="n8n"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/95">
+                  <RefreshCw className="h-10 w-10 text-orange-400/50" />
+                  <p className="text-sm text-slate-500">
+                    {isHe
+                      ? 'הגדר כתובת n8n ב-environment variables'
+                      : 'Configure n8n URL in environment variables'}
+                  </p>
+                  <code className="rounded bg-slate-800 px-3 py-1.5 text-xs text-orange-300">
+                    NEXT_PUBLIC_N8N_URL=https://your-n8n.example.com
+                  </code>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -38,6 +38,32 @@ function saveNotifications(items: NotificationItem[]) {
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
+/** Push a notification from anywhere: window.dispatchEvent(new CustomEvent("cc-notify", { detail })) */
+function pushNotification(detail: { type: NotificationItem["type"]; titleHe: string; titleEn: string; titleRu?: string }) {
+  const items = loadNotifications();
+  const newItem: NotificationItem = {
+    id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    type: detail.type,
+    title: { he: detail.titleHe, en: detail.titleEn, ru: detail.titleRu || detail.titleEn },
+    timestamp: Date.now(),
+    read: false,
+  };
+  // Keep max 50 notifications
+  const updated = [newItem, ...items].slice(0, 50);
+  saveNotifications(updated);
+}
+
+// Global listener — install once
+if (typeof window !== "undefined") {
+  let _installed = false;
+  if (!_installed) {
+    window.addEventListener("cc-notify", ((e: CustomEvent) => {
+      if (e.detail) pushNotification(e.detail);
+    }) as EventListener);
+    _installed = true;
+  }
+}
+
 function timeAgo(timestamp: number, lang: "he" | "en" | "ru"): string {
   const diff = Date.now() - timestamp;
   const minutes = Math.floor(diff / 60000);
@@ -73,6 +99,9 @@ export function NotificationsPanel() {
 
   useEffect(() => {
     setItems(loadNotifications());
+    const sync = () => setItems(loadNotifications());
+    window.addEventListener(EVENT_NAME, sync);
+    return () => window.removeEventListener(EVENT_NAME, sync);
   }, []);
 
   const markRead = useCallback(

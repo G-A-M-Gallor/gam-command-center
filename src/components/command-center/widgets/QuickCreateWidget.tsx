@@ -2,10 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, FolderPlus, CheckSquare, X } from "lucide-react";
+import { FileText, FolderPlus, CheckSquare, X, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getTranslations } from "@/lib/i18n";
+import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const CREATED_ITEMS_KEY = "cc-created-items";
@@ -46,15 +47,47 @@ export function QuickCreatePanel() {
 
   const [creating, setCreating] = useState<"project" | "task" | null>(null);
   const [title, setTitle] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const handleCreate = useCallback(() => {
-    if (!title.trim() || !creating) return;
-    saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
+  const handleCreate = useCallback(async () => {
+    if (!title.trim() || !creating || saving) return;
+    setSaving(true);
     const label = creating === "project" ? t.widgets.newProjectAction : t.widgets.newTaskAction;
-    toast({ message: `${label}: ${title.trim()}`, type: "success" });
+
+    try {
+      if (creating === "project") {
+        const { error } = await supabase.from("projects").insert({
+          name: title.trim(),
+          status: "active",
+          health_score: 50,
+          layer: "product",
+          source: "manual",
+        });
+        if (error) throw error;
+      } else {
+        // Tasks go into vb_records as type "task"
+        const { error } = await supabase.from("vb_records").insert({
+          title: title.trim(),
+          record_type: "task",
+          status: "active",
+        });
+        if (error) throw error;
+      }
+      saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
+      toast({ message: `${label}: ${title.trim()}`, type: "success" });
+      // Dispatch notification
+      window.dispatchEvent(new CustomEvent("cc-notify", {
+        detail: { type: "status", titleHe: `${label}: ${title.trim()}`, titleEn: `${label}: ${title.trim()}` },
+      }));
+    } catch {
+      // Fallback: save locally if DB fails
+      saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
+      toast({ message: `${label}: ${title.trim()} (${language === "he" ? "שמור מקומית" : "saved locally"})`, type: "warning" });
+    }
+    setSaving(false);
     setTitle("");
     setCreating(null);
-  }, [title, creating, t, toast]);
+  }, [title, creating, saving, t, toast, language]);
 
   const todayCount = getCreatedTodayCount();
 
@@ -122,9 +155,10 @@ export function QuickCreatePanel() {
             <button
               type="button"
               onClick={handleCreate}
-              disabled={!title.trim()}
-              className="rounded bg-[var(--cc-accent-600)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40"
+              disabled={!title.trim() || saving}
+              className="flex items-center gap-1.5 rounded bg-[var(--cc-accent-600)] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40"
             >
+              {saving && <Loader2 className="h-3 w-3 animate-spin" />}
               {t.widgets.create}
             </button>
           </div>

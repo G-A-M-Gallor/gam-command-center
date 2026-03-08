@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarDays, Clock, Bell } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CalendarDays, Clock, Bell, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -9,10 +10,8 @@ interface EventItem {
   time: string;
   title: { he: string; en: string };
   project?: { he: string; en: string };
+  type: "meeting" | "deadline" | "reminder";
 }
-
-// Events will come from calendar integration (Google Calendar / Supabase)
-// For now, show real date + empty state
 
 function getHebrewDate(): string {
   const days = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
@@ -33,48 +32,37 @@ function getEnglishDate(): string {
   });
 }
 
-interface SectionProps {
-  title: string;
-  icon: typeof CalendarDays;
-  items: EventItem[];
-  lang: "he" | "en";
-  iconColor: string;
-}
+const typeIcons = {
+  meeting: CalendarDays,
+  deadline: Clock,
+  reminder: Bell,
+};
 
-function Section({ title, icon: Icon, items, lang, iconColor }: SectionProps) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex items-center gap-1.5">
-        <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
-        <span className="text-xs font-medium text-slate-300">{title}</span>
-      </div>
-      {items.map((item, i) => (
-        <div
-          key={i}
-          className="flex items-center gap-2 rounded px-2 py-1.5 transition-colors hover:bg-slate-700/30"
-        >
-          <span className="w-10 shrink-0 text-[11px] font-medium text-[var(--cc-accent-400)]">
-            {item.time === "מחר" && lang === "en" ? "Tmrw" : item.time}
-          </span>
-          <span className="flex-1 truncate text-sm text-slate-300">
-            {item.title[lang]}
-          </span>
-          {item.project && (
-            <span className="shrink-0 rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400">
-              {item.project[lang]}
-            </span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
+const typeColors = {
+  meeting: "text-blue-400",
+  deadline: "text-red-400",
+  reminder: "text-amber-400",
+};
 
 export function TodayPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
+  const isHe = language === "he";
 
-  const dateStr = language === "he" ? getHebrewDate() : getEnglishDate();
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/events/today")
+      .then((r) => r.json())
+      .then((data) => {
+        setEvents(data.events || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const dateStr = isHe ? getHebrewDate() : getEnglishDate();
 
   return (
     <div className="space-y-4">
@@ -83,11 +71,43 @@ export function TodayPanel() {
         <p className="text-sm font-medium text-slate-100">{dateStr}</p>
       </div>
 
-      <div className="py-4 text-center text-sm text-slate-500">
-        {language === "he"
-          ? "אין אירועים להיום. חבר יומן כדי לראות פגישות ודדליינים."
-          : "No events today. Connect a calendar to see meetings and deadlines."}
-      </div>
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 py-4 text-sm text-slate-500">
+          <RefreshCw size={14} className="animate-spin" />
+          {isHe ? "טוען..." : "Loading..."}
+        </div>
+      ) : events.length === 0 ? (
+        <div className="py-4 text-center text-sm text-slate-500">
+          {isHe
+            ? "אין אירועים להיום."
+            : "No events today."}
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {events.map((item, i) => {
+            const Icon = typeIcons[item.type];
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-2 rounded px-2 py-1.5 transition-colors hover:bg-slate-700/30"
+              >
+                <Icon size={13} className={`shrink-0 ${typeColors[item.type]}`} />
+                <span className="w-10 shrink-0 text-[11px] font-medium text-[var(--cc-accent-400)]">
+                  {item.time}
+                </span>
+                <span className="flex-1 truncate text-sm text-slate-300">
+                  {item.title[language === "he" ? "he" : "en"]}
+                </span>
+                {item.project && (
+                  <span className="shrink-0 rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400">
+                    {item.project[language === "he" ? "he" : "en"]}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -97,7 +117,6 @@ export function TodayBarContent({ size }: { size: WidgetSize }) {
 
   if (size < 2) return null;
 
-  // Show today's date in the bar
   const now = new Date();
   const short = now.toLocaleDateString(language === "he" ? "he-IL" : "en-US", {
     weekday: "short",
