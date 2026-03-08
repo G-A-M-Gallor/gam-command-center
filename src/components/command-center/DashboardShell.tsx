@@ -13,7 +13,6 @@ import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
 import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
-import { InstallPrompt } from "./InstallPrompt";
 import { GibberishDetector } from "./GibberishDetector";
 
 const SIDEBAR_WIDTH = "15rem";
@@ -149,9 +148,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           onWidgetPanelOpen={handleBottomBarWidgetPanelOpen}
         />
       )}
-
-      {/* PWA install prompt */}
-      <InstallPrompt />
 
       {/* Gibberish auto-detection */}
       <GibberishDetector />

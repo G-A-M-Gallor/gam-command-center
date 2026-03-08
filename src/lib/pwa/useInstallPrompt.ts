@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
 const DISMISS_KEY = "cc-pwa-install-dismissed";
-const COOLDOWN_DAYS = 7;
+const INSTALLED_KEY = "cc-pwa-installed";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -22,10 +22,15 @@ function isStandalone(): boolean {
 
 function isDismissed(): boolean {
   try {
-    const raw = localStorage.getItem(DISMISS_KEY);
-    if (!raw) return false;
-    const ts = parseInt(raw, 10);
-    return Date.now() - ts < COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+    return localStorage.getItem(DISMISS_KEY) !== null;
+  } catch {
+    return false;
+  }
+}
+
+function isInstalled(): boolean {
+  try {
+    return localStorage.getItem(INSTALLED_KEY) !== null;
   } catch {
     return false;
   }
@@ -45,7 +50,7 @@ export function useInstallPrompt() {
   const deferredPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (isStandalone()) {
+    if (isStandalone() || isInstalled()) {
       setState("standalone");
       return;
     }
@@ -72,6 +77,7 @@ export function useInstallPrompt() {
     deferredPromptRef.current = null;
     if (outcome === "accepted") {
       setState("standalone");
+      localStorage.setItem(INSTALLED_KEY, "1");
       return true;
     }
     return false;
@@ -79,7 +85,7 @@ export function useInstallPrompt() {
 
   const dismiss = useCallback(() => {
     setState("hidden");
-    localStorage.setItem(DISMISS_KEY, String(Date.now()));
+    localStorage.setItem(DISMISS_KEY, "1");
   }, []);
 
   const canInstall = state === "installable" || state === "ios";
