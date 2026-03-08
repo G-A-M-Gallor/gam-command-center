@@ -589,17 +589,31 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                   ) : null;
                 })()}
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileWidgetPanelOpen(false);
-                  setMobileActiveWidgetId(null);
-                }}
-                className="rounded p-1.5 text-slate-400 active:bg-slate-700 shrink-0"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileWidgetPanelOpen(false);
+                    setMobileActiveWidgetId(null);
+                    setStoreOpen(true);
+                  }}
+                  className="rounded p-1.5 text-slate-400 active:bg-slate-700"
+                  aria-label={t.widgets.editMode}
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileWidgetPanelOpen(false);
+                    setMobileActiveWidgetId(null);
+                  }}
+                  className="rounded p-1.5 text-slate-400 active:bg-slate-700"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
             </div>
 
             {/* Widget grid — scrollable, with bottom bar clearance */}
