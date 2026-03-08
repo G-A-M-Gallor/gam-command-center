@@ -545,10 +545,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     </>
   );
 
-  // Widget panel is on the opposite side of the sidebar
-  const widgetPanelOnRight = sidebarPosition === "left";
-
-  // ─── Mobile: minimal top bar + sliding widget panel ────────────────
+  // ─── Mobile: minimal top bar + full-screen widget panel ─────────────
   if (isMobile) {
     const activeWidget = mobileActiveWidgetId
       ? visibleWidgets.find((w) => w.id === mobileActiveWidgetId)
@@ -567,130 +564,118 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
           <div className="flex-1" />
         </div>
 
-        {/* Backdrop */}
+        {/* Full-screen Widget Panel Popup */}
         {mobileWidgetPanelOpen && (
-          <button
-            type="button"
-            onClick={() => {
-              setMobileWidgetPanelOpen(false);
-              setMobileActiveWidgetId(null);
-            }}
-            className="fixed inset-0 z-[55] bg-black/40"
-            aria-label="Close widget panel"
-          />
-        )}
-
-        {/* Sliding Widget Panel */}
-        <div
-          data-cc-id="topbar.mobile-widget-panel"
-          className={`fixed top-0 bottom-0 z-[56] w-72 max-w-[85vw] bg-slate-900 border-slate-700 shadow-2xl transition-transform duration-300 ease-out ${
-            widgetPanelOnRight
-              ? `right-0 border-l ${mobileWidgetPanelOpen ? "translate-x-0" : "translate-x-full"}`
-              : `left-0 border-r ${mobileWidgetPanelOpen ? "translate-x-0" : "-translate-x-full"}`
-          }`}
-          style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
-        >
-          {/* Panel header */}
-          <div className="flex h-12 items-center justify-between border-b border-slate-700 px-4">
-            <div className="flex items-center gap-2 min-w-0">
-              <h2 className="text-sm font-semibold text-slate-200 shrink-0">
-                {t.widgets.store || "Widgets"}
-              </h2>
-              {activeProfileId && (() => {
-                const s = t.settings as Record<string, string>;
-                const bp = BUILTIN_PROFILES.find((p) => p.id === activeProfileId);
-                const up = profiles.find((p) => p.id === activeProfileId);
-                const name = bp?.nameKey ? (s[bp.nameKey] || bp.name) : up?.name;
-                return name ? (
-                  <span className="truncate rounded-full bg-[var(--cc-accent-600-30)] px-2 py-0.5 text-[10px] font-medium text-[var(--cc-accent-300)]">
-                    {name}
-                  </span>
-                ) : null;
-              })()}
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setMobileWidgetPanelOpen(false);
-                setMobileActiveWidgetId(null);
-              }}
-              className="rounded p-1.5 text-slate-400 active:bg-slate-700 shrink-0"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Widget grid */}
-          <div className="overflow-y-auto" style={{ height: "calc(100vh - 48px)" }}>
-            <div className="grid grid-cols-3 gap-2 p-3">
-              {visibleWidgets.map((widget) => (
-                <button
-                  key={widget.id}
-                  type="button"
-                  onClick={() => handleMobileWidgetClick(widget.id)}
-                  className={`flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition-colors ${
-                    mobileActiveWidgetId === widget.id
-                      ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-                      : "text-slate-400 active:bg-slate-800 hover:text-slate-200"
-                  }`}
-                >
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                    mobileActiveWidgetId === widget.id
-                      ? "bg-[var(--cc-accent-600-30)]"
-                      : "bg-slate-800"
-                  }`}>
-                    <widget.icon className="h-5 w-5" />
-                  </div>
-                  <span className="max-w-full truncate text-[10px] font-medium">
-                    {widget.label[language]}
-                  </span>
-                </button>
-              ))}
-
-              {/* Widget Store button */}
+          <div
+            data-cc-id="topbar.mobile-widget-panel"
+            className="fixed inset-0 z-[56] flex flex-col bg-slate-900"
+          >
+            {/* Panel header */}
+            <div className="flex h-12 shrink-0 items-center justify-between border-b border-slate-700 px-4">
+              <div className="flex items-center gap-2 min-w-0">
+                <Grid3X3 className="h-4 w-4 text-[var(--cc-accent-400)] shrink-0" />
+                <h2 className="text-sm font-semibold text-slate-200 shrink-0">
+                  {t.widgets.store || "Widgets"}
+                </h2>
+                {activeProfileId && (() => {
+                  const s = t.settings as Record<string, string>;
+                  const bp = BUILTIN_PROFILES.find((p) => p.id === activeProfileId);
+                  const up = profiles.find((p) => p.id === activeProfileId);
+                  const name = bp?.nameKey ? (s[bp.nameKey] || bp.name) : up?.name;
+                  return name ? (
+                    <span className="truncate rounded-full bg-[var(--cc-accent-600-30)] px-2 py-0.5 text-[10px] font-medium text-[var(--cc-accent-300)]">
+                      {name}
+                    </span>
+                  ) : null;
+                })()}
+              </div>
               <button
                 type="button"
                 onClick={() => {
                   setMobileWidgetPanelOpen(false);
                   setMobileActiveWidgetId(null);
-                  setStoreOpen(true);
                 }}
-                className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-slate-600 p-2.5 text-slate-500 active:bg-slate-800"
+                className="rounded p-1.5 text-slate-400 active:bg-slate-700 shrink-0"
+                aria-label="Close"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/50">
-                  <Store className="h-5 w-5" />
-                </div>
-                <span className="max-w-full truncate text-[10px] font-medium">
-                  {t.widgets.store}
-                </span>
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Active widget panel content (inline) */}
-            {activeWidget && ActiveContent && (
-              <div className="border-t border-slate-700">
-                <div className="flex items-center gap-2 border-b border-slate-700/50 px-4 py-2.5">
-                  <activeWidget.icon className="h-4 w-4 text-[var(--cc-accent-400)]" />
-                  <span className="text-sm font-semibold text-slate-200">
-                    {activeWidget.label[language]}
-                  </span>
+            {/* Widget grid — scrollable, with bottom bar clearance */}
+            <div
+              className="flex-1 overflow-y-auto"
+              style={{ paddingBottom: "calc(3.5rem + var(--safe-area-bottom, 0px))" }}
+            >
+              <div className="grid grid-cols-3 gap-2 p-3">
+                {visibleWidgets.map((widget) => (
                   <button
+                    key={widget.id}
                     type="button"
-                    onClick={() => setMobileActiveWidgetId(null)}
-                    className="ms-auto text-slate-500 active:text-slate-300"
-                    aria-label="Close"
+                    onClick={() => handleMobileWidgetClick(widget.id)}
+                    className={`flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition-colors ${
+                      mobileActiveWidgetId === widget.id
+                        ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                        : "text-slate-400 active:bg-slate-800 hover:text-slate-200"
+                    }`}
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                      mobileActiveWidgetId === widget.id
+                        ? "bg-[var(--cc-accent-600-30)]"
+                        : "bg-slate-800"
+                    }`}>
+                      <widget.icon className="h-5 w-5" />
+                    </div>
+                    <span className="max-w-full truncate text-[10px] font-medium">
+                      {widget.label[language]}
+                    </span>
                   </button>
-                </div>
-                <div className="max-h-80 overflow-y-auto p-4">
-                  <ActiveContent />
-                </div>
+                ))}
+
+                {/* Widget Store button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileWidgetPanelOpen(false);
+                    setMobileActiveWidgetId(null);
+                    setStoreOpen(true);
+                  }}
+                  className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-slate-600 p-2.5 text-slate-500 active:bg-slate-800"
+                >
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/50">
+                    <Store className="h-5 w-5" />
+                  </div>
+                  <span className="max-w-full truncate text-[10px] font-medium">
+                    {t.widgets.store}
+                  </span>
+                </button>
               </div>
-            )}
+
+              {/* Active widget panel content (inline) */}
+              {activeWidget && ActiveContent && (
+                <div className="border-t border-slate-700">
+                  <div className="flex items-center gap-2 border-b border-slate-700/50 px-4 py-2.5">
+                    <activeWidget.icon className="h-4 w-4 text-[var(--cc-accent-400)]" />
+                    <span className="text-sm font-semibold text-slate-200">
+                      {activeWidget.label[language]}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setMobileActiveWidgetId(null)}
+                      className="ms-auto text-slate-500 active:text-slate-300"
+                      aria-label="Close"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto p-4">
+                    <ActiveContent />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {mobileModals}
       </>

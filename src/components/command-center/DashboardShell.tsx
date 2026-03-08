@@ -42,7 +42,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [floatOpen, setFloatOpen] = useState(false);
 
   // Bottom bar callbacks
-  const handleBottomBarSidebarOpen = useCallback(() => setFloatOpen(true), []);
+  const handleBottomBarSidebarToggle = useCallback(() => setFloatOpen((prev) => !prev), []);
   const handleBottomBarWidgetPanelOpen = useCallback(() => {
     window.dispatchEvent(new Event("cc-widget-panel-toggle"));
   }, []);
@@ -142,7 +142,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Mobile bottom navigation bar */}
       {isMobile && (
         <MobileBottomBar
-          onSidebarOpen={handleBottomBarSidebarOpen}
+          sidebarOpen={floatOpen}
+          onSidebarToggle={handleBottomBarSidebarToggle}
           onWidgetPanelOpen={handleBottomBarWidgetPanelOpen}
         />
       )}

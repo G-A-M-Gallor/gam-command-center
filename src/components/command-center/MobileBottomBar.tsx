@@ -147,11 +147,12 @@ function SlotPicker({ slotIndex, onSelect, onClose, language }: SlotPickerProps)
 // ─── MobileBottomBar ────────────────────────────────────
 
 interface MobileBottomBarProps {
-  onSidebarOpen: () => void;
+  sidebarOpen: boolean;
+  onSidebarToggle: () => void;
   onWidgetPanelOpen: () => void;
 }
 
-export function MobileBottomBar({ onSidebarOpen, onWidgetPanelOpen }: MobileBottomBarProps) {
+export function MobileBottomBar({ sidebarOpen, onSidebarToggle, onWidgetPanelOpen }: MobileBottomBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { language } = useSettings();
@@ -301,14 +302,18 @@ export function MobileBottomBar({ onSidebarOpen, onWidgetPanelOpen }: MobileBott
 
         {/* 5-slot bar */}
         <div className="flex h-14 items-stretch">
-          {/* Slot 0: Widget panel toggle */}
+          {/* Slot 0 (left): Sidebar toggle */}
           <button
             type="button"
-            onClick={onWidgetPanelOpen}
-            className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-slate-400 active:text-[var(--cc-accent-400)] transition-colors"
+            onClick={onSidebarToggle}
+            className={`flex flex-1 flex-col items-center justify-center gap-0.5 py-1 transition-colors ${
+              sidebarOpen
+                ? "text-[var(--cc-accent-400)]"
+                : "text-slate-400 active:text-[var(--cc-accent-400)]"
+            }`}
           >
-            <Grid3X3 className="h-5 w-5" />
-            <span className="text-[9px] font-medium">{bb.widgetPanel}</span>
+            <Menu className="h-5 w-5" />
+            <span className="text-[9px] font-medium">{bb.sidebar}</span>
           </button>
 
           {/* Middle 3 customizable slots */}
@@ -318,14 +323,14 @@ export function MobileBottomBar({ onSidebarOpen, onWidgetPanelOpen }: MobileBott
             </div>
           ))}
 
-          {/* Slot 4: Sidebar toggle */}
+          {/* Slot 4 (right): Widget panel toggle */}
           <button
             type="button"
-            onClick={onSidebarOpen}
+            onClick={onWidgetPanelOpen}
             className="flex flex-1 flex-col items-center justify-center gap-0.5 py-1 text-slate-400 active:text-[var(--cc-accent-400)] transition-colors"
           >
-            <Menu className="h-5 w-5" />
-            <span className="text-[9px] font-medium">{bb.sidebar}</span>
+            <Grid3X3 className="h-5 w-5" />
+            <span className="text-[9px] font-medium">{bb.widgetPanel}</span>
           </button>
         </div>
       </div>
