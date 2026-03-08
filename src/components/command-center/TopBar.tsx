@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, HelpCircle, Menu, ChevronDown, ChevronUp, X, Grid3X3 } from "lucide-react";
+import { Store, Pencil, HelpCircle, Menu, X, Grid3X3 } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -85,27 +85,8 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   const isMobile = breakpoint === "mobile";
 
   const [mounted, setMounted] = useState(false);
-  const [mobileCollapsed, setMobileCollapsed] = useState(false);
   const [mobileWidgetPanelOpen, setMobileWidgetPanelOpen] = useState(false);
   const [mobileActiveWidgetId, setMobileActiveWidgetId] = useState<string | null>(null);
-
-  // Persist mobile collapsed state
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("cc-topbar-mobile-collapsed");
-      if (saved === "true") setMobileCollapsed(true);
-    } catch {}
-  }, []);
-
-  const toggleMobileCollapsed = useCallback(() => {
-    setMobileCollapsed((prev) => {
-      const next = !prev;
-      try { localStorage.setItem("cc-topbar-mobile-collapsed", String(next)); } catch {}
-      // Notify DashboardShell about the change
-      window.dispatchEvent(new Event("cc-topbar-collapse-change"));
-      return next;
-    });
-  }, []);
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null);
   const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
   const [storeOpen, setStoreOpen] = useState(false);
@@ -225,6 +206,13 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
       setAiPanelOpen(true);
       window.dispatchEvent(new CustomEvent("cc-ai-clear-chat"));
     };
+    // Mobile bottom bar triggers widget panel toggle
+    const handleWidgetPanelToggle = () => {
+      setMobileWidgetPanelOpen((p) => {
+        if (p) setMobileActiveWidgetId(null);
+        return !p;
+      });
+    };
 
     window.addEventListener("cc-open-search", handleOpenSearch);
     window.addEventListener("cc-open-ai", handleOpenAI);
@@ -240,6 +228,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     window.addEventListener("cc-ai-mode-analyze", handleAiModeAnalyze);
     window.addEventListener("cc-ai-mode-write", handleAiModeWrite);
     window.addEventListener("cc-ai-clear", handleAiClear);
+    window.addEventListener("cc-widget-panel-toggle", handleWidgetPanelToggle);
     return () => {
       window.removeEventListener("cc-open-search", handleOpenSearch);
       window.removeEventListener("cc-open-ai", handleOpenAI);
@@ -255,6 +244,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
       window.removeEventListener("cc-ai-mode-analyze", handleAiModeAnalyze);
       window.removeEventListener("cc-ai-mode-write", handleAiModeWrite);
       window.removeEventListener("cc-ai-clear", handleAiClear);
+      window.removeEventListener("cc-widget-panel-toggle", handleWidgetPanelToggle);
     };
   }, [setEditMode, setSidebarVisibility, router]);
 
@@ -565,65 +555,16 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
       : null;
     const ActiveContent = activeWidget?.component;
 
+    // Widget panel is triggered by bottom bar via cc-widget-panel-toggle event
     return (
       <>
-        {/* Minimal top bar */}
+        {/* Minimal top bar — no buttons, navigation moved to bottom bar */}
         <div
           data-cc-id="topbar.root"
-          className={`fixed top-0 z-40 flex items-center border-b border-slate-700 bg-slate-800 ${
-            mobileCollapsed ? "h-7" : "h-12"
-          }`}
-          style={{ left: 0, right: 0, transition: "height 200ms ease" }}
+          className="fixed top-0 z-40 flex h-10 items-center border-b border-slate-700/50 bg-slate-800/80 backdrop-blur-sm"
+          style={{ left: 0, right: 0 }}
         >
-          {/* Hamburger — open sidebar */}
-          {onSidebarOpen && (
-            <button
-              type="button"
-              onClick={onSidebarOpen}
-              className={`shrink-0 items-center justify-center text-slate-400 active:bg-slate-700 ${
-                mobileCollapsed ? "flex h-7 w-8" : "flex h-12 w-10"
-              }`}
-              aria-label="Open sidebar"
-            >
-              <Menu className={mobileCollapsed ? "h-3.5 w-3.5" : "h-5 w-5"} />
-            </button>
-          )}
-
-          {/* Spacer */}
           <div className="flex-1" />
-
-          {/* Widget panel toggle — on the opposite side */}
-          <button
-            type="button"
-            onClick={() => {
-              setMobileWidgetPanelOpen((p) => !p);
-              if (mobileWidgetPanelOpen) setMobileActiveWidgetId(null);
-            }}
-            className={`shrink-0 items-center justify-center rounded transition-colors ${
-              mobileWidgetPanelOpen
-                ? "bg-[var(--cc-accent-600)] text-white"
-                : "text-slate-400 active:bg-slate-700"
-            } ${mobileCollapsed ? "flex h-6 w-7 mx-0.5" : "flex h-9 w-9 mx-1"}`}
-            aria-label="Toggle widgets"
-          >
-            <Grid3X3 className={mobileCollapsed ? "h-3.5 w-3.5" : "h-4.5 w-4.5"} />
-          </button>
-
-          {/* Collapse/expand toggle */}
-          <button
-            type="button"
-            onClick={toggleMobileCollapsed}
-            className={`shrink-0 items-center justify-center text-slate-500 active:bg-slate-700 ${
-              mobileCollapsed ? "flex h-7 w-7" : "flex h-12 w-8"
-            }`}
-            aria-label={mobileCollapsed ? "Expand toolbar" : "Collapse toolbar"}
-          >
-            {mobileCollapsed ? (
-              <ChevronDown className="h-3.5 w-3.5" />
-            ) : (
-              <ChevronUp className="h-4 w-4" />
-            )}
-          </button>
         </div>
 
         {/* Backdrop */}
@@ -647,6 +588,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
               ? `right-0 border-l ${mobileWidgetPanelOpen ? "translate-x-0" : "translate-x-full"}`
               : `left-0 border-r ${mobileWidgetPanelOpen ? "translate-x-0" : "-translate-x-full"}`
           }`}
+          style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
         >
           {/* Panel header */}
           <div className="flex h-12 items-center justify-between border-b border-slate-700 px-4">

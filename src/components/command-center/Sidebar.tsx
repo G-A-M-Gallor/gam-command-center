@@ -46,20 +46,20 @@ type ViewMode = "list" | "grid" | "compact";
 
 // ─── Grouped Navigation ─────────────────────────────────
 
-interface NavItem {
+export interface NavItem {
   href: string;
   key: string;
   icon: React.ElementType;
   status: "active" | "coming-soon";
 }
 
-interface NavGroup {
+export interface NavGroup {
   id: string;
   labelKey: "groupCore" | "groupTools" | "groupSystem";
   items: NavItem[];
 }
 
-const NAV_GROUPS: NavGroup[] = [
+export const NAV_GROUPS: NavGroup[] = [
   {
     id: "core",
     labelKey: "groupCore",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Search,
@@ -1362,12 +1363,13 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
     </div>
   );
 
-  // ─── Mobile: Full-screen ────────────────────────────
+  // ─── Mobile: Full-screen (portaled to escape stacking context) ──
   if (isMobile) {
-    return (
+    return createPortal(
       <div
         ref={trapRef}
-        className="fixed inset-0 z-[60] flex flex-col bg-slate-900"
+        className="fixed inset-0 z-[9999] flex flex-col bg-slate-900"
+        style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
         role="dialog"
         aria-modal="true"
         aria-label={t.widgets.store}
@@ -1376,7 +1378,8 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
           {headerContent}
         </div>
         {bodyContent}
-      </div>
+      </div>,
+      document.body
     );
   }
 

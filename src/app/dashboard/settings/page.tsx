@@ -193,6 +193,19 @@ function GeneralTab() {
         </div>
       </Section>
 
+      <Section label={(t.bottomBar as Record<string, string>).editBottomBar} ccId="settings.bottomBar">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("cc-bottom-bar-edit"))}
+          className={`rounded px-4 py-2 text-sm font-medium transition-colors ${inactiveBtn}`}
+        >
+          {(t.bottomBar as Record<string, string>).editMode}
+        </button>
+        <p className="mt-2 text-xs text-slate-500">
+          {(t.bottomBar as Record<string, string>).longPressToEdit}
+        </p>
+      </Section>
+
       <OverridesSection />
     </div>
   );

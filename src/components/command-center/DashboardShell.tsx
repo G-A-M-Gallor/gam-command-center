@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { MobileBottomBar } from "./MobileBottomBar";
 // EditToolbar moved into CanvasEditor — FieldLibrary opens from canvas toolbar
 import { ContextMenuProvider } from "./ContextMenu";
 import { GuideOverlay } from "./GuideOverlay";
@@ -11,10 +12,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
 import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
-import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
-
-const TOPBAR_COLLAPSED_KEY = "cc-topbar-mobile-collapsed";
 
 const SIDEBAR_WIDTH = "15rem";
 const STRIP_WIDTH = "48px";
@@ -43,19 +41,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isMobile = breakpoint === "mobile";
   const [floatOpen, setFloatOpen] = useState(false);
 
-  // Track mobile topbar collapsed state for proper padding
-  const [mobileTopbarCollapsed, setMobileTopbarCollapsed] = useState(false);
-  useEffect(() => {
-    if (!isMobile) return;
-    try {
-      setMobileTopbarCollapsed(localStorage.getItem(TOPBAR_COLLAPSED_KEY) === "true");
-    } catch {}
-    const handleToggle = () => {
-      try { setMobileTopbarCollapsed(localStorage.getItem(TOPBAR_COLLAPSED_KEY) === "true"); } catch {}
-    };
-    window.addEventListener("cc-topbar-collapse-change", handleToggle);
-    return () => window.removeEventListener("cc-topbar-collapse-change", handleToggle);
-  }, [isMobile]);
+  // Bottom bar callbacks
+  const handleBottomBarSidebarOpen = useCallback(() => setFloatOpen(true), []);
+  const handleBottomBarWidgetPanelOpen = useCallback(() => {
+    window.dispatchEvent(new Event("cc-widget-panel-toggle"));
+  }, []);
 
   // Override sidebar behavior based on screen size
   const effectiveVisibility = useMemo(() => {
@@ -139,12 +129,23 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <main
         data-cc-id="content.main"
         className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] ${
-          isMobile && mobileTopbarCollapsed ? "pt-10" : "pt-16"
+          isMobile ? "pt-12" : "pt-16"
         }`}
-        style={contentMargin}
+        style={{
+          ...contentMargin,
+          ...(isMobile ? { paddingBottom: "calc(3.5rem + var(--safe-area-bottom, 0px) + 1rem)" } : undefined),
+        }}
       >
         {children}
       </main>
+
+      {/* Mobile bottom navigation bar */}
+      {isMobile && (
+        <MobileBottomBar
+          onSidebarOpen={handleBottomBarSidebarOpen}
+          onWidgetPanelOpen={handleBottomBarWidgetPanelOpen}
+        />
+      )}
 
       {/* Guide mode overlay */}
       <GuideOverlay />
