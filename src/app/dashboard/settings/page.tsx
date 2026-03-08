@@ -128,9 +128,11 @@ function GeneralTab() {
     language,
     sidebarPosition,
     sidebarVisibility,
+    gibberishDetect,
     setLanguage,
     setSidebarPosition,
     setSidebarVisibility,
+    setGibberishDetect,
   } = useSettings();
   const { hoverDelay, setHoverDelay } = useWidgets();
   const t = getTranslations(language);
@@ -213,6 +215,20 @@ function GeneralTab() {
         </button>
         <p className="mt-2 text-xs text-slate-500">
           {(t.bottomBar as Record<string, string>).longPressToEdit}
+        </p>
+      </Section>
+
+      <Section label={t.settings.gibberishDetect} ccId="settings.gibberishDetect">
+        <div className="flex gap-2">
+          <ToggleButton active={gibberishDetect} onClick={() => setGibberishDetect(true)}>
+            {t.settings.on}
+          </ToggleButton>
+          <ToggleButton active={!gibberishDetect} onClick={() => setGibberishDetect(false)}>
+            {t.settings.off}
+          </ToggleButton>
+        </div>
+        <p className="mt-2 text-xs text-slate-500">
+          {t.settings.gibberishDetectHint}
         </p>
       </Section>
 

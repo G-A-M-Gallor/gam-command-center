@@ -56,6 +56,83 @@ export function toEnglish(text: string): string {
 }
 
 /**
+ * Detect if text was typed with the wrong keyboard layout.
+ * Returns the direction to convert, or null if no gibberish detected.
+ */
+export function detectGibberish(
+  text: string
+): { direction: "to_hebrew" | "to_english"; preview: string; confidence: number } | null {
+  const trimmed = text.trim();
+  if (trimmed.length < 4) return null;
+
+  let heCount = 0;
+  let enCount = 0;
+
+  for (const ch of trimmed) {
+    const code = ch.codePointAt(0) ?? 0;
+    if (code >= 0x0590 && code <= 0x05ff) heCount++;
+    else if ((code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a)) enCount++;
+  }
+
+  const total = heCount + enCount;
+  if (total < 3) return null;
+
+  const ratio = Math.max(heCount, enCount) / total;
+  // Length bonus: longer text = more confident
+  const lengthBonus = Math.min(trimmed.length / 40, 0.1);
+  const confidence = ratio + lengthBonus;
+
+  if (confidence < 0.7) return null;
+
+  if (enCount > heCount) {
+    // Mostly English chars → user meant to type Hebrew
+    const converted = toHebrew(trimmed);
+    if (converted === trimmed) return null;
+    return {
+      direction: "to_hebrew",
+      preview: converted.length > 40 ? converted.slice(0, 40) + "…" : converted,
+      confidence,
+    };
+  } else {
+    // Mostly Hebrew chars → user meant to type English
+    const converted = toEnglish(trimmed);
+    if (converted === trimmed) return null;
+    return {
+      direction: "to_english",
+      preview: converted.length > 40 ? converted.slice(0, 40) + "…" : converted,
+      confidence,
+    };
+  }
+}
+
+/**
+ * Replace the full text of an input/textarea element with converted text.
+ * Used by auto-detect to replace the entire field value.
+ */
+export function replaceFullText(
+  el: HTMLInputElement | HTMLTextAreaElement,
+  converter: (text: string) => string
+): boolean {
+  const original = el.value;
+  const converted = converter(original);
+  if (converted === original) return false;
+
+  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+    el.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+    "value"
+  )?.set;
+
+  if (nativeInputValueSetter) {
+    nativeInputValueSetter.call(el, converted);
+  } else {
+    el.value = converted;
+  }
+
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  return true;
+}
+
+/**
  * Replace the currently selected text in the active element with converted text.
  * Works with input/textarea and contenteditable elements.
  */

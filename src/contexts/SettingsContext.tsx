@@ -25,6 +25,7 @@ const STORAGE_KEYS = {
   accentEffect: "cc-accent-effect",
   archivedColors: "cc-archived-colors",
   skin: "cc-skin",
+  gibberishDetect: "cc-gibberish-detect",
 } as const;
 
 export type Language = "he" | "en" | "ru";
@@ -79,6 +80,7 @@ interface Settings {
   archivedColors: SavedColor[];
   accentEffect: AccentEffect;
   skin: SkinName;
+  gibberishDetect: boolean;
   setLanguage: (lang: Language) => void;
   setSidebarPosition: (pos: SidebarPosition) => void;
   setSidebarVisibility: (mode: SidebarVisibility) => void;
@@ -92,6 +94,7 @@ interface Settings {
   setArchivedColors: (colors: SavedColor[]) => void;
   setAccentEffect: (effect: AccentEffect) => void;
   setSkin: (skin: SkinName) => void;
+  setGibberishDetect: (enabled: boolean) => void;
 }
 
 const defaultBrandProfile: BrandProfile = {
@@ -131,6 +134,7 @@ const defaultSettings: Settings = {
   archivedColors: [],
   accentEffect: defaultAccentEffect,
   skin: "dark" as SkinName,
+  gibberishDetect: true,
   setLanguage: () => {},
   setSidebarPosition: () => {},
   setSidebarVisibility: () => {},
@@ -144,6 +148,7 @@ const defaultSettings: Settings = {
   setArchivedColors: () => {},
   setAccentEffect: () => {},
   setSkin: () => {},
+  setGibberishDetect: () => {},
 };
 
 const ACCENT_COLORS: AccentColor[] = ["purple", "blue", "emerald", "amber", "rose", "cyan", "brand", "custom"];
@@ -173,6 +178,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [archivedColors, setArchivedColorsState] = useState<SavedColor[]>([]);
   const [accentEffect, setAccentEffectState] = useState<AccentEffect>(defaultAccentEffect);
   const [skin, setSkinState] = useState<SkinName>("dark");
+  const [gibberishDetect, setGibberishDetectState] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   // Load all settings from localStorage on mount
@@ -226,6 +232,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (storedSkin && ["dark", "light", "midnight", "forest", "royal"].includes(storedSkin)) {
       setSkinState(storedSkin);
     }
+
+    const storedGibberish = localStorage.getItem(STORAGE_KEYS.gibberishDetect);
+    if (storedGibberish !== null) setGibberishDetectState(storedGibberish !== "false");
 
     setMounted(true);
   }, []);
@@ -390,6 +399,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.skin, s);
   }, []);
 
+  const setGibberishDetect = useCallback((enabled: boolean) => {
+    setGibberishDetectState(enabled);
+    localStorage.setItem(STORAGE_KEYS.gibberishDetect, String(enabled));
+  }, []);
+
   const value = useMemo<Settings>(
     () => ({
       language,
@@ -405,6 +419,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       archivedColors,
       accentEffect,
       skin,
+      gibberishDetect,
       setLanguage,
       setSidebarPosition,
       setSidebarVisibility,
@@ -418,6 +433,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setArchivedColors,
       setAccentEffect,
       setSkin,
+      setGibberishDetect,
     }),
     [
       language,
@@ -446,6 +462,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setArchivedColors,
       setAccentEffect,
       setSkin,
+      gibberishDetect,
+      setGibberishDetect,
     ]
   );
 
