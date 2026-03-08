@@ -379,6 +379,7 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'automations':     makeChecklist(true, true, true, true, true),
   'settings':        makeChecklist(true, true, true, true, true),
   'gam-landing':     makeChecklist(true, true, true, true, true),
+  'library-tab':     makeChecklist(true, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -2133,5 +2134,28 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'RESILIENCE + PERFORMANCE: One broken widget crashes all of dashboard. WeeklyPlannerProvider re-renders entire app on planner state changes despite being used in one widget.',
     purposeHe: 'חוסן + ביצועים: ווידג\'ט שבור אחד מקריס את כל הדשבורד. WeeklyPlannerProvider גורם ל-re-render של כל האפליקציה בשינויי state למרות שמשמש רק ווידג\'ט אחד.',
     connectedTo: ['DashboardShell.tsx', 'WidgetWrapper.tsx'],
+  },
+  {
+    id: 'library-tab',
+    feature: 'Library tab — external component catalog (shadcn/ui, Magic UI, 21st.dev)',
+    featureHe: 'לשונית ספרייה — קטלוג קומפוננטות חיצוני (shadcn/ui, Magic UI, 21st.dev)',
+    status: 'working',
+    commitStatus: 'committed',
+    workflowStatus: 'complete',
+    date: '2026-03-08',
+    phase: 5,
+    files: [
+      'src/app/dashboard/design-system/libraryRegistry.ts',
+      'src/app/dashboard/design-system/LibraryTab.tsx',
+      'src/app/dashboard/design-system/page.tsx',
+      'src/app/api/installed-components/route.ts',
+      'src/components/command-center/widgets/AIWidget.tsx',
+    ],
+    route: '/dashboard/design-system',
+    notes: '114 components from 3 MCP sources. Real installed detection via API route (reads src/components/ui/). Install via AI panel (cc-ai-prefill event). Preview modal with docs iframe. Sync button asks Claude to refresh catalog via MCP tools. i18n in he/en/ru.',
+    notesHe: '114 קומפוננטות מ-3 מקורות MCP. זיהוי מותקנים אמיתי דרך API route (קורא src/components/ui/). התקנה דרך פאנל AI (אירוע cc-ai-prefill). מודל תצוגה מקדימה עם iframe של דוקומנטציה. כפתור סנכרון מבקש מ-Claude לרענן קטלוג דרך MCP tools. i18n ב-he/en/ru.',
+    purpose: 'Makes MCP-connected design tools (shadcn/ui, Magic UI, 21st.dev) discoverable from within the dashboard. Developers can browse 114 components, filter by source/category, preview docs, and install via AI panel — without leaving the app.',
+    purposeHe: 'הופך את כלי העיצוב המחוברים ב-MCP (shadcn/ui, Magic UI, 21st.dev) לגלויים מתוך הדשבורד. מפתחים יכולים לדפדף ב-114 קומפוננטות, לסנן לפי מקור/קטגוריה, לצפות בדוקומנטציה ולהתקין דרך פאנל AI — בלי לעזוב את האפליקציה.',
+    connectedTo: ['componentRegistry.ts', 'AIWidget.tsx (cc-ai-prefill)', 'WidgetRegistry.ts', 'i18n.ts'],
   },
 ];

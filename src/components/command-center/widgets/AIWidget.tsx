@@ -131,6 +131,19 @@ function ChatContent({ compact = false }: ChatContentProps) {
     setContexts([label]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Listen for prefill events from other components (e.g. Library tab)
+  useEffect(() => {
+    const handlePrefill = (e: Event) => {
+      const detail = (e as CustomEvent<{ message: string }>).detail;
+      if (detail?.message) {
+        setInput(detail.message);
+        setTimeout(() => textareaRef.current?.focus(), 100);
+      }
+    };
+    window.addEventListener("cc-ai-prefill", handlePrefill);
+    return () => window.removeEventListener("cc-ai-prefill", handlePrefill);
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isStreaming, streamingContent]);

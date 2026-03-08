@@ -821,6 +821,9 @@ export const translations = {
       libraryMagicUi: "Magic UI",
       library21st: "21st.dev",
       library21stNote: "21st.dev מבוסס חיפוש — 10 קומפוננטות מומלצות מוצגות כאן. לעוד, בקשו מ-Claude לחפש ב-21st.dev.",
+      librarySync: "סנכרון",
+      libraryInstall: "התקן",
+      libraryPreview: "תצוגה",
     },
     functionalMap: {
       gridTitle: "מפה פונקציונלית של GAM",
@@ -1863,6 +1866,9 @@ export const translations = {
       libraryMagicUi: "Magic UI",
       library21st: "21st.dev",
       library21stNote: "21st.dev is search-based — 10 featured components shown here. For more, ask Claude to search 21st.dev.",
+      librarySync: "Sync",
+      libraryInstall: "Install",
+      libraryPreview: "Preview",
     },
     functionalMap: {
       gridTitle: "GAM Functional Map",
@@ -2890,6 +2896,9 @@ export const translations = {
       libraryMagicUi: "Magic UI",
       library21st: "21st.dev",
       library21stNote: "21st.dev работает через поиск — здесь показаны 10 рекомендуемых компонентов. Для других попросите Claude найти в 21st.dev.",
+      librarySync: "Синхронизация",
+      libraryInstall: "Установить",
+      libraryPreview: "Превью",
     },
     functionalMap: {
       gridTitle: "Функциональная карта GAM",
