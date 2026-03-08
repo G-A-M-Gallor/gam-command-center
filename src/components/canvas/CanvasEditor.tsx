@@ -14,6 +14,7 @@ import {
 } from '@dnd-kit/core';
 import { supabase } from '@/lib/supabaseClient';
 import { useSettings } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
 import { useAutoSave } from '@/lib/editor/useAutoSave';
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { useCanvasGrid } from '@/lib/canvas/useCanvasGrid';
@@ -25,6 +26,8 @@ import { FieldConfigModal } from '@/components/command-center/fields/FieldConfig
 import { FieldLibrary } from '@/components/command-center/fields/FieldLibrary';
 import { ShareDialog } from '@/components/editor/ShareDialog';
 import { VersionHistory } from '@/components/editor/VersionHistory';
+import { SourceBanner } from '@/components/editor/SourceBanner';
+import { EditorBreadcrumb } from '@/components/editor/EditorBreadcrumb';
 import { duplicateDocument, saveVersion, createTemplate } from '@/lib/supabase/editorQueries';
 import type { FieldTypeId, FieldConfig } from '@/components/command-center/fields/fieldTypes';
 
@@ -35,7 +38,8 @@ interface CanvasEditorProps {
 // ─── Inner Component (uses context) ──────────────────
 function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   const router = useRouter();
-  const { sidebarPosition } = useSettings();
+  const { sidebarPosition, language } = useSettings();
+  const t = getTranslations(language);
   const {
     layout,
     placements,
@@ -60,6 +64,14 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     fieldType: FieldTypeId;
     fieldId?: string;
     config?: FieldConfig;
+  } | null>(null);
+  const [storyNoteMeta, setStoryNoteMeta] = useState<{
+    cardText: string;
+    epicText?: string;
+  } | null>(null);
+  const [bookmarkNoteMeta, setBookmarkNoteMeta] = useState<{
+    bookmarkUrl: string;
+    bookmarkId: string;
   } | null>(null);
 
   // ── Auto-save with retry + offline fallback ─────
@@ -100,7 +112,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       setLoading(true);
       const { data, error: err } = await supabase
         .from('vb_records')
-        .select('id, title, content')
+        .select('id, title, content, record_type, source')
         .eq('id', recordId)
         .single();
 
@@ -114,6 +126,38 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       setTitle(loadedTitle);
       savedTitleRef.current = loadedTitle;
       setContent(data.content || { type: 'doc', content: [{ type: 'paragraph' }] });
+
+      // Load story note metadata if this is a story-note
+      if (data.record_type === 'story-note') {
+        // Extract card text from content metadata
+        const firstNode = (data.content as { content?: { attrs?: Record<string, string> }[] })?.content?.[0];
+        const cardText = firstNode?.attrs?.['data-story-card-text'] || loadedTitle;
+        const cardCol = firstNode?.attrs?.['data-story-card-col'];
+
+        // Try to find the epic for this column
+        let epicText: string | undefined;
+        if (cardCol !== undefined) {
+          const { data: epic } = await supabase
+            .from('story_cards')
+            .select('text')
+            .eq('type', 'epic')
+            .eq('col', Number(cardCol))
+            .limit(1)
+            .maybeSingle();
+          if (epic) epicText = epic.text;
+        }
+
+        setStoryNoteMeta({ cardText, epicText });
+      }
+
+      // Load bookmark note metadata if this is a bookmark-note
+      if (data.record_type === 'bookmark-note') {
+        const firstNode = (data.content as { content?: { attrs?: Record<string, string> }[] })?.content?.[0];
+        const bookmarkUrl = firstNode?.attrs?.['data-bookmark-url'] || '';
+        const bookmarkId = firstNode?.attrs?.['data-bookmark-id'] || '';
+        setBookmarkNoteMeta({ bookmarkUrl, bookmarkId });
+      }
+
       setLoading(false);
     }
     load();
@@ -352,6 +396,38 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
 
   return (
     <div className="flex h-full flex-col" dir="rtl">
+      {/* Story note banner + breadcrumb */}
+      {storyNoteMeta && (
+        <div className="space-y-2 px-4 pt-3 pb-1">
+          <EditorBreadcrumb
+            storyMapLabel={t.editor.breadcrumbStoryMap}
+            epicText={storyNoteMeta.epicText}
+            cardText={storyNoteMeta.cardText}
+          />
+          <SourceBanner
+            cardText={storyNoteMeta.cardText}
+            t={{
+              storyMap: t.editor.sourceBannerStoryMap,
+              backToStoryMap: t.editor.sourceBannerBack,
+            }}
+          />
+        </div>
+      )}
+
+      {/* Bookmark note banner */}
+      {bookmarkNoteMeta && (
+        <div className="space-y-2 px-4 pt-3 pb-1">
+          <SourceBanner
+            cardText={bookmarkNoteMeta.bookmarkUrl}
+            t={{
+              storyMap: t.editor.sourceBannerBookmark || 'Bookmark',
+              backToStoryMap: t.editor.sourceBannerOpenUrl || 'Open URL',
+            }}
+            linkHref={bookmarkNoteMeta.bookmarkUrl}
+          />
+        </div>
+      )}
+
       <CanvasToolbar
         title={title}
         onTitleChange={setTitle}

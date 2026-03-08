@@ -179,6 +179,125 @@ export async function duplicateDocument(sourceId: string): Promise<DocRecord | n
   return newDoc as DocRecord;
 }
 
+// ─── Story Note ─────────────────────────────────────────────
+
+export async function createStoryNote(card: {
+  id: string;
+  text: string;
+  project_id: string;
+  type: string;
+  col: number;
+}): Promise<DocRecord | null> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) return null;
+
+  // Get workspace context from an existing record
+  const { data: existing } = await supabase
+    .from("vb_records")
+    .select("workspace_id, entity_id")
+    .limit(1)
+    .maybeSingle();
+
+  if (!existing?.workspace_id || !existing?.entity_id) return null;
+
+  const truncatedTitle = card.text.length > 60 ? card.text.slice(0, 57) + "..." : card.text;
+
+  const { data, error } = await supabase
+    .from("vb_records")
+    .insert({
+      workspace_id: existing.workspace_id,
+      entity_id: existing.entity_id,
+      created_by: user.id,
+      title: truncatedTitle,
+      content: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            attrs: {
+              "data-story-card-id": card.id,
+              "data-story-card-text": card.text,
+              "data-story-card-col": card.col,
+            },
+          },
+          { type: "paragraph" },
+        ],
+      },
+      record_type: "story-note",
+      source: "story-map",
+      status: "active",
+      project_id: card.project_id,
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("createStoryNote error:", error.message);
+    return null;
+  }
+  return data as DocRecord;
+}
+
+// ─── Bookmark Note ──────────────────────────────────────
+
+export async function createBookmarkNote(bookmark: {
+  id: string;
+  url: string;
+  label: string;
+}): Promise<DocRecord | null> {
+  const supabase = createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) return null;
+
+  const { data: existing } = await supabase
+    .from("vb_records")
+    .select("workspace_id, entity_id")
+    .limit(1)
+    .maybeSingle();
+
+  if (!existing?.workspace_id || !existing?.entity_id) return null;
+
+  const truncatedTitle = bookmark.label.length > 60
+    ? bookmark.label.slice(0, 57) + "..."
+    : bookmark.label;
+
+  const { data, error } = await supabase
+    .from("vb_records")
+    .insert({
+      workspace_id: existing.workspace_id,
+      entity_id: existing.entity_id,
+      created_by: user.id,
+      title: truncatedTitle,
+      content: {
+        type: "doc",
+        content: [
+          {
+            type: "paragraph",
+            attrs: {
+              "data-bookmark-id": bookmark.id,
+              "data-bookmark-url": bookmark.url,
+            },
+          },
+          { type: "paragraph" },
+        ],
+      },
+      record_type: "bookmark-note",
+      source: "widget-bar",
+      status: "active",
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    console.error("createBookmarkNote error:", error.message);
+    return null;
+  }
+  return data as DocRecord;
+}
+
 // ─── Template CRUD ──────────────────────────────────────────
 
 export async function fetchTemplates(): Promise<DocTemplate[]> {

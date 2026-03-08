@@ -20,6 +20,7 @@ export interface StoryCard {
   notes: string;
   diagram: string;
   estimation: string | null;
+  note_id: string | null;
   created_at: string;
 }
 
@@ -42,7 +43,7 @@ export async function fetchStoryCards(projectId: string): Promise<StoryCard[]> {
 
 // ─── Create a card ────────────────────────────────────
 export async function createStoryCard(
-  card: Omit<StoryCard, 'id' | 'created_at' | 'notes' | 'diagram' | 'estimation'> & { notes?: string; diagram?: string; estimation?: string | null }
+  card: Omit<StoryCard, 'id' | 'created_at' | 'notes' | 'diagram' | 'estimation' | 'note_id'> & { notes?: string; diagram?: string; estimation?: string | null; note_id?: string | null }
 ): Promise<StoryCard | null> {
   try {
     const { data, error } = await supabase
@@ -61,7 +62,7 @@ export async function createStoryCard(
 // ─── Update a card ────────────────────────────────────
 export async function updateStoryCard(
   id: string,
-  updates: Partial<Pick<StoryCard, 'text' | 'col' | 'row' | 'color' | 'subs' | 'sort_order' | 'notes' | 'diagram' | 'estimation'>>
+  updates: Partial<Pick<StoryCard, 'text' | 'col' | 'row' | 'color' | 'subs' | 'sort_order' | 'notes' | 'diagram' | 'estimation' | 'note_id'>>
 ): Promise<boolean> {
   try {
     const { error } = await supabase

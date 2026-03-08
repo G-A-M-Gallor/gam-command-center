@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   DndContext,
   PointerSensor,
@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, HelpCircle, Menu, X, Grid3X3 } from "lucide-react";
+import { Store, Pencil, HelpCircle, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -22,12 +22,14 @@ import { WidgetWrapper } from "./widgets/WidgetWrapper";
 import { WidgetSettings } from "./widgets/WidgetSettings";
 import { WidgetStore } from "./widgets/WidgetStore";
 import { AppsDrawer } from "./widgets/AppsDrawer";
+import { ProfileSwitcher } from "./widgets/ProfileSwitcher";
 import { FolderWrapper } from "./widgets/FolderWrapper";
 import { FolderSettings } from "./widgets/FolderSettings";
 import { SearchPanel } from "./widgets/SearchWidget";
 import { ShortcutsPanel } from "./widgets/ShortcutsWidget";
 import { WeeklyPlannerPanel } from "./widgets/WeeklyPlannerWidget";
 import { AIPanel, type AIViewMode } from "./widgets/AIWidget";
+import { UniversalSidePanel } from "./widgets/UniversalSidePanel";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
@@ -76,8 +78,14 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     setWidgetPositions,
     activeProfileId,
     profiles,
+    addFolder,
+    updateFolder,
+    displayMode,
+    setDisplayMode,
+    widgetPanelModes,
   } = useWidgets();
   const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language } = useSettings();
+  const pathname = usePathname();
   const { editMode, setEditMode, guideMode, setGuideMode } = useDashboardMode();
   const router = useRouter();
   const t = getTranslations(language);
@@ -95,6 +103,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   const [plannerOpen, setPlannerOpen] = useState(false);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [aiViewMode, setAiViewMode] = useState<AIViewMode>("side-panel");
+  const [sidePanelWidgetId, setSidePanelWidgetId] = useState<string | null>(null);
 
   // AI panel offset for widget dropdown positioning
   const aiPanelOffset = useMemo(() => {
@@ -282,6 +291,56 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     }
   }, [modalHandlers]);
 
+  // Quick bookmark handler
+  const handleQuickBookmark = useCallback(() => {
+    const QUICK_BM_ID = "__quick-bookmarks__";
+    const existing = folders.find((f) => f.id === QUICK_BM_ID);
+    const name = document.title || pathname;
+    const bookmark = {
+      type: "bookmark" as const,
+      id: `bm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      url: pathname,
+      label: { he: name, en: name, ru: name },
+      icon: "📌",
+      noteId: null,
+      createdAt: new Date().toISOString(),
+    };
+
+    if (existing) {
+      updateFolder(QUICK_BM_ID, {
+        items: [...existing.items, bookmark],
+      });
+    } else {
+      addFolder({
+        id: QUICK_BM_ID,
+        label: { he: "סימניות מהירות", en: "Quick Bookmarks", ru: "Быстрые закладки" },
+        icon: "🔖",
+        defaultSize: 2,
+        gridCols: 1,
+        gridRows: 4,
+        items: [bookmark],
+        pinned: false,
+      });
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("cc-notify", {
+        detail: { type: "success", message: t.widgets.bookmarkAdded || "Bookmark added" },
+      })
+    );
+  }, [folders, pathname, addFolder, updateFolder, t]);
+
+  // Display mode cycle
+  const handleCycleDisplayMode = useCallback(() => {
+    const modes = ["normal", "compact", "icons-only"] as const;
+    const idx = modes.indexOf(displayMode);
+    setDisplayMode(modes[(idx + 1) % modes.length]);
+  }, [displayMode, setDisplayMode]);
+
+  // Display mode dimensions
+  const UNIT_SIZE = displayMode === "compact" ? 36 : displayMode === "icons-only" ? 32 : UNIT;
+  const BAR_HEIGHT = displayMode === "compact" ? "h-9" : displayMode === "icons-only" ? "h-8" : "h-12";
+
   // Visible widgets (placement === "toolbar")
   const visibleWidgets = useMemo(() => {
     return widgetRegistry.filter((w) => {
@@ -306,6 +365,26 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     ];
     return items;
   }, [visibleWidgets, visibleFolders]);
+
+  // Auto-pack: removes gaps, preserves relative order
+  const handleAutoPack = useCallback(() => {
+    const positioned = allTopBarDefs
+      .filter((item) => widgetPositions[item.id] !== undefined)
+      .sort((a, b) => (widgetPositions[a.id] ?? 0) - (widgetPositions[b.id] ?? 0));
+
+    const packed: Record<string, number> = {};
+    let nextCol = 0;
+
+    for (const item of positioned) {
+      const size = widgetSizes[item.id] ?? item.defaultSize;
+      if (nextCol + size <= totalColumns) {
+        packed[item.id] = nextCol;
+        nextCol += size;
+      }
+    }
+
+    setWidgetPositions(packed);
+  }, [allTopBarDefs, widgetPositions, widgetSizes, totalColumns, setWidgetPositions]);
 
   // Auto-initialize positions for widgets and folders that don't have one yet
   useEffect(() => {
@@ -701,7 +780,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     <>
       <div
         data-cc-id="topbar.root"
-        className="fixed top-0 z-40 flex h-12 items-center border-b border-slate-700 bg-slate-800"
+        className={`fixed top-0 z-40 flex ${BAR_HEIGHT} items-center border-b border-slate-700 bg-slate-800`}
         style={{ left: 0, right: 0 }}
       >
         {/* Hamburger — left side */}
@@ -740,6 +819,32 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                 </div>
               )}
 
+              {/* Gap visualization — edit mode only */}
+              {editMode && !activeDragId && (() => {
+                const occupied = new Set<number>();
+                for (const item of allTopBarDefs) {
+                  const col = widgetPositions[item.id];
+                  if (col === undefined) continue;
+                  const sz = widgetSizes[item.id] ?? item.defaultSize;
+                  for (let c = col; c < col + sz && c < totalColumns; c++) {
+                    occupied.add(c);
+                  }
+                }
+                return (
+                  <div className="pointer-events-none absolute inset-0">
+                    {Array.from({ length: totalColumns }).map((_, i) =>
+                      !occupied.has(i) ? (
+                        <div
+                          key={i}
+                          className="absolute top-1.5 bottom-1.5 rounded-sm border border-dashed border-slate-600/30 bg-slate-700/10"
+                          style={{ left: i * UNIT + 2, width: UNIT - 4 }}
+                        />
+                      ) : null
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* Drop target highlight */}
               {activeDragId && tentativeCol !== null && (
                 <div
@@ -761,6 +866,22 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                 if (col === undefined) return null;
                 const wSize = widgetSizes[widget.id] ?? widget.defaultSize;
                 if (col + wSize > totalColumns) return null;
+
+                // Determine custom click behavior based on panel mode override or widget default
+                const effectivePanelMode = widgetPanelModes[widget.id] || widget.panelMode;
+                let customClick: (() => void) | undefined;
+                if (effectivePanelMode === "side-panel") {
+                  if (widget.id === "ai-assistant") {
+                    customClick = handleAiOpen;
+                  } else {
+                    customClick = () => setSidePanelWidgetId(
+                      (prev) => prev === widget.id ? null : widget.id
+                    );
+                  }
+                } else if (modalHandlers[widget.id]) {
+                  customClick = modalHandlers[widget.id];
+                }
+
                 return (
                   <WidgetWrapper
                     key={widget.id}
@@ -768,11 +889,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                     column={col}
                     onEditOpen={setEditingWidgetId}
                     aiPanelOffset={aiPanelOffset}
-                    onCustomClick={
-                      widget.panelMode === "side-panel"
-                        ? handleAiOpen
-                        : modalHandlers[widget.id]
-                    }
+                    onCustomClick={customClick}
                   />
                 );
               })}
@@ -801,8 +918,22 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
           )}
         </div>
 
+        {/* Profile Switcher */}
+        <ProfileSwitcher />
+
         {/* Apps Drawer */}
         <AppsDrawer onOpenWidget={handleOpenFromApps} />
+
+        {/* Quick Bookmark */}
+        <button
+          type="button"
+          onClick={handleQuickBookmark}
+          aria-label={t.widgets.quickBookmark || "Bookmark"}
+          className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+          title={t.widgets.quickBookmark || "Bookmark"}
+        >
+          <Bookmark className="h-4 w-4" />
+        </button>
 
         {/* Edit Mode toggle */}
         <button
@@ -820,6 +951,19 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
           <Pencil className="h-4 w-4" />
         </button>
 
+        {/* Auto-Pack (edit mode only) */}
+        {editMode && (
+          <button
+            type="button"
+            onClick={handleAutoPack}
+            aria-label={t.widgets.autoPack || "Auto-pack"}
+            className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+            title={t.widgets.autoPack || "Auto-pack"}
+          >
+            <AlignHorizontalJustifyStart className="h-4 w-4" />
+          </button>
+        )}
+
         {/* Guide Mode toggle */}
         <button
           type="button"
@@ -834,6 +978,17 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
           title={t.widgets.guideMode || "Guide"}
         >
           <HelpCircle className="h-4 w-4" />
+        </button>
+
+        {/* Display Mode cycle */}
+        <button
+          type="button"
+          onClick={handleCycleDisplayMode}
+          aria-label={t.widgets.displayMode || "Display Mode"}
+          className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+          title={`${t.widgets.displayMode || "Display Mode"}: ${displayMode}`}
+        >
+          <LayoutList className="h-4 w-4" />
         </button>
 
         {/* Widget Store button */}
@@ -900,6 +1055,19 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
           }}
         />
       )}
+
+      {/* Universal Side Panel — for any widget with side-panel mode */}
+      {sidePanelWidgetId && (() => {
+        const w = widgetRegistry.find((wr) => wr.id === sidePanelWidgetId);
+        if (!w) return null;
+        return (
+          <UniversalSidePanel
+            widget={w}
+            onClose={() => setSidePanelWidgetId(null)}
+            onSwitchToDropdown={() => setSidePanelWidgetId(null)}
+          />
+        );
+      })()}
     </>
   );
 }

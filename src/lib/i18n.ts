@@ -326,6 +326,12 @@ export const translations = {
       noItems: "התיקייה ריקה",
       editFolder: "ערוך תיקייה",
       deleteFolder: "מחק תיקייה",
+      bookmarksTab: "סימניות",
+      addBookmark: "הוסף",
+      bookmarkName: "שם סימנייה",
+      bookmarkUrl: "כתובת URL או /dashboard/...",
+      bookmarkIcon: "אייקון",
+      addCurrentPage: "דף נוכחי",
     },
     fieldLibrary: {
       title: "ספריית שדות",
@@ -432,6 +438,9 @@ export const translations = {
       exportMarkdown: "ייצוא Markdown",
       exportPNG: "ייצוא PNG",
       exporting: "מייצא...",
+      openInEditor: "פתח בעורך",
+      createNote: "יצירת פתק...",
+      hasNote: "יש פתק מקושר",
     },
     health: {
       healthy: "בריא",
@@ -811,6 +820,30 @@ export const translations = {
       appsDrawer: "אפליקציות",
       appsEmpty: "אין אפליקציות כאן עדיין. העבר ווידג'טים ל-'אפליקציות' בחנות.",
       appsHint: "ווידג'טים במיקום אפליקציות מוצגים כאן.",
+      // Custom Labels
+      customLabel: "שם מותאם",
+      resetLabel: "אפס שם",
+      // Profile Switcher
+      profileSwitcher: "מחליף פרופילים",
+      switchProfile: "החלף פרופיל",
+      saveAsNew: "שמור כחדש",
+      profileName: "שם פרופיל...",
+      // Display Modes
+      displayMode: "מצב תצוגה",
+      displayNormal: "רגיל",
+      displayCompact: "קומפקטי",
+      displayIconsOnly: "אייקונים בלבד",
+      // Auto-Pack
+      autoPack: "ארגן",
+      // Panel Modes
+      panelMode: "מצב פאנל",
+      panelModeDropdown: "נפתח",
+      panelModeSidePanel: "פאנל צד",
+      panelModePopup: "חלון קופץ",
+      // Quick Bookmark
+      quickBookmark: "סימנייה מהירה",
+      bookmarkAdded: "נוסף לסימניות",
+      openNote: "פתח הערה",
     },
     gallery: {
       allDesigns: "כל העיצובים",
@@ -1076,6 +1109,11 @@ export const translations = {
       expires7d: "7 ימים",
       expires30d: "30 ימים",
       linkExpired: "קישור זה פג תוקף",
+      sourceBannerStoryMap: "מפת סיפור",
+      sourceBannerBack: "חזרה למפת סיפור",
+      breadcrumbStoryMap: "מפת סיפור",
+      sourceBannerBookmark: "סימנייה",
+      sourceBannerOpenUrl: "פתח כתובת",
     },
     aiHub: {
       modeChat: "צ'אט",
@@ -1543,6 +1581,12 @@ export const translations = {
       noItems: "Folder is empty",
       editFolder: "Edit Folder",
       deleteFolder: "Delete Folder",
+      bookmarksTab: "Bookmarks",
+      addBookmark: "Add",
+      bookmarkName: "Bookmark name",
+      bookmarkUrl: "URL or /dashboard/...",
+      bookmarkIcon: "Icon",
+      addCurrentPage: "Current Page",
     },
     fieldLibrary: {
       title: "Field Library",
@@ -1649,6 +1693,9 @@ export const translations = {
       exportMarkdown: "Export Markdown",
       exportPNG: "Export PNG",
       exporting: "Exporting...",
+      openInEditor: "Open in Editor",
+      createNote: "Creating note...",
+      hasNote: "Has linked note",
     },
     health: {
       healthy: "Healthy",
@@ -2028,6 +2075,30 @@ export const translations = {
       appsDrawer: "Apps",
       appsEmpty: "No apps here yet. Move widgets to 'Apps' in the Widget Store.",
       appsHint: "Widgets in Apps placement appear here.",
+      // Custom Labels
+      customLabel: "Custom Label",
+      resetLabel: "Reset",
+      // Profile Switcher
+      profileSwitcher: "Profile Switcher",
+      switchProfile: "Switch Profile",
+      saveAsNew: "Save as new",
+      profileName: "Profile name...",
+      // Display Modes
+      displayMode: "Display Mode",
+      displayNormal: "Normal",
+      displayCompact: "Compact",
+      displayIconsOnly: "Icons Only",
+      // Auto-Pack
+      autoPack: "Auto-pack",
+      // Panel Modes
+      panelMode: "Panel Mode",
+      panelModeDropdown: "Dropdown",
+      panelModeSidePanel: "Side Panel",
+      panelModePopup: "Popup",
+      // Quick Bookmark
+      quickBookmark: "Quick Bookmark",
+      bookmarkAdded: "Bookmark added",
+      openNote: "Open note",
     },
     gallery: {
       allDesigns: "All Designs",
@@ -2293,6 +2364,11 @@ export const translations = {
       expires7d: "7 days",
       expires30d: "30 days",
       linkExpired: "This link has expired",
+      sourceBannerStoryMap: "Story Map",
+      sourceBannerBack: "Back to Story Map",
+      breadcrumbStoryMap: "Story Map",
+      sourceBannerBookmark: "Bookmark",
+      sourceBannerOpenUrl: "Open URL",
     },
     aiHub: {
       modeChat: "Chat",
@@ -2759,6 +2835,12 @@ export const translations = {
       noItems: "Папка пуста",
       editFolder: "Редактировать папку",
       deleteFolder: "Удалить папку",
+      bookmarksTab: "Закладки",
+      addBookmark: "Добавить",
+      bookmarkName: "Название закладки",
+      bookmarkUrl: "URL или /dashboard/...",
+      bookmarkIcon: "Иконка",
+      addCurrentPage: "Текущая страница",
     },
     fieldLibrary: {
       title: "Библиотека полей",
@@ -2865,6 +2947,9 @@ export const translations = {
       exportMarkdown: "Экспорт Markdown",
       exportPNG: "Экспорт PNG",
       exporting: "Экспорт...",
+      openInEditor: "Открыть в редакторе",
+      createNote: "Создание заметки...",
+      hasNote: "Есть связанная заметка",
     },
     health: {
       healthy: "Здоров",
@@ -3230,6 +3315,30 @@ export const translations = {
       appsDrawer: "Приложения",
       appsEmpty: "Пока нет приложений. Переместите виджеты в «Приложения» в магазине.",
       appsHint: "Виджеты в размещении «Приложения» отображаются здесь.",
+      // Custom Labels
+      customLabel: "Пользовательская метка",
+      resetLabel: "Сбросить",
+      // Profile Switcher
+      profileSwitcher: "Переключатель профилей",
+      switchProfile: "Сменить профиль",
+      saveAsNew: "Сохранить как новый",
+      profileName: "Название профиля...",
+      // Display Modes
+      displayMode: "Режим отображения",
+      displayNormal: "Обычный",
+      displayCompact: "Компактный",
+      displayIconsOnly: "Только иконки",
+      // Auto-Pack
+      autoPack: "Упаковать",
+      // Panel Modes
+      panelMode: "Режим панели",
+      panelModeDropdown: "Выпадающее меню",
+      panelModeSidePanel: "Боковая панель",
+      panelModePopup: "Всплывающее окно",
+      // Quick Bookmark
+      quickBookmark: "Быстрая закладка",
+      bookmarkAdded: "Закладка добавлена",
+      openNote: "Открыть заметку",
     },
     gallery: {
       allDesigns: "Все дизайны",
@@ -3495,6 +3604,11 @@ export const translations = {
       expires7d: "7 дней",
       expires30d: "30 дней",
       linkExpired: "Срок ссылки истёк",
+      sourceBannerStoryMap: "Карта историй",
+      sourceBannerBack: "Назад к карте историй",
+      breadcrumbStoryMap: "Карта историй",
+      sourceBannerBookmark: "Закладка",
+      sourceBannerOpenUrl: "Открыть URL",
     },
     aiHub: {
       modeChat: "Чат",

@@ -1,42 +1,72 @@
 'use client';
 
 // ===================================================
-// GAM Command Center — Floating Toolbar V2
-// Custom positioned toolbar (Tiptap v3)
-// Added: Text Color + Background Color dropdowns
+// GAM Command Center — Floating Toolbar V3
+// Redesigned: Lucide icons, below-selection positioning,
+// button groups, alignment, gibberish convert, expanded menu
 // ===================================================
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/core';
+import {
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Type,
+  Highlighter,
+  Link,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Languages,
+  MoreHorizontal,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  CheckSquare,
+  Quote,
+  Code,
+  Minus,
+  RemoveFormatting,
+  Copy,
+  Trash2,
+} from 'lucide-react';
 import { ColorMenu } from './ColorMenu';
+import { toHebrew, toEnglish } from '@/lib/gibberish';
 
 interface FloatingToolbarProps {
   editor: Editor;
 }
 
-interface ToolbarButton {
-  key: string;
-  label: string;
-  icon: string;
-  action: () => void;
-  isActive: () => boolean;
-  isColorBtn?: boolean;
-}
+const ICON_SIZE = 15;
 
 export function FloatingToolbar({ editor }: FloatingToolbarProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [flipAbove, setFlipAbove] = useState(false);
   const [colorMenu, setColorMenu] = useState<'text' | 'background' | null>(null);
+  const [showAlign, setShowAlign] = useState(false);
+  const [showMore, setShowMore] = useState(false);
 
-  // Position toolbar above selection
+  // Close all dropdowns
+  const closeDropdowns = useCallback(() => {
+    setColorMenu(null);
+    setShowAlign(false);
+    setShowMore(false);
+  }, []);
+
+  // Position toolbar below selection (flip above if near bottom)
   const updatePosition = useCallback(() => {
     const { selection } = editor.state;
     const { from, to, empty } = selection;
 
     if (empty) {
       setVisible(false);
-      setColorMenu(null);
+      closeDropdowns();
       return;
     }
 
@@ -45,15 +75,25 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
       const end = editor.view.coordsAtPos(to);
       const editorRect = editor.view.dom.getBoundingClientRect();
 
-      const top = start.top - editorRect.top - 48;
-      const left = (start.left + end.left) / 2 - editorRect.left;
+      const midX = (start.left + end.right) / 2 - editorRect.left;
+      const belowTop = end.bottom - editorRect.top + 8;
+      const aboveTop = start.top - editorRect.top - 48;
 
-      setPosition({ top, left });
+      // Flip above if toolbar would go past bottom of editor
+      const toolbarHeight = 42; // approximate
+      const spaceBelow = editorRect.bottom - end.bottom;
+      const shouldFlip = spaceBelow < toolbarHeight + 20;
+
+      setFlipAbove(shouldFlip);
+      setPosition({
+        top: shouldFlip ? aboveTop : belowTop,
+        left: midX,
+      });
       setVisible(true);
     } catch {
       setVisible(false);
     }
-  }, [editor]);
+  }, [editor, closeDropdowns]);
 
   useEffect(() => {
     editor.on('selectionUpdate', updatePosition);
@@ -68,11 +108,10 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
   // Hide on blur
   useEffect(() => {
     const handleBlur = () => {
-      // Small delay to allow color menu clicks
       setTimeout(() => {
         if (!toolbarRef.current?.matches(':hover')) {
           setVisible(false);
-          setColorMenu(null);
+          closeDropdowns();
         }
       }, 150);
     };
@@ -80,18 +119,29 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
     return () => {
       editor.off('blur', handleBlur);
     };
-  }, [editor]);
+  }, [editor, closeDropdowns]);
 
+  // Close dropdowns on outside click
+  useEffect(() => {
+    if (!visible) return;
+    const handleClick = (e: MouseEvent) => {
+      if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
+        closeDropdowns();
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [visible, closeDropdowns]);
+
+  // Link handler
   const setLink = useCallback(() => {
     const previousUrl = editor.getAttributes('link').href;
     const url = window.prompt('הכנס כתובת URL:', previousUrl);
-
     if (url === null) return;
     if (url === '') {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
       return;
     }
-
     editor
       .chain()
       .focus()
@@ -100,70 +150,45 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
       .run();
   }, [editor]);
 
-  const toggleColorMenu = useCallback((type: 'text' | 'background') => {
-    setColorMenu((prev) => (prev === type ? null : type));
-  }, []);
+  // Gibberish convert handler
+  const handleGibberishConvert = useCallback(() => {
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, ' ');
+    if (!selectedText.trim()) return;
 
-  const buttons: ToolbarButton[] = [
-    {
-      key: 'bold',
-      label: 'Bold',
-      icon: 'B',
-      action: () => editor.chain().focus().toggleBold().run(),
-      isActive: () => editor.isActive('bold'),
-    },
-    {
-      key: 'italic',
-      label: 'Italic',
-      icon: 'I',
-      action: () => editor.chain().focus().toggleItalic().run(),
-      isActive: () => editor.isActive('italic'),
-    },
-    {
-      key: 'underline',
-      label: 'Underline',
-      icon: 'U',
-      action: () => editor.chain().focus().toggleUnderline().run(),
-      isActive: () => editor.isActive('underline'),
-    },
-    {
-      key: 'strike',
-      label: 'Strikethrough',
-      icon: 'S',
-      action: () => editor.chain().focus().toggleStrike().run(),
-      isActive: () => editor.isActive('strike'),
-    },
-    {
-      key: 'textColor',
-      label: 'צבע טקסט',
-      icon: 'A',
-      action: () => toggleColorMenu('text'),
-      isActive: () => colorMenu === 'text',
-      isColorBtn: true,
-    },
-    {
-      key: 'bgColor',
-      label: 'צבע רקע',
-      icon: '🖍',
-      action: () => toggleColorMenu('background'),
-      isActive: () => colorMenu === 'background',
-      isColorBtn: true,
-    },
-    {
-      key: 'link',
-      label: 'Link',
-      icon: '🔗',
-      action: setLink,
-      isActive: () => editor.isActive('link'),
-    },
-  ];
+    // Detect direction: count Hebrew vs English chars
+    let heCount = 0;
+    let enCount = 0;
+    for (const ch of selectedText) {
+      const code = ch.codePointAt(0) ?? 0;
+      if (code >= 0x0590 && code <= 0x05ff) heCount++;
+      else if ((code >= 0x41 && code <= 0x5a) || (code >= 0x61 && code <= 0x7a)) enCount++;
+    }
+
+    const converted = heCount > enCount ? toEnglish(selectedText) : toHebrew(selectedText);
+    if (converted === selectedText) return;
+
+    editor.chain().focus().insertContent(converted).run();
+  }, [editor]);
+
+  // Get current alignment icon
+  const getAlignIcon = () => {
+    if (editor.isActive({ textAlign: 'center' })) return AlignCenter;
+    if (editor.isActive({ textAlign: 'left' })) return AlignLeft;
+    return AlignRight;
+  };
+
+  // Get current text color for the Type icon underline
+  const currentTextColor = editor.getAttributes('textStyle').color || 'var(--cc-accent-400, #a78bfa)';
 
   if (!visible) return null;
+
+  const AlignIcon = getAlignIcon();
 
   return (
     <div
       ref={toolbarRef}
-      className="gam-floating-toolbar"
+      className={`gam-ftb ${flipAbove ? 'gam-ftb--above' : 'gam-ftb--below'}`}
       style={{
         position: 'absolute',
         top: `${position.top}px`,
@@ -172,60 +197,252 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
         zIndex: 50,
       }}
     >
-      {buttons.map((btn, i) => (
-        <span key={btn.key} style={{ position: 'relative' }}>
-          {/* Separator before color buttons */}
-          {btn.key === 'textColor' && (
-            <span className="gam-floating-toolbar__sep" />
-          )}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              btn.action();
-            }}
-            className={`gam-floating-toolbar__btn ${
-              btn.isActive() ? 'gam-floating-toolbar__btn--active' : ''
-            } ${btn.isColorBtn ? 'gam-floating-toolbar__btn--color' : ''}`}
-            title={btn.label}
-            type="button"
-          >
-            <span
-              className={`gam-floating-toolbar__icon ${
-                btn.key === 'bold' ? 'gam-floating-toolbar__icon--bold' : ''
-              } ${btn.key === 'italic' ? 'gam-floating-toolbar__icon--italic' : ''}
-              ${btn.key === 'underline' ? 'gam-floating-toolbar__icon--underline' : ''}
-              ${btn.key === 'strike' ? 'gam-floating-toolbar__icon--strike' : ''}
-              ${btn.key === 'textColor' ? 'gam-floating-toolbar__icon--textcolor' : ''}`}
-            >
-              {btn.icon}
+      {/* ─── Formatting Group ─── */}
+      <ToolbarBtn
+        icon={<Bold size={ICON_SIZE} />}
+        active={editor.isActive('bold')}
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        title="Bold (Ctrl+B)"
+      />
+      <ToolbarBtn
+        icon={<Italic size={ICON_SIZE} />}
+        active={editor.isActive('italic')}
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        title="Italic (Ctrl+I)"
+      />
+      <ToolbarBtn
+        icon={<Underline size={ICON_SIZE} />}
+        active={editor.isActive('underline')}
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        title="Underline (Ctrl+U)"
+      />
+      <ToolbarBtn
+        icon={<Strikethrough size={ICON_SIZE} />}
+        active={editor.isActive('strike')}
+        onClick={() => editor.chain().focus().toggleStrike().run()}
+        title="Strikethrough"
+      />
+
+      <span className="gam-ftb__sep" />
+
+      {/* ─── Color Group ─── */}
+      <span className="gam-ftb__color-wrap">
+        <ToolbarBtn
+          icon={
+            <span className="gam-ftb__color-icon">
+              <Type size={ICON_SIZE} />
+              <span className="gam-ftb__color-bar" style={{ backgroundColor: currentTextColor }} />
             </span>
-            {btn.isColorBtn && (
-              <span className="gam-floating-toolbar__dropdown-arrow">▾</span>
-            )}
-          </button>
+          }
+          active={colorMenu === 'text'}
+          onClick={() => {
+            setColorMenu(colorMenu === 'text' ? null : 'text');
+            setShowAlign(false);
+            setShowMore(false);
+          }}
+          title="צבע טקסט"
+          hasDropdown
+        />
+        {colorMenu === 'text' && (
+          <ColorMenu editor={editor} type="text" onClose={() => setColorMenu(null)} />
+        )}
+      </span>
 
-          {/* Color dropdown */}
-          {btn.key === 'textColor' && colorMenu === 'text' && (
-            <ColorMenu
-              editor={editor}
-              type="text"
-              onClose={() => setColorMenu(null)}
-            />
-          )}
-          {btn.key === 'bgColor' && colorMenu === 'background' && (
-            <ColorMenu
-              editor={editor}
-              type="background"
-              onClose={() => setColorMenu(null)}
-            />
-          )}
+      <span className="gam-ftb__color-wrap">
+        <ToolbarBtn
+          icon={<Highlighter size={ICON_SIZE} />}
+          active={colorMenu === 'background'}
+          onClick={() => {
+            setColorMenu(colorMenu === 'background' ? null : 'background');
+            setShowAlign(false);
+            setShowMore(false);
+          }}
+          title="צבע רקע"
+          hasDropdown
+        />
+        {colorMenu === 'background' && (
+          <ColorMenu editor={editor} type="background" onClose={() => setColorMenu(null)} />
+        )}
+      </span>
 
-          {/* Separator after color buttons */}
-          {btn.key === 'bgColor' && (
-            <span className="gam-floating-toolbar__sep" />
-          )}
-        </span>
-      ))}
+      <span className="gam-ftb__sep" />
+
+      {/* ─── Link ─── */}
+      <ToolbarBtn
+        icon={<Link size={ICON_SIZE} />}
+        active={editor.isActive('link')}
+        onClick={setLink}
+        title="קישור"
+      />
+
+      {/* ─── Alignment ─── */}
+      <span className="gam-ftb__color-wrap">
+        <ToolbarBtn
+          icon={<AlignIcon size={ICON_SIZE} />}
+          active={showAlign}
+          onClick={() => {
+            setShowAlign(!showAlign);
+            setColorMenu(null);
+            setShowMore(false);
+          }}
+          title="יישור טקסט"
+          hasDropdown
+        />
+        {showAlign && (
+          <div className="gam-ftb__dropdown">
+            <button
+              type="button"
+              className={`gam-ftb__dropdown-item ${editor.isActive({ textAlign: 'right' }) ? 'gam-ftb__dropdown-item--active' : ''}`}
+              onClick={() => { editor.chain().focus().setTextAlign('right').run(); setShowAlign(false); }}
+            >
+              <AlignRight size={14} />
+              <span>ימין</span>
+            </button>
+            <button
+              type="button"
+              className={`gam-ftb__dropdown-item ${editor.isActive({ textAlign: 'center' }) ? 'gam-ftb__dropdown-item--active' : ''}`}
+              onClick={() => { editor.chain().focus().setTextAlign('center').run(); setShowAlign(false); }}
+            >
+              <AlignCenter size={14} />
+              <span>מרכז</span>
+            </button>
+            <button
+              type="button"
+              className={`gam-ftb__dropdown-item ${editor.isActive({ textAlign: 'left' }) ? 'gam-ftb__dropdown-item--active' : ''}`}
+              onClick={() => { editor.chain().focus().setTextAlign('left').run(); setShowAlign(false); }}
+            >
+              <AlignLeft size={14} />
+              <span>שמאל</span>
+            </button>
+          </div>
+        )}
+      </span>
+
+      <span className="gam-ftb__sep" />
+
+      {/* ─── Gibberish Convert ─── */}
+      <ToolbarBtn
+        icon={<Languages size={ICON_SIZE} />}
+        active={false}
+        onClick={handleGibberishConvert}
+        title="תיקון שפה"
+      />
+
+      <span className="gam-ftb__sep" />
+
+      {/* ─── More Menu ─── */}
+      <span className="gam-ftb__color-wrap">
+        <ToolbarBtn
+          icon={<MoreHorizontal size={ICON_SIZE} />}
+          active={showMore}
+          onClick={() => {
+            setShowMore(!showMore);
+            setColorMenu(null);
+            setShowAlign(false);
+          }}
+          title="עוד אפשרויות"
+        />
+        {showMore && (
+          <div className="gam-ftb__dropdown gam-ftb__dropdown--more">
+            {/* Turn Into section */}
+            <div className="gam-ftb__dropdown-label">הפוך ל...</div>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleHeading({ level: 1 }).run(); setShowMore(false); }}>
+              <Heading1 size={14} /> <span>כותרת 1</span>
+            </button>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleHeading({ level: 2 }).run(); setShowMore(false); }}>
+              <Heading2 size={14} /> <span>כותרת 2</span>
+            </button>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleHeading({ level: 3 }).run(); setShowMore(false); }}>
+              <Heading3 size={14} /> <span>כותרת 3</span>
+            </button>
+
+            <div className="gam-ftb__dropdown-sep" />
+
+            {/* Lists */}
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleBulletList().run(); setShowMore(false); }}>
+              <List size={14} /> <span>רשימה</span>
+            </button>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleOrderedList().run(); setShowMore(false); }}>
+              <ListOrdered size={14} /> <span>ממוספרת</span>
+            </button>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleTaskList().run(); setShowMore(false); }}>
+              <CheckSquare size={14} /> <span>משימות</span>
+            </button>
+
+            <div className="gam-ftb__dropdown-sep" />
+
+            {/* Blocks */}
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleBlockquote().run(); setShowMore(false); }}>
+              <Quote size={14} /> <span>ציטוט</span>
+            </button>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().toggleCodeBlock().run(); setShowMore(false); }}>
+              <Code size={14} /> <span>קוד</span>
+            </button>
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().setHorizontalRule().run(); setShowMore(false); }}>
+              <Minus size={14} /> <span>קו הפרדה</span>
+            </button>
+
+            <div className="gam-ftb__dropdown-sep" />
+
+            {/* Actions */}
+            <button type="button" className="gam-ftb__dropdown-item" onClick={() => { editor.chain().focus().clearNodes().unsetAllMarks().run(); setShowMore(false); }}>
+              <RemoveFormatting size={14} /> <span>נקה עיצוב</span>
+            </button>
+            <button
+              type="button"
+              className="gam-ftb__dropdown-item"
+              onClick={() => {
+                const { from, to } = editor.state.selection;
+                const text = editor.state.doc.textBetween(from, to, '\n');
+                navigator.clipboard.writeText(text);
+                setShowMore(false);
+              }}
+            >
+              <Copy size={14} /> <span>העתק בלוק</span>
+            </button>
+            <button
+              type="button"
+              className="gam-ftb__dropdown-item gam-ftb__dropdown-item--danger"
+              onClick={() => {
+                editor.chain().focus().deleteSelection().run();
+                setShowMore(false);
+              }}
+            >
+              <Trash2 size={14} /> <span>מחק בלוק</span>
+            </button>
+          </div>
+        )}
+      </span>
     </div>
+  );
+}
+
+// ─── Toolbar Button Component ──────────────────────
+function ToolbarBtn({
+  icon,
+  active,
+  onClick,
+  title,
+  hasDropdown,
+}: {
+  icon: React.ReactNode;
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  hasDropdown?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      className={`gam-ftb__btn ${active ? 'gam-ftb__btn--active' : ''}`}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick();
+      }}
+      title={title}
+    >
+      {icon}
+      {hasDropdown && <span className="gam-ftb__arrow">▾</span>}
+    </button>
   );
 }

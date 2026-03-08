@@ -10,6 +10,7 @@ import { Plus, Layers, Trash2 } from 'lucide-react';
 import { EpicCard, FeatureCard, StoryCard } from './StoryCard';
 import type { StoryCard as StoryCardType } from '@/lib/supabase/storyCardQueries';
 
+
 // ─── Types ──────────────────────────────────────────
 export interface FeatureGroup {
   feature: StoryCardType | null; // null = ungrouped stories
@@ -22,6 +23,7 @@ interface StoryColumnProps {
   featureGroups: FeatureGroup[];
   onUpdateCard: (id: string, updates: Partial<StoryCardType>) => void;
   onDeleteCard: (id: string) => void;
+  onOpenNote?: (card: StoryCardType) => void;
   onAddStory: (col: number, featureId: string | null) => void;
   onAddFeature: (col: number) => void;
   onDeleteColumn: (col: number) => void;
@@ -50,6 +52,8 @@ interface StoryColumnProps {
     save: string;
     estimation: string;
     noEstimation: string;
+    openInEditor?: string;
+    hasNote?: string;
   };
 }
 
@@ -59,6 +63,7 @@ function FeatureGroupSection({
   colIndex,
   onUpdateCard,
   onDeleteCard,
+  onOpenNote,
   onAddStory,
   t,
 }: {
@@ -66,6 +71,7 @@ function FeatureGroupSection({
   colIndex: number;
   onUpdateCard: StoryColumnProps['onUpdateCard'];
   onDeleteCard: StoryColumnProps['onDeleteCard'];
+  onOpenNote?: StoryColumnProps['onOpenNote'];
   onAddStory: StoryColumnProps['onAddStory'];
   t: StoryColumnProps['t'];
 }) {
@@ -94,6 +100,7 @@ function FeatureGroupSection({
             card={story}
             onUpdate={onUpdateCard}
             onDelete={onDeleteCard}
+            onOpenNote={onOpenNote}
             t={t}
           />
         ))}
@@ -120,6 +127,7 @@ export function StoryColumn({
   featureGroups,
   onUpdateCard,
   onDeleteCard,
+  onOpenNote,
   onAddStory,
   onAddFeature,
   onDeleteColumn,
@@ -180,6 +188,7 @@ export function StoryColumn({
               colIndex={colIndex}
               onUpdateCard={onUpdateCard}
               onDeleteCard={onDeleteCard}
+              onOpenNote={onOpenNote}
               onAddStory={onAddStory}
               t={t}
             />

@@ -8,6 +8,7 @@ import {
   type FolderItem,
   type QuickActionId,
 } from "./FolderRegistry";
+import { BookmarkItemCell } from "./BookmarkItemCell";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 
@@ -15,6 +16,7 @@ interface FolderItemCellProps {
   item: FolderItem;
   editMode?: boolean;
   onRemove?: (itemId: string) => void;
+  onUpdateBookmarkNoteId?: (itemId: string, noteId: string) => void;
   dragIndex: number;
   onDragStart: (i: number) => void;
   onDragEnter: (i: number) => void;
@@ -47,6 +49,7 @@ export function FolderItemCell({
   item,
   editMode,
   onRemove,
+  onUpdateBookmarkNoteId,
   dragIndex,
   onDragStart,
   onDragEnter,
@@ -63,6 +66,21 @@ export function FolderItemCell({
     onDragEnd,
     onDragOver: (e: React.DragEvent) => e.preventDefault(),
   };
+
+  if (item.type === "bookmark") {
+    return (
+      <BookmarkItemCell
+        item={item}
+        editMode={editMode}
+        onRemove={onRemove}
+        onUpdateNoteId={onUpdateBookmarkNoteId}
+        dragIndex={dragIndex}
+        onDragStart={onDragStart}
+        onDragEnter={onDragEnter}
+        onDragEnd={onDragEnd}
+      />
+    );
+  }
 
   if (item.type === "widget") {
     const widget = getWidgetById(item.widgetId);

@@ -198,55 +198,177 @@
   padding: 0 2px;
 }
 
-/* ─── Floating Toolbar ───────────────────────────── */
-.gam-floating-toolbar {
+/* ─── Floating Toolbar V3 ────────────────────────── */
+@keyframes gam-ftb-in-below {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes gam-ftb-in-above {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.gam-ftb {
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 4px 6px;
-  background: var(--editor-toolbar-bg, #1e293b);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 4px 5px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
 }
 
-.gam-floating-toolbar__btn {
+.gam-ftb--below {
+  animation: gam-ftb-in-below 0.15s ease-out;
+}
+
+.gam-ftb--above {
+  animation: gam-ftb-in-above 0.15s ease-out;
+}
+
+/* Button */
+.gam-ftb__btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  gap: 2px;
+  width: 30px;
+  height: 30px;
   border: none;
   border-radius: 6px;
   background: transparent;
-  color: var(--editor-toolbar-text, #e2e8f0);
+  color: #cbd5e1;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.15s;
+  padding: 0;
+  transition: background 0.12s, color 0.12s;
 }
 
-.gam-floating-toolbar__btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+.gam-ftb__btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
 }
 
-.gam-floating-toolbar__btn--active {
-  background: rgba(99, 102, 241, 0.3);
-  color: #a5b4fc;
+.gam-ftb__btn--active {
+  background: var(--cc-accent-600-30, rgba(99, 102, 241, 0.3));
+  color: var(--cc-accent-300, #a5b4fc);
 }
 
-.gam-floating-toolbar__icon--bold {
-  font-weight: 800;
+/* Dropdown arrow */
+.gam-ftb__arrow {
+  font-size: 8px;
+  opacity: 0.5;
+  line-height: 1;
+  margin-inline-start: -2px;
 }
 
-.gam-floating-toolbar__icon--italic {
-  font-style: italic;
+/* Separator */
+.gam-ftb__sep {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: rgba(100, 116, 139, 0.4);
+  margin: 0 3px;
+  flex-shrink: 0;
 }
 
-.gam-floating-toolbar__icon--underline {
-  text-decoration: underline;
+/* Color icon with underline bar */
+.gam-ftb__color-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.gam-floating-toolbar__icon--strike {
-  text-decoration: line-through;
+.gam-ftb__color-bar {
+  position: absolute;
+  bottom: -2px;
+  left: 1px;
+  right: 1px;
+  height: 2.5px;
+  border-radius: 1px;
+}
+
+/* Dropdown wrapper (for color, align, more menus) */
+.gam-ftb__color-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* Dropdown panel */
+.gam-ftb__dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 140px;
+  padding: 4px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  z-index: 60;
+  animation: gam-ftb-in-below 0.12s ease-out;
+  direction: rtl;
+}
+
+.gam-ftb__dropdown--more {
+  min-width: 180px;
+  right: 0;
+  left: auto;
+  transform: none;
+}
+
+.gam-ftb__dropdown-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  padding: 6px 8px 4px;
+}
+
+.gam-ftb__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #e2e8f0;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-align: start;
+  direction: rtl;
+  transition: background 0.1s;
+}
+
+.gam-ftb__dropdown-item:hover {
+  background: rgba(99, 102, 241, 0.15);
+}
+
+.gam-ftb__dropdown-item--active {
+  background: var(--cc-accent-600-30, rgba(99, 102, 241, 0.25));
+  color: var(--cc-accent-300, #a5b4fc);
+}
+
+.gam-ftb__dropdown-item--danger {
+  color: #f87171;
+}
+
+.gam-ftb__dropdown-item--danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.gam-ftb__dropdown-sep {
+  height: 1px;
+  margin: 3px 6px;
+  background: rgba(100, 116, 139, 0.2);
 }
 
 /* ─── Slash Command Menu ─────────────────────────── */
@@ -394,10 +516,7 @@
   --editor-menu-title: #e2e8f0;
 }
 
-[data-theme='dark'] .gam-floating-toolbar,
-.dark .gam-floating-toolbar {
-  --editor-toolbar-bg: #0f172a;
-}
+/* Floating toolbar V3 is already dark-first — no dark mode override needed */
 
 /* ─── Tippy.js Reset (for slash menu popup) ──────── */
 .tippy-box {
@@ -423,27 +542,27 @@
 /* ─── Color Menu ─────────────────────────────────── */
 .gam-color-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 6px;
-  background: var(--editor-menu-bg, #ffffff);
-  border: 1px solid var(--editor-menu-border, #e2e8f0);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.5);
   border-radius: 10px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   padding: 10px;
   min-width: 200px;
   direction: rtl;
   z-index: 60;
-  animation: gam-menu-in 0.12s ease-out;
+  animation: gam-ftb-in-below 0.12s ease-out;
 }
 
 .gam-color-menu__label {
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--editor-menu-header, #94a3b8);
+  color: #64748b;
   padding: 0 2px 6px;
 }
 
@@ -473,42 +592,16 @@
 }
 
 .gam-color-menu__swatch--reset {
-  background: var(--editor-menu-icon-bg, #f1f5f9);
-  color: var(--editor-menu-desc, #94a3b8);
+  background: rgba(51, 65, 85, 0.5);
+  color: #94a3b8;
 }
 
 .gam-color-menu__swatch--reset:hover {
-  background: #fee2e2;
-  color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
 }
 
-/* ─── Toolbar Separator ──────────────────────────── */
-.gam-floating-toolbar__sep {
-  display: inline-block;
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 0 4px;
-  vertical-align: middle;
-}
-
-/* ─── Toolbar Color Button Tweaks ────────────────── */
-.gam-floating-toolbar__btn--color {
-  gap: 1px;
-  padding: 0 2px;
-}
-
-.gam-floating-toolbar__dropdown-arrow {
-  font-size: 8px;
-  opacity: 0.6;
-  margin-top: 2px;
-}
-
-.gam-floating-toolbar__icon--textcolor {
-  background: linear-gradient(to bottom, transparent 70%, #e11d48 70%);
-  -webkit-background-clip: text;
-  padding-bottom: 2px;
-}
+/* (Old toolbar separator/color button styles removed — now in V3 .gam-ftb rules) */
 
 /* ─── Code Block ─────────────────────────────────── */
 .gam-codeblock {
@@ -587,11 +680,7 @@
   --editor-code-label: #334155;
 }
 
-[data-theme='dark'] .gam-color-menu,
-.dark .gam-color-menu {
-  --editor-menu-bg: #1e293b;
-  --editor-menu-border: #334155;
-}
+/* Color menu V3 is already dark-first — no dark mode override needed */
 /* ===================================================
    GAM Command Center — Editor Styles Phase 2
    Image, File, Embed, Callout, Table

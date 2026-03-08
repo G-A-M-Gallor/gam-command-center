@@ -12,6 +12,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
 import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
+import { useWidgets } from "@/contexts/WidgetContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { GibberishDetector } from "./GibberishDetector";
 
@@ -37,6 +38,7 @@ const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { sidebarPosition, sidebarVisibility, language } = useSettings();
+  const { displayMode } = useWidgets();
   const pathname = usePathname();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
@@ -130,7 +132,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <main
         data-cc-id="content.main"
         className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] ${
-          isMobile ? "pt-12" : "pt-16"
+          isMobile ? "pt-12"
+            : displayMode === "compact" ? "pt-14"
+            : displayMode === "icons-only" ? "pt-12"
+            : "pt-16"
         }`}
         style={{
           ...contentMargin,

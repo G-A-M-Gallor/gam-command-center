@@ -1,8 +1,9 @@
 "use client";
 
-import { X, Pin, Grid3X3, Power } from "lucide-react";
+import { useState } from "react";
+import { X, Pin, Grid3X3, Power, RotateCcw, PanelRight, Maximize2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
+import { useWidgets, type HoverDelay, type WidgetPanelMode } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
@@ -51,6 +52,11 @@ export function WidgetSettings({
     setWidgetSize,
     setWidgetPlacement,
     setHoverDelay,
+    widgetLabels,
+    setWidgetLabel,
+    clearWidgetLabel,
+    widgetPanelModes,
+    setWidgetPanelMode,
   } = useWidgets();
   const { language } = useSettings();
   const t = getTranslations(language);
@@ -59,6 +65,10 @@ export function WidgetSettings({
 
   const widget = getWidgetById(widgetId);
   if (!widget) return null;
+
+  const currentCustomLabel = widgetLabels[widgetId]?.[language] || "";
+  const [customLabelInput, setCustomLabelInput] = useState(currentCustomLabel);
+  const currentPanelMode = widgetPanelModes[widgetId] || "dropdown";
 
   const currentSize = widgetSizes[widgetId] ?? widget.defaultSize;
   const currentPlacement = getEffectivePlacement(
@@ -179,6 +189,82 @@ export function WidgetSettings({
                     }`}
                   >
                     {delayLabel}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Custom label */}
+          <div>
+            <label className="mb-2 block text-sm text-slate-300">
+              {t.widgets.customLabel || "Custom Label"}
+            </label>
+            <div className="flex gap-1">
+              <input
+                value={customLabelInput}
+                onChange={(e) => setCustomLabelInput(e.target.value)}
+                onBlur={() => {
+                  if (customLabelInput.trim()) {
+                    setWidgetLabel(widgetId, {
+                      ...widgetLabels[widgetId],
+                      [language]: customLabelInput.trim(),
+                    });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && customLabelInput.trim()) {
+                    setWidgetLabel(widgetId, {
+                      ...widgetLabels[widgetId],
+                      [language]: customLabelInput.trim(),
+                    });
+                  }
+                }}
+                placeholder={widget.label[language]}
+                className="flex-1 rounded bg-slate-700 px-2.5 py-1.5 text-xs text-slate-200 outline-none placeholder:text-slate-500"
+              />
+              {widgetLabels[widgetId] && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearWidgetLabel(widgetId);
+                    setCustomLabelInput("");
+                  }}
+                  className="rounded bg-slate-700 px-2 py-1.5 text-xs text-slate-400 transition-colors hover:text-slate-200"
+                  title={t.widgets.resetLabel || "Reset"}
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Panel mode */}
+          <div>
+            <label className="mb-2 block text-sm text-slate-300">
+              {t.widgets.panelMode || "Panel Mode"}
+            </label>
+            <div className="flex gap-1">
+              {(["dropdown", "side-panel", "popup"] as WidgetPanelMode[]).map((mode) => {
+                const modeIcon = mode === "side-panel" ? PanelRight : mode === "popup" ? Maximize2 : ChevronDown;
+                const ModeIcon = modeIcon;
+                const modeLabel =
+                  mode === "dropdown" ? (t.widgets.panelModeDropdown || "Dropdown")
+                  : mode === "side-panel" ? (t.widgets.panelModeSidePanel || "Side Panel")
+                  : (t.widgets.panelModePopup || "Popup");
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setWidgetPanelMode(widgetId, mode)}
+                    className={`flex flex-1 items-center justify-center gap-1 rounded px-2 py-1.5 text-xs font-medium transition-colors ${
+                      currentPanelMode === mode
+                        ? "bg-[var(--cc-accent-600-30)] text-[var(--cc-accent-300)]"
+                        : "bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-slate-200"
+                    }`}
+                  >
+                    <ModeIcon className="h-3 w-3" />
+                    {modeLabel}
                   </button>
                 );
               })}

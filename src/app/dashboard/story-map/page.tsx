@@ -40,6 +40,7 @@ import {
   deleteColumn as deleteColumnDb,
   batchUpdatePositions,
 } from '@/lib/supabase/storyCardQueries';
+import { createStoryNote } from '@/lib/supabase/editorQueries';
 import {
   subscribeToStoryCards,
   unsubscribeFromStoryCards,
@@ -89,6 +90,7 @@ function makeDemoCards(): StoryCard[] {
       notes: '',
       diagram: '',
       estimation: null,
+      note_id: null,
       created_at: now,
     });
   });
@@ -111,6 +113,7 @@ function makeDemoCards(): StoryCard[] {
         notes: '',
         diagram: '',
         estimation: 'M',
+        note_id: null,
         created_at: now,
       });
 
@@ -131,6 +134,7 @@ function makeDemoCards(): StoryCard[] {
             notes: '',
             diagram: '',
             estimation: ['XS', 'S', 'M', 'L', null][Math.floor(Math.random() * 5)],
+            note_id: null,
             created_at: now,
           });
         });
@@ -299,8 +303,8 @@ function StoryMapContent() {
       debounceTimers.current.set(
         id,
         setTimeout(() => {
-          const { text, col, row, color, subs, sort_order, notes, diagram, estimation } = { ...updates } as Partial<StoryCard>;
-          updateStoryCard(id, { text, col, row, color, subs, sort_order, notes, diagram, estimation });
+          const { text, col, row, color, subs, sort_order, notes, diagram, estimation, note_id } = { ...updates } as Partial<StoryCard>;
+          updateStoryCard(id, { text, col, row, color, subs, sort_order, notes, diagram, estimation, note_id });
           debounceTimers.current.delete(id);
         }, 500)
       );
@@ -337,6 +341,7 @@ function StoryMapContent() {
       notes: '',
       diagram: '',
       estimation: null,
+      note_id: null,
       created_at: new Date().toISOString(),
     };
 
@@ -383,6 +388,7 @@ function StoryMapContent() {
         notes: '',
         diagram: '',
         estimation: null,
+        note_id: null,
         created_at: new Date().toISOString(),
       };
 
@@ -461,6 +467,7 @@ function StoryMapContent() {
           notes: '',
           diagram: '',
           estimation: null,
+          note_id: null,
           created_at: new Date().toISOString(),
         };
 
@@ -525,6 +532,39 @@ function StoryMapContent() {
       }
     },
     [isDemo]
+  );
+
+  // ── Open note in editor ──────────────────────────
+  const handleOpenNote = useCallback(
+    async (card: StoryCard) => {
+      // If card already has a linked note, navigate directly
+      if (card.note_id) {
+        router.push(`/dashboard/editor?id=${card.note_id}`);
+        return;
+      }
+
+      // Demo mode — just navigate to editor
+      if (isDemo) {
+        router.push('/dashboard/editor');
+        return;
+      }
+
+      // Create a new story note
+      const note = await createStoryNote({
+        id: card.id,
+        text: card.text,
+        project_id: card.project_id,
+        type: card.type,
+        col: card.col,
+      });
+
+      if (note) {
+        // Update the card locally + in DB with the note_id
+        handleUpdateCard(card.id, { note_id: note.id });
+        router.push(`/dashboard/editor?id=${note.id}`);
+      }
+    },
+    [isDemo, router, handleUpdateCard]
   );
 
   // ── Filtered cards (visual only) ──────────────────
@@ -696,6 +736,7 @@ function StoryMapContent() {
             onAddFeature={handleAddFeature}
             onUpdateCard={handleUpdateCard}
             onDeleteCard={handleDeleteCard}
+            onOpenNote={handleOpenNote}
             onDeleteColumn={handleDeleteColumn}
             onBatchUpdate={handleBatchUpdate}
             t={storyMapT}

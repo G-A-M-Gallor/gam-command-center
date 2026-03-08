@@ -27,6 +27,7 @@ interface StoryBoardProps {
   onAddFeature: (col: number) => void;
   onUpdateCard: (id: string, updates: Partial<StoryCard>) => void;
   onDeleteCard: (id: string) => void;
+  onOpenNote?: (card: StoryCard) => void;
   onDeleteColumn: (col: number) => void;
   onBatchUpdate: (updates: { id: string; col: number; sort_order: number }[]) => void;
   t: {
@@ -57,6 +58,8 @@ interface StoryBoardProps {
     estimation: string;
     noEstimation: string;
     totalPoints: string;
+    openInEditor?: string;
+    hasNote?: string;
   };
 }
 
@@ -68,6 +71,7 @@ export const StoryBoard = memo(function StoryBoard({
   onAddFeature,
   onUpdateCard,
   onDeleteCard,
+  onOpenNote,
   onDeleteColumn,
   onBatchUpdate,
   t,
@@ -255,6 +259,7 @@ export const StoryBoard = memo(function StoryBoard({
             featureGroups={col.featureGroups}
             onUpdateCard={onUpdateCard}
             onDeleteCard={onDeleteCard}
+            onOpenNote={onOpenNote}
             onAddStory={onAddStory}
             onAddFeature={onAddFeature}
             onDeleteColumn={onDeleteColumn}

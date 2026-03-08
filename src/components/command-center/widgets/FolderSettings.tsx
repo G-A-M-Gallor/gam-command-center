@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X, Trash2, Plus } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { X, Trash2, Plus, Globe } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -37,8 +38,12 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
   const folder = folders.find((f) => f.id === folderId);
   if (!folder) return null;
 
+  const pathname = usePathname();
   const size: WidgetSize = widgetSizes[folderId] ?? folder.defaultSize;
-  const [addTab, setAddTab] = useState<"widgets" | "actions">("widgets");
+  const [addTab, setAddTab] = useState<"widgets" | "actions" | "bookmarks">("widgets");
+  const [bmUrl, setBmUrl] = useState("");
+  const [bmName, setBmName] = useState("");
+  const [bmIcon, setBmIcon] = useState("🔗");
 
   const activeWidgets = widgetRegistry.filter((w) => w.status === "active");
 
@@ -268,6 +273,17 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
               >
                 {ft?.actionsTab}
               </button>
+              <button
+                type="button"
+                onClick={() => setAddTab("bookmarks")}
+                className={`flex-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
+                  addTab === "bookmarks"
+                    ? "bg-[var(--cc-accent-600-30)] text-[var(--cc-accent-300)]"
+                    : "bg-slate-700 text-slate-400 hover:text-slate-300"
+                }`}
+              >
+                {ft?.bookmarksTab || "Bookmarks"}
+              </button>
             </div>
 
             {addTab === "widgets" && (
@@ -349,6 +365,88 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
                 })}
               </div>
             )}
+
+            {addTab === "bookmarks" && (
+              <div className="space-y-2">
+                <div className="flex flex-col gap-1.5">
+                  <Input
+                    inputSize="sm"
+                    value={bmUrl}
+                    onChange={(e) => setBmUrl(e.target.value)}
+                    placeholder={ft?.bookmarkUrl || "URL or /dashboard/..."}
+                    dir="ltr"
+                  />
+                  <div className="flex gap-1.5">
+                    <Input
+                      inputSize="sm"
+                      value={bmName}
+                      onChange={(e) => setBmName(e.target.value)}
+                      placeholder={ft?.bookmarkName || "Name"}
+                      className="flex-1"
+                    />
+                    <div className="flex gap-1">
+                      {EMOJI_OPTIONS.slice(0, 8).map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => setBmIcon(emoji)}
+                          className={`flex h-7 w-7 items-center justify-center rounded text-sm transition-colors ${
+                            bmIcon === emoji
+                              ? "bg-[var(--cc-accent-600-30)] ring-1 ring-[var(--cc-accent-500)]"
+                              : "bg-slate-700 hover:bg-slate-600"
+                          }`}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button
+                      type="button"
+                      disabled={!bmUrl.trim() || !bmName.trim()}
+                      onClick={() => {
+                        handleAddItem({
+                          type: "bookmark",
+                          id: `bm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                          url: bmUrl.trim(),
+                          label: { he: bmName.trim(), en: bmName.trim(), ru: bmName.trim() },
+                          icon: bmIcon,
+                          noteId: null,
+                          createdAt: new Date().toISOString(),
+                        });
+                        setBmUrl("");
+                        setBmName("");
+                        setBmIcon("🔗");
+                      }}
+                      className="flex items-center gap-1 rounded bg-[var(--cc-accent-600)] px-2.5 py-1.5 text-xs font-medium text-white transition-opacity disabled:opacity-40"
+                    >
+                      <Plus className="h-3 w-3" />
+                      {ft?.addBookmark || "Add"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const name = document.title || pathname;
+                        handleAddItem({
+                          type: "bookmark",
+                          id: `bm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                          url: pathname,
+                          label: { he: name, en: name, ru: name },
+                          icon: "📌",
+                          noteId: null,
+                          createdAt: new Date().toISOString(),
+                        });
+                      }}
+                      className="flex items-center gap-1 rounded bg-slate-700 px-2.5 py-1.5 text-xs text-slate-300 transition-colors hover:bg-slate-600"
+                    >
+                      <Globe className="h-3 w-3" />
+                      {ft?.addCurrentPage || "Current Page"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -377,11 +475,14 @@ function ItemRow({
   let label = "";
   let typeLabel = "";
 
-  if (item.type === "widget" || item.type === "shortcut") {
+  if (item.type === "bookmark") {
+    label = item.label[language] || item.label.en;
+    typeLabel = "B";
+  } else if (item.type === "widget" || item.type === "shortcut") {
     const widget = widgetRegistry.find((w) => w.id === item.widgetId);
     label = widget?.label[language] || item.widgetId;
     typeLabel = item.type === "widget" ? "W" : "S";
-  } else {
+  } else if (item.type === "action") {
     const config = ACTION_CONFIG[item.actionId];
     label = config?.label[language] || item.actionId;
     typeLabel = "A";

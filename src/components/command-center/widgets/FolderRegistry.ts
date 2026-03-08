@@ -7,6 +7,7 @@ import {
   Layers,
   PenTool,
   Settings,
+  Bookmark,
   type LucideIcon,
 } from "lucide-react";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -25,6 +26,16 @@ export interface FolderItemShortcut {
   widgetId: string;
 }
 
+export interface FolderItemBookmark {
+  type: "bookmark";
+  id: string;
+  url: string;
+  label: { he: string; en: string; ru: string };
+  icon: string;
+  noteId: string | null;
+  createdAt: string;
+}
+
 export type QuickActionId =
   | "create-document"
   | "create-project"
@@ -33,7 +44,8 @@ export type QuickActionId =
   | "open-ai"
   | "navigate-layers"
   | "navigate-editor"
-  | "navigate-settings";
+  | "navigate-settings"
+  | "add-bookmark";
 
 export interface FolderItemAction {
   type: "action";
@@ -44,7 +56,8 @@ export interface FolderItemAction {
 export type FolderItem =
   | FolderItemWidget
   | FolderItemShortcut
-  | FolderItemAction;
+  | FolderItemAction
+  | FolderItemBookmark;
 
 // ─── Folder Definition ──────────────────────────────────────
 
@@ -107,6 +120,11 @@ export const ACTION_CONFIG: Record<QuickActionId, ActionConfig> = {
     icon: Settings,
     color: "text-slate-400",
     label: { he: "הגדרות", en: "Settings", ru: "Настройки" },
+  },
+  "add-bookmark": {
+    icon: Bookmark,
+    color: "text-yellow-400",
+    label: { he: "הוסף סימנייה", en: "Add Bookmark", ru: "Добавить закладку" },
   },
 };
 

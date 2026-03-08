@@ -20,12 +20,18 @@ const STORAGE_KEYS = {
   folders: "cc-folders",
   profiles: "cc-widget-profiles",
   activeProfile: "cc-widget-active-profile",
+  labels: "cc-widget-labels",
+  displayMode: "cc-topbar-display-mode",
+  panelModes: "cc-widget-panel-modes",
 } as const;
 
 /** Legacy key — read once for migration, then removed */
 const LEGACY_HIDDEN_KEY = "cc-hidden-widgets";
 
 export type HoverDelay = number | "none";
+export type TopBarDisplayMode = "normal" | "compact" | "icons-only";
+export type WidgetPanelMode = "dropdown" | "side-panel" | "popup";
+export type I18nLabel = { he?: string; en?: string; ru?: string };
 
 // ─── Profile System ──────────────────────────────────────────
 
@@ -35,6 +41,7 @@ export interface WidgetBarProfileSnapshot {
   placements: Record<string, WidgetPlacement>;
   hoverDelay: HoverDelay;
   folders: FolderDefinition[];
+  labels?: Record<string, I18nLabel>;
 }
 
 export interface WidgetBarProfile {
@@ -118,6 +125,16 @@ interface WidgetState {
   deleteProfile: (id: string) => void;
   renameProfile: (id: string, newName: string) => void;
   updateProfileSnapshot: (id: string) => void;
+  // Custom labels
+  widgetLabels: Record<string, I18nLabel>;
+  setWidgetLabel: (id: string, labels: I18nLabel) => void;
+  clearWidgetLabel: (id: string) => void;
+  // Display mode
+  displayMode: TopBarDisplayMode;
+  setDisplayMode: (mode: TopBarDisplayMode) => void;
+  // Panel modes
+  widgetPanelModes: Record<string, WidgetPanelMode>;
+  setWidgetPanelMode: (id: string, mode: WidgetPanelMode) => void;
 }
 
 const defaultState: WidgetState = {
@@ -141,6 +158,13 @@ const defaultState: WidgetState = {
   deleteProfile: () => {},
   renameProfile: () => {},
   updateProfileSnapshot: () => {},
+  widgetLabels: {},
+  setWidgetLabel: () => {},
+  clearWidgetLabel: () => {},
+  displayMode: "normal",
+  setDisplayMode: () => {},
+  widgetPanelModes: {},
+  setWidgetPanelMode: () => {},
 };
 
 const WidgetContext = createContext<WidgetState>(defaultState);
@@ -205,6 +229,9 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const [folders, setFoldersState] = useState<FolderDefinition[]>([]);
   const [profiles, setProfilesState] = useState<WidgetBarProfile[]>([]);
   const [activeProfileId, setActiveProfileIdState] = useState<string | null>(null);
+  const [widgetLabels, setWidgetLabelsState] = useState<Record<string, I18nLabel>>({});
+  const [displayMode, setDisplayModeState] = useState<TopBarDisplayMode>("normal");
+  const [widgetPanelModes, setWidgetPanelModesState] = useState<Record<string, WidgetPanelMode>>({});
 
   useEffect(() => {
     setWidgetPositionsState(
@@ -237,6 +264,22 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     );
     setActiveProfileIdState(
       localStorage.getItem(STORAGE_KEYS.activeProfile) || null
+    );
+    setWidgetLabelsState(
+      parseJson<Record<string, I18nLabel>>(
+        localStorage.getItem(STORAGE_KEYS.labels),
+        {}
+      )
+    );
+    const savedMode = localStorage.getItem(STORAGE_KEYS.displayMode);
+    if (savedMode === "normal" || savedMode === "compact" || savedMode === "icons-only") {
+      setDisplayModeState(savedMode);
+    }
+    setWidgetPanelModesState(
+      parseJson<Record<string, WidgetPanelMode>>(
+        localStorage.getItem(STORAGE_KEYS.panelModes),
+        {}
+      )
     );
   }, []);
 
@@ -327,6 +370,42 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // ─── Custom labels ─────────────────────────────────────────
+
+  const setWidgetLabel = useCallback((id: string, labels: I18nLabel) => {
+    setWidgetLabelsState((prev) => {
+      const next = { ...prev, [id]: labels };
+      localStorage.setItem(STORAGE_KEYS.labels, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const clearWidgetLabel = useCallback((id: string) => {
+    setWidgetLabelsState((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      localStorage.setItem(STORAGE_KEYS.labels, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // ─── Display mode ─────────────────────────────────────────
+
+  const setDisplayMode = useCallback((mode: TopBarDisplayMode) => {
+    setDisplayModeState(mode);
+    localStorage.setItem(STORAGE_KEYS.displayMode, mode);
+  }, []);
+
+  // ─── Panel modes ──────────────────────────────────────────
+
+  const setWidgetPanelMode = useCallback((id: string, mode: WidgetPanelMode) => {
+    setWidgetPanelModesState((prev) => {
+      const next = { ...prev, [id]: mode };
+      localStorage.setItem(STORAGE_KEYS.panelModes, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   // ─── Profile methods ───────────────────────────────────────
 
   /** Helper: persist profiles array to localStorage */
@@ -342,7 +421,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  /** Apply a snapshot to all 5 widget state fields */
+  /** Apply a snapshot to all widget state fields */
   const applySnapshot = useCallback((snap: WidgetBarProfileSnapshot) => {
     const s = JSON.parse(JSON.stringify(snap)) as WidgetBarProfileSnapshot;
     setWidgetPositionsState(s.positions);
@@ -358,6 +437,10 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     );
     setFoldersState(s.folders);
     localStorage.setItem(STORAGE_KEYS.folders, JSON.stringify(s.folders));
+    // Labels (backwards-compatible — older snapshots may not have labels)
+    const labels = s.labels || {};
+    setWidgetLabelsState(labels);
+    localStorage.setItem(STORAGE_KEYS.labels, JSON.stringify(labels));
   }, []);
 
   /** Capture current state as a snapshot */
@@ -367,7 +450,8 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     placements: { ...widgetPlacements },
     hoverDelay,
     folders: JSON.parse(JSON.stringify(folders)),
-  }), [widgetPositions, widgetSizes, widgetPlacements, hoverDelay, folders]);
+    labels: { ...widgetLabels },
+  }), [widgetPositions, widgetSizes, widgetPlacements, hoverDelay, folders, widgetLabels]);
 
   const saveProfile = useCallback(
     (name: string) => {
@@ -475,6 +559,13 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       deleteProfile,
       renameProfile,
       updateProfileSnapshot,
+      widgetLabels,
+      setWidgetLabel,
+      clearWidgetLabel,
+      displayMode,
+      setDisplayMode,
+      widgetPanelModes,
+      setWidgetPanelMode,
     }),
     [
       widgetPositions,
@@ -497,6 +588,13 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       deleteProfile,
       renameProfile,
       updateProfileSnapshot,
+      widgetLabels,
+      setWidgetLabel,
+      clearWidgetLabel,
+      displayMode,
+      setDisplayMode,
+      widgetPanelModes,
+      setWidgetPanelMode,
     ]
   );
 

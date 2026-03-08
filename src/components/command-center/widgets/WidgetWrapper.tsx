@@ -144,14 +144,20 @@ export function WidgetWrapper({
   onCustomClick,
   aiPanelOffset,
 }: WidgetWrapperProps) {
-  const { widgetSizes, hoverDelay } = useWidgets();
+  const { widgetSizes, hoverDelay, widgetLabels, displayMode } = useWidgets();
   const { language, sidebarPosition, sidebarVisibility } = useSettings();
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
 
   const size: WidgetSize = widgetSizes[widget.id] ?? widget.defaultSize;
-  const barWidth = size * UNIT;
+  const unitSize = displayMode === "compact" ? 36 : displayMode === "icons-only" ? 32 : UNIT;
+  const barWidth = size * unitSize;
+  const showLabel = displayMode === "normal" ? size >= 2
+    : displayMode === "compact" ? size >= 3
+    : false;
+  const barHeight = displayMode === "compact" ? "h-9" : displayMode === "icons-only" ? "h-8" : "h-12";
+  const iconSize = displayMode === "icons-only" ? "h-3.5 w-3.5" : "h-4 w-4";
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelPos, setPanelPos] = useState<PanelPos | null>(null);
@@ -179,7 +185,7 @@ export function WidgetWrapper({
   const style = {
     position: "absolute" as const,
     top: 0,
-    left: column * UNIT,
+    left: column * unitSize,
     width: barWidth,
     transform: CSS.Transform.toString(transform),
     opacity: isDragging ? 0.7 : 1,
@@ -316,7 +322,8 @@ export function WidgetWrapper({
     };
   }, [clearTimer, clearLeaveTimer]);
 
-  const label = widget.label[language];
+  const customLabel = widgetLabels[widget.id]?.[language];
+  const label = customLabel || widget.label[language];
   const description = widget.description[language];
   const WidgetContent = widget.component;
   const BarContent = widget.renderBar;
@@ -328,7 +335,7 @@ export function WidgetWrapper({
         wrapperRef.current = node;
       }}
       style={style}
-      className="flex h-12 items-center"
+      className={`flex ${barHeight} items-center`}
       onMouseEnter={handleWrapperEnter}
       onMouseLeave={handleWrapperLeave}
       {...attributes}
@@ -344,11 +351,11 @@ export function WidgetWrapper({
         title={label}
       >
         <span className="relative shrink-0">
-          <widget.icon className="h-4 w-4" />
-          {BarContent && size < 2 && <BarContent size={size} />}
+          <widget.icon className={iconSize} />
+          {BarContent && !showLabel && <BarContent size={size} />}
         </span>
-        {BarContent && size >= 2 && <BarContent size={size} />}
-        {!BarContent && size >= 2 && (
+        {BarContent && showLabel && <BarContent size={size} />}
+        {!BarContent && showLabel && (
           <span className="truncate text-xs">{label}</span>
         )}
       </button>

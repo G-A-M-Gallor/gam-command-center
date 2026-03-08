@@ -13,6 +13,7 @@ import {
   X,
   StickyNote,
   GitBranch,
+  FileText,
 } from 'lucide-react';
 import type { StoryCard as StoryCardType, SubStory } from '@/lib/supabase/storyCardQueries';
 
@@ -59,6 +60,7 @@ interface StoryCardProps {
   card: StoryCardType;
   onUpdate: (id: string, updates: Partial<StoryCardType>) => void;
   onDelete: (id: string) => void;
+  onOpenNote?: (card: StoryCardType) => void;
   t: {
     storyPlaceholder: string;
     epicPlaceholder: string;
@@ -78,6 +80,8 @@ interface StoryCardProps {
     save: string;
     estimation: string;
     noEstimation: string;
+    openInEditor?: string;
+    hasNote?: string;
   };
 }
 
@@ -583,7 +587,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 }
 
 // ─── Story Card (sortable/draggable) ────────────────
-export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
+export function StoryCard({ card, onUpdate, onDelete, onOpenNote, t }: StoryCardProps) {
   const {
     attributes,
     listeners,
@@ -674,6 +678,7 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
 
   const hasNotes = !!(card.notes && card.notes.trim());
   const hasDiagram = !!(card.diagram && card.diagram.trim());
+  const hasEditorNote = !!card.note_id;
 
   return (
     <>
@@ -732,9 +737,12 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
               {/* Estimation badge */}
               <EstimationBadge estimation={card.estimation} />
 
-              {/* Indicators for notes/diagram */}
-              {(hasNotes || hasDiagram) && (
+              {/* Indicators for notes/diagram/editor note */}
+              {(hasNotes || hasDiagram || hasEditorNote) && (
                 <div className="flex shrink-0 items-center gap-0.5">
+                  {hasEditorNote && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-400" title={t.hasNote || 'Note'} />
+                  )}
                   {hasNotes && (
                     <div className="h-1.5 w-1.5 rounded-full bg-amber-400" title={t.notes} />
                   )}
@@ -886,6 +894,20 @@ export function StoryCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
           >
             <StickyNote className="h-3 w-3" />
           </button>
+          {/* Open in editor */}
+          {onOpenNote && (
+            <button
+              type="button"
+              onClick={() => onOpenNote(card)}
+              className={`rounded bg-slate-700 p-0.5 hover:text-slate-200 ${
+                hasEditorNote ? 'text-blue-400' : 'text-slate-400'
+              }`}
+              title={t.openInEditor || 'Open in Editor'}
+              aria-label={t.openInEditor || 'Open in Editor'}
+            >
+              <FileText className="h-3 w-3" />
+            </button>
+          )}
           {/* Diagram toggle */}
           <button
             type="button"
