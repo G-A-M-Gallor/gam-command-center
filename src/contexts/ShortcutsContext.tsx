@@ -23,6 +23,7 @@ import {
   detectConflict,
   type ConflictResult,
 } from "@/lib/shortcuts/shortcutEngine";
+import { toHebrew, toEnglish, replaceSelection } from "@/lib/gibberish";
 
 // ─── Storage ────────────────────────────────────────────────
 
@@ -223,6 +224,16 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
       card_expand: "cc-card-expand",
       card_archive: "cc-card-archive",
     };
+
+    // ── Gibberish Converter ────────────────────────────────
+    if (actionSlug === "gibberish_to_he") {
+      replaceSelection(toHebrew);
+      return;
+    }
+    if (actionSlug === "gibberish_to_en") {
+      replaceSelection(toEnglish);
+      return;
+    }
 
     const eventName = EVENTS[actionSlug];
     if (eventName) {

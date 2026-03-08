@@ -127,6 +127,10 @@ export const SYSTEM_SHORTCUTS: ShortcutDefinition[] = [
   { id: "ai_analyze_mode", keyCombo: "Cmd+Shift+A", actionSlug: "ai_analyze_mode", category: "ai", displayName: { he: "מצב ניתוח", en: "Analyze Mode", ru: "Режим анализа" }, isSystem: true, scope: "global", sortOrder: 2 },
   { id: "ai_write_mode", keyCombo: "Cmd+Shift+R", actionSlug: "ai_write_mode", category: "ai", displayName: { he: "מצב כתיבה", en: "Write Mode", ru: "Режим записи" }, isSystem: true, scope: "global", sortOrder: 3 },
   { id: "ai_clear_chat", keyCombo: "Cmd+Shift+K", actionSlug: "ai_clear_chat", category: "ai", displayName: { he: "נקה שיחת AI", en: "Clear AI Chat", ru: "Очистить чат AI" }, isSystem: true, scope: "global", sortOrder: 4 },
+
+  // ── Gibberish Converter ───────────────────────────────────
+  { id: "gibberish_to_he", keyCombo: "Cmd+Shift+H", actionSlug: "gibberish_to_he", category: "editing", displayName: { he: "המר לעברית (Gibberish)", en: "Convert to Hebrew (Gibberish)", ru: "Конвертировать в иврит (Gibberish)" }, isSystem: true, scope: "global", sortOrder: 10 },
+  { id: "gibberish_to_en", keyCombo: "Cmd+Shift+E", actionSlug: "gibberish_to_en", category: "editing", displayName: { he: "המר לאנגלית (Gibberish)", en: "Convert to English (Gibberish)", ru: "Конвертировать в английский (Gibberish)" }, isSystem: true, scope: "global", sortOrder: 11 },
 ];
 
 // ─── OS-Reserved Combos ────────────────────────────────────
