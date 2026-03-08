@@ -14,6 +14,8 @@ import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 
+const TOPBAR_COLLAPSED_KEY = "cc-topbar-mobile-collapsed";
+
 const SIDEBAR_WIDTH = "15rem";
 const STRIP_WIDTH = "48px";
 
@@ -38,7 +40,22 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { sidebarPosition, sidebarVisibility, language } = useSettings();
   const pathname = usePathname();
   const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === "mobile";
   const [floatOpen, setFloatOpen] = useState(false);
+
+  // Track mobile topbar collapsed state for proper padding
+  const [mobileTopbarCollapsed, setMobileTopbarCollapsed] = useState(false);
+  useEffect(() => {
+    if (!isMobile) return;
+    try {
+      setMobileTopbarCollapsed(localStorage.getItem(TOPBAR_COLLAPSED_KEY) === "true");
+    } catch {}
+    const handleToggle = () => {
+      try { setMobileTopbarCollapsed(localStorage.getItem(TOPBAR_COLLAPSED_KEY) === "true"); } catch {}
+    };
+    window.addEventListener("cc-topbar-collapse-change", handleToggle);
+    return () => window.removeEventListener("cc-topbar-collapse-change", handleToggle);
+  }, [isMobile]);
 
   // Override sidebar behavior based on screen size
   const effectiveVisibility = useMemo(() => {
@@ -120,7 +137,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <main
         data-cc-id="content.main"
-        className="min-h-screen overflow-x-hidden p-[var(--cc-density-content)] pt-16"
+        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] ${
+          isMobile && mobileTopbarCollapsed ? "pt-10" : "pt-16"
+        }`}
         style={contentMargin}
       >
         {children}

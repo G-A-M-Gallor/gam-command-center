@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { ColorPicker } from "@/components/command-center/ColorPicker";
 import {
@@ -16,10 +16,15 @@ import {
   type SkinName,
 } from "@/contexts/SettingsContext";
 import { SKINS } from "@/lib/skins";
-import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
+import {
+  useWidgets,
+  type HoverDelay,
+  BUILTIN_PROFILES,
+  type WidgetBarProfile,
+} from "@/contexts/WidgetContext";
 import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
 import { getTranslations } from "@/lib/i18n";
-import { Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw } from "lucide-react";
+import { Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -50,12 +55,13 @@ const DENSITY_OPTIONS: { value: Density; key: "compact" | "default" | "spacious"
   { value: "spacious", key: "spacious" },
 ];
 
-type SettingsTab = "general" | "theme" | "brand";
+type SettingsTab = "general" | "theme" | "brand" | "widgetBar";
 
-const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" }[] = [
+const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" }[] = [
   { tab: "general", tKey: "tabGeneral" },
   { tab: "theme", tKey: "tabTheme" },
   { tab: "brand", tKey: "tabBrand" },
+  { tab: "widgetBar", tKey: "tabWidgetBar" },
 ];
 
 // --- Shared button classes ---
@@ -816,6 +822,233 @@ function BrandTab() {
   );
 }
 
+// ─── Widget Bar Tab ──────────────────────────────────────────
+
+function WidgetBarTab() {
+  const { language } = useSettings();
+  const {
+    profiles,
+    activeProfileId,
+    saveProfile,
+    loadProfile,
+    deleteProfile,
+    renameProfile,
+    updateProfileSnapshot,
+    widgetPositions,
+    widgetSizes,
+    widgetPlacements,
+    hoverDelay,
+    folders,
+  } = useWidgets();
+  const t = getTranslations(language);
+  const s = t.settings as Record<string, string>;
+
+  const [newName, setNewName] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+
+  const allProfiles = useMemo(
+    () => [...BUILTIN_PROFILES, ...profiles],
+    [profiles]
+  );
+
+  const activeProfile = useMemo(
+    () => allProfiles.find((p) => p.id === activeProfileId) || null,
+    [allProfiles, activeProfileId]
+  );
+
+  const isModified = useMemo(() => {
+    if (!activeProfile) return false;
+    const current = JSON.stringify({
+      positions: widgetPositions,
+      sizes: widgetSizes,
+      placements: widgetPlacements,
+      hoverDelay,
+      folders,
+    });
+    return current !== JSON.stringify(activeProfile.snapshot);
+  }, [activeProfile, widgetPositions, widgetSizes, widgetPlacements, hoverDelay, folders]);
+
+  const handleSave = useCallback(() => {
+    const name = newName.trim();
+    if (!name) return;
+    saveProfile(name);
+    setNewName("");
+  }, [newName, saveProfile]);
+
+  const handleFinishRename = useCallback(
+    (id: string) => {
+      const name = editName.trim();
+      if (name) renameProfile(id, name);
+      setEditingId(null);
+    },
+    [editName, renameProfile]
+  );
+
+  const profileName = useCallback(
+    (p: WidgetBarProfile) => (p.nameKey ? s[p.nameKey] || p.name : p.name),
+    [s]
+  );
+
+  return (
+    <div className="max-w-2xl space-y-4">
+      {/* Active profile */}
+      <Section label={s.activeProfile} ccId="settings.activeProfile">
+        <div className="flex items-center gap-2 rounded-lg bg-slate-700/30 px-3 py-2.5">
+          {activeProfile ? (
+            <>
+              <div className="h-2 w-2 rounded-full bg-[var(--cc-accent-500)]" />
+              <span className="text-sm font-medium text-slate-200">
+                {profileName(activeProfile)}
+              </span>
+              {activeProfile.builtIn && (
+                <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-500">
+                  {s.builtIn}
+                </span>
+              )}
+              {isModified && (
+                <span className="text-xs text-amber-400">{s.profileModified}</span>
+              )}
+            </>
+          ) : (
+            <span className="text-sm text-slate-500">{s.noActiveProfile}</span>
+          )}
+        </div>
+      </Section>
+
+      {/* Save current as new */}
+      <Section label={s.saveNewProfile} ccId="settings.saveNewProfile">
+        <div className="flex gap-2">
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSave(); }}
+            placeholder={s.profileNamePlaceholder}
+            className="flex-1"
+          />
+          <Button onClick={handleSave} disabled={!newName.trim()} icon={Download}>
+            {t.common?.save || "Save"}
+          </Button>
+        </div>
+      </Section>
+
+      {/* Overwrite active (only for user profiles that are modified) */}
+      {activeProfile && !activeProfile.builtIn && isModified && (
+        <Section label={s.updateProfile} ccId="settings.updateProfile">
+          <Button
+            variant="ghost"
+            icon={Upload}
+            onClick={() => updateProfileSnapshot(activeProfile.id)}
+          >
+            {s.overwriteProfile}
+          </Button>
+        </Section>
+      )}
+
+      {/* Profile list */}
+      <Section label={s.savedProfiles} ccId="settings.savedProfiles">
+        {allProfiles.length === 0 ? (
+          <p className="py-4 text-center text-xs text-slate-500">{s.noProfiles}</p>
+        ) : (
+          <div className="space-y-2">
+            {allProfiles.map((p) => (
+              <div
+                key={p.id}
+                className={`flex items-center gap-3 rounded-lg p-3 transition-colors ${
+                  activeProfileId === p.id
+                    ? "bg-[var(--cc-accent-600-20)] border border-[var(--cc-accent-500)]/20"
+                    : "bg-slate-700/30"
+                }`}
+              >
+                {/* Active dot */}
+                {activeProfileId === p.id && (
+                  <div className="h-2 w-2 shrink-0 rounded-full bg-[var(--cc-accent-500)]" />
+                )}
+
+                {/* Name / edit */}
+                <div className="flex-1 min-w-0">
+                  {editingId === p.id ? (
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleFinishRename(p.id);
+                        if (e.key === "Escape") setEditingId(null);
+                      }}
+                      onBlur={() => handleFinishRename(p.id)}
+                      autoFocus
+                      className="w-full rounded bg-slate-700 px-2 py-1 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
+                    />
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium text-slate-200">
+                        {profileName(p)}
+                      </span>
+                      {p.builtIn && (
+                        <span className="ms-2 rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-500">
+                          {s.builtIn}
+                        </span>
+                      )}
+                      <div className="text-[10px] text-slate-600">
+                        {new Date(p.createdAt).toLocaleDateString(
+                          language === "he" ? "he-IL" : language === "ru" ? "ru-RU" : "en-US"
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex shrink-0 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => loadProfile(p.id)}
+                    className={`rounded px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      activeProfileId === p.id
+                        ? "bg-[var(--cc-accent-600)] text-white"
+                        : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                    }`}
+                  >
+                    {activeProfileId === p.id ? (
+                      <Check className="inline h-3 w-3" />
+                    ) : (
+                      s.loadProfile
+                    )}
+                  </button>
+                  {!p.builtIn && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(p.id);
+                          setEditName(p.name);
+                        }}
+                        className="rounded p-1.5 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                        title={s.renameProfile}
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteProfile(p.id)}
+                        className="rounded p-1.5 text-slate-500 hover:bg-red-500/10 hover:text-red-400"
+                        title={t.common?.delete || "Delete"}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Section>
+    </div>
+  );
+}
+
 // ─── Settings Page ────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -850,6 +1083,7 @@ export default function SettingsPage() {
         {activeTab === "general" && <GeneralTab />}
         {activeTab === "theme" && <ThemeTab />}
         {activeTab === "brand" && <BrandTab />}
+        {activeTab === "widgetBar" && <WidgetBarTab />}
       </div>
     </div>
   );

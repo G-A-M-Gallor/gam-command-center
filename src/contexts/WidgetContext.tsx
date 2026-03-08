@@ -18,12 +18,83 @@ const STORAGE_KEYS = {
   placements: "cc-widget-placements",
   hoverDelay: "cc-widget-hover-delay",
   folders: "cc-folders",
+  profiles: "cc-widget-profiles",
+  activeProfile: "cc-widget-active-profile",
 } as const;
 
 /** Legacy key — read once for migration, then removed */
 const LEGACY_HIDDEN_KEY = "cc-hidden-widgets";
 
 export type HoverDelay = number | "none";
+
+// ─── Profile System ──────────────────────────────────────────
+
+export interface WidgetBarProfileSnapshot {
+  positions: Record<string, number>;
+  sizes: Record<string, WidgetSize>;
+  placements: Record<string, WidgetPlacement>;
+  hoverDelay: HoverDelay;
+  folders: FolderDefinition[];
+}
+
+export interface WidgetBarProfile {
+  id: string;
+  name: string;
+  /** i18n key for built-in profiles (e.g. "profileDefault") */
+  nameKey?: string;
+  builtIn: boolean;
+  createdAt: string;
+  snapshot: WidgetBarProfileSnapshot;
+}
+
+/** Built-in read-only profiles */
+export const BUILTIN_PROFILES: WidgetBarProfile[] = [
+  {
+    id: "__default__",
+    name: "Default",
+    nameKey: "profileDefault",
+    builtIn: true,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    snapshot: {
+      positions: {},
+      sizes: {},
+      placements: {},
+      hoverDelay: 0.5,
+      folders: [],
+    },
+  },
+  {
+    id: "__minimal__",
+    name: "Minimal",
+    nameKey: "profileMinimal",
+    builtIn: true,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    snapshot: {
+      positions: {},
+      sizes: {},
+      placements: {
+        "quick-create": "disabled",
+        favorites: "disabled",
+        today: "apps",
+        timer: "disabled",
+        clipboard: "disabled",
+        "keyboard-shortcuts": "apps",
+        "weekly-planner": "apps",
+        kpi: "apps",
+        shortcuts: "disabled",
+        "origami-forms": "disabled",
+        "form-submissions": "disabled",
+        "form-scanner": "disabled",
+        wati: "disabled",
+        team: "disabled",
+      },
+      hoverDelay: "none",
+      folders: [],
+    },
+  },
+];
+
+// ─── Context Interface ───────────────────────────────────────
 
 interface WidgetState {
   widgetPositions: Record<string, number>;
@@ -39,6 +110,14 @@ interface WidgetState {
   addFolder: (folder: FolderDefinition) => void;
   updateFolder: (id: string, patch: Partial<FolderDefinition>) => void;
   removeFolder: (id: string) => void;
+  // Profile system
+  profiles: WidgetBarProfile[];
+  activeProfileId: string | null;
+  saveProfile: (name: string) => void;
+  loadProfile: (id: string) => void;
+  deleteProfile: (id: string) => void;
+  renameProfile: (id: string, newName: string) => void;
+  updateProfileSnapshot: (id: string) => void;
 }
 
 const defaultState: WidgetState = {
@@ -55,6 +134,13 @@ const defaultState: WidgetState = {
   addFolder: () => {},
   updateFolder: () => {},
   removeFolder: () => {},
+  profiles: [],
+  activeProfileId: null,
+  saveProfile: () => {},
+  loadProfile: () => {},
+  deleteProfile: () => {},
+  renameProfile: () => {},
+  updateProfileSnapshot: () => {},
 };
 
 const WidgetContext = createContext<WidgetState>(defaultState);
@@ -117,6 +203,8 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   >({});
   const [hoverDelay, setHoverDelayState] = useState<HoverDelay>(0.5);
   const [folders, setFoldersState] = useState<FolderDefinition[]>([]);
+  const [profiles, setProfilesState] = useState<WidgetBarProfile[]>([]);
+  const [activeProfileId, setActiveProfileIdState] = useState<string | null>(null);
 
   useEffect(() => {
     setWidgetPositionsState(
@@ -141,7 +229,18 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
         []
       )
     );
+    setProfilesState(
+      parseJson<WidgetBarProfile[]>(
+        localStorage.getItem(STORAGE_KEYS.profiles),
+        []
+      )
+    );
+    setActiveProfileIdState(
+      localStorage.getItem(STORAGE_KEYS.activeProfile) || null
+    );
   }, []);
+
+  // ─── Existing widget setters ───────────────────────────────
 
   const setWidgetPosition = useCallback(
     (id: string, col: number) => {
@@ -228,6 +327,132 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  // ─── Profile methods ───────────────────────────────────────
+
+  /** Helper: persist profiles array to localStorage */
+  const persistProfiles = useCallback((arr: WidgetBarProfile[]) => {
+    localStorage.setItem(STORAGE_KEYS.profiles, JSON.stringify(arr));
+  }, []);
+
+  const persistActiveId = useCallback((id: string | null) => {
+    if (id) {
+      localStorage.setItem(STORAGE_KEYS.activeProfile, id);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.activeProfile);
+    }
+  }, []);
+
+  /** Apply a snapshot to all 5 widget state fields */
+  const applySnapshot = useCallback((snap: WidgetBarProfileSnapshot) => {
+    const s = JSON.parse(JSON.stringify(snap)) as WidgetBarProfileSnapshot;
+    setWidgetPositionsState(s.positions);
+    localStorage.setItem(STORAGE_KEYS.positions, JSON.stringify(s.positions));
+    setWidgetSizesState(s.sizes);
+    localStorage.setItem(STORAGE_KEYS.sizes, JSON.stringify(s.sizes));
+    setWidgetPlacementsState(s.placements);
+    localStorage.setItem(STORAGE_KEYS.placements, JSON.stringify(s.placements));
+    setHoverDelayState(s.hoverDelay);
+    localStorage.setItem(
+      STORAGE_KEYS.hoverDelay,
+      s.hoverDelay === "none" ? "none" : String(s.hoverDelay)
+    );
+    setFoldersState(s.folders);
+    localStorage.setItem(STORAGE_KEYS.folders, JSON.stringify(s.folders));
+  }, []);
+
+  /** Capture current state as a snapshot */
+  const captureSnapshot = useCallback((): WidgetBarProfileSnapshot => ({
+    positions: { ...widgetPositions },
+    sizes: { ...widgetSizes },
+    placements: { ...widgetPlacements },
+    hoverDelay,
+    folders: JSON.parse(JSON.stringify(folders)),
+  }), [widgetPositions, widgetSizes, widgetPlacements, hoverDelay, folders]);
+
+  const saveProfile = useCallback(
+    (name: string) => {
+      const profile: WidgetBarProfile = {
+        id: crypto.randomUUID(),
+        name,
+        builtIn: false,
+        createdAt: new Date().toISOString(),
+        snapshot: captureSnapshot(),
+      };
+      setProfilesState((prev) => {
+        const next = [...prev, profile];
+        persistProfiles(next);
+        return next;
+      });
+      setActiveProfileIdState(profile.id);
+      persistActiveId(profile.id);
+      window.dispatchEvent(new CustomEvent("cc-notify", {
+        detail: { type: "success" },
+      }));
+    },
+    [captureSnapshot, persistProfiles, persistActiveId]
+  );
+
+  const loadProfile = useCallback(
+    (id: string) => {
+      const all = [...BUILTIN_PROFILES, ...profiles];
+      const profile = all.find((p) => p.id === id);
+      if (!profile) return;
+      applySnapshot(profile.snapshot);
+      setActiveProfileIdState(id);
+      persistActiveId(id);
+      window.dispatchEvent(new Event("cc-profile-change"));
+    },
+    [profiles, applySnapshot, persistActiveId]
+  );
+
+  const deleteProfile = useCallback(
+    (id: string) => {
+      setProfilesState((prev) => {
+        const target = prev.find((p) => p.id === id);
+        if (!target || target.builtIn) return prev;
+        const next = prev.filter((p) => p.id !== id);
+        persistProfiles(next);
+        return next;
+      });
+      setActiveProfileIdState((prev) => {
+        if (prev === id) {
+          persistActiveId(null);
+          return null;
+        }
+        return prev;
+      });
+    },
+    [persistProfiles, persistActiveId]
+  );
+
+  const renameProfile = useCallback(
+    (id: string, newName: string) => {
+      setProfilesState((prev) => {
+        const next = prev.map((p) =>
+          p.id === id && !p.builtIn ? { ...p, name: newName } : p
+        );
+        persistProfiles(next);
+        return next;
+      });
+    },
+    [persistProfiles]
+  );
+
+  const updateProfileSnapshot = useCallback(
+    (id: string) => {
+      setProfilesState((prev) => {
+        const next = prev.map((p) =>
+          p.id === id && !p.builtIn
+            ? { ...p, snapshot: captureSnapshot() }
+            : p
+        );
+        persistProfiles(next);
+        return next;
+      });
+    },
+    [captureSnapshot, persistProfiles]
+  );
+
   const value = useMemo<WidgetState>(
     () => ({
       widgetPositions,
@@ -243,6 +468,13 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       addFolder,
       updateFolder,
       removeFolder,
+      profiles,
+      activeProfileId,
+      saveProfile,
+      loadProfile,
+      deleteProfile,
+      renameProfile,
+      updateProfileSnapshot,
     }),
     [
       widgetPositions,
@@ -258,6 +490,13 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       addFolder,
       updateFolder,
       removeFolder,
+      profiles,
+      activeProfileId,
+      saveProfile,
+      loadProfile,
+      deleteProfile,
+      renameProfile,
+      updateProfileSnapshot,
     ]
   );
 

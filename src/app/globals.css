@@ -203,3 +203,12 @@ body {
   color: var(--foreground);
   font-family: var(--cc-font-family), Arial, Helvetica, sans-serif;
 }
+
+/* ── Scrollbar hide utility ── */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
