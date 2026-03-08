@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 // EditToolbar moved into CanvasEditor — FieldLibrary opens from canvas toolbar
@@ -80,8 +79,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   // Backdrop only for hidden mode
   const showBackdrop = isHidden && floatOpen;
-  // Hamburger only for hidden mode
-  const showHamburger = isHidden && !floatOpen;
 
   const contentMargin = isVisible
     ? {
@@ -106,7 +103,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <button
           type="button"
           onClick={() => setFloatOpen(false)}
-          className="fixed inset-0 z-40 bg-black/30"
+          className="fixed inset-x-0 bottom-0 top-12 z-40 bg-black/30"
           aria-label="Close sidebar"
         />
       )}
@@ -119,29 +116,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       />
 
       {/* Top Bar */}
-      <TopBar />
-
-      {/* Edit Mode Toolbar removed — FieldLibrary opens from CanvasEditor toolbar */}
-
-      {/* Hamburger: only for hidden mode, pinned to screen edge */}
-      {showHamburger && (
-        <button
-          type="button"
-          onClick={() => setFloatOpen(true)}
-          className={`fixed top-0 z-30 flex h-12 w-12 items-center justify-center bg-slate-800/80 text-slate-400 shadow-lg transition-colors hover:bg-slate-700 hover:text-slate-200 ${
-            sidebarPosition === "right"
-              ? "right-0 rounded-bl-lg"
-              : "left-0 rounded-br-lg"
-          }`}
-          aria-label="Open sidebar"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-      )}
+      <TopBar onSidebarOpen={isHidden ? () => setFloatOpen(true) : undefined} />
 
       <main
         data-cc-id="content.main"
-        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] pt-16 ${isHidden && !floatOpen ? "pt-[72px]" : ""}`}
+        className="min-h-screen overflow-x-hidden p-[var(--cc-density-content)] pt-16"
         style={contentMargin}
       >
         {children}

@@ -241,7 +241,7 @@ export function Sidebar({
   return (
     <aside
       data-cc-id="sidebar.root"
-      className={`fixed top-0 z-50 h-screen shrink-0 overflow-hidden ${
+      className={`fixed top-12 z-50 shrink-0 overflow-hidden ${
         onRight ? "right-0 border-l" : "left-0 border-r"
       } border-slate-700/50 ${
         isFloat ? "shadow-lg" : ""
@@ -250,7 +250,8 @@ export function Sidebar({
       }`}
       style={{
         width: isCollapsed ? STRIP_WIDTH : expandedWidth,
-        maxWidth: isMobile ? "calc(100vw - 56px)" : undefined,
+        maxWidth: isMobile ? "100vw" : undefined,
+        height: "calc(100vh - 48px)",
         transition: isFloat ? "width 300ms ease" : undefined,
         backgroundColor: isCollapsed
           ? "rgba(15, 23, 42, 0.8)"

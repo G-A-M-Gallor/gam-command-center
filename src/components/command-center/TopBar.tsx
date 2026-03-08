@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, HelpCircle } from "lucide-react";
+import { Store, Pencil, HelpCircle, Menu } from "lucide-react";
 import {
   widgetRegistry,
   getEffectivePlacement,
@@ -32,8 +32,6 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { getTranslations } from "@/lib/i18n";
 
-const SIDEBAR_WIDTH = 240;
-const STRIP_WIDTH = 48;
 const UNIT = 48;
 
 /** Check if placing a widget at col with size overlaps any other visible widget */
@@ -63,7 +61,11 @@ function isOverlapping(
   return false;
 }
 
-export function TopBar() {
+interface TopBarProps {
+  onSidebarOpen?: () => void;
+}
+
+export function TopBar({ onSidebarOpen }: TopBarProps) {
   const {
     widgetPositions,
     widgetSizes,
@@ -263,19 +265,6 @@ export function TopBar() {
       modalHandlers[widgetId]();
     }
   }, [modalHandlers]);
-
-  // Sidebar offset
-  const sidebarOffset =
-    sidebarVisibility === "visible"
-      ? SIDEBAR_WIDTH
-      : sidebarVisibility === "float"
-        ? STRIP_WIDTH
-        : 0;
-
-  const positionStyle = {
-    [sidebarPosition === "right" ? "right" : "left"]: sidebarOffset,
-    [sidebarPosition === "right" ? "left" : "right"]: 0,
-  };
 
   // Visible widgets (placement === "toolbar")
   const visibleWidgets = useMemo(() => {
@@ -506,8 +495,20 @@ export function TopBar() {
       <div
         data-cc-id="topbar.root"
         className="fixed top-0 z-40 flex h-12 items-center border-b border-slate-700 bg-slate-800"
-        style={positionStyle}
+        style={{ left: 0, right: 0 }}
       >
+        {/* Hamburger — left side */}
+        {sidebarPosition === "left" && sidebarVisibility === "hidden" && onSidebarOpen && (
+          <button
+            type="button"
+            onClick={onSidebarOpen}
+            className="flex h-12 w-12 shrink-0 items-center justify-center border-r border-slate-700 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+            aria-label="Open sidebar"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+
         <div ref={containerRef} className="relative h-full flex-1">
           {!mounted ? (
             <span className="px-3 text-xs text-slate-500">&nbsp;</span>
@@ -638,6 +639,18 @@ export function TopBar() {
         >
           <Store className="h-4 w-4" />
         </button>
+
+        {/* Hamburger — right side */}
+        {sidebarPosition === "right" && sidebarVisibility === "hidden" && onSidebarOpen && (
+          <button
+            type="button"
+            onClick={onSidebarOpen}
+            className="flex h-12 w-12 shrink-0 items-center justify-center border-l border-slate-700 text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"
+            aria-label="Open sidebar"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Widget settings panel */}
