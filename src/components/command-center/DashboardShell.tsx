@@ -13,6 +13,7 @@ import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
 import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { InstallPrompt } from "./InstallPrompt";
 
 const SIDEBAR_WIDTH = "15rem";
 const STRIP_WIDTH = "48px";
@@ -147,6 +148,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           onWidgetPanelOpen={handleBottomBarWidgetPanelOpen}
         />
       )}
+
+      {/* PWA install prompt */}
+      <InstallPrompt />
 
       {/* Guide mode overlay */}
       <GuideOverlay />

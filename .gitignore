@@ -40,5 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# PWA — generated service worker files
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+
 # MCP config (contains secrets)
 .mcp.json

@@ -64,6 +64,30 @@ export const gitDeploySchema = z.object({
 
 export type GitDeployInput = z.infer<typeof gitDeploySchema>;
 
+// ─── Push Subscribe ─────────────────────────────────────────
+
+export const pushSubscribeSchema = z.object({
+  endpoint: z.string().url("endpoint must be a valid URL"),
+  keys: z.object({
+    p256dh: z.string().min(1, "p256dh key is required"),
+    auth: z.string().min(1, "auth key is required"),
+  }),
+});
+
+export type PushSubscribeInput = z.infer<typeof pushSubscribeSchema>;
+
+// ─── Push Send ──────────────────────────────────────────────
+
+export const pushSendSchema = z.object({
+  title: z.string().min(1, "title is required").max(200),
+  body: z.string().max(500).optional().default(""),
+  url: z.string().optional().default("/dashboard"),
+  tag: z.string().optional(),
+  userId: z.string().uuid().optional(), // target specific user, or all if omitted
+});
+
+export type PushSendInput = z.infer<typeof pushSendSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

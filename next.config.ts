@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import withSerwist from "@serwist/next";
 
 const nextConfig: NextConfig = {
+  // Serwist uses webpack — tell Next.js 16 this is intentional
+  turbopack: {},
   async headers() {
     return [
       {
@@ -16,8 +19,19 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
     ];
   },
 };
 
-export default nextConfig;
+export default withSerwist({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+})(nextConfig);

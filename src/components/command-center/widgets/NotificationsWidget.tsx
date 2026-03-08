@@ -8,9 +8,14 @@ import {
   Sparkles,
   Check,
   CheckCheck,
+  BellRing,
+  BellOff,
+  Loader2,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { usePushSubscription } from "@/lib/pwa/usePushSubscription";
+import { updateAppBadge } from "@/lib/pwa/badge";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const STORAGE_KEY = "cc-notifications";
@@ -102,6 +107,24 @@ export function NotificationsPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const [items, setItems] = useState<NotificationItem[]>([]);
+  const { state: pushState, subscribe, unsubscribe } = usePushSubscription();
+  const [pushLoading, setPushLoading] = useState(false);
+
+  const handlePushToggle = useCallback(async () => {
+    setPushLoading(true);
+    if (pushState === "subscribed") {
+      await unsubscribe();
+    } else {
+      await subscribe();
+    }
+    setPushLoading(false);
+  }, [pushState, subscribe, unsubscribe]);
+
+  // Update app badge when unread count changes
+  useEffect(() => {
+    const unread = items.filter((n) => !n.read).length;
+    updateAppBadge(unread);
+  }, [items]);
 
   useEffect(() => {
     // Load from localStorage first (instant)
@@ -164,6 +187,33 @@ export function NotificationsPanel() {
 
   return (
     <div className="space-y-2">
+      {/* Push notification toggle */}
+      {pushState !== "unsupported" && (
+        <div className="flex items-center justify-between rounded-lg bg-slate-700/30 px-2.5 py-2">
+          <span className="text-xs text-slate-400">
+            {pushState === "denied"
+              ? t.pwa.pushBlocked
+              : pushState === "subscribed"
+                ? t.pwa.pushEnabled
+                : t.pwa.pushEnable}
+          </span>
+          <button
+            type="button"
+            onClick={handlePushToggle}
+            disabled={pushLoading || pushState === "denied"}
+            className="flex items-center gap-1 rounded px-2 py-1 text-xs transition-colors hover:bg-slate-600/50 disabled:opacity-40"
+          >
+            {pushLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" />
+            ) : pushState === "subscribed" ? (
+              <BellOff className="h-3.5 w-3.5 text-slate-400" />
+            ) : (
+              <BellRing className="h-3.5 w-3.5 text-[var(--cc-accent-400)]" />
+            )}
+          </button>
+        </div>
+      )}
+
       {unreadCount > 0 && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500">

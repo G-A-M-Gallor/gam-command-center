@@ -27,7 +27,7 @@ import type { Viewport } from "next";
 export const metadata: Metadata = {
   title: "GAM Command Center",
   description: "Internal project management dashboard for G.A.M",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
