@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Link2, Plus, X, Loader2, Users } from 'lucide-react';
 import { StakeholderPanel } from './StakeholderPanel';
 import { ActivityFeed } from './ActivityFeed';
+import { NoteActions } from './NoteActions';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import {
@@ -280,6 +281,23 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-white/[0.04]">
+          {/* Action buttons */}
+          {etInfo?.template_config?.action_buttons && etInfo.template_config.action_buttons.length > 0 && (
+            <NoteActions
+              note={{
+                id: noteId, title: '', content: null, record_type: '',
+                entity_type: entityType, meta, status: (meta.status as string) ?? 'active',
+                source: '', is_deleted: false, created_at: '', last_edited_at: '',
+              }}
+              entityType={entityType!}
+              templateConfig={etInfo.template_config}
+              language={language}
+              fields={fields}
+              allNotes={[]}
+              onRefresh={() => onMetaChange({ ...meta })}
+            />
+          )}
+
           {/* Meta fields — template sections or flat grid */}
           {etInfo?.template_config?.layout.sections && etInfo.template_config.layout.sections.length > 0 ? (
             // Template-driven sectioned layout

@@ -13,6 +13,8 @@ interface Props {
   onSort: (sort: ViewSort) => void;
   onUpdate: () => void;
   language: string;
+  selectedIds?: Set<string>;
+  onSelectionChange?: (ids: Set<string>) => void;
 }
 
 function renderCompositeValue(field: GlobalField, meta: Record<string, unknown>): string {
@@ -181,16 +183,18 @@ function EditableCell({
   );
 }
 
-export function TableView({ notes, fields, groups, sort, onSort, onUpdate, language }: Props) {
+export function TableView({ notes, fields, groups, sort, onSort, onUpdate, language, selectedIds: controlledIds, onSelectionChange }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [internalIds, setInternalIds] = useState<Set<string>>(new Set());
+
+  // Use controlled mode if props provided, otherwise internal state
+  const selectedIds = controlledIds ?? internalIds;
+  const setSelectedIds = onSelectionChange ?? setInternalIds;
 
   const toggleSelect = (id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedIds(next);
   };
 
   const toggleAll = () => {

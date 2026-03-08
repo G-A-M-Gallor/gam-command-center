@@ -5,7 +5,16 @@
 // It defines which fields to show, not what the note IS.
 // A note can wear multiple lenses.
 
-import type { EntityTypeInsert, EntityConnectionInsert, TemplateConfig } from './types';
+import type { EntityTypeInsert, EntityConnectionInsert, TemplateConfig, ActionButton } from './types';
+import { BUILTIN_ACTIONS } from './actionRegistry';
+
+// ─── Helpers ─────────────────────────────────────────
+
+function pickActions(...ids: string[]): ActionButton[] {
+  return ids
+    .map(id => BUILTIN_ACTIONS[id])
+    .filter((a): a is ActionButton => !!a);
+}
 
 // ─── Template Configs ────────────────────────────────
 
@@ -28,6 +37,7 @@ const devTaskTemplate: TemplateConfig = {
     { event_type: 'status_change', field_key: 'status' },
     { event_type: 'field_change', field_key: 'story_points' },
   ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'open_in_ai', 'export_csv'),
 };
 
 const dealTemplate: TemplateConfig = {
@@ -48,6 +58,7 @@ const dealTemplate: TemplateConfig = {
     { event_type: 'status_change', field_key: 'pipeline_stage' },
     { event_type: 'field_change', field_key: 'deal_value' },
   ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv'),
 };
 
 const leadTemplate: TemplateConfig = {
@@ -66,6 +77,7 @@ const leadTemplate: TemplateConfig = {
   kpi_triggers: [
     { event_type: 'status_change', field_key: 'pipeline_stage' },
   ],
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'open_in_ai'),
 };
 
 const agreementTemplate: TemplateConfig = {
@@ -81,6 +93,49 @@ const agreementTemplate: TemplateConfig = {
   gantt_config: { start_field: 'effective_date', end_field: 'expiry_date' },
   track_activity: true,
   track_kpi_events: false,
+  action_buttons: pickActions('deactivate', 'reactivate', 'send_notification', 'export_csv'),
+};
+
+// ─── Minimal Action-only Configs (base entity types) ──
+
+const taskActions: TemplateConfig = {
+  layout: { meta_columns: 2, field_order: [], sections: [] },
+  available_views: ['board', 'table', 'list'],
+  track_activity: false,
+  track_kpi_events: false,
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv'),
+};
+
+const contactActions: TemplateConfig = {
+  layout: { meta_columns: 2, field_order: [], sections: [] },
+  available_views: ['table', 'list'],
+  track_activity: false,
+  track_kpi_events: false,
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv'),
+};
+
+const clientActions: TemplateConfig = {
+  layout: { meta_columns: 2, field_order: [], sections: [] },
+  available_views: ['table', 'list'],
+  track_activity: false,
+  track_kpi_events: false,
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv'),
+};
+
+const projectActions: TemplateConfig = {
+  layout: { meta_columns: 2, field_order: [], sections: [] },
+  available_views: ['board', 'table', 'list'],
+  track_activity: false,
+  track_kpi_events: false,
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv'),
+};
+
+const documentActions: TemplateConfig = {
+  layout: { meta_columns: 2, field_order: [], sections: [] },
+  available_views: ['list', 'table'],
+  track_activity: false,
+  track_kpi_events: false,
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv'),
 };
 
 // ─── Entity Types ────────────────────────────────────
@@ -94,7 +149,7 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     field_refs: ['status', 'priority', 'assignee', 'due_date', 'tags'],
     group_refs: [],
     default_view: 'board',
-    template_config: null,
+    template_config: taskActions,
     sort_order: 0,
   },
   {
@@ -105,7 +160,7 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     field_refs: ['full_name', 'phone', 'email', 'tags'],
     group_refs: ['call_log'],
     default_view: 'table',
-    template_config: null,
+    template_config: contactActions,
     sort_order: 1,
   },
   {
@@ -116,7 +171,7 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     field_refs: ['business', 'phone', 'email', 'status', 'address', 'tags'],
     group_refs: ['call_log'],
     default_view: 'table',
-    template_config: null,
+    template_config: clientActions,
     sort_order: 2,
   },
   {
@@ -127,7 +182,7 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     field_refs: ['status', 'priority', 'assignee', 'due_date', 'tags'],
     group_refs: [],
     default_view: 'board',
-    template_config: null,
+    template_config: projectActions,
     sort_order: 3,
   },
   {
@@ -138,7 +193,7 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     field_refs: ['status', 'tags'],
     group_refs: [],
     default_view: 'list',
-    template_config: null,
+    template_config: documentActions,
     sort_order: 4,
   },
   // ─── Phase 2 Entity Types ─────────────────────────

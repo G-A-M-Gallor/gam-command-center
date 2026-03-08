@@ -11,7 +11,6 @@ import {
   Grid3X3,
   Bot,
   Palette,
-  FormInput,
   Network,
   Calendar,
   Compass,
@@ -92,7 +91,6 @@ export const NAV_GROUPS: NavGroup[] = [
     labelKey: "groupSystem",
     items: [
       { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
-      { href: "/dashboard/formily", key: "formily", icon: FormInput, status: "coming-soon" },
       { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
       { href: "/dashboard/settings", key: "settings", icon: Settings, status: "active" },
     ],

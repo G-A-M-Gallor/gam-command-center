@@ -20,7 +20,6 @@ type PageKey =
   | "functionalMap"
   | "aiHub"
   | "designSystem"
-  | "formily"
   | "architecture"
   | "plan"
   | "settings"
@@ -38,7 +37,6 @@ const pageRoutes: Record<PageKey, string> = {
   functionalMap: "/dashboard/functional-map",
   aiHub: "/dashboard/ai-hub",
   designSystem: "/dashboard/design-system",
-  formily: "/dashboard/formily",
   architecture: "/dashboard/architecture",
   plan: "/dashboard/plan",
   entities: "/dashboard/entities",

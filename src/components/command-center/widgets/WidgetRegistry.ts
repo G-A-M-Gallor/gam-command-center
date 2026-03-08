@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, FileText, FileCheck, FileScan } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -49,14 +49,6 @@ const WATIBarContent = dynamic(() => import("./WATIWidget").then((m) => ({ defau
 const TeamPanel = dynamic(() => import("./TeamWidget").then((m) => ({ default: m.TeamPanel })), { ssr: false }) as ComponentType<any>;
 const TeamBarContent = dynamic(() => import("./TeamWidget").then((m) => ({ default: m.TeamBarContent })), { ssr: false }) as ComponentType<any>;
 
-const OrigamiFormsPanel = dynamic(() => import("./OrigamiFormsWidget").then((m) => ({ default: m.OrigamiFormsPanel })), { ssr: false }) as ComponentType<any>;
-const OrigamiFormsBarContent = dynamic(() => import("./OrigamiFormsWidget").then((m) => ({ default: m.OrigamiFormsBarContent })), { ssr: false }) as ComponentType<any>;
-
-const FormSubmissionsPanel = dynamic(() => import("./FormSubmissionsWidget").then((m) => ({ default: m.FormSubmissionsPanel })), { ssr: false }) as ComponentType<any>;
-const FormSubmissionsBarContent = dynamic(() => import("./FormSubmissionsWidget").then((m) => ({ default: m.FormSubmissionsBarContent })), { ssr: false }) as ComponentType<any>;
-
-const FormScannerPanel = dynamic(() => import("./FormScannerWidget").then((m) => ({ default: m.FormScannerPanel })), { ssr: false }) as ComponentType<any>;
-const FormScannerBarContent = dynamic(() => import("./FormScannerWidget").then((m) => ({ default: m.FormScannerBarContent })), { ssr: false }) as ComponentType<any>;
 
 export type WidgetSize = 1 | 2 | 3 | 4;
 
@@ -64,7 +56,6 @@ export type WidgetCategory =
   | "basics"
   | "productivity"
   | "ai_comms"
-  | "forms"
   | "team"
   | "analytics"
   | "integrations";
@@ -294,58 +285,6 @@ export const widgetRegistry: WidgetDefinition[] = [
     component: WeeklyPlannerPanel,
     renderBar: WeeklyPlannerBarContent,
     panelMode: "modal",
-  },
-  // ─── Forms ─────────────────────────────────────────────────────
-  {
-    id: "origami-forms",
-    icon: FileText,
-    label: { he: "טפסי Origami", en: "Origami Forms", ru: "Формы Origami" },
-    description: {
-      he: "ישויות וטפסים מ-Origami CRM — קליטת לקוחות, דוחות, בקרה",
-      en: "Entities & forms from Origami CRM — intake, reports, inspections",
-      ru: "Сущности и формы из Origami CRM — приём, отчёты, проверки",
-    },
-    defaultSize: 2,
-    status: "active",
-    category: "forms",
-    tier: "pro",
-    isRemovable: true,
-    component: OrigamiFormsPanel,
-    renderBar: OrigamiFormsBarContent,
-  },
-  {
-    id: "form-submissions",
-    icon: FileCheck,
-    label: { he: "הגשות טפסים", en: "Form Submissions", ru: "Отправки форм" },
-    description: {
-      he: "הגשות אחרונות, סטטוסים ואישורים ממערכת הטפסים",
-      en: "Recent submissions, statuses & approvals from forms",
-      ru: "Последние отправки, статусы и утверждения из форм",
-    },
-    defaultSize: 2,
-    status: "active",
-    category: "forms",
-    tier: "pro",
-    isRemovable: true,
-    component: FormSubmissionsPanel,
-    renderBar: FormSubmissionsBarContent,
-  },
-  {
-    id: "form-scanner",
-    icon: FileScan,
-    label: { he: "סורק מסמכים", en: "Document Scanner", ru: "Сканер документов" },
-    description: {
-      he: "סריקת מסמכים, חתימות דיגיטליות ואימות שדות",
-      en: "Document scanning, digital signatures & field validation",
-      ru: "Сканирование документов, цифровые подписи и валидация полей",
-    },
-    defaultSize: 2,
-    status: "active",
-    category: "forms",
-    tier: "business",
-    isRemovable: true,
-    component: FormScannerPanel,
-    renderBar: FormScannerBarContent,
   },
   // ─── Communications & Team ────────────────────────────────────
   {

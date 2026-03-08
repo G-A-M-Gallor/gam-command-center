@@ -179,6 +179,25 @@ export interface ViewSort {
   direction: 'asc' | 'desc';
 }
 
+// ─── Action Buttons ──────────────────────────────────
+// Per-entity-type configurable actions for toolbar + note sidebar.
+
+export interface ActionButton {
+  id: string;
+  label: I18nLabel;
+  icon: string;
+  variant: 'default' | 'destructive' | 'outline' | 'ghost';
+  scope: 'single' | 'bulk' | 'global';
+  show_when?: {
+    status_in?: string[];
+    status_not_in?: string[];
+    field_exists?: string;
+    is_active?: boolean;
+  };
+  confirm?: boolean;
+  sort_order: number;
+}
+
 // ─── Template Config ───────────────────────────────
 // Templates transform an entity type into a specific experience.
 // Same underlying note, different layout and behavior.
@@ -220,6 +239,7 @@ export interface TemplateConfig {
   track_activity: boolean;
   track_kpi_events: boolean;
   kpi_triggers?: KPITrigger[];
+  action_buttons?: ActionButton[];
 }
 
 export function defaultTemplateConfig(views: ViewType[] = ['table', 'board', 'list']): TemplateConfig {

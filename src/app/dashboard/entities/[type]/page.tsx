@@ -19,6 +19,7 @@ import { ListView } from '@/components/entities/views/ListView';
 import { CalendarView } from '@/components/entities/views/CalendarView';
 import { GanttView } from '@/components/entities/views/GanttView';
 import { TimelineView } from '@/components/entities/views/TimelineView';
+import { EntityActionBar } from '@/components/entities/EntityActionBar';
 import type { EntityType, GlobalField, NoteRecord, ViewType, ViewFilter, ViewSort, FieldGroup } from '@/lib/entities/types';
 
 const VIEW_ICONS: Record<ViewType, React.ElementType> = {
@@ -54,6 +55,7 @@ export default function EntityViewPage() {
   const [page, setPage] = useState(0);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const pageSize = 50;
 
   // Load entity type + fields
@@ -298,6 +300,20 @@ export default function EntityViewPage() {
         </div>
       )}
 
+      {/* Action Bar */}
+      {entityType?.template_config?.action_buttons && entityType.template_config.action_buttons.length > 0 && (
+        <EntityActionBar
+          selectedIds={selectedIds}
+          notes={filteredNotes}
+          entityType={entitySlug}
+          templateConfig={entityType.template_config}
+          language={language}
+          fields={fields}
+          onRefresh={loadNotes}
+          onClearSelection={() => setSelectedIds(new Set())}
+        />
+      )}
+
       {/* View */}
       {loading ? (
         <div className="space-y-2">
@@ -316,6 +332,8 @@ export default function EntityViewPage() {
               onSort={setSort}
               onUpdate={handleUpdateNote}
               language={language}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
             />
           )}
           {view === 'board' && (
