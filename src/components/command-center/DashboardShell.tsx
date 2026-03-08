@@ -127,6 +127,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar: always rendered for visible + float; translate-controlled for hidden */}
       <Sidebar
+        effectiveMode={effectiveVisibility}
         isFloating={isFloat || isHidden}
         isOpen={isFloat ? true : floatOpen}
         onClose={() => setFloatOpen(false)}

@@ -115,12 +115,15 @@ function loadViewMode(): ViewMode {
 // ─── Component ───────────────────────────────────────────
 
 interface SidebarProps {
+  /** Effective visibility mode (accounts for mobile/tablet overrides) */
+  effectiveMode?: "visible" | "float" | "hidden";
   isFloating?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 export function Sidebar({
+  effectiveMode,
   isFloating = false,
   isOpen = true,
   onClose,
@@ -163,12 +166,15 @@ export function Sidebar({
     window.dispatchEvent(new Event("cc-favorites-change"));
   }, []);
 
-  const isFloat = sidebarVisibility === "float";
+  // Use effectiveMode (from DashboardShell) when available — it accounts for mobile/tablet overrides.
+  // Fall back to raw sidebarVisibility for backwards compatibility.
+  const mode = effectiveMode ?? sidebarVisibility;
+  const isFloat = mode === "float";
   const isCollapsed = isFloat && !hovered;
   const onRight = sidebarPosition === "right";
   const expandedWidth = isMobile ? MOBILE_WIDTH : FULL_WIDTH;
 
-  const isHidden = sidebarVisibility === "hidden";
+  const isHidden = mode === "hidden";
   const shouldCloseOnNav = isHidden && isFloating && onClose;
   const isTranslatedOff = isHidden && isFloating && !isOpen;
   const translateClass =
