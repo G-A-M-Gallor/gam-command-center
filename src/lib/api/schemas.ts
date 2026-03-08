@@ -88,6 +88,16 @@ export const pushSendSchema = z.object({
 
 export type PushSendInput = z.infer<typeof pushSendSchema>;
 
+// ─── Push Subscribers Delete ────────────────────────────────
+
+export const pushSubscribersDeleteSchema = z.object({
+  mode: z.enum(["expired"], {
+    error: 'mode must be "expired"',
+  }),
+});
+
+export type PushSubscribersDeleteInput = z.infer<typeof pushSubscribersDeleteSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { ColorPicker } from "@/components/command-center/ColorPicker";
 import {
@@ -24,9 +24,18 @@ import {
 } from "@/contexts/WidgetContext";
 import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
 import { getTranslations } from "@/lib/i18n";
-import { Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload } from "lucide-react";
+import {
+  Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload,
+  Smartphone, Bell, Camera, Users, Wifi, WifiOff, Share2, Moon, Vibrate, MapPin, BadgeCheck, RefreshCw, Send, ScanLine, Trash, Image,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useInstallPrompt } from "@/lib/pwa/useInstallPrompt";
+import { usePushSubscription } from "@/lib/pwa/usePushSubscription";
+import { useDeviceCapabilities } from "@/lib/pwa/useDeviceCapabilities";
+import { useCamera } from "@/lib/pwa/useCamera";
+import { useContacts } from "@/lib/pwa/useContacts";
+import { useWakeLock } from "@/lib/pwa/useWakeLock";
 
 const ACCENT_OPTIONS: { value: AccentColor; swatch: string }[] = [
   { value: "purple", swatch: "#9333ea" },
@@ -55,13 +64,14 @@ const DENSITY_OPTIONS: { value: Density; key: "compact" | "default" | "spacious"
   { value: "spacious", key: "spacious" },
 ];
 
-type SettingsTab = "general" | "theme" | "brand" | "widgetBar";
+type SettingsTab = "general" | "theme" | "brand" | "widgetBar" | "pwa";
 
-const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" }[] = [
+const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" | "tabPwa" }[] = [
   { tab: "general", tKey: "tabGeneral" },
   { tab: "theme", tKey: "tabTheme" },
   { tab: "brand", tKey: "tabBrand" },
   { tab: "widgetBar", tKey: "tabWidgetBar" },
+  { tab: "pwa", tKey: "tabPwa" },
 ];
 
 // --- Shared button classes ---
@@ -1062,6 +1072,617 @@ function WidgetBarTab() {
   );
 }
 
+// ─── Notification Template Types ─────────────────────────────
+
+type TemplateType = "status" | "mention" | "deadline" | "ai";
+
+interface NotificationTemplate {
+  title: string;
+  body: string;
+}
+
+type NotificationTemplates = Record<TemplateType, NotificationTemplate>;
+
+const DEFAULT_TEMPLATES: NotificationTemplates = {
+  status: { title: "{{project}} — Status Update", body: "Status changed by {{user}}" },
+  mention: { title: "{{user}} mentioned you", body: "In {{project}}" },
+  deadline: { title: "Deadline: {{project}}", body: "Due {{date}}" },
+  ai: { title: "AI Response Ready", body: "Your request in {{project}} is complete" },
+};
+
+const TEMPLATES_KEY = "cc-notification-templates";
+
+function loadTemplates(): NotificationTemplates {
+  try {
+    const raw = localStorage.getItem(TEMPLATES_KEY);
+    if (raw) return { ...DEFAULT_TEMPLATES, ...JSON.parse(raw) };
+  } catch { /* ignore */ }
+  return { ...DEFAULT_TEMPLATES };
+}
+
+// ─── PWA Tab ─────────────────────────────────────────────────
+
+function PWATab() {
+  const { language } = useSettings();
+  const t = getTranslations(language);
+  const p = t.pwa as Record<string, string>;
+  const install = useInstallPrompt();
+  const push = usePushSubscription();
+  const caps = useDeviceCapabilities();
+  const camera = useCamera();
+  const contacts = useContacts();
+  const wakeLock = useWakeLock();
+
+  // Notification templates
+  const [templates, setTemplates] = useState<NotificationTemplates>(DEFAULT_TEMPLATES);
+  useEffect(() => { setTemplates(loadTemplates()); }, []);
+
+  const updateTemplate = useCallback(
+    (type: TemplateType, field: "title" | "body", value: string) => {
+      setTemplates((prev) => {
+        const next = { ...prev, [type]: { ...prev[type], [field]: value } };
+        localStorage.setItem(TEMPLATES_KEY, JSON.stringify(next));
+        return next;
+      });
+    },
+    []
+  );
+
+  // QR Scanner modal
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanResult, setScanResult] = useState<string | null>(null);
+
+  // Geolocation
+  const [geoLocation, setGeoLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  // Push subscribers
+  const [subscribers, setSubscribers] = useState<Array<{ user_id: string; endpoint: string; email?: string; created_at: string; updated_at: string }>>([]);
+  const [subsLoading, setSubsLoading] = useState(false);
+  const [cleaningExpired, setCleaningExpired] = useState(false);
+
+  useEffect(() => {
+    async function fetchSubs() {
+      setSubsLoading(true);
+      try {
+        const res = await fetch("/api/push/subscribers");
+        if (res.ok) {
+          const data = await res.json();
+          setSubscribers(data.subscribers || []);
+        }
+      } catch { /* ignore */ }
+      setSubsLoading(false);
+    }
+    fetchSubs();
+  }, []);
+
+  const handleSendTest = useCallback(async () => {
+    await fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "GAM CC — Test",
+        body: p.testPushSent,
+        url: "/dashboard/settings",
+        tag: "test",
+      }),
+    });
+  }, [p.testPushSent]);
+
+  const handleSendToUser = useCallback(async (userId: string) => {
+    await fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "GAM CC",
+        body: "Notification from admin",
+        userId,
+      }),
+    });
+  }, []);
+
+  const handleSendToAll = useCallback(async () => {
+    await fetch("/api/push/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "GAM CC",
+        body: "Broadcast notification",
+      }),
+    });
+  }, []);
+
+  const handleCleanExpired = useCallback(async () => {
+    setCleaningExpired(true);
+    try {
+      const res = await fetch("/api/push/subscribers", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "expired" }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.cleaned > 0) {
+          // Refresh list
+          const listRes = await fetch("/api/push/subscribers");
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            setSubscribers(listData.subscribers || []);
+          }
+        }
+      }
+    } catch { /* ignore */ }
+    setCleaningExpired(false);
+  }, []);
+
+  const handleTestShare = useCallback(async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "GAM Command Center",
+          text: "Internal project management dashboard",
+          url: window.location.origin + "/dashboard",
+        });
+      } catch { /* user cancelled */ }
+    }
+  }, []);
+
+  const handleTestVibration = useCallback(() => {
+    if (navigator.vibrate) {
+      navigator.vibrate([100, 50, 100]);
+    }
+  }, []);
+
+  const handleGetLocation = useCallback(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setGeoLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => { /* denied */ }
+    );
+  }, []);
+
+  // Permission badge helper
+  const permBadge = (granted: boolean, label?: string) => (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+        granted
+          ? "bg-emerald-500/20 text-emerald-400"
+          : "bg-slate-700 text-slate-400"
+      }`}
+    >
+      {granted ? (label || p.supported) : (label || p.notSupported)}
+    </span>
+  );
+
+  const TEMPLATE_TYPES: { type: TemplateType; tKey: string }[] = [
+    { type: "status", tKey: "templateStatus" },
+    { type: "mention", tKey: "templateMention" },
+    { type: "deadline", tKey: "templateDeadline" },
+    { type: "ai", tKey: "templateAi" },
+  ];
+
+  return (
+    <div className="max-w-2xl space-y-4">
+      {/* Section 1: Installation Status */}
+      <Section label={p.installationStatus} ccId="settings.pwa.install">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Smartphone className="h-5 w-5 text-slate-400" />
+            {install.state === "standalone" ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-sm font-medium text-emerald-400">
+                {p.installedStandalone}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 px-3 py-1 text-sm font-medium text-amber-400">
+                {p.runningInBrowser}
+              </span>
+            )}
+          </div>
+
+          {install.state === "installable" && (
+            <Button icon={Download} onClick={install.install}>
+              {p.installApp}
+            </Button>
+          )}
+          {install.state === "ios" && (
+            <p className="text-xs text-slate-500">{p.iosInstallHint}</p>
+          )}
+
+          <div className="space-y-1 text-xs text-slate-500">
+            <div><span className="text-slate-400">{p.appName}:</span> GAM Command Center</div>
+            <div><span className="text-slate-400">{p.appDescription}:</span> Internal project management dashboard for G.A.M</div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Section 2: Push Notifications */}
+      <Section label={p.pushNotifications} ccId="settings.pwa.push">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Bell className="h-5 w-5 text-slate-400" />
+            {push.state === "subscribed" && permBadge(true, p.permGranted)}
+            {push.state === "denied" && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/20 px-2.5 py-1 text-xs font-medium text-red-400">
+                {p.permDenied}
+              </span>
+            )}
+            {push.state === "prompt" && permBadge(false, p.permPrompt)}
+            {push.state === "unsupported" && permBadge(false, p.permUnsupported)}
+            {push.state === "loading" && (
+              <span className="text-xs text-slate-500">{p.loading}</span>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            {push.state === "subscribed" ? (
+              <Button variant="ghost" size="sm" icon={WifiOff} onClick={push.unsubscribe}>
+                {p.disablePush}
+              </Button>
+            ) : push.state === "prompt" ? (
+              <Button size="sm" icon={Wifi} onClick={push.subscribe}>
+                {p.enablePush}
+              </Button>
+            ) : null}
+
+            {push.state === "subscribed" && (
+              <Button variant="ghost" size="sm" icon={Send} onClick={handleSendTest}>
+                {p.sendTestPush}
+              </Button>
+            )}
+          </div>
+
+          {/* Notification Templates */}
+          <div className="mt-2 space-y-2">
+            <label className="block text-xs font-medium text-slate-400">{p.notificationTemplates}</label>
+            <p className="text-[10px] text-slate-600">{p.templateVars}</p>
+            {TEMPLATE_TYPES.map(({ type, tKey }) => (
+              <div key={type} className="space-y-1 rounded-lg bg-slate-700/30 p-2.5">
+                <span className="text-[11px] font-medium text-slate-300">{p[tKey]}</span>
+                <input
+                  type="text"
+                  value={templates[type].title}
+                  onChange={(e) => updateTemplate(type, "title", e.target.value)}
+                  placeholder={p.templateTitle}
+                  className="w-full rounded bg-slate-700 px-2 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
+                />
+                <input
+                  type="text"
+                  value={templates[type].body}
+                  onChange={(e) => updateTemplate(type, "body", e.target.value)}
+                  placeholder={p.templateBody}
+                  className="w-full rounded bg-slate-700 px-2 py-1 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Section 3: Camera & Scanner */}
+      <Section label={p.cameraScanner} ccId="settings.pwa.camera">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Camera className="h-5 w-5 text-slate-400" />
+            {camera.isSupported ? (
+              permBadge(camera.permission === "granted", camera.permission === "granted" ? p.permGranted : p.permPrompt)
+            ) : (
+              permBadge(false, p.permUnsupported)
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {camera.isSupported && camera.permission !== "granted" && (
+              <Button size="sm" variant="ghost" icon={Camera} onClick={camera.requestPermission}>
+                {p.requestCamera}
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" icon={ScanLine} onClick={() => setScannerOpen(true)}>
+              {p.scanQR}
+            </Button>
+            <Button size="sm" variant="ghost" icon={Image} onClick={camera.takePhoto}>
+              {p.takePhoto}
+            </Button>
+          </div>
+
+          {/* QR Scanner Modal */}
+          {scannerOpen && <QRScannerModal onClose={() => setScannerOpen(false)} onResult={(r) => { setScanResult(r); setScannerOpen(false); }} />}
+
+          {scanResult && (
+            <div className="rounded-lg bg-slate-700/30 p-2.5">
+              <label className="text-[10px] font-medium text-slate-400">{p.scanResult}</label>
+              <p className="mt-1 break-all text-xs text-slate-200">{scanResult}</p>
+            </div>
+          )}
+
+          {camera.photoUrl && (
+            <div className="space-y-2">
+              <label className="text-[10px] font-medium text-slate-400">{p.photoPreview}</label>
+              <img src={camera.photoUrl} alt="Captured" className="max-h-48 rounded-lg border border-slate-700" />
+              <Button size="sm" variant="ghost" icon={Trash} onClick={camera.clearPhoto}>
+                {p.clearPhoto}
+              </Button>
+            </div>
+          )}
+        </div>
+      </Section>
+
+      {/* Section 4: Contacts */}
+      <Section label={p.contacts} ccId="settings.pwa.contacts">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Users className="h-5 w-5 text-slate-400" />
+            {contacts.isSupported ? (
+              permBadge(true, p.contactsSupported)
+            ) : (
+              permBadge(false, p.contactsNotSupported)
+            )}
+          </div>
+
+          {!contacts.isSupported && (
+            <p className="text-xs text-slate-500">{p.contactsHint}</p>
+          )}
+
+          {contacts.isSupported && (
+            <div className="flex gap-2">
+              <Button size="sm" icon={Users} onClick={contacts.pickContacts} disabled={contacts.loading}>
+                {p.importContacts}
+              </Button>
+              {contacts.contacts.length > 0 && (
+                <Button size="sm" variant="ghost" icon={Trash} onClick={contacts.clearContacts}>
+                  {p.clearContacts}
+                </Button>
+              )}
+            </div>
+          )}
+
+          {contacts.contacts.length > 0 ? (
+            <div className="max-h-48 overflow-y-auto rounded-lg bg-slate-700/30">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-700 text-slate-400">
+                    <th className="px-2 py-1.5 text-start font-medium">{p.contactName}</th>
+                    <th className="px-2 py-1.5 text-start font-medium">{p.contactEmail}</th>
+                    <th className="px-2 py-1.5 text-start font-medium">{p.contactPhone}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {contacts.contacts.map((c, i) => (
+                    <tr key={i} className="border-b border-slate-700/50 last:border-0">
+                      <td className="px-2 py-1.5 text-slate-200">{c.name || "—"}</td>
+                      <td className="px-2 py-1.5 text-slate-300">{c.email || "—"}</td>
+                      <td className="px-2 py-1.5 text-slate-300">{c.tel || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : contacts.isSupported ? (
+            <p className="text-xs text-slate-500">{p.noContacts}</p>
+          ) : null}
+        </div>
+      </Section>
+
+      {/* Section 5: Device Capabilities */}
+      <Section label={p.deviceCapabilities} ccId="settings.pwa.capabilities">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {/* Web Share */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Share2 className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.webShare}</span>
+            </div>
+            {permBadge(caps.share)}
+            {caps.share && (
+              <button type="button" onClick={handleTestShare} className="mt-2 w-full rounded bg-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:bg-slate-600">
+                {p.testShare}
+              </button>
+            )}
+          </div>
+
+          {/* Wake Lock */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Moon className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.wakeLock}</span>
+            </div>
+            {permBadge(caps.wakeLock)}
+            {caps.wakeLock && (
+              <>
+                <button
+                  type="button"
+                  onClick={wakeLock.toggle}
+                  className={`mt-2 w-full rounded px-2 py-1 text-[10px] transition-colors ${
+                    wakeLock.isActive
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                  }`}
+                >
+                  {wakeLock.isActive ? p.wakeLockActive : p.wakeLock}
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* Vibration */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Vibrate className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.vibration}</span>
+            </div>
+            {permBadge(caps.vibration)}
+            {caps.vibration && (
+              <button type="button" onClick={handleTestVibration} className="mt-2 w-full rounded bg-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:bg-slate-600">
+                {p.testVibration}
+              </button>
+            )}
+          </div>
+
+          {/* Geolocation */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.geolocation}</span>
+            </div>
+            {permBadge(caps.geolocation)}
+            {caps.geolocation && (
+              <>
+                <button type="button" onClick={handleGetLocation} className="mt-2 w-full rounded bg-slate-700 px-2 py-1 text-[10px] text-slate-300 hover:bg-slate-600">
+                  {p.getLocation}
+                </button>
+                {geoLocation && (
+                  <p className="mt-1 text-[10px] font-mono text-slate-400">
+                    {geoLocation.lat.toFixed(5)}, {geoLocation.lng.toFixed(5)}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Badge API */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <BadgeCheck className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.badgeApi}</span>
+            </div>
+            {permBadge(caps.badge)}
+          </div>
+
+          {/* Background Sync */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.backgroundSync}</span>
+            </div>
+            {permBadge(caps.backgroundSync)}
+          </div>
+
+          {/* Service Worker */}
+          <div className="rounded-lg bg-slate-700/30 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <Wifi className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-medium text-slate-300">{p.serviceWorkerStatus}</span>
+            </div>
+            {permBadge(caps.serviceWorker)}
+          </div>
+        </div>
+      </Section>
+
+      {/* Section 6: Push Subscribers Admin */}
+      <Section label={p.pushAdmin} ccId="settings.pwa.admin">
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="ghost" icon={Send} onClick={handleSendToAll} disabled={subscribers.length === 0}>
+              {p.sendToAll}
+            </Button>
+            <Button size="sm" variant="ghost" icon={Trash} onClick={handleCleanExpired} disabled={cleaningExpired}>
+              {cleaningExpired ? p.cleaning : p.cleanExpired}
+            </Button>
+          </div>
+
+          {subsLoading ? (
+            <p className="py-4 text-center text-xs text-slate-500">{p.loading}</p>
+          ) : subscribers.length === 0 ? (
+            <p className="py-4 text-center text-xs text-slate-500">{p.noSubscribers}</p>
+          ) : (
+            <div className="max-h-64 overflow-y-auto rounded-lg bg-slate-700/30">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-700 text-slate-400">
+                    <th className="px-2 py-1.5 text-start font-medium">{p.subscriberEmail}</th>
+                    <th className="px-2 py-1.5 text-start font-medium">{p.subscriberDate}</th>
+                    <th className="px-2 py-1.5 text-start font-medium">{p.subscriberLastActive}</th>
+                    <th className="px-2 py-1.5 text-end font-medium" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscribers.map((sub, i) => (
+                    <tr key={i} className="border-b border-slate-700/50 last:border-0">
+                      <td className="px-2 py-1.5 text-slate-200">{sub.email || sub.user_id.slice(0, 8)}</td>
+                      <td className="px-2 py-1.5 text-slate-400">
+                        {new Date(sub.created_at).toLocaleDateString(language === "he" ? "he-IL" : language === "ru" ? "ru-RU" : "en-US")}
+                      </td>
+                      <td className="px-2 py-1.5 text-slate-400">
+                        {new Date(sub.updated_at).toLocaleDateString(language === "he" ? "he-IL" : language === "ru" ? "ru-RU" : "en-US")}
+                      </td>
+                      <td className="px-2 py-1.5 text-end">
+                        <button
+                          type="button"
+                          onClick={() => handleSendToUser(sub.user_id)}
+                          className="rounded px-2 py-0.5 text-[10px] text-slate-400 hover:bg-slate-600 hover:text-slate-200"
+                        >
+                          {p.sendToUser}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+// ─── QR Scanner Modal ────────────────────────────────────────
+
+function QRScannerModal({ onClose, onResult }: { onClose: () => void; onResult: (result: string) => void }) {
+  const scannerRef = useRef<HTMLDivElement>(null);
+  const html5QrRef = useRef<unknown>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      if (cancelled || !scannerRef.current) return;
+
+      const scanner = new Html5Qrcode(scannerRef.current.id);
+      html5QrRef.current = scanner;
+
+      try {
+        await scanner.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            onResult(decodedText);
+            scanner.stop().catch(() => {});
+          },
+          () => { /* ignore scan failures */ }
+        );
+      } catch {
+        // Camera denied or unavailable
+        onClose();
+      }
+    }
+
+    init();
+
+    return () => {
+      cancelled = true;
+      if (html5QrRef.current) {
+        const s = html5QrRef.current as { stop: () => Promise<void> };
+        s.stop().catch(() => {});
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" onClick={onClose}>
+      <div className="relative w-full max-w-sm rounded-lg bg-slate-800 p-4" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute end-2 top-2 rounded-full p-1 text-slate-400 hover:bg-slate-700 hover:text-white"
+        >
+          <XIcon className="h-4 w-4" />
+        </button>
+        <div id="qr-scanner-container" ref={scannerRef} className="overflow-hidden rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
 // ─── Settings Page ────────────────────────────────────────────
 
 export default function SettingsPage() {
@@ -1097,6 +1718,7 @@ export default function SettingsPage() {
         {activeTab === "theme" && <ThemeTab />}
         {activeTab === "brand" && <BrandTab />}
         {activeTab === "widgetBar" && <WidgetBarTab />}
+        {activeTab === "pwa" && <PWATab />}
       </div>
     </div>
   );

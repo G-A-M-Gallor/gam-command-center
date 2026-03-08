@@ -32,6 +32,7 @@ export async function POST(request: Request) {
         endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,
+        email: user.email || null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id,endpoint" }
