@@ -26,6 +26,7 @@ import {
   Star,
   Download,
   Share,
+  Database,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -72,6 +73,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/editor", key: "editor", icon: FileEdit, status: "active" },
       { href: "/dashboard/story-map", key: "storyMap", icon: Map, status: "active" },
       { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot, status: "active" },
+      { href: "/dashboard/entities/fields", key: "entities", icon: Database, status: "active" },
     ],
   },
   {

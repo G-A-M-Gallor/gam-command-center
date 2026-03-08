@@ -25,7 +25,10 @@ type PageKey =
   | "plan"
   | "settings"
   | "automations"
-  | "admin";
+  | "admin"
+  | "entities"
+  | "entityFields"
+  | "entityTypes";
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
@@ -38,6 +41,9 @@ const pageRoutes: Record<PageKey, string> = {
   formily: "/dashboard/formily",
   architecture: "/dashboard/architecture",
   plan: "/dashboard/plan",
+  entities: "/dashboard/entities",
+  entityFields: "/dashboard/entities/fields",
+  entityTypes: "/dashboard/entities/types",
   settings: "/dashboard/settings",
   automations: "/dashboard/automations",
   admin: "/dashboard/admin",

@@ -29,6 +29,7 @@ import { VersionHistory } from '@/components/editor/VersionHistory';
 import { SourceBanner } from '@/components/editor/SourceBanner';
 import { EditorBreadcrumb } from '@/components/editor/EditorBreadcrumb';
 import { duplicateDocument, saveVersion, createTemplate } from '@/lib/supabase/editorQueries';
+import { NoteMeta } from '@/components/entities/NoteMeta';
 import type { FieldTypeId, FieldConfig } from '@/components/command-center/fields/fieldTypes';
 
 interface CanvasEditorProps {
@@ -73,6 +74,8 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     bookmarkUrl: string;
     bookmarkId: string;
   } | null>(null);
+  const [entityType, setEntityType] = useState<string | null>(null);
+  const [noteMeta, setNoteMeta] = useState<Record<string, unknown>>({});
 
   // ── Auto-save with retry + offline fallback ─────
   const { saveState, lastSavedAt, saveNow, queueSave } = useAutoSave({ recordId });
@@ -112,7 +115,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       setLoading(true);
       const { data, error: err } = await supabase
         .from('vb_records')
-        .select('id, title, content, record_type, source')
+        .select('id, title, content, record_type, source, entity_type, meta')
         .eq('id', recordId)
         .single();
 
@@ -126,6 +129,8 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
       setTitle(loadedTitle);
       savedTitleRef.current = loadedTitle;
       setContent(data.content || { type: 'doc', content: [{ type: 'paragraph' }] });
+      setEntityType(data.entity_type ?? null);
+      setNoteMeta((data.meta as Record<string, unknown>) ?? {});
 
       // Load story note metadata if this is a story-note
       if (data.record_type === 'story-note') {
@@ -424,6 +429,18 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
               backToStoryMap: t.editor.sourceBannerOpenUrl || 'Open URL',
             }}
             linkHref={bookmarkNoteMeta.bookmarkUrl}
+          />
+        </div>
+      )}
+
+      {/* Entity meta fields panel */}
+      {entityType && (
+        <div className="px-4 pt-2">
+          <NoteMeta
+            noteId={recordId}
+            entityType={entityType}
+            meta={noteMeta}
+            onMetaChange={setNoteMeta}
           />
         </div>
       )}
