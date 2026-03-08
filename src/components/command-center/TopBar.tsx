@@ -538,6 +538,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   // ─── Mobile: shared modals ────────────────────────────────────────
   const mobileModals = (
     <>
+      {storeOpen && <WidgetStore onClose={() => setStoreOpen(false)} />}
       {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}
       {shortcutsOpen && <ShortcutsPanel onClose={() => setShortcutsOpen(false)} />}
       {plannerOpen && <WeeklyPlannerPanel onClose={() => setPlannerOpen(false)} />}
@@ -704,6 +705,24 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                   </span>
                 </button>
               ))}
+
+              {/* Widget Store button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileWidgetPanelOpen(false);
+                  setMobileActiveWidgetId(null);
+                  setStoreOpen(true);
+                }}
+                className="flex flex-col items-center gap-1.5 rounded-xl border border-dashed border-slate-600 p-2.5 text-slate-500 active:bg-slate-800"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/50">
+                  <Store className="h-5 w-5" />
+                </div>
+                <span className="max-w-full truncate text-[10px] font-medium">
+                  {t.widgets.store}
+                </span>
+              </button>
             </div>
 
             {/* Active widget panel content (inline) */}
