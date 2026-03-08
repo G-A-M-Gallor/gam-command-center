@@ -24,11 +24,14 @@ import {
   LayoutGrid,
   AlignJustify,
   Star,
+  Download,
+  Share,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { useInstallPrompt } from "@/lib/pwa/useInstallPrompt";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import type { FavoriteItem } from "./widgets/FavoritesWidget";
 
@@ -131,6 +134,7 @@ export function Sidebar({
   const pathname = usePathname();
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
   const { user, signOut } = useAuth();
+  const { state: installState, canInstall, install: triggerInstall } = useInstallPrompt();
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
@@ -580,6 +584,48 @@ export function Sidebar({
             </div>
           ))}
         </nav>
+
+        {/* Install app button */}
+        {canInstall && (
+          <div className="shrink-0 border-t border-slate-700/50 p-2">
+            {isCollapsed ? (
+              <button
+                type="button"
+                onClick={installState === "ios" ? undefined : triggerInstall}
+                className="group relative flex w-full items-center justify-center rounded-lg p-2.5 text-[var(--cc-accent-400)] transition-colors hover:bg-[var(--cc-accent-600-20)]"
+                title={t.pwa.installTitle}
+              >
+                {installState === "ios" ? <Share className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+                <span
+                  className={`absolute ${
+                    onRight ? "right-full mr-2" : "left-full ml-2"
+                  } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                >
+                  {t.pwa.installTitle}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={installState === "ios" ? undefined : triggerInstall}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors text-[var(--cc-accent-400)] hover:bg-[var(--cc-accent-600-20)] ${
+                  onRight ? "flex-row-reverse" : ""
+                }`}
+              >
+                {installState === "ios" ? <Share className="h-[18px] w-[18px] shrink-0" /> : <Download className="h-[18px] w-[18px] shrink-0" />}
+                <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>
+                  {t.pwa.installTitle}
+                </span>
+              </button>
+            )}
+            {/* iOS share guide (expanded only) */}
+            {installState === "ios" && !isCollapsed && (
+              <p className="mt-1 px-3 text-[10px] text-slate-500 leading-relaxed">
+                {t.pwa.iosShareGuide}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* User section */}
         {user && (
