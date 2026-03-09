@@ -582,8 +582,14 @@ export default function AIHubPage() {
     // Build rich contexts with actual page data
     const richContexts = await buildRichContexts(contexts);
 
+    // Get auth token for API calls
+    const supabase = createBrowserClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const authToken = sessionData?.session?.access_token;
+
     // Shared SSE callbacks
     const streamCallbacks = {
+      token: authToken,
       signal: controller.signal,
       onToken: (token: string) => {
         setStreamingContent((prev) => prev + token);

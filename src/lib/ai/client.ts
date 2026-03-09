@@ -4,6 +4,7 @@ interface StreamChatOptions {
   messages: { role: "user" | "assistant"; content: string }[];
   mode: AIMode;
   contexts?: string[];
+  token?: string;
   onToken: (text: string) => void;
   onDone: (usage: { input_tokens: number; output_tokens: number }) => void;
   onError: (error: string) => void;
@@ -15,6 +16,7 @@ interface StreamWorkManagerOptions {
   session_id: string;
   user_id: string;
   current_view?: { page: string; open_tasks?: string[]; time_in_view?: string };
+  token?: string;
   onToken: (text: string) => void;
   onDone: (usage: { input_tokens: number; output_tokens: number }) => void;
   onError: (error: string) => void;
@@ -25,6 +27,7 @@ export async function streamChat({
   messages,
   mode,
   contexts = [],
+  token,
   onToken,
   onDone,
   onError,
@@ -34,7 +37,10 @@ export async function streamChat({
   try {
     response = await fetch("/api/ai/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({ messages, mode, contexts }),
       signal,
     });
@@ -103,6 +109,7 @@ export async function streamWorkManager({
   session_id,
   user_id,
   current_view,
+  token,
   onToken,
   onDone,
   onError,
@@ -112,7 +119,10 @@ export async function streamWorkManager({
   try {
     response = await fetch("/api/work-manager", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({ messages, session_id, user_id, current_view }),
       signal,
     });

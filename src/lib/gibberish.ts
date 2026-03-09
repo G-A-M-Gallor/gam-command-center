@@ -55,15 +55,66 @@ export function toEnglish(text: string): string {
   return convertText(text, HE_TO_EN);
 }
 
+// ─── Language plausibility checks ────────────────────────────
+// Real text has common letter pairs (digrams). Keyboard gibberish doesn't.
+
+const EN_DIGRAMS = new Set([
+  "th", "he", "in", "er", "an", "re", "on", "at", "en", "nd",
+  "ti", "es", "or", "te", "of", "ed", "is", "it", "al", "ar",
+  "st", "to", "nt", "ng", "se", "ha", "as", "ou", "io", "le",
+]);
+
+const HE_DIGRAMS = new Set([
+  "של", "על", "את", "הי", "לא", "ים", "ות", "בר", "מה", "הו",
+  "שה", "לה", "בו", "כל", "זה", "אל", "עם", "מא", "הם", "יה",
+  "אם", "או", "וא", "לי", "כי", "שי", "הא", "תי", "לו", "ני",
+]);
+
+/** Does this look like intentional English? (vowels + common digrams) */
+function looksLikeRealEnglish(text: string): boolean {
+  const lower = text.toLowerCase();
+  const alpha = (lower.match(/[a-z]/g) || []).length;
+  if (alpha < 4) return false;
+
+  // Vowel ratio: real English ≈ 30-50%, gibberish is outside this
+  const vowels = (lower.match(/[aeiou]/g) || []).length;
+  const vowelRatio = vowels / alpha;
+  if (vowelRatio < 0.12 || vowelRatio > 0.75) return false;
+
+  // At least one common English digram
+  for (let i = 0; i < lower.length - 1; i++) {
+    if (EN_DIGRAMS.has(lower.slice(i, i + 2))) return true;
+  }
+  return false;
+}
+
+/** Does this look like intentional Hebrew? (common digrams) */
+function looksLikeRealHebrew(text: string): boolean {
+  // Need enough Hebrew chars to judge
+  let heChars = 0;
+  for (const ch of text) {
+    const code = ch.codePointAt(0) ?? 0;
+    if (code >= 0x0590 && code <= 0x05ff) heChars++;
+  }
+  if (heChars < 4) return false;
+
+  // At least one common Hebrew digram
+  for (let i = 0; i < text.length - 1; i++) {
+    if (HE_DIGRAMS.has(text.slice(i, i + 2))) return true;
+  }
+  return false;
+}
+
 /**
  * Detect if text was typed with the wrong keyboard layout.
+ * Only triggers when the text is actual gibberish — NOT valid text in the wrong language.
  * Returns the direction to convert, or null if no gibberish detected.
  */
 export function detectGibberish(
   text: string
 ): { direction: "to_hebrew" | "to_english"; preview: string; confidence: number } | null {
   const trimmed = text.trim();
-  if (trimmed.length < 4) return null;
+  if (trimmed.length < 6) return null;
 
   let heCount = 0;
   let enCount = 0;
@@ -75,17 +126,18 @@ export function detectGibberish(
   }
 
   const total = heCount + enCount;
-  if (total < 3) return null;
+  if (total < 4) return null;
 
   const ratio = Math.max(heCount, enCount) / total;
-  // Length bonus: longer text = more confident
   const lengthBonus = Math.min(trimmed.length / 40, 0.1);
   const confidence = ratio + lengthBonus;
 
-  if (confidence < 0.7) return null;
+  if (confidence < 0.85) return null;
 
   if (enCount > heCount) {
-    // Mostly English chars → user meant to type Hebrew
+    // Mostly English chars — but is it real English or keyboard gibberish?
+    if (looksLikeRealEnglish(trimmed)) return null;
+
     const converted = toHebrew(trimmed);
     if (converted === trimmed) return null;
     return {
@@ -94,7 +146,9 @@ export function detectGibberish(
       confidence,
     };
   } else {
-    // Mostly Hebrew chars → user meant to type English
+    // Mostly Hebrew chars — but is it real Hebrew or keyboard gibberish?
+    if (looksLikeRealHebrew(trimmed)) return null;
+
     const converted = toEnglish(trimmed);
     if (converted === trimmed) return null;
     return {

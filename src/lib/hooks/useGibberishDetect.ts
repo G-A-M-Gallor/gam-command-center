@@ -6,8 +6,8 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getTranslations } from "@/lib/i18n";
 
-const DEBOUNCE_MS = 700;
-const COOLDOWN_MS = 10_000;
+const DEBOUNCE_MS = 1200;
+const COOLDOWN_MS = 30_000;
 const EXCLUDED_TYPES = new Set(["password", "email", "url", "number"]);
 
 function isExcluded(el: HTMLElement): boolean {
