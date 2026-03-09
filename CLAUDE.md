@@ -46,6 +46,12 @@ app/dashboard/
     page.tsx              ← Gallery + Components + Handbook + App Preview + Library tabs
     LibraryTab.tsx        ← Component browser (127 components from shadcn/Magic UI/21st.dev)
     libraryRegistry.ts    ← Static catalog of all available components
+  entities/
+    page.tsx              ← Entity home — list of entity types with counts
+    fields/page.tsx       ← Global field library
+    types/page.tsx        ← Entity types manager
+    [type]/page.tsx       ← Entity list view — table/board/list/calendar/gantt/timeline
+    [type]/[id]/page.tsx  ← Entity detail — editable title, NoteMeta, stakeholders, activity
   formily/
     page.tsx              ← Origami CRM forms with connection status
   architecture/
@@ -193,7 +199,7 @@ CREATE TABLE notifications (
 - **i18n:** Always use `t.section.key` pattern — never `isHe ? "..." : "..."` for translatable text
 - **Cross-component sync:** Custom DOM events (`cc-favorites-change`, `cc-notify`, `timer-state-change`, etc.)
 
-## 📋 13 Dashboard Pages
+## 📋 17 Dashboard Pages
 
 | # | Tab | Route | Status | Notes |
 |---|-----|-------|--------|-------|
@@ -204,12 +210,17 @@ CREATE TABLE notifications (
 | 4 | **Functional Map** | `/dashboard/functional-map` | Active | 3×5 locked grid with inline editing |
 | 5 | **AI Hub** | `/dashboard/ai-hub` | Active | Claude API with 4 modes, streaming |
 | 6 | **Design System** | `/dashboard/design-system` | Active | Gallery, components, handbook, app preview, library (127 components) |
-| 7 | **Formily** | `/dashboard/formily` | Active | Origami CRM forms with connection status |
-| 8 | **Architecture** | `/dashboard/architecture` | Active | Mermaid diagram + tool stack table |
-| 9 | **Plan** | `/dashboard/plan` | Active | 5-phase roadmap with timeline |
-| 10 | **Automations** | `/dashboard/automations` | Active | n8n iframe + Supabase automation types |
-| 11 | **Settings** | `/dashboard/settings` | Active | Accent, fonts, skins, density, brand, overrides |
-| 12 | **Admin** | `/dashboard/admin` | Active | System registry — routes, widgets, contexts, changelog |
+| 7 | **Entities** | `/dashboard/entities` | Active | Entity home — list of types with counts |
+| 7a | | `/dashboard/entities/fields` | Active | Global field library |
+| 7b | | `/dashboard/entities/types` | Active | Entity types manager |
+| 7c | | `/dashboard/entities/[type]` | Active | Entity list — table/board/list/calendar/gantt/timeline views |
+| 7d | | `/dashboard/entities/[type]/[id]` | Active | Entity detail — editable title, fields, stakeholders, activity |
+| 8 | **Formily** | `/dashboard/formily` | Active | Origami CRM forms with connection status |
+| 9 | **Architecture** | `/dashboard/architecture` | Active | Mermaid diagram + tool stack table |
+| 10 | **Plan** | `/dashboard/plan` | Active | 5-phase roadmap with timeline |
+| 11 | **Automations** | `/dashboard/automations` | Active | n8n iframe + Supabase automation types |
+| 12 | **Settings** | `/dashboard/settings` | Active | Accent, fonts, skins, density, brand, overrides |
+| 13 | **Admin** | `/dashboard/admin` | Active | System registry — routes, widgets, contexts, changelog |
 
 ## 🔲 Top Bar Widget System
 

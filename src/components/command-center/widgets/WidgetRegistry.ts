@@ -136,9 +136,9 @@ export const widgetRegistry: WidgetDefinition[] = [
     icon: Plus,
     label: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" },
     description: {
-      he: "צור מסמך, פרויקט או משימה",
-      en: "Create a document, project or task",
-      ru: "Создать документ, проект или задачу",
+      he: "צור מסמך או ישות חדשה",
+      en: "Create a document or new entity",
+      ru: "Создать документ или новую сущность",
     },
     defaultSize: 2,
     status: "active",

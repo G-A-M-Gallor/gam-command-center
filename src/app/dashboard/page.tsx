@@ -20,8 +20,14 @@ import {
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
+import { fetchEntityTypes } from "@/lib/supabase/entityQueries";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { getHealthStatus } from "@/components/command-center/HealthBadge";
+import type { EntityType } from "@/lib/entities/types";
+
+interface EntityTypeWithCount extends EntityType {
+  noteCount: number;
+}
 
 interface DashboardData {
   projectCount: number;
@@ -30,6 +36,8 @@ interface DashboardData {
   documentCount: number;
   recentProjects: Array<{ id: string; name: string; health_score: number; status: string; updated_at: string }>;
   todayEvents: Array<{ time: string; title: { he: string; en: string }; type: string }>;
+  entityTypes: EntityTypeWithCount[];
+  recentEntities: Array<{ id: string; title: string; entity_type: string; status: string; last_edited_at: string }>;
 }
 
 export default function DashboardPage() {
@@ -47,13 +55,19 @@ export default function DashboardPage() {
     setLoading(true);
     setError(false);
     try {
-      const [projectsRes, docsRes, eventsRes] = await Promise.all([
+      const [projectsRes, docsRes, eventsRes, entityTypesData, recentEntitiesRes] = await Promise.all([
         supabase.from("projects").select("id, name, health_score, status, updated_at").order("updated_at", { ascending: false }).limit(10),
         supabase.from("vb_records").select("id", { count: "exact", head: true }),
         fetch("/api/events/today").then((r) => {
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           return r.json();
         }).catch(() => ({ events: [] })),
+        fetchEntityTypes(),
+        supabase.from("vb_records").select("id, title, entity_type, status, last_edited_at")
+          .eq("is_deleted", false)
+          .not("entity_type", "is", null)
+          .order("last_edited_at", { ascending: false })
+          .limit(5),
       ]);
 
       const projects = projectsRes.data || [];
@@ -62,6 +76,17 @@ export default function DashboardPage() {
         ? Math.round(active.reduce((s, p) => s + (p.health_score || 0), 0) / active.length)
         : 0;
 
+      // Get entity type counts
+      const entityTypesWithCounts: EntityTypeWithCount[] = await Promise.all(
+        entityTypesData.map(async (et) => {
+          const { count } = await supabase.from("vb_records")
+            .select("id", { count: "exact", head: true })
+            .eq("entity_type", et.slug)
+            .eq("is_deleted", false);
+          return { ...et, noteCount: count ?? 0 };
+        }),
+      );
+
       setData({
         projectCount: projects.length,
         activeProjects: active.length,
@@ -69,6 +94,8 @@ export default function DashboardPage() {
         documentCount: docsRes.count || 0,
         recentProjects: projects.slice(0, 5),
         todayEvents: eventsRes.events || [],
+        entityTypes: entityTypesWithCounts,
+        recentEntities: (recentEntitiesRes.data ?? []) as DashboardData["recentEntities"],
       });
     } catch {
       setError(true);
@@ -177,6 +204,44 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* Entity Types Row */}
+        {!loading && (data?.entityTypes.length ?? 0) > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-200">{d.entityTypes}</h3>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/entities")}
+                className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
+              >
+                {d.viewAll}
+                <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+              {data!.entityTypes.map((et) => (
+                <button
+                  key={et.slug}
+                  type="button"
+                  onClick={() => router.push(`/dashboard/entities/${et.slug}`)}
+                  className="group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-slate-800/40 px-4 py-3 text-start transition-all hover:border-white/[0.1] hover:bg-slate-800/70"
+                >
+                  <span className="text-lg">{et.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium text-slate-300 truncate">
+                      {et.label[isRtl ? "he" : "en"]}
+                    </div>
+                    <div className="text-[10px] text-slate-500">
+                      {et.noteCount} {d.items}
+                    </div>
+                  </div>
+                  <ChevronRight size={12} className={`text-slate-700 group-hover:text-slate-500 transition-colors ${isRtl ? "rotate-180" : ""}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Recent Projects */}
           <div className="lg:col-span-2 rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
@@ -263,6 +328,42 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+
+            {/* Recent Entities */}
+            {!loading && (data?.recentEntities.length ?? 0) > 0 && (
+              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-200">{d.recentEntities}</h3>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard/entities")}
+                    className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
+                  >
+                    {d.viewAll}
+                    <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  {data!.recentEntities.map((e) => {
+                    const etInfo = data!.entityTypes.find(et => et.slug === e.entity_type);
+                    return (
+                      <button
+                        key={e.id}
+                        type="button"
+                        onClick={() => router.push(`/dashboard/entities/${e.entity_type}/${e.id}`)}
+                        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-start transition-colors hover:bg-slate-700/30"
+                      >
+                        <span className="text-sm shrink-0">{etInfo?.icon ?? "📄"}</span>
+                        <span className="flex-1 min-w-0 truncate text-xs text-slate-300">{e.title}</span>
+                        <span className="shrink-0 text-[10px] text-slate-600">
+                          {new Date(e.last_edited_at).toLocaleDateString(isRtl ? "he-IL" : "en-US", { day: "numeric", month: "short" })}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Quick Actions */}
             <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">

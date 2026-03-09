@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Plus, Search, Filter, Table2, Kanban, List, Calendar as CalendarIcon,
   ArrowUpDown, SlidersHorizontal, ChevronDown, X,
-  GanttChart, Clock, Eye, EyeOff,
+  GanttChart, Clock, Eye, EyeOff, Bookmark, Save, Trash2,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
@@ -20,7 +20,8 @@ import { CalendarView } from '@/components/entities/views/CalendarView';
 import { GanttView } from '@/components/entities/views/GanttView';
 import { TimelineView } from '@/components/entities/views/TimelineView';
 import { EntityActionBar } from '@/components/entities/EntityActionBar';
-import type { EntityType, GlobalField, NoteRecord, ViewType, ViewFilter, ViewSort, FieldGroup } from '@/lib/entities/types';
+import { useToast } from '@/contexts/ToastContext';
+import type { EntityType, GlobalField, NoteRecord, ViewType, ViewFilter, ViewSort, FieldGroup, SavedView } from '@/lib/entities/types';
 
 const VIEW_ICONS: Record<ViewType, React.ElementType> = {
   table: Table2,
@@ -30,6 +31,19 @@ const VIEW_ICONS: Record<ViewType, React.ElementType> = {
   gantt: GanttChart,
   timeline: Clock,
 };
+
+const SAVED_VIEWS_KEY = 'cc-saved-views';
+
+function loadSavedViews(entitySlug: string): SavedView[] {
+  try {
+    const raw = localStorage.getItem(`${SAVED_VIEWS_KEY}-${entitySlug}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function persistSavedViews(entitySlug: string, views: SavedView[]) {
+  localStorage.setItem(`${SAVED_VIEWS_KEY}-${entitySlug}`, JSON.stringify(views));
+}
 
 export default function EntityViewPage() {
   const params = useParams();
@@ -56,6 +70,15 @@ export default function EntityViewPage() {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
+  // Saved views
+  const [savedViews, setSavedViews] = useState<SavedView[]>([]);
+  const [activeViewId, setActiveViewId] = useState<string | null>(null);
+  const [showSavedViews, setShowSavedViews] = useState(false);
+  const [savingViewName, setSavingViewName] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
+
   const pageSize = 50;
 
   // Load entity type + fields
@@ -98,6 +121,74 @@ export default function EntityViewPage() {
     }
     return ['table', 'board', 'list', 'calendar'] as ViewType[];
   }, [entityType]);
+
+  // Close saved views dropdown on outside click
+  const savedViewsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!showSavedViews) return;
+    const handler = (e: MouseEvent) => {
+      if (savedViewsRef.current && !savedViewsRef.current.contains(e.target as Node)) {
+        setShowSavedViews(false);
+        setShowSaveInput(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showSavedViews]);
+
+  // Load saved views from localStorage
+  useEffect(() => {
+    setSavedViews(loadSavedViews(entitySlug));
+    setActiveViewId(null);
+  }, [entitySlug]);
+
+  const handleSaveView = useCallback(() => {
+    if (!savingViewName.trim()) return;
+    const newView: SavedView = {
+      id: crypto.randomUUID(),
+      name: savingViewName.trim(),
+      view,
+      filters,
+      sort,
+      showInactive,
+    };
+    const updated = [...savedViews, newView];
+    setSavedViews(updated);
+    persistSavedViews(entitySlug, updated);
+    setActiveViewId(newView.id);
+    setSavingViewName('');
+    setShowSaveInput(false);
+    toast({ message: te.viewSaved, type: 'success' });
+  }, [savingViewName, view, filters, sort, showInactive, savedViews, entitySlug, toast, te]);
+
+  const handleLoadView = useCallback((sv: SavedView) => {
+    setView(sv.view);
+    setFilters(sv.filters);
+    setSort(sv.sort);
+    setShowInactive(sv.showInactive);
+    setActiveViewId(sv.id);
+    setShowSavedViews(false);
+    setPage(0);
+  }, []);
+
+  const handleDeleteView = useCallback((id: string) => {
+    const updated = savedViews.filter(v => v.id !== id);
+    setSavedViews(updated);
+    persistSavedViews(entitySlug, updated);
+    if (activeViewId === id) setActiveViewId(null);
+    toast({ message: te.viewDeleted, type: 'info' });
+  }, [savedViews, entitySlug, activeViewId, toast, te]);
+
+  // Clear active view when user changes filters/sort manually
+  const activeView = savedViews.find(v => v.id === activeViewId);
+  useEffect(() => {
+    if (!activeView) return;
+    const filtersMatch = JSON.stringify(activeView.filters) === JSON.stringify(filters);
+    const sortMatch = JSON.stringify(activeView.sort) === JSON.stringify(sort);
+    if (!filtersMatch || !sortMatch || activeView.view !== view || activeView.showInactive !== showInactive) {
+      setActiveViewId(null);
+    }
+  }, [filters, sort, view, showInactive, activeView]);
 
   // Search + inactive filter
   const filteredNotes = useMemo(() => {
@@ -241,6 +332,110 @@ export default function EntityViewPage() {
           {filters.length > 0 && <span className="text-[10px]">({filters.length})</span>}
         </button>
 
+        {/* Saved views dropdown */}
+        <div className="relative" ref={savedViewsRef}>
+          <button
+            onClick={() => setShowSavedViews(p => !p)}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
+              activeViewId
+                ? 'border-purple-500/40 text-purple-300 bg-purple-500/10'
+                : 'border-white/[0.08] text-slate-400 hover:bg-white/[0.04]'
+            }`}
+          >
+            <Bookmark size={14} />
+            {activeView ? activeView.name : te.savedViews}
+            <ChevronDown size={12} />
+          </button>
+          {showSavedViews && (
+            <div className="absolute top-full mt-1 end-0 z-50 w-64 rounded-lg border border-white/[0.08] bg-slate-800 p-2 shadow-xl">
+              {/* All records (reset) */}
+              <button
+                onClick={() => {
+                  setFilters([]);
+                  setSort(undefined);
+                  setShowInactive(false);
+                  setActiveViewId(null);
+                  setShowSavedViews(false);
+                  if (entityType) setView(entityType.default_view);
+                }}
+                className={`w-full flex items-center gap-2 rounded px-2.5 py-1.5 text-xs transition-colors ${
+                  !activeViewId ? 'bg-purple-600/20 text-purple-300' : 'text-slate-300 hover:bg-white/[0.04]'
+                }`}
+              >
+                {te.allRecords}
+              </button>
+
+              {/* Saved views list */}
+              {savedViews.map(sv => (
+                <div key={sv.id} className="flex items-center gap-1">
+                  <button
+                    onClick={() => handleLoadView(sv)}
+                    className={`flex-1 flex items-center gap-2 rounded px-2.5 py-1.5 text-xs text-start transition-colors ${
+                      activeViewId === sv.id ? 'bg-purple-600/20 text-purple-300' : 'text-slate-300 hover:bg-white/[0.04]'
+                    }`}
+                  >
+                    <Bookmark size={11} />
+                    <span className="truncate">{sv.name}</span>
+                    <span className="ms-auto text-[10px] text-slate-500">
+                      {(te.views as Record<string, string>)?.[sv.view] ?? sv.view}
+                      {sv.filters.length > 0 && ` +${sv.filters.length}`}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteView(sv.id)}
+                    className="p-1 text-slate-500 hover:text-red-400 transition-colors"
+                    title={te.deleteView}
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              ))}
+
+              {savedViews.length === 0 && (
+                <p className="px-2.5 py-1.5 text-[11px] text-slate-500">{te.noSavedViews}</p>
+              )}
+
+              {/* Save current view */}
+              <div className="mt-1.5 border-t border-white/[0.06] pt-1.5">
+                {showSaveInput ? (
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      value={savingViewName}
+                      onChange={e => setSavingViewName(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSaveView()}
+                      placeholder={te.viewName}
+                      className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-purple-500/50"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveView}
+                      disabled={!savingViewName.trim()}
+                      className="rounded bg-purple-600 px-2 py-1 text-[11px] text-white hover:bg-purple-500 disabled:opacity-40"
+                    >
+                      <Save size={11} />
+                    </button>
+                    <button
+                      onClick={() => { setShowSaveInput(false); setSavingViewName(''); }}
+                      className="p-1 text-slate-500 hover:text-slate-300"
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowSaveInput(true)}
+                    className="w-full flex items-center gap-1.5 rounded px-2.5 py-1.5 text-xs text-purple-400 hover:text-purple-300 hover:bg-white/[0.04]"
+                  >
+                    <Save size={12} />
+                    {te.saveView}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {sort && (
           <button
             onClick={() => setSort(undefined)}
@@ -332,6 +527,7 @@ export default function EntityViewPage() {
               onSort={setSort}
               onUpdate={handleUpdateNote}
               language={language}
+              entityType={entitySlug}
               selectedIds={selectedIds}
               onSelectionChange={setSelectedIds}
             />
@@ -342,6 +538,7 @@ export default function EntityViewPage() {
               fields={fields}
               onUpdate={handleUpdateNote}
               language={language}
+              entityType={entitySlug}
             />
           )}
           {view === 'list' && (
@@ -350,6 +547,7 @@ export default function EntityViewPage() {
               fields={fields}
               onUpdate={handleUpdateNote}
               language={language}
+              entityType={entitySlug}
             />
           )}
           {view === 'calendar' && (
@@ -357,6 +555,7 @@ export default function EntityViewPage() {
               notes={filteredNotes}
               fields={fields}
               language={language}
+              entityType={entitySlug}
             />
           )}
           {view === 'gantt' && (

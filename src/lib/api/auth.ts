@@ -59,7 +59,8 @@ export async function requireAuth(request: Request): Promise<AuthResult> {
 
 /**
  * Verify authentication and check for admin role.
- * Currently checks that the user exists (admin role check is a placeholder for future use).
+ * Checks user.app_metadata.role === 'admin'.
+ * Falls back to allowing all authenticated users when no roles are configured.
  *
  * Usage in API routes:
  *   const { user, error } = await requireAdmin(request);
@@ -72,7 +73,44 @@ export async function requireAdmin(request: Request): Promise<AuthResult> {
     return result;
   }
 
-  // Future: check user.app_metadata.role === 'admin' or similar
-  // For now, any authenticated user passes the admin check
+  const user = result.user!;
+  const role = user.app_metadata?.role;
+
+  // If roles are configured, enforce admin
+  if (role && role !== 'admin') {
+    return { user: null, error: "Admin access required" };
+  }
+
+  // No role configured = legacy mode, allow any authenticated user
+  return result;
+}
+
+/**
+ * Verify authentication and check for a specific role.
+ * Accepts a list of allowed roles.
+ */
+export async function requireRole(
+  request: Request,
+  allowedRoles: string[],
+): Promise<AuthResult> {
+  const result = await requireAuth(request);
+
+  if (result.error) {
+    return result;
+  }
+
+  const u = result.user!;
+  const role = u.app_metadata?.role;
+
+  // No role configured = legacy mode, allow
+  if (!role) return result;
+
+  // Admin always passes
+  if (role === 'admin') return result;
+
+  if (!allowedRoles.includes(role)) {
+    return { user: null, error: `Required role: ${allowedRoles.join(' or ')}` };
+  }
+
   return result;
 }

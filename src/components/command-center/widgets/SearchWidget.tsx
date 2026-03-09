@@ -13,11 +13,15 @@ import {
   ArrowDown,
   CornerDownLeft,
   Sparkles,
+  StickyNote,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { supabase } from "@/lib/supabaseClient";
+import { searchNotes } from "@/lib/supabase/entityQueries";
+import { fetchEntityTypes } from "@/lib/supabase/entityQueries";
+import type { EntityType, NoteRecord } from "@/lib/entities/types";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
@@ -39,10 +43,12 @@ interface DbDocument {
 interface SearchItem {
   id: string;
   label: string;
-  type: "page" | "document" | "action" | "semantic";
+  type: "page" | "document" | "action" | "semantic" | "entity";
   href?: string;
   icon: typeof Search;
   similarity?: number;
+  entityIcon?: string;
+  entityTypeLabel?: string;
 }
 
 function getRecentPages(): RecentPage[] {
@@ -99,11 +105,13 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const [dbDocuments, setDbDocuments] = useState<DbDocument[]>([]);
   const [searchResults, setSearchResults] = useState<DbDocument[]>([]);
   const [semanticResults, setSemanticResults] = useState<DbDocument[]>([]);
+  const [entityResults, setEntityResults] = useState<NoteRecord[]>([]);
+  const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Focus input on mount + load recent documents
+  // Focus input on mount + load recent documents + entity types
   useEffect(() => {
     inputRef.current?.focus();
     async function loadDocs() {
@@ -119,18 +127,25 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       } catch { /* silent — search still works with pages */ }
     }
     loadDocs();
+    fetchEntityTypes().then(setEntityTypes);
   }, []);
 
-  // Server-side search via RPC (debounced) + semantic fallback
+  // Server-side search via RPC (debounced) + semantic fallback + entity search
   useEffect(() => {
     if (!query.trim()) {
       setSearchResults([]);
       setSemanticResults([]);
+      setEntityResults([]);
       return;
     }
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(async () => {
       setSemanticResults([]);
+      // Entity search in parallel with document search
+      searchNotes(query.trim()).then(notes => {
+        // Filter out documents (already covered by doc search)
+        setEntityResults(notes.filter(n => n.entity_type && n.record_type !== 'document'));
+      });
       try {
         const { data } = await supabase.rpc('search_documents', {
           query: query.trim(),
@@ -202,7 +217,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       return [...pageItems, ...docItems, ...searchItems];
     }
 
-    // Search state: use server-side results + pages + actions
+    // Search state: use server-side results + pages + entities + actions
     const q = query.toLowerCase();
     const documents: SearchItem[] = searchResults
       .map((d) => ({
@@ -229,6 +244,22 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         icon,
       }));
 
+    // Entity results — grouped by entity_type
+    const entityTypeMap = new Map(entityTypes.map(et => [et.slug, et]));
+    const entities: SearchItem[] = entityResults.slice(0, 15).map((n) => {
+      const et = n.entity_type ? entityTypeMap.get(n.entity_type) : undefined;
+      const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
+      return {
+        id: `entity-${n.id}`,
+        label: n.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
+        type: "entity" as const,
+        href: `/dashboard/entities/${n.entity_type}/${n.id}`,
+        icon: StickyNote,
+        entityIcon: et?.icon,
+        entityTypeLabel: et?.label[lang] || n.entity_type || '',
+      };
+    });
+
     // Semantic results (shown when FTS has no matches)
     const semantic: SearchItem[] = semanticResults.map((d) => ({
       id: `sem-${d.id}`,
@@ -243,8 +274,8 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       { id: "action-document", label: t.widgets.newDocument, type: "action" as const, href: "__new-doc__", icon: Plus },
     ];
 
-    return [...pages, ...documents, ...semantic, ...actions];
-  }, [query, language, t, dbDocuments, searchResults, semanticResults]);
+    return [...pages, ...documents, ...entities, ...semantic, ...actions];
+  }, [query, language, t, dbDocuments, searchResults, semanticResults, entityResults, entityTypes]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -380,16 +411,29 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
     const pages = items.filter((i) => i.type === "page");
     const documents = items.filter((i) => i.type === "document");
+    const entityItems = items.filter((i) => i.type === "entity");
     const semanticItems = items.filter((i) => i.type === "semantic");
     const actions = items.filter((i) => i.type === "action");
 
     const sections: { title: string; items: SearchItem[] }[] = [];
     if (pages.length > 0) sections.push({ title: t.widgets.recent, items: pages });
     if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
+    if (entityItems.length > 0) {
+      // Group entities by type for cleaner display
+      const byType = new Map<string, SearchItem[]>();
+      for (const item of entityItems) {
+        const typeLabel = item.entityTypeLabel || 'entities';
+        if (!byType.has(typeLabel)) byType.set(typeLabel, []);
+        byType.get(typeLabel)!.push(item);
+      }
+      for (const [typeLabel, typeItems] of byType) {
+        sections.push({ title: typeLabel, items: typeItems });
+      }
+    }
     if (semanticItems.length > 0) sections.push({ title: language === 'he' ? 'תוצאות סמנטיות' : language === 'ru' ? 'Семантические результаты' : 'Semantic Results', items: semanticItems });
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
     return sections;
-  }, [items, query, t]);
+  }, [items, query, t, language]);
 
   // Compute global index for each item across sections
   let globalIndex = 0;
@@ -461,8 +505,12 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                           : "text-slate-300 hover:bg-slate-700/50"
                       }`}
                     >
-                      <Icon className={`h-4 w-4 shrink-0 ${item.type === 'semantic' ? 'text-purple-400' : 'text-slate-400'}`} />
-                      <span className="flex-1 truncate text-left">{item.label}</span>
+                      {item.entityIcon ? (
+                        <span className="shrink-0 text-sm">{item.entityIcon}</span>
+                      ) : (
+                        <Icon className={`h-4 w-4 shrink-0 ${item.type === 'semantic' ? 'text-purple-400' : 'text-slate-400'}`} />
+                      )}
+                      <span className="flex-1 truncate text-start">{item.label}</span>
                       {item.similarity != null && (
                         <span className="shrink-0 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
                           {Math.round(item.similarity * 100)}%

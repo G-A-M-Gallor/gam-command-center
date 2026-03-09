@@ -8,6 +8,7 @@ interface Props {
   notes: NoteRecord[];
   fields: GlobalField[];
   language: string;
+  entityType?: string;
 }
 
 const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
@@ -15,7 +16,7 @@ const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS_HE = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
 const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-export function CalendarView({ notes, fields, language }: Props) {
+export function CalendarView({ notes, fields, language, entityType }: Props) {
   const isHe = language === 'he';
   const lang = isHe ? 'he' : 'en';
   const days = isHe ? DAYS_HE : DAYS_EN;
@@ -119,7 +120,7 @@ export function CalendarView({ notes, fields, language }: Props) {
                   return (
                     <a
                       key={note.id}
-                      href={`/dashboard/editor/${note.id}`}
+                      href={entityType ? `/dashboard/entities/${entityType}/${note.id}` : `/dashboard/editor/${note.id}`}
                       className="block truncate rounded px-1 py-0.5 text-[9px] hover:bg-white/[0.06]"
                       style={{ color: statusOpt?.color ?? '#cbd5e1' }}
                     >

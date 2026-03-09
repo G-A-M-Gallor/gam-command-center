@@ -148,9 +148,10 @@ export interface NoteStakeholder {
   // Joined from contact note (optional)
   contact_title?: string;
   contact_meta?: Record<string, unknown>;
+  contact_entity_type?: string | null;
 }
 
-export type NoteStakeholderInsert = Omit<NoteStakeholder, 'id' | 'added_at' | 'contact_title' | 'contact_meta'>;
+export type NoteStakeholderInsert = Omit<NoteStakeholder, 'id' | 'added_at' | 'contact_title' | 'contact_meta' | 'contact_entity_type'>;
 
 // ─── Note Record (vb_records with entity extensions) ─
 export interface NoteRecord {
@@ -177,6 +178,16 @@ export interface ViewFilter {
 export interface ViewSort {
   field: string;
   direction: 'asc' | 'desc';
+}
+
+// ─── Saved Views ────────────────────────────────────
+export interface SavedView {
+  id: string;
+  name: string;
+  view: ViewType;
+  filters: ViewFilter[];
+  sort?: ViewSort;
+  showInactive: boolean;
 }
 
 // ─── Action Buttons ──────────────────────────────────

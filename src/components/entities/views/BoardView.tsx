@@ -14,10 +14,11 @@ interface Props {
   fields: GlobalField[];
   onUpdate: () => void;
   language: string;
+  entityType?: string;
 }
 
 // ─── Draggable Card ──────────────────────────────────
-function DraggableCard({ note, fields, lang }: { note: NoteRecord; fields: GlobalField[]; lang: string }) {
+function DraggableCard({ note, fields, lang, entityType }: { note: NoteRecord; fields: GlobalField[]; lang: string; entityType?: string }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: note.id,
     data: { note },
@@ -39,7 +40,7 @@ function DraggableCard({ note, fields, lang }: { note: NoteRecord; fields: Globa
       {...listeners}
       className="rounded-lg border border-white/[0.06] bg-slate-800/80 p-3 cursor-grab active:cursor-grabbing hover:border-white/[0.12] transition-colors"
     >
-      <a href={`/dashboard/editor/${note.id}`} className="text-sm font-medium text-slate-200 hover:text-purple-300 block mb-1">
+      <a href={entityType ? `/dashboard/entities/${entityType}/${note.id}` : `/dashboard/editor/${note.id}`} className="text-sm font-medium text-slate-200 hover:text-purple-300 block mb-1">
         {note.title}
       </a>
       {displayFields.map(f => {
@@ -58,10 +59,10 @@ function DraggableCard({ note, fields, lang }: { note: NoteRecord; fields: Globa
 
 // ─── Droppable Column ────────────────────────────────
 function DroppableColumn({
-  columnValue, label, color, notes, fields, lang,
+  columnValue, label, color, notes, fields, lang, entityType,
 }: {
   columnValue: string; label: string; color: string;
-  notes: NoteRecord[]; fields: GlobalField[]; lang: string;
+  notes: NoteRecord[]; fields: GlobalField[]; lang: string; entityType?: string;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: columnValue });
 
@@ -79,14 +80,14 @@ function DroppableColumn({
       </div>
       <div className="space-y-2">
         {notes.map(note => (
-          <DraggableCard key={note.id} note={note} fields={fields} lang={lang} />
+          <DraggableCard key={note.id} note={note} fields={fields} lang={lang} entityType={entityType} />
         ))}
       </div>
     </div>
   );
 }
 
-export function BoardView({ notes, fields, onUpdate, language }: Props) {
+export function BoardView({ notes, fields, onUpdate, language, entityType }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
 
   // Find the first select field to use as board columns
@@ -149,6 +150,7 @@ export function BoardView({ notes, fields, onUpdate, language }: Props) {
             notes={notesByColumn[col.value] ?? []}
             fields={fields}
             lang={lang}
+            entityType={entityType}
           />
         ))}
       </div>

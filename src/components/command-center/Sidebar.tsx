@@ -72,7 +72,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/editor", key: "editor", icon: FileEdit, status: "active" },
       { href: "/dashboard/story-map", key: "storyMap", icon: Map, status: "active" },
       { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot, status: "active" },
-      { href: "/dashboard/entities/fields", key: "entities", icon: Database, status: "active" },
+      { href: "/dashboard/entities", key: "entities", icon: Database, status: "active" },
     ],
   },
   {
@@ -133,7 +133,7 @@ export function Sidebar({
 }: SidebarProps = {}) {
   const pathname = usePathname();
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
-  const { user, signOut } = useAuth();
+  const { user, signOut, permissions } = useAuth();
   const { state: installState, canInstall, install: triggerInstall } = useInstallPrompt();
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
@@ -199,10 +199,14 @@ export function Sidebar({
     try { localStorage.setItem(VIEW_MODE_KEY, v); } catch {}
   };
 
-  // ── Compute filtered groups ───────────────────────────
+  // ── Compute filtered groups (includes RBAC page visibility) ─
   const filteredGroups = NAV_GROUPS.map((group) => ({
     ...group,
     items: group.items.filter((item) => {
+      // RBAC: hide pages the user doesn't have access to
+      if (permissions.visiblePages && !permissions.visiblePages.includes(item.key)) {
+        return false;
+      }
       if (filter === "all") return true;
       if (filter === "active") return item.status === "active";
       if (filter === "coming-soon") return item.status === "coming-soon";

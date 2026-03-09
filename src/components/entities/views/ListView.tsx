@@ -8,9 +8,10 @@ interface Props {
   fields: GlobalField[];
   onUpdate: () => void;
   language: string;
+  entityType?: string;
 }
 
-export function ListView({ notes, fields, onUpdate, language }: Props) {
+export function ListView({ notes, fields, onUpdate, language, entityType }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
 
   // Pick key fields to show as badges
@@ -30,7 +31,7 @@ export function ListView({ notes, fields, onUpdate, language }: Props) {
       {notes.map(note => (
         <a
           key={note.id}
-          href={`/dashboard/editor/${note.id}`}
+          href={entityType ? `/dashboard/entities/${entityType}/${note.id}` : `/dashboard/editor/${note.id}`}
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-white/[0.03] transition-colors group"
         >
           <div className="flex-1 min-w-0">

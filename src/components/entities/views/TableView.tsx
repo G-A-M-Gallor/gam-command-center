@@ -13,6 +13,7 @@ interface Props {
   onSort: (sort: ViewSort) => void;
   onUpdate: () => void;
   language: string;
+  entityType?: string;
   selectedIds?: Set<string>;
   onSelectionChange?: (ids: Set<string>) => void;
 }
@@ -183,7 +184,7 @@ function EditableCell({
   );
 }
 
-export function TableView({ notes, fields, groups, sort, onSort, onUpdate, language, selectedIds: controlledIds, onSelectionChange }: Props) {
+export function TableView({ notes, fields, groups, sort, onSort, onUpdate, language, entityType, selectedIds: controlledIds, onSelectionChange }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
   const [internalIds, setInternalIds] = useState<Set<string>>(new Set());
 
@@ -275,7 +276,7 @@ export function TableView({ notes, fields, groups, sort, onSort, onUpdate, langu
               </td>
               <td className="px-3 py-2">
                 <a
-                  href={`/dashboard/editor/${note.id}`}
+                  href={entityType ? `/dashboard/entities/${entityType}/${note.id}` : `/dashboard/editor/${note.id}`}
                   className="text-sm font-medium text-slate-200 hover:text-purple-300 transition-colors"
                 >
                   {note.title}

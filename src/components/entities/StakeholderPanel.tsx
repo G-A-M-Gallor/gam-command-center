@@ -308,7 +308,9 @@ function StakeholderRow({
 
         {/* Contact name */}
         <a
-          href={`/dashboard/editor/${s.contact_note_id}`}
+          href={s.contact_entity_type
+            ? `/dashboard/entities/${s.contact_entity_type}/${s.contact_note_id}`
+            : `/dashboard/editor/${s.contact_note_id}`}
           className="text-xs text-slate-200 hover:text-purple-300 truncate flex-1"
         >
           {s.contact_title || s.contact_note_id}

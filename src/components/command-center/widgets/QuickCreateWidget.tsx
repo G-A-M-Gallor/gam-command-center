@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, FolderPlus, CheckSquare, X, Loader2 } from "lucide-react";
+import { FileText, X, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getTranslations } from "@/lib/i18n";
-import { supabase } from "@/lib/supabaseClient";
+import { fetchEntityTypes, createNote } from "@/lib/supabase/entityQueries";
+import type { EntityType } from "@/lib/entities/types";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const CREATED_ITEMS_KEY = "cc-created-items";
 
 interface CreatedItem {
-  type: "project" | "task";
+  type: string;
   title: string;
   timestamp: number;
 }
@@ -44,57 +45,64 @@ export function QuickCreatePanel() {
   const t = getTranslations(language);
   const router = useRouter();
   const { toast } = useToast();
+  const lang = language === "he" ? "he" : language === "ru" ? "ru" : "en";
 
-  const [creating, setCreating] = useState<"project" | "task" | null>(null);
+  const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
+  const [creating, setCreating] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchEntityTypes().then(setEntityTypes);
+  }, []);
+
+  const creatingType = creating
+    ? entityTypes.find((et) => et.slug === creating)
+    : null;
 
   const handleCreate = useCallback(async () => {
     if (!title.trim() || !creating || saving) return;
     setSaving(true);
-    const label = creating === "project" ? t.widgets.newProjectAction : t.widgets.newTaskAction;
+
+    const et = entityTypes.find((e) => e.slug === creating);
+    const label = et?.label[lang] || creating;
 
     try {
-      if (creating === "project") {
-        const { error } = await supabase.from("projects").insert({
-          name: title.trim(),
-          status: "active",
-          health_score: 50,
-          layer: "product",
-          source: "manual",
-        });
-        if (error) throw error;
-      } else {
-        // Tasks go into vb_records as type "task"
-        const { error } = await supabase.from("vb_records").insert({
-          title: title.trim(),
-          record_type: "task",
-          status: "active",
-        });
-        if (error) throw error;
-      }
+      const note = await createNote(title.trim(), creating);
+      if (!note) throw new Error("createNote failed");
+
       saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
       toast({ message: `${label}: ${title.trim()}`, type: "success" });
-      // Dispatch notification
-      window.dispatchEvent(new CustomEvent("cc-notify", {
-        detail: { type: "status", titleHe: `${label}: ${title.trim()}`, titleEn: `${label}: ${title.trim()}` },
-      }));
+      window.dispatchEvent(
+        new CustomEvent("cc-notify", {
+          detail: {
+            type: "status",
+            titleHe: `${label}: ${title.trim()}`,
+            titleEn: `${label}: ${title.trim()}`,
+          },
+        })
+      );
+      // Navigate to the new entity detail page
+      router.push(`/dashboard/entities/${creating}/${note.id}`);
     } catch {
-      // Fallback: save locally if DB fails
       saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
-      toast({ message: `${label}: ${title.trim()} (${language === "he" ? "שמור מקומית" : "saved locally"})`, type: "warning" });
+      toast({
+        message: `${label}: ${title.trim()} (${language === "he" ? "שמור מקומית" : "saved locally"})`,
+        type: "warning",
+      });
     }
     setSaving(false);
     setTitle("");
     setCreating(null);
-  }, [title, creating, saving, t, toast, language]);
+  }, [title, creating, saving, entityTypes, lang, toast, language, router]);
 
   const todayCount = getCreatedTodayCount();
 
   return (
     <div className="space-y-3">
-      {/* Action cards */}
+      {/* Action cards — Document + all entity types */}
       <div className="grid grid-cols-3 gap-2">
+        {/* Document — navigates to editor */}
         <button
           type="button"
           onClick={() => router.push("/dashboard/editor")}
@@ -103,32 +111,30 @@ export function QuickCreatePanel() {
           <FileText className="h-5 w-5 text-blue-400" />
           <span className="text-[11px]">{t.widgets.newDocAction}</span>
         </button>
-        <button
-          type="button"
-          onClick={() => setCreating("project")}
-          className="flex flex-col items-center gap-2 rounded-lg border border-slate-700 bg-slate-700/30 p-3 text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-700/50"
-        >
-          <FolderPlus className="h-5 w-5 text-emerald-400" />
-          <span className="text-[11px]">{t.widgets.newProjectAction}</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setCreating("task")}
-          className="flex flex-col items-center gap-2 rounded-lg border border-slate-700 bg-slate-700/30 p-3 text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-700/50"
-        >
-          <CheckSquare className="h-5 w-5 text-amber-400" />
-          <span className="text-[11px]">{t.widgets.newTaskAction}</span>
-        </button>
+
+        {/* Dynamic entity type buttons */}
+        {entityTypes.map((et) => (
+          <button
+            key={et.slug}
+            type="button"
+            onClick={() => setCreating(et.slug)}
+            className="flex flex-col items-center gap-2 rounded-lg border border-slate-700 bg-slate-700/30 p-3 text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-700/50"
+          >
+            <span className="text-lg">{et.icon}</span>
+            <span className="text-[11px] truncate max-w-full">
+              {et.label[lang] || et.slug}
+            </span>
+          </button>
+        ))}
       </div>
 
       {/* Inline creation form */}
       {creating && (
         <div className="rounded-lg border border-slate-600 bg-slate-700/30 p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-300">
-              {creating === "project"
-                ? t.widgets.newProjectAction
-                : t.widgets.newTaskAction}
+            <span className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+              {creatingType && <span>{creatingType.icon}</span>}
+              {creatingType?.label[lang] || creating}
             </span>
             <button
               type="button"

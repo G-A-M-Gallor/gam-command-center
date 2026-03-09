@@ -7,10 +7,12 @@ import { ActivityFeed } from './ActivityFeed';
 import { NoteActions } from './NoteActions';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   fetchGlobalFields, fetchEntityTypes, updateNoteMeta,
   fetchNoteRelations, createNoteRelation, deleteNoteRelation,
-  searchNotes, fetchFieldGroups,
+  searchNotes, fetchFieldGroups, fetchNoteInfoBatch,
+  fetchStakeholders,
 } from '@/lib/supabase/entityQueries';
 import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel, TemplateConfig, TemplateSection } from '@/lib/entities/types';
 
@@ -19,6 +21,8 @@ interface Props {
   entityType: string | null;
   meta: Record<string, unknown>;
   onMetaChange: (meta: Record<string, unknown>) => void;
+  /** When true, hides StakeholderPanel + ActivityFeed (detail page renders them in its own sidebar) */
+  hideSidebar?: boolean;
 }
 
 // ─── Field Value Editor ──────────────────────────────
@@ -178,8 +182,9 @@ function GroupEditor({
   );
 }
 
-export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
+export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }: Props) {
   const { language } = useSettings();
+  const { user, permissions } = useAuth();
   const t = getTranslations(language);
   const isHe = language === 'he';
   const lang = isHe ? 'he' : 'en';
@@ -195,8 +200,9 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
   const [linkQuery, setLinkQuery] = useState('');
   const [linkResults, setLinkResults] = useState<NoteRecord[]>([]);
   const [expanded, setExpanded] = useState(true);
+  const [visibleFieldKeys, setVisibleFieldKeys] = useState<Set<string> | null>(null);
 
-  // Load fields for this entity type
+  // Load fields for this entity type + check stakeholder visible_fields for RBAC
   useEffect(() => {
     (async () => {
       const [allF, types, allGroups] = await Promise.all([
@@ -209,20 +215,43 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
         const et = types.find(t => t.slug === entityType);
         if (et) {
           setEtInfo(et);
-          setFields(allF.filter(f => et.field_refs.includes(f.meta_key)));
+          let filteredFields = allF.filter(f => et.field_refs.includes(f.meta_key));
+
+          // RBAC: if user is external/viewer, check stakeholder visible_fields
+          if (user && (permissions.role === 'external' || permissions.role === 'viewer')) {
+            const stakeholders = await fetchStakeholders(noteId);
+            const myStakeholder = stakeholders.find(s => s.contact_note_id === user.id);
+            if (myStakeholder && myStakeholder.visible_fields.length > 0) {
+              const allowed = new Set(myStakeholder.visible_fields);
+              setVisibleFieldKeys(allowed);
+              filteredFields = filteredFields.filter(f => allowed.has(f.meta_key));
+            }
+          }
+
+          setFields(filteredFields);
           setGroups(allGroups.filter(g => et.group_refs.includes(g.meta_key)));
         }
       }
     })();
-  }, [entityType]);
+  }, [entityType, noteId, user, permissions.role]);
 
-  // Load relations
-  useEffect(() => {
-    (async () => {
-      const rels = await fetchNoteRelations(noteId);
-      setRelations(rels);
-    })();
+  // Load relations + linked note info
+  const loadRelations = useCallback(async () => {
+    const rels = await fetchNoteRelations(noteId);
+    setRelations(rels);
+    // Fetch linked note titles + entity_types
+    const linkedIds = rels.map(r => r.source_id === noteId ? r.target_id : r.source_id);
+    if (linkedIds.length > 0) {
+      const info = await fetchNoteInfoBatch(linkedIds);
+      const map: Record<string, NoteRecord> = {};
+      for (const [id, val] of Object.entries(info)) {
+        map[id] = { id, title: val.title, entity_type: val.entity_type } as NoteRecord;
+      }
+      setLinkedNotes(map);
+    }
   }, [noteId]);
+
+  useEffect(() => { loadRelations(); }, [loadRelations]);
 
   const trackActivity = etInfo?.template_config?.track_activity ?? false;
 
@@ -247,18 +276,16 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
 
   const handleLink = useCallback(async (targetId: string) => {
     await createNoteRelation(noteId, targetId);
-    const rels = await fetchNoteRelations(noteId);
-    setRelations(rels);
+    await loadRelations();
     setShowLinkSearch(false);
     setLinkQuery('');
     setLinkResults([]);
-  }, [noteId]);
+  }, [noteId, loadRelations]);
 
   const handleUnlink = useCallback(async (relationId: string) => {
     await deleteNoteRelation(relationId);
-    const rels = await fetchNoteRelations(noteId);
-    setRelations(rels);
-  }, [noteId]);
+    await loadRelations();
+  }, [loadRelations]);
 
   if (!entityType || fields.length === 0) return null;
 
@@ -409,14 +436,22 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
               <div className="space-y-1">
                 {relations.map(rel => {
                   const linkedId = rel.source_id === noteId ? rel.target_id : rel.source_id;
+                  const linked = linkedNotes[linkedId];
+                  const linkedEt = linked?.entity_type;
+                  const href = linkedEt
+                    ? `/dashboard/entities/${linkedEt}/${linkedId}`
+                    : `/dashboard/editor/${linkedId}`;
                   return (
                     <div key={rel.id} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-white/[0.03] group">
                       <a
-                        href={`/dashboard/editor/${linkedId}`}
+                        href={href}
                         className="text-xs text-purple-400 hover:text-purple-300 flex-1 truncate"
                       >
-                        {linkedId}
+                        {linked?.title || linkedId}
                       </a>
+                      {linkedEt && (
+                        <span className="text-[9px] text-slate-600">{linkedEt}</span>
+                      )}
                       <span className="text-[9px] text-slate-600">{rel.relation_type}</span>
                       <button
                         onClick={() => handleUnlink(rel.id)}
@@ -431,12 +466,14 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange }: Props) {
             )}
           </div>
 
-          {/* Stakeholders */}
-          <StakeholderPanel noteId={noteId} />
-
-          {/* Activity Feed — only when template has tracking enabled */}
-          {trackActivity && (
-            <ActivityFeed noteId={noteId} language={language} />
+          {/* Stakeholders + Activity — hidden when detail page renders them in sidebar */}
+          {!hideSidebar && (
+            <>
+              <StakeholderPanel noteId={noteId} />
+              {trackActivity && (
+                <ActivityFeed noteId={noteId} language={language} />
+              )}
+            </>
           )}
         </div>
       )}

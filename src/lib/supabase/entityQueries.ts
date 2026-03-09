@@ -153,6 +153,28 @@ export async function deleteEntityConnection(id: string): Promise<boolean> {
   return true;
 }
 
+// ─── Single Note ────────────────────────────────────
+
+export async function fetchNote(id: string): Promise<NoteRecord | null> {
+  const { data, error } = await supabase
+    .from('vb_records')
+    .select('*')
+    .eq('id', id)
+    .eq('is_deleted', false)
+    .single();
+  if (error) { console.error('fetchNote:', error.message); return null; }
+  return data as NoteRecord;
+}
+
+export async function updateNoteTitle(id: string, title: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('vb_records')
+    .update({ title, last_edited_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { console.error('updateNoteTitle:', error.message); return false; }
+  return true;
+}
+
 // ─── Notes (vb_records) ─────────────────────────────
 
 export async function fetchNotes(
@@ -285,6 +307,23 @@ export async function deleteNote(id: string): Promise<boolean> {
   return true;
 }
 
+// ─── Batch Note Info ────────────────────────────────
+// Lightweight fetch for enriching links (title + entity_type only)
+
+export async function fetchNoteInfoBatch(ids: string[]): Promise<Record<string, { title: string; entity_type: string | null }>> {
+  if (ids.length === 0) return {};
+  const { data, error } = await supabase
+    .from('vb_records')
+    .select('id, title, entity_type')
+    .in('id', ids);
+  if (error) { console.error('fetchNoteInfoBatch:', error.message); return {}; }
+  const map: Record<string, { title: string; entity_type: string | null }> = {};
+  for (const row of data ?? []) {
+    map[row.id] = { title: row.title, entity_type: row.entity_type };
+  }
+  return map;
+}
+
 // ─── Note Relations ─────────────────────────────────
 
 export async function fetchNoteRelations(noteId: string): Promise<NoteRelation[]> {
@@ -404,7 +443,7 @@ export async function fetchStakeholders(noteId: string): Promise<NoteStakeholder
     const contactIds = stakeholders.map(s => s.contact_note_id);
     const { data: contacts } = await supabase
       .from('vb_records')
-      .select('id, title, meta')
+      .select('id, title, meta, entity_type')
       .in('id', contactIds);
 
     if (contacts) {
@@ -414,6 +453,7 @@ export async function fetchStakeholders(noteId: string): Promise<NoteStakeholder
         if (contact) {
           s.contact_title = contact.title;
           s.contact_meta = (contact.meta as Record<string, unknown>) ?? {};
+          s.contact_entity_type = contact.entity_type;
         }
       }
     }
@@ -534,6 +574,79 @@ export async function addCallLogEntry(
     noteText: summary,
     metadata,
   });
+}
+
+// ─── Template Linking ──────────────────────────────
+// Templates are vb_records with record_type = 'template' or 'document'.
+// Link them to entity instances via note_relations with relation_type = 'template'.
+
+export async function fetchLinkedTemplates(noteId: string): Promise<NoteRecord[]> {
+  // Get relations where this note is the source and relation_type = 'template'
+  const { data: rels, error } = await supabase
+    .from('note_relations')
+    .select('target_id')
+    .eq('source_id', noteId)
+    .eq('relation_type', 'template');
+  if (error || !rels?.length) return [];
+
+  const templateIds = rels.map(r => r.target_id);
+  const { data: templates } = await supabase
+    .from('vb_records')
+    .select('*')
+    .in('id', templateIds)
+    .eq('is_deleted', false)
+    .order('last_edited_at', { ascending: false });
+
+  return (templates ?? []) as NoteRecord[];
+}
+
+export async function linkTemplate(noteId: string, templateId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('note_relations')
+    .insert([{ source_id: noteId, target_id: templateId, relation_type: 'template' }]);
+  if (error) { console.error('linkTemplate:', error.message); return false; }
+  return true;
+}
+
+export async function unlinkTemplate(noteId: string, templateId: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('note_relations')
+    .delete()
+    .eq('source_id', noteId)
+    .eq('target_id', templateId)
+    .eq('relation_type', 'template');
+  if (error) { console.error('unlinkTemplate:', error.message); return false; }
+  return true;
+}
+
+export async function searchTemplates(query: string): Promise<NoteRecord[]> {
+  const { data, error } = await supabase
+    .from('vb_records')
+    .select('*')
+    .eq('is_deleted', false)
+    .in('record_type', ['template', 'document'])
+    .ilike('title', `%${query}%`)
+    .order('last_edited_at', { ascending: false })
+    .limit(20);
+  if (error) { console.error('searchTemplates:', error.message); return []; }
+  return (data ?? []) as NoteRecord[];
+}
+
+export async function createTemplate(title: string): Promise<NoteRecord | null> {
+  const { data, error } = await supabase
+    .from('vb_records')
+    .insert([{
+      title,
+      record_type: 'template',
+      status: 'active',
+      source: 'manual',
+      content: { type: 'doc', content: [{ type: 'paragraph' }] },
+      meta: {},
+    }])
+    .select()
+    .single();
+  if (error) { console.error('createTemplate:', error.message); return null; }
+  return data as NoteRecord;
 }
 
 // ─── Active / Inactive Toggle ──────────────────────

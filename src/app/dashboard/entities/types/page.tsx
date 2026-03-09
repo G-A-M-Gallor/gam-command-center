@@ -13,7 +13,8 @@ import {
 import { BUILTIN_ENTITY_TYPES, BUILTIN_CONNECTIONS } from '@/lib/entities/builtinEntityTypes';
 import { BUILTIN_FIELD_GROUPS } from '@/lib/entities/builtinFields';
 import { ConnectionDiagram } from '@/components/entities/ConnectionDiagram';
-import type { EntityType, EntityTypeInsert, EntityConnection, GlobalField, FieldGroup, ViewType, I18nLabel } from '@/lib/entities/types';
+import { TemplateEditor } from '@/components/entities/TemplateEditor';
+import type { EntityType, EntityTypeInsert, EntityConnection, GlobalField, FieldGroup, ViewType, I18nLabel, TemplateConfig } from '@/lib/entities/types';
 
 const VIEW_OPTIONS: ViewType[] = ['table', 'board', 'list', 'calendar', 'gantt', 'timeline'];
 const EMPTY_LABEL: I18nLabel = { he: '', en: '', ru: '' };
@@ -50,6 +51,7 @@ export default function EntityTypesPage() {
   const [draft, setDraft] = useState<EntityTypeInsert>(newTypeDefaults());
   const [showConnections, setShowConnections] = useState(false);
   const [connDraft, setConnDraft] = useState({ source: '', target: '', label: '', reverse: '' });
+  const [editTab, setEditTab] = useState<'general' | 'template'>('general');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -120,6 +122,7 @@ export default function EntityTypesPage() {
       template_config: et.template_config ?? null,
       sort_order: et.sort_order,
     });
+    setEditTab('general');
     setShowCreate(true);
   };
 
@@ -321,111 +324,146 @@ export default function EntityTypesPage() {
               {editingId ? te.editType : te.newType}
             </h2>
 
-            <div className="space-y-4">
-              {/* Slug */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.slug}</label>
-                <input
-                  type="text"
-                  value={draft.slug}
-                  onChange={e => setDraft(d => ({ ...d, slug: e.target.value.replace(/[^a-z0-9_-]/g, '') }))}
-                  placeholder="task, client, project..."
-                  disabled={!!editingId}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none disabled:opacity-50"
-                  dir="ltr"
-                />
-              </div>
+            {/* Tabs */}
+            <div className="flex gap-1 mb-4 border-b border-white/[0.06] pb-2">
+              <button
+                onClick={() => setEditTab('general')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  editTab === 'general'
+                    ? 'bg-purple-500/10 text-purple-300 border border-purple-500/30'
+                    : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                }`}
+              >
+                {isHe ? 'כללי' : language === 'ru' ? 'Общее' : 'General'}
+              </button>
+              <button
+                onClick={() => setEditTab('template')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  editTab === 'template'
+                    ? 'bg-purple-500/10 text-purple-300 border border-purple-500/30'
+                    : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                }`}
+              >
+                {isHe ? 'תבנית' : language === 'ru' ? 'Шаблон' : 'Template'}
+              </button>
+            </div>
 
-              {/* Labels */}
-              <div className="grid grid-cols-2 gap-3">
+            {editTab === 'general' ? (
+              <div className="space-y-4">
+                {/* Slug */}
                 <div>
-                  <label className="text-xs font-medium text-slate-400">{te.labelHe}</label>
+                  <label className="text-xs font-medium text-slate-400">{te.slug}</label>
                   <input
-                    type="text" value={draft.label.he}
-                    onChange={e => setDraft(d => ({ ...d, label: { ...d.label, he: e.target.value } }))}
-                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200" dir="rtl"
+                    type="text"
+                    value={draft.slug}
+                    onChange={e => setDraft(d => ({ ...d, slug: e.target.value.replace(/[^a-z0-9_-]/g, '') }))}
+                    placeholder="task, client, project..."
+                    disabled={!!editingId}
+                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none disabled:opacity-50"
+                    dir="ltr"
                   />
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-400">{te.labelEn}</label>
-                  <input
-                    type="text" value={draft.label.en}
-                    onChange={e => setDraft(d => ({ ...d, label: { ...d.label, en: e.target.value } }))}
-                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200" dir="ltr"
-                  />
-                </div>
-              </div>
 
-              {/* Icon + Color + View */}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="text-xs font-medium text-slate-400">{te.icon}</label>
-                  <input
-                    type="text" value={draft.icon}
-                    onChange={e => setDraft(d => ({ ...d, icon: e.target.value }))}
-                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200"
-                  />
+                {/* Labels */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-400">{te.labelHe}</label>
+                    <input
+                      type="text" value={draft.label.he}
+                      onChange={e => setDraft(d => ({ ...d, label: { ...d.label, he: e.target.value } }))}
+                      className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200" dir="rtl"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-400">{te.labelEn}</label>
+                    <input
+                      type="text" value={draft.label.en}
+                      onChange={e => setDraft(d => ({ ...d, label: { ...d.label, en: e.target.value } }))}
+                      className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200" dir="ltr"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-slate-400">{te.color}</label>
-                  <input
-                    type="color" value={draft.color ?? '#94a3b8'}
-                    onChange={e => setDraft(d => ({ ...d, color: e.target.value }))}
-                    className="mt-1 h-9 w-12 rounded border-0 bg-transparent cursor-pointer"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="text-xs font-medium text-slate-400">{te.defaultView}</label>
-                  <select
-                    value={draft.default_view}
-                    onChange={e => setDraft(d => ({ ...d, default_view: e.target.value as ViewType }))}
-                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300"
-                  >
-                    {VIEW_OPTIONS.map(v => <option key={v} value={v}>{te.views?.[v] ?? v}</option>)}
-                  </select>
-                </div>
-              </div>
 
-              {/* Field selection */}
-              <div>
-                <label className="text-xs font-medium text-slate-400 mb-2 block">{te.selectFields}</label>
-                <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2">
-                  {fields.map(f => (
-                    <label key={f.meta_key} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-white/[0.04] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={draft.field_refs.includes(f.meta_key)}
-                        onChange={() => toggleFieldRef(f.meta_key)}
-                        className="rounded border-white/20"
-                      />
-                      <span className="text-xs text-slate-300">{f.label[lang] || f.meta_key}</span>
-                      <code className="text-[9px] text-slate-500">{f.meta_key}</code>
-                    </label>
-                  ))}
+                {/* Icon + Color + View */}
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="text-xs font-medium text-slate-400">{te.icon}</label>
+                    <input
+                      type="text" value={draft.icon}
+                      onChange={e => setDraft(d => ({ ...d, icon: e.target.value }))}
+                      className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-slate-400">{te.color}</label>
+                    <input
+                      type="color" value={draft.color ?? '#94a3b8'}
+                      onChange={e => setDraft(d => ({ ...d, color: e.target.value }))}
+                      className="mt-1 h-9 w-12 rounded border-0 bg-transparent cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-medium text-slate-400">{te.defaultView}</label>
+                    <select
+                      value={draft.default_view}
+                      onChange={e => setDraft(d => ({ ...d, default_view: e.target.value as ViewType }))}
+                      className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-300"
+                    >
+                      {VIEW_OPTIONS.map(v => <option key={v} value={v}>{te.views?.[v] ?? v}</option>)}
+                    </select>
+                  </div>
                 </div>
-              </div>
 
-              {/* Group selection */}
-              {groups.length > 0 && (
+                {/* Field selection */}
                 <div>
-                  <label className="text-xs font-medium text-slate-400 mb-2 block">{te.selectGroups}</label>
-                  <div className="space-y-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2">
-                    {groups.map(g => (
-                      <label key={g.meta_key} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-white/[0.04] cursor-pointer">
+                  <label className="text-xs font-medium text-slate-400 mb-2 block">{te.selectFields}</label>
+                  <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2">
+                    {fields.map(f => (
+                      <label key={f.meta_key} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-white/[0.04] cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={draft.group_refs.includes(g.meta_key)}
-                          onChange={() => toggleGroupRef(g.meta_key)}
+                          checked={draft.field_refs.includes(f.meta_key)}
+                          onChange={() => toggleFieldRef(f.meta_key)}
                           className="rounded border-white/20"
                         />
-                        <span className="text-xs text-slate-300">{g.label[lang] || g.meta_key}</span>
-                        <span className="text-[9px] text-slate-500">({g.field_refs.join(', ')})</span>
+                        <span className="text-xs text-slate-300">{f.label[lang] || f.meta_key}</span>
+                        <code className="text-[9px] text-slate-500">{f.meta_key}</code>
                       </label>
                     ))}
                   </div>
                 </div>
-              )}
-            </div>
+
+                {/* Group selection */}
+                {groups.length > 0 && (
+                  <div>
+                    <label className="text-xs font-medium text-slate-400 mb-2 block">{te.selectGroups}</label>
+                    <div className="space-y-1 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2">
+                      {groups.map(g => (
+                        <label key={g.meta_key} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-white/[0.04] cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={draft.group_refs.includes(g.meta_key)}
+                            onChange={() => toggleGroupRef(g.meta_key)}
+                            className="rounded border-white/20"
+                          />
+                          <span className="text-xs text-slate-300">{g.label[lang] || g.meta_key}</span>
+                          <span className="text-[9px] text-slate-500">({g.field_refs.join(', ')})</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Template tab */
+              <TemplateEditor
+                config={draft.template_config}
+                fieldRefs={draft.field_refs}
+                fields={fields}
+                language={language}
+                onChange={(tc: TemplateConfig) => setDraft(d => ({ ...d, template_config: tc }))}
+              />
+            )}
 
             <div className="flex justify-end gap-2 mt-6">
               <button
