@@ -214,6 +214,19 @@ body {
   display: none;
 }
 
+/* ── SpeedDial fan animations ── */
+
+@keyframes sd-fan-out {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+  70% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes sd-glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--cc-accent-500-30), 0 -2px 12px var(--cc-accent-600-20); }
+  50% { box-shadow: 0 0 16px var(--cc-accent-500-50), 0 -4px 20px var(--cc-accent-600-30); }
+}
+
 /* ── Safe area insets (iPhone notch/home bar) ── */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   :root {
