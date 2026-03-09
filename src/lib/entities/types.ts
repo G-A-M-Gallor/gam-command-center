@@ -59,11 +59,12 @@ export interface GlobalField {
   default_value: unknown;
   icon: string | null;
   category: FieldCategory;
+  aliases: string[];
   sort_order: number;
   created_at: string;
 }
 
-export type GlobalFieldInsert = Omit<GlobalField, 'id' | 'created_at'>;
+export type GlobalFieldInsert = Omit<GlobalField, 'id' | 'created_at' | 'aliases'> & { aliases?: string[] };
 
 // ─── Field Group (repeating) ────────────────────────
 export interface FieldGroup {

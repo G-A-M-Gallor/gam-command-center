@@ -4,14 +4,14 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Plus, Search, Edit3, Trash2, ChevronDown, ChevronRight,
   Hash, Type, Calendar as CalendarIcon, CheckSquare, List, Link as LinkIcon,
-  Mail, Phone, Users, Tag, Combine, Filter,
+  Mail, Phone, Users, Tag, Combine, Filter, Lock, GitMerge, X,
 } from 'lucide-react';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import {
   fetchGlobalFields, createGlobalField, updateGlobalField, deleteGlobalField,
-  getFieldUsage,
+  getFieldUsage, generateMetaKey, mergeField,
 } from '@/lib/supabase/entityQueries';
 import { BUILTIN_FIELDS } from '@/lib/entities/builtinFields';
 import type { GlobalField, GlobalFieldInsert, FieldType, FieldCategory, SubField, FieldOption, I18nLabel } from '@/lib/entities/types';
@@ -65,6 +65,7 @@ function newFieldDefaults(): GlobalFieldInsert {
     default_value: null,
     icon: null,
     category: 'general',
+    aliases: [],
     sort_order: 0,
   };
 }
@@ -84,6 +85,8 @@ export default function FieldLibraryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<GlobalFieldInsert>(newFieldDefaults());
   const [usageMap, setUsageMap] = useState<Record<string, string[]>>({});
+  const [mergeSourceId, setMergeSourceId] = useState<string | null>(null);
+  const [newAlias, setNewAlias] = useState('');
 
   const loadFields = useCallback(async () => {
     setLoading(true);
@@ -128,11 +131,18 @@ export default function FieldLibraryPage() {
   }, [fields, search, categoryFilter, typeFilter, isHe]);
 
   const handleSave = async () => {
-    if (!draft.meta_key.trim()) return;
+    let finalDraft = { ...draft };
+    // Auto-generate meta_key for new fields
+    if (!editingId) {
+      const label = draft.label.en || draft.label.he;
+      if (!label.trim()) return;
+      finalDraft.meta_key = generateMetaKey(label);
+    }
+    if (!finalDraft.meta_key.trim()) return;
     if (editingId) {
-      await updateGlobalField(editingId, draft);
+      await updateGlobalField(editingId, finalDraft);
     } else {
-      await createGlobalField(draft);
+      await createGlobalField(finalDraft);
     }
     setShowCreate(false);
     setEditingId(null);
@@ -160,9 +170,29 @@ export default function FieldLibraryPage() {
       default_value: field.default_value,
       icon: field.icon,
       category: field.category as FieldCategory,
+      aliases: [...(field.aliases ?? [])],
       sort_order: field.sort_order,
     });
+    setNewAlias('');
     setShowCreate(true);
+  };
+
+  const handleMerge = async (targetId: string) => {
+    if (!mergeSourceId) return;
+    await mergeField(mergeSourceId, targetId, fields);
+    setMergeSourceId(null);
+    await loadFields();
+  };
+
+  const addAlias = () => {
+    const alias = newAlias.replace(/[^a-z0-9_]/g, '').trim();
+    if (!alias || (draft.aliases ?? []).includes(alias)) return;
+    setDraft(d => ({ ...d, aliases: [...(d.aliases ?? []), alias] }));
+    setNewAlias('');
+  };
+
+  const removeAlias = (alias: string) => {
+    setDraft(d => ({ ...d, aliases: (d.aliases ?? []).filter(a => a !== alias) }));
   };
 
   const addSubField = () => {
@@ -301,7 +331,19 @@ export default function FieldLibraryPage() {
                     )}
                   </div>
                 </div>
+                {field.aliases?.length > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300" title={field.aliases.join(', ')}>
+                    {field.aliases.length} {te.aliases ?? 'aliases'}
+                  </span>
+                )}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setMergeSourceId(field.id)}
+                    className="rounded p-1.5 text-slate-500 hover:text-blue-400 hover:bg-white/[0.06]"
+                    title={te.mergeField}
+                  >
+                    <GitMerge size={13} />
+                  </button>
                   <button
                     onClick={() => startEdit(field)}
                     className="rounded p-1.5 text-slate-500 hover:text-slate-300 hover:bg-white/[0.06]"
@@ -338,18 +380,20 @@ export default function FieldLibraryPage() {
             </h2>
 
             <div className="space-y-4">
-              {/* meta_key */}
+              {/* meta_key — auto-generated, locked */}
               <div>
                 <label className="text-xs font-medium text-slate-400">{te.metaKey}</label>
-                <input
-                  type="text"
-                  value={draft.meta_key}
-                  onChange={e => setDraft(d => ({ ...d, meta_key: e.target.value.replace(/[^a-z0-9_]/g, '') }))}
-                  placeholder="phone, full_name, etc."
-                  disabled={!!editingId}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500/50 focus:outline-none disabled:opacity-50"
-                  dir="ltr"
-                />
+                {editingId ? (
+                  <div className="mt-1 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+                    <Lock size={12} className="text-slate-500 shrink-0" />
+                    <code className="text-sm text-slate-300">{draft.meta_key}</code>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2">
+                    <Lock size={12} className="text-slate-500 shrink-0" />
+                    <span className="text-sm text-slate-500">{te.autoGenerated}</span>
+                  </div>
+                )}
               </div>
 
               {/* Label HE */}
@@ -501,6 +545,42 @@ export default function FieldLibraryPage() {
               )}
             </div>
 
+            {/* Aliases */}
+            {editingId && (
+              <div className="space-y-2 mt-4">
+                <label className="text-xs font-medium text-slate-400">{te.aliases}</label>
+                {(draft.aliases ?? []).length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {(draft.aliases ?? []).map(alias => (
+                      <span key={alias} className="inline-flex items-center gap-1 rounded bg-blue-500/15 px-2 py-1 text-xs text-blue-300">
+                        <LinkIcon size={10} />
+                        <code>{alias}</code>
+                        <button onClick={() => removeAlias(alias)} className="text-blue-400 hover:text-red-400 ms-0.5">
+                          <X size={10} />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-slate-600">{te.noAliases ?? 'No aliases'}</p>
+                )}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newAlias}
+                    onChange={e => setNewAlias(e.target.value.replace(/[^a-z0-9_]/g, ''))}
+                    placeholder="alias_key"
+                    className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
+                    dir="ltr"
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAlias(); } }}
+                  />
+                  <button onClick={addAlias} className="text-xs text-purple-400 hover:text-purple-300 px-2">
+                    + {te.addAlias}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             <div className="flex justify-end gap-2 mt-6">
               <button
@@ -511,10 +591,43 @@ export default function FieldLibraryPage() {
               </button>
               <button
                 onClick={handleSave}
-                disabled={!draft.meta_key.trim()}
+                disabled={editingId ? !draft.meta_key.trim() : !(draft.label.en.trim() || draft.label.he.trim())}
                 className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-40"
               >
                 {editingId ? te.save : te.create}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Merge Modal */}
+      {mergeSourceId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl border border-white/[0.08] bg-slate-900 p-6 shadow-2xl" dir={isHe ? 'rtl' : 'ltr'}>
+            <h2 className="text-lg font-semibold text-slate-100 mb-2">{te.mergeField}</h2>
+            <p className="text-xs text-amber-400 mb-4">{te.mergeWarning}</p>
+            <div className="space-y-1 max-h-[50vh] overflow-y-auto">
+              {fields
+                .filter(f => f.id !== mergeSourceId)
+                .map(f => (
+                  <button
+                    key={f.id}
+                    onClick={() => handleMerge(f.id)}
+                    className="w-full flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-start hover:bg-white/[0.06] transition-colors"
+                  >
+                    <GitMerge size={13} className="text-blue-400 shrink-0" />
+                    <span className="text-sm text-slate-200">{f.label[lang] || f.meta_key}</span>
+                    <code className="text-[10px] text-slate-500 ms-auto">{f.meta_key}</code>
+                  </button>
+                ))}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setMergeSourceId(null)}
+                className="rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-slate-400 hover:bg-white/[0.04]"
+              >
+                {te.cancel}
               </button>
             </div>
           </div>
