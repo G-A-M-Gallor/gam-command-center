@@ -11,6 +11,12 @@ import {
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import {
+  fetchActionPermissions,
+  roleDefaults,
+  ACTION_PERMISSION_MAP,
+  type ActionPermissions,
+} from "@/lib/supabase/permissionQueries";
 
 export type UserRole = 'admin' | 'manager' | 'member' | 'viewer' | 'external';
 
@@ -57,14 +63,20 @@ interface AuthContextValue {
   user: User | null;
   loading: boolean;
   permissions: UserPermissions;
+  actionPermissions: ActionPermissions;
+  canPerformAction: (actionId: string) => boolean;
   isAdmin: boolean;
   signOut: () => Promise<void>;
 }
+
+const DEFAULT_ACTION_PERMISSIONS = roleDefaults('member');
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
   permissions: DEFAULT_PERMISSIONS,
+  actionPermissions: DEFAULT_ACTION_PERMISSIONS,
+  canPerformAction: () => true,
   isAdmin: false,
   signOut: async () => {},
 });
@@ -72,6 +84,7 @@ const AuthContext = createContext<AuthContextValue>({
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionPerms, setActionPerms] = useState<ActionPermissions>(DEFAULT_ACTION_PERMISSIONS);
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
@@ -93,18 +106,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [supabase]);
 
+  const permissions = useMemo(() => resolvePermissions(user), [user]);
+  const isAdmin = permissions.role === 'admin';
+
+  // Fetch action permissions when user loads
+  useEffect(() => {
+    if (!user) {
+      setActionPerms(roleDefaults('viewer'));
+      return;
+    }
+    fetchActionPermissions(user.id, permissions.role).then(setActionPerms);
+  }, [user, permissions.role]);
+
+  const canPerformAction = useCallback((actionId: string): boolean => {
+    if (isAdmin) return true;
+    const permKey = ACTION_PERMISSION_MAP[actionId];
+    if (!permKey) return true; // unknown action → allow by default
+    return actionPerms[permKey];
+  }, [isAdmin, actionPerms]);
+
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
   }, [supabase, router]);
 
-  const permissions = useMemo(() => resolvePermissions(user), [user]);
-  const isAdmin = permissions.role === 'admin';
-
   const value = useMemo(
-    () => ({ user, loading, permissions, isAdmin, signOut }),
-    [user, loading, permissions, isAdmin, signOut]
+    () => ({ user, loading, permissions, actionPermissions: actionPerms, canPerformAction, isAdmin, signOut }),
+    [user, loading, permissions, actionPerms, canPerformAction, isAdmin, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

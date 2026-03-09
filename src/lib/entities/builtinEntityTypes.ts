@@ -37,7 +37,7 @@ const devTaskTemplate: TemplateConfig = {
     { event_type: 'status_change', field_key: 'status' },
     { event_type: 'field_change', field_key: 'story_points' },
   ],
-  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'open_in_ai', 'export_csv'),
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'open_in_ai', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const dealTemplate: TemplateConfig = {
@@ -58,7 +58,7 @@ const dealTemplate: TemplateConfig = {
     { event_type: 'status_change', field_key: 'pipeline_stage' },
     { event_type: 'field_change', field_key: 'deal_value' },
   ],
-  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv'),
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const leadTemplate: TemplateConfig = {
@@ -77,7 +77,7 @@ const leadTemplate: TemplateConfig = {
   kpi_triggers: [
     { event_type: 'status_change', field_key: 'pipeline_stage' },
   ],
-  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'open_in_ai'),
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'open_in_ai', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const agreementTemplate: TemplateConfig = {
@@ -93,7 +93,7 @@ const agreementTemplate: TemplateConfig = {
   gantt_config: { start_field: 'effective_date', end_field: 'expiry_date' },
   track_activity: true,
   track_kpi_events: false,
-  action_buttons: pickActions('deactivate', 'reactivate', 'send_notification', 'export_csv'),
+  action_buttons: pickActions('deactivate', 'reactivate', 'send_notification', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 // ─── Minimal Action-only Configs (base entity types) ──
@@ -103,7 +103,7 @@ const taskActions: TemplateConfig = {
   available_views: ['board', 'table', 'list'],
   track_activity: false,
   track_kpi_events: false,
-  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv'),
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const contactActions: TemplateConfig = {
@@ -111,7 +111,7 @@ const contactActions: TemplateConfig = {
   available_views: ['table', 'list'],
   track_activity: false,
   track_kpi_events: false,
-  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv'),
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const clientActions: TemplateConfig = {
@@ -119,7 +119,7 @@ const clientActions: TemplateConfig = {
   available_views: ['table', 'list'],
   track_activity: false,
   track_kpi_events: false,
-  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv'),
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const projectActions: TemplateConfig = {
@@ -127,7 +127,7 @@ const projectActions: TemplateConfig = {
   available_views: ['board', 'table', 'list'],
   track_activity: false,
   track_kpi_events: false,
-  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv'),
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 const documentActions: TemplateConfig = {
@@ -135,7 +135,7 @@ const documentActions: TemplateConfig = {
   available_views: ['list', 'table'],
   track_activity: false,
   track_kpi_events: false,
-  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv'),
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
 // ─── Entity Types ────────────────────────────────────

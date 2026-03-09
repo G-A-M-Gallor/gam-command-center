@@ -16,6 +16,63 @@ import type {
   ActivityLogEntry, ActivityType, NoteEvent,
 } from '@/lib/entities/types';
 
+// ─── Field Key Helpers ──────────────────────────────
+
+/** Resolve a meta_key or alias to the canonical GlobalField */
+export function resolveField(fields: GlobalField[], key: string): GlobalField | undefined {
+  return fields.find(f => f.meta_key === key || f.aliases.includes(key));
+}
+
+/** Generate a URL-safe meta_key from a label string */
+export function generateMetaKey(label: string): string {
+  const slug = label
+    .normalize('NFKD')
+    .replace(/[\u0590-\u05FF]+/g, m => transliterateHebrew(m))
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/[\s-]+/g, '_')
+    .toLowerCase()
+    .slice(0, 40);
+  const shortId = Math.random().toString(36).slice(2, 6);
+  return slug ? `${slug}_${shortId}` : `field_${shortId}`;
+}
+
+/** Basic Hebrew transliteration for meta_key generation */
+function transliterateHebrew(text: string): string {
+  const map: Record<string, string> = {
+    'א': 'a', 'ב': 'b', 'ג': 'g', 'ד': 'd', 'ה': 'h', 'ו': 'v', 'ז': 'z',
+    'ח': 'ch', 'ט': 't', 'י': 'y', 'כ': 'k', 'ך': 'k', 'ל': 'l', 'מ': 'm',
+    'ם': 'm', 'נ': 'n', 'ן': 'n', 'ס': 's', 'ע': 'a', 'פ': 'p', 'ף': 'p',
+    'צ': 'ts', 'ץ': 'ts', 'ק': 'q', 'ר': 'r', 'ש': 'sh', 'ת': 't',
+  };
+  return text.split('').map(c => map[c] ?? '').join('');
+}
+
+/** Merge field A into field B: A's meta_key becomes an alias on B, A is deleted */
+export async function mergeField(
+  sourceId: string,
+  targetId: string,
+  fields: GlobalField[],
+): Promise<boolean> {
+  const source = fields.find(f => f.id === sourceId);
+  const target = fields.find(f => f.id === targetId);
+  if (!source || !target) return false;
+
+  // Add source's meta_key + its aliases to target's aliases
+  const newAliases = [...new Set([
+    ...target.aliases,
+    source.meta_key,
+    ...source.aliases,
+  ])];
+
+  const ok = await updateGlobalField(targetId, { aliases: newAliases });
+  if (!ok) return false;
+
+  // Delete the source field
+  await deleteGlobalField(sourceId);
+  return true;
+}
+
 // ─── Global Fields ──────────────────────────────────
 
 export async function fetchGlobalFields(): Promise<GlobalField[]> {
@@ -365,12 +422,16 @@ export async function deleteNoteRelation(id: string): Promise<boolean> {
 export async function searchByMetaKey(
   metaKey: string,
   value: string,
+  allFields?: GlobalField[],
 ): Promise<NoteRecord[]> {
+  // If the key is an alias, resolve to canonical meta_key
+  const resolvedKey = allFields ? (resolveField(allFields, metaKey)?.meta_key ?? metaKey) : metaKey;
+
   const { data, error } = await supabase
     .from('vb_records')
     .select('*')
     .eq('is_deleted', false)
-    .ilike(`meta->>${metaKey}`, `%${value}%`)
+    .ilike(`meta->>${resolvedKey}`, `%${value}%`)
     .order('last_edited_at', { ascending: false })
     .limit(50);
   if (error) { console.error('searchByMetaKey:', error.message); return []; }
@@ -404,13 +465,14 @@ export async function searchNotes(
 export async function bulkUpdateMeta(
   ids: string[],
   metaPatch: Record<string, unknown>,
-): Promise<boolean> {
-  // Update meta for multiple notes at once
+  options?: { trackActivity?: boolean; actorId?: string | null },
+): Promise<{ success: boolean; updatedCount: number }> {
+  let updatedCount = 0;
   for (const id of ids) {
-    const ok = await updateNoteMeta(id, metaPatch);
-    if (!ok) return false;
+    const ok = await updateNoteMeta(id, metaPatch, options);
+    if (ok) updatedCount++;
   }
-  return true;
+  return { success: updatedCount === ids.length, updatedCount };
 }
 
 // ─── Field Usage Across Entities ────────────────────

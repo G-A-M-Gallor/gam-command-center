@@ -8,6 +8,7 @@ interface ResolveContext {
   scope: 'single' | 'bulk' | 'global';
   note?: NoteRecord;
   hasSelection?: boolean;
+  canPerformAction?: (actionId: string) => boolean;
 }
 
 /**
@@ -23,6 +24,9 @@ export function resolveActions(
 
   return buttons
     .filter(btn => {
+      // Permission check
+      if (context.canPerformAction && !context.canPerformAction(btn.id)) return false;
+
       // Scope matching
       if (context.scope === 'single' && btn.scope !== 'single') return false;
       if (context.scope === 'bulk' && btn.scope === 'single') return false;

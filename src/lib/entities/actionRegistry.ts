@@ -75,6 +75,30 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     show_when: { field_exists: 'phone' },
     sort_order: 40,
   },
+  bulk_field_update: {
+    id: 'bulk_field_update',
+    label: { he: 'עדכון שדה', en: 'Update Field', ru: 'Обновить поле' },
+    icon: 'Pencil',
+    variant: 'default',
+    scope: 'bulk',
+    sort_order: 5,
+  },
+  bulk_status_change: {
+    id: 'bulk_status_change',
+    label: { he: 'שינוי סטטוס', en: 'Change Status', ru: 'Изменить статус' },
+    icon: 'ArrowRightLeft',
+    variant: 'default',
+    scope: 'bulk',
+    sort_order: 6,
+  },
+  bulk_assign: {
+    id: 'bulk_assign',
+    label: { he: 'הקצאה', en: 'Assign', ru: 'Назначить' },
+    icon: 'UserPlus',
+    variant: 'default',
+    scope: 'bulk',
+    sort_order: 7,
+  },
 };
 
 /** Get a built-in action by ID, returns undefined if not found */

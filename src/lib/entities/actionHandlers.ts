@@ -130,4 +130,7 @@ export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   send_notification: handleSendNotification,
   call_log: async () => ({ success: true, message: 'call_log_form' }), // handled by UI
   send_whatsapp: handleSendWhatsapp,
+  bulk_field_update: async () => ({ success: true, message: 'bulk_field_update_modal' }), // handled by UI
+  bulk_status_change: async () => ({ success: true, message: 'bulk_status_change_modal' }), // handled by UI
+  bulk_assign: async () => ({ success: true, message: 'bulk_assign_modal' }), // handled by UI
 };
