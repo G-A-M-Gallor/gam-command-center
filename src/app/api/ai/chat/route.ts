@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts";
 import { requireAuth } from "@/lib/api/auth";
 import { aiChatSchema } from "@/lib/api/schemas";
+import { getTasksSummaryForPrompt } from "@/lib/notion/client";
 
 const DAILY_TOKEN_LIMIT = 100_000;
 
@@ -120,11 +121,45 @@ export async function POST(request: Request) {
     );
   }
 
+  // Load dynamic session context from Supabase
+  const supabaseCtx = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+  let sessionBlock = "";
+  try {
+    const { data: ctxRows } = await supabaseCtx
+      .from("session_context")
+      .select("context_key, context_value")
+      .eq("user_id", userId)
+      .or("expires_at.is.null,expires_at.gt." + new Date().toISOString());
+    if (ctxRows && ctxRows.length > 0) {
+      const lines = ctxRows.map(
+        (r: { context_key: string; context_value: unknown }) =>
+          `[${r.context_key}]: ${JSON.stringify(r.context_value)}`
+      );
+      sessionBlock = `\n\n--- Session Context ---\n${lines.join("\n").slice(0, 2000)}`;
+    }
+  } catch {
+    // session_context table may not exist yet — graceful fallback
+  }
+
   // Build system prompt with contexts (rich data from pages)
   let systemPrompt = SYSTEM_PROMPTS[mode];
   if (contexts.length > 0) {
     const contextBlock = contexts.join("\n\n").slice(0, 1500);
     systemPrompt += `\n\n--- Dashboard Data ---\n${contextBlock}`;
+  }
+  systemPrompt += sessionBlock;
+
+  // Load Notion tasks context (graceful if not configured)
+  try {
+    const notionSummary = await getTasksSummaryForPrompt();
+    if (notionSummary) {
+      systemPrompt += `\n\n--- Notion Tasks ---\n${notionSummary.slice(0, 1500)}`;
+    }
+  } catch {
+    // Notion not configured — skip silently
   }
 
   // Sliding window: keep first user message + last N exchanges

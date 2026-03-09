@@ -898,7 +898,7 @@ export default function AIHubPage() {
               const afterAction = parsed ? parsed.text : msg.content;
               const action = parsed?.action ?? null;
               const isWorkMode = activeConvo?.mode === "work";
-              const confidenceParsed = isAssistant && isWorkMode ? parseConfidence(afterAction) : null;
+              const confidenceParsed = isAssistant ? parseConfidence(afterAction) : null;
               const displayText = confidenceParsed ? confidenceParsed.text : afterAction;
               const confidence: ConfidenceLevel = confidenceParsed?.confidence ?? null;
 
