@@ -228,7 +228,6 @@ export const userJourneySteps: UserJourneyStep[] = [
       { name: 'Tool stack table', nameHe: 'טבלת חבילת כלים', status: 'done', risk: 'low' },
       { name: 'functional_map_cells table', nameHe: 'טבלת functional_map_cells', status: 'done', risk: 'low', note: 'Migration: 20260329_create_functional_map_cells.sql', noteHe: 'מיגרציה: 20260329_create_functional_map_cells.sql' },
       { name: 'Realtime sync for cells', nameHe: 'סנכרון Realtime לתאים', status: 'done', risk: 'low' },
-      { name: 'Origami iframe for Formily', nameHe: 'Origami iframe ל-Formily', status: 'missing', risk: 'high', note: 'External dependency', noteHe: 'תלות חיצונית' },
       { name: 'Notion API for live data', nameHe: 'Notion API לנתונים חיים', status: 'missing', risk: 'medium', note: 'External dependency', noteHe: 'תלות חיצונית' },
     ],
     unhappyPaths: ['Table missing (handled — local fallback)', 'Mermaid render fail (handled — securityLevel strict)'],
@@ -374,7 +373,6 @@ export const mlpTiers: MLPTier[] = [
     nameHe: 'שכבה ו׳: אינטגרציות חיצוניות',
     features: [
       { name: 'Notion live connection', nameHe: 'חיבור חי ל-Notion', why: 'Knowledge SOT', whyHe: 'מקור אמת לידע', effort: 'L', risk: 'high' },
-      { name: 'Origami API for Formily', nameHe: 'Origami API ל-Formily', why: 'Form management', whyHe: 'ניהול טפסים', effort: 'L', risk: 'high' },
       { name: 'WATI widget', nameHe: 'ווידג׳ט WATI', why: 'WhatsApp messages', whyHe: 'הודעות WhatsApp', effort: 'M', risk: 'high' },
     ],
   },
@@ -387,7 +385,6 @@ export const riskMatrix: RiskEntry[] = [
   { risk: 'Missing Supabase tables', riskHe: 'טבלאות Supabase חסרות', type: 'Technical', typeHe: 'טכני', level: 'low', mitigation: 'RESOLVED — all core tables created', mitigationHe: 'טופל — כל הטבלאות הליבתיות נוצרו' },
   { risk: 'Missing ANTHROPIC_API_KEY', riskHe: 'ANTHROPIC_API_KEY חסר', type: 'Dependency', typeHe: 'תלות', level: 'high', mitigation: 'Set env var', mitigationHe: 'הגדר משתנה סביבה' },
   { risk: 'n8n Origami sync', riskHe: 'סנכרון n8n Origami', type: 'Dependency', typeHe: 'תלות', level: 'high', mitigation: 'Requires Origami API access', mitigationHe: 'דורש גישה ל-Origami API' },
-  { risk: 'Origami API for Formily', riskHe: 'Origami API ל-Formily', type: 'Dependency', typeHe: 'תלות', level: 'high', mitigation: 'External cooperation needed', mitigationHe: 'נדרש שיתוף פעולה חיצוני' },
   { risk: 'Notion API integration', riskHe: 'אינטגרציית Notion API', type: 'Dependency', typeHe: 'תלות', level: 'high', mitigation: 'API key + mapping needed', mitigationHe: 'נדרש מפתח API + מיפוי' },
   { risk: 'RLS for new tables', riskHe: 'RLS לטבלאות חדשות', type: 'Technical', typeHe: 'טכני', level: 'low', mitigation: 'RESOLVED — RLS policies added', mitigationHe: 'טופל — מדיניות RLS נוספו' },
   { risk: 'Large story maps perf', riskHe: 'ביצועי מפות סיפורים גדולות', type: 'Technical', typeHe: 'טכני', level: 'medium', mitigation: 'Pagination/virtualization', mitigationHe: 'עימוד/וירטואליזציה' },

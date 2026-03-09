@@ -184,7 +184,6 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
       nav_functional_map: "/dashboard/functional-map",
       nav_ai_hub: "/dashboard/ai-hub",
       nav_design_system: "/dashboard/design-system",
-      nav_formily: "/dashboard/formily",
       nav_architecture: "/dashboard/architecture",
       nav_plan: "/dashboard/plan",
       nav_home: "/dashboard",

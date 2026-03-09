@@ -101,7 +101,7 @@ const pageKeys: Record<string, string> = {
   "/dashboard/functional-map": "functionalMap",
   "/dashboard/ai-hub": "aiHub",
   "/dashboard/design-system": "designSystem",
-  "/dashboard/formily": "formily",
+
   "/dashboard/architecture": "architecture",
   "/dashboard/plan": "plan",
 };
@@ -751,7 +751,7 @@ export default function AIHubPage() {
   const atLimit = messages.length >= MAX_CONVERSATION_MESSAGES;
 
   return (
-    <div className="flex h-full flex-col" dir={isHe ? "rtl" : "ltr"} data-cc-id="aihub.root">
+    <div className="flex h-[calc(100vh-48px)] flex-col" dir={isHe ? "rtl" : "ltr"} data-cc-id="aihub.root">
       <PageHeader pageKey="aiHub">
         {/* Live mode indicator */}
         <div className="mt-2 flex items-center gap-3">
@@ -781,13 +781,13 @@ export default function AIHubPage() {
       </PageHeader>
 
       {/* Main 2-column layout */}
-      <div className="mt-6 flex flex-1 gap-0 overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30">
+      <div className="mt-6 flex flex-1 min-h-0 gap-0 overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30">
         {/* Left sidebar — overlay on mobile, inline on desktop */}
         {sidebarOpen && isMobile && (
           <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)} />
         )}
         {sidebarOpen && (
-          <div data-cc-id="aihub.sidebar" className={`flex shrink-0 flex-col border-e border-slate-700/50 bg-slate-800/50 ${
+          <div data-cc-id="aihub.sidebar" className={`flex shrink-0 flex-col overflow-hidden border-e border-slate-700/50 bg-slate-800/50 ${
             isMobile
               ? "fixed inset-y-0 start-0 z-50 w-[280px] max-w-[calc(100vw-56px)] shadow-xl bg-slate-900"
               : "w-[280px]"

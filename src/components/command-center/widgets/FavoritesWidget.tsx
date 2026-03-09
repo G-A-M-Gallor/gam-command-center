@@ -11,7 +11,6 @@ import {
   Grid3X3,
   Bot,
   Palette,
-  FormInput,
   Network,
   Calendar,
   Compass,
@@ -37,7 +36,6 @@ const routeIcons: Record<string, typeof Layers> = {
   "/dashboard/functional-map": Grid3X3,
   "/dashboard/ai-hub": Bot,
   "/dashboard/design-system": Palette,
-  "/dashboard/formily": FormInput,
   "/dashboard/architecture": Network,
   "/dashboard/plan": Calendar,
   "/roadmap": Compass,
@@ -106,7 +104,6 @@ export function FavoritesPanel() {
       "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" },
       "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub", ru: "Центр AI" },
       "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" },
-      "/dashboard/formily": { he: "טפסים", en: "Formily", ru: "Формы" },
       "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" },
       "/dashboard/plan": { he: "תוכנית", en: "Plan", ru: "План" },
     };

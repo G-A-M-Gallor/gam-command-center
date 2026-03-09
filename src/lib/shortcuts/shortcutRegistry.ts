@@ -77,9 +77,8 @@ export const SYSTEM_SHORTCUTS: ShortcutDefinition[] = [
   { id: "nav_functional_map", keyCombo: "Cmd+4", actionSlug: "nav_functional_map", category: "navigation", displayName: { he: "עבור למפה פונקציונלית", en: "Go to Functional Map", ru: "Перейти к функциональной карте" }, isSystem: true, scope: "global", sortOrder: 4 },
   { id: "nav_ai_hub", keyCombo: "Cmd+5", actionSlug: "nav_ai_hub", category: "navigation", displayName: { he: "עבור למרכז AI", en: "Go to AI Hub", ru: "Перейти к центру AI" }, isSystem: true, scope: "global", sortOrder: 5 },
   { id: "nav_design_system", keyCombo: "Cmd+6", actionSlug: "nav_design_system", category: "navigation", displayName: { he: "עבור למערכת עיצוב", en: "Go to Design System", ru: "Перейти к дизайн-системе" }, isSystem: true, scope: "global", sortOrder: 6 },
-  { id: "nav_formily", keyCombo: "Cmd+7", actionSlug: "nav_formily", category: "navigation", displayName: { he: "עבור לטפסים", en: "Go to Formily", ru: "Перейти к формам" }, isSystem: true, scope: "global", sortOrder: 7 },
-  { id: "nav_architecture", keyCombo: "Cmd+8", actionSlug: "nav_architecture", category: "navigation", displayName: { he: "עבור לארכיטקטורה", en: "Go to Architecture", ru: "Перейти к архитектуре" }, isSystem: true, scope: "global", sortOrder: 8 },
-  { id: "nav_plan", keyCombo: "Cmd+9", actionSlug: "nav_plan", category: "navigation", displayName: { he: "עבור לתוכנית", en: "Go to Plan", ru: "Перейти к плану" }, isSystem: true, scope: "global", sortOrder: 9 },
+  { id: "nav_architecture", keyCombo: "Cmd+7", actionSlug: "nav_architecture", category: "navigation", displayName: { he: "עבור לארכיטקטורה", en: "Go to Architecture", ru: "Перейти к архитектуре" }, isSystem: true, scope: "global", sortOrder: 7 },
+  { id: "nav_plan", keyCombo: "Cmd+8", actionSlug: "nav_plan", category: "navigation", displayName: { he: "עבור לתוכנית", en: "Go to Plan", ru: "Перейти к плану" }, isSystem: true, scope: "global", sortOrder: 8 },
   { id: "nav_home", keyCombo: "Cmd+H", actionSlug: "nav_home", category: "navigation", displayName: { he: "חזור לדשבורד", en: "Go Home", ru: "На главную" }, isSystem: true, scope: "global", sortOrder: 10 },
 
   // ── Quick Actions ───────────────────────────────────────

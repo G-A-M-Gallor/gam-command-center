@@ -56,7 +56,6 @@ const pageKeys: Record<string, string> = {
   "/dashboard/functional-map": "functionalMap",
   "/dashboard/ai-hub": "aiHub",
   "/dashboard/design-system": "designSystem",
-  "/dashboard/formily": "formily",
   "/dashboard/architecture": "architecture",
   "/dashboard/plan": "plan",
 };

@@ -87,16 +87,6 @@ const planChecks: AuditCheck[] = [
     file: 'src/app/dashboard/design-system/page.tsx',
   },
   {
-    id: 'route-formily',
-    hat: 'plan',
-    title: 'Formily page — placeholder only',
-    titleHe: 'דף טפסים — placeholder בלבד',
-    result: 'info',
-    detail: '19 lines. CLAUDE.md says "Origami native forms — no custom builder". Correct as placeholder.',
-    detailHe: '19 שורות. CLAUDE.md אומר "טפסים מקוריים של Origami — ללא בנאי מותאם". תקין כ-placeholder.',
-    file: 'src/app/dashboard/formily/page.tsx',
-  },
-  {
     id: 'route-architecture',
     hat: 'plan',
     title: 'Architecture page — placeholder only',
@@ -199,8 +189,8 @@ const planChecks: AuditCheck[] = [
     title: 'No custom form builder — correct',
     titleHe: 'אין בנאי טפסים מותאם — תקין',
     result: 'pass',
-    detail: 'CLAUDE.md says "❌ Form Builder from scratch". Formily page is correctly a placeholder.',
-    detailHe: 'CLAUDE.md אומר "❌ בנאי טפסים מאפס". דף Formily הוא placeholder כהלכה.',
+    detail: 'CLAUDE.md says "❌ Form Builder from scratch". Entity platform handles CRUD instead.',
+    detailHe: 'CLAUDE.md אומר "❌ בנאי טפסים מאפס". פלטפורמת הישויות מטפלת ב-CRUD במקום.',
   },
   {
     id: 'no-multi-theme',

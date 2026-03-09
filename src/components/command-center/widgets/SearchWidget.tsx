@@ -84,7 +84,6 @@ const routeIcons: Record<string, typeof Search> = {
   "/dashboard/functional-map": Layers,
   "/dashboard/ai-hub": Bot,
   "/dashboard/design-system": Layers,
-  "/dashboard/formily": Layers,
   "/dashboard/architecture": Layers,
   "/dashboard/plan": Layers,
 };
@@ -377,7 +376,6 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" },
     "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub", ru: "AI Центр" },
     "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" },
-    "/dashboard/formily": { he: "טפסים", en: "Formily", ru: "Формы" },
     "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" },
     "/dashboard/plan": { he: "תוכנית", en: "Plan", ru: "План" },
     "/dashboard/settings": { he: "הגדרות", en: "Settings", ru: "Настройки" },

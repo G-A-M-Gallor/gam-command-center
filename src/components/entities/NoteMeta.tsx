@@ -23,6 +23,8 @@ interface Props {
   onMetaChange: (meta: Record<string, unknown>) => void;
   /** When true, hides StakeholderPanel + ActivityFeed (detail page renders them in its own sidebar) */
   hideSidebar?: boolean;
+  /** Number of columns for field grid (default: 2) */
+  columns?: 1 | 2 | 3 | 4;
 }
 
 // ─── Field Value Editor ──────────────────────────────
@@ -182,7 +184,7 @@ function GroupEditor({
   );
 }
 
-export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }: Props) {
+export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, columns = 2 }: Props) {
   const { language } = useSettings();
   const { user, permissions } = useAuth();
   const t = getTranslations(language);
@@ -201,6 +203,8 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }
   const [linkResults, setLinkResults] = useState<NoteRecord[]>([]);
   const [expanded, setExpanded] = useState(true);
   const [visibleFieldKeys, setVisibleFieldKeys] = useState<Set<string> | null>(null);
+  const [savingField, setSavingField] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Load fields for this entity type + check stakeholder visible_fields for RBAC
   useEffect(() => {
@@ -258,13 +262,27 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }
   const handleFieldChange = useCallback(async (metaKey: string, value: unknown) => {
     const newMeta = { ...meta, [metaKey]: value };
     onMetaChange(newMeta);
-    await updateNoteMeta(noteId, { [metaKey]: value }, { trackActivity });
+    setSavingField(metaKey);
+    setSaveError(null);
+    const ok = await updateNoteMeta(noteId, { [metaKey]: value }, { trackActivity });
+    setSavingField(null);
+    if (!ok) {
+      setSaveError(metaKey);
+      setTimeout(() => setSaveError(null), 3000);
+    }
   }, [noteId, meta, onMetaChange, trackActivity]);
 
   const handleGroupChange = useCallback(async (groupKey: string, values: Record<string, unknown>[]) => {
     const newMeta = { ...meta, [groupKey]: values };
     onMetaChange(newMeta);
-    await updateNoteMeta(noteId, { [groupKey]: values });
+    setSavingField(groupKey);
+    setSaveError(null);
+    const ok = await updateNoteMeta(noteId, { [groupKey]: values });
+    setSavingField(null);
+    if (!ok) {
+      setSaveError(groupKey);
+      setTimeout(() => setSaveError(null), 3000);
+    }
   }, [noteId, meta, onMetaChange]);
 
   const handleLinkSearch = useCallback(async (q: string) => {
@@ -332,17 +350,23 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }
               {etInfo.template_config.layout.sections.map(section => {
                 const sectionFields = fields.filter(f => section.field_refs.includes(f.meta_key));
                 if (sectionFields.length === 0) return null;
-                const cols = etInfo.template_config?.layout.meta_columns ?? 2;
+                const cols = columns ?? etInfo.template_config?.layout.meta_columns ?? 2;
+                const gridClass = cols === 1 ? 'grid-cols-1'
+                  : cols === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                  : cols === 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+                  : 'grid-cols-1 md:grid-cols-2';
                 return (
                   <div key={section.key} className="pt-2">
                     <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">
                       {section.label[lang] || section.key}
                     </h4>
-                    <div className={`grid gap-3 ${cols === 1 ? 'grid-cols-1' : cols === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+                    <div className={`grid gap-3 ${gridClass}`}>
                       {sectionFields.map(field => (
-                        <div key={field.meta_key}>
-                          <label className="text-[10px] font-medium text-slate-400 mb-1 block">
+                        <div key={field.meta_key} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+                          <label className="text-[10px] font-medium text-slate-400 mb-1.5 block flex items-center gap-1.5">
                             {field.label[lang] || field.meta_key}
+                            {savingField === field.meta_key && <Loader2 size={10} className="animate-spin text-slate-500" />}
+                            {saveError === field.meta_key && <span className="text-[9px] text-red-400">{te.saveFailed}</span>}
                           </label>
                           <FieldEditor
                             field={field}
@@ -358,12 +382,19 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }
               })}
             </>
           ) : (
-            // Flat grid (original behavior)
-            <div className="grid grid-cols-2 gap-3 pt-3">
+            // Flat grid
+            <div className={`grid gap-3 pt-3 ${
+              columns === 1 ? 'grid-cols-1'
+                : columns === 3 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                : columns === 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
+                : 'grid-cols-1 md:grid-cols-2'
+            }`}>
               {fields.map(field => (
-                <div key={field.meta_key}>
-                  <label className="text-[10px] font-medium text-slate-400 mb-1 block">
+                <div key={field.meta_key} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
+                  <label className="text-[10px] font-medium text-slate-400 mb-1.5 block flex items-center gap-1.5">
                     {field.label[lang] || field.meta_key}
+                    {savingField === field.meta_key && <Loader2 size={10} className="animate-spin text-slate-500" />}
+                    {saveError === field.meta_key && <span className="text-[9px] text-red-400">{te.saveFailed}</span>}
                   </label>
                   <FieldEditor
                     field={field}

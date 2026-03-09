@@ -210,27 +210,23 @@ export default function EntityDetailPage() {
         </div>
       </div>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main column */}
-        <div className="lg:col-span-2">
-          <NoteMeta
-            noteId={noteId}
-            entityType={entityTypeSlug}
-            meta={note.meta}
-            onMetaChange={handleMetaChange}
-            hideSidebar
-          />
-        </div>
+      {/* Full-width fields */}
+      <NoteMeta
+        noteId={noteId}
+        entityType={entityTypeSlug}
+        meta={note.meta}
+        onMetaChange={handleMetaChange}
+        hideSidebar
+        columns={3}
+      />
 
-        {/* Sidebar column */}
-        <div className="space-y-4">
-          <TemplatePicker noteId={noteId} />
-          <StakeholderPanel noteId={noteId} />
-          {trackActivity && (
-            <ActivityFeed noteId={noteId} language={language} />
-          )}
-        </div>
+      {/* Tools strip */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <TemplatePicker noteId={noteId} />
+        <StakeholderPanel noteId={noteId} />
+        {trackActivity && (
+          <ActivityFeed noteId={noteId} language={language} />
+        )}
       </div>
 
       {/* Single-scope action buttons */}
