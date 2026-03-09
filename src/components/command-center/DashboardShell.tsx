@@ -15,6 +15,7 @@ import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { GibberishDetector } from "./GibberishDetector";
+import { SpeedDial } from "./SpeedDial";
 
 const SIDEBAR_WIDTH = "15rem";
 const STRIP_WIDTH = "48px";
@@ -156,6 +157,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Gibberish auto-detection */}
       <GibberishDetector />
+
+      {/* FAB Speed Dial — desktop only */}
+      {!isMobile && <SpeedDial />}
 
       {/* Guide mode overlay */}
       <GuideOverlay />

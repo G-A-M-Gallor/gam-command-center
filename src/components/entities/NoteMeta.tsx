@@ -245,7 +245,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }
       const info = await fetchNoteInfoBatch(linkedIds);
       const map: Record<string, NoteRecord> = {};
       for (const [id, val] of Object.entries(info)) {
-        map[id] = { id, title: val.title, entity_type: val.entity_type } as NoteRecord;
+        map[id] = { id, title: val.title, entity_type: val.entity_type, created_by: null } as NoteRecord;
       }
       setLinkedNotes(map);
     }
@@ -314,7 +314,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar }
               note={{
                 id: noteId, title: '', content: null, record_type: '',
                 entity_type: entityType, meta, status: (meta.status as string) ?? 'active',
-                source: '', is_deleted: false, created_at: '', last_edited_at: '',
+                source: '', is_deleted: false, created_by: null, created_at: '', last_edited_at: '',
               }}
               entityType={entityType!}
               templateConfig={etInfo.template_config}

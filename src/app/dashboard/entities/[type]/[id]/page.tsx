@@ -4,19 +4,22 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, ArrowRight, ChevronRight, Loader2,
-  Power, PowerOff, Trash2,
+  Power, PowerOff, Trash2, Lock,
+  Type, CircleDot, UserCircle, Calendar, Clock,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import {
-  fetchNote, fetchEntityTypes, updateNoteTitle,
+  fetchNote, fetchEntityTypes, fetchGlobalFields, updateNoteTitle,
   deactivateNote, reactivateNote, deleteNote,
 } from '@/lib/supabase/entityQueries';
 import { NoteMeta } from '@/components/entities/NoteMeta';
+import { NoteActionBar } from '@/components/entities/NoteActionBar';
 import { StakeholderPanel } from '@/components/entities/StakeholderPanel';
 import { ActivityFeed } from '@/components/entities/ActivityFeed';
 import { TemplatePicker } from '@/components/entities/TemplatePicker';
-import type { NoteRecord, EntityType } from '@/lib/entities/types';
+import { SYSTEM_FIELDS } from '@/lib/entities/builtinFields';
+import type { NoteRecord, EntityType, GlobalField } from '@/lib/entities/types';
 
 export default function EntityDetailPage() {
   const params = useParams();
@@ -25,13 +28,14 @@ export default function EntityDetailPage() {
   const t = getTranslations(language);
   const te = t.entities;
   const isHe = language === 'he';
-  const lang = isHe ? 'he' : 'en';
+  const lang = language === 'ru' ? 'ru' : isHe ? 'he' : 'en';
 
   const entityTypeSlug = params.type as string;
   const noteId = params.id as string;
 
   const [note, setNote] = useState<NoteRecord | null>(null);
   const [etInfo, setEtInfo] = useState<EntityType | null>(null);
+  const [fields, setFields] = useState<GlobalField[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
@@ -42,9 +46,10 @@ export default function EntityDetailPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const [noteData, types] = await Promise.all([
+      const [noteData, types, globalFields] = await Promise.all([
         fetchNote(noteId),
         fetchEntityTypes(),
+        fetchGlobalFields(),
       ]);
       if (noteData) {
         setNote(noteData);
@@ -52,6 +57,7 @@ export default function EntityDetailPage() {
       }
       const et = types.find(t => t.slug === entityTypeSlug);
       if (et) setEtInfo(et);
+      setFields(globalFields);
       setLoading(false);
     })();
   }, [noteId, entityTypeSlug]);
@@ -76,6 +82,11 @@ export default function EntityDetailPage() {
   const handleMetaChange = useCallback((meta: Record<string, unknown>) => {
     setNote(prev => prev ? { ...prev, meta } : prev);
   }, []);
+
+  const handleNoteRefresh = useCallback(async () => {
+    const updated = await fetchNote(noteId);
+    if (updated) { setNote(updated); setTitle(updated.title); }
+  }, [noteId]);
 
   const handleDeactivate = async () => {
     if (!note) return;
@@ -161,21 +172,42 @@ export default function EntityDetailPage() {
         )}
       </div>
 
-      {/* Status bar */}
-      <div className="flex items-center gap-4 text-[11px] text-slate-500">
-        {note.status && !isInactive && (
-          <span className="rounded-full bg-white/[0.04] px-2 py-0.5">
-            {note.status}
-          </span>
-        )}
-        <span>
-          {te.createdAt}: {new Date(note.created_at).toLocaleDateString(isHe ? 'he-IL' : 'en-US')}
-        </span>
-        {note.last_edited_at && (
-          <span>
-            {te.lastEdited}: {new Date(note.last_edited_at).toLocaleDateString(isHe ? 'he-IL' : 'en-US')}
-          </span>
-        )}
+      {/* System Fields strip */}
+      <div className="rounded-lg border border-purple-500/15 bg-purple-500/[0.03] p-3">
+        <div className="flex items-center gap-1.5 mb-2.5 text-[11px] font-medium text-amber-400/80">
+          <Lock size={11} />
+          {te.systemFields}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          {SYSTEM_FIELDS.map(sf => {
+            const IconMap: Record<string, React.ElementType> = {
+              Type, CircleDot, UserCircle, Calendar, Clock,
+            };
+            const SfIcon = IconMap[sf.icon] ?? Type;
+            const raw = note[sf.noteField as keyof NoteRecord];
+            let display: string;
+            if (raw == null || raw === '') {
+              display = '—';
+            } else if (sf.noteField === 'created_at' || sf.noteField === 'last_edited_at') {
+              display = new Date(raw as string).toLocaleDateString(isHe ? 'he-IL' : 'en-US', {
+                day: '2-digit', month: '2-digit', year: '2-digit',
+              });
+            } else {
+              display = String(raw);
+            }
+            return (
+              <div key={sf.key} className="flex flex-col gap-1 rounded-md bg-white/[0.03] border border-white/[0.06] px-3 py-2">
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                  <SfIcon size={11} />
+                  {sf.label[lang]}
+                </div>
+                <span className="text-xs text-slate-200 truncate" title={display}>
+                  {display}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Two-column layout */}
@@ -200,6 +232,16 @@ export default function EntityDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Single-scope action buttons */}
+      <NoteActionBar
+        note={note}
+        entityType={entityTypeSlug}
+        templateConfig={etInfo?.template_config}
+        language={language}
+        fields={fields}
+        onRefresh={handleNoteRefresh}
+      />
 
       {/* Bottom actions */}
       <div className="flex items-center gap-3 border-t border-white/[0.06] pt-4">

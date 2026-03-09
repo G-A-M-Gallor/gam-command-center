@@ -6,7 +6,102 @@
 
 import type { GlobalFieldInsert } from './types';
 
+// ─── System Fields Metadata ───────────────────────────
+// Maps system field keys to NoteRecord columns for the universal strip.
+export const SYSTEM_FIELDS: {
+  key: string;
+  noteField: string;
+  label: { he: string; en: string; ru: string };
+  icon: string;
+}[] = [
+  { key: 'sys_title', noteField: 'title', label: { he: 'כותרת', en: 'Title', ru: 'Заголовок' }, icon: 'Type' },
+  { key: 'sys_status', noteField: 'status', label: { he: 'סטטוס', en: 'Status', ru: 'Статус' }, icon: 'CircleDot' },
+  { key: 'sys_created_by', noteField: 'created_by', label: { he: 'נוצר על ידי', en: 'Created By', ru: 'Создано' }, icon: 'UserCircle' },
+  { key: 'sys_created_at', noteField: 'created_at', label: { he: 'תאריך יצירה', en: 'Created At', ru: 'Дата создания' }, icon: 'Calendar' },
+  { key: 'sys_last_edited_at', noteField: 'last_edited_at', label: { he: 'עודכן לאחרונה', en: 'Last Edited', ru: 'Последнее изменение' }, icon: 'Clock' },
+];
+
 export const BUILTIN_FIELDS: GlobalFieldInsert[] = [
+  // ─── System Fields (always present, cannot be deleted) ──
+  {
+    meta_key: 'sys_title',
+    label: { he: 'כותרת', en: 'Title', ru: 'Заголовок' },
+    description: { he: 'כותרת הפתק', en: 'Note title', ru: 'Заголовок записки' },
+    field_type: 'text',
+    is_composite: false,
+    sub_fields: [],
+    display_template: null,
+    options: [],
+    validation: { required: true },
+    default_value: null,
+    icon: 'Type',
+    category: 'system',
+    sort_order: -5,
+  },
+  {
+    meta_key: 'sys_status',
+    label: { he: 'סטטוס', en: 'Status', ru: 'Статус' },
+    description: { he: 'סטטוס הפתק', en: 'Note status', ru: 'Статус записки' },
+    field_type: 'select',
+    is_composite: false,
+    sub_fields: [],
+    display_template: null,
+    options: [
+      { value: 'active', label: { he: 'פעיל', en: 'Active', ru: 'Активный' }, color: '#34d399' },
+      { value: 'inactive', label: { he: 'לא פעיל', en: 'Inactive', ru: 'Неактивный' }, color: '#ef4444' },
+    ],
+    validation: {},
+    default_value: 'active',
+    icon: 'CircleDot',
+    category: 'system',
+    sort_order: -4,
+  },
+  {
+    meta_key: 'sys_created_by',
+    label: { he: 'נוצר על ידי', en: 'Created By', ru: 'Создано' },
+    description: { he: 'מי יצר את הפתק', en: 'Who created the note', ru: 'Кто создал записку' },
+    field_type: 'person',
+    is_composite: false,
+    sub_fields: [],
+    display_template: null,
+    options: [],
+    validation: {},
+    default_value: null,
+    icon: 'UserCircle',
+    category: 'system',
+    sort_order: -3,
+  },
+  {
+    meta_key: 'sys_created_at',
+    label: { he: 'תאריך יצירה', en: 'Created At', ru: 'Дата создания' },
+    description: { he: 'מתי נוצר הפתק', en: 'When the note was created', ru: 'Когда была создана записка' },
+    field_type: 'date',
+    is_composite: false,
+    sub_fields: [],
+    display_template: null,
+    options: [],
+    validation: {},
+    default_value: null,
+    icon: 'Calendar',
+    category: 'system',
+    sort_order: -2,
+  },
+  {
+    meta_key: 'sys_last_edited_at',
+    label: { he: 'עודכן לאחרונה', en: 'Last Edited', ru: 'Последнее изменение' },
+    description: { he: 'מתי עודכן הפתק לאחרונה', en: 'When the note was last edited', ru: 'Когда записка была изменена' },
+    field_type: 'date',
+    is_composite: false,
+    sub_fields: [],
+    display_template: null,
+    options: [],
+    validation: {},
+    default_value: null,
+    icon: 'Clock',
+    category: 'system',
+    sort_order: -1,
+  },
+
   // ─── Composite Fields ─────────────────────────────
   {
     meta_key: 'full_name',

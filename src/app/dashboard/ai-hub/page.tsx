@@ -15,6 +15,7 @@ import ReactMarkdown from "react-markdown";
 import { streamChat, streamWorkManager } from "@/lib/ai/client";
 import { parseAction, parseConfidence, type ConfidenceLevel } from "@/lib/work-manager/parseAction";
 import { ActionPreview } from "@/components/work-manager/ActionPreview";
+import { ChatToolbar } from "@/components/command-center/ChatToolbar";
 import { addUsage, getUsagePercent, isOverBudget, isNearBudget } from "@/lib/ai/tokenTracker";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { MODE_MODELS, MAX_CONVERSATION_MESSAGES, type AIMode } from "@/lib/ai/prompts";
@@ -313,6 +314,46 @@ function TokenUsageBar({ t }: { t: ReturnType<typeof getTranslations> }) {
         </p>
       )}
     </div>
+  );
+}
+
+// ─── ChatToolbar + Textarea wrapper ─────────────────────────────────
+
+function ChatToolbarWrapper({
+  textareaRef, value, onChange, lang, onSubmitKeyDown, placeholder, disabled, isHe,
+}: {
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  value: string;
+  onChange: (v: string) => void;
+  lang: "he" | "en" | "ru";
+  onSubmitKeyDown: (e: React.KeyboardEvent) => void;
+  placeholder: string;
+  disabled: boolean;
+  isHe: boolean;
+}) {
+  const { toolbar, onKeyDown: toolbarKeyDown } = ChatToolbar({
+    textareaRef, value, onChange, lang,
+  });
+
+  return (
+    <>
+      {toolbar}
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          toolbarKeyDown(e);
+          if (!e.defaultPrevented) onSubmitKeyDown(e);
+        }}
+        placeholder={placeholder}
+        rows={1}
+        disabled={disabled}
+        dir={isHe ? "rtl" : "ltr"}
+        className="w-full resize-none rounded-b-lg rounded-t-none border border-slate-600 border-t-0 bg-slate-700/50 px-3 py-2.5 pe-10 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[var(--cc-accent-500)] transition-colors disabled:opacity-40"
+        style={{ maxHeight: 120 }}
+      />
+    </>
   );
 }
 
@@ -881,10 +922,9 @@ export default function AIHubPage() {
                       </div>
                     ) : (
                       <div
-                        className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-[var(--cc-accent-600-30)] text-slate-100"
-                        style={{ whiteSpace: "pre-wrap" }}
+                        className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-[var(--cc-accent-600-30)] text-slate-100 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
                       >
-                        {displayText}
+                        <ReactMarkdown>{displayText}</ReactMarkdown>
                       </div>
                     )}
                     {confidence && (
@@ -989,17 +1029,15 @@ export default function AIHubPage() {
               </div>
 
               <div className="relative flex-1">
-                <textarea
-                  ref={textareaRef}
+                <ChatToolbarWrapper
+                  textareaRef={textareaRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
+                  onChange={setInput}
+                  lang={language}
+                  onSubmitKeyDown={handleKeyDown}
                   placeholder={atLimit ? t.aiHub.conversationLimit : t.aiHub.typePlaceholder}
-                  rows={1}
                   disabled={atLimit}
-                  dir={isHe ? "rtl" : "ltr"}
-                  className="w-full resize-none rounded-lg border border-slate-600 bg-slate-700/50 px-3 py-2.5 pe-10 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[var(--cc-accent-500)] transition-colors disabled:opacity-40"
-                  style={{ maxHeight: 120 }}
+                  isHe={isHe}
                 />
                 {input.length > 0 && (
                   <span className="absolute bottom-1 end-10 text-[10px] text-slate-600">

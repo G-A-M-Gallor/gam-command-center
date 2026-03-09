@@ -13,7 +13,7 @@ export type FieldType =
 export type ViewType = 'table' | 'board' | 'list' | 'calendar' | 'gantt' | 'timeline';
 
 export type FieldCategory =
-  | 'general' | 'contact' | 'business' | 'project' | 'hr' | 'finance';
+  | 'system' | 'general' | 'contact' | 'business' | 'project' | 'hr' | 'finance';
 
 export type RelationKind = 'one-to-one' | 'one-to-many' | 'many-to-many';
 
@@ -165,6 +165,7 @@ export interface NoteRecord {
   status: string;
   source: string;
   is_deleted: boolean;
+  created_by: string | null;
   created_at: string;
   last_edited_at: string;
 }
