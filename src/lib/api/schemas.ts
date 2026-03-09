@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // ─── AI Chat ────────────────────────────────────────────────
 
-const VALID_MODES = ["chat", "analyze", "write", "decompose"] as const;
+const VALID_MODES = ["chat", "analyze", "write", "decompose", "work"] as const;
 
 const aiChatMessageSchema = z.object({
   role: z
@@ -97,6 +97,39 @@ export const pushSubscribersDeleteSchema = z.object({
 });
 
 export type PushSubscribersDeleteInput = z.infer<typeof pushSubscribersDeleteSchema>;
+
+// ─── Work Manager ──────────────────────────────────────────
+
+export const workManagerSchema = z.object({
+  messages: z
+    .array(aiChatMessageSchema)
+    .min(1, "At least one message is required")
+    .max(50, "Maximum 50 messages per request"),
+  session_id: z.string().min(1, "session_id is required"),
+  user_id: z.string().uuid("user_id must be a valid UUID"),
+  current_view: z
+    .object({
+      page: z.string(),
+      open_tasks: z.array(z.string()).optional(),
+      time_in_view: z.string().optional(),
+    })
+    .optional(),
+});
+
+export type WorkManagerInput = z.infer<typeof workManagerSchema>;
+
+// ─── Work Manager Execute ──────────────────────────────────
+
+export const workManagerExecuteSchema = z.object({
+  action_type: z.enum(["create_task", "update_status", "add_note", "invoke_persona"], {
+    error: 'action_type must be one of: create_task, update_status, add_note, invoke_persona',
+  }),
+  title: z.string().min(1, "title is required"),
+  details: z.record(z.string(), z.string()),
+  session_id: z.string().min(1, "session_id is required"),
+});
+
+export type WorkManagerExecuteInput = z.infer<typeof workManagerExecuteSchema>;
 
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —

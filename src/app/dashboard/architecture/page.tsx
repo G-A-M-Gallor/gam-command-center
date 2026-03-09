@@ -27,12 +27,23 @@ const MERMAID_DEFINITION = `graph TB
   subgraph Msg["Messaging"]
     WATI["WATI"]
   end
+  subgraph AI["AI Layer"]
+    AIHUB["AI Hub"]
+    WORKMGR["Work Manager"]
+  end
+  subgraph ExtAI["External AI"]
+    ANTHROPIC["Anthropic API"]
+  end
   NEXTJS -->|reads/writes| SUPA
   NEXTJS -.->|reads specs| NOTION
   N8N -->|syncs| SUPA
   N8N -->|webhooks| ORIGAMI
   N8N -->|triggers| WATI
-  ORIGAMI -.->|SOT| SUPA`;
+  ORIGAMI -.->|SOT| SUPA
+  AIHUB -->|mode 5| WORKMGR
+  WORKMGR -->|calls| ANTHROPIC
+  WORKMGR -->|budget check| SUPA
+  AIHUB -->|calls| ANTHROPIC`;
 
 // ─── Tool Stack ─────────────────────────────────────────
 

@@ -5,14 +5,18 @@ import { usePathname } from "next/navigation";
 import {
   Send, Plus, X, MessageCircle, BarChart3, PenTool, GitBranch,
   Trash2, Sparkles, PanelLeftClose, PanelLeftOpen, Square, Zap,
-  AlertTriangle,
+  AlertTriangle, Briefcase,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
-import { streamChat } from "@/lib/ai/client";
+import ReactMarkdown from "react-markdown";
+import { streamChat, streamWorkManager } from "@/lib/ai/client";
+import { parseAction, parseConfidence, type ConfidenceLevel } from "@/lib/work-manager/parseAction";
+import { ActionPreview } from "@/components/work-manager/ActionPreview";
 import { addUsage, getUsagePercent, isOverBudget, isNearBudget } from "@/lib/ai/tokenTracker";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { MODE_MODELS, MAX_CONVERSATION_MESSAGES, type AIMode } from "@/lib/ai/prompts";
 import { usePageContext } from "@/lib/ai/usePageContext";
 import {
@@ -49,6 +53,7 @@ const MODE_ICONS: Record<AIMode, typeof MessageCircle> = {
   analyze: BarChart3,
   write: PenTool,
   decompose: GitBranch,
+  work: Briefcase,
 };
 
 const MODE_COLORS: Record<AIMode, string> = {
@@ -56,6 +61,7 @@ const MODE_COLORS: Record<AIMode, string> = {
   analyze: "blue",
   write: "emerald",
   decompose: "amber",
+  work: "amber",
 };
 
 const MODEL_LABELS: Record<string, string> = {
@@ -112,6 +118,7 @@ function ModeSelector({
     { key: "analyze", label: t.aiHub.modeAnalyze, desc: t.aiHub.modeAnalyzeDesc },
     { key: "write", label: t.aiHub.modeWrite, desc: t.aiHub.modeWriteDesc },
     { key: "decompose", label: t.aiHub.modeDecompose, desc: t.aiHub.modeDecomposeDesc },
+    { key: "work", label: t.aiHub.modeWork, desc: t.aiHub.modeWorkDesc },
   ];
 
   return (
@@ -215,6 +222,7 @@ function ModeTabBar({
     { key: "analyze", label: t.aiHub.modeAnalyze },
     { key: "write", label: t.aiHub.modeWrite },
     { key: "decompose", label: t.aiHub.modeDecompose },
+    { key: "work", label: t.aiHub.modeWork },
   ];
 
   return (
@@ -254,6 +262,8 @@ function getSuggestions(mode: AIMode, t: ReturnType<typeof getTranslations>): st
       return [t.aiHub.suggestWriteReport, t.aiHub.suggestWriteEmail];
     case "decompose":
       return [t.aiHub.suggestDecomposeEpic, t.aiHub.suggestDecomposeTasks];
+    case "work":
+      return [t.aiHub.workSuggestStatus, t.aiHub.workSuggestNext, t.aiHub.workSuggestDecisions, t.aiHub.workSuggestPriority];
   }
 }
 
@@ -327,6 +337,7 @@ export default function AIHubPage() {
   const isMobile = breakpoint === "mobile";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<"idle" | "saving" | "saved" | "offline">("idle");
+  const [dismissedActions, setDismissedActions] = useState<Set<string>>(() => new Set());
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -571,15 +582,13 @@ export default function AIHubPage() {
     // Build rich contexts with actual page data
     const richContexts = await buildRichContexts(contexts);
 
-    streamChat({
-      messages: apiMessages,
-      mode,
-      contexts: richContexts,
+    // Shared SSE callbacks
+    const streamCallbacks = {
       signal: controller.signal,
-      onToken: (token) => {
+      onToken: (token: string) => {
         setStreamingContent((prev) => prev + token);
       },
-      onDone: (usage) => {
+      onDone: (usage: { input_tokens: number; output_tokens: number }) => {
         addUsage(usage.input_tokens, usage.output_tokens);
         setStreamingContent((prev) => {
           const assistantMsg: ChatMessage = {
@@ -608,7 +617,7 @@ export default function AIHubPage() {
         setIsStreaming(false);
         abortRef.current = null;
       },
-      onError: (error) => {
+      onError: (error: string) => {
         // If aborted by user, save partial content
         setStreamingContent((prev) => {
           if (prev) {
@@ -646,8 +655,25 @@ export default function AIHubPage() {
         setIsStreaming(false);
         abortRef.current = null;
       },
-    });
-  }, [input, isStreaming, activeId, conversations, mode, contexts, messages.length, updateConversations, debouncedCloudSave]);
+    };
+
+    if (mode === "work") {
+      streamWorkManager({
+        messages: apiMessages,
+        session_id: targetId!,
+        user_id: convo.id,
+        current_view: { page: pathname },
+        ...streamCallbacks,
+      });
+    } else {
+      streamChat({
+        messages: apiMessages,
+        mode,
+        contexts: richContexts,
+        ...streamCallbacks,
+      });
+    }
+  }, [input, isStreaming, activeId, conversations, mode, contexts, messages.length, updateConversations, debouncedCloudSave, pathname, buildRichContexts]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -671,6 +697,12 @@ export default function AIHubPage() {
             <Zap size={11} />
             {t.aiHub.liveMode}
           </div>
+          {mode === "work" && (
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              {t.aiHub.workConnected}
+            </div>
+          )}
           <span className="text-[11px] text-slate-500">
             {t.aiHub.modelLabel}: {modelLabel}
           </span>
@@ -813,32 +845,103 @@ export default function AIHubPage() {
               </div>
             )}
 
-            {messages.map((msg, i) => (
-              <div
-                key={`${msg.timestamp}-${i}`}
-                className={`mb-4 ${msg.role === "user" ? "flex justify-end" : ""}`}
-              >
+            {messages.map((msg, i) => {
+              const isAssistant = msg.role === "assistant";
+              const parsed = isAssistant ? parseAction(msg.content) : null;
+              const afterAction = parsed ? parsed.text : msg.content;
+              const action = parsed?.action ?? null;
+              const isWorkMode = activeConvo?.mode === "work";
+              const confidenceParsed = isAssistant && isWorkMode ? parseConfidence(afterAction) : null;
+              const displayText = confidenceParsed ? confidenceParsed.text : afterAction;
+              const confidence: ConfidenceLevel = confidenceParsed?.confidence ?? null;
+
+              const confidenceConfig: Record<"high" | "medium" | "low", { dot: string; label: string }> = {
+                high: { dot: "bg-emerald-400", label: t.aiHub.confidenceHigh },
+                medium: { dot: "bg-amber-400", label: t.aiHub.confidenceMedium },
+                low: { dot: "bg-red-400", label: t.aiHub.confidenceLow },
+              };
+
+              return (
                 <div
-                  className={`max-w-[75%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-[var(--cc-accent-600-30)] text-slate-100"
-                      : "bg-slate-700/50 text-slate-300"
-                  }`}
-                  style={{ whiteSpace: "pre-wrap" }}
+                  key={`${msg.timestamp}-${i}`}
+                  className={`mb-4 ${msg.role === "user" ? "flex justify-end" : ""}`}
                 >
-                  {msg.content}
+                  <div className="max-w-[75%]">
+                    {isAssistant ? (
+                      <div
+                        className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-slate-700/50 text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
+                      >
+                        <ReactMarkdown>{displayText}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div
+                        className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-[var(--cc-accent-600-30)] text-slate-100"
+                        style={{ whiteSpace: "pre-wrap" }}
+                      >
+                        {displayText}
+                      </div>
+                    )}
+                    {confidence && (
+                      <div className="mt-1.5 flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${confidenceConfig[confidence].dot}`} />
+                        <span className="text-[11px] text-slate-500">
+                          {confidenceConfig[confidence].label}
+                        </span>
+                      </div>
+                    )}
+                    {action && !dismissedActions.has(`${msg.timestamp}-${i}`) && (
+                      <ActionPreview
+                        action={action}
+                        lang={language as "he" | "en" | "ru"}
+                        onConfirm={async () => {
+                          setDismissedActions((prev) => new Set(prev).add(`${msg.timestamp}-${i}`));
+                          try {
+                            const supabase = createBrowserClient();
+                            const { data: { session } } = await supabase.auth.getSession();
+                            const token = session?.access_token;
+
+                            const res = await fetch("/api/work-manager/execute", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                              },
+                              body: JSON.stringify({
+                                action_type: action.type,
+                                title: action.title,
+                                details: action.details,
+                                session_id: activeId || "unknown",
+                              }),
+                            });
+
+                            const data = await res.json();
+                            if (data.success) {
+                              console.log("[WorkManager] Action executed:", data.action_type, data.result);
+                            } else {
+                              console.error("[WorkManager] Action failed:", data.error);
+                            }
+                          } catch (err) {
+                            console.error("[WorkManager] Execute request failed:", err);
+                          }
+                        }}
+                        onCancel={() => {
+                          console.log("[WorkManager] Action cancelled:", action.type);
+                          setDismissedActions((prev) => new Set(prev).add(`${msg.timestamp}-${i}`));
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {/* Streaming content */}
             {isStreaming && streamingContent && (
               <div className="mb-4">
                 <div
-                  className="max-w-[75%] rounded-xl bg-slate-700/50 px-4 py-3 text-sm leading-relaxed text-slate-300"
-                  style={{ whiteSpace: "pre-wrap" }}
+                  className="max-w-[75%] rounded-xl bg-slate-700/50 px-4 py-3 text-sm leading-relaxed text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
                 >
-                  {streamingContent}
+                  <ReactMarkdown>{streamingContent}</ReactMarkdown>
                   <span className="inline-block w-0.5 h-4 bg-slate-300 animate-pulse ms-0.5 align-text-bottom" />
                 </div>
               </div>

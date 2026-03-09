@@ -80,6 +80,8 @@ components/command-center/
   ColorPicker.tsx         ← Color picker for settings
   EditToolbar.tsx         ← Editor toolbar
   widgets/                ← 18 widget files (see Widget System below)
+  ../work-manager/
+    ActionPreview.tsx     ← Action confirmation card for Work Manager
 
 contexts/
   SettingsContext.tsx      ← Language, sidebar, accent color, fonts, skins, density, brand
@@ -99,6 +101,7 @@ lib/
   api/auth.ts             ← requireAuth helper (Bearer token validation)
   api/schemas.ts          ← Zod schemas (aiChat, embeddings, gitCommit, gitDeploy)
   utils/timeAgo.ts        ← Shared time formatting utility (he/en/ru)
+  work-manager/parseAction.ts  ← Parse ACTION:{} blocks from Work Manager responses
 ```
 
 ## 🗄️ Supabase Schema
@@ -208,7 +211,7 @@ CREATE TABLE notifications (
 | 2 | **Editor** | `/dashboard/editor` | Active | Canvas block editor, templates, export, version history |
 | 3 | **Story Map** | `/dashboard/story-map` | Active | 3-tier drag-and-drop with Realtime sync |
 | 4 | **Functional Map** | `/dashboard/functional-map` | Active | 3×5 locked grid with inline editing |
-| 5 | **AI Hub** | `/dashboard/ai-hub` | Active | Claude API with 4 modes, streaming |
+| 5 | **AI Hub** | `/dashboard/ai-hub` | Active | Claude API with 5 modes (chat/analyze/write/decompose/work), streaming |
 | 6 | **Design System** | `/dashboard/design-system` | Active | Gallery, components, handbook, app preview, library (127 components) |
 | 7 | **Entities** | `/dashboard/entities` | Active | Entity home — list of types with counts |
 | 7a | | `/dashboard/entities/fields` | Active | Global field library |
@@ -287,7 +290,7 @@ components/command-center/widgets/
 - **AI panel** always opens on the opposite side of the sidebar
 - **Code splitting:** All 18 widgets use `next/dynamic` imports in WidgetRegistry.ts
 
-## 🔌 API Routes (14)
+## 🔌 API Routes (15)
 
 | Route | Method | Auth | Validation | Purpose |
 |-------|--------|------|------------|---------|
@@ -305,6 +308,7 @@ components/command-center/widgets/
 | `/api/origami/sync` | POST | webhook key | — | Origami→Supabase sync |
 | `/api/system/snapshot` | GET | requireAuth | — | System info snapshot |
 | `/api/weekly-planner` | GET/PUT | cookie | — | Weekly planner data |
+| `/api/work-manager` | POST | requireAuth | Zod | Work Manager streaming chat |
 
 ## ✅ Dev Checklist — Mandatory Per Feature
 

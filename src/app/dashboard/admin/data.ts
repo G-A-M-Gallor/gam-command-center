@@ -466,6 +466,8 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'entity-action-buttons':   makeChecklist(false, true, true,  true, true),
   'entity-detail-page':      makeChecklist(true,  true, true,  true, true),
   'bulk-field-update-permissions': makeChecklist(false, true, true, true, true),
+  // ── Work Manager ──
+  'work-manager':                makeChecklist(false, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -2809,5 +2811,31 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Enables mass operations on entity records — update any field, change status, or assign across multiple records at once. Permission system gates all action buttons by user role + per-user overrides from DB, preventing unauthorized bulk operations.',
     purposeHe: 'מאפשר פעולות מסיביות על רשומות ישויות — עדכון כל שדה, שינוי סטטוס, או הקצאה על פני רשומות מרובות בבת אחת. מערכת הרשאות שולטת בכל כפתורי הפעולה לפי תפקיד + דריסות למשתמש מ-DB, מונעת פעולות גורפות בלתי מורשות.',
     connectedTo: ['entity-platform', 'entity-action-bar', 'auth-context'],
+  },
+  {
+    id: 'work-manager',
+    feature: 'Work Manager — AI Hub Mode 5',
+    featureHe: 'מנהל עבודה — מצב חמישי ב-AI Hub',
+    status: 'not-verified',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
+    date: '2026-03-09',
+    phase: 2,
+    files: [
+      'src/app/api/work-manager/route.ts',
+      'src/lib/work-manager/parseAction.ts',
+      'src/components/work-manager/ActionPreview.tsx',
+      'src/lib/api/schemas.ts',
+      'src/lib/ai/prompts.ts',
+      'src/lib/ai/client.ts',
+      'src/lib/i18n.ts',
+      'src/app/dashboard/ai-hub/page.tsx',
+    ],
+    route: '/dashboard/ai-hub',
+    notes: 'Fifth AI Hub mode: Work Manager. Dedicated API route with rich system prompt, mock session context, and Action Preview layer. New files: route.ts (streaming endpoint), parseAction.ts (structured action extraction), ActionPreview.tsx (action preview UI). Updated schemas, prompts, AI client, i18n, and AI Hub page to support the new mode.',
+    notesHe: 'מצב חמישי ב-AI Hub: מנהל עבודה. API route ייעודי עם system prompt עשיר, mock session context ושכבת Action Preview. קבצים חדשים: route.ts (נקודת קצה סטרימינג), parseAction.ts (חילוץ פעולות מובנה), ActionPreview.tsx (ממשק תצוגה מקדימה של פעולות). עדכון schemas, prompts, לקוח AI, i18n ודף AI Hub לתמיכה במצב החדש.',
+    purpose: 'Adds an operational AI mode that can understand work context, suggest actions, and present structured previews before execution. Unlike chat/analyze/write/decompose modes that produce text, Work Manager bridges AI reasoning with dashboard actions — previewing entity updates, status changes, and task assignments before committing them.',
+    purposeHe: 'מוסיף מצב AI תפעולי שיכול להבין הקשר עבודה, להציע פעולות ולהציג תצוגות מקדימות מובנות לפני ביצוע. בניגוד למצבי צ׳אט/ניתוח/כתיבה/פירוק שמייצרים טקסט, מנהל העבודה מגשר בין חשיבה AI לפעולות דשבורד — מציג תצוגה מקדימה של עדכוני ישויות, שינויי סטטוס והקצאות משימות לפני שמירתם.',
+    connectedTo: ['AI Hub', 'Anthropic API', 'Supabase (budget)'],
   },
 ];

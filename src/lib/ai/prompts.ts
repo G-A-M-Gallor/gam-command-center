@@ -1,7 +1,7 @@
 // System prompts for AI Hub modes
 // Each prompt is ~200-400 tokens to keep costs low
 
-export type AIMode = "chat" | "analyze" | "write" | "decompose";
+export type AIMode = "chat" | "analyze" | "write" | "decompose" | "work";
 
 export const SYSTEM_PROMPTS: Record<AIMode, string> = {
   chat: `You are GAM Command Center's AI assistant — a bilingual (Hebrew/English) helper for G.A.M, a business services company in Israel's construction industry.
@@ -49,6 +49,9 @@ Rules:
 - Match the user's language (Hebrew/English)
 - Group related stories logically
 - Consider dependencies between items`,
+
+  work: `מנהל העבודה של GAM — הפרומפט המלא נטען ב-/api/work-manager route.
+תמציתי, עברית כברירת מחדל, confidence level בסוף כל תשובה.`,
 };
 
 // Model selection per mode — haiku for cheap modes, sonnet for quality
@@ -57,6 +60,7 @@ export const MODE_MODELS: Record<AIMode, string> = {
   analyze: "claude-sonnet-4-6",
   write: "claude-sonnet-4-6",
   decompose: "claude-haiku-4-5-20251001",
+  work: "claude-sonnet-4-6",
 };
 
 // Max output tokens per mode
@@ -65,6 +69,7 @@ export const MODE_MAX_TOKENS: Record<AIMode, number> = {
   analyze: 2048,
   write: 4096,
   decompose: 2048,
+  work: 4096,
 };
 
 // Conversation limits
