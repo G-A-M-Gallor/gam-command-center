@@ -1,22 +1,30 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { workManagerSchema } from "@/lib/api/schemas";
+import { detectAgent } from "@/lib/work-manager/detectAgent";
+import { AGENT_PROMPTS, AGENT_CONFIGS, type AgentType } from "@/lib/work-manager/agentPrompts";
+import { getTasksSummaryForPrompt } from "@/lib/notion/client";
+
+// ─── Supabase Helper ────────────────────────────────────────
+
+function getSupabase(): SupabaseClient {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
 
 // ─── Budget ─────────────────────────────────────────────────
 
 const DAILY_TOKEN_LIMIT = 100_000;
 
 async function checkAndUpdateBudget(
+  supabase: SupabaseClient,
   userId: string,
   tokensUsed: { input: number; output: number }
 ): Promise<{ allowed: boolean; remaining: number }> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   try {
     const { data, error } = await supabase.rpc("check_ai_budget", {
       p_user_id: userId,
@@ -72,32 +80,14 @@ interface SessionContext {
   last_decisions: string[];
 }
 
-const MOCK_CONTEXT: SessionContext = {
-  open_projects: [
-    { name: "GAM Command Center", status: "בתהליך", sprint: "Sprint Work Manager" },
-    { name: "Professional Board", status: "תכנון" },
-    { name: "Origami Placement", status: "בתהליך" },
-  ],
-  open_tasks: [
-    { title: "Work Manager API Route", assignee: "Claude", priority: "P0" },
-    { title: "Notion MCP חיבור", assignee: "Claude", priority: "P1" },
-    { title: "Action Preview Layer", assignee: "Claude", priority: "P1" },
-  ],
-  last_decisions: [
-    "MCP-First architecture — כל חיבור דרך MCP",
-    "Read-only בשלב ראשון",
-    "Confidence level על כל תשובה",
-  ],
+const EMPTY_CONTEXT: SessionContext = {
+  open_projects: [],
+  open_tasks: [],
+  last_decisions: [],
 };
 
-async function loadSessionContext(_userId: string): Promise<SessionContext> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
+async function loadSessionContext(supabase: SupabaseClient): Promise<SessionContext> {
   try {
-    // Fetch active projects
     const { data: projects } = await supabase
       .from("projects")
       .select("name, status, health_score, layer")
@@ -105,46 +95,39 @@ async function loadSessionContext(_userId: string): Promise<SessionContext> {
       .order("updated_at", { ascending: false })
       .limit(10);
 
-    // Fetch recent story cards as tasks
     const { data: stories } = await supabase
       .from("story_cards")
       .select("text, type")
       .order("created_at", { ascending: false })
       .limit(10);
 
-    // Fetch recent AI conversations for decisions (work-mode only)
     const { data: conversations } = await supabase
       .from("ai_conversations")
       .select("title, messages")
       .order("updated_at", { ascending: false })
       .limit(5);
 
-    // If no data at all, fall back to mock
     if ((!projects || projects.length === 0) && (!stories || stories.length === 0)) {
-      return MOCK_CONTEXT;
+      return EMPTY_CONTEXT;
     }
 
-    // Transform projects
     const open_projects = (projects || []).map((p) => ({
       name: p.name,
       status: p.status || "active",
       ...(p.layer ? { sprint: p.layer } : {}),
     }));
 
-    // Transform story cards into tasks
     const open_tasks = (stories || []).map((s) => ({
       title: s.text,
       assignee: "Claude",
       priority: s.type === "epic" ? "P0" : "P1",
     }));
 
-    // Extract decisions from recent conversations
     const last_decisions: string[] = [];
     for (const conv of conversations || []) {
       if (conv.title) {
         last_decisions.push(conv.title);
       }
-      // Pull last assistant message as a decision summary
       const msgs = Array.isArray(conv.messages) ? conv.messages : [];
       const lastAssistant = [...msgs].reverse().find(
         (m: { role?: string }) => m.role === "assistant"
@@ -158,65 +141,66 @@ async function loadSessionContext(_userId: string): Promise<SessionContext> {
       if (last_decisions.length >= 5) break;
     }
 
-    return {
-      open_projects: open_projects.length > 0 ? open_projects : MOCK_CONTEXT.open_projects,
-      open_tasks: open_tasks.length > 0 ? open_tasks : MOCK_CONTEXT.open_tasks,
-      last_decisions: last_decisions.length > 0 ? last_decisions : MOCK_CONTEXT.last_decisions,
-    };
+    return { open_projects, open_tasks, last_decisions };
   } catch {
-    // Any Supabase failure — fall back to mock
-    return MOCK_CONTEXT;
+    return EMPTY_CONTEXT;
   }
 }
 
-// ─── System Prompt ──────────────────────────────────────────
+// ─── Session Context Persistence ─────────────────────────────
 
-function buildSystemPrompt(
+async function persistSessionContext(supabase: SupabaseClient, userId: string, ctx: SessionContext): Promise<void> {
+  try {
+    await supabase.from("session_context").upsert(
+      [
+        { user_id: userId, context_key: "open_projects", context_value: ctx.open_projects },
+        { user_id: userId, context_key: "open_tasks", context_value: ctx.open_tasks },
+        { user_id: userId, context_key: "last_decisions", context_value: ctx.last_decisions },
+      ],
+      { onConflict: "user_id,context_key" }
+    );
+  } catch {
+    // Non-critical — don't fail the request
+  }
+}
+
+// ─── System Prompt Builder ──────────────────────────────────
+
+function buildAgentSystemPrompt(
+  agent: AgentType,
   sessionContext: SessionContext,
+  notionSummary: string,
   currentView?: { page: string; open_tasks?: string[]; time_in_view?: string }
 ): string {
+  const agentPrompt = AGENT_PROMPTS[agent];
+
   const viewBlock = currentView
     ? `\n\n--- Current View ---\nPage: ${currentView.page}${
         currentView.open_tasks?.length ? `\nOpen tasks: ${currentView.open_tasks.join(", ")}` : ""
       }${currentView.time_in_view ? `\nTime in view: ${currentView.time_in_view}` : ""}`
     : "";
 
-  return `אתה מנהל העבודה של חברת G.A.M — חברת שירותי עסקים בענף הבנייה בישראל.
-אתה מכיר את הקונטקסט, הפרויקטים הפתוחים, המשימות והצוות.
+  const notionBlock = notionSummary
+    ? `\n\n--- Notion Tasks ---\n${notionSummary}`
+    : "";
 
-## צוות GAM
-- **גל** — מנכ"ל, ארכיטקט מערכות, מנהל מוצר. מקבל החלטות אחרונות.
-- **Claude** — AI architect. כותב קוד, מתכנן, מפרק פיצ'רים.
-- **n8n** — אוטומציות ותיזמור. לא כותב קוד — מחבר מערכות.
-
-## כללים
-1. **עברית כברירת מחדל** — אם המשתמש כותב באנגלית, ענה באנגלית
-2. **תמציתי ופרקטי** — תשובות קצרות ואקשנביליות
-3. **Confidence level** — בסוף כל תשובה הוסף: 🟢 (בטוח), 🟡 (סביר), 🔴 (לא בטוח — צריך לבדוק)
-4. **Read-only בשלב ראשון** — אל תבצע פעולות כתיבה ללא אישור מפורש
-5. **Action Preview** — כשמוצע לבצע פעולה, ציין אותה בפורמט: ACTION:{"type":"<type>","title":"<title>","details":{...}}
-6. **אל תמציא מידע** — אם אתה לא יודע, תגיד שאתה לא יודע ותציע לבדוק
-
-## כלים זמינים (לעתיד)
-- create_task — יצירת משימה חדשה
-- update_status — עדכון סטטוס של פריט
-- add_note — הוספת הערה לפרויקט/משימה
-- invoke_persona — הפעלת פרסונה (Claude/n8n) למשימה
-
-## פורמט תשובה
-- Markdown עם כותרות, רשימות, bold
-- עברית RTL
-- Confidence level בסוף כל תשובה
-
-## הקשר נוכחי
+  const contextBlock = `\n\n## הקשר נוכחי
 ### פרויקטים פתוחים
-${sessionContext.open_projects.map((p) => `- **${p.name}**: ${p.status}${"sprint" in p ? ` (${p.sprint})` : ""}`).join("\n")}
+${sessionContext.open_projects.length > 0
+  ? sessionContext.open_projects.map((p) => `- **${p.name}**: ${p.status}${p.sprint ? ` (${p.sprint})` : ""}`).join("\n")
+  : "- אין פרויקטים פתוחים כרגע"}
 
 ### משימות פתוחות
-${sessionContext.open_tasks.map((t) => `- [${t.priority}] ${t.title} — ${t.assignee}`).join("\n")}
+${sessionContext.open_tasks.length > 0
+  ? sessionContext.open_tasks.map((t) => `- [${t.priority}] ${t.title} — ${t.assignee}`).join("\n")
+  : "- אין משימות פתוחות כרגע"}
 
 ### החלטות אחרונות
-${sessionContext.last_decisions.map((d) => `- ${d}`).join("\n")}${viewBlock}`;
+${sessionContext.last_decisions.length > 0
+  ? sessionContext.last_decisions.map((d) => `- ${d}`).join("\n")
+  : "- אין החלטות מתועדות"}`;
+
+  return `${agentPrompt}${contextBlock}${notionBlock}${viewBlock}`;
 }
 
 // ─── Route Handler ──────────────────────────────────────────
@@ -258,10 +242,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const { messages, current_view } = parsed.data;
+  const { messages, session_id, current_view } = parsed.data;
+
+  const supabase = getSupabase();
 
   // Budget check
-  const budget = await checkAndUpdateBudget(userId, { input: 0, output: 0 });
+  const budget = await checkAndUpdateBudget(supabase, userId, { input: 0, output: 0 });
   if (!budget.allowed) {
     return new Response(
       JSON.stringify({ error: "Daily token budget exceeded", remaining: 0 }),
@@ -269,10 +255,21 @@ export async function POST(request: Request) {
     );
   }
 
-  // Load real session context from Supabase (falls back to MOCK_CONTEXT)
-  const sessionContext = await loadSessionContext(userId);
+  // Detect which agent to route to
+  const lastUserMsg = messages[messages.length - 1]?.content || "";
+  const agent = detectAgent(lastUserMsg);
+  const agentConfig = AGENT_CONFIGS[agent];
 
-  const systemPrompt = buildSystemPrompt(sessionContext, current_view);
+  // Load session context + Notion tasks in parallel
+  const [sessionContext, notionSummary] = await Promise.all([
+    loadSessionContext(supabase),
+    getTasksSummaryForPrompt().catch(() => ""),
+  ]);
+
+  // Persist session context for /api/ai/chat to read (non-blocking)
+  persistSessionContext(supabase, userId, sessionContext);
+
+  const systemPrompt = buildAgentSystemPrompt(agent, sessionContext, notionSummary, current_view);
 
   // Sliding window: keep last 6 exchanges
   const SLIDING_WINDOW = 6;
@@ -295,8 +292,8 @@ export async function POST(request: Request) {
 
   try {
     const stream = client.messages.stream({
-      model: "claude-sonnet-4-6",
-      max_tokens: 4096,
+      model: agentConfig.model,
+      max_tokens: agentConfig.maxTokens,
       system: systemPrompt,
       messages: apiMessages,
     });
@@ -305,11 +302,20 @@ export async function POST(request: Request) {
 
     const readable = new ReadableStream({
       async start(controller) {
+        let fullResponse = "";
         try {
+          // Emit agent type as first SSE event
+          controller.enqueue(
+            encoder.encode(
+              `data: ${JSON.stringify({ type: "agent", agent })}\n\n`
+            )
+          );
+
           for await (const event of stream) {
             if (event.type === "content_block_delta") {
               const delta = event.delta;
               if ("text" in delta) {
+                fullResponse += delta.text;
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({ type: "text", text: delta.text })}\n\n`
@@ -325,16 +331,31 @@ export async function POST(request: Request) {
             output_tokens: finalMessage.usage.output_tokens,
           };
 
-          if (userId) {
-            await checkAndUpdateBudget(userId, {
-              input: usageData.input_tokens,
-              output: usageData.output_tokens,
-            });
-          }
+          await checkAndUpdateBudget(supabase, userId, {
+            input: usageData.input_tokens,
+            output: usageData.output_tokens,
+          });
+
+          // Save conversation log with full response (non-blocking)
+          const fullMessages = [
+            ...apiMessages,
+            { role: "assistant" as const, content: fullResponse },
+          ];
+          supabase.from("ai_conversations").upsert(
+            {
+              id: session_id,
+              mode: "work",
+              model: agentConfig.model,
+              messages: fullMessages,
+              total_tokens_input: usageData.input_tokens,
+              total_tokens_output: usageData.output_tokens,
+            },
+            { onConflict: "id" }
+          ).then(() => {}, () => {});
 
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ type: "done", usage: usageData })}\n\n`
+              `data: ${JSON.stringify({ type: "done", usage: usageData, agent })}\n\n`
             )
           );
           controller.close();

@@ -18,6 +18,7 @@ interface StreamWorkManagerOptions {
   current_view?: { page: string; open_tasks?: string[]; time_in_view?: string };
   token?: string;
   onToken: (text: string) => void;
+  onAgent?: (agent: string) => void;
   onDone: (usage: { input_tokens: number; output_tokens: number }) => void;
   onError: (error: string) => void;
   signal?: AbortSignal;
@@ -111,6 +112,7 @@ export async function streamWorkManager({
   current_view,
   token,
   onToken,
+  onAgent,
   onDone,
   onError,
   signal,
@@ -166,7 +168,9 @@ export async function streamWorkManager({
 
         try {
           const data = JSON.parse(trimmed.slice(6));
-          if (data.type === "text") {
+          if (data.type === "agent") {
+            onAgent?.(data.agent);
+          } else if (data.type === "text") {
             onToken(data.text);
           } else if (data.type === "done") {
             onDone(data.usage);

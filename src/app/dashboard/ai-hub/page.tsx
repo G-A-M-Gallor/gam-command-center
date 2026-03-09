@@ -6,6 +6,7 @@ import {
   Send, Plus, X, MessageCircle, BarChart3, PenTool, GitBranch,
   Trash2, Sparkles, PanelLeftClose, PanelLeftOpen, Square, Zap,
   AlertTriangle, Briefcase,
+  Workflow, ClipboardList, Code2, Palette, ShieldCheck, TrendingUp,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
@@ -14,12 +15,17 @@ import { PageHeader } from "@/components/command-center/PageHeader";
 import ReactMarkdown from "react-markdown";
 import { streamChat, streamWorkManager } from "@/lib/ai/client";
 import { parseAction, parseConfidence, type ConfidenceLevel } from "@/lib/work-manager/parseAction";
+import { AGENT_LABELS, AGENT_ICONS, type AgentType } from "@/lib/work-manager/agentPrompts";
 import { ActionPreview } from "@/components/work-manager/ActionPreview";
 import { ChatToolbar } from "@/components/command-center/ChatToolbar";
 import { addUsage, getUsagePercent, isOverBudget, isNearBudget } from "@/lib/ai/tokenTracker";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { MODE_MODELS, MAX_CONVERSATION_MESSAGES, type AIMode } from "@/lib/ai/prompts";
 import { usePageContext } from "@/lib/ai/usePageContext";
+
+const AGENT_ICON_COMPONENTS: Record<string, typeof Workflow> = {
+  Workflow, ClipboardList, Code2, Palette, ShieldCheck, TrendingUp,
+};
 import {
   saveConversation as saveToSupabase,
   loadConversations as loadFromSupabase,
@@ -32,6 +38,7 @@ interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   timestamp: number;
+  agent?: string;
 }
 
 interface Conversation {
@@ -379,6 +386,8 @@ export default function AIHubPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<"idle" | "saving" | "saved" | "offline">("idle");
   const [dismissedActions, setDismissedActions] = useState<Set<string>>(() => new Set());
+  const [currentAgent, setCurrentAgent] = useState<string | null>(null);
+  const agentRef = useRef<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -642,6 +651,7 @@ export default function AIHubPage() {
             role: "assistant",
             content: prev,
             timestamp: Date.now(),
+            ...(agentRef.current ? { agent: agentRef.current } : {}),
           };
           setConversations((prevConvos) => {
             const next = prevConvos.map((c) => {
@@ -672,6 +682,7 @@ export default function AIHubPage() {
               role: "assistant",
               content: prev + (controller.signal.aborted ? "" : `\n\n⚠️ ${error}`),
               timestamp: Date.now(),
+              ...(agentRef.current ? { agent: agentRef.current } : {}),
             };
             setConversations((prevConvos) => {
               const next = prevConvos.map((c) => {
@@ -687,6 +698,7 @@ export default function AIHubPage() {
               role: "assistant",
               content: `⚠️ ${error}`,
               timestamp: Date.now(),
+              ...(agentRef.current ? { agent: agentRef.current } : {}),
             };
             setConversations((prevConvos) => {
               const next = prevConvos.map((c) => {
@@ -705,11 +717,14 @@ export default function AIHubPage() {
     };
 
     if (mode === "work") {
+      setCurrentAgent(null);
+      agentRef.current = null;
       streamWorkManager({
         messages: apiMessages,
         session_id: targetId!,
         user_id: convo.id,
         current_view: { page: pathname },
+        onAgent: (a) => { setCurrentAgent(a); agentRef.current = a; },
         ...streamCallbacks,
       });
     } else {
@@ -908,12 +923,23 @@ export default function AIHubPage() {
                 low: { dot: "bg-red-400", label: t.aiHub.confidenceLow },
               };
 
+              const msgAgent = msg.agent || (isAssistant && isWorkMode ? currentAgent : null);
+              const agentKey = msgAgent ? msgAgent as AgentType : null;
+              const AgentIconComponent = agentKey ? AGENT_ICON_COMPONENTS[AGENT_ICONS[agentKey]] : null;
+              const agentLabel = agentKey ? AGENT_LABELS[agentKey]?.[language as "he" | "en" | "ru"] ?? AGENT_LABELS[agentKey]?.en : null;
+
               return (
                 <div
                   key={`${msg.timestamp}-${i}`}
                   className={`mb-4 ${msg.role === "user" ? "flex justify-end" : ""}`}
                 >
                   <div className="max-w-[75%]">
+                    {isAssistant && agentLabel && AgentIconComponent && (
+                      <div className="mb-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                        <AgentIconComponent className="h-3 w-3" />
+                        <span>{agentLabel}</span>
+                      </div>
+                    )}
                     {isAssistant ? (
                       <div
                         className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-slate-700/50 text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
@@ -982,16 +1008,27 @@ export default function AIHubPage() {
             })}
 
             {/* Streaming content */}
-            {isStreaming && streamingContent && (
-              <div className="mb-4">
-                <div
-                  className="max-w-[75%] rounded-xl bg-slate-700/50 px-4 py-3 text-sm leading-relaxed text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
-                >
-                  <ReactMarkdown>{streamingContent}</ReactMarkdown>
-                  <span className="inline-block w-0.5 h-4 bg-slate-300 animate-pulse ms-0.5 align-text-bottom" />
+            {isStreaming && streamingContent && (() => {
+              const streamAgentKey = (mode === "work" && currentAgent) ? currentAgent as AgentType : null;
+              const StreamAgentIcon = streamAgentKey ? AGENT_ICON_COMPONENTS[AGENT_ICONS[streamAgentKey]] : null;
+              const streamAgentLabel = streamAgentKey ? AGENT_LABELS[streamAgentKey]?.[language as "he" | "en" | "ru"] ?? AGENT_LABELS[streamAgentKey]?.en : null;
+              return (
+                <div className="mb-4">
+                  {streamAgentLabel && StreamAgentIcon && (
+                    <div className="mb-1 flex items-center gap-1.5 text-[11px] text-slate-500">
+                      <StreamAgentIcon className="h-3 w-3" />
+                      <span>{streamAgentLabel}</span>
+                    </div>
+                  )}
+                  <div
+                    className="max-w-[75%] rounded-xl bg-slate-700/50 px-4 py-3 text-sm leading-relaxed text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
+                  >
+                    <ReactMarkdown>{streamingContent}</ReactMarkdown>
+                    <span className="inline-block w-0.5 h-4 bg-slate-300 animate-pulse ms-0.5 align-text-bottom" />
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Typing indicator (before streaming starts) */}
             {isStreaming && !streamingContent && (
