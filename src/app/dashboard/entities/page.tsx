@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Database, Hash, Link2, ArrowRight, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/command-center/PageHeader';
+import { IconDisplay } from '@/components/ui/IconPicker';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { fetchGlobalFields, fetchEntityTypes, fetchEntityConnections } from '@/lib/supabase/entityQueries';
@@ -106,7 +107,7 @@ export default function EntitiesPage() {
                     href={`/dashboard/entities/${et.slug}`}
                     className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5 hover:bg-white/[0.04] transition-colors group"
                   >
-                    <span className="text-lg">{et.icon}</span>
+                    <IconDisplay value={et.icon} size={22} className="text-slate-300" />
                     <span className="text-xs font-medium text-slate-300 group-hover:text-purple-300 transition-colors">
                       {et.label[lang] || et.slug}
                     </span>

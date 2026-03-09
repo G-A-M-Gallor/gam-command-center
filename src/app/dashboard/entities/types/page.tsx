@@ -14,6 +14,7 @@ import { BUILTIN_ENTITY_TYPES, BUILTIN_CONNECTIONS } from '@/lib/entities/builti
 import { BUILTIN_FIELD_GROUPS } from '@/lib/entities/builtinFields';
 import { ConnectionDiagram } from '@/components/entities/ConnectionDiagram';
 import { TemplateEditor } from '@/components/entities/TemplateEditor';
+import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 import type { EntityType, EntityTypeInsert, EntityConnection, GlobalField, FieldGroup, ViewType, I18nLabel, TemplateConfig } from '@/lib/entities/types';
 
 const VIEW_OPTIONS: ViewType[] = ['table', 'board', 'list', 'calendar', 'gantt', 'timeline'];
@@ -252,7 +253,7 @@ export default function EntityTypesPage() {
                 className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 hover:bg-white/[0.04] transition-colors group"
               >
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{et.icon}</span>
+                  <IconDisplay value={et.icon} size={28} className="text-slate-300" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-slate-200">
@@ -386,12 +387,12 @@ export default function EntityTypesPage() {
 
                 {/* Icon + Color + View */}
                 <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="text-xs font-medium text-slate-400">{te.icon}</label>
-                    <input
-                      type="text" value={draft.icon}
-                      onChange={e => setDraft(d => ({ ...d, icon: e.target.value }))}
-                      className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200"
+                  <div>
+                    <label className="text-xs font-medium text-slate-400 mb-1 block">{te.icon}</label>
+                    <IconPicker
+                      value={draft.icon}
+                      onChange={icon => setDraft(d => ({ ...d, icon }))}
+                      size={24}
                     />
                   </div>
                   <div>

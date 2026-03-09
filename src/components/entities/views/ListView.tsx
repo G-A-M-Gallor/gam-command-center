@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronRight } from 'lucide-react';
+import { IconDisplay } from '@/components/ui/IconPicker';
 import type { NoteRecord, GlobalField, I18nLabel } from '@/lib/entities/types';
 
 interface Props {
@@ -36,6 +37,7 @@ export function ListView({ notes, fields, onUpdate, language, entityType }: Prop
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
+              {typeof note.meta.__icon === 'string' && <IconDisplay value={note.meta.__icon} size={14} className="shrink-0 text-slate-400" />}
               <span className="text-sm font-medium text-slate-200 group-hover:text-purple-300 transition-colors truncate">
                 {note.title}
               </span>

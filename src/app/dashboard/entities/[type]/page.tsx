@@ -20,6 +20,7 @@ import { CalendarView } from '@/components/entities/views/CalendarView';
 import { GanttView } from '@/components/entities/views/GanttView';
 import { TimelineView } from '@/components/entities/views/TimelineView';
 import { EntityActionBar } from '@/components/entities/EntityActionBar';
+import { IconDisplay } from '@/components/ui/IconPicker';
 import { useToast } from '@/contexts/ToastContext';
 import type { EntityType, GlobalField, NoteRecord, ViewType, ViewFilter, ViewSort, FieldGroup, SavedView } from '@/lib/entities/types';
 
@@ -258,7 +259,7 @@ export default function EntityViewPage() {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-700/50 pb-4">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{entityType.icon}</span>
+          <IconDisplay value={entityType.icon} size={28} className="text-slate-300" />
           <div>
             <h1 className="text-xl font-semibold text-slate-100">
               {entityType.label[lang] || entityType.slug}

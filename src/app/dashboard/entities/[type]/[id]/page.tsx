@@ -18,7 +18,9 @@ import { NoteActionBar } from '@/components/entities/NoteActionBar';
 import { StakeholderPanel } from '@/components/entities/StakeholderPanel';
 import { ActivityFeed } from '@/components/entities/ActivityFeed';
 import { TemplatePicker } from '@/components/entities/TemplatePicker';
+import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 import { SYSTEM_FIELDS } from '@/lib/entities/builtinFields';
+import { updateNoteMeta } from '@/lib/supabase/entityQueries';
 import type { NoteRecord, EntityType, GlobalField } from '@/lib/entities/types';
 
 export default function EntityDetailPage() {
@@ -83,6 +85,13 @@ export default function EntityDetailPage() {
     setNote(prev => prev ? { ...prev, meta } : prev);
   }, []);
 
+  const handleIconChange = useCallback(async (icon: string) => {
+    if (!note) return;
+    const newMeta = { ...note.meta, __icon: icon };
+    await updateNoteMeta(noteId, { __icon: icon });
+    setNote(prev => prev ? { ...prev, meta: newMeta } : prev);
+  }, [noteId, note]);
+
   const handleNoteRefresh = useCallback(async () => {
     const updated = await fetchNote(noteId);
     if (updated) { setNote(updated); setTitle(updated.title); }
@@ -144,7 +153,7 @@ export default function EntityDetailPage() {
         >
           <BackArrow size={14} />
           {etInfo ? (
-            <span>{etInfo.icon} {etInfo.label[lang] || entityTypeSlug}</span>
+            <span className="flex items-center gap-1"><IconDisplay value={etInfo.icon} size={14} className="text-slate-400" /> {etInfo.label[lang] || entityTypeSlug}</span>
           ) : (
             <span>{entityTypeSlug}</span>
           )}
@@ -155,6 +164,11 @@ export default function EntityDetailPage() {
 
       {/* Title */}
       <div className="flex items-center gap-3">
+        <IconPicker
+          value={note.meta.__icon as string | undefined}
+          onChange={handleIconChange}
+          size={28}
+        />
         <input
           ref={titleRef}
           type="text"
