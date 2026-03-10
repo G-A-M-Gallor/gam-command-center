@@ -6,6 +6,7 @@ import { workManagerSchema } from "@/lib/api/schemas";
 import { detectAgent } from "@/lib/work-manager/detectAgent";
 import { AGENT_PROMPTS, AGENT_CONFIGS, type AgentType } from "@/lib/work-manager/agentPrompts";
 import { getTasksSummaryForPrompt } from "@/lib/notion/client";
+import { getKnowledgeContext } from "@/lib/ai/knowledgeBase";
 
 // ─── Supabase Helper ────────────────────────────────────────
 
@@ -200,7 +201,12 @@ ${sessionContext.last_decisions.length > 0
   ? sessionContext.last_decisions.map((d) => `- ${d}`).join("\n")
   : "- אין החלטות מתועדות"}`;
 
-  return `${agentPrompt}${contextBlock}${notionBlock}${viewBlock}`;
+  const knowledgeBlock = getKnowledgeContext();
+  const gamBlock = knowledgeBlock
+    ? `\n\n--- GAM Knowledge Base ---\n${knowledgeBlock}`
+    : "";
+
+  return `${agentPrompt}${contextBlock}${notionBlock}${viewBlock}${gamBlock}`;
 }
 
 // ─── Route Handler ──────────────────────────────────────────
