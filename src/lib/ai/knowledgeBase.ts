@@ -8,12 +8,12 @@ import { join } from "path";
 const MAX_CHARS = 3000;
 
 const SECTIONS_TO_EXTRACT = [
-  "Project Overview",
-  "Architecture — Who Does What",
-  "Design Conventions",
+  "Who Am I",
+  "Architecture",
   "Coding Conventions",
   "Important Context",
-  "Known Issues",
+  "Open Issues",
+  "What NOT to Build",
 ];
 
 let cachedKnowledge: string | null = null;
@@ -26,7 +26,7 @@ function extractSections(markdown: string): string {
 
   for (const line of lines) {
     // Detect ## headings
-    const headingMatch = line.match(/^##\s+(?:🎯|🏗️|🎨|🔧|🔑|🐛)?\s*(.+)/);
+    const headingMatch = line.match(/^##\s+(.+)/);
     if (headingMatch) {
       // Save previous chunk if we were capturing
       if (capturing && currentChunk.length > 0) {
