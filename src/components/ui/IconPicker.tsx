@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Search, Upload, Link2, X, Smile, Shapes, ImageIcon } from 'lucide-react';
+import { Search, Upload, Link2, X, Smile, Shapes, ImageIcon, Circle } from 'lucide-react';
 import { parseIconValue, serializeIcon, type ParsedIcon } from '@/lib/icons/iconValue';
 import { EMOJI_CATEGORIES } from '@/lib/icons/emojiData';
 import { LUCIDE_CATEGORIES, LUCIDE_MAP } from '@/lib/icons/lucideIconList';
@@ -31,7 +31,7 @@ export function IconDisplay({
       );
     case 'lucide': {
       const Icon = LUCIDE_MAP[parsed.value];
-      if (!Icon) return <span className={className} style={{ fontSize: size }}>{parsed.value}</span>;
+      if (!Icon) return <Circle size={size} className={className || 'text-slate-500'} />;
       return <Icon size={size} className={className} />;
     }
     case 'image':
