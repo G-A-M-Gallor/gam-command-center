@@ -9,7 +9,7 @@
 - **Repo:** `G-A-M-Gallor/vBrain.io` — Next.js 16.1.6 (Turbopack) on Vercel
 - **Branch:** `main`
 - **Route:** `/dashboard` (route group)
-- **Status:** 13 pages, 18 widgets, 14 API routes, 9 contexts — all active
+- **Status:** 16 pages, 15 widgets, 21 API routes, 9 contexts — all active
 
 ## 🏗️ Architecture — Who Does What
 
@@ -41,7 +41,7 @@ app/dashboard/
   functional-map/
     page.tsx              ← 3×5 locked grid with inline editing
   ai-hub/
-    page.tsx              ← AI assistant with 4 modes (chat/analyze/write/decompose)
+    page.tsx              ← AI assistant with 5 modes (chat/analyze/write/decompose/work)
   design-system/
     page.tsx              ← Gallery + Components + Handbook + App Preview + Library tabs
     LibraryTab.tsx        ← Component browser (127 components from shadcn/Magic UI/21st.dev)
@@ -52,8 +52,9 @@ app/dashboard/
     types/page.tsx        ← Entity types manager
     [type]/page.tsx       ← Entity list view — table/board/list/calendar/gantt/timeline
     [type]/[id]/page.tsx  ← Entity detail — editable title, NoteMeta, stakeholders, activity
-  formily/
-    page.tsx              ← Origami CRM forms with connection status
+  wiki/
+    page.tsx              ← Wiki page list + search
+    [slug]/page.tsx       ← Wiki page viewer
   architecture/
     page.tsx              ← Mermaid diagram + 6-tool stack table
   plan/
@@ -79,7 +80,7 @@ components/command-center/
   StoryColumn.tsx         ← Story map column
   ColorPicker.tsx         ← Color picker for settings
   EditToolbar.tsx         ← Editor toolbar
-  widgets/                ← 18 widget files (see Widget System below)
+  widgets/                ← 15 widget files (see Widget System below)
   ../work-manager/
     ActionPreview.tsx     ← Action confirmation card for Work Manager
 
@@ -202,7 +203,7 @@ CREATE TABLE notifications (
 - **i18n:** Always use `t.section.key` pattern — never `isHe ? "..." : "..."` for translatable text
 - **Cross-component sync:** Custom DOM events (`cc-favorites-change`, `cc-notify`, `timer-state-change`, etc.)
 
-## 📋 17 Dashboard Pages
+## 📋 16 Dashboard Pages
 
 | # | Tab | Route | Status | Notes |
 |---|-----|-------|--------|-------|
@@ -217,8 +218,8 @@ CREATE TABLE notifications (
 | 7a | | `/dashboard/entities/fields` | Active | Global field library |
 | 7b | | `/dashboard/entities/types` | Active | Entity types manager |
 | 7c | | `/dashboard/entities/[type]` | Active | Entity list — table/board/list/calendar/gantt/timeline views |
-| 7d | | `/dashboard/entities/[type]/[id]` | Active | Entity detail — editable title, fields, stakeholders, activity |
-| 8 | **Formily** | `/dashboard/formily` | Active | Origami CRM forms with connection status |
+| 7d | | `/dashboard/entities/[type]/[id]` | Active | Entity detail — fields, canvas, stakeholders, activity, comments |
+| 8 | **Wiki** | `/dashboard/wiki` | Active | Wiki pages + search |
 | 9 | **Architecture** | `/dashboard/architecture` | Active | Mermaid diagram + tool stack table |
 | 10 | **Plan** | `/dashboard/plan` | Active | 5-phase roadmap with timeline |
 | 11 | **Automations** | `/dashboard/automations` | Active | n8n iframe + Supabase automation types |
@@ -248,7 +249,7 @@ The top bar is a fixed 48px bar above the content area. It holds a grid of drag-
 - **Error boundaries:** Each widget wrapped in per-widget error boundary
 - Widget dropdown panels respect both sidebar and AI panel boundaries
 
-### 18 Active Widgets
+### 15 Active Widgets
 
 | ID | Icon | Size | Panel Mode | File | Category |
 |----|------|------|------------|------|----------|
@@ -265,20 +266,17 @@ The top bar is a fixed 48px bar above the content area. It holds a grid of drag-
 | `weekly-planner` | CalendarDays | 2x | modal | `WeeklyPlannerWidget.tsx` | tools |
 | `kpi` | BarChart3 | 2x | dropdown | `KPIWidget.tsx` | data |
 | `shortcuts` | ExternalLink | 1x | dropdown | `ExternalLinksWidget.tsx` | tools |
-| `origami-forms` | FileStack | 2x | dropdown | `OrigamiFormsWidget.tsx` | forms |
-| `form-submissions` | FileCheck | 2x | dropdown | `FormSubmissionsWidget.tsx` | forms |
-| `form-scanner` | ScanLine | 2x | dropdown | `FormScannerWidget.tsx` | forms |
 | `wati` | MessageSquare | 2x | dropdown | `WATIWidget.tsx` | communication |
 | `team` | Users | 2x | dropdown | `TeamWidget.tsx` | communication |
 
 ### Widget File Structure
 ```
 components/command-center/widgets/
-  WidgetRegistry.ts       ← All 18 widget definitions with dynamic imports (code splitting)
+  WidgetRegistry.ts       ← All 15 widget definitions with dynamic imports (code splitting)
   WidgetWrapper.tsx        ← Renders bar content + dropdown panel, handles hover/click/drag
   WidgetSettings.tsx       ← Size/visibility/hover-delay editor (modal)
   WidgetStore.tsx          ← Widget browser with categories — replaces WidgetLibrary
-  [18 widget .tsx files]   ← Each exports Panel + BarContent components
+  [15 widget .tsx files]   ← Each exports Panel + BarContent components
 ```
 
 ### Key Patterns
@@ -288,15 +286,18 @@ components/command-center/widgets/
 - **localStorage keys:** `cc-widget-positions`, `cc-widget-sizes`, `cc-widget-placements`, `cc-widget-hover-delay`, `cc-folders`
 - **Custom events** for cross-component sync: `cc-favorites-change`, `cc-notify`, `timer-state-change`, `notifications-change`, `clipboard-change`, `cc-open-ai`, `cc-ai-prefill`
 - **AI panel** always opens on the opposite side of the sidebar
-- **Code splitting:** All 18 widgets use `next/dynamic` imports in WidgetRegistry.ts
+- **Code splitting:** All 15 widgets use `next/dynamic` imports in WidgetRegistry.ts
 
-## 🔌 API Routes (15)
+## 🔌 API Routes (21)
 
 | Route | Method | Auth | Validation | Purpose |
 |-------|--------|------|------------|---------|
-| `/api/ai/chat` | POST | requireAuth | Zod | Claude API streaming chat |
+| `/api/ai/chat` | POST | requireAuth | Zod | Claude API streaming chat (5 modes) |
 | `/api/embeddings/generate` | POST | requireAuth | Zod | Generate document embeddings |
 | `/api/embeddings/search` | POST | requireAuth | Zod | Semantic search |
+| `/api/entities/[type]` | GET/POST/PATCH | requireAuth | Zod | Entity list CRUD + bulk ops |
+| `/api/entities/[type]/[id]` | GET/PATCH/DELETE | requireAuth | — | Single entity CRUD |
+| `/api/entities/[type]/[id]/comments` | POST | requireAuth | Zod | Entity comments |
 | `/api/events/today` | GET | cookie | — | Today's calendar events |
 | `/api/git/commit` | POST | requireAuth | Zod | Git commit (dev only) |
 | `/api/git/deploy` | POST | requireAuth | Zod | Git commit + push (dev only) |
@@ -304,11 +305,16 @@ components/command-center/widgets/
 | `/api/health` | GET | public | — | System healthcheck |
 | `/api/installed-components` | GET | cookie | — | List installed UI components |
 | `/api/notifications` | GET/POST/PATCH | requireAuth | Zod | Notification CRUD |
+| `/api/notion/tasks` | POST | requireAuth | Zod | Sync tasks to Notion |
 | `/api/origami/entities` | GET | cookie | — | Origami CRM entities |
 | `/api/origami/sync` | POST | webhook key | — | Origami→Supabase sync |
+| `/api/push/send` | POST | webhook key | — | Send push notification |
+| `/api/push/subscribe` | POST | requireAuth | Zod | Register push subscription |
+| `/api/push/subscribers` | GET | requireAuth | — | List push subscribers |
 | `/api/system/snapshot` | GET | requireAuth | — | System info snapshot |
 | `/api/weekly-planner` | GET/PUT | cookie | — | Weekly planner data |
 | `/api/work-manager` | POST | requireAuth | Zod | Work Manager streaming chat |
+| `/api/work-manager/execute` | POST | requireAuth | Zod | Execute Work Manager actions |
 
 ## ✅ Dev Checklist — Mandatory Per Feature
 
@@ -346,10 +352,54 @@ Every changelog entry in `/dashboard/admin` must complete 5 items:
 - `ORIGAMI_API_KEY` + `ORIGAMI_BASE_URL` — Origami CRM integration
 - `NEXT_PUBLIC_WATI_URL` — WATI WhatsApp widget
 - `NEXT_PUBLIC_N8N_URL` — Automations page iframe
-- Sentry DSN — Error tracking pipeline
+
+> Sentry DSN is configured and active.
+
+## 🤖 AI Reading Guide
+
+When starting a new session, read in this order:
+
+1. **This file** (`CLAUDE.md`) — architecture, conventions, what NOT to build
+2. **`memory/MEMORY.md`** — decisions, preferences, workflow, completed work
+3. **`memory/FEATURE_INDEX.md`** — comprehensive feature inventory with all routes, components, APIs
+4. **`memory/qa-checklist.md`** — Self-QA phases 1-5 (run after every task)
+5. **`memory/post-task-protocol.md`** — pointer to full 8-step protocol in Notion
+
+### Key files for common tasks
+
+| Task | Read first |
+|------|-----------|
+| Entity platform work | `src/lib/entities/types.ts`, `builtinEntityTypes.ts`, `entityQueries.ts` |
+| AI Hub changes | `src/lib/ai/prompts.ts`, `src/lib/work-manager/agentPrompts.ts` |
+| Widget changes | `src/components/command-center/widgets/WidgetRegistry.ts` |
+| i18n changes | `src/lib/i18n.ts` — search for existing section before adding |
+| API routes | `src/lib/api/auth.ts` (auth pattern), `src/lib/api/schemas.ts` (Zod pattern) |
+| Supabase queries | `src/lib/supabase/entityQueries.ts` (pattern for all query files) |
+| Admin/registry | `src/app/dashboard/admin/data.ts` — single source of truth |
+
+## 📱 Mobile Pending
+
+No mobile app yet. Features to test when mobile app ships:
+- EntityCanvas — DnD touch events
+- Story Map — DnD touch events
+- Wiki page viewer — responsive layout
+- Push notifications — real device testing
+
+## 🐛 Known Issues
+
+| Issue | Location | Priority |
+|-------|----------|----------|
+| `isHe` anti-pattern | 57+ instances across widgets, editor, story map | Medium — gradual i18n migration |
+| vb_ai_memory table | Supabase table exists, no code reads from it | Low |
+| AI Hub prompts generic | No GAM-specific knowledge injected | Medium |
+| console.log in prod | 2 instances in ai-hub/page.tsx | Low |
+| TeamWidget TODO | Needs Supabase Realtime Presence | Blocked |
+| WATIWidget TODO | Needs real WATI API | Blocked |
+| Sentry auto-fix pipeline | L1-L3 not built (needs PAT workflow scope) | Medium |
 
 ## 📎 References
 
 - **Notion Project:** https://www.notion.so/3158f27212f881639507feab50d68d44
+- **Post-Task Protocol:** https://www.notion.so/31f8f27212f881fca47ce9680e169931
 - **Production Plan:** See `cc-production-plan.md` in repo
 - **Prototype Source:** V8 Step 4 artifact (92K single-file React)
