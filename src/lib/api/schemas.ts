@@ -179,6 +179,49 @@ export const reactionSchema = z.object({
 
 export type ReactionInput = z.infer<typeof reactionSchema>;
 
+// ─── OTP Auth ──────────────────────────────────────────────
+
+export const sendOtpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  shouldCreateUser: z.boolean().optional().default(false),
+});
+
+export type SendOtpInput = z.infer<typeof sendOtpSchema>;
+
+export const verifyOtpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  token: z.string().length(6, "OTP must be exactly 6 digits").regex(/^\d{6}$/, "OTP must contain only digits"),
+});
+
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
+
+export const profileSetupSchema = z.object({
+  display_name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name exceeds 100 characters").transform((s) => s.trim()),
+  role: z.enum(["internal", "client", "talent", "admin", "contractor"]).optional().default("client"),
+});
+
+export type ProfileSetupInput = z.infer<typeof profileSetupSchema>;
+
+// ─── Contractor Submission ─────────────────────────────────
+
+export const contractorSubmitSchema = z.object({
+  business_name: z.string().min(2, "Business name is required").max(200),
+  business_id: z.string().min(5, "Business ID (ח.פ) is required").max(20),
+  phone: z.string().min(9, "Phone number is required").max(15),
+  email: z.string().email("Invalid email address"),
+  address: z.string().min(5, "Address is required").max(300),
+  contractor_license_number: z.string().min(1, "License number is required").max(20),
+  contractor_classification: z.string().min(1, "Classification is required"),
+  classification_category: z.array(z.string()).min(1, "At least one category is required"),
+  license_expiry_date: z.string().min(1, "License expiry date is required"),
+  insurance_expiry_date: z.string().min(1, "Insurance expiry date is required"),
+  service_area: z.array(z.string()).min(1, "At least one service area is required"),
+  insurance_file_url: z.string().optional(),
+  license_file_url: z.string().optional(),
+});
+
+export type ContractorSubmitInput = z.infer<typeof contractorSubmitSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

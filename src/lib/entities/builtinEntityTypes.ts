@@ -200,6 +200,27 @@ const caseTemplate: TemplateConfig = {
   action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
+const contractorTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['business', 'phone', 'email', 'address', 'contractor_license_number', 'contractor_classification', 'classification_category', 'license_expiry_date', 'insurance_expiry_date', 'registration_status', 'service_area', 'tags'],
+    sections: [
+      { key: 'business_info', label: { he: 'פרטי עסק', en: 'Business Info', ru: 'Данные о бизнесе' }, field_refs: ['business', 'phone', 'email', 'address'] },
+      { key: 'license', label: { he: 'רישיון וסיווג', en: 'License & Classification', ru: 'Лицензия и классификация' }, field_refs: ['contractor_license_number', 'contractor_classification', 'classification_category'] },
+      { key: 'insurance', label: { he: 'ביטוח ומסמכים', en: 'Insurance & Documents', ru: 'Страховка и документы' }, field_refs: ['license_expiry_date', 'insurance_expiry_date'] },
+      { key: 'service', label: { he: 'אזור שירות', en: 'Service Area', ru: 'Зона обслуживания' }, field_refs: ['service_area', 'registration_status'] },
+    ],
+  },
+  available_views: ['board', 'table', 'list'],
+  board_config: { group_field: 'registration_status', card_fields: ['business', 'contractor_classification', 'contractor_license_number', 'phone'] },
+  track_activity: true,
+  track_kpi_events: true,
+  kpi_triggers: [
+    { event_type: 'status_change', field_key: 'registration_status' },
+  ],
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change'),
+};
+
 // ─── Minimal Action-only Configs (base entity types) ──
 
 const taskActions: TemplateConfig = {
@@ -402,6 +423,18 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     template_config: caseTemplate,
     sort_order: 13,
   },
+  // ─── Contractor Registration Entity Type ──────────
+  {
+    slug: 'contractor',
+    label: { he: 'קבלן רשום', en: 'Contractor', ru: 'Подрядчик' },
+    icon: '🏗️',
+    color: '#f97316',
+    field_refs: ['business', 'phone', 'email', 'address', 'contractor_license_number', 'contractor_classification', 'classification_category', 'license_expiry_date', 'insurance_expiry_date', 'registration_status', 'service_area', 'tags'],
+    group_refs: ['document_log'],
+    default_view: 'board',
+    template_config: contractorTemplate,
+    sort_order: 14,
+  },
 ];
 
 export const BUILTIN_CONNECTIONS: EntityConnectionInsert[] = [
@@ -575,5 +608,27 @@ export const BUILTIN_CONNECTIONS: EntityConnectionInsert[] = [
     relation_label: { he: 'הסכמים', en: 'Agreements', ru: 'Соглашения' },
     reverse_label: { he: 'שייך לתיק', en: 'Belongs to Case', ru: 'Принадлежит делу' },
     relation_kind: 'one-to-many',
+  },
+  // ─── Contractor Connections ─────────────────────────
+  {
+    source_type: 'contractor',
+    target_type: 'project',
+    relation_label: { he: 'פרויקטים', en: 'Projects', ru: 'Проекты' },
+    reverse_label: { he: 'קבלן', en: 'Contractor', ru: 'Подрядчик' },
+    relation_kind: 'many-to-many',
+  },
+  {
+    source_type: 'contractor',
+    target_type: 'property',
+    relation_label: { he: 'נכסים / אתרים', en: 'Properties / Sites', ru: 'Объекты / Стройки' },
+    reverse_label: { he: 'קבלן', en: 'Contractor', ru: 'Подрядчик' },
+    relation_kind: 'many-to-many',
+  },
+  {
+    source_type: 'case',
+    target_type: 'contractor',
+    relation_label: { he: 'קבלנים', en: 'Contractors', ru: 'Подрядчики' },
+    reverse_label: { he: 'תיקי שירות', en: 'Cases', ru: 'Дела' },
+    relation_kind: 'many-to-many',
   },
 ];
