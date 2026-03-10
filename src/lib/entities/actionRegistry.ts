@@ -13,6 +13,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'Archive',
     variant: 'destructive',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     show_when: { is_active: true },
     confirm: true,
     sort_order: 90,
@@ -23,6 +25,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'ArchiveRestore',
     variant: 'outline',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     show_when: { is_active: false },
     sort_order: 91,
   },
@@ -32,6 +36,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'ArrowRightLeft',
     variant: 'default',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     sort_order: 10,
   },
   export_csv: {
@@ -40,6 +46,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'Download',
     variant: 'outline',
     scope: 'global',
+    handler_type: 'builtin',
+    positions: ['toolbar'],
     sort_order: 80,
   },
   open_in_ai: {
@@ -48,6 +56,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'Bot',
     variant: 'ghost',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     sort_order: 50,
   },
   send_notification: {
@@ -56,6 +66,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'Bell',
     variant: 'outline',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     sort_order: 60,
   },
   call_log: {
@@ -64,6 +76,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'Phone',
     variant: 'default',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     sort_order: 30,
   },
   send_whatsapp: {
@@ -72,6 +86,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'MessageSquare',
     variant: 'default',
     scope: 'single',
+    handler_type: 'builtin',
+    positions: ['sidebar', 'detail_header'],
     show_when: { field_exists: 'phone' },
     sort_order: 40,
   },
@@ -81,6 +97,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'Pencil',
     variant: 'default',
     scope: 'bulk',
+    handler_type: 'builtin',
+    positions: ['toolbar', 'floating'],
     sort_order: 5,
   },
   bulk_status_change: {
@@ -89,6 +107,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'ArrowRightLeft',
     variant: 'default',
     scope: 'bulk',
+    handler_type: 'builtin',
+    positions: ['toolbar', 'floating'],
     sort_order: 6,
   },
   bulk_assign: {
@@ -97,6 +117,8 @@ export const BUILTIN_ACTIONS: Record<string, ActionButton> = {
     icon: 'UserPlus',
     variant: 'default',
     scope: 'bulk',
+    handler_type: 'builtin',
+    positions: ['toolbar', 'floating'],
     sort_order: 7,
   },
 };

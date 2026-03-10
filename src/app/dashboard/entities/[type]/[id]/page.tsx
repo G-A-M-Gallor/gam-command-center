@@ -22,6 +22,9 @@ import { RelationPanel } from '@/components/entities/RelationPanel';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 import { SYSTEM_FIELDS } from '@/lib/entities/builtinFields';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
+import { resolveActions } from '@/lib/entities/resolveActions';
+import { executeAction } from '@/lib/entities/actionHandlers';
+import { resolveActionIcon } from '@/lib/entities/actionIconMap';
 import type { NoteRecord, EntityType, GlobalField } from '@/lib/entities/types';
 
 export default function EntityDetailPage() {
@@ -44,6 +47,7 @@ export default function EntityDetailPage() {
   const [title, setTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [confirmAction, setConfirmAction] = useState<'deactivate' | 'delete' | null>(null);
+  const [headerActionLoading, setHeaderActionLoading] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   // Load note + entity type
@@ -116,6 +120,22 @@ export default function EntityDetailPage() {
     router.push(`/dashboard/entities/${entityTypeSlug}`);
   };
 
+  const headerActions = note
+    ? resolveActions(etInfo?.template_config, { scope: 'single', position: 'detail_header', note })
+    : [];
+
+  const handleHeaderAction = useCallback(async (actionId: string) => {
+    if (!note) return;
+    const action = headerActions.find(a => a.id === actionId);
+    if (!action) return;
+    setHeaderActionLoading(actionId);
+    const result = await executeAction(action, [note.id], entityTypeSlug, {
+      language, fields, notes: [note], onRefresh: handleNoteRefresh,
+    });
+    setHeaderActionLoading(null);
+    if (result.success) handleNoteRefresh();
+  }, [note, headerActions, entityTypeSlug, language, fields, handleNoteRefresh]);
+
   const backHref = `/dashboard/entities/${entityTypeSlug}`;
   const BackArrow = isRtl ? ArrowRight : ArrowLeft;
   const trackActivity = etInfo?.template_config?.track_activity ?? false;
@@ -181,6 +201,25 @@ export default function EntityDetailPage() {
           className="flex-1 bg-transparent text-2xl font-bold text-slate-100 border-b border-transparent hover:border-white/[0.08] focus:border-purple-500/50 focus:outline-none py-1 transition-colors"
         />
         {saving && <Loader2 size={16} className="animate-spin text-slate-500" />}
+        {headerActions.length > 0 && (
+          <div className="flex items-center gap-1">
+            {headerActions.map(action => {
+              const Icon = resolveActionIcon(action.icon);
+              const isLoading = headerActionLoading === action.id;
+              return (
+                <button
+                  key={action.id}
+                  onClick={() => handleHeaderAction(action.id)}
+                  disabled={isLoading}
+                  className={`rounded-md p-1.5 transition-colors text-slate-400 hover:text-purple-300 hover:bg-purple-500/10 ${isLoading ? 'opacity-50' : ''}`}
+                  title={action.label[lang] || action.label.en}
+                >
+                  {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Icon size={14} />}
+                </button>
+              );
+            })}
+          </div>
+        )}
         {isInactive && (
           <span className="rounded-full bg-red-500/10 px-2.5 py-1 text-[10px] font-medium text-red-400">
             {te.inactive}

@@ -2,18 +2,29 @@
 // Resolve Actions — Filter & sort visible actions
 // ===================================================
 
-import type { ActionButton, NoteRecord, TemplateConfig } from './types';
+import type { ActionButton, ActionPosition, NoteRecord, TemplateConfig } from './types';
 
 interface ResolveContext {
   scope: 'single' | 'bulk' | 'global';
+  position?: ActionPosition;
   note?: NoteRecord;
   hasSelection?: boolean;
   canPerformAction?: (actionId: string) => boolean;
 }
 
+/** Default positions based on action scope when none explicitly set */
+function defaultPositions(scope: ActionButton['scope']): ActionPosition[] {
+  switch (scope) {
+    case 'single': return ['sidebar', 'detail_header'];
+    case 'bulk':   return ['toolbar', 'floating'];
+    case 'global': return ['toolbar'];
+  }
+}
+
 /**
  * Resolves which action buttons are visible given template config and context.
- * Used by both EntityActionBar (page toolbar) and NoteActions (note sidebar).
+ * Used by EntityActionBar (page toolbar), NoteActions (note sidebar),
+ * and entity detail page (detail_header).
  */
 export function resolveActions(
   templateConfig: TemplateConfig | null | undefined,
@@ -31,6 +42,13 @@ export function resolveActions(
       if (context.scope === 'single' && btn.scope !== 'single') return false;
       if (context.scope === 'bulk' && btn.scope === 'single') return false;
       if (context.scope === 'global' && btn.scope === 'single') return false;
+
+      // Position filtering — when a specific position is requested,
+      // only show buttons that include that position
+      if (context.position) {
+        const btnPositions = btn.positions ?? defaultPositions(btn.scope);
+        if (!btnPositions.includes(context.position)) return false;
+      }
 
       // show_when conditions
       if (btn.show_when) {

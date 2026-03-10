@@ -1,21 +1,14 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import {
-  Archive, ArchiveRestore, ArrowRightLeft, Download, Bot,
-  Bell, Phone, MessageSquare, Loader2, X, Check,
-} from 'lucide-react';
+import { Loader2, X, Check, Phone } from 'lucide-react';
 import { resolveActions } from '@/lib/entities/resolveActions';
-import { ACTION_HANDLERS } from '@/lib/entities/actionHandlers';
+import { executeAction } from '@/lib/entities/actionHandlers';
+import { resolveActionIcon } from '@/lib/entities/actionIconMap';
 import { updateNoteMeta, addCallLogEntry } from '@/lib/supabase/entityQueries';
 import { getTranslations } from '@/lib/i18n';
 import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, TemplateConfig, GlobalField } from '@/lib/entities/types';
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Archive, ArchiveRestore, ArrowRightLeft, Download, Bot,
-  Bell, Phone, MessageSquare,
-};
 
 const VARIANT_CLASSES: Record<string, string> = {
   default: 'text-slate-300 hover:text-purple-300 hover:bg-purple-500/10',
@@ -47,7 +40,7 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
   const [uiSaving, setUiSaving] = useState(false);
   const callInputRef = useRef<HTMLInputElement>(null);
 
-  const actions = resolveActions(templateConfig, { scope: 'single', note });
+  const actions = resolveActions(templateConfig, { scope: 'single', position: 'sidebar', note });
 
   // Find the status select field for the status picker
   const statusField = fields.find(
@@ -62,8 +55,8 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
   }, [activeUI]);
 
   const handleAction = useCallback(async (actionId: string) => {
-    const handler = ACTION_HANDLERS[actionId];
-    if (!handler) return;
+    const action = actions.find(a => a.id === actionId);
+    if (!action) return;
 
     // Intercept status_picker / call_log_form — open inline UI instead
     if (actionId === 'change_status') {
@@ -79,14 +72,14 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
     }
 
     // Confirmation for destructive actions
-    if (actions.find(a => a.id === actionId)?.confirm && confirming !== actionId) {
+    if (action.confirm && confirming !== actionId) {
       setConfirming(actionId);
       return;
     }
     setConfirming(null);
 
     setLoading(actionId);
-    const result = await handler([note.id], entityType, {
+    const result = await executeAction(action, [note.id], entityType, {
       language, fields, notes: allNotes, onRefresh,
     });
     setLoading(null);
@@ -128,7 +121,7 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
       {/* Action buttons row */}
       <div className="flex items-center gap-1 flex-wrap">
         {actions.map(action => {
-          const Icon = ICON_MAP[action.icon] || Bot;
+          const Icon = resolveActionIcon(action.icon);
           const isConfirming = confirming === action.id;
           const isLoading = loading === action.id;
           const isActive =

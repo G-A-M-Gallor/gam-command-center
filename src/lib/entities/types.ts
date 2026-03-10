@@ -8,7 +8,8 @@
 export type FieldType =
   | 'text' | 'number' | 'select' | 'multi-select' | 'date'
   | 'person' | 'url' | 'email' | 'phone' | 'checkbox'
-  | 'relation' | 'formula' | 'composite';
+  | 'relation' | 'formula' | 'composite'
+  | 'file' | 'rich_text' | 'datetime' | 'currency' | 'rating';
 
 export type ViewType = 'table' | 'board' | 'list' | 'calendar' | 'gantt' | 'timeline';
 
@@ -223,12 +224,40 @@ export interface SavedView {
 // ─── Action Buttons ──────────────────────────────────
 // Per-entity-type configurable actions for toolbar + note sidebar.
 
+export type HandlerType = 'builtin' | 'navigate' | 'set_field' | 'custom_event' | 'webhook';
+export type ActionPosition = 'sidebar' | 'toolbar' | 'detail_header' | 'floating';
+
+export interface NavigateConfig {
+  url_template: string;            // supports {field_key} placeholders
+  target: '_blank' | '_self';
+}
+
+export interface SetFieldConfig {
+  field_key: string;
+  value: string;
+}
+
+export interface CustomEventConfig {
+  event_name: string;
+  detail_template: string;          // JSON string with {field_key} placeholders
+}
+
+export interface WebhookConfig {
+  url: string;
+  include_meta: boolean;
+}
+
+export type HandlerConfig = NavigateConfig | SetFieldConfig | CustomEventConfig | WebhookConfig;
+
 export interface ActionButton {
   id: string;
   label: I18nLabel;
   icon: string;
   variant: 'default' | 'destructive' | 'outline' | 'ghost';
   scope: 'single' | 'bulk' | 'global';
+  handler_type?: HandlerType;
+  handler_config?: HandlerConfig;
+  positions?: ActionPosition[];
   show_when?: {
     status_in?: string[];
     status_not_in?: string[];

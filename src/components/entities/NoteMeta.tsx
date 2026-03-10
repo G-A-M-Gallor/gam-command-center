@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ChevronDown, ChevronRight, Link2, Plus, X, Loader2, Users, Lock } from 'lucide-react';
+import { ChevronDown, ChevronRight, Link2, Plus, X, Loader2, Users, Lock, Paperclip, Star } from 'lucide-react';
 import { StakeholderPanel } from './StakeholderPanel';
 import { ActivityFeed } from './ActivityFeed';
 import { NoteActions } from './NoteActions';
@@ -27,14 +27,34 @@ interface Props {
   columns?: 1 | 2 | 3 | 4;
 }
 
+// ─── Formula Evaluator ───────────────────────────────
+function evaluateFormula(formula: string, meta: Record<string, unknown>): string {
+  // Replace {field_key} placeholders with numeric meta values
+  const expr = formula.replace(/\{([^}]+)\}/g, (_, key) => {
+    const val = meta[key];
+    const num = Number(val);
+    return isNaN(num) ? '0' : String(num);
+  });
+  // Evaluate simple math: only digits, +, -, *, /, ., (, ), spaces
+  if (!/^[\d\s+\-*/().]+$/.test(expr)) return '—';
+  try {
+    // eslint-disable-next-line no-new-func
+    const result = new Function(`"use strict"; return (${expr});`)();
+    return typeof result === 'number' && isFinite(result) ? String(Math.round(result * 100) / 100) : '—';
+  } catch {
+    return '—';
+  }
+}
+
 // ─── Field Value Editor ──────────────────────────────
 function FieldEditor({
-  field, value, lang, onChange, readOnly, fieldColor,
+  field, value, lang, onChange, readOnly, fieldColor, meta,
 }: {
   field: GlobalField; value: unknown; lang: string;
   onChange: (val: unknown) => void;
   readOnly?: boolean;
   fieldColor?: string | null;
+  meta?: Record<string, unknown>;
 }) {
   const colorStyle = fieldColor ? { borderColor: fieldColor, boxShadow: `0 0 0 1px ${fieldColor}20` } : {};
   const readOnlyClass = readOnly ? 'opacity-60 pointer-events-none' : '';
@@ -113,6 +133,88 @@ function FieldEditor({
           className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none ${readOnlyClass}`}
         />
       );
+    case 'datetime':
+      return (
+        <input
+          type="datetime-local"
+          value={String(value ?? '')}
+          readOnly={readOnly}
+          onChange={e => onChange(e.target.value)}
+          style={colorStyle}
+          className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none ${readOnlyClass}`}
+        />
+      );
+    case 'currency':
+      return (
+        <div className={`flex items-center gap-1 ${readOnlyClass}`}>
+          <span className="text-xs text-slate-500 shrink-0">₪</span>
+          <input
+            type="number"
+            value={String(value ?? '')}
+            readOnly={readOnly}
+            onChange={e => onChange(e.target.value ? Number(e.target.value) : null)}
+            style={colorStyle}
+            className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none"
+          />
+        </div>
+      );
+    case 'rating': {
+      const ratingVal = typeof value === 'number' ? value : 0;
+      return (
+        <div className={`flex items-center gap-0.5 ${readOnlyClass}`}>
+          {[1, 2, 3, 4, 5].map(n => (
+            <button
+              key={n}
+              type="button"
+              disabled={readOnly}
+              onClick={() => onChange(ratingVal === n ? 0 : n)}
+              className="p-0.5 transition-colors"
+            >
+              <Star
+                size={16}
+                className={n <= ratingVal ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}
+              />
+            </button>
+          ))}
+        </div>
+      );
+    }
+    case 'rich_text':
+      return (
+        <textarea
+          rows={4}
+          value={String(value ?? '')}
+          readOnly={readOnly}
+          onChange={e => onChange(e.target.value)}
+          placeholder={field.label[lang as keyof I18nLabel] || field.meta_key}
+          style={colorStyle}
+          className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none resize-y ${readOnlyClass}`}
+        />
+      );
+    case 'file':
+      return (
+        <div className={`flex items-center gap-1 ${readOnlyClass}`}>
+          <Paperclip size={12} className="text-slate-500 shrink-0" />
+          <input
+            type="url"
+            value={String(value ?? '')}
+            readOnly={readOnly}
+            onChange={e => onChange(e.target.value)}
+            placeholder="https://..."
+            style={colorStyle}
+            className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
+          />
+        </div>
+      );
+    case 'formula': {
+      const formulaStr = field.default_value != null ? String(field.default_value) : '';
+      const result = meta ? evaluateFormula(formulaStr, meta) : '—';
+      return (
+        <div className="rounded border border-white/[0.08] bg-white/[0.02] px-2 py-1.5 text-xs text-slate-300 opacity-70">
+          {result}
+        </div>
+      );
+    }
     default:
       return (
         <input
@@ -427,6 +529,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
                               onChange={val => handleFieldChange(field.meta_key, val)}
                               readOnly={field.read_only}
                               fieldColor={fc}
+                              meta={meta}
                             />
                           </div>
                         );
@@ -461,6 +564,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
                       onChange={val => handleFieldChange(field.meta_key, val)}
                       readOnly={field.read_only}
                       fieldColor={fc}
+                      meta={meta}
                     />
                   </div>
                 );

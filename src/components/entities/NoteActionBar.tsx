@@ -1,21 +1,13 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import {
-  Archive, ArchiveRestore, ArrowRightLeft, Download, Bot,
-  Bell, Phone, MessageSquare, Pencil, UserPlus,
-} from 'lucide-react';
 import { resolveActions } from '@/lib/entities/resolveActions';
-import { ACTION_HANDLERS } from '@/lib/entities/actionHandlers';
+import { executeAction } from '@/lib/entities/actionHandlers';
+import { resolveActionIcon } from '@/lib/entities/actionIconMap';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTranslations } from '@/lib/i18n';
 import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, TemplateConfig, GlobalField, ActionButton } from '@/lib/entities/types';
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  Archive, ArchiveRestore, ArrowRightLeft, Download, Bot,
-  Bell, Phone, MessageSquare, Pencil, UserPlus,
-};
 
 const VARIANT_CLASSES: Record<string, string> = {
   default: 'border-purple-500/30 text-purple-300 hover:bg-purple-500/15',
@@ -48,9 +40,6 @@ export function NoteActionBar({
   );
 
   const handleAction = useCallback(async (action: ActionButton) => {
-    const handler = ACTION_HANDLERS[action.id];
-    if (!handler) return;
-
     if (action.confirm && confirming !== action.id) {
       setConfirming(action.id);
       return;
@@ -58,7 +47,7 @@ export function NoteActionBar({
     setConfirming(null);
 
     setLoading(action.id);
-    const result = await handler([note.id], entityType, {
+    const result = await executeAction(action, [note.id], entityType, {
       language, fields, notes: [note], onRefresh,
     });
     setLoading(null);
@@ -75,7 +64,7 @@ export function NoteActionBar({
       dir={isRtl ? 'rtl' : 'ltr'}
     >
       {actions.map(action => {
-        const Icon = ICON_MAP[action.icon] || Download;
+        const Icon = resolveActionIcon(action.icon);
         const isConfirming = confirming === action.id;
 
         if (isConfirming) {

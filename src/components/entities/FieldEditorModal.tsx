@@ -6,6 +6,7 @@ import {
   Hash, Type, Calendar as CalendarIcon, CheckSquare, List,
   Link as LinkIcon, Mail, Phone, Users, Tag, Combine,
   Eye, EyeOff, Palette, GripVertical, Sparkles,
+  Paperclip, FileText, CalendarClock, DollarSign, Star,
 } from 'lucide-react';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 import { CustomSelect } from '@/components/ui/CustomSelect';
@@ -25,6 +26,8 @@ const FIELD_TYPE_ICONS: Record<string, React.ElementType> = {
   date: CalendarIcon, person: Users, url: LinkIcon, email: Mail,
   phone: Phone, checkbox: CheckSquare, composite: Combine,
   relation: LinkIcon, formula: Hash,
+  file: Paperclip, rich_text: FileText, datetime: CalendarClock,
+  currency: DollarSign, rating: Star,
 };
 
 const FIELD_TYPE_LABELS: Record<string, { he: string; en: string; ru: string }> = {
@@ -41,6 +44,11 @@ const FIELD_TYPE_LABELS: Record<string, { he: string; en: string; ru: string }> 
   composite: { he: 'מורכב', en: 'Composite', ru: 'Составной' },
   relation: { he: 'קשר', en: 'Relation', ru: 'Связь' },
   formula: { he: 'נוסחה', en: 'Formula', ru: 'Формула' },
+  file: { he: 'קובץ', en: 'File', ru: 'Файл' },
+  rich_text: { he: 'טקסט עשיר', en: 'Rich Text', ru: 'Форматированный текст' },
+  datetime: { he: 'תאריך ושעה', en: 'Date & Time', ru: 'Дата и время' },
+  currency: { he: 'מטבע', en: 'Currency', ru: 'Валюта' },
+  rating: { he: 'דירוג', en: 'Rating', ru: 'Рейтинг' },
 };
 
 const CATEGORIES: FieldCategory[] = ['general', 'contact', 'business', 'project', 'hr', 'finance', 'construction'];
@@ -90,6 +98,11 @@ const VALIDATION_CONFIG: Record<string, { required?: boolean; minMax?: boolean; 
   composite: { required: true },
   formula: {},
   checkbox: {},
+  file: { required: true },
+  rich_text: { required: true },
+  datetime: { required: true },
+  currency: { required: true, minMax: true },
+  rating: {},
 };
 
 type Tab = 'general' | 'options' | 'validation' | 'visibility' | 'colors' | 'aliases';

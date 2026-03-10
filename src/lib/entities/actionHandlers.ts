@@ -2,8 +2,11 @@
 // Action Handlers — Execute action logic per button ID
 // ===================================================
 
-import { deactivateNote, reactivateNote } from '@/lib/supabase/entityQueries';
-import type { NoteRecord, GlobalField } from './types';
+import { deactivateNote, reactivateNote, updateNoteMeta } from '@/lib/supabase/entityQueries';
+import type {
+  NoteRecord, GlobalField, ActionButton,
+  NavigateConfig, SetFieldConfig, CustomEventConfig, WebhookConfig,
+} from './types';
 
 export interface ActionContext {
   language: string;
@@ -134,3 +137,107 @@ export const ACTION_HANDLERS: Record<string, ActionHandler> = {
   bulk_status_change: async () => ({ success: true, message: 'bulk_status_change_modal' }), // handled by UI
   bulk_assign: async () => ({ success: true, message: 'bulk_assign_modal' }), // handled by UI
 };
+
+// ─── Template resolver ────────────────────────────────
+
+/**
+ * Replaces `{field_key}` placeholders in a template string
+ * with values from the note's meta + top-level fields.
+ */
+export function resolveTemplate(
+  template: string,
+  meta: Record<string, unknown>,
+): string {
+  return template.replace(/\{(\w+)\}/g, (_, key) => {
+    const val = meta[key];
+    if (val === null || val === undefined) return '';
+    return String(val);
+  });
+}
+
+// ─── Universal action dispatcher ──────────────────────
+
+/**
+ * Executes an action button based on its handler_type.
+ * - builtin → delegates to ACTION_HANDLERS map
+ * - navigate → opens resolved URL
+ * - set_field → updates note meta field
+ * - custom_event → dispatches a DOM CustomEvent
+ * - webhook → POSTs to configured URL
+ */
+export async function executeAction(
+  action: ActionButton,
+  noteIds: string[],
+  entityType: string,
+  context: ActionContext,
+): Promise<ActionResult> {
+  const handlerType = action.handler_type ?? 'builtin';
+
+  // Builtin — use existing handler map
+  if (handlerType === 'builtin') {
+    const handler = ACTION_HANDLERS[action.id];
+    if (!handler) return { success: false, message: `No handler for ${action.id}` };
+    return handler(noteIds, entityType, context);
+  }
+
+  const note = context.notes.find(n => n.id === noteIds[0]);
+  const meta = note?.meta ?? {};
+
+  // Navigate — open URL with resolved placeholders
+  if (handlerType === 'navigate' && action.handler_config) {
+    const cfg = action.handler_config as NavigateConfig;
+    const url = resolveTemplate(cfg.url_template, meta);
+    if (!url) return { success: false, message: 'Empty URL' };
+    window.open(url, cfg.target ?? '_blank');
+    return { success: true };
+  }
+
+  // Set field — update a meta field value
+  if (handlerType === 'set_field' && action.handler_config) {
+    const cfg = action.handler_config as SetFieldConfig;
+    const value = resolveTemplate(cfg.value, meta);
+    let allOk = true;
+    for (const id of noteIds) {
+      const ok = await updateNoteMeta(id, { [cfg.field_key]: value }, { trackActivity: true });
+      if (!ok) allOk = false;
+    }
+    if (allOk) context.onRefresh();
+    return { success: allOk };
+  }
+
+  // Custom event — dispatch DOM event
+  if (handlerType === 'custom_event' && action.handler_config) {
+    const cfg = action.handler_config as CustomEventConfig;
+    const detailStr = resolveTemplate(cfg.detail_template, meta);
+    let detail: unknown;
+    try { detail = JSON.parse(detailStr); } catch { detail = detailStr; }
+    window.dispatchEvent(new CustomEvent(cfg.event_name, { detail }));
+    return { success: true };
+  }
+
+  // Webhook — POST to external URL
+  if (handlerType === 'webhook' && action.handler_config) {
+    const cfg = action.handler_config as WebhookConfig;
+    const body: Record<string, unknown> = {
+      action_id: action.id,
+      entity_type: entityType,
+      note_ids: noteIds,
+    };
+    if (cfg.include_meta && note) {
+      body.meta = note.meta;
+      body.title = note.title;
+    }
+    try {
+      const res = await fetch(cfg.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      return { success: res.ok, message: res.ok ? undefined : `Webhook failed: ${res.status}` };
+    } catch (err) {
+      return { success: false, message: `Webhook error: ${err instanceof Error ? err.message : 'unknown'}` };
+    }
+  }
+
+  return { success: false, message: `Unknown handler type: ${handlerType}` };
+}
