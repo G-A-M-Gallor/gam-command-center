@@ -12,19 +12,21 @@ import { routes, standalonePages, widgets, contexts } from './data';
 
 // ─── Shared Sub-components ───────────────────────────────
 
-function StatusBadge({ status, isHe }: { status: Status; isHe: boolean }) {
-  const cfg: Record<Status, { en: string; he: string; color: string; icon: React.ElementType }> = {
-    active: { en: 'Active', he: 'פעיל', color: '#34d399', icon: CheckCircle2 },
-    placeholder: { en: 'Placeholder', he: 'ריק', color: '#fbbf24', icon: AlertCircle },
-    'coming-soon': { en: 'Coming Soon', he: 'בקרוב', color: '#818cf8', icon: Clock },
-    deprecated: { en: 'Deprecated', he: 'הוסר', color: '#ef4444', icon: Circle },
+type AdminTranslations = ReturnType<typeof getTranslations>['admin'];
+
+function StatusBadge({ status, ta }: { status: Status; ta: AdminTranslations }) {
+  const cfg: Record<Status, { label: string; color: string; icon: React.ElementType }> = {
+    active: { label: ta.statusActive, color: '#34d399', icon: CheckCircle2 },
+    placeholder: { label: ta.statusPlaceholder, color: '#fbbf24', icon: AlertCircle },
+    'coming-soon': { label: ta.statusComingSoon, color: '#818cf8', icon: Clock },
+    deprecated: { label: ta.statusDeprecated, color: '#ef4444', icon: Circle },
   };
   const c = cfg[status];
   const Icon = c.icon;
   return (
     <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ color: c.color, background: `${c.color}15` }}>
       <Icon size={12} />
-      {isHe ? c.he : c.en}
+      {c.label}
     </span>
   );
 }
@@ -56,7 +58,7 @@ function CollapsibleRow({ title, defaultOpen = false, count, children, isHe }: {
   );
 }
 
-function RouteCard({ route, isHe }: { route: RouteEntry; isHe: boolean }) {
+function RouteCard({ route, isHe, ta }: { route: RouteEntry; isHe: boolean; ta: AdminTranslations }) {
   const Icon = route.icon;
   const description = isHe ? route.descriptionHe : route.descriptionEn;
   const displayName = isHe ? route.nameHe : route.name;
@@ -74,18 +76,18 @@ function RouteCard({ route, isHe }: { route: RouteEntry; isHe: boolean }) {
               <span className="font-semibold text-slate-100">{displayName}</span>
               <span className="text-xs text-slate-500">{secondaryName}</span>
               <PhaseBadge phase={route.phase} />
-              <StatusBadge status={route.status} isHe={isHe} />
+              <StatusBadge status={route.status} ta={ta} />
             </div>
             <div className="mt-0.5 flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
               <code className="rounded bg-white/5 px-1.5 py-0.5" dir="ltr">{route.path}</code>
               <span>v{route.version}</span>
               <span>{route.addedDate}</span>
               {route.visible ? (
-                <span className="flex items-center gap-1 text-emerald-400"><Eye size={10} /> {isHe ? 'נראה' : 'Visible'}</span>
+                <span className="flex items-center gap-1 text-emerald-400"><Eye size={10} /> {ta.routeVisible}</span>
               ) : (
-                <span className="flex items-center gap-1 text-slate-600"><EyeOff size={10} /> {isHe ? 'מוסתר' : 'Hidden'}</span>
+                <span className="flex items-center gap-1 text-slate-600"><EyeOff size={10} /> {ta.routeHidden}</span>
               )}
-              {route.sidebarTab && <span className="text-blue-400">{isHe ? 'סיידבר' : 'Sidebar'}</span>}
+              {route.sidebarTab && <span className="text-blue-400">{ta.routeSidebar}</span>}
             </div>
           </div>
         </div>
@@ -94,12 +96,12 @@ function RouteCard({ route, isHe }: { route: RouteEntry; isHe: boolean }) {
       <p className="mb-3 text-xs text-slate-500">{description}</p>
 
       {route.components.length > 0 && (
-        <CollapsibleRow isHe={isHe} title={<span className="flex items-center gap-1.5"><Component size={13} className="text-slate-500" /> {isHe ? 'קומפוננטות' : 'Components'}</span>} count={route.components.length}>
+        <CollapsibleRow isHe={isHe} title={<span className="flex items-center gap-1.5"><Component size={13} className="text-slate-500" /> {ta.routeComponents}</span>} count={route.components.length}>
           <div className="mt-1 space-y-2">
             {route.components.map(comp => (
               <div key={comp.id} className="rounded-lg border border-white/[0.04] bg-white/[0.015] px-3 py-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <StatusBadge status={comp.status} isHe={isHe} />
+                  <StatusBadge status={comp.status} ta={ta} />
                   <span className="text-sm font-medium text-slate-200">{comp.name}</span>
                   <code className="text-[10px] text-slate-600" dir="ltr">{comp.file}</code>
                 </div>
@@ -121,7 +123,7 @@ function RouteCard({ route, isHe }: { route: RouteEntry; isHe: boolean }) {
 
       {route.contexts.length > 0 && (
         <div className="mt-2 flex items-center gap-1.5 text-[11px] flex-wrap">
-          <span className="text-slate-600">{isHe ? 'קונטקסטים:' : 'Contexts:'}</span>
+          <span className="text-slate-600">{ta.routeContexts}</span>
           {route.contexts.map(c => (
             <span key={c} className="rounded bg-purple-500/10 px-1.5 py-0.5 text-purple-400">{c}</span>
           ))}
@@ -131,9 +133,9 @@ function RouteCard({ route, isHe }: { route: RouteEntry; isHe: boolean }) {
       {route.supabaseTables && route.supabaseTables.length > 0 && (
         <div className="mt-1.5 flex items-center gap-1.5 text-[11px] flex-wrap">
           <Database size={10} className="text-slate-600" />
-          <span className="text-slate-600">{isHe ? 'טבלאות:' : 'Tables:'}</span>
-          {route.supabaseTables.map(t => (
-            <code key={t} className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-emerald-400">{t}</code>
+          <span className="text-slate-600">{ta.routeTables}</span>
+          {route.supabaseTables.map(tbl => (
+            <code key={tbl} className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-emerald-400">{tbl}</code>
           ))}
         </div>
       )}
@@ -190,7 +192,7 @@ export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<type
         </h3>
         <div className="space-y-3">
           {filteredRoutes.filter(r => r.path.startsWith('/dashboard')).map(route => (
-            <RouteCard key={route.id} route={route} isHe={isHe} />
+            <RouteCard key={route.id} route={route} isHe={isHe} ta={ta} />
           ))}
         </div>
       </div>
@@ -202,7 +204,7 @@ export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<type
           </h3>
           <div className="space-y-3">
             {filteredRoutes.filter(r => !r.path.startsWith('/dashboard')).map(route => (
-              <RouteCard key={route.id} route={route} isHe={isHe} />
+              <RouteCard key={route.id} route={route} isHe={isHe} ta={ta} />
             ))}
           </div>
         </div>
@@ -213,13 +215,13 @@ export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<type
 
 // ─── Widgets Tab ─────────────────────────────────────────
 
-export function WidgetsSection({ isHe }: { isHe: boolean }) {
+export function WidgetsSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
   return (
     <div className="space-y-2">
       {widgets.map(w => (
         <div key={w.id} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 flex-wrap gap-2">
           <div className="flex items-center gap-3">
-            <StatusBadge status={w.status} isHe={isHe} />
+            <StatusBadge status={w.status} ta={ta} />
             <div>
               <span className="text-sm font-medium text-slate-200">{isHe ? w.nameHe : w.name}</span>
               <span className="mx-2 text-xs text-slate-600">{isHe ? w.name : w.nameHe}</span>
@@ -240,14 +242,14 @@ export function WidgetsSection({ isHe }: { isHe: boolean }) {
 
 // ─── Contexts Tab ────────────────────────────────────────
 
-export function ContextsSection({ isHe }: { isHe: boolean }) {
+export function ContextsSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
   return (
     <div className="space-y-3">
       {contexts.map(ctx => (
         <div key={ctx.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-3">
-              <StatusBadge status={ctx.status} isHe={isHe} />
+              <StatusBadge status={ctx.status} ta={ta} />
               <span className="text-sm font-medium text-slate-200">{ctx.name}</span>
               <code className="text-[10px] text-slate-600" dir="ltr">{ctx.file}</code>
             </div>

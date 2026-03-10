@@ -27,53 +27,53 @@ const FIELD_TYPE_ICONS: Record<string, React.ElementType> = {
   relation: LinkIcon, formula: Hash,
 };
 
-const FIELD_TYPE_LABELS: Record<string, { he: string; en: string }> = {
-  text: { he: 'טקסט', en: 'Text' },
-  number: { he: 'מספר', en: 'Number' },
-  select: { he: 'בחירה', en: 'Select' },
-  'multi-select': { he: 'בחירה מרובה', en: 'Multi-Select' },
-  date: { he: 'תאריך', en: 'Date' },
-  person: { he: 'איש קשר', en: 'Person' },
-  url: { he: 'קישור', en: 'URL' },
-  email: { he: 'אימייל', en: 'Email' },
-  phone: { he: 'טלפון', en: 'Phone' },
-  checkbox: { he: 'תיבת סימון', en: 'Checkbox' },
-  composite: { he: 'מורכב', en: 'Composite' },
-  relation: { he: 'קשר', en: 'Relation' },
-  formula: { he: 'נוסחה', en: 'Formula' },
+const FIELD_TYPE_LABELS: Record<string, { he: string; en: string; ru: string }> = {
+  text: { he: 'טקסט', en: 'Text', ru: 'Текст' },
+  number: { he: 'מספר', en: 'Number', ru: 'Число' },
+  select: { he: 'בחירה', en: 'Select', ru: 'Выбор' },
+  'multi-select': { he: 'בחירה מרובה', en: 'Multi-Select', ru: 'Мультивыбор' },
+  date: { he: 'תאריך', en: 'Date', ru: 'Дата' },
+  person: { he: 'איש קשר', en: 'Person', ru: 'Контакт' },
+  url: { he: 'קישור', en: 'URL', ru: 'Ссылка' },
+  email: { he: 'אימייל', en: 'Email', ru: 'Email' },
+  phone: { he: 'טלפון', en: 'Phone', ru: 'Телефон' },
+  checkbox: { he: 'תיבת סימון', en: 'Checkbox', ru: 'Чекбокс' },
+  composite: { he: 'מורכב', en: 'Composite', ru: 'Составной' },
+  relation: { he: 'קשר', en: 'Relation', ru: 'Связь' },
+  formula: { he: 'נוסחה', en: 'Formula', ru: 'Формула' },
 };
 
 const CATEGORIES: FieldCategory[] = ['general', 'contact', 'business', 'project', 'hr', 'finance', 'construction'];
-const CATEGORY_LABELS: Record<string, { he: string; en: string }> = {
-  general: { he: 'כללי', en: 'General' },
-  contact: { he: 'איש קשר', en: 'Contact' },
-  business: { he: 'עסקי', en: 'Business' },
-  project: { he: 'פרויקט', en: 'Project' },
-  hr: { he: 'משאבי אנוש', en: 'HR' },
-  finance: { he: 'כספים', en: 'Finance' },
-  construction: { he: 'בנייה', en: 'Construction' },
+const CATEGORY_LABELS: Record<string, { he: string; en: string; ru: string }> = {
+  general: { he: 'כללי', en: 'General', ru: 'Общее' },
+  contact: { he: 'איש קשר', en: 'Contact', ru: 'Контакт' },
+  business: { he: 'עסקי', en: 'Business', ru: 'Бизнес' },
+  project: { he: 'פרויקט', en: 'Project', ru: 'Проект' },
+  hr: { he: 'משאבי אנוש', en: 'HR', ru: 'Кадры' },
+  finance: { he: 'כספים', en: 'Finance', ru: 'Финансы' },
+  construction: { he: 'בנייה', en: 'Construction', ru: 'Строительство' },
 };
 
-const VISIBILITY_OPERATORS: { value: VisibilityOperator; he: string; en: string }[] = [
-  { value: 'eq', he: 'שווה ל', en: 'Equals' },
-  { value: 'neq', he: 'לא שווה ל', en: 'Not equals' },
-  { value: 'empty', he: 'ריק', en: 'Is empty' },
-  { value: 'not_empty', he: 'לא ריק', en: 'Not empty' },
-  { value: 'contains', he: 'מכיל', en: 'Contains' },
-  { value: 'gt', he: 'גדול מ', en: 'Greater than' },
-  { value: 'lt', he: 'קטן מ', en: 'Less than' },
+const VISIBILITY_OPERATORS: { value: VisibilityOperator; he: string; en: string; ru: string }[] = [
+  { value: 'eq', he: 'שווה ל', en: 'Equals', ru: 'Равно' },
+  { value: 'neq', he: 'לא שווה ל', en: 'Not equals', ru: 'Не равно' },
+  { value: 'empty', he: 'ריק', en: 'Is empty', ru: 'Пусто' },
+  { value: 'not_empty', he: 'לא ריק', en: 'Not empty', ru: 'Не пусто' },
+  { value: 'contains', he: 'מכיל', en: 'Contains', ru: 'Содержит' },
+  { value: 'gt', he: 'גדול מ', en: 'Greater than', ru: 'Больше чем' },
+  { value: 'lt', he: 'קטן מ', en: 'Less than', ru: 'Меньше чем' },
 ];
 
-const COLOR_OPERATORS: { value: ColorOperator; he: string; en: string }[] = [
-  { value: 'empty', he: 'ריק', en: 'Is empty' },
-  { value: 'not_empty', he: 'לא ריק', en: 'Not empty' },
-  { value: 'eq', he: 'שווה ל', en: 'Equals' },
-  { value: 'neq', he: 'לא שווה ל', en: 'Not equals' },
-  { value: 'contains', he: 'מכיל', en: 'Contains' },
-  { value: 'length_lt', he: 'אורך קטן מ', en: 'Length less than' },
-  { value: 'length_gt', he: 'אורך גדול מ', en: 'Length greater than' },
-  { value: 'gt', he: 'גדול מ', en: 'Greater than' },
-  { value: 'lt', he: 'קטן מ', en: 'Less than' },
+const COLOR_OPERATORS: { value: ColorOperator; he: string; en: string; ru: string }[] = [
+  { value: 'empty', he: 'ריק', en: 'Is empty', ru: 'Пусто' },
+  { value: 'not_empty', he: 'לא ריק', en: 'Not empty', ru: 'Не пусто' },
+  { value: 'eq', he: 'שווה ל', en: 'Equals', ru: 'Равно' },
+  { value: 'neq', he: 'לא שווה ל', en: 'Not equals', ru: 'Не равно' },
+  { value: 'contains', he: 'מכיל', en: 'Contains', ru: 'Содержит' },
+  { value: 'length_lt', he: 'אורך קטן מ', en: 'Length less than', ru: 'Длина меньше' },
+  { value: 'length_gt', he: 'אורך גדול מ', en: 'Length greater than', ru: 'Длина больше' },
+  { value: 'gt', he: 'גדול מ', en: 'Greater than', ru: 'Больше чем' },
+  { value: 'lt', he: 'קטן מ', en: 'Less than', ru: 'Меньше чем' },
 ];
 
 const VALIDATION_CONFIG: Record<string, { required?: boolean; minMax?: boolean; pattern?: boolean; unique?: boolean }> = {
@@ -107,8 +107,8 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
   const { language } = useSettings();
   const t = getTranslations(language);
   const te = t.entities;
-  const isHe = language === 'he';
-  const lang = isHe ? 'he' : 'en';
+  const isRtl = language === 'he';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
 
   const [activeTab, setActiveTab] = useState<Tab>('general');
   const [newAlias, setNewAlias] = useState('');
@@ -124,12 +124,12 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
   const TypeIcon = FIELD_TYPE_ICONS[draft.field_type] ?? Type;
 
   const tabs: { key: Tab; label: string; icon: React.ElementType; show: boolean; tip?: string }[] = [
-    { key: 'general', label: isHe ? 'כללי' : 'General', icon: Type, show: true },
-    { key: 'options', label: isHe ? 'אפשרויות' : 'Options', icon: List, show: hasOptions || draft.is_composite, tip: tips.options },
-    { key: 'validation', label: isHe ? 'ולידציה' : 'Validation', icon: CheckSquare, show: hasValidation, tip: tips.validation },
-    { key: 'visibility', label: isHe ? 'חוקי הצגה' : 'Visibility', icon: Eye, show: true, tip: tips.visibilityRules },
-    { key: 'colors', label: isHe ? 'חוקי צבע' : 'Colors', icon: Palette, show: true, tip: tips.colorRules },
-    { key: 'aliases', label: isHe ? 'כינויים' : 'Aliases', icon: LinkIcon, show: !!editingId, tip: tips.aliases },
+    { key: 'general', label: te.tabGeneral, icon: Type, show: true },
+    { key: 'options', label: te.tabOptions, icon: List, show: hasOptions || draft.is_composite, tip: tips.options },
+    { key: 'validation', label: te.tabValidation, icon: CheckSquare, show: hasValidation, tip: tips.validation },
+    { key: 'visibility', label: te.tabVisibility, icon: Eye, show: true, tip: tips.visibilityRules },
+    { key: 'colors', label: te.tabColors, icon: Palette, show: true, tip: tips.colorRules },
+    { key: 'aliases', label: te.tabAliases, icon: LinkIcon, show: !!editingId, tip: tips.aliases },
   ];
 
   const visibleTabs = tabs.filter(t => t.show);
@@ -147,7 +147,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
         className="w-full max-w-2xl rounded-2xl border border-white/[0.08] bg-slate-900 shadow-2xl flex flex-col max-h-[90vh]"
-        dir={isHe ? 'rtl' : 'ltr'}
+        dir={isRtl ? 'rtl' : 'ltr'}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -200,7 +200,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               {/* Icon + Label row */}
               <div className="flex gap-4">
                 <div className="shrink-0">
-                  <label className="text-xs font-medium text-slate-400 mb-1.5 block">{isHe ? 'אייקון' : 'Icon'}</label>
+                  <label className="text-xs font-medium text-slate-400 mb-1.5 block">{te.icon}</label>
                   <IconPicker
                     value={draft.icon ?? undefined}
                     onChange={icon => setDraft(d => ({ ...d, icon }))}
@@ -294,7 +294,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                 <div>
                   <span className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
                     <Lock size={13} />
-                    {isHe ? 'שדה לקריאה בלבד' : 'Read-only field'}
+                    {te.readOnlyField}
                     <InfoTooltip text={tips.readOnly ?? ''} size={11} />
                   </span>
                 </div>
@@ -466,24 +466,24 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                 <div>
                   <h3 className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
                     <Eye size={14} />
-                    {isHe ? 'חוקי הצגה' : 'Visibility Rules'}
+                    {te.visibilityRulesLabel}
                   </h3>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    {isHe ? 'השדה יוצג רק אם כל התנאים מתקיימים. שדה חובה מוסתר — לא נאכף.' : 'Field shown only when all conditions are met. Hidden required fields are not enforced.'}
+                    {te.visibilityRulesDesc}
                   </p>
                 </div>
                 <button
                   onClick={() => setDraft(d => ({ ...d, visibility_rules: [...(d.visibility_rules ?? []), { field_ref: '', operator: 'not_empty' }] }))}
                   className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300"
                 >
-                  <Plus size={12} /> {isHe ? 'הוסף תנאי' : 'Add rule'}
+                  <Plus size={12} /> {te.addCondition}
                 </button>
               </div>
 
               {(draft.visibility_rules ?? []).length === 0 && (
                 <div className="rounded-lg border border-dashed border-white/[0.08] bg-white/[0.02] px-4 py-6 text-center">
                   <EyeOff size={20} className="text-slate-600 mx-auto mb-2" />
-                  <p className="text-xs text-slate-500">{isHe ? 'השדה מוצג תמיד (ללא תנאים)' : 'Field always visible (no conditions)'}</p>
+                  <p className="text-xs text-slate-500">{te.fieldAlwaysVisible}</p>
                 </div>
               )}
 
@@ -502,7 +502,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                     className="min-w-[120px]"
                   />
                   {!['empty', 'not_empty'].includes(rule.operator) && (
-                    <input type="text" value={rule.value ?? ''} placeholder={isHe ? 'ערך' : 'Value'}
+                    <input type="text" value={rule.value ?? ''} placeholder={te.valuePlaceholder}
                       onChange={e => setDraft(d => ({ ...d, visibility_rules: (d.visibility_rules ?? []).map((r, j) => j === i ? { ...r, value: e.target.value } : r) }))}
                       className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none" />
                   )}
@@ -520,24 +520,24 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                 <div>
                   <h3 className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
                     <Palette size={14} />
-                    {isHe ? 'חוקי צבע' : 'Color Rules'}
+                    {te.colorRulesLabel}
                   </h3>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    {isHe ? 'צבע השדה ישתנה בהתאם לתנאים. הכלל הראשון שמתקיים קובע.' : 'Field color changes based on conditions. First matching rule wins.'}
+                    {te.colorRulesDesc}
                   </p>
                 </div>
                 <button
                   onClick={() => setDraft(d => ({ ...d, color_rules: [...(d.color_rules ?? []), { operator: 'empty', color: '#ef4444' }] }))}
                   className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300"
                 >
-                  <Plus size={12} /> {isHe ? 'הוסף חוק' : 'Add rule'}
+                  <Plus size={12} /> {te.addColorRule}
                 </button>
               </div>
 
               {(draft.color_rules ?? []).length === 0 && (
                 <div className="rounded-lg border border-dashed border-white/[0.08] bg-white/[0.02] px-4 py-6 text-center">
                   <Palette size={20} className="text-slate-600 mx-auto mb-2" />
-                  <p className="text-xs text-slate-500">{isHe ? 'ללא חוקי צבע (צבע ברירת מחדל)' : 'No color rules (default styling)'}</p>
+                  <p className="text-xs text-slate-500">{te.noColorRules}</p>
                 </div>
               )}
 
@@ -553,7 +553,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                     className="min-w-[140px]"
                   />
                   {!['empty', 'not_empty'].includes(rule.operator) && (
-                    <input type="text" value={rule.value ?? ''} placeholder={isHe ? 'ערך' : 'Value'}
+                    <input type="text" value={rule.value ?? ''} placeholder={te.valuePlaceholder}
                       onChange={e => setDraft(d => ({ ...d, color_rules: (d.color_rules ?? []).map((r, j) => j === i ? { ...r, value: e.target.value } : r) }))}
                       className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none" />
                   )}

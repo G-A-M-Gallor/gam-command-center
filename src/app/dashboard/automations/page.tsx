@@ -185,7 +185,6 @@ export default function AutomationsPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const a = t.automations;
-  const isHe = language === 'he';
 
   return (
     <div className="min-h-screen">
@@ -193,7 +192,7 @@ export default function AutomationsPage() {
 
       <div className="mt-8 space-y-10">
         {/* ── n8n Section ──────────────────────── */}
-        <N8nSection a={a} isHe={isHe} />
+        <N8nSection a={a} />
 
         {/* ── Supabase Automations Header ─────── */}
         <div>
@@ -226,7 +225,6 @@ export default function AutomationsPage() {
             activationCode={ACTIVATE_TRIGGER}
             activateLabel={a.howToActivate}
             exampleLabel={a.example}
-            isHe={isHe}
           />
 
           <AutomationCard
@@ -249,7 +247,6 @@ export default function AutomationsPage() {
             activationCode={ACTIVATE_EDGE}
             activateLabel={a.howToActivate}
             exampleLabel={a.example}
-            isHe={isHe}
           />
 
           <AutomationCard
@@ -275,19 +272,18 @@ export default function AutomationsPage() {
             exampleLabel={a.example}
             highlighted
             highlightLabel={a.pgCronBest}
-            isHe={isHe}
           />
         </div>
 
         {/* ── Comparison Table ────────────────── */}
-        <ComparisonTable a={a} isHe={isHe} />
+        <ComparisonTable a={a} />
       </div>
     </div>
   );
 }
 
 // ─── n8n Section ─────────────────────────────────────
-function N8nSection({ a, isHe }: { a: ReturnType<typeof getTranslations>['automations']; isHe: boolean }) {
+function N8nSection({ a }: { a: ReturnType<typeof getTranslations>['automations'] }) {
   const [showIframe, setShowIframe] = useState(false);
 
   return (
@@ -347,9 +343,7 @@ function N8nSection({ a, isHe }: { a: ReturnType<typeof getTranslations>['automa
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-900/95">
                   <RefreshCw className="h-10 w-10 text-orange-400/50" />
                   <p className="text-sm text-slate-500">
-                    {isHe
-                      ? 'הגדר כתובת n8n ב-environment variables'
-                      : 'Configure n8n URL in environment variables'}
+                    {a.n8nConfigureUrl}
                   </p>
                   <code className="rounded bg-slate-800 px-3 py-1.5 text-xs text-orange-300">
                     NEXT_PUBLIC_N8N_URL=https://your-n8n.example.com
@@ -384,7 +378,6 @@ interface AutomationCardProps {
   exampleLabel: string;
   highlighted?: boolean;
   highlightLabel?: string;
-  isHe: boolean;
 }
 
 function AutomationCard({
@@ -406,7 +399,6 @@ function AutomationCard({
   exampleLabel,
   highlighted,
   highlightLabel,
-  isHe,
 }: AutomationCardProps) {
   const [expandedExample, setExpandedExample] = useState<number | null>(null);
   const [showActivation, setShowActivation] = useState(false);
@@ -526,43 +518,43 @@ function CodeBlock({ code }: { code: string }) {
 }
 
 // ─── Comparison Table ────────────────────────────────
-function ComparisonTable({ a, isHe }: { a: ReturnType<typeof getTranslations>['automations']; isHe: boolean }) {
+function ComparisonTable({ a }: { a: ReturnType<typeof getTranslations>['automations'] }) {
   const rows = [
     {
-      feature: isHe ? 'סוג' : 'Type',
-      trigger: isHe ? 'פונקציה ב-DB' : 'DB Function',
-      edge: isHe ? 'קוד TypeScript בענן' : 'Cloud TypeScript',
-      cron: isHe ? 'משימה מתוזמנת' : 'Scheduled Job',
+      feature: a.compType,
+      trigger: a.compTriggerType,
+      edge: a.compEdgeType,
+      cron: a.compCronType,
     },
     {
-      feature: isHe ? 'מה מפעיל?' : 'Trigger',
-      trigger: 'INSERT / UPDATE / DELETE',
+      feature: a.compTrigger,
+      trigger: a.compTriggerTrigger,
       edge: 'HTTP Request / Webhook',
-      cron: isHe ? 'לוח זמנים (cron)' : 'Schedule (cron)',
+      cron: a.compCronTrigger,
     },
     {
-      feature: isHe ? 'מהירות' : 'Speed',
-      trigger: isHe ? 'מיידי (בתוך טרנזקציה)' : 'Instant (in transaction)',
-      edge: isHe ? 'מהיר (~200ms cold)' : 'Fast (~200ms cold)',
-      cron: isHe ? 'לפי לוח זמנים' : 'By schedule',
+      feature: a.compSpeed,
+      trigger: a.compTriggerSpeed,
+      edge: a.compEdgeSpeed,
+      cron: a.compCronSpeed,
     },
     {
-      feature: isHe ? 'שפה' : 'Language',
+      feature: a.compLanguage,
       trigger: 'PL/pgSQL (SQL)',
       edge: 'TypeScript / Deno',
       cron: 'SQL',
     },
     {
-      feature: isHe ? 'מתאים ל...' : 'Best for',
-      trigger: isHe ? 'שמירת שלמות נתונים' : 'Data integrity',
-      edge: isHe ? 'אינטגרציות חיצוניות' : 'External integrations',
-      cron: isHe ? 'חזרתיות ותחזוקה' : 'Recurrence & maintenance',
+      feature: a.compBestFor,
+      trigger: a.compTriggerBestFor,
+      edge: a.compEdgeBestFor,
+      cron: a.compCronBestFor,
     },
     {
-      feature: isHe ? 'דוגמה' : 'Example',
-      trigger: isHe ? 'עדכון updated_at' : 'Update updated_at',
-      edge: isHe ? 'Webhook מ-Origami' : 'Origami webhook',
-      cron: isHe ? 'משימות חוזרות' : 'Recurring tasks',
+      feature: a.compExample,
+      trigger: a.compTriggerExample,
+      edge: a.compEdgeExample,
+      cron: a.compCronExample,
     },
   ];
 
@@ -570,7 +562,7 @@ function ComparisonTable({ a, isHe }: { a: ReturnType<typeof getTranslations>['a
     <div className="overflow-hidden rounded-xl border border-slate-700/50" data-cc-id="automations.comparison">
       <div className="border-b border-slate-700/50 bg-slate-800/50 px-5 py-3">
         <h3 className="text-sm font-semibold text-slate-200">
-          {isHe ? 'השוואה — מתי להשתמש במה?' : 'Comparison — When to use what?'}
+          {a.comparisonTitle}
         </h3>
       </div>
       <div className="overflow-x-auto">

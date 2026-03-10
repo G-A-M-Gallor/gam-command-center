@@ -21,19 +21,18 @@ interface Props {
   noteId: string;
 }
 
-const NOTIFY_LABELS: Record<NotifyLevel, { he: string; en: string }> = {
-  all: { he: 'הכל', en: 'All' },
-  milestones: { he: 'אבני דרך', en: 'Milestones' },
-  mentions: { he: 'אזכורים', en: 'Mentions' },
-  none: { he: 'ללא', en: 'None' },
-};
+// Notify labels now resolved from i18n te keys at render time
 
 export function StakeholderPanel({ noteId }: Props) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
-  const lang = isHe ? 'he' : 'en';
+  const isRtl = language === 'he';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const te = t.entities;
+  const notifyLabels: Record<NotifyLevel, string> = {
+    all: te.notifyAll, milestones: te.notifyMilestones,
+    mentions: te.notifyMentions, none: te.notifyNone,
+  };
 
   const [stakeholders, setStakeholders] = useState<NoteStakeholder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +113,7 @@ export function StakeholderPanel({ noteId }: Props) {
     <div
       data-cc-id="stakeholder-panel"
       className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden"
-      dir={isHe ? 'rtl' : 'ltr'}
+      dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Header */}
       <button
@@ -123,7 +122,7 @@ export function StakeholderPanel({ noteId }: Props) {
       >
         {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         <Users size={13} className="text-purple-400" />
-        <span>{isHe ? 'בעלי עניין' : 'Stakeholders'}</span>
+        <span>{te.stakeholders}</span>
         <span className="text-[10px] text-slate-500 ms-auto">{stakeholders.length}</span>
       </button>
 
@@ -133,7 +132,7 @@ export function StakeholderPanel({ noteId }: Props) {
           {primaryStakeholders.length > 0 && (
             <div className="space-y-1.5">
               <span className="text-[9px] font-medium text-yellow-400/80 uppercase tracking-wider">
-                {isHe ? 'ראשיים' : 'Primary'}
+                {te.primary}
               </span>
               {primaryStakeholders.map(s => (
                 <StakeholderRow
@@ -146,6 +145,8 @@ export function StakeholderPanel({ noteId }: Props) {
                   onUpdateAccess={handleUpdateAccess}
                   onUpdateNotify={handleUpdateNotify}
                   onRemove={handleRemove}
+                  te={te as unknown as Record<string, unknown>}
+                  notifyLabels={notifyLabels}
                 />
               ))}
             </div>
@@ -156,7 +157,7 @@ export function StakeholderPanel({ noteId }: Props) {
             <div className="space-y-1.5">
               {primaryStakeholders.length > 0 && (
                 <span className="text-[9px] font-medium text-slate-500 uppercase tracking-wider">
-                  {isHe ? 'נוספים' : 'Additional'}
+                  {te.additional}
                 </span>
               )}
               {otherStakeholders.map(s => (
@@ -170,6 +171,8 @@ export function StakeholderPanel({ noteId }: Props) {
                   onUpdateAccess={handleUpdateAccess}
                   onUpdateNotify={handleUpdateNotify}
                   onRemove={handleRemove}
+                  te={te as unknown as Record<string, unknown>}
+                  notifyLabels={notifyLabels}
                 />
               ))}
             </div>
@@ -177,7 +180,7 @@ export function StakeholderPanel({ noteId }: Props) {
 
           {stakeholders.length === 0 && !loading && (
             <p className="text-[11px] text-slate-500 text-center py-2">
-              {isHe ? 'אין בעלי עניין עדיין' : 'No stakeholders yet'}
+              {te.noStakeholdersYet}
             </p>
           )}
 
@@ -188,7 +191,7 @@ export function StakeholderPanel({ noteId }: Props) {
               className="flex items-center gap-1.5 text-[11px] text-purple-400 hover:text-purple-300 transition-colors"
             >
               <Plus size={12} />
-              {isHe ? 'הוסף בעל עניין' : 'Add stakeholder'}
+              {te.addStakeholder}
             </button>
           ) : (
             <div className="space-y-2 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3">
@@ -197,7 +200,7 @@ export function StakeholderPanel({ noteId }: Props) {
                 type="text"
                 value={searchQuery}
                 onChange={e => handleSearch(e.target.value)}
-                placeholder={isHe ? 'חפש איש קשר...' : 'Search contact...'}
+                placeholder={te.searchContact}
                 className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none"
                 autoFocus
               />
@@ -272,6 +275,8 @@ function StakeholderRow({
   onUpdateAccess,
   onUpdateNotify,
   onRemove,
+  te,
+  notifyLabels,
 }: {
   stakeholder: NoteStakeholder;
   lang: string;
@@ -281,6 +286,8 @@ function StakeholderRow({
   onUpdateAccess: (id: string, level: AccessLevel) => void;
   onUpdateNotify: (id: string, level: NotifyLevel) => void;
   onRemove: (id: string) => void;
+  te: Record<string, unknown>;
+  notifyLabels: Record<NotifyLevel, string>;
 }) {
   const roleDef = BUILTIN_ROLES.find(r => r.role === s.role);
   const isEditing = editingId === s.id;
@@ -322,7 +329,7 @@ function StakeholderRow({
            s.access_level === 'external' ? <Eye size={10} className="text-slate-500" /> :
            <Shield size={10} className="text-slate-500" />}
         </span>
-        <span className="text-[9px] text-slate-600" title={NOTIFY_LABELS[s.notify]?.[lang as 'he' | 'en']}>
+        <span className="text-[9px] text-slate-600" title={notifyLabels[s.notify]}>
           {s.notify === 'none' ? <BellOff size={10} className="text-slate-600" /> :
            <Bell size={10} className={s.notify === 'all' ? 'text-purple-400' : 'text-slate-500'} />}
         </span>
@@ -348,7 +355,7 @@ function StakeholderRow({
       {isEditing && (
         <div className="flex flex-wrap gap-2 px-2.5 pb-2.5 border-t border-white/[0.04] pt-2">
           <div>
-            <label className="text-[9px] text-slate-500">{lang === 'he' ? 'גישה' : 'Access'}</label>
+            <label className="text-[9px] text-slate-500">{te.access as string}</label>
             <select
               value={s.access_level}
               onChange={e => onUpdateAccess(s.id, e.target.value as AccessLevel)}
@@ -360,14 +367,14 @@ function StakeholderRow({
             </select>
           </div>
           <div>
-            <label className="text-[9px] text-slate-500">{lang === 'he' ? 'עדכונים' : 'Notify'}</label>
+            <label className="text-[9px] text-slate-500">{te.notify as string}</label>
             <select
               value={s.notify}
               onChange={e => onUpdateNotify(s.id, e.target.value as NotifyLevel)}
               className="block rounded border border-white/[0.08] bg-white/[0.03] px-1.5 py-1 text-[10px] text-slate-300 mt-0.5"
             >
               {(['all', 'milestones', 'mentions', 'none'] as NotifyLevel[]).map(n => (
-                <option key={n} value={n}>{NOTIFY_LABELS[n]?.[lang as 'he' | 'en']}</option>
+                <option key={n} value={n}>{notifyLabels[n]}</option>
               ))}
             </select>
           </div>

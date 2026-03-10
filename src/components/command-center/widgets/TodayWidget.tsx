@@ -13,6 +13,8 @@ interface EventItem {
   type: "meeting" | "deadline" | "reminder";
 }
 
+const LOCALE_MAP: Record<string, string> = { he: "he-IL", en: "en-US", ru: "ru-RU" };
+
 function getHebrewDate(): string {
   const days = ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"];
   const months = [
@@ -23,8 +25,10 @@ function getHebrewDate(): string {
   return `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
 }
 
-function getEnglishDate(): string {
-  return new Date().toLocaleDateString("en-US", {
+function getFormattedDate(language: string): string {
+  if (language === "he") return getHebrewDate();
+  const locale = LOCALE_MAP[language] || "en-US";
+  return new Date().toLocaleDateString(locale, {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -47,7 +51,7 @@ const typeColors = {
 export function TodayPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
+  const isRtl = language === "he";
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +66,7 @@ export function TodayPanel() {
       .catch(() => setLoading(false));
   }, []);
 
-  const dateStr = isHe ? getHebrewDate() : getEnglishDate();
+  const dateStr = getFormattedDate(language);
 
   return (
     <div className="space-y-4">
@@ -74,13 +78,11 @@ export function TodayPanel() {
       {loading ? (
         <div className="flex items-center justify-center gap-2 py-4 text-sm text-slate-500">
           <RefreshCw size={14} className="animate-spin" />
-          {isHe ? "טוען..." : "Loading..."}
+          {t.widgets.todayLoading}
         </div>
       ) : events.length === 0 ? (
         <div className="py-4 text-center text-sm text-slate-500">
-          {isHe
-            ? "אין אירועים להיום."
-            : "No events today."}
+          {t.widgets.todayNoEvents}
         </div>
       ) : (
         <div className="space-y-1.5">
@@ -118,7 +120,7 @@ export function TodayBarContent({ size }: { size: WidgetSize }) {
   if (size < 2) return null;
 
   const now = new Date();
-  const short = now.toLocaleDateString(language === "he" ? "he-IL" : "en-US", {
+  const short = now.toLocaleDateString(LOCALE_MAP[language] || "en-US", {
     weekday: "short",
     day: "numeric",
     month: "short",

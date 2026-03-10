@@ -44,19 +44,19 @@ const zones: ZoneCard[] = [
 export default function Home() {
   const { language, setLanguage } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
-  const Arrow = isHe ? ChevronLeft : ChevronRight;
+  const isRtl = language === "he";
+  const Arrow = isRtl ? ChevronLeft : ChevronRight;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0a] px-4">
       {/* Language toggle */}
       <button
         type="button"
-        onClick={() => setLanguage(isHe ? "en" : "he")}
+        onClick={() => setLanguage(isRtl ? "en" : "he")}
         className="fixed top-4 left-4 z-10 flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-slate-200"
       >
         <Globe size={13} />
-        {isHe ? "EN" : "עב"}
+        {isRtl ? "EN" : "עב"}
       </button>
 
       {/* Header */}
@@ -110,7 +110,7 @@ export default function Home() {
               <p className="mt-1 text-[11px] leading-relaxed text-slate-500">{desc}</p>
               <span className="mt-3 inline-flex items-center gap-1 text-[11px] text-slate-600 transition-colors group-hover:text-[var(--cc-accent-500)]">
                 <CheckCircle2 size={10} className="text-emerald-500" />
-                Active
+                {t.home.active}
                 <Arrow size={12} className="opacity-0 transition-opacity group-hover:opacity-100" />
               </span>
             </Link>

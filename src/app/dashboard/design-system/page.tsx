@@ -46,10 +46,12 @@ type TabId = "gallery" | "components" | "handbook" | "app-preview" | "library";
 function DesignCard({
   design,
   isHe,
+  td,
   onPreview,
 }: {
   design: DesignEntry;
   isHe: boolean;
+  td: Record<string, string>;
   onPreview: (d: DesignEntry) => void;
 }) {
   const [hovered, setHovered] = useState(false);
@@ -80,7 +82,7 @@ function DesignCard({
         >
           <span className="flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
             <Eye className="h-4 w-4" />
-            {isHe ? "תצוגה מקדימה" : "Preview"}
+            {td.previewLabel}
           </span>
         </div>
         <div className="absolute bottom-2 left-2 flex gap-1.5">
@@ -132,10 +134,12 @@ function DesignCard({
 function DesignPreview({
   design,
   isHe,
+  td,
   onClose,
 }: {
   design: DesignEntry;
   isHe: boolean;
+  td: Record<string, string>;
   onClose: () => void;
 }) {
   const title = isHe ? design.titleHe : design.title;
@@ -150,7 +154,7 @@ function DesignPreview({
             icon={isHe ? ArrowRight : ArrowLeft}
             onClick={onClose}
           >
-            {isHe ? "חזרה לגלריה" : "Back to Gallery"}
+            {td.backToGallery}
           </Button>
           <span className="h-4 w-px bg-slate-700" />
           <span className="text-sm font-medium text-slate-200">{title}</span>
@@ -162,7 +166,7 @@ function DesignPreview({
         <div className="flex items-center gap-2">
           <a href={design.route} target="_blank" rel="noopener noreferrer">
             <Button variant="ghost" size="sm" icon={ExternalLink}>
-              {isHe ? "פתח בחלון חדש" : "Open in new tab"}
+              {td.openNewTab}
             </Button>
           </a>
           <Button variant="ghost" size="sm" icon={X} onClick={onClose} />
@@ -459,9 +463,11 @@ const HANDBOOK_SECTIONS: HandbookSection[] = [
 
 function HandbookTab({
   isHe,
+  langKey,
   td,
 }: {
   isHe: boolean;
+  langKey: "he" | "en";
   td: Record<string, string>;
 }) {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(["registries"]));
@@ -506,7 +512,7 @@ function HandbookTab({
                   <div>
                     <span className="text-[12px] font-medium text-slate-200">{r.name}</span>
                     <p className="text-[11px] text-slate-500">
-                      {isHe ? r.descriptionHe : r.description}
+                      {langKey === "he" ? r.descriptionHe : r.description}
                     </p>
                     <span className="mt-0.5 block font-mono text-[10px] text-slate-600">
                       {r.file}
@@ -535,7 +541,7 @@ function HandbookTab({
             )}
             <BookOpen size={15} className="text-blue-400" />
             <span className="text-sm font-medium text-slate-200">
-              {isHe ? section.title.he : section.title.en}
+              {section.title[langKey]}
             </span>
           </button>
           {openSections.has(section.id) && (
@@ -544,7 +550,7 @@ function HandbookTab({
                 {section.content.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-[12px] text-slate-400">
                     <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-slate-600" />
-                    {isHe ? item.he : item.en}
+                    {item[langKey]}
                   </li>
                 ))}
               </ul>
@@ -569,7 +575,7 @@ type DevicePresetId = typeof DEVICE_PRESETS[number]["id"];
 
 // ─── App Preview Tab ────────────────────────────────────────────
 
-function AppPreviewTab({ isHe, td }: { isHe: boolean; td: Record<string, string> }) {
+function AppPreviewTab({ isHe, langKey, td }: { isHe: boolean; langKey: "he" | "en"; td: Record<string, string> }) {
   const [selectedDevice, setSelectedDevice] = useState<DevicePresetId>("iphone15pro");
   const [selectedPage, setSelectedPage] = useState("/dashboard/layers");
 
@@ -614,7 +620,7 @@ function AppPreviewTab({ isHe, td }: { isHe: boolean; td: Record<string, string>
               .filter((r) => r.visible && r.sidebarTab)
               .map((r) => (
                 <option key={r.id} value={r.path}>
-                  {isHe ? r.nameHe : r.name}
+                  {langKey === "he" ? r.nameHe : r.name}
                 </option>
               ))}
           </select>
@@ -631,7 +637,7 @@ function AppPreviewTab({ isHe, td }: { isHe: boolean; td: Record<string, string>
           className="ms-auto flex items-center gap-1 rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
         >
           <ExternalLink size={12} />
-          {isHe ? "פתח בחלון" : "Open in tab"}
+          {td.openInTab}
         </a>
       </div>
 
@@ -728,6 +734,8 @@ export default function DesignSystemPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const isHe = language === "he";
+  const isRtl = language === "he";
+  const langKey = language === "he" ? "he" as const : "en" as const;
   const td = t.designSystem;
 
   const [activeTab, setActiveTab] = useState<TabId>("gallery");
@@ -830,6 +838,7 @@ export default function DesignSystemPage() {
                     key={design.id}
                     design={design}
                     isHe={isHe}
+                    td={td}
                     onPreview={handlePreview}
                   />
                 ))}
@@ -937,17 +946,17 @@ export default function DesignSystemPage() {
 
         {/* Tab: Handbook */}
         {activeTab === "handbook" && (
-          <HandbookTab isHe={isHe} td={td} />
+          <HandbookTab isHe={isHe} langKey={langKey} td={td} />
         )}
 
         {/* Tab: App Preview */}
         {activeTab === "app-preview" && (
-          <AppPreviewTab isHe={isHe} td={td as Record<string, string>} />
+          <AppPreviewTab isHe={isHe} langKey={langKey} td={td as Record<string, string>} />
         )}
 
         {/* Tab: Library */}
         {activeTab === "library" && (
-          <LibraryTab isHe={isHe} td={td as Record<string, string>} />
+          <LibraryTab isHe={isHe} language={language} td={td as Record<string, string>} />
         )}
       </div>
 
@@ -956,6 +965,7 @@ export default function DesignSystemPage() {
         <DesignPreview
           design={previewDesign}
           isHe={isHe}
+          td={td}
           onClose={handleClose}
         />
       )}

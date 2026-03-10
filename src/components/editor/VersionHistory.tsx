@@ -25,8 +25,9 @@ export function VersionHistory({
 }: VersionHistoryProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
+  const isRtl = language === "he";
   const et = t.editor;
+  const localeMap = { he: "he-IL", en: "en-US", ru: "ru-RU" } as const;
 
   const [versions, setVersions] = useState<DocVersion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,8 +58,8 @@ export function VersionHistory({
     <div
       data-cc-id="editor.version-history"
       className="fixed inset-y-0 z-50 flex w-80 flex-col border-s border-slate-700 bg-slate-800 shadow-2xl"
-      style={{ [isHe ? "left" : "right"]: 0, top: 0 }}
-      dir={isHe ? "rtl" : "ltr"}
+      style={{ [isRtl ? "left" : "right"]: 0, top: 0 }}
+      dir={isRtl ? "rtl" : "ltr"}
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
@@ -77,7 +78,7 @@ export function VersionHistory({
       {/* Versions list */}
       <div className="flex-1 overflow-y-auto p-3">
         {loading && (
-          <p className="text-center text-sm text-slate-500 py-4">{isHe ? "טוען..." : "Loading..."}</p>
+          <p className="text-center text-sm text-slate-500 py-4">{t.common.loading}</p>
         )}
 
         {!loading && versions.length === 0 && (
@@ -108,7 +109,7 @@ export function VersionHistory({
                 {v.title}
               </div>
               <div className="mt-0.5 text-[10px] text-slate-600">
-                {new Date(v.created_at).toLocaleString(isHe ? "he-IL" : "en-US")}
+                {new Date(v.created_at).toLocaleString(localeMap[language])}
               </div>
             </div>
           ))}

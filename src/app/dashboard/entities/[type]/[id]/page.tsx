@@ -18,6 +18,7 @@ import { NoteActionBar } from '@/components/entities/NoteActionBar';
 import { StakeholderPanel } from '@/components/entities/StakeholderPanel';
 import { ActivityFeed } from '@/components/entities/ActivityFeed';
 import { TemplatePicker } from '@/components/entities/TemplatePicker';
+import { RelationPanel } from '@/components/entities/RelationPanel';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 import { SYSTEM_FIELDS } from '@/lib/entities/builtinFields';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
@@ -29,8 +30,9 @@ export default function EntityDetailPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const te = t.entities;
-  const isHe = language === 'he';
-  const lang = language === 'ru' ? 'ru' : isHe ? 'he' : 'en';
+  const isRtl = language === 'he';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
+  const LOCALE_MAP: Record<string, string> = { he: 'he-IL', en: 'en-US', ru: 'ru-RU' };
 
   const entityTypeSlug = params.type as string;
   const noteId = params.id as string;
@@ -115,7 +117,7 @@ export default function EntityDetailPage() {
   };
 
   const backHref = `/dashboard/entities/${entityTypeSlug}`;
-  const BackArrow = isHe ? ArrowRight : ArrowLeft;
+  const BackArrow = isRtl ? ArrowRight : ArrowLeft;
   const trackActivity = etInfo?.template_config?.track_activity ?? false;
 
   if (loading) {
@@ -143,7 +145,7 @@ export default function EntityDetailPage() {
     <div
       data-cc-id="entity-detail-page"
       className="max-w-6xl mx-auto px-4 py-6 space-y-6"
-      dir={isHe ? 'rtl' : 'ltr'}
+      dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-slate-400">
@@ -203,7 +205,7 @@ export default function EntityDetailPage() {
             if (raw == null || raw === '') {
               display = '—';
             } else if (sf.noteField === 'created_at' || sf.noteField === 'last_edited_at') {
-              display = new Date(raw as string).toLocaleDateString(isHe ? 'he-IL' : 'en-US', {
+              display = new Date(raw as string).toLocaleDateString(LOCALE_MAP[lang] ?? 'en-US', {
                 day: '2-digit', month: '2-digit', year: '2-digit',
               });
             } else {
@@ -238,6 +240,7 @@ export default function EntityDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <TemplatePicker noteId={noteId} />
         <StakeholderPanel noteId={noteId} />
+        <RelationPanel noteId={noteId} entityType={entityTypeSlug} language={language} />
         {trackActivity && (
           <ActivityFeed noteId={noteId} language={language} />
         )}

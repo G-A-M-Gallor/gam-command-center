@@ -36,32 +36,32 @@ const FIELD_TYPE_ICONS: Record<string, React.ElementType> = {
   relation: LinkIcon, formula: Hash,
 };
 
-const FIELD_TYPE_LABELS: Record<string, { he: string; en: string }> = {
-  text: { he: 'טקסט', en: 'Text' },
-  number: { he: 'מספר', en: 'Number' },
-  select: { he: 'בחירה', en: 'Select' },
-  'multi-select': { he: 'בחירה מרובה', en: 'Multi-select' },
-  date: { he: 'תאריך', en: 'Date' },
-  person: { he: 'אדם', en: 'Person' },
-  url: { he: 'קישור', en: 'URL' },
-  email: { he: 'אימייל', en: 'Email' },
-  phone: { he: 'טלפון', en: 'Phone' },
-  checkbox: { he: 'תיבת סימון', en: 'Checkbox' },
-  composite: { he: 'מורכב', en: 'Composite' },
-  relation: { he: 'קשר', en: 'Relation' },
-  formula: { he: 'נוסחה', en: 'Formula' },
+const FIELD_TYPE_LABELS: Record<string, { he: string; en: string; ru: string }> = {
+  text: { he: 'טקסט', en: 'Text', ru: 'Текст' },
+  number: { he: 'מספר', en: 'Number', ru: 'Число' },
+  select: { he: 'בחירה', en: 'Select', ru: 'Выбор' },
+  'multi-select': { he: 'בחירה מרובה', en: 'Multi-select', ru: 'Мультивыбор' },
+  date: { he: 'תאריך', en: 'Date', ru: 'Дата' },
+  person: { he: 'אדם', en: 'Person', ru: 'Контакт' },
+  url: { he: 'קישור', en: 'URL', ru: 'Ссылка' },
+  email: { he: 'אימייל', en: 'Email', ru: 'Email' },
+  phone: { he: 'טלפון', en: 'Phone', ru: 'Телефон' },
+  checkbox: { he: 'תיבת סימון', en: 'Checkbox', ru: 'Чекбокс' },
+  composite: { he: 'מורכב', en: 'Composite', ru: 'Составной' },
+  relation: { he: 'קשר', en: 'Relation', ru: 'Связь' },
+  formula: { he: 'נוסחה', en: 'Formula', ru: 'Формула' },
 };
 
 const CATEGORIES: FieldCategory[] = ['system', 'general', 'contact', 'business', 'project', 'hr', 'finance', 'construction'];
-const CATEGORY_LABELS: Record<string, { he: string; en: string }> = {
-  system: { he: 'מערכת', en: 'System' },
-  general: { he: 'כללי', en: 'General' },
-  contact: { he: 'יצירת קשר', en: 'Contact' },
-  business: { he: 'עסקי', en: 'Business' },
-  project: { he: 'פרויקט', en: 'Project' },
-  hr: { he: 'משאבי אנוש', en: 'HR' },
-  finance: { he: 'פיננסי', en: 'Finance' },
-  construction: { he: 'בנייה', en: 'Construction' },
+const CATEGORY_LABELS: Record<string, { he: string; en: string; ru: string }> = {
+  system: { he: 'מערכת', en: 'System', ru: 'Система' },
+  general: { he: 'כללי', en: 'General', ru: 'Общее' },
+  contact: { he: 'יצירת קשר', en: 'Contact', ru: 'Контакт' },
+  business: { he: 'עסקי', en: 'Business', ru: 'Бизнес' },
+  project: { he: 'פרויקט', en: 'Project', ru: 'Проект' },
+  hr: { he: 'משאבי אנוש', en: 'HR', ru: 'Кадры' },
+  finance: { he: 'פיננסי', en: 'Finance', ru: 'Финансы' },
+  construction: { he: 'בנייה', en: 'Construction', ru: 'Строительство' },
 };
 
 const EMPTY_LABEL: I18nLabel = { he: '', en: '', ru: '' };
@@ -109,7 +109,7 @@ function newFieldDefaults(): GlobalFieldInsert {
 
 type FieldRowProps = {
   field: GlobalField;
-  lang: 'he' | 'en';
+  lang: 'he' | 'en' | 'ru';
   te: Record<string, unknown>;
   usageMap: Record<string, string[]>;
   onEdit: (f: GlobalField) => void;
@@ -255,7 +255,7 @@ function FieldCard({
   field, lang, te, usageMap, onEdit, onDelete,
 }: {
   field: GlobalField;
-  lang: 'he' | 'en';
+  lang: 'he' | 'en' | 'ru';
   te: Record<string, unknown>;
   usageMap: Record<string, string[]>;
   onEdit: (f: GlobalField) => void;
@@ -394,7 +394,7 @@ function FieldCard({
 export default function FieldLibraryPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const te = t.entities;
 
   const [activeTab, setActiveTab] = useState<FieldTab>('library');
@@ -420,7 +420,7 @@ export default function FieldLibraryPage() {
   });
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
-  const lang = isHe ? 'he' : 'en';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const tips = (te as unknown as { tips: Record<string, string> }).tips ?? {};
 
   // DnD sensors
@@ -707,7 +707,7 @@ export default function FieldLibraryPage() {
   );
 
   return (
-    <div className="space-y-6" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="entityFields" />
 
       {/* Tab switcher: System vs Library */}
@@ -1006,7 +1006,7 @@ export default function FieldLibraryPage() {
       {/* Merge Modal */}
       {mergeSourceId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border border-white/[0.08] bg-slate-900 p-6 shadow-2xl" dir={isHe ? 'rtl' : 'ltr'}>
+          <div className="w-full max-w-md rounded-xl border border-white/[0.08] bg-slate-900 p-6 shadow-2xl" dir={isRtl ? 'rtl' : 'ltr'}>
             <h2 className="text-lg font-semibold text-slate-100 mb-2">{te.mergeField}</h2>
             <p className="text-xs text-amber-400 mb-4">{te.mergeWarning}</p>
             <div className="space-y-1 max-h-[50vh] overflow-y-auto">

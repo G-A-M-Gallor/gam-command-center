@@ -131,6 +131,31 @@ export const workManagerExecuteSchema = z.object({
 
 export type WorkManagerExecuteInput = z.infer<typeof workManagerExecuteSchema>;
 
+// ─── Entity CRUD ───────────────────────────────────────────
+
+export const entityCreateSchema = z.object({
+  title: z.string().min(1, "title is required").max(500, "title exceeds 500 character limit"),
+  meta: z.record(z.string(), z.unknown()).optional().default({}),
+});
+
+export type EntityCreateInput = z.infer<typeof entityCreateSchema>;
+
+export const entityUpdateSchema = z.object({
+  id: z.string().uuid("id must be a valid UUID").optional(),
+  title: z.string().min(1, "title is required").max(500, "title exceeds 500 character limit").optional(),
+  meta: z.record(z.string(), z.unknown()).optional(),
+  status: z.string().optional(),
+});
+
+export type EntityUpdateInput = z.infer<typeof entityUpdateSchema>;
+
+export const entityDeleteSchema = z.union([
+  z.object({ id: z.string().uuid("id must be a valid UUID") }),
+  z.object({ ids: z.array(z.string().uuid("each id must be a valid UUID")).min(1, "at least one id is required").max(100, "maximum 100 ids per request") }),
+]);
+
+export type EntityDeleteInput = z.infer<typeof entityDeleteSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

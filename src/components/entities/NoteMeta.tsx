@@ -130,10 +130,11 @@ function FieldEditor({
 
 // ─── Repeating Group Editor ──────────────────────────
 function GroupEditor({
-  group, groupFields, values, lang, onChange,
+  group, groupFields, values, lang, addRowLabel, onChange,
 }: {
   group: FieldGroup; groupFields: GlobalField[];
   values: Record<string, unknown>[]; lang: string;
+  addRowLabel: string;
   onChange: (vals: Record<string, unknown>[]) => void;
 }) {
   const [expanded, setExpanded] = useState(true);
@@ -192,7 +193,7 @@ function GroupEditor({
             onClick={addRow}
             className="text-[10px] text-purple-400 hover:text-purple-300"
           >
-            + {lang === 'he' ? 'הוסף שורה' : 'Add row'}
+            + {addRowLabel}
           </button>
         </div>
       )}
@@ -236,8 +237,8 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
   const { language } = useSettings();
   const { user, permissions } = useAuth();
   const t = getTranslations(language);
-  const isHe = language === 'he';
-  const lang = isHe ? 'he' : 'en';
+  const isRtl = language === 'he';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const te = t.entities;
 
   const [fields, setFields] = useState<GlobalField[]>([]);
@@ -359,7 +360,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
     <div
       data-cc-id="note-meta"
       className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden mb-4"
-      dir={isHe ? 'rtl' : 'ltr'}
+      dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Header */}
       <button
@@ -475,6 +476,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
               groupFields={allFields.filter(f => group.field_refs.includes(f.meta_key))}
               values={Array.isArray(meta[group.meta_key]) ? meta[group.meta_key] as Record<string, unknown>[] : []}
               lang={lang}
+              addRowLabel={te.addRow}
               onChange={vals => handleGroupChange(group.meta_key, vals)}
             />
           ))}

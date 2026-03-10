@@ -3,22 +3,25 @@
 import { useState, useEffect } from "react";
 import { Users, Circle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
+
+type LangKey = "he" | "en" | "ru";
 
 interface TeamMemberStatus {
   id: string;
   name: string;
-  role: { he: string; en: string };
+  role: Record<LangKey, string>;
   status: "online" | "busy" | "away" | "offline";
-  activity?: { he: string; en: string };
+  activity?: Record<LangKey, string>;
 }
 
 const DEMO_TEAM: TeamMemberStatus[] = [
-  { id: "1", name: "גל", role: { he: "מנהל פרויקטים", en: "Project Manager" }, status: "online", activity: { he: "עובד על vBrain.io", en: "Working on vBrain.io" } },
-  { id: "2", name: "חני", role: { he: "מנהלת תפעול", en: "Operations Manager" }, status: "online", activity: { he: "סקירת לקוחות", en: "Client review" } },
-  { id: "3", name: "יואב", role: { he: "מפתח", en: "Developer" }, status: "busy", activity: { he: "פגישה", en: "In a meeting" } },
-  { id: "4", name: "נועה", role: { he: "עיצוב", en: "Design" }, status: "away" },
-  { id: "5", name: "רון", role: { he: "מכירות", en: "Sales" }, status: "offline" },
+  { id: "1", name: "גל", role: { he: "מנהל פרויקטים", en: "Project Manager", ru: "Менеджер проектов" }, status: "online", activity: { he: "עובד על vBrain.io", en: "Working on vBrain.io", ru: "Работает над vBrain.io" } },
+  { id: "2", name: "חני", role: { he: "מנהלת תפעול", en: "Operations Manager", ru: "Операционный менеджер" }, status: "online", activity: { he: "סקירת לקוחות", en: "Client review", ru: "Обзор клиентов" } },
+  { id: "3", name: "יואב", role: { he: "מפתח", en: "Developer", ru: "Разработчик" }, status: "busy", activity: { he: "פגישה", en: "In a meeting", ru: "На встрече" } },
+  { id: "4", name: "נועה", role: { he: "עיצוב", en: "Design", ru: "Дизайн" }, status: "away" },
+  { id: "5", name: "רון", role: { he: "מכירות", en: "Sales", ru: "Продажи" }, status: "offline" },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -28,16 +31,16 @@ const STATUS_COLORS: Record<string, string> = {
   offline: "text-slate-600",
 };
 
-const STATUS_LABELS: Record<string, { he: string; en: string }> = {
-  online: { he: "מחובר", en: "Online" },
-  busy: { he: "עסוק", en: "Busy" },
-  away: { he: "לא זמין", en: "Away" },
-  offline: { he: "לא מחובר", en: "Offline" },
+const STATUS_LABELS: Record<string, Record<LangKey, string>> = {
+  online: { he: "מחובר", en: "Online", ru: "Онлайн" },
+  busy: { he: "עסוק", en: "Busy", ru: "Занят" },
+  away: { he: "לא זמין", en: "Away", ru: "Отошёл" },
+  offline: { he: "לא מחובר", en: "Offline", ru: "Оффлайн" },
 };
 
 export function TeamPanel() {
   const { language } = useSettings();
-  const isHe = language === "he";
+  const t = getTranslations(language);
   const [team, setTeam] = useState<TeamMemberStatus[]>([]);
 
   useEffect(() => {
@@ -51,10 +54,10 @@ export function TeamPanel() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          {isHe ? "צוות" : "Team"}
+          {t.widgets.teamTitle}
         </span>
         <span className="text-[10px] text-slate-500">
-          {onlineCount}/{team.length} {isHe ? "מחוברים" : "online"}
+          {onlineCount}/{team.length} {t.widgets.teamOnline}
         </span>
       </div>
 
@@ -78,17 +81,17 @@ export function TeamPanel() {
               <div className="flex items-center gap-1.5">
                 <span className="text-sm text-slate-200 truncate">{member.name}</span>
                 <span className="text-[10px] text-slate-600">
-                  {member.role[isHe ? "he" : "en"]}
+                  {member.role[language]}
                 </span>
               </div>
               {member.activity && (
                 <p className="text-[11px] text-slate-500 truncate">
-                  {member.activity[isHe ? "he" : "en"]}
+                  {member.activity[language]}
                 </p>
               )}
             </div>
             <span className={`text-[10px] ${STATUS_COLORS[member.status]}`}>
-              {STATUS_LABELS[member.status][isHe ? "he" : "en"]}
+              {STATUS_LABELS[member.status][language]}
             </span>
           </div>
         ))}
@@ -99,12 +102,13 @@ export function TeamPanel() {
 
 export function TeamBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
+  const t = getTranslations(language);
   if (size < 2) return null;
 
   const onlineCount = DEMO_TEAM.filter((m) => m.status === "online" || m.status === "busy").length;
   return (
     <span className="truncate text-xs text-slate-400">
-      {onlineCount} {language === "he" ? "מחוברים" : "online"}
+      {onlineCount} {t.widgets.teamBar}
     </span>
   );
 }

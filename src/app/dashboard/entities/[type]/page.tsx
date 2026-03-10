@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   Plus, Search, Filter, Table2, Kanban, List, Calendar as CalendarIcon,
   ArrowUpDown, SlidersHorizontal, ChevronDown, X,
-  GanttChart, Clock, Eye, EyeOff, Bookmark, Save, Trash2,
+  GanttChart, Clock, Eye, EyeOff, Bookmark, Save, Trash2, Upload,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
@@ -20,6 +20,8 @@ import { CalendarView } from '@/components/entities/views/CalendarView';
 import { GanttView } from '@/components/entities/views/GanttView';
 import { TimelineView } from '@/components/entities/views/TimelineView';
 import { EntityActionBar } from '@/components/entities/EntityActionBar';
+import { CsvImportModal } from '@/components/entities/CsvImportModal';
+import { BulkActionBar } from '@/components/entities/BulkActionBar';
 import { IconDisplay } from '@/components/ui/IconPicker';
 import { useToast } from '@/contexts/ToastContext';
 import type { EntityType, GlobalField, NoteRecord, ViewType, ViewFilter, ViewSort, FieldGroup, SavedView } from '@/lib/entities/types';
@@ -53,9 +55,9 @@ export default function EntityViewPage() {
 
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const te = t.entities;
-  const lang = isHe ? 'he' : 'en';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
 
   const [entityType, setEntityType] = useState<EntityType | null>(null);
   const [fields, setFields] = useState<GlobalField[]>([]);
@@ -72,6 +74,7 @@ export default function EntityViewPage() {
   const [showInactive, setShowInactive] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const [showCsvImport, setShowCsvImport] = useState(false);
 
   // Saved views
   const [savedViews, setSavedViews] = useState<SavedView[]>([]);
@@ -219,7 +222,7 @@ export default function EntityViewPage() {
       }
     }
     const note = await createNote(
-      isHe ? `${entityType.label.he} חדש` : `New ${entityType.label.en}`,
+      lang === 'he' ? `${entityType.label.he} חדש` : lang === 'ru' ? `Новый ${entityType.label.ru}` : `New ${entityType.label.en}`,
       entitySlug,
       defaultMeta,
     );
@@ -255,7 +258,7 @@ export default function EntityViewPage() {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
-    <div className="space-y-4" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="space-y-4" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-700/50 pb-4">
         <div className="flex items-center gap-3">
@@ -292,9 +295,18 @@ export default function EntityViewPage() {
           <button
             onClick={() => setShowInactive(s => !s)}
             className={`p-2 rounded-lg border transition-colors ${showInactive ? 'border-amber-500/40 text-amber-300 bg-amber-500/10' : 'border-white/[0.08] text-slate-500 hover:text-slate-300'}`}
-            title={showInactive ? (isHe ? 'הסתר לא פעילים' : 'Hide inactive') : (isHe ? 'הצג לא פעילים' : 'Show inactive')}
+            title={showInactive ? te.hideInactive : te.showInactive}
           >
             {showInactive ? <Eye size={15} /> : <EyeOff size={15} />}
+          </button>
+
+          <button
+            onClick={() => setShowCsvImport(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] px-3 py-2 text-sm text-slate-400 hover:bg-white/[0.04] transition-colors"
+            title={te.csvImport?.importCsv ?? 'Import CSV'}
+          >
+            <Upload size={14} />
+            CSV
           </button>
 
           <button
@@ -601,6 +613,29 @@ export default function EntityViewPage() {
           </button>
         </div>
       )}
+
+      {/* CSV Import Modal */}
+      <CsvImportModal
+        open={showCsvImport}
+        onClose={() => setShowCsvImport(false)}
+        entityType={entitySlug}
+        fields={fields}
+        language={language}
+        onImportComplete={() => {
+          setShowCsvImport(false);
+          loadNotes();
+        }}
+      />
+
+      {/* Bulk Action Bar — floating bottom toolbar */}
+      <BulkActionBar
+        selectedIds={selectedIds}
+        entityType={entitySlug}
+        fields={fields}
+        language={language}
+        onClearSelection={() => setSelectedIds(new Set())}
+        onRefresh={loadNotes}
+      />
     </div>
   );
 }

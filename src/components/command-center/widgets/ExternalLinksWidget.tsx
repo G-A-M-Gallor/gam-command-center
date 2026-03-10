@@ -8,6 +8,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 interface QuickLink {
@@ -43,7 +44,7 @@ function saveLinks(links: QuickLink[]) {
 
 export function ExternalLinksPanel() {
   const { language } = useSettings();
-  const isHe = language === "he";
+  const t = getTranslations(language);
 
   const [links, setLinks] = useState<QuickLink[]>(loadLinks);
   const [adding, setAdding] = useState(false);
@@ -122,7 +123,7 @@ export function ExternalLinksPanel() {
             <input
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
-              placeholder={isHe ? "שם" : "Label"}
+              placeholder={t.widgets.externalLinksLabelPlaceholder}
               className="flex-1 rounded bg-slate-700 px-2 py-1 text-sm text-slate-200 placeholder-slate-500 outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
               autoFocus
             />
@@ -141,7 +142,7 @@ export function ExternalLinksPanel() {
               onClick={() => setAdding(false)}
               className="rounded px-2 py-1 text-xs text-slate-400 hover:text-slate-200"
             >
-              {isHe ? "ביטול" : "Cancel"}
+              {t.widgets.externalLinksCancel}
             </button>
             <button
               type="button"
@@ -149,7 +150,7 @@ export function ExternalLinksPanel() {
               disabled={!newLabel.trim() || !newUrl.trim()}
               className="rounded bg-[var(--cc-accent-600)] px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40"
             >
-              {isHe ? "הוסף" : "Add"}
+              {t.widgets.externalLinksAdd}
             </button>
           </div>
         </div>
@@ -161,7 +162,7 @@ export function ExternalLinksPanel() {
             className="flex items-center gap-1.5 rounded-md border border-dashed border-slate-600 px-3 py-1.5 text-xs text-slate-500 transition-colors hover:border-slate-400 hover:text-slate-300"
           >
             <Plus size={12} />
-            {isHe ? "הוסף קישור" : "Add Link"}
+            {t.widgets.externalLinksAddLink}
           </button>
           {links.some((l) => l.id.startsWith("custom-")) && (
             <button
@@ -169,7 +170,7 @@ export function ExternalLinksPanel() {
               onClick={handleReset}
               className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors"
             >
-              {isHe ? "איפוס" : "Reset"}
+              {t.widgets.externalLinksReset}
             </button>
           )}
         </div>
@@ -180,10 +181,11 @@ export function ExternalLinksPanel() {
 
 export function ExternalLinksBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
+  const t = getTranslations(language);
   if (size < 2) return null;
   return (
     <span className="truncate text-xs text-slate-400">
-      {language === "he" ? "קיצורים" : "Links"}
+      {t.widgets.externalLinksBar}
     </span>
   );
 }

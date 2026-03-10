@@ -33,8 +33,9 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
   const router = useRouter();
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
+  const isRtl = language === "he";
   const et = t.editor;
+  const localeMap = { he: "he-IL", en: "en-US", ru: "ru-RU" } as const;
 
   const [docs, setDocs] = useState<DocRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +72,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
 
   const handleCreate = async () => {
     setCreating(true);
-    const doc = await createDocument(isHe ? "מסמך חדש" : "New Document");
+    const doc = await createDocument(et.newDocument);
     if (doc) {
       openDoc(doc.id);
     }
@@ -141,7 +142,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleDateString(isHe ? "he-IL" : "en-US", {
+      return new Date(dateStr).toLocaleDateString(localeMap[language], {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -169,7 +170,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
     });
 
   return (
-    <div dir={isHe ? "rtl" : "ltr"} className="mx-auto max-w-4xl px-6 py-8" data-cc-id="editor.doclist.root">
+    <div dir={isRtl ? "rtl" : "ltr"} className="mx-auto max-w-4xl px-6 py-8" data-cc-id="editor.doclist.root">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -250,7 +251,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
       {/* Loading */}
       {loading && (
         <p className="py-8 text-center text-sm text-slate-500">
-          {isHe ? "⏳ טוען מסמכים..." : "⏳ Loading documents..."}
+          {"⏳ "}{et.loadingDocuments}
         </p>
       )}
 
@@ -260,8 +261,8 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
           <div className="text-2xl mb-2">📝</div>
           <p className="text-sm text-slate-500">
             {search
-              ? (isHe ? "לא נמצאו תוצאות" : "No results found")
-              : (isHe ? "אין מסמכים עדיין" : "No documents yet")}
+              ? t.common.noResults
+              : et.noDocumentsYet}
           </p>
         </div>
       )}
@@ -278,7 +279,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
               <FileText size={16} className="shrink-0 text-slate-500" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 truncate text-sm font-medium text-slate-200">
-                  {doc.title || (isHe ? "ללא כותרת" : "Untitled")}
+                  {doc.title || et.untitled}
                   {sharedDocIds.has(doc.id) && <Link2 size={11} className="shrink-0 text-purple-400" />}
                 </div>
                 <div className="text-[11px] text-slate-500">
@@ -320,7 +321,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
                 {sharedDocIds.has(doc.id) && <Link2 size={12} className="text-purple-400" />}
               </div>
               <div className="truncate text-sm font-medium text-slate-200">
-                {doc.title || (isHe ? "ללא כותרת" : "Untitled")}
+                {doc.title || et.untitled}
               </div>
               <div className="mt-1 text-[11px] text-slate-500">
                 {formatDate(doc.last_edited_at)}

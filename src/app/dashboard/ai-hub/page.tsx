@@ -988,7 +988,7 @@ export default function AIHubPage() {
 
                             const data = await res.json();
                             if (data.success) {
-                              console.log("[WorkManager] Action executed:", data.action_type, data.result);
+                              // action executed successfully
                             } else {
                               console.error("[WorkManager] Action failed:", data.error);
                             }
@@ -997,7 +997,7 @@ export default function AIHubPage() {
                           }
                         }}
                         onCancel={() => {
-                          console.log("[WorkManager] Action cancelled:", action.type);
+                          // action cancelled by user
                           setDismissedActions((prev) => new Set(prev).add(`${msg.timestamp}-${i}`));
                         }}
                       />

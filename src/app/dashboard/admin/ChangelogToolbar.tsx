@@ -26,17 +26,13 @@ const WORKFLOW_COLORS: Record<WorkflowStatus, { color: string; bg: string }> = {
   cancelled:  { color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
 };
 
-const WORKFLOW_LABELS_HE: Record<WorkflowStatus, string> = {
-  inbox: 'נכנס', wishlist: 'משאלות', todo: 'לביצוע', next: 'הבא',
-  inProgress: 'בביצוע', hold: 'המתנה', stuck: 'תקוע', freeze: 'קפוא',
-  complete: 'הושלם', cancelled: 'בוטל',
-};
-
-const WORKFLOW_LABELS_EN: Record<WorkflowStatus, string> = {
-  inbox: 'Inbox', wishlist: 'Wishlist', todo: 'To Do', next: 'Next',
-  inProgress: 'In Progress', hold: 'Hold', stuck: 'Stuck', freeze: 'Frozen',
-  complete: 'Complete', cancelled: 'Cancelled',
-};
+function getWfLabels(ta: ReturnType<typeof getTranslations>['admin']): Record<WorkflowStatus, string> {
+  return {
+    inbox: ta.wfLabelInbox, wishlist: ta.wfLabelWishlist, todo: ta.wfLabelTodo, next: ta.wfLabelNext,
+    inProgress: ta.wfLabelInProgress, hold: ta.wfLabelHold, stuck: ta.wfLabelStuck, freeze: ta.wfLabelFreeze,
+    complete: ta.wfLabelComplete, cancelled: ta.wfLabelCancelled,
+  };
+}
 
 interface ChangelogToolbarProps {
   sortBy: SortField;
@@ -63,7 +59,7 @@ export default function ChangelogToolbar({
   isHe, ta,
 }: ChangelogToolbarProps) {
   const dir = isHe ? 'rtl' : 'ltr';
-  const wfLabels = isHe ? WORKFLOW_LABELS_HE : WORKFLOW_LABELS_EN;
+  const wfLabels = getWfLabels(ta);
 
   const sortOptions: { field: SortField; label: string }[] = [
     { field: 'date', label: ta.sortDate },

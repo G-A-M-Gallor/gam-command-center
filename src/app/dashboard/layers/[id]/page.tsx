@@ -39,7 +39,8 @@ export default function ProjectDetailPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const pd = t.projectDetail;
-  const isHe = language === "he";
+  const isRtl = language === "he";
+  const localeMap: Record<string, string> = { he: "he-IL", en: "en-US", ru: "ru-RU" };
 
   const [project, setProject] = useState<Project | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -105,7 +106,7 @@ export default function ProjectDetailPage() {
           onClick={() => router.push("/dashboard/layers")}
           className="flex items-center gap-2 rounded-lg bg-slate-700/50 px-4 py-2 text-sm text-slate-300 hover:bg-slate-700"
         >
-          {isHe ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
+          {isRtl ? <ArrowRight size={16} /> : <ArrowLeft size={16} />}
           {pd.backToLayers}
         </button>
       </div>
@@ -138,7 +139,7 @@ export default function ProjectDetailPage() {
           onClick={() => router.push("/dashboard/layers")}
           className="flex items-center gap-1.5 rounded-lg bg-slate-800/60 px-3 py-1.5 text-sm text-slate-400 transition-colors hover:text-slate-200"
         >
-          {isHe ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+          {isRtl ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
           {pd.layers}
         </button>
         <div className="h-4 w-px bg-slate-700" />
@@ -204,7 +205,7 @@ export default function ProjectDetailPage() {
                 >
                   <span className="truncate text-sm text-slate-300">{doc.title}</span>
                   <span className="shrink-0 text-[10px] text-slate-600">
-                    {new Date(doc.updated_at).toLocaleDateString(isHe ? "he-IL" : "en-US")}
+                    {new Date(doc.updated_at).toLocaleDateString(localeMap[language] || "en-US")}
                   </span>
                 </button>
               ))}

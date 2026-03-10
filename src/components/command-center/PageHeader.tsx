@@ -27,7 +27,8 @@ type PageKey =
   | "admin"
   | "entities"
   | "entityFields"
-  | "entityTypes";
+  | "entityTypes"
+  | "wiki";
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
@@ -45,6 +46,7 @@ const pageRoutes: Record<PageKey, string> = {
   settings: "/dashboard/settings",
   automations: "/dashboard/automations",
   admin: "/dashboard/admin",
+  wiki: "/dashboard/wiki",
 };
 
 interface PageHeaderProps {

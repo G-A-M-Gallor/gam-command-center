@@ -37,7 +37,7 @@ export function NoteActionBar({
   note, entityType, templateConfig, language, fields, onRefresh,
 }: Props) {
   const t = getTranslations(language as Language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const { canPerformAction } = useAuth();
   const [confirming, setConfirming] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -72,7 +72,7 @@ export function NoteActionBar({
     <div
       data-cc-id="note-action-bar"
       className="flex items-center gap-2 flex-wrap"
-      dir={isHe ? 'rtl' : 'ltr'}
+      dir={isRtl ? 'rtl' : 'ltr'}
     >
       {actions.map(action => {
         const Icon = ICON_MAP[action.icon] || Download;

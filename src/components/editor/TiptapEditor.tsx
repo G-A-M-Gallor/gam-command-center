@@ -20,7 +20,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { JSONContent } from '@tiptap/react';
 import { useDebouncedCallback } from 'use-debounce';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettings, type Language } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 
 import { SlashCommands } from './extensions/SlashCommands';
@@ -43,33 +43,35 @@ const DEFAULT_CONTENT: JSONContent = {
   content: [{ type: 'paragraph' }],
 };
 
-// ─── Per-block Placeholder Config ────────────────────
-const PLACEHOLDER_MAP: Record<string, string | ((node: any) => string)> = {
-  paragraph: 'הקלד / לתפריט בלוקים...',
-  heading: (node: any) => {
-    const level = node.attrs?.level || 1;
-    const labels: Record<number, string> = {
-      1: 'כותרת ראשית',
-      2: 'כותרת משנית',
-      3: 'כותרת קטנה',
-    };
-    return labels[level] || 'כותרת';
-  },
-  bulletList: 'פריט ברשימה',
-  orderedList: 'פריט ברשימה',
-  taskList: 'משימה',
-  blockquote: 'ציטוט...',
-  codeBlock: '// כתוב קוד כאן...',
-  detailsSummary: 'כותרת מתקפלת...',
-  callout: 'כתוב כאן...',
-};
+// ─── Per-block Placeholder Config (language-aware) ───
+function getPlaceholderMap(et: Record<string, string>): Record<string, string | ((node: any) => string)> {
+  return {
+    paragraph: et.placeholderSlashMenu,
+    heading: (node: any) => {
+      const level = node.attrs?.level || 1;
+      const labels: Record<number, string> = {
+        1: et.placeholderHeading1,
+        2: et.placeholderHeading2,
+        3: et.placeholderHeading3,
+      };
+      return labels[level] || et.placeholderHeading;
+    },
+    bulletList: et.placeholderListItem,
+    orderedList: et.placeholderListItem,
+    taskList: et.placeholderTask,
+    blockquote: et.placeholderBlockquote,
+    codeBlock: et.placeholderCode,
+    detailsSummary: et.placeholderToggle,
+    callout: et.placeholderCallout,
+  };
+}
 
 // ─── Component ───────────────────────────────────────
 export function TiptapEditor({
   content,
   onChange,
   onSave,
-  placeholder = 'הקלד / לתפריט בלוקים...',
+  placeholder,
   editable = true,
   autoFocus = false,
   className = '',
@@ -80,8 +82,9 @@ export function TiptapEditor({
 }: TiptapEditorProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
   const et = t.editor;
+  const placeholderMap = useMemo(() => getPlaceholderMap(et), [et]);
+  const defaultPlaceholder = et.placeholderSlashMenu;
   // Track internal changes to prevent content sync from resetting the editor
   const isInternalChange = useRef(false);
 
@@ -100,10 +103,10 @@ export function TiptapEditor({
       Placeholder.configure({
         placeholder: ({ node }) => {
           const type = node.type.name;
-          const entry = PLACEHOLDER_MAP[type];
+          const entry = placeholderMap[type];
           if (typeof entry === 'function') return entry(node);
           if (typeof entry === 'string') return entry;
-          return placeholder;
+          return placeholder || defaultPlaceholder;
         },
         emptyEditorClass: 'gam-editor--empty',
         emptyNodeClass: 'gam-editor__node--empty',
@@ -223,7 +226,7 @@ export function TiptapEditor({
       {editable && <BlockHandle editor={editor} />}
       {editable && <FloatingToolbar editor={editor} />}
       <EditorContent editor={editor} />
-      <StatusBar editor={editor} saveStatus={saveStatus} lastSavedAt={lastSavedAt} isHe={isHe} et={et} onConflictReload={onConflictReload} />
+      <StatusBar editor={editor} saveStatus={saveStatus} lastSavedAt={lastSavedAt} language={language} et={et} onConflictReload={onConflictReload} />
     </div>
   );
 }
@@ -233,14 +236,14 @@ function StatusBar({
   editor,
   saveStatus,
   lastSavedAt,
-  isHe,
+  language,
   et,
   onConflictReload,
 }: {
   editor: ReturnType<typeof useEditor>;
   saveStatus: string;
   lastSavedAt?: Date;
-  isHe: boolean;
+  language: Language;
   et: Record<string, string>;
   onConflictReload?: () => void;
 }) {
@@ -252,33 +255,33 @@ function StatusBar({
   const relativeTime = useMemo(() => {
     if (!lastSavedAt) return '';
     const diff = Math.round((Date.now() - lastSavedAt.getTime()) / 1000);
-    if (diff < 10) return isHe ? 'עכשיו' : 'just now';
-    if (diff < 60) return isHe ? `לפני ${diff} שנ'` : `${diff}s ago`;
+    if (diff < 10) return et.timeJustNow;
+    if (diff < 60) return et.timeSecondsAgo.replace('{{n}}', String(diff));
     const mins = Math.round(diff / 60);
-    if (mins < 60) return isHe ? `לפני ${mins} דק'` : `${mins}m ago`;
+    if (mins < 60) return et.timeMinutesAgo.replace('{{n}}', String(mins));
     const hrs = Math.round(mins / 60);
-    return isHe ? `לפני ${hrs} שע'` : `${hrs}h ago`;
-  }, [lastSavedAt, isHe]);
+    return et.timeHoursAgo.replace('{{n}}', String(hrs));
+  }, [lastSavedAt, et]);
 
   return (
     <div className="gam-editor-statusbar">
       <span className="gam-editor-statusbar__save">
-        {saveStatus === 'saving' && <span className="text-blue-400">{isHe ? 'שומר...' : 'Saving...'}</span>}
-        {saveStatus === 'saved' && <span className="text-emerald-400">{isHe ? '✓ נשמר' : '✓ Saved'}</span>}
-        {saveStatus === 'retrying' && <span className="text-amber-400">{isHe ? 'מנסה שוב...' : 'Retrying...'}</span>}
-        {saveStatus === 'error' && <span className="text-red-400">{isHe ? '⚠ שגיאה בשמירה' : '⚠ Save error'}</span>}
+        {saveStatus === 'saving' && <span className="text-blue-400">{et.saving}</span>}
+        {saveStatus === 'saved' && <span className="text-emerald-400">{"✓ "}{et.saved}</span>}
+        {saveStatus === 'retrying' && <span className="text-amber-400">{et.retrying}</span>}
+        {saveStatus === 'error' && <span className="text-red-400">{"⚠ "}{et.saveError}</span>}
         {saveStatus === 'conflict' && (
           <span className="flex items-center gap-2 text-amber-400">
-            <span>{isHe ? '⚠ המסמך עודכן בטאב אחר' : '⚠ Document updated in another tab'}</span>
+            <span>{"⚠ "}{et.conflictMessage}</span>
             <button
               onClick={() => onConflictReload ? onConflictReload() : window.location.reload()}
               className="rounded bg-amber-500/20 px-2 py-0.5 text-[11px] font-medium text-amber-300 hover:bg-amber-500/30 transition-colors"
             >
-              {isHe ? 'טען מחדש' : 'Reload'}
+              {et.reload}
             </button>
           </span>
         )}
-        {saveStatus === 'offline' && <span className="text-orange-400">{isHe ? '☁ אופליין — נשמר מקומית' : '☁ Offline — saved locally'}</span>}
+        {saveStatus === 'offline' && <span className="text-orange-400">{"☁ "}{et.offlineSavedLocally}</span>}
         {saveStatus === 'idle' && relativeTime && (
           <span className="text-slate-500">{et.lastSaved}: {relativeTime}</span>
         )}
@@ -288,7 +291,7 @@ function StatusBar({
         {readingTime > 0 && ` · ${readingTime} ${et.minRead}`}
       </span>
       <span className="gam-editor-statusbar__hint">
-        <kbd>/</kbd> {isHe ? 'תפריט' : 'menu'} · <kbd>{typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl'}+S</kbd>
+        <kbd>/</kbd> {et.menu} · <kbd>{typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘' : 'Ctrl'}+S</kbd>
       </span>
     </div>
   );

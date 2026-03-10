@@ -31,7 +31,7 @@ interface Props {
 export function TemplateEditor({ config, fieldRefs, fields, language, onChange }: Props) {
   const c = config ?? defaultTemplateConfig();
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
 
   const t = {
     he: {
@@ -226,7 +226,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
   );
 
   return (
-    <div className="space-y-2" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="space-y-2" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Available Views */}
       <PanelToggle id="views" label={t.availableViews} />
       {openPanel === 'views' && (

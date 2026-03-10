@@ -244,6 +244,19 @@ export const routes: RouteEntry[] = [
     contexts: ['SettingsContext'], supabaseTables: ['vb_records', 'note_relations', 'note_stakeholders', 'note_activity_log'], visible: false, sidebarTab: false,
     connectedTo: ['entity-view', 'entity-fields', 'entity-types'],
   },
+  {
+    id: 'wiki', path: '/dashboard/wiki', name: 'Wiki', nameHe: 'ויקי', icon: BookOpen,
+    phase: 2, status: 'active', version: '0.1.0', addedDate: '2026-03-10',
+    descriptionHe: 'בסיס ידע עסקי — מאגר שאלות ותשובות שה-AI לומד ממנו להכיר את צרכי העסק. חיפוש, סינון לפי קטגוריה, עריכה inline.',
+    descriptionEn: 'Business knowledge base — Q&A repository the AI learns from to understand business needs. Search, category filter, inline editing.',
+    components: [
+      { id: 'wiki-list', name: 'WikiListPage', file: 'app/dashboard/wiki/page.tsx', status: 'active' },
+      { id: 'wiki-detail', name: 'WikiDetailPage', file: 'app/dashboard/wiki/[id]/page.tsx', status: 'active' },
+      { id: 'wiki-new', name: 'WikiNewPage', file: 'app/dashboard/wiki/new/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['wiki_entries'], visible: true, sidebarTab: true,
+    connectedTo: ['ai-hub'],
+  },
 ];
 
 export const standalonePages: RouteEntry[] = [
@@ -468,6 +481,8 @@ export const CHANGELOG_CHECKLISTS: Record<string, DevChecklist> = {
   'bulk-field-update-permissions': makeChecklist(false, true, true, true, true),
   // ── Work Manager ──
   'work-manager':                makeChecklist(false, true, true, true, true),
+  // ── Wiki ──
+  'wiki':                        makeChecklist(false, true, true, true, true),
 };
 
 export function getChecklistScore(checklist?: DevChecklist): { done: number; total: number; pct: number } {
@@ -2834,5 +2849,30 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Adds an operational AI mode that can understand work context, suggest actions, and present structured previews before execution. Unlike chat/analyze/write/decompose modes that produce text, Work Manager bridges AI reasoning with dashboard actions — previewing entity updates, status changes, and task assignments before committing them.',
     purposeHe: 'מוסיף מצב AI תפעולי שיכול להבין הקשר עבודה, להציע פעולות ולהציג תצוגות מקדימות מובנות לפני ביצוע. בניגוד למצבי צ׳אט/ניתוח/כתיבה/פירוק שמייצרים טקסט, מנהל העבודה מגשר בין חשיבה AI לפעולות דשבורד — מציג תצוגה מקדימה של עדכוני ישויות, שינויי סטטוס והקצאות משימות לפני שמירתם.',
     connectedTo: ['AI Hub', 'Anthropic API', 'Supabase (budget)'],
+  },
+  {
+    id: 'wiki',
+    feature: 'Wiki — Business Knowledge Base',
+    featureHe: 'ויקי — בסיס ידע עסקי',
+    status: 'not-verified',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'inProgress',
+    date: '2026-03-10',
+    phase: 2,
+    files: [
+      'src/app/dashboard/wiki/page.tsx',
+      'src/app/dashboard/wiki/[id]/page.tsx',
+      'src/app/dashboard/wiki/new/page.tsx',
+      'src/lib/i18n.ts',
+      'src/components/command-center/Sidebar.tsx',
+      'src/components/command-center/PageHeader.tsx',
+      'src/app/dashboard/admin/data.ts',
+    ],
+    route: '/dashboard/wiki',
+    notes: 'Business wiki with list view (search + category filter), detail/edit page (auto-save on blur), and new entry page. Q&A pairs editor for AI training context. Full i18n (he/en/ru), RTL, dark theme.',
+    notesHe: 'ויקי עסקי עם תצוגת רשימה (חיפוש + סינון לפי קטגוריה), דף עריכה (שמירה אוטומטית), ודף יצירת ערך חדש. עורך שאלות ותשובות לאימון AI. i18n מלא (עברית/אנגלית/רוסית), RTL, ערכת נושא כהה.',
+    purpose: 'Provides a structured knowledge base that the AI assistant can learn from to better understand business needs. Wiki entries with Q&A pairs serve as training context, bridging business domain knowledge with AI capabilities.',
+    purposeHe: 'מספק בסיס ידע מובנה שהעוזר ה-AI לומד ממנו להכיר טוב יותר את צרכי העסק. ערכי ויקי עם זוגות שאלה-תשובה משמשים כהקשר אימון, מגשרים בין ידע תחום עסקי ליכולות AI.',
+    connectedTo: ['AI Hub', 'Supabase'],
   },
 ];

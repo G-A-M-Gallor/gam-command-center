@@ -365,6 +365,7 @@ export function TemplateGallery({
   const { language } = useSettings();
   const t = getTranslations(language);
   const isHe = language === "he";
+  const isRtl = language === "he";
   const et = t.editor;
 
   const [customTemplates, setCustomTemplates] = useState<DocTemplate[]>([]);
@@ -453,7 +454,7 @@ export function TemplateGallery({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div
         className="max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-700 bg-slate-800 shadow-2xl"
-        dir={isHe ? "rtl" : "ltr"}
+        dir={isRtl ? "rtl" : "ltr"}
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-700 bg-slate-800 px-5 py-3">
@@ -482,9 +483,13 @@ export function TemplateGallery({
           {categories.map((cat) => {
             const catTemplates = allTemplates.filter((t) => t.category === cat);
             const CatIcon = CATEGORY_ICONS[cat] || FileText;
-            const catLabel = isHe
-              ? { management: "ניהול", development: "פיתוח", strategy: "אסטרטגיה", general: "כללי" }[cat] || cat
-              : cat.charAt(0).toUpperCase() + cat.slice(1);
+            const categoryLabels: Record<string, string> = {
+              management: et.categoryManagement,
+              development: et.categoryDevelopment,
+              strategy: et.categoryStrategy,
+              general: et.categoryGeneral,
+            };
+            const catLabel = categoryLabels[cat] || cat.charAt(0).toUpperCase() + cat.slice(1);
 
             return (
               <div key={cat}>

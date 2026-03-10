@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Circle, Star } from 'lucide-react';
+import { getTranslations } from '@/lib/i18n';
 import type { NoteRecord, GlobalField, I18nLabel, TemplateConfig } from '@/lib/entities/types';
 
 interface Props {
@@ -40,9 +41,12 @@ interface TimelineGroup {
 }
 
 export function TimelineView({ notes, fields, language, timelineConfig }: Props) {
+  const t = getTranslations(language as 'he' | 'en' | 'ru');
+  const te = t.entities;
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
-  const isHe = language === 'he';
-  const locale = isHe ? 'he-IL' : lang === 'ru' ? 'ru-RU' : 'en-US';
+  const isRtl = language === 'he';
+  const LOCALE_MAP: Record<string, string> = { he: 'he-IL', en: 'en-US', ru: 'ru-RU' };
+  const locale = LOCALE_MAP[lang] ?? 'en-US';
 
   const dateField = timelineConfig?.date_field ?? 'due_date';
   const milestoneStatuses = timelineConfig?.milestone_statuses ?? [];
@@ -93,13 +97,13 @@ export function TimelineView({ notes, fields, language, timelineConfig }: Props)
   if (groups.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-sm text-slate-500">
-        {isHe ? 'אין נתונים להצגה בציר הזמן' : 'No data for timeline view'}
+        {te.noTimelineDataDisplay}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       {groups.map(group => (
         <div key={group.label}>
           {/* Month header */}

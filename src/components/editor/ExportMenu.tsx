@@ -57,8 +57,8 @@ export function ExportMenu({ content, title }: ExportMenuProps) {
           break;
         }
       }
-    } catch {
-      // Silent fail on export
+    } catch (err) {
+      console.error("[ExportMenu] Export failed:", err);
     }
     setExporting(null);
     setOpen(false);

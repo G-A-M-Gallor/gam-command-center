@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getTranslations } from '@/lib/i18n';
 import type { NoteRecord, GlobalField, I18nLabel } from '@/lib/entities/types';
 
 interface Props {
@@ -11,16 +12,24 @@ interface Props {
   entityType?: string;
 }
 
-const DAYS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
-const DAYS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS_HE = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
-const MONTHS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const DAYS: Record<string, string[]> = {
+  he: ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'],
+  en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+  ru: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+};
+const MONTHS: Record<string, string[]> = {
+  he: ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  ru: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+};
 
 export function CalendarView({ notes, fields, language, entityType }: Props) {
-  const isHe = language === 'he';
-  const lang = isHe ? 'he' : 'en';
-  const days = isHe ? DAYS_HE : DAYS_EN;
-  const months = isHe ? MONTHS_HE : MONTHS_EN;
+  const t = getTranslations(language as 'he' | 'en' | 'ru');
+  const te = t.entities;
+  const isRtl = language === 'he';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
+  const days = DAYS[lang] ?? DAYS.en;
+  const months = MONTHS[lang] ?? MONTHS.en;
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const year = currentDate.getFullYear();
@@ -64,13 +73,13 @@ export function CalendarView({ notes, fields, language, entityType }: Props) {
   if (!dateField) {
     return (
       <div className="py-16 text-center text-sm text-slate-500">
-        {isHe ? 'אין שדה תאריך מוגדר בישות זו' : 'No date field defined for this entity'}
+        {te.noDateFieldDefined}
       </div>
     );
   }
 
   return (
-    <div dir={isHe ? 'rtl' : 'ltr'}>
+    <div dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Month nav */}
       <div className="flex items-center justify-between mb-4">
         <button onClick={prevMonth} className="rounded p-1.5 text-slate-400 hover:bg-white/[0.06]">

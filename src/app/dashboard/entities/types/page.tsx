@@ -37,9 +37,9 @@ function newTypeDefaults(): EntityTypeInsert {
 export default function EntityTypesPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const te = t.entities;
-  const lang = isHe ? 'he' : 'en';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
 
   const [types, setTypes] = useState<EntityType[]>([]);
   const [connections, setConnections] = useState<EntityConnection[]>([]);
@@ -184,7 +184,7 @@ export default function EntityTypesPage() {
   };
 
   return (
-    <div className="space-y-6" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="entityTypes" />
 
       {/* Toolbar */}
@@ -345,7 +345,7 @@ export default function EntityTypesPage() {
       {/* Create/Edit Modal */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-xl border border-white/[0.08] bg-slate-900 p-6 shadow-2xl max-h-[85vh] overflow-y-auto" dir={isHe ? 'rtl' : 'ltr'}>
+          <div className="w-full max-w-lg rounded-xl border border-white/[0.08] bg-slate-900 p-6 shadow-2xl max-h-[85vh] overflow-y-auto" dir={isRtl ? 'rtl' : 'ltr'}>
             <h2 className="text-lg font-semibold text-slate-100 mb-4">
               {editingId ? te.editType : te.newType}
             </h2>
@@ -360,7 +360,7 @@ export default function EntityTypesPage() {
                     : 'text-slate-400 hover:text-slate-200 border border-transparent'
                 }`}
               >
-                {isHe ? 'כללי' : language === 'ru' ? 'Общее' : 'General'}
+                {te.tabGeneralType}
               </button>
               <button
                 onClick={() => setEditTab('template')}
@@ -370,7 +370,7 @@ export default function EntityTypesPage() {
                     : 'text-slate-400 hover:text-slate-200 border border-transparent'
                 }`}
               >
-                {isHe ? 'תבנית' : language === 'ru' ? 'Шаблон' : 'Template'}
+                {te.tabTemplateType}
               </button>
             </div>
 

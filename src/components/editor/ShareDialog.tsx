@@ -26,8 +26,9 @@ interface ShareDialogProps {
 export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
+  const isRtl = language === "he";
   const et = t.editor;
+  const localeMap = { he: "he-IL", en: "en-US", ru: "ru-RU" } as const;
 
   const [share, setShare] = useState<DocShare | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,7 +73,7 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
       <div
         data-cc-id="editor.share-dialog"
         className="w-full max-w-md rounded-xl border border-slate-700 bg-slate-800 shadow-2xl"
-        dir={isHe ? "rtl" : "ltr"}
+        dir={isRtl ? "rtl" : "ltr"}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-700 px-5 py-3">
@@ -138,7 +139,7 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
               </div>
               {share.expires_at && (
                 <p className="text-[11px] text-slate-500">
-                  {et.shareExpiry}: {new Date(share.expires_at).toLocaleDateString(isHe ? "he-IL" : "en-US")}
+                  {et.shareExpiry}: {new Date(share.expires_at).toLocaleDateString(localeMap[language])}
                 </p>
               )}
               <button

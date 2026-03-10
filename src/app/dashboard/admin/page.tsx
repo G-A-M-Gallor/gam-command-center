@@ -85,8 +85,8 @@ export default function AdminDevLogPage() {
           <div className="flex items-center gap-3">
             <ClipboardCheck size={18} className="text-purple-400" />
             <div>
-              <span className="text-sm font-medium text-slate-200">{isHe ? 'ביקורת קוד — סקירה רב-כובעית' : 'Code Audit — Multi-Hat Review'}</span>
-              <p className="text-[11px] text-slate-500">{isHe ? '4 כובעים · תוכנית · מציאות · איכות · שלמות' : '4 hats · plan · reality · quality · integrity'}</p>
+              <span className="text-sm font-medium text-slate-200">{ta.auditLinkTitle}</span>
+              <p className="text-[11px] text-slate-500">{ta.auditLinkSubtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -136,8 +136,8 @@ export default function AdminDevLogPage() {
 
         {/* Tab Content */}
         {activeSection === 'routes' && <RoutesSection isHe={isHe} ta={ta} />}
-        {activeSection === 'widgets' && <WidgetsSection isHe={isHe} />}
-        {activeSection === 'contexts' && <ContextsSection isHe={isHe} />}
+        {activeSection === 'widgets' && <WidgetsSection isHe={isHe} ta={ta} />}
+        {activeSection === 'contexts' && <ContextsSection isHe={isHe} ta={ta} />}
         {activeSection === 'changelog' && <ChangelogTab isHe={isHe} ta={ta} />}
         {activeSection === 'storymap' && <StoryMapTab isHe={isHe} ta={ta} />}
 
@@ -149,9 +149,9 @@ export default function AdminDevLogPage() {
               { layer: 'UI', tool: 'Next.js 15', color: '#60a5fa' },
               { layer: 'DB + API', tool: 'Supabase', color: '#34d399' },
               { layer: 'SOT', tool: 'Origami CRM', color: '#f472b6' },
-              { layer: isHe ? 'ידע' : 'Knowledge', tool: 'Notion', color: '#fbbf24' },
-              { layer: isHe ? 'אוטומציה' : 'Automation', tool: 'n8n', color: '#fb923c' },
-              { layer: isHe ? 'הודעות' : 'Messaging', tool: 'WATI', color: '#a78bfa' },
+              { layer: ta.layerKnowledge, tool: 'Notion', color: '#fbbf24' },
+              { layer: ta.layerAutomation, tool: 'n8n', color: '#fb923c' },
+              { layer: ta.layerMessaging, tool: 'WATI', color: '#a78bfa' },
             ].map(s => (
               <div key={s.layer} className="rounded-lg border border-white/[0.04] bg-white/[0.015] px-3 py-2 text-center">
                 <div className="text-[10px] text-slate-600">{s.layer}</div>

@@ -42,7 +42,7 @@ export function EntityActionBar({
 }: Props) {
   const t = getTranslations(language as Language);
   const ta = t.entities.actions;
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const { canPerformAction, user } = useAuth();
   const [confirming, setConfirming] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -133,7 +133,7 @@ export function EntityActionBar({
       <div
         data-cc-id="entity-action-bar"
         className="flex items-center gap-2 flex-wrap"
-        dir={isHe ? 'rtl' : 'ltr'}
+        dir={isRtl ? 'rtl' : 'ltr'}
       >
         {/* Global actions */}
         {globalActions.map(action => {
@@ -222,7 +222,7 @@ export function EntityActionBar({
       {/* Bulk Status Change — inline picker */}
       {showBulkStatus && statusField && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-xs rounded-xl border border-white/[0.08] bg-slate-900 p-4 shadow-2xl" dir={isHe ? 'rtl' : 'ltr'}>
+          <div className="w-full max-w-xs rounded-xl border border-white/[0.08] bg-slate-900 p-4 shadow-2xl" dir={isRtl ? 'rtl' : 'ltr'}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-slate-100">{ta.bulkStatusChange}</h3>
               <button onClick={() => setShowBulkStatus(false)} className="text-slate-500 hover:text-slate-300"><X size={16} /></button>
@@ -249,7 +249,7 @@ export function EntityActionBar({
       {/* Bulk Assign — inline input */}
       {showBulkAssign && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-xs rounded-xl border border-white/[0.08] bg-slate-900 p-4 shadow-2xl" dir={isHe ? 'rtl' : 'ltr'}>
+          <div className="w-full max-w-xs rounded-xl border border-white/[0.08] bg-slate-900 p-4 shadow-2xl" dir={isRtl ? 'rtl' : 'ltr'}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-slate-100">{ta.bulkAssignTitle}</h3>
               <button onClick={() => setShowBulkAssign(false)} className="text-slate-500 hover:text-slate-300"><X size={16} /></button>

@@ -15,21 +15,29 @@ import {
   riskMatrix, implementationSequence, getJourneyStats,
 } from './storyMapData';
 
+// ─── Types ──────────────────────────────────────────────
+
+type AdminTranslations = ReturnType<typeof getTranslations>['admin'];
+
 // ─── Config ─────────────────────────────────────────────
 
-const STATUS_CONFIG: Record<StoryStatus, { color: string; bg: string; icon: React.ElementType; en: string; he: string }> = {
-  done:     { color: 'text-emerald-400', bg: 'bg-emerald-500/10', icon: CheckCircle2, en: 'Done', he: 'הושלם' },
-  broken:   { color: 'text-red-400',     bg: 'bg-red-500/10',     icon: XCircle,      en: 'Broken', he: 'שבור' },
-  missing:  { color: 'text-amber-400',   bg: 'bg-amber-500/10',   icon: AlertCircle,  en: 'Missing', he: 'חסר' },
-  untested: { color: 'text-sky-400',     bg: 'bg-sky-500/10',     icon: AlertTriangle, en: 'Untested', he: 'לא נבדק' },
-};
+function getStatusConfig(ta: AdminTranslations): Record<StoryStatus, { color: string; bg: string; icon: React.ElementType; label: string }> {
+  return {
+    done:     { color: 'text-emerald-400', bg: 'bg-emerald-500/10', icon: CheckCircle2, label: ta.smStatusDone },
+    broken:   { color: 'text-red-400',     bg: 'bg-red-500/10',     icon: XCircle,      label: ta.smStatusBroken },
+    missing:  { color: 'text-amber-400',   bg: 'bg-amber-500/10',   icon: AlertCircle,  label: ta.smStatusMissing },
+    untested: { color: 'text-sky-400',     bg: 'bg-sky-500/10',     icon: AlertTriangle, label: ta.smStatusUntested },
+  };
+}
 
-const RISK_CONFIG: Record<RiskLevel, { color: string; bg: string; en: string; he: string }> = {
-  low:      { color: 'text-emerald-400', bg: 'bg-emerald-500/10', en: 'Low', he: 'נמוך' },
-  medium:   { color: 'text-amber-400',   bg: 'bg-amber-500/10',   en: 'Medium', he: 'בינוני' },
-  high:     { color: 'text-orange-400',  bg: 'bg-orange-500/10',  en: 'High', he: 'גבוה' },
-  critical: { color: 'text-red-400',     bg: 'bg-red-500/10',     en: 'Critical', he: 'קריטי' },
-};
+function getRiskConfig(ta: AdminTranslations): Record<RiskLevel, { color: string; bg: string; label: string }> {
+  return {
+    low:      { color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: ta.smRiskLow },
+    medium:   { color: 'text-amber-400',   bg: 'bg-amber-500/10',   label: ta.smRiskMedium },
+    high:     { color: 'text-orange-400',  bg: 'bg-orange-500/10',  label: ta.smRiskHigh },
+    critical: { color: 'text-red-400',     bg: 'bg-red-500/10',     label: ta.smRiskCritical },
+  };
+}
 
 const EFFORT_CONFIG: Record<Effort, { color: string; bg: string }> = {
   S: { color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
@@ -68,22 +76,22 @@ function Collapsible({ title, defaultOpen, count, children, isHe }: {
   );
 }
 
-function StatusBadge({ status, isHe }: { status: StoryStatus; isHe: boolean }) {
-  const cfg = STATUS_CONFIG[status];
+function StatusBadge({ status, ta }: { status: StoryStatus; ta: AdminTranslations }) {
+  const cfg = getStatusConfig(ta)[status];
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${cfg.bg} ${cfg.color}`}>
       <Icon size={10} />
-      {isHe ? cfg.he : cfg.en}
+      {cfg.label}
     </span>
   );
 }
 
-function RiskBadge({ level, isHe }: { level: RiskLevel; isHe: boolean }) {
-  const cfg = RISK_CONFIG[level];
+function RiskBadge({ level, ta }: { level: RiskLevel; ta: AdminTranslations }) {
+  const cfg = getRiskConfig(ta)[level];
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${cfg.bg} ${cfg.color}`}>
-      {isHe ? cfg.he : cfg.en}
+      {cfg.label}
     </span>
   );
 }
@@ -109,7 +117,7 @@ function ProgressBar({ done, total, height = 'h-2' }: { done: number; total: num
 
 // ─── Journey Step Card ──────────────────────────────────
 
-function JourneyStepCard({ step, isHe }: { step: UserJourneyStep; isHe: boolean }) {
+function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: boolean; ta: AdminTranslations }) {
   const [expanded, setExpanded] = useState(false);
   const Icon = STEP_ICONS[step.id] || Circle;
   const doneCount = step.stories.filter(s => s.status === 'done').length;
@@ -154,15 +162,15 @@ function JourneyStepCard({ step, isHe }: { step: UserJourneyStep; isHe: boolean 
           {/* Emotion / Friction / Aha */}
           <div className="grid grid-cols-3 gap-2 text-[11px]">
             <div className="rounded-lg bg-pink-500/5 border border-pink-500/10 px-2.5 py-2">
-              <div className="flex items-center gap-1 text-pink-400 mb-1"><Heart size={10} /> {isHe ? 'רגש' : 'Emotion'}</div>
+              <div className="flex items-center gap-1 text-pink-400 mb-1"><Heart size={10} /> {ta.smEmotion}</div>
               <div className="text-slate-400">{isHe ? step.emotionHe : step.emotion}</div>
             </div>
             <div className="rounded-lg bg-amber-500/5 border border-amber-500/10 px-2.5 py-2">
-              <div className="flex items-center gap-1 text-amber-400 mb-1"><Zap size={10} /> {isHe ? 'חיכוך' : 'Friction'}</div>
+              <div className="flex items-center gap-1 text-amber-400 mb-1"><Zap size={10} /> {ta.smFriction}</div>
               <div className="text-slate-400">{isHe ? step.frictionHe : step.friction}</div>
             </div>
             <div className="rounded-lg bg-purple-500/5 border border-purple-500/10 px-2.5 py-2">
-              <div className="flex items-center gap-1 text-purple-400 mb-1"><TrendingUp size={10} /> {isHe ? 'רגע אהא' : 'Aha!'}</div>
+              <div className="flex items-center gap-1 text-purple-400 mb-1"><TrendingUp size={10} /> {ta.smAha}</div>
               <div className="text-slate-400">{step.ahamoment ? (isHe ? step.ahamomentHe : step.ahamoment) : '—'}</div>
             </div>
           </div>
@@ -172,10 +180,10 @@ function JourneyStepCard({ step, isHe }: { step: UserJourneyStep; isHe: boolean 
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="bg-white/[0.02] text-slate-500">
-                  <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'סיפור' : 'Story'}</th>
-                  <th className="px-2 py-1.5 font-medium text-center w-20">{isHe ? 'סטטוס' : 'Status'}</th>
-                  <th className="px-2 py-1.5 font-medium text-center w-16">{isHe ? 'סיכון' : 'Risk'}</th>
-                  <th className={`px-2 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'} w-48`}>{isHe ? 'קובץ' : 'File'}</th>
+                  <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smThStory}</th>
+                  <th className="px-2 py-1.5 font-medium text-center w-20">{ta.smThStatus}</th>
+                  <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smThRisk}</th>
+                  <th className={`px-2 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'} w-48`}>{ta.smThFile}</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,8 +195,8 @@ function JourneyStepCard({ step, isHe }: { step: UserJourneyStep; isHe: boolean 
                         <span className="ml-2 text-[10px] text-slate-600">({isHe ? story.noteHe : story.note})</span>
                       )}
                     </td>
-                    <td className="px-2 py-1.5 text-center"><StatusBadge status={story.status} isHe={isHe} /></td>
-                    <td className="px-2 py-1.5 text-center"><RiskBadge level={story.risk} isHe={isHe} /></td>
+                    <td className="px-2 py-1.5 text-center"><StatusBadge status={story.status} ta={ta} /></td>
+                    <td className="px-2 py-1.5 text-center"><RiskBadge level={story.risk} ta={ta} /></td>
                     <td className="px-2 py-1.5">
                       {story.keyFile && <code className="rounded bg-white/5 px-1 py-0.5 text-[9px] text-slate-600" dir="ltr">{story.keyFile}</code>}
                     </td>
@@ -202,7 +210,7 @@ function JourneyStepCard({ step, isHe }: { step: UserJourneyStep; isHe: boolean 
           <div className="grid grid-cols-2 gap-2">
             <div className="rounded-lg bg-red-500/5 border border-red-500/10 px-3 py-2">
               <div className="flex items-center gap-1.5 text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1.5">
-                <AlertTriangle size={10} /> {isHe ? 'נתיבים לא שמחים' : 'Unhappy Paths'}
+                <AlertTriangle size={10} /> {ta.smUnhappyPaths}
               </div>
               <ul className="space-y-0.5">
                 {(isHe ? step.unhappyPathsHe : step.unhappyPaths).map((p, i) => (
@@ -229,8 +237,8 @@ function JourneyStepCard({ step, isHe }: { step: UserJourneyStep; isHe: boolean 
 
 // ─── Release Tier Section ───────────────────────────────
 
-function ReleaseTierSection({ tier, isHe, accent }: {
-  tier: typeof walkingSkeleton; isHe: boolean; accent: string;
+function ReleaseTierSection({ tier, isHe, accent, ta }: {
+  tier: typeof walkingSkeleton; isHe: boolean; accent: string; ta: AdminTranslations;
 }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
@@ -239,7 +247,7 @@ function ReleaseTierSection({ tier, isHe, accent }: {
           <div className="h-3 w-3 rounded-full" style={{ background: accent }} />
           <h4 className="text-sm font-semibold text-slate-200">{isHe ? tier.nameHe : tier.name}</h4>
         </div>
-        <span className="text-[10px] text-slate-500">{tier.tasks.length} {isHe ? 'משימות' : 'tasks'}</span>
+        <span className="text-[10px] text-slate-500">{tier.tasks.length} {ta.smTasks}</span>
       </div>
       <p className="text-xs text-slate-400 mb-3">{isHe ? tier.goalHe : tier.goal}</p>
 
@@ -247,10 +255,10 @@ function ReleaseTierSection({ tier, isHe, accent }: {
         <table className="w-full text-[11px]">
           <thead>
             <tr className="bg-white/[0.02] text-slate-500">
-              <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'משימה' : 'Task'}</th>
-              <th className="px-2 py-1.5 font-medium text-center w-20">{isHe ? 'מצב' : 'Status'}</th>
-              <th className="px-2 py-1.5 font-medium text-center w-16">{isHe ? 'מאמץ' : 'Effort'}</th>
-              <th className="px-2 py-1.5 font-medium text-center w-16">{isHe ? 'סיכון' : 'Risk'}</th>
+              <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smThTask}</th>
+              <th className="px-2 py-1.5 font-medium text-center w-20">{ta.smThStatus}</th>
+              <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smThEffort}</th>
+              <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smThRisk}</th>
             </tr>
           </thead>
           <tbody>
@@ -267,7 +275,7 @@ function ReleaseTierSection({ tier, isHe, accent }: {
                   </span>
                 </td>
                 <td className="px-2 py-1.5 text-center text-slate-500">{task.effort}</td>
-                <td className="px-2 py-1.5 text-center"><RiskBadge level={task.risk} isHe={isHe} /></td>
+                <td className="px-2 py-1.5 text-center"><RiskBadge level={task.risk} ta={ta} /></td>
               </tr>
             ))}
           </tbody>
@@ -287,7 +295,7 @@ function ReleaseTierSection({ tier, isHe, accent }: {
 
 // ─── MLP Tier Card ──────────────────────────────────────
 
-function MLPTierCard({ tier, isHe }: { tier: MLPTier; isHe: boolean }) {
+function MLPTierCard({ tier, isHe, ta }: { tier: MLPTier; isHe: boolean; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <h4 className="text-sm font-semibold text-slate-200 mb-3">{isHe ? tier.nameHe : tier.name}</h4>
@@ -299,7 +307,7 @@ function MLPTierCard({ tier, isHe }: { tier: MLPTier; isHe: boolean }) {
               {isHe ? feat.whyHe : feat.why}
             </span>
             <EffortBadge effort={feat.effort} />
-            <RiskBadge level={feat.risk} isHe={isHe} />
+            <RiskBadge level={feat.risk} ta={ta} />
           </div>
         ))}
       </div>
@@ -309,21 +317,21 @@ function MLPTierCard({ tier, isHe }: { tier: MLPTier; isHe: boolean }) {
 
 // ─── Risk Matrix ────────────────────────────────────────
 
-function RiskMatrixSection({ isHe }: { isHe: boolean }) {
+function RiskMatrixSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
         <Shield size={16} className="text-red-400" />
-        <h4 className="text-sm font-semibold text-slate-200">{isHe ? 'מטריצת סיכונים' : 'Risk Matrix'}</h4>
+        <h4 className="text-sm font-semibold text-slate-200">{ta.smRiskMatrix}</h4>
       </div>
       <div className="rounded-lg border border-white/[0.04] overflow-hidden">
         <table className="w-full text-[11px]">
           <thead>
             <tr className="bg-white/[0.02] text-slate-500">
-              <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'סיכון' : 'Risk'}</th>
-              <th className="px-2 py-1.5 font-medium text-center w-20">{isHe ? 'סוג' : 'Type'}</th>
-              <th className="px-2 py-1.5 font-medium text-center w-16">{isHe ? 'רמה' : 'Level'}</th>
-              <th className={`px-2 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{isHe ? 'מיטיגציה' : 'Mitigation'}</th>
+              <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smRiskCol}</th>
+              <th className="px-2 py-1.5 font-medium text-center w-20">{ta.smType}</th>
+              <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smLevel}</th>
+              <th className={`px-2 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smMitigation}</th>
             </tr>
           </thead>
           <tbody>
@@ -333,7 +341,7 @@ function RiskMatrixSection({ isHe }: { isHe: boolean }) {
                 <td className="px-2 py-1.5 text-center">
                   <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-500">{isHe ? r.typeHe : r.type}</span>
                 </td>
-                <td className="px-2 py-1.5 text-center"><RiskBadge level={r.level} isHe={isHe} /></td>
+                <td className="px-2 py-1.5 text-center"><RiskBadge level={r.level} ta={ta} /></td>
                 <td className="px-2 py-1.5 text-slate-500">{isHe ? r.mitigationHe : r.mitigation}</td>
               </tr>
             ))}
@@ -346,12 +354,12 @@ function RiskMatrixSection({ isHe }: { isHe: boolean }) {
 
 // ─── Implementation Timeline ────────────────────────────
 
-function TimelineSection({ isHe }: { isHe: boolean }) {
+function TimelineSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
         <Calendar size={16} className="text-blue-400" />
-        <h4 className="text-sm font-semibold text-slate-200">{isHe ? 'רצף יישום' : 'Implementation Sequence'}</h4>
+        <h4 className="text-sm font-semibold text-slate-200">{ta.smImplSequence}</h4>
       </div>
       <div className="space-y-3">
         {implementationSequence.map((week, i) => (
@@ -379,7 +387,7 @@ function TimelineSection({ isHe }: { isHe: boolean }) {
 
 export default function StoryMapTab({ isHe, ta }: {
   isHe: boolean;
-  ta: ReturnType<typeof getTranslations>['admin'];
+  ta: AdminTranslations;
 }) {
   const stats = useMemo(() => getJourneyStats(), []);
   const [viewMode, setViewMode] = useState<'journey' | 'releases' | 'risks'>('journey');
@@ -390,29 +398,29 @@ export default function StoryMapTab({ isHe, ta }: {
       <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
           <div className="text-2xl font-bold text-blue-400">{stats.totalStories}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500">{isHe ? 'סיפורים' : 'Stories'}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">{ta.smStories}</div>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
           <div className="text-2xl font-bold text-emerald-400">{stats.doneStories}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500">{isHe ? 'הושלמו' : 'Done'}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">{ta.smDone}</div>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
           <div className="text-2xl font-bold text-amber-400">{stats.missingStories}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500">{isHe ? 'חסרים' : 'Missing'}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">{ta.smMissing}</div>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
           <div className="text-2xl font-bold text-red-400">{stats.brokenStories}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500">{isHe ? 'שבורים' : 'Broken'}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">{ta.smBroken}</div>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
           <div className="text-2xl font-bold text-red-400">{stats.criticalRisks}</div>
-          <div className="mt-0.5 text-[11px] text-slate-500">{isHe ? 'סיכונים קריטיים' : 'Critical Risks'}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">{ta.smCriticalRisks}</div>
         </div>
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
           <div className={`text-2xl font-bold ${stats.completionPct >= 80 ? 'text-emerald-400' : stats.completionPct >= 50 ? 'text-amber-400' : 'text-red-400'}`}>
             {stats.completionPct}%
           </div>
-          <div className="mt-0.5 text-[11px] text-slate-500">{isHe ? 'השלמה' : 'Complete'}</div>
+          <div className="mt-0.5 text-[11px] text-slate-500">{ta.smComplete}</div>
         </div>
       </div>
 
@@ -423,9 +431,9 @@ export default function StoryMapTab({ isHe, ta }: {
             className={`rounded-t-lg px-4 py-2 text-xs font-medium transition-colors ${
               viewMode === mode ? 'bg-white/5 text-white border-b-2 border-purple-400' : 'text-slate-500 hover:text-slate-300'
             }`}>
-            {mode === 'journey' ? (isHe ? 'מסע משתמש' : 'User Journey') :
-             mode === 'releases' ? (isHe ? 'שכבות שחרור' : 'Release Tiers') :
-             (isHe ? 'סיכונים + ציר זמן' : 'Risks + Timeline')}
+            {mode === 'journey' ? ta.smUserJourney :
+             mode === 'releases' ? ta.smReleaseTiers :
+             ta.smRisksTimeline}
           </button>
         ))}
       </div>
@@ -434,7 +442,7 @@ export default function StoryMapTab({ isHe, ta }: {
       {viewMode === 'journey' && (
         <div className="space-y-2">
           {userJourneySteps.map(step => (
-            <JourneyStepCard key={step.id} step={step} isHe={isHe} />
+            <JourneyStepCard key={step.id} step={step} isHe={isHe} ta={ta} />
           ))}
         </div>
       )}
@@ -442,21 +450,20 @@ export default function StoryMapTab({ isHe, ta }: {
       {/* Releases View */}
       {viewMode === 'releases' && (
         <div className="space-y-4">
-          <ReleaseTierSection tier={walkingSkeleton} isHe={isHe} accent="#ef4444" />
-          <ReleaseTierSection tier={mvp} isHe={isHe} accent="#f59e0b" />
+          <ReleaseTierSection tier={walkingSkeleton} isHe={isHe} accent="#ef4444" ta={ta} />
+          <ReleaseTierSection tier={mvp} isHe={isHe} accent="#f59e0b" ta={ta} />
 
           <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-4">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp size={16} className="text-purple-400" />
-              <h3 className="text-sm font-semibold text-slate-200">MLP — {isHe ? 'המוצר שאוהבים' : 'The Product Users Love'}</h3>
+              <h3 className="text-sm font-semibold text-slate-200">MLP — {ta.smMlpSubtitle}</h3>
             </div>
             <p className="text-xs text-slate-500 mb-3">
-              {isHe ? 'KPIs: שימוש יומי >80%, יצירת מסמך <2 דקות, סשני AI >10/שבוע/משתמש, שביעות רצון >4/5'
-                     : 'KPIs: Daily active usage >80%, Document creation <2min, AI sessions >10/week/user, Satisfaction >4/5'}
+              {ta.smMlpKpis}
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {mlpTiers.map(tier => (
-                <MLPTierCard key={tier.id} tier={tier} isHe={isHe} />
+                <MLPTierCard key={tier.id} tier={tier} isHe={isHe} ta={ta} />
               ))}
             </div>
           </div>
@@ -466,24 +473,24 @@ export default function StoryMapTab({ isHe, ta }: {
       {/* Risks + Timeline View */}
       {viewMode === 'risks' && (
         <div className="space-y-4">
-          <RiskMatrixSection isHe={isHe} />
-          <TimelineSection isHe={isHe} />
+          <RiskMatrixSection isHe={isHe} ta={ta} />
+          <TimelineSection isHe={isHe} ta={ta} />
 
           {/* Verification Checklist */}
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <h4 className="text-sm font-semibold text-slate-200 mb-3">{isHe ? 'אימות לכל שכבה' : 'Verification Per Tier'}</h4>
+            <h4 className="text-sm font-semibold text-slate-200 mb-3">{ta.smVerificationTitle}</h4>
             <div className="space-y-2 text-[11px]">
               <div className="flex items-start gap-2">
                 <span className="shrink-0 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-bold text-red-400">WS</span>
-                <span className="text-slate-400">{isHe ? 'כניסה → דשבורד מרונדר → פרויקטים נראים' : 'Login → dashboard renders → projects visible'}</span>
+                <span className="text-slate-400">{ta.smVerifyWs}</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="shrink-0 rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">MVP</span>
-                <span className="text-slate-400">{isHe ? 'כל 12 הדפים עובדים, CRUD בכל הטבלאות, AI streaming, realtime מסתנכרן' : 'All 12 pages work, CRUD on all tables, AI streams, realtime syncs'}</span>
+                <span className="text-slate-400">{ta.smVerifyMvp}</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="shrink-0 rounded bg-purple-500/10 px-1.5 py-0.5 text-[10px] font-bold text-purple-400">MLP</span>
-                <span className="text-slate-400">{isHe ? 'מסע משתמש מלא ללא נתוני הדגמה, כל האינטגרציות חיות, סקר שביעות רצון >4/5' : 'Full user journey without demo data, all integrations live, satisfaction survey >4/5'}</span>
+                <span className="text-slate-400">{ta.smVerifyMlp}</span>
               </div>
             </div>
           </div>

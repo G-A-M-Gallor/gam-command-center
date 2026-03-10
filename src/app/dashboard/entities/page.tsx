@@ -13,9 +13,9 @@ import { EntitySetupGuide } from '@/components/entities/EntitySetupGuide';
 export default function EntitiesPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const te = t.entities;
-  const lang = isHe ? 'he' : 'en';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
 
   const [stats, setStats] = useState({ fields: 0, types: 0, connections: 0 });
   const [types, setTypes] = useState<{ slug: string; label: { he: string; en: string; ru: string }; icon: string; color: string | null }[]>([]);
@@ -54,7 +54,7 @@ export default function EntitiesPage() {
   ];
 
   return (
-    <div className="space-y-6" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isRtl ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="entities" />
 
       {loading ? (
@@ -97,7 +97,7 @@ export default function EntitiesPage() {
 
           {/* Setup Guide */}
           <EntitySetupGuide
-            lang={language === 'ru' ? 'ru' : isHe ? 'he' : 'en'}
+            lang={lang}
             completedFields={stats.fields}
             completedTypes={stats.types}
             completedConnections={stats.connections}

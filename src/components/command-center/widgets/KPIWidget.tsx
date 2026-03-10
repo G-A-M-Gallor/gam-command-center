@@ -11,6 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
 
@@ -23,7 +24,7 @@ interface KPIData {
 
 export function KPIPanel() {
   const { language } = useSettings();
-  const isHe = language === "he";
+  const t = getTranslations(language);
   const [data, setData] = useState<KPIData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -88,28 +89,28 @@ export function KPIPanel() {
 
   const cards = [
     {
-      label: isHe ? "פרויקטים פתוחים" : "Open Projects",
+      label: t.widgets.kpiOpenProjects,
       value: data?.openProjects ?? "-",
       icon: FolderOpen,
       color: "text-blue-400",
       bg: "bg-blue-500/10",
     },
     {
-      label: isHe ? "מסמכים" : "Documents",
+      label: t.widgets.kpiDocuments,
       value: data?.totalDocuments ?? "-",
       icon: FileText,
       color: "text-purple-400",
       bg: "bg-purple-500/10",
     },
     {
-      label: isHe ? "פעילות (7 ימים)" : "Activity (7d)",
+      label: t.widgets.kpiActivity7d,
       value: data?.recentActivity ?? "-",
       icon: Activity,
       color: "text-cyan-400",
       bg: "bg-cyan-500/10",
     },
     {
-      label: isHe ? "בריאות ממוצעת" : "Avg Health",
+      label: t.widgets.kpiAvgHealth,
       value: data ? `${data.avgHealth}%` : "-",
       icon: HealthIcon,
       color: healthColor,
@@ -128,7 +129,7 @@ export function KPIPanel() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          {isHe ? "מדדים מהירים" : "Quick Metrics"}
+          {t.widgets.kpiQuickMetrics}
         </span>
         <button
           type="button"
@@ -169,11 +170,12 @@ export function KPIPanel() {
 
 export function KPIBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
+  const t = getTranslations(language);
   if (size < 2) return null;
 
   return (
     <span className="truncate text-xs text-slate-400">
-      {language === "he" ? "מדדים" : "KPIs"}
+      {t.widgets.kpiBar}
     </span>
   );
 }

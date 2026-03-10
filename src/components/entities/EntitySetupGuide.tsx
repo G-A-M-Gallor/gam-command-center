@@ -242,7 +242,7 @@ export function EntitySetupGuide({ lang, completedFields, completedTypes, comple
   const [open, setOpen] = useState(false);
   const [expandedStep, setExpandedStep] = useState<string | null>(null);
 
-  const isHe = lang === 'he';
+  const isRtl = lang === 'he';
   const title = { he: 'מדריך הקמת ישויות', en: 'Entity Setup Guide', ru: 'Руководство по настройке' }[lang];
   const subtitle = { he: 'צעד אחר צעד', en: 'Step by step', ru: 'Шаг за шагом' }[lang];
 
@@ -315,7 +315,7 @@ export function EntitySetupGuide({ lang, completedFields, completedTypes, comple
                 </button>
 
                 {expanded && (
-                  <div className="px-3 pb-3 ps-10 border-t border-white/[0.04]" dir={isHe ? 'rtl' : 'ltr'}>
+                  <div className="px-3 pb-3 ps-10 border-t border-white/[0.04]" dir={isRtl ? 'rtl' : 'ltr'}>
                     <ul className="space-y-1.5 mt-2">
                       {step.details[lang].map((detail, i) => (
                         <li key={i} className="flex items-start gap-2 text-[11px] text-slate-400">
@@ -330,7 +330,7 @@ export function EntitySetupGuide({ lang, completedFields, completedTypes, comple
                         className="inline-flex items-center gap-1 mt-2 text-[10px] text-blue-400 hover:text-blue-300 transition-colors"
                       >
                         <ExternalLink size={10} />
-                        {isHe ? 'פתח' : lang === 'ru' ? 'Открыть' : 'Open'}
+                        {{ he: 'פתח', en: 'Open', ru: 'Открыть' }[lang]}
                       </a>
                     )}
                   </div>

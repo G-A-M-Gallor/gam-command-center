@@ -192,6 +192,12 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
   const commitColor = entry.commitStatus === 'committed' ? 'text-emerald-400 bg-emerald-500/10' : 'text-amber-400 bg-amber-500/10';
   const wf = WORKFLOW_CONFIG[entry.workflowStatus];
   const WfIcon = wf.icon;
+  const wfLabelMap: Record<string, string> = {
+    inbox: ta.wfLabelInbox, wishlist: ta.wfLabelWishlist, todo: ta.wfLabelTodo,
+    next: ta.wfLabelNext, inProgress: ta.wfLabelInProgress, hold: ta.wfLabelHold,
+    stuck: ta.wfLabelStuck, freeze: ta.wfLabelFreeze, complete: ta.wfLabelComplete,
+    cancelled: ta.wfLabelCancelled,
+  };
 
   return (
     <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4">
@@ -201,7 +207,7 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
           {entry.phase && <PhaseBadge phase={entry.phase} />}
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${wf.bg} ${wf.text}`}>
             <WfIcon size={10} />
-            {isHe ? wf.heLabel : wf.enLabel}
+            {wfLabelMap[entry.workflowStatus] || wf.enLabel}
           </span>
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${sc.bg} ${sc.text}`}>
             <StatusIcon size={10} />
@@ -222,12 +228,12 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
       </div>
       <p className="mt-2 text-xs text-slate-400">{isHe ? entry.notesHe : entry.notes}</p>
       <div className="mt-2 rounded-lg bg-purple-500/5 border border-purple-500/10 px-3 py-2">
-        <span className="text-[10px] font-semibold text-purple-400 uppercase tracking-wider">{isHe ? 'למה נבנה' : 'Why it was built'}</span>
+        <span className="text-[10px] font-semibold text-purple-400 uppercase tracking-wider">{ta.whyBuilt}</span>
         <p className="mt-1 text-xs text-slate-400">{isHe ? entry.purposeHe : entry.purpose}</p>
       </div>
       {entry.connectedTo && entry.connectedTo.length > 0 && (
         <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] font-medium text-slate-600">{isHe ? 'מחובר ל:' : 'Connected to:'}</span>
+          <span className="text-[10px] font-medium text-slate-600">{ta.connectedToLabel}</span>
           {entry.connectedTo.map(c => (
             <span key={c} className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[10px] text-blue-400">{c}</span>
           ))}
@@ -243,7 +249,7 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
           <code key={f} className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-600" dir="ltr">{f}</code>
         ))}
         {entry.files.length > 4 && (
-          <span className="text-[10px] text-slate-600">+{entry.files.length - 4} {isHe ? 'קבצים' : 'files'}</span>
+          <span className="text-[10px] text-slate-600">+{entry.files.length - 4} {ta.moreFiles}</span>
         )}
       </div>
       <div className="mt-2 border-t border-white/[0.04] pt-2">
@@ -545,13 +551,19 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
         case 'workflow': {
           key = entry.workflowStatus;
           const wf = WORKFLOW_CONFIG[entry.workflowStatus];
-          label = isHe ? wf.heLabel : wf.enLabel;
+          const wfLabelMap: Record<string, string> = {
+            inbox: ta.wfLabelInbox, wishlist: ta.wfLabelWishlist, todo: ta.wfLabelTodo,
+            next: ta.wfLabelNext, inProgress: ta.wfLabelInProgress, hold: ta.wfLabelHold,
+            stuck: ta.wfLabelStuck, freeze: ta.wfLabelFreeze, complete: ta.wfLabelComplete,
+            cancelled: ta.wfLabelCancelled,
+          };
+          label = wfLabelMap[entry.workflowStatus] || wf.enLabel;
           color = wf.color;
           break;
         }
         case 'phase': {
           key = entry.phase ? `P${entry.phase}` : 'none';
-          label = entry.phase ? `${isHe ? 'שלב' : 'Phase'} ${entry.phase}` : (isHe ? 'ללא שלב' : 'No Phase');
+          label = entry.phase ? `${ta.phaseLabel} ${entry.phase}` : ta.noPhase;
           const phaseColors: Record<string, string> = { P1: '#34d399', P2: '#60a5fa', P3: '#c084fc', P4: '#f472b6', P5: '#94a3b8', none: '#64748b' };
           color = phaseColors[key] || '#64748b';
           break;
@@ -664,7 +676,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
           {ta.featureStatus}
           <span className="text-xs font-normal text-slate-500">
             — {changelogSearch
-              ? `${directMatches.length + relatedMatches.length} ${isHe ? 'תוצאות' : 'results'}`
+              ? `${directMatches.length + relatedMatches.length} ${ta.results}`
               : `${directMatches.length} / ${changelogEntries.length}`
             }
           </span>
@@ -738,9 +750,9 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
             <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: '#78350f', border: '1px solid #fbbf24' }} /> {ta.notVerified}</span>
             <span className="flex items-center gap-1.5"><span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: '#7f1d1d', border: '1px solid #ef4444' }} /> {ta.broken}</span>
             <span className="text-slate-700">|</span>
-            <span>[ ] = {isHe ? 'עם נתיב' : 'has route'}</span>
-            <span>( ) = {isHe ? 'ללא נתיב' : 'no route'}</span>
-            <span>-.- = {isHe ? 'מחובר ל' : 'connected to'}</span>
+            <span>[ ] = {ta.hasRoute}</span>
+            <span>( ) = {ta.noRoute}</span>
+            <span>-.- = {ta.connectedToLegend}</span>
           </div>
         </div>
       )}

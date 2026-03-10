@@ -29,43 +29,35 @@ const ACTIVITY_ICONS: Record<ActivityType, React.ElementType> = {
   reactivated: Power,
 };
 
-function activityLabel(type: ActivityType, lang: string): string {
-  const labels: Record<ActivityType, { he: string; en: string }> = {
-    field_change: { he: 'שינוי שדה', en: 'Field changed' },
-    status_change: { he: 'שינוי סטטוס', en: 'Status changed' },
-    comment: { he: 'תגובה', en: 'Comment' },
-    call_log: { he: 'שיחה', en: 'Call' },
-    relation_added: { he: 'קשר נוסף', en: 'Relation added' },
-    relation_removed: { he: 'קשר הוסר', en: 'Relation removed' },
-    stakeholder_added: { he: 'בעל עניין נוסף', en: 'Stakeholder added' },
-    stakeholder_removed: { he: 'בעל עניין הוסר', en: 'Stakeholder removed' },
-    created: { he: 'נוצר', en: 'Created' },
-    deactivated: { he: 'הושבת', en: 'Deactivated' },
-    reactivated: { he: 'הופעל מחדש', en: 'Reactivated' },
-  };
-  return labels[type]?.[lang === 'he' ? 'he' : 'en'] ?? type;
-}
+const LOCALE_MAP: Record<string, string> = { he: 'he-IL', en: 'en-US', ru: 'ru-RU' };
 
-function formatTime(iso: string, lang: string): string {
+function formatTimeI18n(
+  iso: string,
+  te: { timeNow: string; timeMinutesAgo: string; timeHoursAgo: string; timeDaysAgo: string },
+  locale: string,
+): string {
   const d = new Date(iso);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
 
-  if (diffMin < 1) return lang === 'he' ? 'עכשיו' : 'now';
-  if (diffMin < 60) return lang === 'he' ? `לפני ${diffMin} דק׳` : `${diffMin}m ago`;
+  if (diffMin < 1) return te.timeNow;
+  if (diffMin < 60) return te.timeMinutesAgo.replace('{n}', String(diffMin));
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return lang === 'he' ? `לפני ${diffH} שע׳` : `${diffH}h ago`;
+  if (diffH < 24) return te.timeHoursAgo.replace('{n}', String(diffH));
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 7) return lang === 'he' ? `לפני ${diffD} ימים` : `${diffD}d ago`;
-  return d.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' });
+  if (diffD < 7) return te.timeDaysAgo.replace('{n}', String(diffD));
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 export function ActivityFeed({ noteId, language }: Props) {
-  const lang = language === 'he' ? 'he' : 'en';
+  const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
+  const locale = LOCALE_MAP[lang] ?? 'en-US';
   const t = getTranslations(language as 'he' | 'en' | 'ru');
   const te = t.entities;
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
+
+  const activityLabels = (te as unknown as { activityLabels: Record<string, string> }).activityLabels ?? {};
 
   const [entries, setEntries] = useState<ActivityLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,9 +89,9 @@ export function ActivityFeed({ noteId, language }: Props) {
   };
 
   return (
-    <div className="border-t border-white/[0.04] pt-3" dir={isHe ? 'rtl' : 'ltr'}>
+    <div className="border-t border-white/[0.04] pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
       <h4 className="text-[10px] font-medium text-slate-400 mb-2">
-        {te.activity ?? (isHe ? 'פעילות' : 'Activity')}
+        {te.activity}
       </h4>
 
       {/* Input area */}
@@ -110,14 +102,14 @@ export function ActivityFeed({ noteId, language }: Props) {
             className={`px-2 py-1 rounded ${mode === 'comment' ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <MessageSquare size={10} className="inline me-1" />
-            {te.comment ?? (isHe ? 'תגובה' : 'Comment')}
+            {te.comment}
           </button>
           <button
             onClick={() => setMode('call')}
             className={`px-2 py-1 rounded ${mode === 'call' ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
           >
             <Phone size={10} className="inline me-1" />
-            {te.callLog ?? (isHe ? 'שיחה' : 'Call')}
+            {te.callLog}
           </button>
         </div>
 
@@ -128,7 +120,7 @@ export function ActivityFeed({ noteId, language }: Props) {
               value={commentText}
               onChange={e => setCommentText(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAddComment()}
-              placeholder={isHe ? 'הוסף תגובה...' : 'Add comment...'}
+              placeholder={te.addCommentPlaceholder}
               className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
             />
             <button
@@ -147,7 +139,7 @@ export function ActivityFeed({ noteId, language }: Props) {
               value={callSummary}
               onChange={e => setCallSummary(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAddCallLog()}
-              placeholder={isHe ? 'סיכום שיחה...' : 'Call summary...'}
+              placeholder={te.callSummaryPlaceholder}
               className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
             />
             <button
@@ -162,9 +154,9 @@ export function ActivityFeed({ noteId, language }: Props) {
 
       {/* Timeline */}
       {loading ? (
-        <div className="text-[10px] text-slate-600 py-2">{isHe ? 'טוען...' : 'Loading...'}</div>
+        <div className="text-[10px] text-slate-600 py-2">{te.loading}</div>
       ) : entries.length === 0 ? (
-        <div className="text-[10px] text-slate-600 py-2">{isHe ? 'אין פעילות עדיין' : 'No activity yet'}</div>
+        <div className="text-[10px] text-slate-600 py-2">{te.noActivityYet}</div>
       ) : (
         <div className="space-y-1.5 max-h-64 overflow-y-auto">
           {entries.map(entry => {
@@ -176,7 +168,7 @@ export function ActivityFeed({ noteId, language }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="text-slate-300 font-medium">
-                    {activityLabel(entry.activity_type, lang)}
+                    {activityLabels[entry.activity_type] ?? entry.activity_type}
                   </span>
                   {entry.field_key && (
                     <span className="text-slate-500 ms-1">
@@ -195,7 +187,7 @@ export function ActivityFeed({ noteId, language }: Props) {
                   )}
                 </div>
                 <span className="text-[9px] text-slate-600 shrink-0">
-                  {formatTime(entry.created_at, lang)}
+                  {formatTimeI18n(entry.created_at, te as unknown as { timeNow: string; timeMinutesAgo: string; timeHoursAgo: string; timeDaysAgo: string }, locale)}
                 </span>
               </div>
             );

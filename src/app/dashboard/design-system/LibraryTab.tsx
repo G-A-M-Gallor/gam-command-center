@@ -28,6 +28,7 @@ import {
 
 interface LibraryTabProps {
   isHe: boolean;
+  language?: "he" | "en" | "ru";
   td: Record<string, string>;
 }
 
@@ -42,7 +43,8 @@ const SOURCE_TABS: { id: LibrarySource | "all"; labelKey: string }[] = [
 
 // ─── Component ───────────────────────────────────────────────────────
 
-export function LibraryTab({ isHe, td }: LibraryTabProps) {
+export function LibraryTab({ isHe, language, td }: LibraryTabProps) {
+  const langKey = isHe ? "he" as const : "en" as const;
   const [activeSource, setActiveSource] = useState<LibrarySource | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<LibraryCategory | "all">("all");
@@ -127,7 +129,7 @@ export function LibraryTab({ isHe, td }: LibraryTabProps) {
 
   // Open AI panel with install command pre-filled
   const handleInstallViaAI = useCallback((entry: LibraryComponentEntry) => {
-    const message = isHe
+    const message = langKey === "he"
       ? `התקן את הקומפוננטה ${entry.name}: ${entry.installCmd}`
       : `Install ${entry.name} component: ${entry.installCmd}`;
     window.dispatchEvent(new CustomEvent("cc-open-ai"));
@@ -137,7 +139,7 @@ export function LibraryTab({ isHe, td }: LibraryTabProps) {
         new CustomEvent("cc-ai-prefill", { detail: { message } })
       );
     }, 150);
-  }, [isHe]);
+  }, [langKey]);
 
   // Close preview on Escape
   useEffect(() => {
@@ -202,7 +204,7 @@ export function LibraryTab({ isHe, td }: LibraryTabProps) {
           </span>
           <button
             onClick={() => {
-              const msg = isHe
+              const msg = langKey === "he"
                 ? "רענן את קטלוג הקומפוננטות — בדוק מה זמין ב-shadcn/ui ו-Magic UI דרך ה-MCP tools"
                 : "Refresh the component catalog — check what's available in shadcn/ui and Magic UI via MCP tools";
               window.dispatchEvent(new CustomEvent("cc-open-ai"));
@@ -256,9 +258,7 @@ export function LibraryTab({ isHe, td }: LibraryTabProps) {
         </button>
         {Array.from(availableCategories.entries()).map(([cat, count]) => {
           const cc = LIBRARY_CATEGORY_COLORS[cat];
-          const label = isHe
-            ? LIBRARY_CATEGORY_LABELS[cat].he
-            : LIBRARY_CATEGORY_LABELS[cat].en;
+          const label = LIBRARY_CATEGORY_LABELS[cat][langKey];
           return (
             <button
               key={cat}
@@ -299,10 +299,8 @@ export function LibraryTab({ isHe, td }: LibraryTabProps) {
             const isInstalled = installedSlugs.has(entry.id);
             const sc = SOURCE_COLORS[entry.source];
             const cc = LIBRARY_CATEGORY_COLORS[entry.category];
-            const desc = isHe ? entry.description.he : entry.description.en;
-            const catLabel = isHe
-              ? LIBRARY_CATEGORY_LABELS[entry.category].he
-              : LIBRARY_CATEGORY_LABELS[entry.category].en;
+            const desc = entry.description[langKey];
+            const catLabel = LIBRARY_CATEGORY_LABELS[entry.category][langKey];
             const isCopied = copiedId === entry.id;
 
             return (

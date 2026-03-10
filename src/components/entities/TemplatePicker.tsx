@@ -20,7 +20,7 @@ export function TemplatePicker({ noteId }: Props) {
   const { language } = useSettings();
   const t = getTranslations(language);
   const te = t.entities;
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
 
   const [linked, setLinked] = useState<NoteRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +78,7 @@ export function TemplatePicker({ noteId }: Props) {
   return (
     <div
       className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden"
-      dir={isHe ? 'rtl' : 'ltr'}
+      dir={isRtl ? 'rtl' : 'ltr'}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.04]">
@@ -115,7 +115,7 @@ export function TemplatePicker({ noteId }: Props) {
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleCreate()}
-            placeholder={isHe ? 'שם התבנית...' : language === 'ru' ? 'Название шаблона...' : 'Template name...'}
+            placeholder={te.templateNamePlaceholder}
             className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none"
             autoFocus
           />

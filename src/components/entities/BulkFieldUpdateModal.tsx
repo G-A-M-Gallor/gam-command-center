@@ -25,7 +25,7 @@ export function BulkFieldUpdateModal({
 }: Props) {
   const t = getTranslations(language as Language);
   const tb = t.entities.bulk;
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
 
   const [step, setStep] = useState<Step>('field');
   const [selectedField, setSelectedField] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export function BulkFieldUpdateModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div
         className="w-full max-w-lg rounded-xl border border-white/[0.08] bg-slate-900 shadow-2xl"
-        dir={isHe ? 'rtl' : 'ltr'}
+        dir={isRtl ? 'rtl' : 'ltr'}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3.5">

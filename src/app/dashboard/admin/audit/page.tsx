@@ -32,12 +32,16 @@ const resultColors: Record<CheckResult, string> = {
   info: 'border-blue-500/20 bg-blue-500/5',
 };
 
-const resultLabels: Record<CheckResult, { en: string; he: string }> = {
-  pass: { en: 'Pass', he: 'עובר' },
-  warn: { en: 'Warning', he: 'אזהרה' },
-  fail: { en: 'Fail', he: 'נכשל' },
-  info: { en: 'Info', he: 'מידע' },
-};
+type AuditTranslations = ReturnType<typeof getTranslations>['audit'];
+
+function getResultLabels(ta: AuditTranslations): Record<CheckResult, string> {
+  return {
+    pass: ta.resultPass,
+    warn: ta.resultWarn,
+    fail: ta.resultFail,
+    info: ta.resultInfo,
+  };
+}
 
 function ScoreRing({ pct, size = 64 }: { pct: number; size?: number }) {
   const r = (size - 8) / 2;
@@ -61,9 +65,10 @@ function ScoreRing({ pct, size = 64 }: { pct: number; size?: number }) {
   );
 }
 
-function CheckCard({ check, isHe }: { check: AuditCheck; isHe: boolean }) {
+function CheckCard({ check, isHe, ta }: { check: AuditCheck; isHe: boolean; ta: AuditTranslations }) {
   const [expanded, setExpanded] = useState(false);
   const Arrow = expanded ? ChevronDown : (isHe ? ChevronLeft : ChevronRight);
+  const resultLabelMap = getResultLabels(ta);
 
   return (
     <div className={`rounded-lg border ${resultColors[check.result]} transition-colors`}>
@@ -82,7 +87,7 @@ function CheckCard({ check, isHe }: { check: AuditCheck; isHe: boolean }) {
           check.result === 'fail' ? 'bg-red-500/20 text-red-400' :
           'bg-blue-500/20 text-blue-400'
         }`}>
-          {isHe ? resultLabels[check.result].he : resultLabels[check.result].en}
+          {resultLabelMap[check.result]}
         </span>
         <Arrow size={14} className="shrink-0 text-slate-600" />
       </button>
@@ -101,7 +106,7 @@ function CheckCard({ check, isHe }: { check: AuditCheck; isHe: boolean }) {
           {check.recommendation && (
             <div className="mt-2 rounded-md bg-white/[0.03] px-3 py-2">
               <span className="text-[10px] font-medium text-slate-500">
-                {isHe ? 'המלצה:' : 'Recommendation:'}
+                {ta.recommendation}
               </span>
               <p className="mt-0.5 text-xs text-slate-400">
                 {isHe ? check.recommendationHe : check.recommendation}
@@ -114,8 +119,8 @@ function CheckCard({ check, isHe }: { check: AuditCheck; isHe: boolean }) {
   );
 }
 
-function HatSummary({ hat, isHe, isActive, onClick }: {
-  hat: AuditHat; isHe: boolean; isActive: boolean; onClick: () => void;
+function HatSummary({ hat, isHe, isActive, onClick, ta }: {
+  hat: AuditHat; isHe: boolean; isActive: boolean; onClick: () => void; ta: AuditTranslations;
 }) {
   const score = getHatScore(hat);
   const meta = hatMeta[hat];
@@ -143,15 +148,15 @@ function HatSummary({ hat, isHe, isActive, onClick }: {
             {isHe ? meta.descriptionHe : meta.description}
           </p>
           <div className="mt-2 flex items-center gap-2 text-[10px]">
-            <span className="text-emerald-400">{score.pass} {isHe ? 'עובר' : 'pass'}</span>
+            <span className="text-emerald-400">{score.pass} {ta.passCount}</span>
             <span className="text-slate-700">|</span>
-            <span className="text-amber-400">{score.warn} {isHe ? 'אזהרה' : 'warn'}</span>
+            <span className="text-amber-400">{score.warn} {ta.warnCount}</span>
             <span className="text-slate-700">|</span>
-            <span className="text-red-400">{score.fail} {isHe ? 'נכשל' : 'fail'}</span>
+            <span className="text-red-400">{score.fail} {ta.failCount}</span>
             {score.info > 0 && (
               <>
                 <span className="text-slate-700">|</span>
-                <span className="text-blue-400">{score.info} {isHe ? 'מידע' : 'info'}</span>
+                <span className="text-blue-400">{score.info} {ta.infoCount}</span>
               </>
             )}
           </div>
@@ -246,6 +251,7 @@ export default function AuditPage() {
               key={hat}
               hat={hat}
               isHe={isHe}
+              ta={ta}
               isActive={activeHat === hat}
               onClick={() => setActiveHat(activeHat === hat ? 'all' : hat)}
             />
@@ -303,7 +309,7 @@ export default function AuditPage() {
             <div className="py-12 text-center text-sm text-slate-600">{ta.noChecks}</div>
           ) : (
             displayChecks.map(check => (
-              <CheckCard key={check.id} check={check} isHe={isHe} />
+              <CheckCard key={check.id} check={check} isHe={isHe} ta={ta} />
             ))
           )}
         </div>
@@ -319,11 +325,11 @@ export default function AuditPage() {
                 <tr className="border-b border-white/[0.06]">
                   <th className="py-2 text-left text-slate-500 font-medium">{ta.hat}</th>
                   <th className="py-2 text-center text-slate-500 font-medium">{ta.score}</th>
-                  <th className="py-2 text-center text-emerald-500 font-medium">Pass</th>
-                  <th className="py-2 text-center text-amber-500 font-medium">Warn</th>
-                  <th className="py-2 text-center text-red-500 font-medium">Fail</th>
-                  <th className="py-2 text-center text-blue-500 font-medium">Info</th>
-                  <th className="py-2 text-center text-slate-500 font-medium">Total</th>
+                  <th className="py-2 text-center text-emerald-500 font-medium">{ta.resultPass}</th>
+                  <th className="py-2 text-center text-amber-500 font-medium">{ta.resultWarn}</th>
+                  <th className="py-2 text-center text-red-500 font-medium">{ta.resultFail}</th>
+                  <th className="py-2 text-center text-blue-500 font-medium">{ta.resultInfo}</th>
+                  <th className="py-2 text-center text-slate-500 font-medium">{ta.totalLabel}</th>
                 </tr>
               </thead>
               <tbody>
