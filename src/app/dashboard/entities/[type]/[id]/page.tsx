@@ -21,7 +21,13 @@ import { CommentsSection } from '@/components/entities/CommentsSection';
 import { EntityContentEditor } from '@/components/entities/EntityContentEditor';
 import { TemplatePicker } from '@/components/entities/TemplatePicker';
 import { RelationPanel } from '@/components/entities/RelationPanel';
+import dynamic from 'next/dynamic';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
+
+const EntityCanvas = dynamic(
+  () => import('@/components/entities/EntityCanvas').then(m => ({ default: m.EntityCanvas })),
+  { ssr: false, loading: () => <div className="h-[320px] animate-pulse rounded-lg bg-white/[0.03]" /> }
+);
 import { SYSTEM_FIELDS } from '@/lib/entities/builtinFields';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
 import { resolveActions } from '@/lib/entities/resolveActions';
@@ -279,6 +285,15 @@ export default function EntityDetailPage() {
 
       {/* Content Editor */}
       <EntityContentEditor noteId={noteId} language={language} />
+
+      {/* Entity Canvas */}
+      <EntityCanvas
+        noteId={noteId}
+        entityType={entityTypeSlug}
+        language={language}
+        meta={note.meta}
+        fields={etInfo ? fields.filter(f => etInfo.field_refs.includes(f.meta_key)) : []}
+      />
 
       {/* Tools strip */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
