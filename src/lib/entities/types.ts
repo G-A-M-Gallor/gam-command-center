@@ -13,7 +13,7 @@ export type FieldType =
 export type ViewType = 'table' | 'board' | 'list' | 'calendar' | 'gantt' | 'timeline';
 
 export type FieldCategory =
-  | 'system' | 'general' | 'contact' | 'business' | 'project' | 'hr' | 'finance';
+  | 'system' | 'general' | 'contact' | 'business' | 'project' | 'hr' | 'finance' | 'construction';
 
 export type RelationKind = 'one-to-one' | 'one-to-many' | 'many-to-many';
 
@@ -45,6 +45,26 @@ export interface FieldValidation {
   unique?: boolean;
 }
 
+// ─── Visibility Rules ──────────────────────────────
+// Show/hide a field based on another field's value
+export type VisibilityOperator = 'eq' | 'neq' | 'empty' | 'not_empty' | 'contains' | 'gt' | 'lt';
+
+export interface VisibilityRule {
+  field_ref: string;        // the field to check (meta_key)
+  operator: VisibilityOperator;
+  value?: string;           // not needed for empty/not_empty
+}
+
+// ─── Color Rules ───────────────────────────────────
+// Dynamic field coloring based on conditions
+export type ColorOperator = 'empty' | 'not_empty' | 'eq' | 'neq' | 'contains' | 'length_lt' | 'length_gt' | 'gt' | 'lt';
+
+export interface ColorRule {
+  operator: ColorOperator;
+  value?: string;
+  color: string;            // hex color, e.g. "#ef4444"
+}
+
 export interface GlobalField {
   id: string;
   meta_key: string;
@@ -61,10 +81,18 @@ export interface GlobalField {
   category: FieldCategory;
   aliases: string[];
   sort_order: number;
+  read_only: boolean;
+  visibility_rules: VisibilityRule[];
+  color_rules: ColorRule[];
   created_at: string;
 }
 
-export type GlobalFieldInsert = Omit<GlobalField, 'id' | 'created_at' | 'aliases'> & { aliases?: string[] };
+export type GlobalFieldInsert = Omit<GlobalField, 'id' | 'created_at' | 'aliases' | 'read_only' | 'visibility_rules' | 'color_rules'> & {
+  aliases?: string[];
+  read_only?: boolean;
+  visibility_rules?: VisibilityRule[];
+  color_rules?: ColorRule[];
+};
 
 // ─── Field Group (repeating) ────────────────────────
 export interface FieldGroup {

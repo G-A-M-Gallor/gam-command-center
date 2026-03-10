@@ -1,0 +1,71 @@
+{
+  "name": "WATI Get Messages",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wati-messages",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [250, 300],
+      "id": "wati-messages-webhook",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://live-mt-server.wati.io/102586/api/v1/getMessages/{{ $json.body.phone }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pageSize",
+              "value": "={{ $json.body.pageSize || 20 }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImdhbG1pbGxlcjY5QGdtYWlsLmNvbSIsIm5hbWVpZCI6ImdhbG1pbGxlcjY5QGdtYWlsLmNvbSIsImVtYWlsIjoiZ2FsbWlsbGVyNjlAZ21haWwuY29tIiwiYXV0aF90aW1lIjoiMDMvMDkvMjAyNiAyMjozMToxNCIsInRlbmFudF9pZCI6IjEwMjU4NiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBRE1JTklTVFJBVE9SIiwiZXhwIjoyNTM0MDIzMDA4MDAsImlzcyI6IkNsYXJlX0FJIiwiYXVkIjoiQ2xhcmVfQUkifQ.yneQRQ5CO-5QK2ZBD7VgaP9SYKlAf8z3k2JK9saARLI"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300],
+      "id": "wati-messages-http",
+      "name": "WATI Get Messages"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ phone: $input.first().json.body?.phone, messages: ($json.messages?.items || []).filter(m => m.type === 'text' || m.type === 'image' || m.type === 'document').map(m => ({ text: m.text || '', from: m.owner ? 'agent' : 'contact', timestamp: m.created, type: m.type })) }) }}"
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 300],
+      "id": "wati-messages-respond",
+      "name": "Respond"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "WATI Get Messages", "type": "main", "index": 0 }]]
+    },
+    "WATI Get Messages": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}

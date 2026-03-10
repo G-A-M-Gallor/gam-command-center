@@ -1,0 +1,79 @@
+{
+  "name": "WATI Get Contacts",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wati-contacts",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [250, 300],
+      "id": "wati-contacts-webhook",
+      "name": "Webhook"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://live-mt-server.wati.io/102586/api/v1/getContacts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "pageSize",
+              "value": "={{ $json.body.pageSize || 20 }}"
+            },
+            {
+              "name": "pageNumber",
+              "value": "={{ $json.body.pageNumber || 1 }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $json.body.name || '' }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6ImdhbG1pbGxlcjY5QGdtYWlsLmNvbSIsIm5hbWVpZCI6ImdhbG1pbGxlcjY5QGdtYWlsLmNvbSIsImVtYWlsIjoiZ2FsbWlsbGVyNjlAZ21haWwuY29tIiwiYXV0aF90aW1lIjoiMDMvMDkvMjAyNiAyMjozMToxNCIsInRlbmFudF9pZCI6IjEwMjU4NiIsImRiX25hbWUiOiJtdC1wcm9kLVRlbmFudHMiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBRE1JTklTVFJBVE9SIiwiZXhwIjoyNTM0MDIzMDA4MDAsImlzcyI6IkNsYXJlX0FJIiwiYXVkIjoiQ2xhcmVfQUkifQ.yneQRQ5CO-5QK2ZBD7VgaP9SYKlAf8z3k2JK9saARLI"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 300],
+      "id": "wati-contacts-http",
+      "name": "WATI Get Contacts"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ total: $json.link?.total || 0, contacts: ($json.contact_list || []).map(c => ({ name: c.fullName || 'Unknown', phone: c.phone, status: c.contactStatus, lastUpdated: c.lastUpdated, source: c.source, leadStage: (c.customParams || []).find(p => p.name === 'lead_stage')?.value || '' })) }) }}"
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [720, 300],
+      "id": "wati-contacts-respond",
+      "name": "Respond"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "WATI Get Contacts", "type": "main", "index": 0 }]]
+    },
+    "WATI Get Contacts": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  }
+}

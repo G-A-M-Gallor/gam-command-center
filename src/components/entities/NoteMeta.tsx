@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ChevronDown, ChevronRight, Link2, Plus, X, Loader2, Users } from 'lucide-react';
+import { ChevronDown, ChevronRight, Link2, Plus, X, Loader2, Users, Lock } from 'lucide-react';
 import { StakeholderPanel } from './StakeholderPanel';
 import { ActivityFeed } from './ActivityFeed';
 import { NoteActions } from './NoteActions';
@@ -14,7 +14,7 @@ import {
   searchNotes, fetchFieldGroups, fetchNoteInfoBatch,
   fetchStakeholders,
 } from '@/lib/supabase/entityQueries';
-import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel, TemplateConfig, TemplateSection } from '@/lib/entities/types';
+import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel, TemplateConfig, TemplateSection, VisibilityRule, ColorRule } from '@/lib/entities/types';
 
 interface Props {
   noteId: string;
@@ -29,14 +29,18 @@ interface Props {
 
 // ─── Field Value Editor ──────────────────────────────
 function FieldEditor({
-  field, value, lang, onChange,
+  field, value, lang, onChange, readOnly, fieldColor,
 }: {
   field: GlobalField; value: unknown; lang: string;
   onChange: (val: unknown) => void;
+  readOnly?: boolean;
+  fieldColor?: string | null;
 }) {
+  const colorStyle = fieldColor ? { borderColor: fieldColor, boxShadow: `0 0 0 1px ${fieldColor}20` } : {};
+  const readOnlyClass = readOnly ? 'opacity-60 pointer-events-none' : '';
   if (field.is_composite) {
     return (
-      <div className="space-y-1.5">
+      <div className={`space-y-1.5 ${readOnlyClass}`}>
         {field.sub_fields.map(sf => (
           <div key={sf.meta_key} className="flex items-center gap-2">
             <label className="text-[10px] text-slate-500 w-16 shrink-0">
@@ -45,11 +49,14 @@ function FieldEditor({
             <input
               type={sf.field_type === 'number' ? 'number' : sf.field_type === 'date' ? 'date' : 'text'}
               value={String((value as Record<string, unknown> | undefined)?.[sf.meta_key] ?? '')}
+              readOnly={readOnly}
               onChange={e => {
+                if (readOnly) return;
                 const current = (typeof value === 'object' && value) ? { ...value as Record<string, unknown> } : {};
                 current[sf.meta_key] = e.target.value;
                 onChange(current);
               }}
+              style={colorStyle}
               className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none"
             />
           </div>
@@ -63,8 +70,10 @@ function FieldEditor({
       return (
         <select
           value={String(value ?? '')}
+          disabled={readOnly}
           onChange={e => onChange(e.target.value)}
-          className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300"
+          style={colorStyle}
+          className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300 ${readOnlyClass}`}
         >
           <option value="">—</option>
           {field.options.map(o => (
@@ -77,8 +86,9 @@ function FieldEditor({
         <input
           type="checkbox"
           checked={!!value}
+          disabled={readOnly}
           onChange={e => onChange(e.target.checked)}
-          className="rounded border-white/20"
+          className={`rounded border-white/20 ${readOnlyClass}`}
         />
       );
     case 'date':
@@ -86,8 +96,10 @@ function FieldEditor({
         <input
           type="date"
           value={String(value ?? '')}
+          readOnly={readOnly}
           onChange={e => onChange(e.target.value)}
-          className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none"
+          style={colorStyle}
+          className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none ${readOnlyClass}`}
         />
       );
     case 'number':
@@ -95,8 +107,10 @@ function FieldEditor({
         <input
           type="number"
           value={String(value ?? '')}
+          readOnly={readOnly}
           onChange={e => onChange(Number(e.target.value))}
-          className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none"
+          style={colorStyle}
+          className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 focus:border-purple-500/50 focus:outline-none ${readOnlyClass}`}
         />
       );
     default:
@@ -104,9 +118,11 @@ function FieldEditor({
         <input
           type={field.field_type === 'email' ? 'email' : field.field_type === 'url' ? 'url' : 'text'}
           value={String(value ?? '')}
+          readOnly={readOnly}
           onChange={e => onChange(e.target.value)}
           placeholder={field.label[lang as keyof I18nLabel] || field.meta_key}
-          className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
+          style={colorStyle}
+          className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none ${readOnlyClass}`}
         />
       );
   }
@@ -182,6 +198,38 @@ function GroupEditor({
       )}
     </div>
   );
+}
+
+// ─── Visibility & Color Rule Evaluation ─────────────
+function evaluateCondition(operator: string, fieldValue: unknown, ruleValue?: string): boolean {
+  const strVal = fieldValue != null ? String(fieldValue) : '';
+  switch (operator) {
+    case 'empty': return !strVal;
+    case 'not_empty': return !!strVal;
+    case 'eq': return strVal === (ruleValue ?? '');
+    case 'neq': return strVal !== (ruleValue ?? '');
+    case 'contains': return strVal.includes(ruleValue ?? '');
+    case 'gt': return Number(strVal) > Number(ruleValue ?? 0);
+    case 'lt': return Number(strVal) < Number(ruleValue ?? 0);
+    case 'length_lt': return strVal.length < Number(ruleValue ?? 0);
+    case 'length_gt': return strVal.length > Number(ruleValue ?? 0);
+    default: return true;
+  }
+}
+
+function isFieldVisible(field: GlobalField, meta: Record<string, unknown>): boolean {
+  const rules = field.visibility_rules;
+  if (!rules || rules.length === 0) return true;
+  return rules.every(rule => evaluateCondition(rule.operator, meta[rule.field_ref], rule.value));
+}
+
+function getFieldColor(field: GlobalField, value: unknown): string | null {
+  const rules = field.color_rules;
+  if (!rules || rules.length === 0) return null;
+  for (const rule of rules) {
+    if (evaluateCondition(rule.operator, value, rule.value)) return rule.color;
+  }
+  return null;
 }
 
 export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, columns = 2 }: Props) {
@@ -361,21 +409,27 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
                       {section.label[lang] || section.key}
                     </h4>
                     <div className={`grid gap-3 ${gridClass}`}>
-                      {sectionFields.map(field => (
-                        <div key={field.meta_key} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                          <label className="text-[10px] font-medium text-slate-400 mb-1.5 block flex items-center gap-1.5">
-                            {field.label[lang] || field.meta_key}
-                            {savingField === field.meta_key && <Loader2 size={10} className="animate-spin text-slate-500" />}
-                            {saveError === field.meta_key && <span className="text-[9px] text-red-400">{te.saveFailed}</span>}
-                          </label>
-                          <FieldEditor
-                            field={field}
-                            value={meta[field.meta_key]}
-                            lang={lang}
-                            onChange={val => handleFieldChange(field.meta_key, val)}
-                          />
-                        </div>
-                      ))}
+                      {sectionFields.filter(f => isFieldVisible(f, meta)).map(field => {
+                        const fc = getFieldColor(field, meta[field.meta_key]);
+                        return (
+                          <div key={field.meta_key} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5" style={fc ? { borderColor: fc } : undefined}>
+                            <label className="text-[10px] font-medium text-slate-400 mb-1.5 block flex items-center gap-1.5">
+                              {field.label[lang] || field.meta_key}
+                              {field.read_only && <Lock size={9} className="text-slate-600" />}
+                              {savingField === field.meta_key && <Loader2 size={10} className="animate-spin text-slate-500" />}
+                              {saveError === field.meta_key && <span className="text-[9px] text-red-400">{te.saveFailed}</span>}
+                            </label>
+                            <FieldEditor
+                              field={field}
+                              value={meta[field.meta_key]}
+                              lang={lang}
+                              onChange={val => handleFieldChange(field.meta_key, val)}
+                              readOnly={field.read_only}
+                              fieldColor={fc}
+                            />
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -389,21 +443,27 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
                 : columns === 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'
                 : 'grid-cols-1 md:grid-cols-2'
             }`}>
-              {fields.map(field => (
-                <div key={field.meta_key} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                  <label className="text-[10px] font-medium text-slate-400 mb-1.5 block flex items-center gap-1.5">
-                    {field.label[lang] || field.meta_key}
-                    {savingField === field.meta_key && <Loader2 size={10} className="animate-spin text-slate-500" />}
-                    {saveError === field.meta_key && <span className="text-[9px] text-red-400">{te.saveFailed}</span>}
-                  </label>
-                  <FieldEditor
-                    field={field}
-                    value={meta[field.meta_key]}
-                    lang={lang}
-                    onChange={val => handleFieldChange(field.meta_key, val)}
-                  />
-                </div>
-              ))}
+              {fields.filter(f => isFieldVisible(f, meta)).map(field => {
+                const fc = getFieldColor(field, meta[field.meta_key]);
+                return (
+                  <div key={field.meta_key} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5" style={fc ? { borderColor: fc } : undefined}>
+                    <label className="text-[10px] font-medium text-slate-400 mb-1.5 block flex items-center gap-1.5">
+                      {field.label[lang] || field.meta_key}
+                      {field.read_only && <Lock size={9} className="text-slate-600" />}
+                      {savingField === field.meta_key && <Loader2 size={10} className="animate-spin text-slate-500" />}
+                      {saveError === field.meta_key && <span className="text-[9px] text-red-400">{te.saveFailed}</span>}
+                    </label>
+                    <FieldEditor
+                      field={field}
+                      value={meta[field.meta_key]}
+                      lang={lang}
+                      onChange={val => handleFieldChange(field.meta_key, val)}
+                      readOnly={field.read_only}
+                      fieldColor={fc}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
 

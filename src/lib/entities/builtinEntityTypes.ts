@@ -96,6 +96,88 @@ const agreementTemplate: TemplateConfig = {
   action_buttons: pickActions('deactivate', 'reactivate', 'send_notification', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
 };
 
+// ─── Phase 3 Templates ──────────────────────────────
+
+const employeeTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['full_name', 'role', 'department', 'employee_status', 'manager', 'hire_date', 'phone', 'email', 'id_number', 'salary', 'vacation_days', 'gender', 'tags'],
+    sections: [
+      { key: 'identity', label: { he: 'פרטים אישיים', en: 'Personal Details', ru: 'Личные данные' }, field_refs: ['full_name', 'id_number', 'gender', 'phone', 'email'] },
+      { key: 'employment', label: { he: 'תעסוקה', en: 'Employment', ru: 'Занятость' }, field_refs: ['role', 'department', 'employee_status', 'manager', 'hire_date'] },
+      { key: 'compensation', label: { he: 'תגמול', en: 'Compensation', ru: 'Компенсация' }, field_refs: ['salary', 'vacation_days'] },
+    ],
+  },
+  available_views: ['table', 'board', 'list'],
+  board_config: { group_field: 'department', card_fields: ['role', 'employee_status', 'phone'] },
+  track_activity: true,
+  track_kpi_events: true,
+  kpi_triggers: [
+    { event_type: 'status_change', field_key: 'employee_status' },
+  ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv', 'bulk_field_update', 'bulk_status_change'),
+};
+
+const vendorTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['business', 'business_type', 'industry', 'service_area', 'phone', 'email', 'address', 'status', 'tags'],
+    sections: [
+      { key: 'business', label: { he: 'פרטי עסק', en: 'Business Details', ru: 'Данные о бизнесе' }, field_refs: ['business', 'business_type', 'industry', 'company_size'] },
+      { key: 'contact', label: { he: 'פרטי קשר', en: 'Contact Info', ru: 'Контактные данные' }, field_refs: ['phone', 'email', 'address'] },
+      { key: 'service', label: { he: 'שירות', en: 'Service', ru: 'Услуги' }, field_refs: ['service_area', 'status'] },
+    ],
+  },
+  available_views: ['table', 'board', 'list'],
+  board_config: { group_field: 'industry', card_fields: ['business', 'service_area', 'phone'] },
+  track_activity: true,
+  track_kpi_events: false,
+  action_buttons: pickActions('change_status', 'send_whatsapp', 'call_log', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change'),
+};
+
+const propertyTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['address', 'project_type', 'construction_stage', 'completion_pct', 'project_budget', 'lot_number', 'permit_number', 'floor_count', 'total_area_sqm', 'main_contractor', 'subcontractors', 'start_date', 'due_date', 'status', 'tags'],
+    sections: [
+      { key: 'location', label: { he: 'מיקום', en: 'Location', ru: 'Расположение' }, field_refs: ['address', 'lot_number', 'permit_number'] },
+      { key: 'construction', label: { he: 'בנייה', en: 'Construction', ru: 'Строительство' }, field_refs: ['project_type', 'construction_stage', 'completion_pct', 'floor_count', 'total_area_sqm'] },
+      { key: 'budget', label: { he: 'תקציב וקבלנים', en: 'Budget & Contractors', ru: 'Бюджет и подрядчики' }, field_refs: ['project_budget', 'main_contractor', 'subcontractors'] },
+      { key: 'dates', label: { he: 'תאריכים', en: 'Dates', ru: 'Даты' }, field_refs: ['start_date', 'due_date'] },
+    ],
+  },
+  available_views: ['table', 'board', 'list', 'gantt'],
+  board_config: { group_field: 'construction_stage', card_fields: ['address', 'completion_pct', 'project_budget'] },
+  gantt_config: { start_field: 'start_date', end_field: 'due_date', group_field: 'construction_stage' },
+  track_activity: true,
+  track_kpi_events: true,
+  kpi_triggers: [
+    { event_type: 'status_change', field_key: 'construction_stage' },
+    { event_type: 'field_change', field_key: 'completion_pct' },
+  ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change'),
+};
+
+const invoiceTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['invoice_number', 'invoice_date', 'invoice_amount', 'currency', 'payment_status', 'payment_method', 'assignee', 'tags'],
+    sections: [
+      { key: 'invoice', label: { he: 'חשבונית', en: 'Invoice', ru: 'Счёт' }, field_refs: ['invoice_number', 'invoice_date', 'invoice_amount', 'currency'] },
+      { key: 'payment', label: { he: 'תשלום', en: 'Payment', ru: 'Оплата' }, field_refs: ['payment_status', 'payment_method', 'assignee'] },
+    ],
+  },
+  available_views: ['table', 'list', 'timeline'],
+  timeline_config: { date_field: 'invoice_date', milestone_statuses: ['paid', 'overdue'] },
+  track_activity: true,
+  track_kpi_events: true,
+  kpi_triggers: [
+    { event_type: 'status_change', field_key: 'payment_status' },
+    { event_type: 'field_change', field_key: 'invoice_amount' },
+  ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change'),
+};
+
 // ─── Minimal Action-only Configs (base entity types) ──
 
 const taskActions: TemplateConfig = {
@@ -241,6 +323,51 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     template_config: agreementTemplate,
     sort_order: 8,
   },
+  // ─── Phase 3 Entity Types ─────────────────────────
+  {
+    slug: 'employee',
+    label: { he: 'עובד', en: 'Employee', ru: 'Сотрудник' },
+    icon: '👷',
+    color: '#f59e0b',
+    field_refs: ['full_name', 'role', 'department', 'employee_status', 'manager', 'hire_date', 'phone', 'email', 'id_number', 'salary', 'vacation_days', 'gender', 'tags'],
+    group_refs: ['work_experience', 'education'],
+    default_view: 'table',
+    template_config: employeeTemplate,
+    sort_order: 9,
+  },
+  {
+    slug: 'vendor',
+    label: { he: 'ספק / קבלן', en: 'Vendor', ru: 'Поставщик' },
+    icon: '🏗️',
+    color: '#ec4899',
+    field_refs: ['business', 'business_type', 'industry', 'company_size', 'service_area', 'phone', 'email', 'address', 'status', 'tags'],
+    group_refs: ['call_log', 'payment_log'],
+    default_view: 'table',
+    template_config: vendorTemplate,
+    sort_order: 10,
+  },
+  {
+    slug: 'property',
+    label: { he: 'נכס / אתר בנייה', en: 'Property / Site', ru: 'Объект / Стройка' },
+    icon: '🏠',
+    color: '#06b6d4',
+    field_refs: ['address', 'project_type', 'construction_stage', 'completion_pct', 'project_budget', 'lot_number', 'permit_number', 'floor_count', 'total_area_sqm', 'main_contractor', 'subcontractors', 'start_date', 'due_date', 'status', 'tags'],
+    group_refs: ['document_log', 'meeting_log'],
+    default_view: 'board',
+    template_config: propertyTemplate,
+    sort_order: 11,
+  },
+  {
+    slug: 'invoice',
+    label: { he: 'חשבונית', en: 'Invoice', ru: 'Счёт' },
+    icon: '🧾',
+    color: '#10b981',
+    field_refs: ['invoice_number', 'invoice_date', 'invoice_amount', 'currency', 'payment_status', 'payment_method', 'assignee', 'tags'],
+    group_refs: ['payment_log'],
+    default_view: 'table',
+    template_config: invoiceTemplate,
+    sort_order: 12,
+  },
 ];
 
 export const BUILTIN_CONNECTIONS: EntityConnectionInsert[] = [
@@ -314,5 +441,69 @@ export const BUILTIN_CONNECTIONS: EntityConnectionInsert[] = [
     relation_label: { he: 'אנשי קשר', en: 'Contacts', ru: 'Контакты' },
     reverse_label: { he: 'קשור לעסקה', en: 'Related to Deal', ru: 'Связан со сделкой' },
     relation_kind: 'many-to-many',
+  },
+  // ─── Phase 3 Connections ──────────────────────────
+  {
+    source_type: 'client',
+    target_type: 'property',
+    relation_label: { he: 'נכסים', en: 'Properties', ru: 'Объекты' },
+    reverse_label: { he: 'שייך ללקוח', en: 'Belongs to Client', ru: 'Принадлежит клиенту' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'property',
+    target_type: 'vendor',
+    relation_label: { he: 'קבלנים', en: 'Vendors', ru: 'Подрядчики' },
+    reverse_label: { he: 'עובד באתר', en: 'Works at Site', ru: 'Работает на объекте' },
+    relation_kind: 'many-to-many',
+  },
+  {
+    source_type: 'property',
+    target_type: 'document',
+    relation_label: { he: 'מסמכים', en: 'Documents', ru: 'Документы' },
+    reverse_label: { he: 'שייך לנכס', en: 'Belongs to Property', ru: 'Принадлежит объекту' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'client',
+    target_type: 'invoice',
+    relation_label: { he: 'חשבוניות', en: 'Invoices', ru: 'Счета' },
+    reverse_label: { he: 'שייך ללקוח', en: 'Belongs to Client', ru: 'Принадлежит клиенту' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'deal',
+    target_type: 'invoice',
+    relation_label: { he: 'חשבוניות', en: 'Invoices', ru: 'Счета' },
+    reverse_label: { he: 'שייך לעסקה', en: 'Belongs to Deal', ru: 'Принадлежит сделке' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'vendor',
+    target_type: 'invoice',
+    relation_label: { he: 'חשבוניות', en: 'Invoices', ru: 'Счета' },
+    reverse_label: { he: 'שייך לספק', en: 'Belongs to Vendor', ru: 'Принадлежит поставщику' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'project',
+    target_type: 'property',
+    relation_label: { he: 'אתרי בנייה', en: 'Sites', ru: 'Стройки' },
+    reverse_label: { he: 'שייך לפרויקט', en: 'Belongs to Project', ru: 'Принадлежит проекту' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'property',
+    target_type: 'employee',
+    relation_label: { he: 'צוות', en: 'Team', ru: 'Команда' },
+    reverse_label: { he: 'עובד באתר', en: 'Works at Site', ru: 'Работает на объекте' },
+    relation_kind: 'many-to-many',
+  },
+  {
+    source_type: 'vendor',
+    target_type: 'agreement',
+    relation_label: { he: 'הסכמים', en: 'Agreements', ru: 'Соглашения' },
+    reverse_label: { he: 'שייך לספק', en: 'Belongs to Vendor', ru: 'Принадлежит поставщику' },
+    relation_kind: 'one-to-many',
   },
 ];

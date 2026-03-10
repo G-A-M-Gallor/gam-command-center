@@ -5,6 +5,7 @@ import {
   Plus, Search, Edit3, Trash2, ChevronDown, ChevronRight,
   Hash, Type, Calendar as CalendarIcon, CheckSquare, List, Link as LinkIcon,
   Mail, Phone, Users, Tag, Combine, Lock, GitMerge, X, GripVertical, LayoutGrid,
+  Info, Eye, Palette, Shield, Table2, CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -21,7 +22,10 @@ import {
   getFieldUsage, generateMetaKey, mergeField,
 } from '@/lib/supabase/entityQueries';
 import { BUILTIN_FIELDS } from '@/lib/entities/builtinFields';
+import { FieldEditorModal } from '@/components/entities/FieldEditorModal';
 import type { GlobalField, GlobalFieldInsert, FieldType, FieldCategory, SubField, FieldOption, I18nLabel } from '@/lib/entities/types';
+
+type ViewMode = 'list' | 'cards' | 'compact';
 
 const FIELD_TYPE_ICONS: Record<string, React.ElementType> = {
   text: Type, number: Hash, select: List, 'multi-select': Tag,
@@ -46,7 +50,7 @@ const FIELD_TYPE_LABELS: Record<string, { he: string; en: string }> = {
   formula: { he: 'נוסחה', en: 'Formula' },
 };
 
-const CATEGORIES: FieldCategory[] = ['system', 'general', 'contact', 'business', 'project', 'hr', 'finance'];
+const CATEGORIES: FieldCategory[] = ['system', 'general', 'contact', 'business', 'project', 'hr', 'finance', 'construction'];
 const CATEGORY_LABELS: Record<string, { he: string; en: string }> = {
   system: { he: 'מערכת', en: 'System' },
   general: { he: 'כללי', en: 'General' },
@@ -55,6 +59,7 @@ const CATEGORY_LABELS: Record<string, { he: string; en: string }> = {
   project: { he: 'פרויקט', en: 'Project' },
   hr: { he: 'משאבי אנוש', en: 'HR' },
   finance: { he: 'פיננסי', en: 'Finance' },
+  construction: { he: 'בנייה', en: 'Construction' },
 };
 
 const EMPTY_LABEL: I18nLabel = { he: '', en: '', ru: '' };
@@ -92,6 +97,9 @@ function newFieldDefaults(): GlobalFieldInsert {
     category: 'general',
     aliases: [],
     sort_order: 0,
+    read_only: false,
+    visibility_rules: [],
+    color_rules: [],
   };
 }
 
@@ -215,6 +223,146 @@ function SortableFieldRow({
   );
 }
 
+/* ─── Field Card (cards view) ─────────────────────────────────── */
+
+function FieldCard({
+  field, lang, te, usageMap, onEdit, onDelete,
+}: {
+  field: GlobalField;
+  lang: 'he' | 'en';
+  te: Record<string, unknown>;
+  usageMap: Record<string, string[]>;
+  onEdit: (f: GlobalField) => void;
+  onDelete: (f: GlobalField) => void;
+}) {
+  const [showInfo, setShowInfo] = useState(false);
+  const Icon = FIELD_TYPE_ICONS[field.field_type] ?? Type;
+  const usage = usageMap[field.meta_key] ?? [];
+  const isSystem = field.category === 'system';
+  const desc = field.description[lang] || (te as { noDescription: string }).noDescription;
+  const hasOpts = field.options.length > 0;
+  const hasVal = field.validation && Object.keys(field.validation).length > 0;
+  const hasCR = (field.color_rules ?? []).length > 0;
+  const hasVR = (field.visibility_rules ?? []).length > 0;
+
+  return (
+    <div className={`relative rounded-xl border p-4 transition-colors hover:bg-white/[0.04] group ${
+      isSystem ? 'border-purple-500/15 bg-purple-500/[0.03]' : 'border-white/[0.06] bg-white/[0.02]'
+    }`}>
+      {/* Top row: icon + name + actions */}
+      <div className="flex items-start gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-lg shrink-0 ${
+          isSystem ? 'bg-amber-500/10' : 'bg-purple-500/10'
+        }`}>
+          <Icon size={18} className={isSystem ? 'text-amber-400' : 'text-purple-400'} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-slate-200 truncate">
+              {field.label[lang] || field.meta_key}
+            </span>
+            {isSystem && <Lock size={10} className="text-amber-400 shrink-0" />}
+            {field.read_only && <Shield size={10} className="text-blue-400 shrink-0" />}
+          </div>
+          <code className="text-[10px] text-slate-500">{field.meta_key}</code>
+        </div>
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={() => setShowInfo(!showInfo)} className="rounded p-1 text-slate-500 hover:text-slate-300 hover:bg-white/[0.06]">
+            <Info size={13} />
+          </button>
+          {!isSystem && (
+            <>
+              <button onClick={() => onEdit(field)} className="rounded p-1 text-slate-500 hover:text-slate-300 hover:bg-white/[0.06]">
+                <Edit3 size={13} />
+              </button>
+              <button onClick={() => onDelete(field)} className="rounded p-1 text-slate-500 hover:text-red-400 hover:bg-white/[0.06]">
+                <Trash2 size={13} />
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Description */}
+      <p className="text-[11px] text-slate-400/80 mt-2 line-clamp-2">{desc}</p>
+
+      {/* Tags row */}
+      <div className="flex flex-wrap gap-1.5 mt-3">
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400">
+          {FIELD_TYPE_LABELS[field.field_type]?.[lang] ?? field.field_type}
+        </span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.06] text-slate-400">
+          {CATEGORY_LABELS[field.category]?.[lang] ?? field.category}
+        </span>
+        {hasOpts && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300">
+            {field.options.length} {(te as { optionsCount: string }).optionsCount}
+          </span>
+        )}
+        {hasCR && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300"><Palette size={9} className="inline -mt-px" /> {(te as { hasColorRules: string }).hasColorRules}</span>}
+        {hasVR && <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-300"><Eye size={9} className="inline -mt-px" /> {(te as { hasVisibilityRules: string }).hasVisibilityRules}</span>}
+        {field.read_only && <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 text-red-300">{(te as { isReadOnly: string }).isReadOnly}</span>}
+      </div>
+
+      {/* Usage */}
+      {usage.length > 0 && (
+        <div className="flex items-center gap-1 mt-2 flex-wrap">
+          <span className="text-[9px] text-slate-600">{(te as { usedIn: string }).usedIn}:</span>
+          {usage.map(slug => (
+            <Link key={slug} href={`/dashboard/entities/${slug}`}
+              className="text-[9px] px-1 py-0.5 rounded bg-purple-500/10 text-purple-300 hover:bg-purple-500/20">
+              {slug}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Expanded info panel */}
+      {showInfo && (
+        <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2 animate-in fade-in duration-200">
+          <div>
+            <span className="text-[10px] font-medium text-slate-500">{(te as { fieldPurpose: string }).fieldPurpose}</span>
+            <p className="text-[11px] text-slate-300 mt-0.5">{field.description[lang] || field.description.en || field.description.he || '—'}</p>
+          </div>
+          {hasVal && (
+            <div>
+              <span className="text-[10px] font-medium text-slate-500">{(te as { hasValidation: string }).hasValidation}</span>
+              <div className="flex gap-2 mt-0.5">
+                {field.validation.required && <span className="text-[10px] text-emerald-400">required</span>}
+                {field.validation.unique && <span className="text-[10px] text-blue-400">unique</span>}
+                {field.validation.pattern && <span className="text-[10px] text-amber-400">/{field.validation.pattern}/</span>}
+                {field.validation.min != null && <span className="text-[10px] text-slate-400">min: {field.validation.min}</span>}
+                {field.validation.max != null && <span className="text-[10px] text-slate-400">max: {field.validation.max}</span>}
+              </div>
+            </div>
+          )}
+          {hasOpts && (
+            <div>
+              <span className="text-[10px] font-medium text-slate-500">{(te as { optionsCount: string }).optionsCount} ({field.options.length})</span>
+              <div className="flex flex-wrap gap-1 mt-0.5">
+                {field.options.slice(0, 8).map((opt, i) => (
+                  <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: `${opt.color}20`, color: opt.color }}>
+                    {opt.label[lang] || opt.value}
+                  </span>
+                ))}
+                {field.options.length > 8 && <span className="text-[10px] text-slate-500">+{field.options.length - 8}</span>}
+              </div>
+            </div>
+          )}
+          {field.aliases.length > 0 && (
+            <div>
+              <span className="text-[10px] font-medium text-slate-500">{(te as { aliases: string }).aliases}</span>
+              <div className="flex gap-1 mt-0.5">
+                {field.aliases.map(a => <code key={a} className="text-[10px] px-1 rounded bg-white/[0.04] text-slate-400">{a}</code>)}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Main page ──────────────────────────────────────────────── */
 
 export default function FieldLibraryPage() {
@@ -235,6 +383,10 @@ export default function FieldLibraryPage() {
   const [mergeSourceId, setMergeSourceId] = useState<string | null>(null);
   const [newAlias, setNewAlias] = useState('');
   const [deletingField, setDeletingField] = useState<GlobalField | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window !== 'undefined') return (localStorage.getItem('cc-fields-view') as ViewMode) || 'list';
+    return 'list';
+  });
   const [groupByCategory, setGroupByCategory] = useState(() => {
     if (typeof window !== 'undefined') return localStorage.getItem('cc-fields-grouped') === 'true';
     return false;
@@ -295,24 +447,28 @@ export default function FieldLibraryPage() {
       if (typeFilter !== 'all' && f.field_type !== typeFilter) return false;
       if (search) {
         const q = search.toLowerCase();
-        const label = f.label[isHe ? 'he' : 'en']?.toLowerCase() ?? '';
-        if (!f.meta_key.includes(q) && !label.includes(q)) return false;
+        const label = (f.label.he?.toLowerCase() ?? '') + ' ' + (f.label.en?.toLowerCase() ?? '') + ' ' + (f.label.ru?.toLowerCase() ?? '');
+        const desc = (f.description.he?.toLowerCase() ?? '') + ' ' + (f.description.en?.toLowerCase() ?? '');
+        const catLabel = (CATEGORY_LABELS[f.category]?.he ?? '') + ' ' + (CATEGORY_LABELS[f.category]?.en ?? '');
+        const typeLabel = (FIELD_TYPE_LABELS[f.field_type]?.he ?? '') + ' ' + (FIELD_TYPE_LABELS[f.field_type]?.en ?? '');
+        const searchIndex = `${f.meta_key} ${label} ${desc} ${catLabel} ${typeLabel} ${(f.aliases ?? []).join(' ')}`.toLowerCase();
+        if (!searchIndex.includes(q)) return false;
       }
       return true;
     });
-  }, [fields, search, categoryFilter, typeFilter, isHe]);
+  }, [fields, search, categoryFilter, typeFilter]);
 
-  // Drag is only active when viewing unfiltered, ungrouped full list
-  const isDragEnabled = !search && categoryFilter === 'all' && typeFilter === 'all' && !groupByCategory;
+  // Drag is only active when viewing unfiltered, ungrouped list view
+  const isDragEnabled = viewMode === 'list' && !search && categoryFilter === 'all' && typeFilter === 'all' && !groupByCategory;
 
   const handleSave = async () => {
     let finalDraft = { ...draft };
     if (!editingId) {
-      const label = draft.label.en || draft.label.he;
+      const label = draft.label?.en || draft.label?.he || '';
       if (!label.trim()) return;
       finalDraft.meta_key = generateMetaKey(label);
     }
-    if (!finalDraft.meta_key.trim()) return;
+    if (!finalDraft.meta_key?.trim()) return;
     let success: boolean;
     if (editingId) {
       success = await updateGlobalField(editingId, finalDraft);
@@ -349,8 +505,8 @@ export default function FieldLibraryPage() {
     setEditingId(field.id);
     setDraft({
       meta_key: field.meta_key,
-      label: { ...field.label },
-      description: { ...field.description },
+      label: { he: field.label?.he ?? '', en: field.label?.en ?? '', ru: field.label?.ru ?? '' },
+      description: { he: field.description?.he ?? '', en: field.description?.en ?? '', ru: field.description?.ru ?? '' },
       field_type: field.field_type,
       is_composite: field.is_composite,
       sub_fields: [...field.sub_fields],
@@ -362,6 +518,9 @@ export default function FieldLibraryPage() {
       category: field.category as FieldCategory,
       aliases: [...(field.aliases ?? [])],
       sort_order: field.sort_order,
+      read_only: field.read_only ?? false,
+      visibility_rules: [...(field.visibility_rules ?? [])],
+      color_rules: [...(field.color_rules ?? [])],
     });
     setNewAlias('');
     setShowCreate(true);
@@ -411,6 +570,11 @@ export default function FieldLibraryPage() {
       ...d,
       options: d.options.map((o, i) => i === idx ? { ...o, ...patch } : o),
     }));
+  };
+
+  const changeViewMode = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('cc-fields-view', mode);
   };
 
   const toggleGroupByCategory = () => {
@@ -511,12 +675,17 @@ export default function FieldLibraryPage() {
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder={te.searchFields}
+            placeholder={(te as unknown as Record<string, string>).searchByAll ?? te.searchFields}
             className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] ps-9 pe-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500/50 focus:outline-none"
           />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+              <X size={14} />
+            </button>
+          )}
         </div>
 
-        {/* 1. CustomSelect — category filter */}
+        {/* Category filter */}
         <CustomSelect
           value={categoryFilter}
           options={categoryOptions}
@@ -524,7 +693,7 @@ export default function FieldLibraryPage() {
           className="min-w-[140px]"
         />
 
-        {/* 1. CustomSelect — type filter */}
+        {/* Type filter */}
         <CustomSelect
           value={typeFilter}
           options={typeOptions}
@@ -532,18 +701,42 @@ export default function FieldLibraryPage() {
           className="min-w-[130px]"
         />
 
-        {/* 2. Group toggle */}
-        <button
-          onClick={toggleGroupByCategory}
-          className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
-            groupByCategory
-              ? 'border-purple-500/30 bg-purple-500/10 text-purple-300'
-              : 'border-white/[0.08] bg-white/[0.03] text-slate-400 hover:text-slate-300'
-          }`}
-          title={groupByCategory ? te.flatList : te.groupByCategory}
-        >
-          {groupByCategory ? <List size={14} /> : <LayoutGrid size={14} />}
-        </button>
+        {/* View mode switcher */}
+        <div className="flex items-center rounded-lg border border-white/[0.08] overflow-hidden">
+          {([
+            { mode: 'list' as ViewMode, icon: List, label: te.viewList },
+            { mode: 'cards' as ViewMode, icon: CreditCard, label: te.viewCards },
+            { mode: 'compact' as ViewMode, icon: Table2, label: te.viewCompact },
+          ]).map(({ mode, icon: ModeIcon, label }) => (
+            <button
+              key={mode}
+              onClick={() => changeViewMode(mode)}
+              className={`flex items-center gap-1 px-2.5 py-2 text-xs transition-colors ${
+                viewMode === mode
+                  ? 'bg-purple-500/15 text-purple-300'
+                  : 'bg-white/[0.02] text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+              }`}
+              title={label as string}
+            >
+              <ModeIcon size={13} />
+            </button>
+          ))}
+        </div>
+
+        {/* Group toggle (only in list view) */}
+        {viewMode === 'list' && (
+          <button
+            onClick={toggleGroupByCategory}
+            className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
+              groupByCategory
+                ? 'border-purple-500/30 bg-purple-500/10 text-purple-300'
+                : 'border-white/[0.08] bg-white/[0.03] text-slate-400 hover:text-slate-300'
+            }`}
+            title={groupByCategory ? te.flatList : te.groupByCategory}
+          >
+            {groupByCategory ? <List size={14} /> : <LayoutGrid size={14} />}
+          </button>
+        )}
 
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setDraft(newFieldDefaults()); }}
@@ -556,8 +749,9 @@ export default function FieldLibraryPage() {
 
       {/* Stats */}
       <div className="flex gap-4 text-xs text-slate-500">
-        <span>{filtered.length} {te.fields}</span>
+        <span>{filtered.length}/{fields.length} {te.fields}</span>
         <span>{fields.filter(f => f.is_composite).length} {te.composite}</span>
+        {search && <span className="text-purple-400">&quot;{search}&quot;</span>}
       </div>
 
       {/* Field List */}
@@ -568,7 +762,6 @@ export default function FieldLibraryPage() {
           ))}
         </div>
       ) : fields.length === 0 ? (
-        /* 9. Empty state — no fields at all */
         <div className="py-16 text-center">
           <Plus size={36} className="mx-auto text-slate-700 mb-3" />
           <p className="text-sm text-slate-400">{te.noFieldsYet}</p>
@@ -580,14 +773,92 @@ export default function FieldLibraryPage() {
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        /* 9. Empty state — search/filter with no results */
         <div className="py-16 text-center">
           <Search size={36} className="mx-auto text-slate-700 mb-3" />
           <p className="text-sm text-slate-400">{te.noFieldsFound}</p>
           <p className="text-xs text-slate-600 mt-1">{te.tryDifferentSearch}</p>
         </div>
-      ) : groupByCategory && groupedFields ? (
-        /* 2. Grouped by category */
+      ) : viewMode === 'cards' ? (
+        /* ── Cards view ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtered.map(field => (
+            <FieldCard
+              key={field.id}
+              field={field}
+              lang={lang}
+              te={te as unknown as Record<string, unknown>}
+              usageMap={usageMap}
+              onEdit={startEdit}
+              onDelete={setDeletingField}
+            />
+          ))}
+        </div>
+      ) : viewMode === 'compact' ? (
+        /* ── Compact table view ── */
+        <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+          <table className="w-full text-[11px]">
+            <thead>
+              <tr className="bg-white/[0.03] text-slate-500 border-b border-white/[0.06]">
+                <th className="text-start px-3 py-2 font-medium">{te.label}</th>
+                <th className="text-start px-3 py-2 font-medium">{te.metaKey}</th>
+                <th className="text-start px-3 py-2 font-medium">{te.fieldType}</th>
+                <th className="text-start px-3 py-2 font-medium">{te.category}</th>
+                <th className="text-start px-3 py-2 font-medium">{te.options}</th>
+                <th className="text-start px-3 py-2 font-medium">{te.fieldSettings}</th>
+                <th className="text-start px-3 py-2 font-medium">{te.usedIn}</th>
+                <th className="px-3 py-2 w-20"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(field => {
+                const Icon = FIELD_TYPE_ICONS[field.field_type] ?? Type;
+                const usage = usageMap[field.meta_key] ?? [];
+                const isSystem = field.category === 'system';
+                return (
+                  <tr key={field.id} className="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors group">
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Icon size={12} className={isSystem ? 'text-amber-400' : 'text-purple-400'} />
+                        <span className="text-slate-200 font-medium">{field.label[lang] || field.meta_key}</span>
+                        {isSystem && <Lock size={9} className="text-amber-400" />}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2"><code className="text-slate-500">{field.meta_key}</code></td>
+                    <td className="px-3 py-2 text-slate-400">{FIELD_TYPE_LABELS[field.field_type]?.[lang] ?? field.field_type}</td>
+                    <td className="px-3 py-2 text-slate-400">{CATEGORY_LABELS[field.category]?.[lang] ?? field.category}</td>
+                    <td className="px-3 py-2 text-slate-500">{field.options.length > 0 ? field.options.length : '—'}</td>
+                    <td className="px-3 py-2">
+                      <div className="flex gap-1">
+                        {field.validation?.required && <span className="text-[9px] px-1 rounded bg-emerald-500/10 text-emerald-400">req</span>}
+                        {field.validation?.unique && <span className="text-[9px] px-1 rounded bg-blue-500/10 text-blue-400">uniq</span>}
+                        {(field.color_rules ?? []).length > 0 && <span className="text-[9px] px-1 rounded bg-amber-500/10 text-amber-300"><Palette size={8} className="inline" /></span>}
+                        {(field.visibility_rules ?? []).length > 0 && <span className="text-[9px] px-1 rounded bg-green-500/10 text-green-300"><Eye size={8} className="inline" /></span>}
+                        {field.read_only && <span className="text-[9px] px-1 rounded bg-red-500/10 text-red-300"><Shield size={8} className="inline" /></span>}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex gap-1">
+                        {usage.map(slug => (
+                          <Link key={slug} href={`/dashboard/entities/${slug}`} className="text-[9px] px-1 rounded bg-purple-500/10 text-purple-300 hover:bg-purple-500/20">{slug}</Link>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      {!isSystem && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => startEdit(field)} className="rounded p-1 text-slate-500 hover:text-slate-300"><Edit3 size={12} /></button>
+                          <button onClick={() => setDeletingField(field)} className="rounded p-1 text-slate-500 hover:text-red-400"><Trash2 size={12} /></button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : viewMode === 'list' && groupByCategory && groupedFields ? (
+        /* ── List view — grouped ── */
         <div className="space-y-4">
           {CATEGORIES.filter(cat => groupedFields[cat]?.length).map(cat => {
             const catFields = groupedFields[cat];
@@ -612,7 +883,7 @@ export default function FieldLibraryPage() {
           })}
         </div>
       ) : (
-        /* Flat list with DnD */
+        /* ── List view — flat with DnD ── */
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filtered.map(f => f.id)} strategy={verticalListSortingStrategy}>
             <div className="grid gap-2">
@@ -645,391 +916,14 @@ export default function FieldLibraryPage() {
 
       {/* Create/Edit Modal */}
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div
-            className="w-full max-w-lg rounded-xl border border-white/[0.08] bg-slate-900 p-6 shadow-2xl max-h-[85vh] overflow-y-auto"
-            dir={isHe ? 'rtl' : 'ltr'}
-          >
-            <h2 className="text-lg font-semibold text-slate-100 mb-4">
-              {editingId ? te.editField : te.newField}
-            </h2>
-
-            <div className="space-y-4">
-              {/* meta_key — auto-generated, locked */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.metaKey}</label>
-                {editingId ? (
-                  <div className="mt-1 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2">
-                    <Lock size={12} className="text-slate-500 shrink-0" />
-                    <code className="text-sm text-slate-300">{draft.meta_key}</code>
-                  </div>
-                ) : (
-                  <div className="mt-1 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2">
-                    <Lock size={12} className="text-slate-500 shrink-0" />
-                    <span className="text-sm text-slate-500">{te.autoGenerated}</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Label HE */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.labelHe}</label>
-                <input
-                  type="text"
-                  value={draft.label.he}
-                  onChange={e => setDraft(d => ({ ...d, label: { ...d.label, he: e.target.value } }))}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none"
-                  dir="rtl"
-                />
-              </div>
-
-              {/* Label EN */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.labelEn}</label>
-                <input
-                  type="text"
-                  value={draft.label.en}
-                  onChange={e => setDraft(d => ({ ...d, label: { ...d.label, en: e.target.value } }))}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none"
-                  dir="ltr"
-                />
-              </div>
-
-              {/* Description HE */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.descriptionHe}</label>
-                <input
-                  type="text"
-                  value={draft.description.he}
-                  onChange={e => setDraft(d => ({ ...d, description: { ...d.description, he: e.target.value } }))}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none"
-                  dir="rtl"
-                />
-              </div>
-
-              {/* Description EN */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.descriptionEn}</label>
-                <input
-                  type="text"
-                  value={draft.description.en}
-                  onChange={e => setDraft(d => ({ ...d, description: { ...d.description, en: e.target.value } }))}
-                  className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none"
-                  dir="ltr"
-                />
-              </div>
-
-              {/* 1. Field Type — CustomSelect */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.fieldType}</label>
-                <CustomSelect
-                  value={draft.field_type}
-                  options={fieldTypeModalOptions}
-                  onChange={v => {
-                    const ft = v as FieldType;
-                    setDraft(d => ({ ...d, field_type: ft, is_composite: ft === 'composite' }));
-                  }}
-                  className="mt-1"
-                />
-              </div>
-
-              {/* 1. Category — CustomSelect */}
-              <div>
-                <label className="text-xs font-medium text-slate-400">{te.category}</label>
-                <CustomSelect
-                  value={draft.category}
-                  options={categoryModalOptions}
-                  onChange={v => setDraft(d => ({ ...d, category: v as FieldCategory }))}
-                  className="mt-1"
-                />
-              </div>
-
-              {/* Sub-fields for composite */}
-              {draft.is_composite && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-400">{te.subFields}</label>
-                    <button onClick={addSubField} className="text-xs text-purple-400 hover:text-purple-300">
-                      + {te.addSubField}
-                    </button>
-                  </div>
-                  {draft.sub_fields.map((sf, i) => (
-                    <div key={i} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={sf.meta_key}
-                        onChange={e => updateSubField(i, { meta_key: e.target.value.replace(/[^a-z0-9_]/g, '') })}
-                        placeholder="meta_key"
-                        className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                        dir="ltr"
-                      />
-                      <input
-                        type="text"
-                        value={sf.label[lang] ?? ''}
-                        onChange={e => updateSubField(i, { label: { ...sf.label, [lang]: e.target.value } })}
-                        placeholder={te.label}
-                        className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                      />
-                      {/* 1. Sub-field type — CustomSelect */}
-                      <CustomSelect
-                        value={sf.field_type}
-                        options={subFieldTypeOptions}
-                        onChange={v => updateSubField(i, { field_type: v as FieldType })}
-                        className="min-w-[100px]"
-                      />
-                    </div>
-                  ))}
-                  <div>
-                    <label className="text-xs font-medium text-slate-400">{te.displayTemplate}</label>
-                    <input
-                      type="text"
-                      value={draft.display_template ?? ''}
-                      onChange={e => setDraft(d => ({ ...d, display_template: e.target.value || null }))}
-                      placeholder="{first_name} {last_name}"
-                      className="mt-1 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Options for select/multi-select */}
-              {(draft.field_type === 'select' || draft.field_type === 'multi-select') && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-slate-400">{te.options}</label>
-                    <button onClick={addOption} className="text-xs text-purple-400 hover:text-purple-300">
-                      + {te.addOption}
-                    </button>
-                  </div>
-                  {draft.options.map((opt, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <input
-                        type="color"
-                        value={opt.color ?? '#94a3b8'}
-                        onChange={e => updateOption(i, { color: e.target.value })}
-                        className="h-7 w-7 rounded border-0 bg-transparent cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={opt.value}
-                        onChange={e => updateOption(i, { value: e.target.value })}
-                        placeholder="value"
-                        className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                        dir="ltr"
-                      />
-                      <input
-                        type="text"
-                        value={opt.label[lang] ?? ''}
-                        onChange={e => updateOption(i, { label: { ...opt.label, [lang]: e.target.value } })}
-                        placeholder={te.label}
-                        className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* 7. Validation Rules */}
-              {(valConfig.required || valConfig.minMax || valConfig.pattern || valConfig.unique) && (
-                <div className="space-y-3 border-t border-white/[0.06] pt-4">
-                  <label className="text-xs font-semibold text-slate-400">{te.validation}</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {valConfig.required && (
-                      <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={draft.validation.required ?? false}
-                          onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, required: e.target.checked || undefined } }))}
-                          className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500/30"
-                        />
-                        {te.required}
-                      </label>
-                    )}
-                    {valConfig.unique && (
-                      <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={draft.validation.unique ?? false}
-                          onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, unique: e.target.checked || undefined } }))}
-                          className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500/30"
-                        />
-                        {te.uniqueValue}
-                      </label>
-                    )}
-                  </div>
-                  {valConfig.minMax && (
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <label className="text-[10px] text-slate-500">Min</label>
-                        <input
-                          type="number"
-                          value={draft.validation.min ?? ''}
-                          onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, min: e.target.value ? Number(e.target.value) : undefined } }))}
-                          className="mt-0.5 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <label className="text-[10px] text-slate-500">Max</label>
-                        <input
-                          type="number"
-                          value={draft.validation.max ?? ''}
-                          onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, max: e.target.value ? Number(e.target.value) : undefined } }))}
-                          className="mt-0.5 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  {valConfig.pattern && (
-                    <div>
-                      <label className="text-[10px] text-slate-500">{te.patternRegex}</label>
-                      <input
-                        type="text"
-                        value={draft.validation.pattern ?? ''}
-                        onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, pattern: e.target.value || undefined } }))}
-                        placeholder="^[A-Z].*"
-                        className="mt-0.5 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                        dir="ltr"
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* 8. Default Value */}
-              <div className="space-y-2 border-t border-white/[0.06] pt-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-400">{te.defaultValue}</label>
-                  {draft.default_value != null && (
-                    <button
-                      onClick={() => setDraft(d => ({ ...d, default_value: null }))}
-                      className="text-[10px] text-slate-500 hover:text-red-400"
-                    >
-                      <X size={12} className="inline" /> {te.noDefault}
-                    </button>
-                  )}
-                </div>
-                {draft.field_type === 'checkbox' ? (
-                  <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={draft.default_value === true}
-                      onChange={e => setDraft(d => ({ ...d, default_value: e.target.checked }))}
-                      className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500/30"
-                    />
-                    {te.defaultValue}
-                  </label>
-                ) : draft.field_type === 'select' ? (
-                  <CustomSelect
-                    value={String(draft.default_value ?? '')}
-                    options={[
-                      { value: '', label: te.noDefault },
-                      ...draft.options.map(o => ({ value: o.value, label: o.label[lang] || o.value })),
-                    ]}
-                    onChange={v => setDraft(d => ({ ...d, default_value: v || null }))}
-                  />
-                ) : draft.field_type === 'multi-select' ? (
-                  <div className="space-y-1">
-                    {draft.options.map(o => {
-                      const selected = Array.isArray(draft.default_value) ? (draft.default_value as string[]).includes(o.value) : false;
-                      return (
-                        <label key={o.value} className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selected}
-                            onChange={e => {
-                              const curr = Array.isArray(draft.default_value) ? [...(draft.default_value as string[])] : [];
-                              if (e.target.checked) curr.push(o.value);
-                              else curr.splice(curr.indexOf(o.value), 1);
-                              setDraft(d => ({ ...d, default_value: curr.length ? curr : null }));
-                            }}
-                            className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500/30"
-                          />
-                          {o.label[lang] || o.value}
-                        </label>
-                      );
-                    })}
-                  </div>
-                ) : draft.field_type === 'number' ? (
-                  <input
-                    type="number"
-                    value={draft.default_value != null ? String(draft.default_value) : ''}
-                    onChange={e => setDraft(d => ({ ...d, default_value: e.target.value ? Number(e.target.value) : null }))}
-                    className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                  />
-                ) : draft.field_type === 'date' ? (
-                  <input
-                    type="date"
-                    value={draft.default_value != null ? String(draft.default_value) : ''}
-                    onChange={e => setDraft(d => ({ ...d, default_value: e.target.value || null }))}
-                    className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                  />
-                ) : (
-                  <input
-                    type="text"
-                    value={draft.default_value != null ? String(draft.default_value) : ''}
-                    onChange={e => setDraft(d => ({ ...d, default_value: e.target.value || null }))}
-                    placeholder={te.noDefault}
-                    className="w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Aliases */}
-            {editingId && (
-              <div className="space-y-2 mt-4">
-                <label className="text-xs font-medium text-slate-400">{te.aliases}</label>
-                {(draft.aliases ?? []).length > 0 ? (
-                  <div className="flex flex-wrap gap-1.5">
-                    {(draft.aliases ?? []).map(alias => (
-                      <span key={alias} className="inline-flex items-center gap-1 rounded bg-blue-500/15 px-2 py-1 text-xs text-blue-300">
-                        <LinkIcon size={10} />
-                        <code>{alias}</code>
-                        <button onClick={() => removeAlias(alias)} className="text-blue-400 hover:text-red-400 ms-0.5">
-                          <X size={10} />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[10px] text-slate-600">{te.noAliases}</p>
-                )}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newAlias}
-                    onChange={e => setNewAlias(e.target.value.replace(/[^a-z0-9_]/g, ''))}
-                    placeholder="alias_key"
-                    className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200"
-                    dir="ltr"
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addAlias(); } }}
-                  />
-                  <button onClick={addAlias} className="text-xs text-purple-400 hover:text-purple-300 px-2">
-                    + {te.addAlias}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                onClick={() => { setShowCreate(false); setEditingId(null); }}
-                className="rounded-lg border border-white/[0.08] px-4 py-2 text-sm text-slate-400 hover:bg-white/[0.04]"
-              >
-                {te.cancel}
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={editingId ? !draft.meta_key.trim() : !(draft.label.en.trim() || draft.label.he.trim())}
-                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-40"
-              >
-                {editingId ? te.save : te.create}
-              </button>
-            </div>
-          </div>
-        </div>
+        <FieldEditorModal
+          draft={draft}
+          editingId={editingId}
+          onDraftChange={setDraft}
+          onSave={handleSave}
+          onClose={() => { setShowCreate(false); setEditingId(null); }}
+          allFieldKeys={fields.map(f => f.meta_key)}
+        />
       )}
 
       {/* Merge Modal */}

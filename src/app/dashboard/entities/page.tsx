@@ -8,6 +8,7 @@ import { IconDisplay } from '@/components/ui/IconPicker';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { fetchGlobalFields, fetchEntityTypes, fetchEntityConnections } from '@/lib/supabase/entityQueries';
+import { EntitySetupGuide } from '@/components/entities/EntitySetupGuide';
 
 export default function EntitiesPage() {
   const { language } = useSettings();
@@ -93,6 +94,14 @@ export default function EntitiesPage() {
               );
             })}
           </div>
+
+          {/* Setup Guide */}
+          <EntitySetupGuide
+            lang={language === 'ru' ? 'ru' : isHe ? 'he' : 'en'}
+            completedFields={stats.fields}
+            completedTypes={stats.types}
+            completedConnections={stats.connections}
+          />
 
           {/* Quick access to entity types */}
           {types.length > 0 && (
