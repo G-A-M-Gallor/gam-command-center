@@ -11,6 +11,7 @@ import {
 import { requireAuth } from "@/lib/api/auth";
 import { aiChatSchema } from "@/lib/api/schemas";
 import { getTasksSummaryForPrompt } from "@/lib/notion/client";
+import { getKnowledgeContext } from "@/lib/ai/knowledgeBase";
 
 const DAILY_TOKEN_LIMIT = 100_000;
 
@@ -151,6 +152,12 @@ export async function POST(request: Request) {
     systemPrompt += `\n\n--- Dashboard Data ---\n${contextBlock}`;
   }
   systemPrompt += sessionBlock;
+
+  // Inject GAM knowledge base from CLAUDE.md
+  const knowledgeBlock = getKnowledgeContext();
+  if (knowledgeBlock) {
+    systemPrompt += `\n\n--- GAM Knowledge Base ---\n${knowledgeBlock}`;
+  }
 
   // Load Notion tasks context (graceful if not configured)
   try {
