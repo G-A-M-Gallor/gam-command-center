@@ -291,8 +291,6 @@ export default function EntityDetailPage() {
         noteId={noteId}
         entityType={entityTypeSlug}
         language={language}
-        meta={note.meta}
-        fields={etInfo ? fields.filter(f => etInfo.field_refs.includes(f.meta_key)) : []}
       />
 
       {/* Tools strip */}
