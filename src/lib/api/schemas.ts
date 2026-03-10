@@ -156,6 +156,29 @@ export const entityDeleteSchema = z.union([
 
 export type EntityDeleteInput = z.infer<typeof entityDeleteSchema>;
 
+// ─── Entity Comments ────────────────────────────────────────
+
+export const commentCreateSchema = z.object({
+  content: z.string().min(1, "content is required").max(5000, "content exceeds 5,000 character limit"),
+  parentId: z.string().uuid("parentId must be a valid UUID").optional(),
+  mentions: z.array(z.string()).optional().default([]),
+});
+
+export type CommentCreateInput = z.infer<typeof commentCreateSchema>;
+
+export const commentUpdateSchema = z.object({
+  content: z.string().min(1, "content is required").max(5000, "content exceeds 5,000 character limit"),
+});
+
+export type CommentUpdateInput = z.infer<typeof commentUpdateSchema>;
+
+export const reactionSchema = z.object({
+  emoji: z.enum(["thumbs_up", "heart", "fire", "eyes", "check"]),
+  action: z.enum(["add", "remove"]),
+});
+
+export type ReactionInput = z.infer<typeof reactionSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

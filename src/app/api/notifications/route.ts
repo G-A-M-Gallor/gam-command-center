@@ -10,10 +10,13 @@ import { z } from "zod";
  */
 
 const postSchema = z.object({
-  type: z.enum(["status", "mention", "deadline", "ai"]).default("status"),
+  type: z.enum(["status", "mention", "deadline", "ai", "entity"]).default("status"),
   titleHe: z.string().min(1).max(500),
   titleEn: z.string().min(1).max(500),
   titleRu: z.string().max(500).optional(),
+  userId: z.string().uuid().optional(),
+  actionUrl: z.string().max(1000).optional(),
+  channel: z.string().max(50).optional(),
 });
 
 const patchSchema = z.union([
@@ -30,11 +33,20 @@ export async function GET(request: Request) {
 
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let query = supabase
       .from("dashboard_notifications")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(50);
+
+    // Filter: show user-specific + global (user_id IS NULL) notifications
+    if (user) {
+      query = query.or(`user_id.eq.${user.id},user_id.is.null`);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return NextResponse.json({ notifications: [], persisted: false });
@@ -50,6 +62,7 @@ export async function GET(request: Request) {
       },
       timestamp: new Date(n.created_at as string).getTime(),
       read: n.is_read || false,
+      actionUrl: n.action_url || null,
     }));
 
     return NextResponse.json({ notifications, persisted: true });
@@ -75,7 +88,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { type, titleHe, titleEn, titleRu } = parsed.data;
+    const { type, titleHe, titleEn, titleRu, userId, actionUrl, channel } = parsed.data;
     const supabase = await createClient();
 
     const { error } = await supabase.from("dashboard_notifications").insert({
@@ -84,6 +97,9 @@ export async function POST(request: Request) {
       title_he: titleHe,
       title_ru: titleRu || titleEn,
       is_read: false,
+      user_id: userId || null,
+      action_url: actionUrl || null,
+      channel: channel || 'in-app',
     });
 
     if (error) {

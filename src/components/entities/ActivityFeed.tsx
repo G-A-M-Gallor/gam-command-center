@@ -13,6 +13,7 @@ import type { ActivityLogEntry, ActivityType, I18nLabel } from '@/lib/entities/t
 interface Props {
   noteId: string;
   language: string;
+  hideCommentInput?: boolean;
 }
 
 const ACTIVITY_ICONS: Record<ActivityType, React.ElementType> = {
@@ -27,6 +28,7 @@ const ACTIVITY_ICONS: Record<ActivityType, React.ElementType> = {
   created: Plus,
   deactivated: Power,
   reactivated: Power,
+  deleted: Trash2,
 };
 
 const LOCALE_MAP: Record<string, string> = { he: 'he-IL', en: 'en-US', ru: 'ru-RU' };
@@ -50,7 +52,7 @@ function formatTimeI18n(
   return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
-export function ActivityFeed({ noteId, language }: Props) {
+export function ActivityFeed({ noteId, language, hideCommentInput }: Props) {
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const locale = LOCALE_MAP[lang] ?? 'en-US';
   const t = getTranslations(language as 'he' | 'en' | 'ru');
@@ -95,62 +97,64 @@ export function ActivityFeed({ noteId, language }: Props) {
       </h4>
 
       {/* Input area */}
-      <div className="mb-3 space-y-2">
-        <div className="flex gap-1 text-[10px]">
-          <button
-            onClick={() => setMode('comment')}
-            className={`px-2 py-1 rounded ${mode === 'comment' ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
-          >
-            <MessageSquare size={10} className="inline me-1" />
-            {te.comment}
-          </button>
-          <button
-            onClick={() => setMode('call')}
-            className={`px-2 py-1 rounded ${mode === 'call' ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
-          >
-            <Phone size={10} className="inline me-1" />
-            {te.callLog}
-          </button>
+      {!hideCommentInput && (
+        <div className="mb-3 space-y-2">
+          <div className="flex gap-1 text-[10px]">
+            <button
+              onClick={() => setMode('comment')}
+              className={`px-2 py-1 rounded ${mode === 'comment' ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              <MessageSquare size={10} className="inline me-1" />
+              {te.comment}
+            </button>
+            <button
+              onClick={() => setMode('call')}
+              className={`px-2 py-1 rounded ${mode === 'call' ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
+            >
+              <Phone size={10} className="inline me-1" />
+              {te.callLog}
+            </button>
+          </div>
+
+          {mode === 'comment' && (
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                value={commentText}
+                onChange={e => setCommentText(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddComment()}
+                placeholder={te.addCommentPlaceholder}
+                className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
+              />
+              <button
+                onClick={handleAddComment}
+                className="rounded bg-purple-600/20 px-2 py-1.5 text-purple-300 hover:bg-purple-600/30"
+              >
+                <Send size={12} />
+              </button>
+            </div>
+          )}
+
+          {mode === 'call' && (
+            <div className="flex gap-1.5">
+              <input
+                type="text"
+                value={callSummary}
+                onChange={e => setCallSummary(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddCallLog()}
+                placeholder={te.callSummaryPlaceholder}
+                className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
+              />
+              <button
+                onClick={handleAddCallLog}
+                className="rounded bg-purple-600/20 px-2 py-1.5 text-purple-300 hover:bg-purple-600/30"
+              >
+                <Send size={12} />
+              </button>
+            </div>
+          )}
         </div>
-
-        {mode === 'comment' && (
-          <div className="flex gap-1.5">
-            <input
-              type="text"
-              value={commentText}
-              onChange={e => setCommentText(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAddComment()}
-              placeholder={te.addCommentPlaceholder}
-              className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
-            />
-            <button
-              onClick={handleAddComment}
-              className="rounded bg-purple-600/20 px-2 py-1.5 text-purple-300 hover:bg-purple-600/30"
-            >
-              <Send size={12} />
-            </button>
-          </div>
-        )}
-
-        {mode === 'call' && (
-          <div className="flex gap-1.5">
-            <input
-              type="text"
-              value={callSummary}
-              onChange={e => setCallSummary(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleAddCallLog()}
-              placeholder={te.callSummaryPlaceholder}
-              className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
-            />
-            <button
-              onClick={handleAddCallLog}
-              className="rounded bg-purple-600/20 px-2 py-1.5 text-purple-300 hover:bg-purple-600/30"
-            >
-              <Send size={12} />
-            </button>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Timeline */}
       {loading ? (

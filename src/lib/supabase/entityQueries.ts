@@ -290,6 +290,15 @@ export async function createNote(
   entityType?: string,
   meta: Record<string, unknown> = {},
 ): Promise<NoteRecord | null> {
+  // Get workspace context from an existing record
+  const { data: existing } = await supabase
+    .from('vb_records')
+    .select('workspace_id, entity_id')
+    .limit(1)
+    .maybeSingle();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from('vb_records')
     .insert([{
@@ -299,6 +308,9 @@ export async function createNote(
       record_type: entityType ?? 'note',
       status: 'active',
       source: 'manual',
+      workspace_id: existing?.workspace_id ?? null,
+      entity_id: existing?.entity_id ?? null,
+      created_by: user?.id ?? null,
     }])
     .select()
     .single();

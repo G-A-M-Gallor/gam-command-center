@@ -327,7 +327,7 @@ export type ActivityType =
   | 'field_change' | 'status_change' | 'comment' | 'call_log'
   | 'relation_added' | 'relation_removed'
   | 'stakeholder_added' | 'stakeholder_removed'
-  | 'created' | 'deactivated' | 'reactivated';
+  | 'created' | 'deactivated' | 'reactivated' | 'deleted';
 
 export interface ActivityLogEntry {
   id: string;

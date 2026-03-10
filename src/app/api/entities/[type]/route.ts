@@ -5,6 +5,7 @@ import {
   entityUpdateSchema,
   entityDeleteSchema,
 } from "@/lib/api/schemas";
+import { logActivityServer, logMetaChanges } from "@/lib/supabase/activityLogger";
 
 /**
  * Entity CRUD API — /api/entities/[type]
@@ -200,6 +201,11 @@ export async function POST(request: Request, context: RouteContext) {
       );
     }
 
+    // Fire-and-forget activity log
+    if (data?.id) {
+      logActivityServer(data.id, 'created', { actorId: user.id }).catch(() => {});
+    }
+
     return NextResponse.json({ data }, { status: 201 });
   } catch (err) {
     return NextResponse.json(
@@ -289,6 +295,28 @@ export async function PATCH(request: Request, context: RouteContext) {
       );
     }
 
+    // Fire-and-forget activity logging
+    const logPromises: Promise<unknown>[] = [];
+
+    if (title !== undefined && title !== existing.title) {
+      logPromises.push(logActivityServer(id, 'field_change', {
+        actorId: user.id, fieldKey: 'title',
+        oldValue: existing.title, newValue: title,
+      }));
+    }
+    if (status !== undefined && status !== existing.status) {
+      logPromises.push(logActivityServer(id, 'status_change', {
+        actorId: user.id, fieldKey: 'status',
+        oldValue: existing.status, newValue: status,
+      }));
+    }
+    if (meta !== undefined) {
+      const oldMeta = typeof existing.meta === 'object' && existing.meta !== null
+        ? (existing.meta as Record<string, unknown>) : {};
+      logPromises.push(logMetaChanges(id, oldMeta, meta, user.id));
+    }
+    Promise.all(logPromises).catch(() => {});
+
     return NextResponse.json({ data });
   } catch (err) {
     return NextResponse.json(
@@ -341,6 +369,15 @@ export async function DELETE(request: Request, context: RouteContext) {
         { error: error.message },
         { status: 500 }
       );
+    }
+
+    // Fire-and-forget activity logging for each deleted entity
+    if (data && data.length > 0) {
+      Promise.all(
+        data.map((d: { id: string }) =>
+          logActivityServer(d.id, 'deleted', { actorId: user.id })
+        )
+      ).catch(() => {});
     }
 
     return NextResponse.json({

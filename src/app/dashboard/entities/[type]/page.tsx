@@ -227,7 +227,9 @@ export default function EntityViewPage() {
       defaultMeta,
     );
     if (note) {
-      await loadNotes();
+      router.push(`/dashboard/entities/${entitySlug}/${note.id}`);
+    } else {
+      toast({ message: lang === 'he' ? 'שגיאה ביצירת פתק — בדוק חיבור ו-auth' : 'Error creating note — check connection & auth', type: 'error' });
     }
   };
 

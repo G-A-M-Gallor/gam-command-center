@@ -178,6 +178,28 @@ const invoiceTemplate: TemplateConfig = {
   action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change'),
 };
 
+const caseTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['case_status', 'service_type', 'assignee', 'total_price', 'paid_amount', 'payment_status', 'agreement_ref', 'start_date', 'due_date', 'tags'],
+    sections: [
+      { key: 'pipeline', label: { he: 'צינור עבודה', en: 'Pipeline', ru: 'Воронка' }, field_refs: ['case_status', 'service_type', 'assignee'] },
+      { key: 'finance', label: { he: 'כספים', en: 'Finance', ru: 'Финансы' }, field_refs: ['total_price', 'paid_amount', 'payment_status'] },
+      { key: 'dates_docs', label: { he: 'תאריכים ומסמכים', en: 'Dates & Documents', ru: 'Даты и документы' }, field_refs: ['start_date', 'due_date', 'agreement_ref'] },
+    ],
+  },
+  available_views: ['board', 'table', 'list', 'timeline'],
+  board_config: { group_field: 'case_status', card_fields: ['service_type', 'total_price', 'assignee', 'due_date'] },
+  timeline_config: { date_field: 'due_date', milestone_statuses: ['completed', 'cancelled'] },
+  track_activity: true,
+  track_kpi_events: true,
+  kpi_triggers: [
+    { event_type: 'status_change', field_key: 'case_status' },
+    { event_type: 'field_change', field_key: 'total_price' },
+  ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
+};
+
 // ─── Minimal Action-only Configs (base entity types) ──
 
 const taskActions: TemplateConfig = {
@@ -368,6 +390,18 @@ export const BUILTIN_ENTITY_TYPES: EntityTypeInsert[] = [
     template_config: invoiceTemplate,
     sort_order: 12,
   },
+  // ─── Phase 4 Entity Types ─────────────────────────
+  {
+    slug: 'case',
+    label: { he: 'תיק שירות', en: 'Case', ru: 'Дело' },
+    icon: '💼',
+    color: '#8b5cf6',
+    field_refs: ['case_status', 'service_type', 'assignee', 'total_price', 'paid_amount', 'payment_status', 'agreement_ref', 'start_date', 'due_date', 'tags'],
+    group_refs: ['call_log'],
+    default_view: 'board',
+    template_config: caseTemplate,
+    sort_order: 13,
+  },
 ];
 
 export const BUILTIN_CONNECTIONS: EntityConnectionInsert[] = [
@@ -504,6 +538,42 @@ export const BUILTIN_CONNECTIONS: EntityConnectionInsert[] = [
     target_type: 'agreement',
     relation_label: { he: 'הסכמים', en: 'Agreements', ru: 'Соглашения' },
     reverse_label: { he: 'שייך לספק', en: 'Belongs to Vendor', ru: 'Принадлежит поставщику' },
+    relation_kind: 'one-to-many',
+  },
+  // ─── Phase 4 Connections ──────────────────────────
+  {
+    source_type: 'client',
+    target_type: 'case',
+    relation_label: { he: 'תיקי שירות', en: 'Cases', ru: 'Дела' },
+    reverse_label: { he: 'שייך ללקוח', en: 'Belongs to Client', ru: 'Принадлежит клиенту' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'case',
+    target_type: 'contact',
+    relation_label: { he: 'אנשי קשר', en: 'Contacts', ru: 'Контакты' },
+    reverse_label: { he: 'קשור לתיק', en: 'Related to Case', ru: 'Связан с делом' },
+    relation_kind: 'many-to-many',
+  },
+  {
+    source_type: 'case',
+    target_type: 'project',
+    relation_label: { he: 'פרויקטים', en: 'Projects', ru: 'Проекты' },
+    reverse_label: { he: 'שייך לתיק', en: 'Belongs to Case', ru: 'Принадлежит делу' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'case',
+    target_type: 'invoice',
+    relation_label: { he: 'חשבוניות', en: 'Invoices', ru: 'Счета' },
+    reverse_label: { he: 'שייך לתיק', en: 'Belongs to Case', ru: 'Принадлежит делу' },
+    relation_kind: 'one-to-many',
+  },
+  {
+    source_type: 'case',
+    target_type: 'agreement',
+    relation_label: { he: 'הסכמים', en: 'Agreements', ru: 'Соглашения' },
+    reverse_label: { he: 'שייך לתיק', en: 'Belongs to Case', ru: 'Принадлежит делу' },
     relation_kind: 'one-to-many',
   },
 ];

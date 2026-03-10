@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   AtSign,
@@ -11,6 +12,7 @@ import {
   BellRing,
   BellOff,
   Loader2,
+  FileText,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -23,10 +25,11 @@ const EVENT_NAME = "notifications-change";
 
 interface NotificationItem {
   id: string;
-  type: "status" | "mention" | "deadline" | "ai";
+  type: "status" | "mention" | "deadline" | "ai" | "entity";
   title: { he: string; en: string; ru: string };
   timestamp: number;
   read: boolean;
+  actionUrl?: string | null;
 }
 
 function loadNotifications(): NotificationItem[] {
@@ -94,6 +97,7 @@ const typeIcons = {
   mention: AtSign,
   deadline: Clock,
   ai: Sparkles,
+  entity: FileText,
 };
 
 const typeColors = {
@@ -101,11 +105,13 @@ const typeColors = {
   mention: "text-blue-400",
   deadline: "text-red-400",
   ai: "text-[var(--cc-accent-400)]",
+  entity: "text-purple-400",
 };
 
 export function NotificationsPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
+  const router = useRouter();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const { state: pushState, subscribe, unsubscribe } = usePushSubscription();
   const [pushLoading, setPushLoading] = useState(false);
@@ -154,6 +160,47 @@ export function NotificationsPanel() {
     const sync = () => setItems(loadNotifications());
     window.addEventListener(EVENT_NAME, sync);
     return () => window.removeEventListener(EVENT_NAME, sync);
+  }, []);
+
+  // Supabase Realtime subscription for live notifications
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: any = null;
+    import("@/lib/supabaseClient").then(({ supabase }) => {
+      channel = supabase
+        .channel("notifications-realtime")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "dashboard_notifications" },
+          (payload: { new: Record<string, unknown> }) => {
+            const n = payload.new;
+            const newItem: NotificationItem = {
+              id: n.id as string,
+              type: (n.notification_type as NotificationItem["type"]) || "status",
+              title: {
+                he: (n.title_he || n.title) as string,
+                en: n.title as string,
+                ru: (n.title_ru || n.title) as string,
+              },
+              timestamp: new Date(n.created_at as string).getTime(),
+              read: false,
+              actionUrl: (n.action_url as string) || null,
+            };
+            const current = loadNotifications();
+            if (!current.some(i => i.id === newItem.id)) {
+              const updated = [newItem, ...current].slice(0, 50);
+              saveNotifications(updated);
+              setItems(updated);
+            }
+          }
+        )
+        .subscribe();
+    }).catch(() => {});
+    return () => {
+      if (channel) {
+        import("@/lib/supabaseClient").then(({ supabase }) => {
+          supabase.removeChannel(channel);
+        }).catch(() => {});
+      }
+    };
   }, []);
 
   const markRead = useCallback(
@@ -237,16 +284,23 @@ export function NotificationsPanel() {
       ) : (
         <div className="space-y-0.5">
           {items.map((n) => {
-            const Icon = typeIcons[n.type];
+            const Icon = typeIcons[n.type] ?? AlertTriangle;
+            const handleClick = () => {
+              if (n.actionUrl) {
+                if (!n.read) markRead(n.id);
+                router.push(n.actionUrl);
+              }
+            };
             return (
               <div
                 key={n.id}
+                onClick={handleClick}
                 className={`flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-slate-700/30 ${
                   n.read ? "opacity-60" : ""
-                }`}
+                } ${n.actionUrl ? "cursor-pointer" : ""}`}
               >
                 <Icon
-                  className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${typeColors[n.type]}`}
+                  className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${typeColors[n.type] ?? "text-slate-400"}`}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-tight text-slate-300">

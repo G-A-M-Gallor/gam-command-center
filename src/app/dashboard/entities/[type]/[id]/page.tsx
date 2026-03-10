@@ -17,6 +17,8 @@ import { NoteMeta } from '@/components/entities/NoteMeta';
 import { NoteActionBar } from '@/components/entities/NoteActionBar';
 import { StakeholderPanel } from '@/components/entities/StakeholderPanel';
 import { ActivityFeed } from '@/components/entities/ActivityFeed';
+import { CommentsSection } from '@/components/entities/CommentsSection';
+import { EntityContentEditor } from '@/components/entities/EntityContentEditor';
 import { TemplatePicker } from '@/components/entities/TemplatePicker';
 import { RelationPanel } from '@/components/entities/RelationPanel';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
@@ -275,13 +277,19 @@ export default function EntityDetailPage() {
         columns={3}
       />
 
+      {/* Content Editor */}
+      <EntityContentEditor noteId={noteId} language={language} />
+
       {/* Tools strip */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <TemplatePicker noteId={noteId} />
         <StakeholderPanel noteId={noteId} />
         <RelationPanel noteId={noteId} entityType={entityTypeSlug} language={language} />
         {trackActivity && (
-          <ActivityFeed noteId={noteId} language={language} />
+          <>
+            <CommentsSection noteId={noteId} entityType={entityTypeSlug} language={language} />
+            <ActivityFeed noteId={noteId} language={language} hideCommentInput />
+          </>
         )}
       </div>
 
