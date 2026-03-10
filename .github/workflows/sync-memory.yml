@@ -1,0 +1,39 @@
+name: Sync CLAUDE.md to AI Memory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "CLAUDE.md"
+      - "memory/**"
+
+jobs:
+  sync:
+    name: Sync to vb_ai_memory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Send CLAUDE.md to Edge Function
+        run: |
+          CONTENT=$(cat CLAUDE.md | jq -Rs .)
+          curl -s -X POST \
+            "${{ secrets.SUPABASE_EDGE_FUNCTION_URL }}/sync-memory" \
+            -H "Content-Type: application/json" \
+            -H "x-webhook-secret: ${{ secrets.SYNC_WEBHOOK_SECRET }}" \
+            -d "{\"content\": $CONTENT, \"source\": \"CLAUDE.md\"}"
+
+      - name: Sync memory files
+        run: |
+          for FILE in memory/*.md; do
+            if [ -f "$FILE" ]; then
+              BASENAME=$(basename "$FILE")
+              CONTENT=$(cat "$FILE" | jq -Rs .)
+              echo "Syncing $BASENAME..."
+              curl -s -X POST \
+                "${{ secrets.SUPABASE_EDGE_FUNCTION_URL }}/sync-memory" \
+                -H "Content-Type: application/json" \
+                -H "x-webhook-secret: ${{ secrets.SYNC_WEBHOOK_SECRET }}" \
+                -d "{\"content\": $CONTENT, \"source\": \"memory/$BASENAME\"}"
+            fi
+          done
