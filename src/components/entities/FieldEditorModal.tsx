@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 import { CustomSelect } from '@/components/ui/CustomSelect';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import type {
@@ -111,6 +112,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
 
   const [activeTab, setActiveTab] = useState<Tab>('general');
   const [newAlias, setNewAlias] = useState('');
+  const tips = (te as unknown as { tips: Record<string, string> }).tips ?? {};
 
   const setDraft = (fn: (d: GlobalFieldInsert) => GlobalFieldInsert) => {
     onDraftChange(fn(draft));
@@ -121,13 +123,13 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
   const hasValidation = Object.values(valConfig).some(Boolean);
   const TypeIcon = FIELD_TYPE_ICONS[draft.field_type] ?? Type;
 
-  const tabs: { key: Tab; label: string; icon: React.ElementType; show: boolean }[] = [
+  const tabs: { key: Tab; label: string; icon: React.ElementType; show: boolean; tip?: string }[] = [
     { key: 'general', label: isHe ? 'כללי' : 'General', icon: Type, show: true },
-    { key: 'options', label: isHe ? 'אפשרויות' : 'Options', icon: List, show: hasOptions || draft.is_composite },
-    { key: 'validation', label: isHe ? 'ולידציה' : 'Validation', icon: CheckSquare, show: hasValidation },
-    { key: 'visibility', label: isHe ? 'חוקי הצגה' : 'Visibility', icon: Eye, show: true },
-    { key: 'colors', label: isHe ? 'חוקי צבע' : 'Colors', icon: Palette, show: true },
-    { key: 'aliases', label: isHe ? 'כינויים' : 'Aliases', icon: LinkIcon, show: !!editingId },
+    { key: 'options', label: isHe ? 'אפשרויות' : 'Options', icon: List, show: hasOptions || draft.is_composite, tip: tips.options },
+    { key: 'validation', label: isHe ? 'ולידציה' : 'Validation', icon: CheckSquare, show: hasValidation, tip: tips.validation },
+    { key: 'visibility', label: isHe ? 'חוקי הצגה' : 'Visibility', icon: Eye, show: true, tip: tips.visibilityRules },
+    { key: 'colors', label: isHe ? 'חוקי צבע' : 'Colors', icon: Palette, show: true, tip: tips.colorRules },
+    { key: 'aliases', label: isHe ? 'כינויים' : 'Aliases', icon: LinkIcon, show: !!editingId, tip: tips.aliases },
   ];
 
   const visibleTabs = tabs.filter(t => t.show);
@@ -172,18 +174,20 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
             const TabIcon = tab.icon;
             const isActive = activeTab === tab.key;
             return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
-                  isActive
-                    ? 'border-purple-500 text-purple-400'
-                    : 'border-transparent text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                <TabIcon size={13} />
-                {tab.label}
-              </button>
+              <div key={tab.key} className="flex items-center">
+                <button
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors whitespace-nowrap ${
+                    isActive
+                      ? 'border-purple-500 text-purple-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-300'
+                  }`}
+                >
+                  <TabIcon size={13} />
+                  {tab.label}
+                </button>
+                {tab.tip && isActive && <InfoTooltip text={tab.tip} size={11} side="bottom" />}
+              </div>
             );
           })}
         </div>
@@ -233,7 +237,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               {/* Description */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-400">{te.descriptionHe}</label>
+                  <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.descriptionHe} <InfoTooltip text={tips.description ?? ''} size={11} /></label>
                   <input
                     type="text"
                     value={draft.description?.he ?? ''}
@@ -257,7 +261,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               {/* Type + Category */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-medium text-slate-400">{te.fieldType}</label>
+                  <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.fieldType} <InfoTooltip text={tips.fieldType ?? ''} size={11} /></label>
                   <CustomSelect
                     value={draft.field_type}
                     options={Object.keys(FIELD_TYPE_LABELS).map(ft => ({ value: ft, label: FIELD_TYPE_LABELS[ft]?.[lang] ?? ft }))}
@@ -269,7 +273,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-400">{te.category}</label>
+                  <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.category} <InfoTooltip text={tips.category ?? ''} size={11} /></label>
                   <CustomSelect
                     value={draft.category}
                     options={CATEGORIES.map(c => ({ value: c, label: CATEGORY_LABELS[c]?.[lang] ?? c }))}
@@ -291,17 +295,15 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                   <span className="text-sm font-medium text-slate-200 flex items-center gap-1.5">
                     <Lock size={13} />
                     {isHe ? 'שדה לקריאה בלבד' : 'Read-only field'}
+                    <InfoTooltip text={tips.readOnly ?? ''} size={11} />
                   </span>
-                  <p className="text-[10px] text-slate-500 mt-0.5">
-                    {isHe ? 'לא ניתן לעריכה, מתעדכן אוטומטית בכל המערכת' : 'Not editable, updated system-wide automatically'}
-                  </p>
                 </div>
               </label>
 
               {/* meta_key (locked) */}
               {editingId && (
                 <div>
-                  <label className="text-xs font-medium text-slate-400">{te.metaKey}</label>
+                  <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.metaKey} <InfoTooltip text={tips.metaKey ?? ''} size={11} /></label>
                   <div className="mt-1 flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2">
                     <Lock size={12} className="text-slate-500 shrink-0" />
                     <code className="text-sm text-slate-300">{draft.meta_key}</code>
@@ -312,7 +314,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               {/* Default Value */}
               <div>
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-400">{te.defaultValue}</label>
+                  <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.defaultValue} <InfoTooltip text={tips.defaultValue ?? ''} size={11} /></label>
                   {draft.default_value != null && (
                     <button onClick={() => setDraft(d => ({ ...d, default_value: null }))} className="text-[10px] text-slate-500 hover:text-red-400">
                       <X size={10} className="inline" /> {te.noDefault}
@@ -348,7 +350,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               {hasOptions && (
                 <>
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-400">{te.options}</label>
+                    <label className="flex items-center gap-1 text-xs font-semibold text-slate-400">{te.options} <InfoTooltip text={tips.options ?? ''} size={11} /></label>
                     <button onClick={() => setDraft(d => ({ ...d, options: [...d.options, { value: '', label: { ...EMPTY_LABEL }, color: '#94a3b8' }] }))}
                       className="text-xs text-purple-400 hover:text-purple-300">+ {te.addOption}</button>
                   </div>
@@ -376,7 +378,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               {draft.is_composite && (
                 <>
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-400">{te.subFields}</label>
+                    <label className="flex items-center gap-1 text-xs font-semibold text-slate-400">{te.subFields} <InfoTooltip text={tips.composite ?? ''} size={11} /></label>
                     <button onClick={() => setDraft(d => ({ ...d, sub_fields: [...d.sub_fields, { meta_key: '', label: { ...EMPTY_LABEL }, field_type: 'text' as FieldType }] }))}
                       className="text-xs text-purple-400 hover:text-purple-300">+ {te.addSubField}</button>
                   </div>
@@ -417,6 +419,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                       onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, required: e.target.checked || undefined } }))}
                       className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500/30" />
                     {te.required}
+                    <InfoTooltip text={tips.required ?? ''} size={11} />
                   </label>
                 )}
                 {valConfig.unique && (
@@ -425,13 +428,14 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                       onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, unique: e.target.checked || undefined } }))}
                       className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500/30" />
                     {te.uniqueValue}
+                    <InfoTooltip text={tips.unique ?? ''} size={11} />
                   </label>
                 )}
               </div>
               {valConfig.minMax && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-400">Min</label>
+                    <label className="flex items-center gap-1 text-xs font-medium text-slate-400">Min <InfoTooltip text={tips.minMax ?? ''} size={11} /></label>
                     <input type="number" value={draft.validation.min ?? ''}
                       onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, min: e.target.value ? Number(e.target.value) : undefined } }))}
                       className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none" />
@@ -446,7 +450,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
               )}
               {valConfig.pattern && (
                 <div>
-                  <label className="text-xs font-medium text-slate-400">{te.patternRegex}</label>
+                  <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.patternRegex} <InfoTooltip text={tips.pattern ?? ''} size={11} /></label>
                   <input type="text" value={draft.validation.pattern ?? ''} placeholder="^[A-Z].*" dir="ltr"
                     onChange={e => setDraft(d => ({ ...d, validation: { ...d.validation, pattern: e.target.value || undefined } }))}
                     className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 focus:border-purple-500/50 focus:outline-none" />
@@ -564,7 +568,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
           {/* ── Aliases Tab ────────────────────────── */}
           {activeTab === 'aliases' && editingId && (
             <div className="space-y-3">
-              <label className="text-xs font-medium text-slate-400">{te.aliases}</label>
+              <label className="flex items-center gap-1 text-xs font-medium text-slate-400">{te.aliases} <InfoTooltip text={tips.aliases ?? ''} size={11} /></label>
               {(draft.aliases ?? []).length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {(draft.aliases ?? []).map(alias => (

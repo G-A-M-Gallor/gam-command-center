@@ -23,9 +23,11 @@ import {
 } from '@/lib/supabase/entityQueries';
 import { BUILTIN_FIELDS } from '@/lib/entities/builtinFields';
 import { FieldEditorModal } from '@/components/entities/FieldEditorModal';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import type { GlobalField, GlobalFieldInsert, FieldType, FieldCategory, SubField, FieldOption, I18nLabel } from '@/lib/entities/types';
 
 type ViewMode = 'list' | 'cards' | 'compact';
+type FieldTab = 'library' | 'system';
 
 const FIELD_TYPE_ICONS: Record<string, React.ElementType> = {
   text: Type, number: Hash, select: List, 'multi-select': Tag,
@@ -395,6 +397,7 @@ export default function FieldLibraryPage() {
   const isHe = language === 'he';
   const te = t.entities;
 
+  const [activeTab, setActiveTab] = useState<FieldTab>('library');
   const [fields, setFields] = useState<GlobalField[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -418,6 +421,7 @@ export default function FieldLibraryPage() {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   const lang = isHe ? 'he' : 'en';
+  const tips = (te as unknown as { tips: Record<string, string> }).tips ?? {};
 
   // DnD sensors
   const sensors = useSensors(
@@ -465,8 +469,13 @@ export default function FieldLibraryPage() {
     })();
   }, [fields]);
 
+  // Split fields by tab
+  const systemFields = useMemo(() => fields.filter(f => f.category === 'system'), [fields]);
+  const libraryFields = useMemo(() => fields.filter(f => f.category !== 'system'), [fields]);
+
   const filtered = useMemo(() => {
-    return fields.filter(f => {
+    const base = activeTab === 'system' ? systemFields : libraryFields;
+    return base.filter(f => {
       if (categoryFilter !== 'all' && f.category !== categoryFilter) return false;
       if (typeFilter !== 'all' && f.field_type !== typeFilter) return false;
       if (search) {
@@ -480,7 +489,7 @@ export default function FieldLibraryPage() {
       }
       return true;
     });
-  }, [fields, search, categoryFilter, typeFilter]);
+  }, [fields, search, categoryFilter, typeFilter, activeTab, systemFields, libraryFields]);
 
   // Drag is only active when viewing unfiltered, ungrouped list view
   const isDragEnabled = viewMode === 'list' && !search && categoryFilter === 'all' && typeFilter === 'all' && !groupByCategory;
@@ -635,10 +644,11 @@ export default function FieldLibraryPage() {
     }
   };
 
-  // Build CustomSelect options
+  // Build CustomSelect options — exclude 'system' in library tab
+  const activeCats = activeTab === 'system' ? ['system'] : CATEGORIES.filter(c => c !== 'system');
   const categoryOptions = [
     { value: 'all', label: te.allCategories },
-    ...CATEGORIES.map(c => ({ value: c, label: CATEGORY_LABELS[c]?.[lang] ?? c })),
+    ...activeCats.map(c => ({ value: c, label: CATEGORY_LABELS[c]?.[lang] ?? c })),
   ];
 
   const typeOptions = [
@@ -700,6 +710,37 @@ export default function FieldLibraryPage() {
     <div className="space-y-6" dir={isHe ? 'rtl' : 'ltr'}>
       <PageHeader pageKey="entityFields" />
 
+      {/* Tab switcher: System vs Library */}
+      <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] w-fit">
+        {([
+          { tab: 'library' as FieldTab, label: (te as unknown as Record<string, string>).tabLibrary ?? 'Field Library', count: libraryFields.length, color: 'purple' },
+          { tab: 'system' as FieldTab, label: (te as unknown as Record<string, string>).tabSystem ?? 'System Fields', count: systemFields.length, color: 'amber' },
+        ]).map(({ tab, label, count, color }) => (
+          <button
+            key={tab}
+            onClick={() => { setActiveTab(tab); setCategoryFilter('all'); setSearch(''); }}
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+              activeTab === tab
+                ? `bg-${color}-500/15 text-${color}-300 shadow-sm`
+                : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+            }`}
+          >
+            {tab === 'system' && <Lock size={13} />}
+            {label}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+              activeTab === tab ? `bg-${color}-500/20 text-${color}-300` : 'bg-white/[0.06] text-slate-500'
+            }`}>{count}</span>
+          </button>
+        ))}
+        <InfoTooltip
+          text={activeTab === 'system'
+            ? ((te as unknown as Record<string, string>).systemFieldsInfo ?? 'System fields are built-in and auto-applied to all entities.')
+            : ((te as unknown as Record<string, string>).libraryFieldsInfo ?? 'Create and manage fields for your entity types.')}
+          size={14}
+          className="ms-1"
+        />
+      </div>
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
@@ -756,8 +797,8 @@ export default function FieldLibraryPage() {
           ))}
         </div>
 
-        {/* Group toggle (only in list view) */}
-        {viewMode === 'list' && (
+        {/* Group toggle (only in list view + library tab) */}
+        {viewMode === 'list' && activeTab === 'library' && (
           <button
             onClick={toggleGroupByCategory}
             className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
@@ -771,13 +812,16 @@ export default function FieldLibraryPage() {
           </button>
         )}
 
-        <button
-          onClick={() => { setShowCreate(true); setEditingId(null); setDraft(newFieldDefaults()); }}
-          className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
-        >
-          <Plus size={14} />
-          {te.newField}
-        </button>
+        {/* New field button — only in library tab */}
+        {activeTab === 'library' && (
+          <button
+            onClick={() => { setShowCreate(true); setEditingId(null); setDraft(newFieldDefaults()); }}
+            className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-500 transition-colors"
+          >
+            <Plus size={14} />
+            {te.newField}
+          </button>
+        )}
       </div>
 
       {/* Stats */}

@@ -82,13 +82,13 @@ export default function EntityTypesPage() {
       if (missingTypes.length > 0) {
         for (const et of missingTypes) await createEntityType(et);
       }
-      const existingConnKeys = new Set(connsData.map(c => `${c.source_type}→${c.target_type}→${c.relation_type}`));
-      const missingConns = BUILTIN_CONNECTIONS.filter(c => !existingConnKeys.has(`${c.source_type}→${c.target_type}→${c.relation_type}`));
+      const existingConnKeys = new Set(connsData.map(c => `${c.source_type}→${c.target_type}→${c.relation_kind}`));
+      const missingConns = BUILTIN_CONNECTIONS.filter(c => !existingConnKeys.has(`${c.source_type}→${c.target_type}→${c.relation_kind}`));
       if (missingConns.length > 0) {
         for (const c of missingConns) await createEntityConnection(c);
       }
-      const existingGroupKeys = new Set(groupsData.map(g => g.group_key));
-      const missingGroups = BUILTIN_FIELD_GROUPS.filter(g => !existingGroupKeys.has(g.group_key));
+      const existingGroupKeys = new Set(groupsData.map(g => g.meta_key));
+      const missingGroups = BUILTIN_FIELD_GROUPS.filter(g => !existingGroupKeys.has(g.meta_key));
       if (missingGroups.length > 0) {
         const { createFieldGroup } = await import('@/lib/supabase/entityQueries');
         for (const g of missingGroups) await createFieldGroup(g);
