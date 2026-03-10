@@ -63,8 +63,8 @@ export default function EntityTypesPage() {
       fetchFieldGroups(),
     ]);
 
-    // Seed if empty
     if (typesData.length === 0) {
+      // Full seed — DB is empty
       for (const et of BUILTIN_ENTITY_TYPES) await createEntityType(et);
       for (const conn of BUILTIN_CONNECTIONS) await createEntityConnection(conn);
       for (const g of BUILTIN_FIELD_GROUPS) {
@@ -76,9 +76,34 @@ export default function EntityTypesPage() {
       setConnections(c2);
       setGroups(g2);
     } else {
-      setTypes(typesData);
-      setConnections(connsData);
-      setGroups(groupsData);
+      // Auto-seed missing built-in types, connections, and groups
+      const existingSlugs = new Set(typesData.map(t => t.slug));
+      const missingTypes = BUILTIN_ENTITY_TYPES.filter(et => !existingSlugs.has(et.slug));
+      if (missingTypes.length > 0) {
+        for (const et of missingTypes) await createEntityType(et);
+      }
+      const existingConnKeys = new Set(connsData.map(c => `${c.source_type}→${c.target_type}→${c.relation_type}`));
+      const missingConns = BUILTIN_CONNECTIONS.filter(c => !existingConnKeys.has(`${c.source_type}→${c.target_type}→${c.relation_type}`));
+      if (missingConns.length > 0) {
+        for (const c of missingConns) await createEntityConnection(c);
+      }
+      const existingGroupKeys = new Set(groupsData.map(g => g.group_key));
+      const missingGroups = BUILTIN_FIELD_GROUPS.filter(g => !existingGroupKeys.has(g.group_key));
+      if (missingGroups.length > 0) {
+        const { createFieldGroup } = await import('@/lib/supabase/entityQueries');
+        for (const g of missingGroups) await createFieldGroup(g);
+      }
+      // Refetch if anything was added
+      if (missingTypes.length > 0 || missingConns.length > 0 || missingGroups.length > 0) {
+        const [t2, c2, g2] = await Promise.all([fetchEntityTypes(), fetchEntityConnections(), fetchFieldGroups()]);
+        setTypes(t2);
+        setConnections(c2);
+        setGroups(g2);
+      } else {
+        setTypes(typesData);
+        setConnections(connsData);
+        setGroups(groupsData);
+      }
     }
     setFields(fieldsData);
     setLoading(false);

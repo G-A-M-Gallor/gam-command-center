@@ -103,11 +103,9 @@ function newFieldDefaults(): GlobalFieldInsert {
   };
 }
 
-/* ─── Sortable field row ─────────────────────────────────────── */
+/* ─── Field row content (shared between sortable and plain) ──── */
 
-function SortableFieldRow({
-  field, lang, te, usageMap, onEdit, onDelete, onMerge, dragEnabled,
-}: {
+type FieldRowProps = {
   field: GlobalField;
   lang: 'he' | 'en';
   te: Record<string, unknown>;
@@ -115,29 +113,16 @@ function SortableFieldRow({
   onEdit: (f: GlobalField) => void;
   onDelete: (f: GlobalField) => void;
   onMerge: (id: string) => void;
-  dragEnabled: boolean;
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id, disabled: !dragEnabled });
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+};
 
+function FieldRowContent({ field, lang, te, usageMap, onEdit, onDelete, onMerge, dragHandle }: FieldRowProps & { dragHandle?: React.ReactNode }) {
   const Icon = FIELD_TYPE_ICONS[field.field_type] ?? Type;
   const usage = usageMap[field.meta_key] ?? [];
   const isSystem = field.category === 'system';
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center gap-3 rounded-lg border px-4 py-3 hover:bg-white/[0.04] transition-colors group ${
-        isSystem ? 'border-purple-500/15 bg-purple-500/[0.03]' : 'border-white/[0.06] bg-white/[0.02]'
-      }`}
-    >
-      {/* Drag handle */}
-      {dragEnabled && !isSystem && (
-        <button {...attributes} {...listeners} className="cursor-grab opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity touch-none" title={(te as { dragToReorder: string }).dragToReorder}>
-          <GripVertical size={14} className="text-slate-500" />
-        </button>
-      )}
+    <>
+      {dragHandle}
       <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white/[0.06] shrink-0">
         <Icon size={15} className={isSystem ? 'text-amber-400' : 'text-purple-400'} />
       </div>
@@ -184,7 +169,6 @@ function SortableFieldRow({
             </>
           )}
         </div>
-        {/* Description preview */}
         {field.description[lang] && (
           <p className="text-[10px] text-slate-500/70 mt-0.5 line-clamp-1">
             {field.description[lang]}
@@ -219,6 +203,46 @@ function SortableFieldRow({
         </button>
       </div>
       )}
+    </>
+  );
+}
+
+/* ─── Sortable field row (only used inside DndContext) ────────── */
+
+function SortableFieldRow(props: FieldRowProps & { dragEnabled: boolean }) {
+  const { field, dragEnabled } = props;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id, disabled: !dragEnabled });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+  const isSystem = field.category === 'system';
+
+  const dragHandle = dragEnabled && !isSystem ? (
+    <button {...attributes} {...listeners} className="cursor-grab opacity-0 group-hover:opacity-60 hover:!opacity-100 transition-opacity touch-none" title={(props.te as { dragToReorder: string }).dragToReorder}>
+      <GripVertical size={14} className="text-slate-500" />
+    </button>
+  ) : null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 rounded-lg border px-4 py-3 hover:bg-white/[0.04] transition-colors group ${
+        isSystem ? 'border-purple-500/15 bg-purple-500/[0.03]' : 'border-white/[0.06] bg-white/[0.02]'
+      }`}
+    >
+      <FieldRowContent {...props} dragHandle={dragHandle} />
+    </div>
+  );
+}
+
+/* ─── Plain field row (used in grouped view — no DndContext) ─── */
+
+function PlainFieldRow(props: FieldRowProps) {
+  const isSystem = props.field.category === 'system';
+  return (
+    <div className={`flex items-center gap-3 rounded-lg border px-4 py-3 hover:bg-white/[0.04] transition-colors group ${
+      isSystem ? 'border-purple-500/15 bg-purple-500/[0.03]' : 'border-white/[0.06] bg-white/[0.02]'
+    }`}>
+      <FieldRowContent {...props} />
     </div>
   );
 }
@@ -417,11 +441,11 @@ export default function FieldLibraryPage() {
       }
       data = await fetchGlobalFields();
     } else {
-      // Auto-seed missing system fields only
+      // Auto-seed any missing built-in fields (system + all categories)
       const existingKeys = new Set(data.map(f => f.meta_key));
-      const missingSystem = BUILTIN_FIELDS.filter(f => f.category === 'system' && !existingKeys.has(f.meta_key));
-      if (missingSystem.length > 0) {
-        for (const f of missingSystem) await createGlobalField(f);
+      const missingFields = BUILTIN_FIELDS.filter(f => !existingKeys.has(f.meta_key));
+      if (missingFields.length > 0) {
+        for (const f of missingFields) await createGlobalField(f);
         data = await fetchGlobalFields();
       }
     }
@@ -648,19 +672,28 @@ export default function FieldLibraryPage() {
   // Validation config for current field type
   const valConfig = VALIDATION_CONFIG[draft.field_type] ?? {};
 
-  // Render field row (shared between flat + grouped)
-  const renderFieldRow = (field: GlobalField) => (
+  const fieldRowProps = (field: GlobalField): FieldRowProps => ({
+    field,
+    lang,
+    te: te as unknown as Record<string, unknown>,
+    usageMap,
+    onEdit: startEdit,
+    onDelete: setDeletingField,
+    onMerge: setMergeSourceId,
+  });
+
+  // Sortable row — only used inside DndContext (flat list view)
+  const renderSortableRow = (field: GlobalField) => (
     <SortableFieldRow
       key={field.id}
-      field={field}
-      lang={lang}
-      te={te as unknown as Record<string, unknown>}
-      usageMap={usageMap}
-      onEdit={startEdit}
-      onDelete={setDeletingField}
-      onMerge={setMergeSourceId}
+      {...fieldRowProps(field)}
       dragEnabled={isDragEnabled}
     />
+  );
+
+  // Plain row — used in grouped view (no DndContext)
+  const renderPlainRow = (field: GlobalField) => (
+    <PlainFieldRow key={field.id} {...fieldRowProps(field)} />
   );
 
   return (
@@ -875,7 +908,7 @@ export default function FieldLibraryPage() {
                 </button>
                 {!collapsed && (
                   <div className="grid gap-2">
-                    {catFields.map(renderFieldRow)}
+                    {catFields.map(renderPlainRow)}
                   </div>
                 )}
               </div>
@@ -887,7 +920,7 @@ export default function FieldLibraryPage() {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filtered.map(f => f.id)} strategy={verticalListSortingStrategy}>
             <div className="grid gap-2">
-              {filtered.map(renderFieldRow)}
+              {filtered.map(renderSortableRow)}
             </div>
           </SortableContext>
         </DndContext>
