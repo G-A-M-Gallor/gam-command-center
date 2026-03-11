@@ -17,7 +17,7 @@ import { Plus } from 'lucide-react';
 import { StoryColumn } from './StoryColumn';
 import type { FeatureGroup } from './StoryColumn';
 import { StoryCardOverlay } from './StoryCard';
-import type { StoryCard } from '@/lib/supabase/storyCardQueries';
+import type { StoryCard, EnrichedEntityLink } from '@/lib/supabase/storyCardQueries';
 
 interface StoryBoardProps {
   cards: StoryCard[];
@@ -30,6 +30,9 @@ interface StoryBoardProps {
   onOpenNote?: (card: StoryCard) => void;
   onDeleteColumn: (col: number) => void;
   onBatchUpdate: (updates: { id: string; col: number; sort_order: number }[]) => void;
+  entityLinks?: Record<string, EnrichedEntityLink[]>;
+  onLinkEntity?: (storyCardId: string, entityNoteId: string) => void;
+  onUnlinkEntity?: (linkId: string, storyCardId: string) => void;
   t: {
     addEpic: string;
     addStory: string;
@@ -60,6 +63,11 @@ interface StoryBoardProps {
     totalPoints: string;
     openInEditor?: string;
     hasNote?: string;
+    linkEntity?: string;
+    linkedEntities?: string;
+    searchEntity?: string;
+    unlinkEntity?: string;
+    noLinkedEntities?: string;
   };
 }
 
@@ -74,6 +82,9 @@ export const StoryBoard = memo(function StoryBoard({
   onOpenNote,
   onDeleteColumn,
   onBatchUpdate,
+  entityLinks,
+  onLinkEntity,
+  onUnlinkEntity,
   t,
 }: StoryBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -263,6 +274,9 @@ export const StoryBoard = memo(function StoryBoard({
             onAddStory={onAddStory}
             onAddFeature={onAddFeature}
             onDeleteColumn={onDeleteColumn}
+            entityLinks={entityLinks}
+            onLinkEntity={onLinkEntity}
+            onUnlinkEntity={onUnlinkEntity}
             t={t}
           />
         ))}

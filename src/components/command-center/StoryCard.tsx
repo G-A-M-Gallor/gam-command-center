@@ -14,8 +14,10 @@ import {
   StickyNote,
   GitBranch,
   FileText,
+  Link2,
 } from 'lucide-react';
-import type { StoryCard as StoryCardType, SubStory } from '@/lib/supabase/storyCardQueries';
+import type { StoryCard as StoryCardType, SubStory, EnrichedEntityLink } from '@/lib/supabase/storyCardQueries';
+import { StoryCardEntityLinker } from './StoryCardEntityLinker';
 
 // ─── Color palette ──────────────────────────────────
 const COLORS = [
@@ -61,6 +63,9 @@ interface StoryCardProps {
   onUpdate: (id: string, updates: Partial<StoryCardType>) => void;
   onDelete: (id: string) => void;
   onOpenNote?: (card: StoryCardType) => void;
+  linkedEntities?: EnrichedEntityLink[];
+  onLinkEntity?: (storyCardId: string, entityNoteId: string) => void;
+  onUnlinkEntity?: (linkId: string, storyCardId: string) => void;
   t: {
     storyPlaceholder: string;
     epicPlaceholder: string;
@@ -82,6 +87,11 @@ interface StoryCardProps {
     noEstimation: string;
     openInEditor?: string;
     hasNote?: string;
+    linkEntity?: string;
+    linkedEntities?: string;
+    searchEntity?: string;
+    unlinkEntity?: string;
+    noLinkedEntities?: string;
   };
 }
 
@@ -587,7 +597,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 }
 
 // ─── Story Card (sortable/draggable) ────────────────
-export function StoryCard({ card, onUpdate, onDelete, onOpenNote, t }: StoryCardProps) {
+export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities, onLinkEntity, onUnlinkEntity, t }: StoryCardProps) {
   const {
     attributes,
     listeners,
@@ -612,8 +622,10 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, t }: StoryCard
   const [showEstimation, setShowEstimation] = useState(false);
   const [notesText, setNotesText] = useState(card.notes || '');
   const [showDiagramModal, setShowDiagramModal] = useState(false);
+  const [showEntityLinker, setShowEntityLinker] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const colorClasses = getColorClasses(card.color);
+  const hasEntityLinks = (linkedEntities?.length ?? 0) > 0;
 
   // Sync notes text when card prop changes (realtime)
   useEffect(() => {
@@ -737,11 +749,14 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, t }: StoryCard
               {/* Estimation badge */}
               <EstimationBadge estimation={card.estimation} />
 
-              {/* Indicators for notes/diagram/editor note */}
-              {(hasNotes || hasDiagram || hasEditorNote) && (
+              {/* Indicators for notes/diagram/editor note/entity links */}
+              {(hasNotes || hasDiagram || hasEditorNote || hasEntityLinks) && (
                 <div className="flex shrink-0 items-center gap-0.5">
                   {hasEditorNote && (
                     <div className="h-1.5 w-1.5 rounded-full bg-blue-400" title={t.hasNote || 'Note'} />
+                  )}
+                  {hasEntityLinks && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" title={t.linkedEntities || 'Linked entities'} />
                   )}
                   {hasNotes && (
                     <div className="h-1.5 w-1.5 rounded-full bg-amber-400" title={t.notes} />
@@ -847,6 +862,37 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, t }: StoryCard
                 {t.diagram}
               </button>
             )}
+
+            {/* Entity link badges */}
+            {hasEntityLinks && !showEntityLinker && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {linkedEntities!.slice(0, 3).map((link) => (
+                  <a
+                    key={link.id}
+                    href={`/dashboard/entities/${link.entity_type ?? 'document'}/${link.entity_note_id}`}
+                    className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] text-emerald-300 transition-colors hover:bg-emerald-500/20"
+                    title={link.entity_title}
+                  >
+                    <Link2 className="h-2 w-2" />
+                    <span className="max-w-[60px] truncate">{link.entity_title}</span>
+                  </a>
+                ))}
+                {linkedEntities!.length > 3 && (
+                  <span className="text-[9px] text-slate-500">+{linkedEntities!.length - 3}</span>
+                )}
+              </div>
+            )}
+
+            {/* Entity linker panel */}
+            {showEntityLinker && onLinkEntity && onUnlinkEntity && (
+              <StoryCardEntityLinker
+                storyCardId={card.id}
+                linkedEntities={linkedEntities ?? []}
+                onLink={onLinkEntity}
+                onUnlink={onUnlinkEntity}
+                t={t}
+              />
+            )}
           </div>
         </div>
 
@@ -920,6 +966,20 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, t }: StoryCard
           >
             <GitBranch className="h-3 w-3" />
           </button>
+          {/* Entity link toggle */}
+          {onLinkEntity && (
+            <button
+              type="button"
+              onClick={() => setShowEntityLinker((v) => !v)}
+              className={`rounded bg-slate-700 p-0.5 hover:text-slate-200 ${
+                hasEntityLinks ? 'text-emerald-400' : 'text-slate-400'
+              }`}
+              title={t.linkEntity || 'Link entity'}
+              aria-label={t.linkEntity || 'Link entity'}
+            >
+              <Link2 className="h-3 w-3" />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onDelete(card.id)}

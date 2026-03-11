@@ -2,82 +2,31 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import {
-  Send, Plus, X, MessageCircle, BarChart3, PenTool, GitBranch,
-  Trash2, Sparkles, PanelLeftClose, PanelLeftOpen, Square, Zap,
-  AlertTriangle, Briefcase,
-  Workflow, ClipboardList, Code2, Palette, ShieldCheck, TrendingUp,
-} from "lucide-react";
+import { Zap } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
-import ReactMarkdown from "react-markdown";
 import { streamChat, streamWorkManager } from "@/lib/ai/client";
-import { parseAction, parseConfidence, type ConfidenceLevel } from "@/lib/work-manager/parseAction";
-import { AGENT_LABELS, AGENT_ICONS, type AgentType } from "@/lib/work-manager/agentPrompts";
-import { ActionPreview } from "@/components/work-manager/ActionPreview";
-import { ChatToolbar } from "@/components/command-center/ChatToolbar";
-import { addUsage, getUsagePercent, isOverBudget, isNearBudget } from "@/lib/ai/tokenTracker";
+import { addUsage, isOverBudget } from "@/lib/ai/tokenTracker";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
+import { fetchNote } from "@/lib/supabase/entityQueries";
 import { MODE_MODELS, MAX_CONVERSATION_MESSAGES, type AIMode } from "@/lib/ai/prompts";
 import { usePageContext } from "@/lib/ai/usePageContext";
-
-const AGENT_ICON_COMPONENTS: Record<string, typeof Workflow> = {
-  Workflow, ClipboardList, Code2, Palette, ShieldCheck, TrendingUp,
-};
 import {
   saveConversation as saveToSupabase,
   loadConversations as loadFromSupabase,
   deleteConversation as deleteFromSupabase,
 } from "@/lib/supabase/aiConversationQueries";
 
-// ─── Types ──────────────────────────────────────────────────────────
+import { AiSidebar } from "@/components/ai-hub/AiSidebar";
+import { AiChatArea } from "@/components/ai-hub/AiChatArea";
+import { AiDocPanel } from "@/components/ai-hub/AiDocPanel";
+import { AiKnowledgeDialog, getKnowledgeUrlsForMode } from "@/components/ai-hub/AiKnowledgeDialog";
+import type { ChatMessage, Conversation, ImageAttachment } from "@/components/ai-hub/types";
+import { STORAGE_KEY, MODEL_LABELS } from "@/components/ai-hub/types";
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-  timestamp: number;
-  agent?: string;
-}
-
-interface Conversation {
-  id: string;
-  mode: AIMode;
-  messages: ChatMessage[];
-  title: string;
-  createdAt: number;
-  updatedAt: number;
-  totalTokensInput: number;
-  totalTokensOutput: number;
-}
-
-// ─── Constants ──────────────────────────────────────────────────────
-
-const STORAGE_KEY = "cc-ai-hub-conversations";
-
-const MODE_ICONS: Record<AIMode, typeof MessageCircle> = {
-  chat: MessageCircle,
-  analyze: BarChart3,
-  write: PenTool,
-  decompose: GitBranch,
-  work: Briefcase,
-};
-
-const MODE_COLORS: Record<AIMode, string> = {
-  chat: "purple",
-  analyze: "blue",
-  write: "emerald",
-  decompose: "amber",
-  work: "amber",
-};
-
-const MODEL_LABELS: Record<string, string> = {
-  "claude-haiku-4-5-20251001": "Haiku 4.5",
-  "claude-sonnet-4-6": "Sonnet 4.6",
-};
-
-// ─── localStorage helpers ───────────────────────────────────────────
+// ─── localStorage helpers ───────────────────────────────────────
 
 function loadConversationsLocal(): Conversation[] {
   try {
@@ -92,7 +41,7 @@ function saveConversationsLocal(convos: Conversation[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(convos));
 }
 
-// ─── Page key from pathname (for context) ───────────────────────────
+// ─── Page key helpers ───────────────────────────────────────────
 
 const pageKeys: Record<string, string> = {
   "/dashboard/layers": "layers",
@@ -101,7 +50,6 @@ const pageKeys: Record<string, string> = {
   "/dashboard/functional-map": "functionalMap",
   "/dashboard/ai-hub": "aiHub",
   "/dashboard/design-system": "designSystem",
-
   "/dashboard/architecture": "architecture",
   "/dashboard/plan": "plan",
 };
@@ -112,259 +60,31 @@ function getPageLabel(pathname: string, t: ReturnType<typeof getTranslations>): 
   return pathname.split("/").pop() || "Dashboard";
 }
 
-// ─── Mode Selector (sidebar section) ────────────────────────────────
-
-function ModeSelector({
-  mode, onModeChange, t,
-}: {
-  mode: AIMode;
-  onModeChange: (m: AIMode) => void;
-  t: ReturnType<typeof getTranslations>;
-}) {
-  const modes: { key: AIMode; label: string; desc: string }[] = [
-    { key: "chat", label: t.aiHub.modeChat, desc: t.aiHub.modeChatDesc },
-    { key: "analyze", label: t.aiHub.modeAnalyze, desc: t.aiHub.modeAnalyzeDesc },
-    { key: "write", label: t.aiHub.modeWrite, desc: t.aiHub.modeWriteDesc },
-    { key: "decompose", label: t.aiHub.modeDecompose, desc: t.aiHub.modeDecomposeDesc },
-    { key: "work", label: t.aiHub.modeWork, desc: t.aiHub.modeWorkDesc },
-  ];
-
-  return (
-    <div className="space-y-1" data-cc-id="aihub.mode-selector">
-      {modes.map((m) => {
-        const Icon = MODE_ICONS[m.key];
-        const active = mode === m.key;
-        const color = MODE_COLORS[m.key];
-        return (
-          <button
-            key={m.key}
-            onClick={() => onModeChange(m.key)}
-            className={`flex w-full items-start gap-2.5 rounded-lg px-3 py-2.5 text-start transition-colors ${
-              active
-                ? `bg-${color}-500/15 text-${color}-300`
-                : "text-slate-400 hover:bg-slate-700/50 hover:text-slate-300"
-            }`}
-          >
-            <Icon size={16} className={`mt-0.5 shrink-0 ${active ? `text-${color}-400` : ""}`} />
-            <div className="min-w-0">
-              <div className="text-sm font-medium">{m.label}</div>
-              <div className="text-[11px] text-slate-500 leading-tight">{m.desc}</div>
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Conversation List ──────────────────────────────────────────────
-
-function ConversationList({
-  conversations, activeId, onSelect, onDelete, t,
-}: {
-  conversations: Conversation[];
-  activeId: string | null;
-  onSelect: (id: string) => void;
-  onDelete: (id: string) => void;
-  t: ReturnType<typeof getTranslations>;
-}) {
-  if (conversations.length === 0) {
-    return (
-      <p className="px-3 py-4 text-center text-xs text-slate-600">
-        {t.aiHub.noConversations}
-      </p>
-    );
+function mergeConversations(
+  local: Conversation[],
+  cloud: { id: string; mode: string; messages: { role: "user" | "assistant"; content: string; timestamp: number }[]; title?: string | null; total_tokens_input: number; total_tokens_output: number; created_at: string; updated_at: string }[]
+): Conversation[] {
+  const localMap = new Map(local.map((c) => [c.id, c]));
+  for (const cc of cloud) {
+    const existing = localMap.get(cc.id);
+    const cloudUpdated = new Date(cc.updated_at).getTime();
+    if (!existing || cloudUpdated > existing.updatedAt) {
+      localMap.set(cc.id, {
+        id: cc.id,
+        mode: cc.mode as AIMode,
+        messages: cc.messages,
+        title: cc.title || "",
+        createdAt: new Date(cc.created_at).getTime(),
+        updatedAt: cloudUpdated,
+        totalTokensInput: cc.total_tokens_input,
+        totalTokensOutput: cc.total_tokens_output,
+      });
+    }
   }
-
-  return (
-    <div className="space-y-0.5">
-      {conversations.map((c) => {
-        const active = c.id === activeId;
-        const color = MODE_COLORS[c.mode];
-        return (
-          <div
-            key={c.id}
-            className={`group flex items-center gap-2 rounded-lg px-3 py-2 cursor-pointer transition-colors ${
-              active
-                ? "bg-slate-700/60 text-slate-200"
-                : "text-slate-400 hover:bg-slate-700/30 hover:text-slate-300"
-            }`}
-            onClick={() => onSelect(c.id)}
-          >
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm">{c.title || t.aiHub.untitled}</div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className={`inline-block rounded px-1 py-0.5 text-[9px] font-medium bg-${color}-500/20 text-${color}-400`}>
-                  {t.aiHub[`mode${c.mode.charAt(0).toUpperCase() + c.mode.slice(1)}` as keyof typeof t.aiHub]}
-                </span>
-                <span className="text-[10px] text-slate-600">
-                  {new Date(c.updatedAt).toLocaleDateString()}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); onDelete(c.id); }}
-              className="shrink-0 rounded p-1 text-slate-600 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
-              title={t.aiHub.deleteConversation}
-            >
-              <Trash2 size={12} />
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
+  return Array.from(localMap.values()).sort((a, b) => b.updatedAt - a.updatedAt);
 }
 
-// ─── Mode Tab Bar (top of chat area) ────────────────────────────────
-
-function ModeTabBar({
-  mode, onModeChange, t,
-}: {
-  mode: AIMode;
-  onModeChange: (m: AIMode) => void;
-  t: ReturnType<typeof getTranslations>;
-}) {
-  const modes: { key: AIMode; label: string }[] = [
-    { key: "chat", label: t.aiHub.modeChat },
-    { key: "analyze", label: t.aiHub.modeAnalyze },
-    { key: "write", label: t.aiHub.modeWrite },
-    { key: "decompose", label: t.aiHub.modeDecompose },
-    { key: "work", label: t.aiHub.modeWork },
-  ];
-
-  return (
-    <div className="flex gap-1 border-b border-slate-700/50 px-4 py-2">
-      {modes.map((m) => {
-        const Icon = MODE_ICONS[m.key];
-        const active = mode === m.key;
-        const color = MODE_COLORS[m.key];
-        return (
-          <button
-            key={m.key}
-            onClick={() => onModeChange(m.key)}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              active
-                ? `bg-${color}-500/15 text-${color}-300`
-                : "text-slate-500 hover:bg-slate-700/50 hover:text-slate-400"
-            }`}
-          >
-            <Icon size={13} />
-            {m.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Suggestion chips per mode ──────────────────────────────────────
-
-function getSuggestions(mode: AIMode, t: ReturnType<typeof getTranslations>): string[] {
-  switch (mode) {
-    case "chat":
-      return [t.aiHub.suggestChatStatus, t.aiHub.suggestChatSummarize];
-    case "analyze":
-      return [t.aiHub.suggestAnalyzeHealth, t.aiHub.suggestAnalyzeAttention];
-    case "write":
-      return [t.aiHub.suggestWriteReport, t.aiHub.suggestWriteEmail];
-    case "decompose":
-      return [t.aiHub.suggestDecomposeEpic, t.aiHub.suggestDecomposeTasks];
-    case "work":
-      return [t.aiHub.workSuggestStatus, t.aiHub.workSuggestNext, t.aiHub.workSuggestDecisions, t.aiHub.workSuggestPriority];
-  }
-}
-
-// ─── Token Usage Bar ────────────────────────────────────────────────
-
-function TokenUsageBar({ t }: { t: ReturnType<typeof getTranslations> }) {
-  const [percent, setPercent] = useState(0);
-  const near = isNearBudget();
-  const over = isOverBudget();
-
-  useEffect(() => {
-    setPercent(getUsagePercent());
-    const interval = setInterval(() => setPercent(getUsagePercent()), 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const barColor = over
-    ? "bg-red-500"
-    : near
-      ? "bg-amber-500"
-      : "bg-emerald-500";
-
-  return (
-    <div className="px-3 py-2" data-cc-id="aihub.token-bar">
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-[10px] text-slate-500">{t.aiHub.tokenUsage}</span>
-        <span className={`text-[10px] ${over ? "text-red-400" : near ? "text-amber-400" : "text-slate-500"}`}>
-          {percent}%
-        </span>
-      </div>
-      <div className="h-1 rounded-full bg-slate-700">
-        <div
-          className={`h-1 rounded-full transition-all ${barColor}`}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-      {over && (
-        <p className="mt-1 text-[10px] text-red-400 flex items-center gap-1">
-          <AlertTriangle size={10} />
-          {t.aiHub.tokenBudgetExceeded}
-        </p>
-      )}
-      {near && !over && (
-        <p className="mt-1 text-[10px] text-amber-400 flex items-center gap-1">
-          <AlertTriangle size={10} />
-          {t.aiHub.tokenBudgetWarning}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ─── ChatToolbar + Textarea wrapper ─────────────────────────────────
-
-function ChatToolbarWrapper({
-  textareaRef, value, onChange, lang, onSubmitKeyDown, placeholder, disabled, isHe,
-}: {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
-  value: string;
-  onChange: (v: string) => void;
-  lang: "he" | "en" | "ru";
-  onSubmitKeyDown: (e: React.KeyboardEvent) => void;
-  placeholder: string;
-  disabled: boolean;
-  isHe: boolean;
-}) {
-  const { toolbar, onKeyDown: toolbarKeyDown } = ChatToolbar({
-    textareaRef, value, onChange, lang,
-  });
-
-  return (
-    <>
-      {toolbar}
-      <textarea
-        ref={textareaRef}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          toolbarKeyDown(e);
-          if (!e.defaultPrevented) onSubmitKeyDown(e);
-        }}
-        placeholder={placeholder}
-        rows={1}
-        disabled={disabled}
-        dir={isHe ? "rtl" : "ltr"}
-        className="w-full resize-none rounded-b-lg rounded-t-none border border-slate-600 border-t-0 bg-slate-700/50 px-3 py-2.5 pe-10 text-sm text-slate-100 placeholder-slate-500 outline-none focus:border-[var(--cc-accent-500)] transition-colors disabled:opacity-40"
-        style={{ maxHeight: 120 }}
-      />
-    </>
-  );
-}
-
-// ─── Main Page ──────────────────────────────────────────────────────
+// ─── Main Page ──────────────────────────────────────────────────
 
 export default function AIHubPage() {
   const { language } = useSettings();
@@ -372,7 +92,7 @@ export default function AIHubPage() {
   const pathname = usePathname();
   const isHe = language === "he";
 
-  // State
+  // ─── State ──────────────────────────────────────────────────
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [mode, setMode] = useState<AIMode>("chat");
@@ -389,17 +109,26 @@ export default function AIHubPage() {
   const [currentAgent, setCurrentAgent] = useState<string | null>(null);
   const agentRef = useRef<string | null>(null);
 
+  // New feature state
+  const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
+  const [attachments, setAttachments] = useState<ImageAttachment[]>([]);
+  const [mentionOpen, setMentionOpen] = useState(false);
+  const [mentionEntities, setMentionEntities] = useState<{ id: string; title: string; entity_type: string | null }[]>([]);
+  const [docPanelOpen, setDocPanelOpen] = useState(false);
+  const [docContext, setDocContext] = useState<{ id: string; title: string; content: string; entityType: string | null } | null>(null);
+  const [knowledgeOpen, setKnowledgeOpen] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Open sidebar by default on non-mobile
+  // ─── Effects ────────────────────────────────────────────────
+
   useEffect(() => {
     if (!isMobile) setSidebarOpen(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Close sidebar when switching to mobile
   useEffect(() => {
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
@@ -414,7 +143,6 @@ export default function AIHubPage() {
     }
     setContexts([getPageLabel(pathname, t)]);
 
-    // Try loading from Supabase (non-blocking)
     loadFromSupabase().then((cloudConvos) => {
       if (cloudConvos.length > 0) {
         const merged = mergeConversations(loaded, cloudConvos);
@@ -430,17 +158,10 @@ export default function AIHubPage() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Scroll to bottom on new messages / streaming
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [conversations, activeId, isStreaming, streamingContent]);
-
-  // Focus textarea
   useEffect(() => {
     textareaRef.current?.focus();
   }, [activeId]);
 
-  // Cleanup abort controller on unmount
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
@@ -448,43 +169,18 @@ export default function AIHubPage() {
     };
   }, []);
 
-  // Active conversation
+  // ─── Derived ────────────────────────────────────────────────
+
   const activeConvo = useMemo(
     () => conversations.find((c) => c.id === activeId) ?? null,
     [conversations, activeId]
   );
-
   const messages = activeConvo?.messages ?? [];
-  const suggestions = getSuggestions(mode, t);
   const currentPageLabel = getPageLabel(pathname, t);
   const currentModel = MODE_MODELS[mode];
   const modelLabel = MODEL_LABELS[currentModel] || currentModel;
 
-  // ─── Helpers ──────────────────────────────────────────────────────
-
-  function mergeConversations(
-    local: Conversation[],
-    cloud: { id: string; mode: string; messages: { role: "user" | "assistant"; content: string; timestamp: number }[]; title?: string | null; total_tokens_input: number; total_tokens_output: number; created_at: string; updated_at: string }[]
-  ): Conversation[] {
-    const localMap = new Map(local.map((c) => [c.id, c]));
-    for (const cc of cloud) {
-      const existing = localMap.get(cc.id);
-      const cloudUpdated = new Date(cc.updated_at).getTime();
-      if (!existing || cloudUpdated > existing.updatedAt) {
-        localMap.set(cc.id, {
-          id: cc.id,
-          mode: cc.mode as AIMode,
-          messages: cc.messages,
-          title: cc.title || "",
-          createdAt: new Date(cc.created_at).getTime(),
-          updatedAt: cloudUpdated,
-          totalTokensInput: cc.total_tokens_input,
-          totalTokensOutput: cc.total_tokens_output,
-        });
-      }
-    }
-    return Array.from(localMap.values()).sort((a, b) => b.updatedAt - a.updatedAt);
-  }
+  // ─── Helpers ────────────────────────────────────────────────
 
   const debouncedCloudSave = useCallback((convo: Conversation) => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -499,18 +195,16 @@ export default function AIHubPage() {
         total_tokens_output: convo.totalTokensOutput,
       });
       setCloudStatus(ok ? "saved" : "offline");
-      if (ok) {
-        setTimeout(() => setCloudStatus("idle"), 2000);
-      }
+      if (ok) setTimeout(() => setCloudStatus("idle"), 2000);
     }, 1500);
   }, []);
-
-  // ─── Actions ────────────────────────────────────────────────────
 
   const updateConversations = useCallback((updated: Conversation[]) => {
     setConversations(updated);
     saveConversationsLocal(updated);
   }, []);
+
+  // ─── Actions ────────────────────────────────────────────────
 
   const createNewChat = useCallback(() => {
     const newConvo: Conversation = {
@@ -523,10 +217,12 @@ export default function AIHubPage() {
       totalTokensInput: 0,
       totalTokensOutput: 0,
     };
-    const updated = [newConvo, ...conversations];
-    updateConversations(updated);
+    updateConversations([newConvo, ...conversations]);
     setActiveId(newConvo.id);
     setInput("");
+    setReplyingTo(null);
+    setAttachments([]);
+    setMentionEntities([]);
   }, [mode, conversations, updateConversations]);
 
   const selectConversation = useCallback((id: string) => {
@@ -534,6 +230,8 @@ export default function AIHubPage() {
     const convo = conversations.find((c) => c.id === id);
     if (convo) setMode(convo.mode);
     setInput("");
+    setReplyingTo(null);
+    setAttachments([]);
     if (isMobile) setSidebarOpen(false);
   }, [conversations, isMobile]);
 
@@ -570,14 +268,25 @@ export default function AIHubPage() {
     abortRef.current?.abort();
   }, []);
 
+  // ─── Entity Mention ─────────────────────────────────────────
+
+  const handleMentionSelect = useCallback(async (entity: { id: string; title: string; entity_type: string | null }) => {
+    setMentionOpen(false);
+    setMentionEntities((prev) => [...prev, entity]);
+
+    // Insert @[Title] token into input
+    const token = `@[${entity.title}] `;
+    setInput((prev) => prev + token);
+    textareaRef.current?.focus();
+  }, []);
+
+  // ─── Send Message ───────────────────────────────────────────
+
   const handleSend = useCallback(async (text?: string) => {
     const msg = (text || input).trim();
-    if (!msg || isStreaming) return;
-
-    // Check budget
+    if (!msg && attachments.length === 0) return;
+    if (isStreaming) return;
     if (isOverBudget()) return;
-
-    // Check conversation limit
     if (messages.length >= MAX_CONVERSATION_MESSAGES) return;
 
     // Auto-create conversation if none active
@@ -599,20 +308,62 @@ export default function AIHubPage() {
       setActiveId(targetId);
     }
 
-    const userMsg: ChatMessage = { role: "user", content: msg, timestamp: Date.now() };
+    // Build user message
+    let messageContent = msg;
+
+    // Prepend reply context
+    if (replyingTo) {
+      messageContent = `> In reply to: "${replyingTo.content.slice(0, 200)}"\n\n${messageContent}`;
+    }
+
+    // Extract entity mention IDs and fetch context
+    const entityContexts: string[] = [];
+    if (mentionEntities.length > 0) {
+      for (const entity of mentionEntities) {
+        try {
+          const note = await fetchNote(entity.id);
+          if (note) {
+            const metaSummary = note.meta
+              ? Object.entries(note.meta as Record<string, unknown>)
+                  .filter(([k]) => !k.startsWith("__"))
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(", ")
+                  .slice(0, 500)
+              : "";
+            entityContexts.push(
+              `@Entity: ${note.title} (${note.entity_type || "note"}) — ${metaSummary}`
+            );
+          }
+        } catch {
+          // skip
+        }
+      }
+    }
+
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: messageContent,
+      timestamp: Date.now(),
+      ...(attachments.length > 0 ? {
+        images: attachments.map((a) => ({ base64: a.base64, mediaType: a.mediaType })),
+      } : {}),
+      ...(replyingTo ? { replyTo: { content: replyingTo.content, timestamp: replyingTo.timestamp } } : {}),
+    };
 
     const updated = currentConvos.map((c) => {
       if (c.id !== targetId) return c;
-      const newMessages = [...c.messages, userMsg];
       return {
         ...c,
-        messages: newMessages,
-        title: c.title || msg.slice(0, 50),
+        messages: [...c.messages, userMsg],
+        title: c.title || (msg || "Image").slice(0, 50),
         updatedAt: Date.now(),
       };
     });
     updateConversations(updated);
     setInput("");
+    setReplyingTo(null);
+    setAttachments([]);
+    setMentionEntities([]);
     setIsStreaming(true);
     setStreamingContent("");
 
@@ -621,23 +372,50 @@ export default function AIHubPage() {
     const apiMessages = convo.messages.map((m) => ({
       role: m.role,
       content: m.content,
+      ...(m.images ? { images: m.images } : {}),
     }));
 
-    // Stream response
     const controller = new AbortController();
     abortRef.current = controller;
-
     const finalId = targetId;
 
-    // Build rich contexts with actual page data
+    // Build rich contexts
     const richContexts = await buildRichContexts(contexts);
 
-    // Get auth token for API calls
+    // Add doc panel context
+    if (docContext) {
+      richContexts.push(`📄 Document: ${docContext.title}\n${docContext.content.slice(0, 2000)}`);
+    }
+
+    // Add entity contexts
+    richContexts.push(...entityContexts);
+
+    // Add knowledge URL contexts
+    const knowledgeUrls = getKnowledgeUrlsForMode(mode);
+    if (knowledgeUrls.length > 0) {
+      for (const url of knowledgeUrls) {
+        try {
+          const res = await fetch("/api/ai/fetch-url", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            richContexts.push(`📎 Knowledge (${url}): ${data.content?.slice(0, 1500) || ""}`);
+          }
+        } catch {
+          // skip
+        }
+      }
+    }
+
+    // Get auth token
     const supabase = createBrowserClient();
     const { data: sessionData } = await supabase.auth.getSession();
     const authToken = sessionData?.session?.access_token;
 
-    // Shared SSE callbacks
+    // Stream callbacks
     const streamCallbacks = {
       token: authToken,
       signal: controller.signal,
@@ -675,7 +453,6 @@ export default function AIHubPage() {
         abortRef.current = null;
       },
       onError: (error: string) => {
-        // If aborted by user, save partial content
         setStreamingContent((prev) => {
           if (prev) {
             const assistantMsg: ChatMessage = {
@@ -693,7 +470,6 @@ export default function AIHubPage() {
               return next;
             });
           } else if (!controller.signal.aborted) {
-            // No content at all — show error as system message
             const errMsg: ChatMessage = {
               role: "assistant",
               content: `⚠️ ${error}`,
@@ -735,378 +511,130 @@ export default function AIHubPage() {
         ...streamCallbacks,
       });
     }
-  }, [input, isStreaming, activeId, conversations, mode, contexts, messages.length, updateConversations, debouncedCloudSave, pathname, buildRichContexts]);
+  }, [input, isStreaming, activeId, conversations, mode, contexts, messages.length,
+      updateConversations, debouncedCloudSave, pathname, buildRichContexts,
+      replyingTo, attachments, mentionEntities, docContext]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  }, [handleSend]);
+  // ─── Regenerate last message ────────────────────────────────
 
-  // ─── Render ─────────────────────────────────────────────────────
+  const handleRegenerate = useCallback(() => {
+    if (isStreaming || messages.length < 2) return;
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUser) return;
 
-  const modeColor = MODE_COLORS[mode];
-  const ModeIcon = MODE_ICONS[mode];
-  const atLimit = messages.length >= MAX_CONVERSATION_MESSAGES;
+    // Remove last assistant message
+    const updated = conversations.map((c) => {
+      if (c.id !== activeId) return c;
+      const newMsgs = [...c.messages];
+      if (newMsgs[newMsgs.length - 1]?.role === "assistant") {
+        newMsgs.pop();
+      }
+      return { ...c, messages: newMsgs, updatedAt: Date.now() };
+    });
+    updateConversations(updated);
+
+    // Re-send last user message
+    handleSend(lastUser.content);
+  }, [isStreaming, messages, conversations, activeId, updateConversations, handleSend]);
+
+  // ─── Render ─────────────────────────────────────────────────
 
   return (
     <div className="flex h-[calc(100vh-48px)] flex-col" dir={isHe ? "rtl" : "ltr"} data-cc-id="aihub.root">
       <PageHeader pageKey="aiHub">
-        {/* Live mode indicator */}
         <div className="mt-2 flex items-center gap-3">
           <div data-cc-id="aihub.livemode" className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-400">
             <Zap size={11} />
             {t.aiHub.liveMode}
           </div>
-          {mode === "work" && (
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              {t.aiHub.workConnected}
-            </div>
-          )}
           <span className="text-[11px] text-slate-500">
             {t.aiHub.modelLabel}: {modelLabel}
           </span>
-          {cloudStatus === "saving" && (
-            <span className="text-[11px] text-slate-500">{t.aiHub.savingToCloud}</span>
-          )}
-          {cloudStatus === "saved" && (
-            <span className="text-[11px] text-emerald-400">{t.aiHub.savedToCloud}</span>
-          )}
-          {cloudStatus === "offline" && (
-            <span className="text-[11px] text-amber-400">{t.aiHub.offlineMode}</span>
-          )}
         </div>
       </PageHeader>
 
-      {/* Main 2-column layout */}
+      {/* Main layout */}
       <div className="mt-6 flex flex-1 min-h-0 gap-0 overflow-hidden rounded-xl border border-slate-700/50 bg-slate-800/30">
-        {/* Left sidebar — overlay on mobile, inline on desktop */}
+        {/* Mobile overlay */}
         {sidebarOpen && isMobile && (
           <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setSidebarOpen(false)} />
         )}
+
+        {/* Sidebar */}
         {sidebarOpen && (
-          <div data-cc-id="aihub.sidebar" className={`flex shrink-0 flex-col overflow-hidden border-e border-slate-700/50 bg-slate-800/50 ${
-            isMobile
-              ? "fixed inset-y-0 start-0 z-50 w-[280px] max-w-[calc(100vw-56px)] shadow-xl bg-slate-900"
-              : "w-[280px]"
-          }`}>
-            {/* Mode selector */}
-            <div className="border-b border-slate-700/50 p-3">
-              <ModeSelector mode={mode} onModeChange={handleModeChange} t={t} />
-            </div>
-
-            {/* Token usage bar */}
-            <div className="border-b border-slate-700/50">
-              <TokenUsageBar t={t} />
-            </div>
-
-            {/* Conversation list */}
-            <div className="flex-1 overflow-y-auto p-2">
-              <div className="mb-2 flex items-center justify-between px-1">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-slate-600">
-                  {t.aiHub.conversations}
-                </span>
-              </div>
-              <ConversationList
-                conversations={conversations}
-                activeId={activeId}
-                onSelect={selectConversation}
-                onDelete={handleDeleteConversation}
-                t={t}
-              />
-            </div>
-
-            {/* New chat button */}
-            <div className="border-t border-slate-700/50 p-3">
-              <button
-                onClick={createNewChat}
-                className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-600 px-3 py-2 text-sm text-slate-400 transition-colors hover:border-slate-500 hover:bg-slate-700/30 hover:text-slate-300"
-              >
-                <Plus size={14} />
-                {t.aiHub.newChat}
-              </button>
-            </div>
-          </div>
+          <AiSidebar
+            mode={mode}
+            onModeChange={handleModeChange}
+            conversations={conversations}
+            activeId={activeId}
+            onSelect={selectConversation}
+            onDelete={handleDeleteConversation}
+            onNewChat={createNewChat}
+            onKnowledgeOpen={() => setKnowledgeOpen(true)}
+            isMobile={isMobile}
+            t={t}
+          />
         )}
 
         {/* Chat area */}
-        <div className="flex flex-1 flex-col min-w-0">
-          {/* Mode tab bar + sidebar toggle */}
-          <div className="flex items-center">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="shrink-0 border-e border-slate-700/50 p-2.5 text-slate-500 transition-colors hover:bg-slate-700/30 hover:text-slate-400"
-              title={sidebarOpen ? "Collapse" : "Expand"}
-            >
-              {sidebarOpen
-                ? <PanelLeftClose size={16} />
-                : <PanelLeftOpen size={16} />
-              }
-            </button>
-            <div className="flex-1">
-              <ModeTabBar mode={mode} onModeChange={handleModeChange} t={t} />
-            </div>
-          </div>
+        <AiChatArea
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          docPanelOpen={docPanelOpen}
+          onToggleDocPanel={() => setDocPanelOpen(!docPanelOpen)}
+          docTitle={docContext?.title ?? null}
+          mode={mode}
+          onModeChange={handleModeChange}
+          activeConvo={activeConvo}
+          activeId={activeId}
+          messages={messages}
+          isStreaming={isStreaming}
+          streamingContent={streamingContent}
+          currentAgent={currentAgent}
+          contexts={contexts}
+          onAddContext={addContext}
+          onRemoveContext={removeContext}
+          input={input}
+          onInputChange={setInput}
+          onSend={handleSend}
+          onStop={stopGeneration}
+          replyingTo={replyingTo}
+          onReply={setReplyingTo}
+          onCancelReply={() => setReplyingTo(null)}
+          onRegenerate={handleRegenerate}
+          attachments={attachments}
+          onAddAttachment={(att) => setAttachments((prev) => [...prev, att])}
+          onRemoveAttachment={(idx) => setAttachments((prev) => prev.filter((_, i) => i !== idx))}
+          mentionOpen={mentionOpen}
+          onMentionOpen={() => setMentionOpen(true)}
+          onMentionClose={() => setMentionOpen(false)}
+          onMentionSelect={handleMentionSelect}
+          dismissedActions={dismissedActions}
+          onDismissAction={(key) => setDismissedActions((prev) => new Set(prev).add(key))}
+          onNewChat={createNewChat}
+          cloudStatus={cloudStatus}
+          textareaRef={textareaRef}
+          t={t}
+          isHe={isHe}
+          language={language}
+        />
 
-          {/* Context bar */}
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-700/50 px-4 py-2">
-            <span className="text-[11px] font-medium text-slate-500">
-              {t.aiHub.context}:
-            </span>
-            {contexts.map((ctx) => (
-              <span
-                key={ctx}
-                className="inline-flex items-center gap-1 rounded-full bg-[var(--cc-accent-600-20)] px-2 py-0.5 text-[11px] text-[var(--cc-accent-300)]"
-              >
-                {ctx}
-                <button
-                  type="button"
-                  onClick={() => removeContext(ctx)}
-                  className="ms-0.5 text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)]"
-                >
-                  <X className="h-2.5 w-2.5" />
-                </button>
-              </span>
-            ))}
-            <button
-              type="button"
-              onClick={addContext}
-              className="inline-flex items-center rounded-full border border-dashed border-slate-600 px-1.5 py-0.5 text-[11px] text-slate-500 transition-colors hover:border-slate-500 hover:text-slate-400"
-              title={t.aiHub.addContext}
-            >
-              <Plus className="h-2.5 w-2.5" />
-            </button>
-          </div>
-
-          {/* Suggestions (when empty) */}
-          {messages.length === 0 && !isStreaming && (
-            <div className="flex flex-wrap gap-1.5 border-b border-slate-700/50 px-4 py-2">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => handleSend(s)}
-                  className="rounded-full border border-slate-600 px-2.5 py-1 text-[11px] text-slate-400 transition-colors hover:border-slate-500 hover:bg-slate-700/50 hover:text-slate-300"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Messages */}
-          <div data-cc-id="aihub.messages" className="flex-1 overflow-y-auto px-4 py-4">
-            {messages.length === 0 && !isStreaming && (
-              <div className="flex h-full flex-col items-center justify-center gap-3">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-${modeColor}-500/10`}>
-                  <ModeIcon size={24} className={`text-${modeColor}-400`} />
-                </div>
-                <p className="text-sm text-slate-500">{t.aiHub.emptyChat}</p>
-              </div>
-            )}
-
-            {messages.map((msg, i) => {
-              const isAssistant = msg.role === "assistant";
-              const parsed = isAssistant ? parseAction(msg.content) : null;
-              const afterAction = parsed ? parsed.text : msg.content;
-              const action = parsed?.action ?? null;
-              const isWorkMode = activeConvo?.mode === "work";
-              const confidenceParsed = isAssistant ? parseConfidence(afterAction) : null;
-              const displayText = confidenceParsed ? confidenceParsed.text : afterAction;
-              const confidence: ConfidenceLevel = confidenceParsed?.confidence ?? null;
-
-              const confidenceConfig: Record<"high" | "medium" | "low", { dot: string; label: string }> = {
-                high: { dot: "bg-emerald-400", label: t.aiHub.confidenceHigh },
-                medium: { dot: "bg-amber-400", label: t.aiHub.confidenceMedium },
-                low: { dot: "bg-red-400", label: t.aiHub.confidenceLow },
-              };
-
-              const msgAgent = msg.agent || (isAssistant && isWorkMode ? currentAgent : null);
-              const agentKey = msgAgent ? msgAgent as AgentType : null;
-              const AgentIconComponent = agentKey ? AGENT_ICON_COMPONENTS[AGENT_ICONS[agentKey]] : null;
-              const agentLabel = agentKey ? AGENT_LABELS[agentKey]?.[language as "he" | "en" | "ru"] ?? AGENT_LABELS[agentKey]?.en : null;
-
-              return (
-                <div
-                  key={`${msg.timestamp}-${i}`}
-                  className={`mb-4 ${msg.role === "user" ? "flex justify-end" : ""}`}
-                >
-                  <div className="max-w-[75%]">
-                    {isAssistant && agentLabel && AgentIconComponent && (
-                      <div className="mb-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                        <AgentIconComponent className="h-3 w-3" />
-                        <span>{agentLabel}</span>
-                      </div>
-                    )}
-                    {isAssistant ? (
-                      <div
-                        className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-slate-700/50 text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
-                      >
-                        <ReactMarkdown>{displayText}</ReactMarkdown>
-                      </div>
-                    ) : (
-                      <div
-                        className="rounded-xl px-4 py-3 text-sm leading-relaxed bg-[var(--cc-accent-600-30)] text-slate-100 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
-                      >
-                        <ReactMarkdown>{displayText}</ReactMarkdown>
-                      </div>
-                    )}
-                    {confidence && (
-                      <div className="mt-1.5 flex items-center gap-1.5">
-                        <span className={`h-2 w-2 rounded-full ${confidenceConfig[confidence].dot}`} />
-                        <span className="text-[11px] text-slate-500">
-                          {confidenceConfig[confidence].label}
-                        </span>
-                      </div>
-                    )}
-                    {action && !dismissedActions.has(`${msg.timestamp}-${i}`) && (
-                      <ActionPreview
-                        action={action}
-                        lang={language as "he" | "en" | "ru"}
-                        onConfirm={async () => {
-                          setDismissedActions((prev) => new Set(prev).add(`${msg.timestamp}-${i}`));
-                          try {
-                            const supabase = createBrowserClient();
-                            const { data: { session } } = await supabase.auth.getSession();
-                            const token = session?.access_token;
-
-                            const res = await fetch("/api/work-manager/execute", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                              },
-                              body: JSON.stringify({
-                                action_type: action.type,
-                                title: action.title,
-                                details: action.details,
-                                session_id: activeId || "unknown",
-                              }),
-                            });
-
-                            const data = await res.json();
-                            if (data.success) {
-                              // action executed successfully
-                            } else {
-                              console.error("[WorkManager] Action failed:", data.error);
-                            }
-                          } catch (err) {
-                            console.error("[WorkManager] Execute request failed:", err);
-                          }
-                        }}
-                        onCancel={() => {
-                          // action cancelled by user
-                          setDismissedActions((prev) => new Set(prev).add(`${msg.timestamp}-${i}`));
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Streaming content */}
-            {isStreaming && streamingContent && (() => {
-              const streamAgentKey = (mode === "work" && currentAgent) ? currentAgent as AgentType : null;
-              const StreamAgentIcon = streamAgentKey ? AGENT_ICON_COMPONENTS[AGENT_ICONS[streamAgentKey]] : null;
-              const streamAgentLabel = streamAgentKey ? AGENT_LABELS[streamAgentKey]?.[language as "he" | "en" | "ru"] ?? AGENT_LABELS[streamAgentKey]?.en : null;
-              return (
-                <div className="mb-4">
-                  {streamAgentLabel && StreamAgentIcon && (
-                    <div className="mb-1 flex items-center gap-1.5 text-[11px] text-slate-500">
-                      <StreamAgentIcon className="h-3 w-3" />
-                      <span>{streamAgentLabel}</span>
-                    </div>
-                  )}
-                  <div
-                    className="max-w-[75%] rounded-xl bg-slate-700/50 px-4 py-3 text-sm leading-relaxed text-slate-300 prose prose-sm prose-invert max-w-none prose-p:my-1 prose-li:my-0.5 prose-headings:mb-1 prose-headings:mt-2 prose-pre:bg-slate-800 prose-pre:border prose-pre:border-slate-600 prose-code:text-amber-300 prose-code:before:content-none prose-code:after:content-none"
-                  >
-                    <ReactMarkdown>{streamingContent}</ReactMarkdown>
-                    <span className="inline-block w-0.5 h-4 bg-slate-300 animate-pulse ms-0.5 align-text-bottom" />
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Typing indicator (before streaming starts) */}
-            {isStreaming && !streamingContent && (
-              <div className="mb-4">
-                <div className="inline-flex items-center gap-2 rounded-xl bg-slate-700/50 px-4 py-3">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:300ms]" />
-                  <span className="text-xs text-slate-500 ms-1">{t.aiHub.streaming}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Conversation limit warning */}
-            {atLimit && (
-              <div className="mb-4 flex items-center justify-center">
-                <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
-                  {t.aiHub.conversationLimit}
-                </p>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input area */}
-          <div data-cc-id="aihub.input" className="border-t border-slate-700/50 px-4 py-3">
-            <div className="flex items-end gap-2">
-              {/* Mode badge */}
-              <div className={`mb-1.5 flex shrink-0 items-center gap-1 rounded-md bg-${modeColor}-500/10 px-2 py-1`}>
-                <ModeIcon size={12} className={`text-${modeColor}-400`} />
-                <span className={`text-[10px] font-medium text-${modeColor}-400`}>
-                  {t.aiHub[`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}` as keyof typeof t.aiHub]}
-                </span>
-              </div>
-
-              <div className="relative flex-1">
-                <ChatToolbarWrapper
-                  textareaRef={textareaRef}
-                  value={input}
-                  onChange={setInput}
-                  lang={language}
-                  onSubmitKeyDown={handleKeyDown}
-                  placeholder={atLimit ? t.aiHub.conversationLimit : t.aiHub.typePlaceholder}
-                  disabled={atLimit}
-                  isHe={isHe}
-                />
-                {input.length > 0 && (
-                  <span className="absolute bottom-1 end-10 text-[10px] text-slate-600">
-                    {input.length}
-                  </span>
-                )}
-              </div>
-
-              {isStreaming ? (
-                <button
-                  type="button"
-                  onClick={stopGeneration}
-                  className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white transition-colors hover:bg-red-500"
-                  title={t.aiHub.stopGeneration}
-                >
-                  <Square size={13} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => handleSend()}
-                  disabled={!input.trim() || isOverBudget() || atLimit}
-                  className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--cc-accent-600)] text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-40"
-                  title={t.aiHub.sendMessage}
-                >
-                  <Send size={15} />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+        {/* Document panel */}
+        <AiDocPanel
+          isOpen={docPanelOpen}
+          onClose={() => { setDocPanelOpen(false); setDocContext(null); }}
+          onDocChange={setDocContext}
+          t={t}
+        />
       </div>
+
+      {/* Knowledge dialog */}
+      <AiKnowledgeDialog
+        isOpen={knowledgeOpen}
+        onClose={() => setKnowledgeOpen(false)}
+        mode={mode}
+        t={t}
+      />
     </div>
   );
 }

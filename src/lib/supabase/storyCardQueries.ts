@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
+import { fetchNoteInfoBatch } from './entityQueries';
 
 // ─── Types ────────────────────────────────────────────
 export interface SubStory {
@@ -22,6 +23,18 @@ export interface StoryCard {
   estimation: string | null;
   note_id: string | null;
   created_at: string;
+}
+
+export interface StoryCardEntityLink {
+  id: string;
+  story_card_id: string;
+  entity_note_id: string;
+  created_at: string;
+}
+
+export interface EnrichedEntityLink extends StoryCardEntityLink {
+  entity_title: string;
+  entity_type: string | null;
 }
 
 // ─── Fetch all cards for a project ────────────────────
@@ -126,5 +139,111 @@ export async function batchUpdatePositions(
     return results.every((r) => !r.error);
   } catch {
     return false;
+  }
+}
+
+// ─── Entity Links — Batch fetch for all cards in a project ───
+export async function fetchEntityLinksForCards(
+  cardIds: string[]
+): Promise<Record<string, EnrichedEntityLink[]>> {
+  if (cardIds.length === 0) return {};
+  try {
+    const { data, error } = await supabase
+      .from('story_card_entity_links')
+      .select('*')
+      .in('story_card_id', cardIds);
+
+    if (error || !data || data.length === 0) return {};
+
+    const noteIds = [...new Set(data.map((l: StoryCardEntityLink) => l.entity_note_id))];
+    const noteInfo = await fetchNoteInfoBatch(noteIds);
+
+    const map: Record<string, EnrichedEntityLink[]> = {};
+    for (const link of data as StoryCardEntityLink[]) {
+      const info = noteInfo[link.entity_note_id];
+      const enriched: EnrichedEntityLink = {
+        ...link,
+        entity_title: info?.title ?? '?',
+        entity_type: info?.entity_type ?? null,
+      };
+      if (!map[link.story_card_id]) map[link.story_card_id] = [];
+      map[link.story_card_id].push(enriched);
+    }
+    return map;
+  } catch {
+    return {};
+  }
+}
+
+// ─── Entity Links — Link an entity to a card ────────────────
+export async function linkEntityToCard(
+  storyCardId: string,
+  entityNoteId: string
+): Promise<StoryCardEntityLink | null> {
+  try {
+    const { data, error } = await supabase
+      .from('story_card_entity_links')
+      .insert({ story_card_id: storyCardId, entity_note_id: entityNoteId })
+      .select()
+      .single();
+    if (error || !data) return null;
+    return data as StoryCardEntityLink;
+  } catch {
+    return null;
+  }
+}
+
+// ─── Entity Links — Unlink an entity from a card ────────────
+export async function unlinkEntityFromCard(linkId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('story_card_entity_links')
+      .delete()
+      .eq('id', linkId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+// ─── Entity Links — Reverse lookup: cards for an entity ─────
+export async function fetchStoryCardsForEntity(
+  entityNoteId: string
+): Promise<{ storyCardId: string; cardText: string; projectId: string; projectName: string }[]> {
+  try {
+    const { data, error } = await supabase
+      .from('story_card_entity_links')
+      .select('story_card_id')
+      .eq('entity_note_id', entityNoteId);
+
+    if (error || !data || data.length === 0) return [];
+
+    const cardIds = data.map((l: { story_card_id: string }) => l.story_card_id);
+    const { data: cards, error: cardsErr } = await supabase
+      .from('story_cards')
+      .select('id, text, project_id')
+      .in('id', cardIds);
+
+    if (cardsErr || !cards) return [];
+
+    const projectIds = [...new Set(cards.map((c: { project_id: string }) => c.project_id))];
+    const { data: projects } = await supabase
+      .from('projects')
+      .select('id, name')
+      .in('id', projectIds);
+
+    const projMap: Record<string, string> = {};
+    for (const p of (projects ?? []) as { id: string; name: string }[]) {
+      projMap[p.id] = p.name;
+    }
+
+    return (cards as { id: string; text: string; project_id: string }[]).map((c) => ({
+      storyCardId: c.id,
+      cardText: c.text,
+      projectId: c.project_id,
+      projectName: projMap[c.project_id] ?? '?',
+    }));
+  } catch {
+    return [];
   }
 }

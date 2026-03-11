@@ -39,13 +39,17 @@ import {
   deleteStoryCard,
   deleteColumn as deleteColumnDb,
   batchUpdatePositions,
+  fetchEntityLinksForCards,
+  linkEntityToCard,
+  unlinkEntityFromCard,
 } from '@/lib/supabase/storyCardQueries';
 import { createStoryNote } from '@/lib/supabase/editorQueries';
+import { fetchNoteInfoBatch } from '@/lib/supabase/entityQueries';
 import {
   subscribeToStoryCards,
   unsubscribeFromStoryCards,
 } from '@/lib/supabase/storyCardRealtime';
-import type { StoryCard } from '@/lib/supabase/storyCardQueries';
+import type { StoryCard, EnrichedEntityLink } from '@/lib/supabase/storyCardQueries';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
 // ─── Demo cards with 3-tier structure ───────────────
@@ -181,6 +185,7 @@ function StoryMapContent() {
   const pendingIds = useRef<Set<string>>(new Set());
   const channelRef = useRef<RealtimeChannel | null>(null);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const [entityLinks, setEntityLinks] = useState<Record<string, EnrichedEntityLink[]>>({});
 
   // ── Scope management — activate card_browser on mount ──
   useEffect(() => {
@@ -215,9 +220,15 @@ function StoryMapContent() {
 
     setIsDemo(false);
     setLoading(true);
-    fetchStoryCards(selectedProject).then((data) => {
+    setEntityLinks({});
+    fetchStoryCards(selectedProject).then(async (data) => {
       setCards(data);
       setLoading(false);
+      // Batch-load entity links for all cards
+      if (data.length > 0) {
+        const links = await fetchEntityLinksForCards(data.map((c) => c.id));
+        setEntityLinks(links);
+      }
     });
   }, [selectedProject]);
 
@@ -567,6 +578,53 @@ function StoryMapContent() {
     [isDemo, router, handleUpdateCard]
   );
 
+  // ── Entity link/unlink callbacks ───────────────────
+  const handleLinkEntity = useCallback(
+    async (storyCardId: string, entityNoteId: string) => {
+      if (isDemo) return;
+      // Optimistic update
+      const noteInfo = await fetchNoteInfoBatch([entityNoteId]);
+      const info = noteInfo[entityNoteId];
+      const tempLink: EnrichedEntityLink = {
+        id: `temp-${Date.now()}`,
+        story_card_id: storyCardId,
+        entity_note_id: entityNoteId,
+        created_at: new Date().toISOString(),
+        entity_title: info?.title ?? '?',
+        entity_type: info?.entity_type ?? null,
+      };
+      setEntityLinks((prev) => ({
+        ...prev,
+        [storyCardId]: [...(prev[storyCardId] ?? []), tempLink],
+      }));
+
+      const result = await linkEntityToCard(storyCardId, entityNoteId);
+      if (result) {
+        // Replace temp link with real one
+        setEntityLinks((prev) => ({
+          ...prev,
+          [storyCardId]: (prev[storyCardId] ?? []).map((l) =>
+            l.id === tempLink.id ? { ...tempLink, id: result.id } : l
+          ),
+        }));
+      }
+    },
+    [isDemo]
+  );
+
+  const handleUnlinkEntity = useCallback(
+    async (linkId: string, storyCardId: string) => {
+      if (isDemo) return;
+      // Optimistic removal
+      setEntityLinks((prev) => ({
+        ...prev,
+        [storyCardId]: (prev[storyCardId] ?? []).filter((l) => l.id !== linkId),
+      }));
+      await unlinkEntityFromCard(linkId);
+    },
+    [isDemo]
+  );
+
   // ── Filtered cards (visual only) ──────────────────
   const filteredCards = useMemo(() => {
     return cards.filter((card) => {
@@ -739,6 +797,9 @@ function StoryMapContent() {
             onOpenNote={handleOpenNote}
             onDeleteColumn={handleDeleteColumn}
             onBatchUpdate={handleBatchUpdate}
+            entityLinks={isDemo ? undefined : entityLinks}
+            onLinkEntity={isDemo ? undefined : handleLinkEntity}
+            onUnlinkEntity={isDemo ? undefined : handleUnlinkEntity}
             t={storyMapT}
           />
         </div>

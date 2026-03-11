@@ -4,12 +4,20 @@ import { z } from "zod";
 
 const VALID_MODES = ["chat", "analyze", "write", "decompose", "work"] as const;
 
+const aiImageSchema = z.object({
+  base64: z.string().min(1, "Image base64 data is required"),
+  mediaType: z.enum(["image/png", "image/jpeg", "image/gif", "image/webp"], {
+    error: "Image must be PNG, JPEG, GIF, or WebP",
+  }),
+});
+
 const aiChatMessageSchema = z.object({
   role: z
     .enum(["user", "assistant"], {
       error: 'role must be "user" or "assistant" — "system" is not allowed',
     }),
   content: z.string().min(1, "Message content cannot be empty").max(10_000, "Message content exceeds 10,000 character limit"),
+  images: z.array(aiImageSchema).max(5, "Maximum 5 images per message").optional(),
 });
 
 export const aiChatSchema = z.object({

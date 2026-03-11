@@ -8,7 +8,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Plus, Layers, Trash2 } from 'lucide-react';
 import { EpicCard, FeatureCard, StoryCard } from './StoryCard';
-import type { StoryCard as StoryCardType } from '@/lib/supabase/storyCardQueries';
+import type { StoryCard as StoryCardType, EnrichedEntityLink } from '@/lib/supabase/storyCardQueries';
 
 
 // ─── Types ──────────────────────────────────────────
@@ -27,6 +27,9 @@ interface StoryColumnProps {
   onAddStory: (col: number, featureId: string | null) => void;
   onAddFeature: (col: number) => void;
   onDeleteColumn: (col: number) => void;
+  entityLinks?: Record<string, EnrichedEntityLink[]>;
+  onLinkEntity?: (storyCardId: string, entityNoteId: string) => void;
+  onUnlinkEntity?: (linkId: string, storyCardId: string) => void;
   t: {
     addStory: string;
     addFeature: string;
@@ -54,6 +57,11 @@ interface StoryColumnProps {
     noEstimation: string;
     openInEditor?: string;
     hasNote?: string;
+    linkEntity?: string;
+    linkedEntities?: string;
+    searchEntity?: string;
+    unlinkEntity?: string;
+    noLinkedEntities?: string;
   };
 }
 
@@ -65,6 +73,9 @@ function FeatureGroupSection({
   onDeleteCard,
   onOpenNote,
   onAddStory,
+  entityLinks,
+  onLinkEntity,
+  onUnlinkEntity,
   t,
 }: {
   featureGroup: FeatureGroup;
@@ -73,6 +84,9 @@ function FeatureGroupSection({
   onDeleteCard: StoryColumnProps['onDeleteCard'];
   onOpenNote?: StoryColumnProps['onOpenNote'];
   onAddStory: StoryColumnProps['onAddStory'];
+  entityLinks?: StoryColumnProps['entityLinks'];
+  onLinkEntity?: StoryColumnProps['onLinkEntity'];
+  onUnlinkEntity?: StoryColumnProps['onUnlinkEntity'];
   t: StoryColumnProps['t'];
 }) {
   const [expanded, setExpanded] = useState(true);
@@ -101,6 +115,9 @@ function FeatureGroupSection({
             onUpdate={onUpdateCard}
             onDelete={onDeleteCard}
             onOpenNote={onOpenNote}
+            linkedEntities={entityLinks?.[story.id]}
+            onLinkEntity={onLinkEntity}
+            onUnlinkEntity={onUnlinkEntity}
             t={t}
           />
         ))}
@@ -131,6 +148,9 @@ export function StoryColumn({
   onAddStory,
   onAddFeature,
   onDeleteColumn,
+  entityLinks,
+  onLinkEntity,
+  onUnlinkEntity,
   t,
 }: StoryColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: `column-${colIndex}` });
@@ -190,6 +210,9 @@ export function StoryColumn({
               onDeleteCard={onDeleteCard}
               onOpenNote={onOpenNote}
               onAddStory={onAddStory}
+              entityLinks={entityLinks}
+              onLinkEntity={onLinkEntity}
+              onUnlinkEntity={onUnlinkEntity}
               t={t}
             />
           ))}

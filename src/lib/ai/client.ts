@@ -1,7 +1,7 @@
 import type { AIMode } from "./prompts";
 
 interface StreamChatOptions {
-  messages: { role: "user" | "assistant"; content: string }[];
+  messages: { role: "user" | "assistant"; content: string; images?: { base64: string; mediaType: string }[] }[];
   mode: AIMode;
   contexts?: string[];
   token?: string;

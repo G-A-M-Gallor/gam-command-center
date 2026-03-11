@@ -180,11 +180,30 @@ export async function POST(request: Request) {
       ? [firstMsg, ...recentMessages]
       : messages;
 
-  // Ensure messages alternate user/assistant correctly
-  const apiMessages = trimmedMessages.map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
-  }));
+  // Build API messages — support multimodal content for the last user message
+  const apiMessages = trimmedMessages.map((m, idx) => {
+    const isLastUser = idx === trimmedMessages.length - 1 && m.role === "user";
+    const hasImages = isLastUser && m.images && m.images.length > 0;
+
+    if (hasImages) {
+      // Multimodal message with images
+      const contentBlocks: Anthropic.MessageCreateParams["messages"][0]["content"] = [];
+      for (const img of m.images!) {
+        contentBlocks.push({
+          type: "image" as const,
+          source: {
+            type: "base64" as const,
+            media_type: img.mediaType as "image/png" | "image/jpeg" | "image/gif" | "image/webp",
+            data: img.base64,
+          },
+        });
+      }
+      contentBlocks.push({ type: "text" as const, text: m.content });
+      return { role: m.role as "user" | "assistant", content: contentBlocks };
+    }
+
+    return { role: m.role as "user" | "assistant", content: m.content };
+  });
 
   const client = new Anthropic({ apiKey });
 
