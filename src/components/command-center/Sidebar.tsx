@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  Activity,
   Layers,
   FileEdit,
   Map,
@@ -71,7 +72,7 @@ export const NAV_GROUPS: NavGroup[] = [
     labelKey: "groupCore",
     items: [
       { href: "/dashboard", key: "dashboard", icon: LayoutDashboard, status: "active" },
-      { href: "/dashboard/layers", key: "layers", icon: Layers, status: "active" },
+      { href: "/dashboard/layers", key: "layers", icon: Activity, status: "active" },
       { href: "/dashboard/editor", key: "editor", icon: FileEdit, status: "active" },
       { href: "/dashboard/story-map", key: "storyMap", icon: Map, status: "active" },
       { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot, status: "active" },

@@ -1,5 +1,5 @@
 import {
-  Circle, CheckCircle2, AlertCircle, Clock, Layers, FileEdit, Map, Grid3X3,
+  Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
@@ -41,21 +41,19 @@ export const routes: RouteEntry[] = [
     contexts: ['SettingsContext'], supabaseTables: ['projects', 'vb_records'], visible: true, sidebarTab: true,
   },
   {
-    id: 'layers', path: '/dashboard/layers', name: 'Layers', nameHe: 'שכבות', icon: Layers,
-    phase: 1, status: 'active', version: '0.3.0', addedDate: '2026-02-15',
-    descriptionHe: 'רשימת פרויקטים עם ציוני בריאות, סנכרון מ-Origami דרך n8n',
-    descriptionEn: 'Projects list with health scores, synced from Origami via n8n',
+    id: 'layers', path: '/dashboard/layers', name: 'Command Hub', nameHe: 'האב', icon: Activity,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-02-15',
+    descriptionHe: 'מרכז פיקוד — סטטיסטיקות, פעילות אחרונה, גרפים וגישה מהירה לכל האפליקציות',
+    descriptionEn: 'Command hub — stats, recent activity, BI charts, and quick access to all apps',
     components: [
-      { id: 'project-card', name: 'ProjectCard', file: 'components/command-center/ProjectCard.tsx', status: 'active', fields: [
-        { name: 'name', type: 'text', source: 'supabase:projects.name' },
-        { name: 'status', type: 'badge', source: 'supabase:projects.status' },
-        { name: 'health_score', type: 'number', source: 'supabase:projects.health_score' },
-        { name: 'layer', type: 'tag', source: 'supabase:projects.layer' },
-      ]},
-      { id: 'health-badge', name: 'HealthBadge', file: 'components/command-center/HealthBadge.tsx', status: 'active' },
+      { id: 'quick-stats', name: 'QuickStats', file: 'components/hub/QuickStats.tsx', status: 'active' },
+      { id: 'activity-feed', name: 'ActivityFeed', file: 'components/hub/ActivityFeed.tsx', status: 'active' },
+      { id: 'bi-charts', name: 'BiCharts', file: 'components/hub/BiCharts.tsx', status: 'active' },
+      { id: 'quick-access', name: 'QuickAccessGrid', file: 'components/hub/QuickAccessGrid.tsx', status: 'active' },
+      { id: 'row-context-menu', name: 'RowContextMenu', file: 'components/hub/RowContextMenu.tsx', status: 'active' },
       { id: 'page-header', name: 'PageHeader', file: 'components/command-center/PageHeader.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['projects'], visible: true, sidebarTab: true,
+    contexts: ['SettingsContext'], supabaseTables: ['vb_records', 'note_activity_log', 'story_cards', 'ai_conversations'], visible: true, sidebarTab: true,
   },
   {
     id: 'editor', path: '/dashboard/editor', name: 'Editor', nameHe: 'עורך', icon: FileEdit,
