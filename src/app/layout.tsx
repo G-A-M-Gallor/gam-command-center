@@ -5,6 +5,7 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import { WidgetProvider } from "@/contexts/WidgetContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ThemeInit } from "@/components/ThemeInit";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -88,6 +89,7 @@ try{var vm=localStorage.getItem('cc-style-view-mode');if(vm!=='system'){var so=J
 })();`,
           }}
         />
+        <ThemeInit />
         <SettingsProvider>
           <ToastProvider>
             <AuthProvider>

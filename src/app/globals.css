@@ -236,3 +236,26 @@ body {
     --safe-area-right: env(safe-area-inset-right, 0px);
   }
 }
+
+/* ============================================================
+   UNCODIXFY THEME SYSTEM — appended, do not remove
+   Variables are set dynamically by applyTheme() in src/lib/themes.ts
+   Fallback = Void Space (dark)
+   ============================================================ */
+
+:root {
+  --theme-bg:            #0d1117;
+  --theme-surface:       #161b22;
+  --theme-primary:       #58a6ff;
+  --theme-secondary:     #79c0ff;
+  --theme-accent:        #f78166;
+  --theme-text:          #c9d1d9;
+  --theme-text-muted:    rgba(201,209,217,0.5);
+  --theme-border:        rgba(201,209,217,0.1);
+  --theme-surface-hover: #1c2128;
+  --theme-primary-hover: rgba(88,166,255,0.85);
+  --theme-shadow-sm:     0 1px 3px rgba(0,0,0,0.35);
+  --theme-shadow-md:     0 2px 8px rgba(0,0,0,0.45);
+}
+
+/* NOTE: prefix is --theme-* (not --color-*) to avoid clashing with existing vars */
