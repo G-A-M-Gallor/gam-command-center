@@ -53,6 +53,10 @@ export function ScheduledJobsPanel({ t }: ScheduledJobsPanelProps) {
 
   return (
     <div className="space-y-6" data-cc-id="automations.scheduledJobs">
+      <div>
+        <h3 className="text-sm font-semibold text-slate-200">{t.scheduledJobs}</h3>
+        <p className="text-xs text-slate-500">{t.scheduledJobsDesc}</p>
+      </div>
       {/* pg_cron section */}
       <div>
         <div className="mb-3 flex items-center gap-2">

@@ -8,32 +8,36 @@ interface ApiEndpointsPanelProps {
 }
 
 interface EndpointDef {
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   auth: 'public' | 'auth' | 'admin';
   testable?: boolean;
 }
 
 const ENDPOINTS: EndpointDef[] = [
-  // Health
+  // Health & Automations
   { method: 'GET', path: '/api/health', auth: 'public', testable: true },
   { method: 'GET', path: '/api/automations/status', auth: 'public', testable: true },
   { method: 'POST', path: '/api/automations/run-job', auth: 'auth' },
   // AI
   { method: 'POST', path: '/api/ai/chat', auth: 'auth' },
   { method: 'POST', path: '/api/ai/boardroom', auth: 'auth' },
-  { method: 'GET', path: '/api/ai/fetch-url', auth: 'auth' },
+  { method: 'POST', path: '/api/ai/fetch-url', auth: 'auth' },
   // Embeddings
   { method: 'POST', path: '/api/embeddings/generate', auth: 'auth' },
   { method: 'POST', path: '/api/embeddings/search', auth: 'auth' },
   // Entities
   { method: 'GET', path: '/api/entities/[type]', auth: 'auth' },
   { method: 'POST', path: '/api/entities/[type]', auth: 'auth' },
+  { method: 'PATCH', path: '/api/entities/[type]', auth: 'auth' },
+  { method: 'DELETE', path: '/api/entities/[type]', auth: 'auth' },
   { method: 'GET', path: '/api/entities/[type]/[id]', auth: 'auth' },
   { method: 'PATCH', path: '/api/entities/[type]/[id]', auth: 'auth' },
   { method: 'DELETE', path: '/api/entities/[type]/[id]', auth: 'auth' },
   { method: 'GET', path: '/api/entities/[type]/[id]/comments', auth: 'auth' },
   { method: 'POST', path: '/api/entities/[type]/[id]/comments', auth: 'auth' },
+  { method: 'PATCH', path: '/api/entities/[type]/[id]/comments', auth: 'auth' },
+  { method: 'DELETE', path: '/api/entities/[type]/[id]/comments', auth: 'auth' },
   // Events
   { method: 'GET', path: '/api/events/today', auth: 'auth' },
   // Git
@@ -44,23 +48,27 @@ const ENDPOINTS: EndpointDef[] = [
   { method: 'GET', path: '/api/installed-components', auth: 'public', testable: true },
   // Notifications
   { method: 'GET', path: '/api/notifications', auth: 'auth' },
+  { method: 'POST', path: '/api/notifications', auth: 'auth' },
+  { method: 'PATCH', path: '/api/notifications', auth: 'auth' },
   // Notion
   { method: 'GET', path: '/api/notion/tasks', auth: 'public', testable: true },
   // Origami
   { method: 'POST', path: '/api/origami/sync', auth: 'auth' },
-  { method: 'POST', path: '/api/origami/entities', auth: 'auth' },
+  { method: 'GET', path: '/api/origami/entities', auth: 'auth' },
   // Contractor
   { method: 'POST', path: '/api/contractor/submit', auth: 'public' },
   { method: 'POST', path: '/api/contractor/upload', auth: 'public' },
   // Push
   { method: 'POST', path: '/api/push/subscribe', auth: 'auth' },
+  { method: 'DELETE', path: '/api/push/subscribe', auth: 'auth' },
   { method: 'POST', path: '/api/push/send', auth: 'auth' },
+  { method: 'GET', path: '/api/push/subscribers', auth: 'auth' },
   { method: 'DELETE', path: '/api/push/subscribers', auth: 'auth' },
   // System
   { method: 'GET', path: '/api/system/snapshot', auth: 'admin', testable: true },
   // Weekly Planner
   { method: 'GET', path: '/api/weekly-planner', auth: 'auth' },
-  { method: 'POST', path: '/api/weekly-planner', auth: 'auth' },
+  { method: 'PUT', path: '/api/weekly-planner', auth: 'auth' },
   // Work Manager
   { method: 'POST', path: '/api/work-manager', auth: 'auth' },
   { method: 'POST', path: '/api/work-manager/execute', auth: 'auth' },
@@ -69,6 +77,7 @@ const ENDPOINTS: EndpointDef[] = [
 const methodColors: Record<string, string> = {
   GET: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
   POST: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+  PUT: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
   PATCH: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
   DELETE: 'bg-red-500/15 text-red-400 border-red-500/30',
 };

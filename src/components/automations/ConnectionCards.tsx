@@ -59,11 +59,15 @@ export function ConnectionCards({ t }: ConnectionCardsProps) {
   const [data, setData] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [testingCard, setTestingCard] = useState<string | null>(null);
+  const [lastCheckedTime, setLastCheckedTime] = useState<string | null>(null);
 
   const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch('/api/automations/status');
-      if (res.ok) setData(await res.json());
+      if (res.ok) {
+        setData(await res.json());
+        setLastCheckedTime(new Date().toLocaleTimeString());
+      }
     } catch {
       // silent
     } finally {
@@ -91,20 +95,33 @@ export function ConnectionCards({ t }: ConnectionCardsProps) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        {cards.map((c) => (
-          <div key={c.key} className={`animate-pulse rounded-xl border ${c.borderColor} bg-white/[0.02] p-4`}>
-            <div className="h-10 w-10 rounded-lg bg-slate-800" />
-            <div className="mt-3 h-4 w-20 rounded bg-slate-800" />
-            <div className="mt-1 h-3 w-16 rounded bg-slate-800/50" />
-          </div>
-        ))}
+      <div>
+        <div className="mb-3 flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-200">{t.connections}</h3>
+          <span className="text-[10px] text-slate-500">{t.checking}</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {cards.map((c) => (
+            <div key={c.key} className={`animate-pulse rounded-xl border ${c.borderColor} bg-white/[0.02] p-4`}>
+              <div className="h-10 w-10 rounded-lg bg-slate-800" />
+              <div className="mt-3 h-4 w-20 rounded bg-slate-800" />
+              <div className="mt-1 h-3 w-16 rounded bg-slate-800/50" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" data-cc-id="automations.connections">
+    <div data-cc-id="automations.connections">
+      <div className="mb-3 flex items-center gap-2">
+        <h3 className="text-sm font-semibold text-slate-200">{t.connections}</h3>
+        {lastCheckedTime && (
+          <span className="text-[10px] text-slate-500">{t.lastChecked}: {lastCheckedTime}</span>
+        )}
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {cards.map((c) => {
         const service = data?.[c.key];
         const status = service?.status || 'unconfigured';
@@ -143,6 +160,7 @@ export function ConnectionCards({ t }: ConnectionCardsProps) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

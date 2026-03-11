@@ -78,7 +78,9 @@ export function QuickActionsBar({ t }: QuickActionsBarProps) {
   ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2" data-cc-id="automations.quickActions">
+    <div data-cc-id="automations.quickActions">
+      <h3 className="mb-2 text-sm font-semibold text-slate-200">{t.quickActions}</h3>
+      <div className="flex flex-wrap items-center gap-2">
       {actions.map((a) => {
         const Icon = a.icon;
         const isRunning = runningAction === a.id;
@@ -105,6 +107,7 @@ export function QuickActionsBar({ t }: QuickActionsBarProps) {
           {result.msg}
         </span>
       )}
+      </div>
     </div>
   );
 }
