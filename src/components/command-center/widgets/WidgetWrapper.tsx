@@ -362,7 +362,7 @@ export function WidgetWrapper({
 
       {/* Mobile fullscreen panel */}
       {panelOpen && isMobile && (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-slate-800">
+        <div className="gam-card fixed inset-0 z-[60] flex flex-col bg-slate-800">
           <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
             <div className="flex items-center gap-2">
               <widget.icon className="h-4 w-4 text-[var(--cc-accent-400)]" />
@@ -389,7 +389,7 @@ export function WidgetWrapper({
       {panelOpen && !isMobile && panelPos && (
         <div
           ref={panelRef}
-          className="fixed z-[60] flex flex-col border border-slate-700 bg-slate-800 shadow-xl"
+          className="gam-card fixed z-[60] flex flex-col border border-slate-700 bg-slate-800 shadow-xl"
           style={{
             top: panelPos.top,
             left: panelPos.left,

@@ -65,7 +65,7 @@ export function Dialog({
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         className={[
-          "relative z-10 w-full rounded-[var(--cc-radius-lg)] border border-white/[0.08] bg-slate-900 shadow-2xl shadow-black/40 outline-none",
+          "gam-card relative z-10 w-full rounded-[var(--cc-radius-lg)] border border-white/[0.08] bg-slate-900 shadow-2xl shadow-black/40 outline-none",
           "mx-4",
           maxWidth,
         ].join(" ")}

@@ -182,7 +182,7 @@ export default function DashboardPage() {
               key={card.label}
               type="button"
               onClick={() => card.href && router.push(card.href)}
-              className={`group rounded-xl border ${card.border} bg-slate-800/50 p-4 text-start transition-all hover:bg-slate-800 ${card.href ? "cursor-pointer" : "cursor-default"}`}
+              className={`gam-card group rounded-xl border ${card.border} bg-slate-800/50 p-4 text-start transition-all hover:bg-slate-800 ${card.href ? "cursor-pointer gam-card-click" : "cursor-default"}`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${card.bg}`}>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
                   key={et.slug}
                   type="button"
                   onClick={() => router.push(`/dashboard/entities/${et.slug}`)}
-                  className="group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-slate-800/40 px-4 py-3 text-start transition-all hover:border-white/[0.1] hover:bg-slate-800/70"
+                  className="gam-card gam-card-click group flex items-center gap-3 rounded-xl border border-white/[0.06] bg-slate-800/40 px-4 py-3 text-start transition-all hover:border-white/[0.1] hover:bg-slate-800/70"
                 >
                   <span className="text-lg">{et.icon}</span>
                   <div className="min-w-0 flex-1">
@@ -244,7 +244,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Recent Projects */}
-          <div className="lg:col-span-2 rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
+          <div className="gam-card lg:col-span-2 rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-semibold text-slate-200">
                 {d.recentProjects}
@@ -298,7 +298,7 @@ export default function DashboardPage() {
           {/* Right Column */}
           <div className="space-y-6">
             {/* Today's Events */}
-            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
+            <div className="gam-card rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
               <h3 className="text-sm font-semibold text-slate-200 mb-4">
                 {d.todayEvents}
               </h3>
@@ -331,7 +331,7 @@ export default function DashboardPage() {
 
             {/* Recent Entities */}
             {!loading && (data?.recentEntities.length ?? 0) > 0 && (
-              <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
+              <div className="gam-card rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-slate-200">{d.recentEntities}</h3>
                   <button
@@ -366,7 +366,7 @@ export default function DashboardPage() {
             )}
 
             {/* Quick Actions */}
-            <div className="rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
+            <div className="gam-card rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
               <h3 className="text-sm font-semibold text-slate-200 mb-3">
                 {d.quickActions}
               </h3>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                     key={action.label}
                     type="button"
                     onClick={() => router.push(action.href)}
-                    className="flex w-full items-center gap-3 rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2.5 text-sm text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700/50"
+                    className="gam-card gam-card-click flex w-full items-center gap-3 rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2.5 text-sm text-slate-300 transition-all hover:border-slate-600 hover:bg-slate-700/50"
                   >
                     <action.icon size={14} className="text-[var(--cc-accent-400)]" />
                     {action.label}

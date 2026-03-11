@@ -257,7 +257,7 @@ export function Sidebar({
   return (
     <aside
       data-cc-id="sidebar.root"
-      className={`fixed top-12 z-50 shrink-0 overflow-hidden ${
+      className={`sidebar fixed top-12 z-50 shrink-0 overflow-hidden ${
         onRight ? "right-0 border-l" : "left-0 border-r"
       } border-slate-700/50 ${
         isFloat ? "shadow-lg" : ""
@@ -435,7 +435,7 @@ export function Sidebar({
                           data-active={isActive || undefined}
                           className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-colors ${
                             isActive
-                              ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                              ? "nav-item-active bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
                               : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
                           }`}
                         >
@@ -476,7 +476,7 @@ export function Sidebar({
                           aria-label={label}
                           className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
                             isActive
-                              ? "text-[var(--cc-accent-300)]"
+                              ? "nav-item-active text-[var(--cc-accent-300)]"
                               : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
                           }`}
                         >
@@ -516,7 +516,7 @@ export function Sidebar({
                               onRight ? "flex-row-reverse" : ""
                             } ${
                               isActive
-                                ? "text-[var(--cc-accent-300)] font-medium"
+                                ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
                             }`}
                           >
@@ -550,7 +550,7 @@ export function Sidebar({
                           data-active={isActive || undefined}
                           className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
                             isActive
-                              ? "text-[var(--cc-accent-300)] font-medium"
+                              ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                               : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
                           }`}
                         >

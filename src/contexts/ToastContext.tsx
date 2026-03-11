@@ -71,7 +71,7 @@ function ToastItem({
     <div
       role="alert"
       className={[
-        "pointer-events-auto flex w-80 items-start gap-2.5 rounded-[var(--cc-radius-lg)] border px-3.5 py-3 shadow-lg shadow-black/30 backdrop-blur-sm",
+        "gam-card pointer-events-auto flex w-80 items-start gap-2.5 rounded-[var(--cc-radius-lg)] border px-3.5 py-3 shadow-lg shadow-black/30 backdrop-blur-sm",
         cfg.bg,
         cfg.border,
       ].join(" ")}
