@@ -16,6 +16,7 @@ import {
   type SkinName,
 } from "@/contexts/SettingsContext";
 import { SKINS } from "@/lib/skins";
+import { ThemeSwitcher } from "@/components/settings/ThemeSwitcher";
 import {
   useWidgets,
   type HoverDelay,
@@ -387,7 +388,12 @@ function ThemeTab() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      {/* 0. Skin Selector */}
+      {/* 0. Color Theme (Uncodixfy palettes) */}
+      <Section label={language === "he" ? "ערכת צבעים" : "Color Theme"} ccId="settings.colorTheme">
+        <ThemeSwitcher />
+      </Section>
+
+      {/* 1. Skin Selector */}
       <Section label={language === "he" ? "עיצוב כללי" : "Skin"} ccId="settings.skin">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {SKINS.map((s) => (
