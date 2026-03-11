@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAM Roadmap Dashboard</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+/* ─── Reset & Base ─────────────────────────────────── */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1e293b}
+::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}
+
+/* ─── Layer Colors ─────────────────────────────────── */
+:root{
+  --goal:#3b82f6;--portfolio:#8b5cf6;--project:#06b6d4;
+  --sprint:#10b981;--task:#f59e0b;--subtask:#ef4444;
+}
+
+/* ─── Status Badges ────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;text-transform:uppercase;letter-spacing:.3px}
+.badge-backlog{background:#334155;color:#94a3b8}
+.badge-in-progress{background:#1e3a5f;color:#60a5fa}
+.badge-done{background:#14532d;color:#4ade80}
+.badge-blocked{background:#450a0a;color:#f87171}
+
+/* ─── Breadcrumb ───────────────────────────────────── */
+#breadcrumb{padding:12px 20px;background:#1e293b;border-bottom:1px solid #334155;font-size:13px;color:#64748b;display:flex;align-items:center;gap:6px;flex-wrap:wrap;direction:ltr}
+#breadcrumb span{cursor:pointer;transition:color .15s}
+#breadcrumb span:hover{color:#e2e8f0}
+#breadcrumb .sep{color:#475569;cursor:default}
+#breadcrumb .active{color:#e2e8f0;font-weight:600}
+
+/* ─── Zone 1: Goals Bar ────────────────────────────── */
+#goals-bar{display:flex;gap:8px;padding:16px 20px;overflow-x:auto;background:#1e293b80;border-bottom:1px solid #334155}
+.goal-card{min-width:160px;flex:1;padding:14px;border-radius:12px;background:#1e293b;border:2px solid #334155;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.goal-card:hover{border-color:var(--goal);transform:translateY(-2px);box-shadow:0 4px 20px #3b82f620}
+.goal-card.selected{border-color:var(--goal);background:#1e293bee;box-shadow:0 0 0 1px var(--goal),0 4px 20px #3b82f630}
+.goal-card .icon{font-size:20px;margin-bottom:6px}
+.goal-card .name{font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:8px;line-height:1.3}
+.goal-card .progress-bar{height:6px;background:#334155;border-radius:3px;overflow:hidden;margin-bottom:6px}
+.goal-card .progress-fill{height:100%;border-radius:3px;background:var(--goal);transition:width .5s ease}
+.goal-card .meta{display:flex;justify-content:space-between;align-items:center}
+.goal-card .pct{font-size:11px;font-weight:700;color:var(--goal)}
+
+/* ─── Zone 2: Roadmap Tree ─────────────────────────── */
+#tree-zone{padding:20px;overflow-x:auto;min-height:300px;direction:ltr}
+#tree-zone .tree-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;position:relative}
+.tree-node{border-radius:10px;padding:12px 16px;cursor:pointer;transition:all .2s;border:1px solid;min-width:180px;position:relative}
+.tree-node:hover{transform:translateY(-1px);box-shadow:0 4px 12px #00000040}
+.tree-node.selected{box-shadow:0 0 0 2px currentColor,0 4px 16px #00000040}
+.tree-node .node-name{font-size:13px;font-weight:600;margin-bottom:4px}
+.tree-node .node-meta{font-size:11px;opacity:.7;margin-bottom:6px}
+.tree-node .node-progress{height:4px;background:#ffffff15;border-radius:2px;overflow:hidden}
+.tree-node .node-progress-fill{height:100%;border-radius:2px;transition:width .5s}
+
+/* Portfolio nodes */
+.node-portfolio{background:#8b5cf615;border-color:#8b5cf640;color:#c4b5fd}
+.node-portfolio .node-progress-fill{background:var(--portfolio)}
+.node-portfolio.selected{background:#8b5cf625}
+
+/* Project nodes */
+.node-project{background:#06b6d415;border-color:#06b6d440;color:#67e8f9}
+.node-project .node-progress-fill{background:var(--project)}
+.node-project.selected{background:#06b6d425}
+
+/* Sprint nodes */
+.node-sprint{background:#10b98115;border-color:#10b98140;color:#6ee7b7}
+.node-sprint .node-progress-fill{background:var(--sprint)}
+.node-sprint.selected{background:#10b98125}
+.node-sprint.is-active{border-color:#10b981;border-width:2px;box-shadow:0 0 12px #10b98120}
+
+/* Tree connectors */
+.tree-connector{display:flex;align-items:center;padding:0 4px;color:#475569;font-size:18px;user-select:none}
+
+/* Tree container */
+.tree-level{margin-bottom:12px}
+.tree-level-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 12px;margin-bottom:8px;border-radius:6px;display:inline-block}
+.label-portfolio{background:#8b5cf620;color:#a78bfa}
+.label-project{background:#06b6d420;color:#22d3ee}
+.label-sprint{background:#10b98120;color:#34d399}
+
+.tree-items{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ─── Zone 3: Task List ────────────────────────────── */
+#task-zone{padding:20px;border-top:1px solid #334155;background:#0f172a}
+#task-zone.hidden{display:none}
+.task-header{font-size:14px;font-weight:700;color:#e2e8f0;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.task-header .sprint-dates{font-size:11px;font-weight:400;color:#64748b}
+
+.task-item{background:#1e293b;border:1px solid #334155;border-radius:8px;margin-bottom:6px;overflow:hidden;transition:all .15s}
+.task-item:hover{border-color:#475569}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer}
+.task-row .task-color{width:4px;height:28px;border-radius:2px;background:var(--task);flex-shrink:0}
+.task-row .task-name{flex:1;font-size:13px;font-weight:500}
+.task-row .task-pct{font-size:11px;font-weight:600;color:var(--task);min-width:36px;text-align:right}
+.task-row .expand-icon{font-size:14px;color:#64748b;transition:transform .2s;width:20px;text-align:center}
+.task-row .expand-icon.open{transform:rotate(90deg)}
+
+.subtask-list{padding:0 14px 10px 28px;display:none}
+.subtask-list.open{display:block}
+.subtask-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;margin-bottom:4px;font-size:12px;background:#0f172a;border:1px solid #1e293b}
+.subtask-item .st-color{width:3px;height:18px;border-radius:2px;background:var(--subtask);flex-shrink:0}
+.subtask-item .st-name{flex:1}
+.subtask-item .st-status{margin-inline-start:auto}
+
+/* ─── Empty State ──────────────────────────────────── */
+.empty-state{text-align:center;padding:40px 20px;color:#475569;font-size:13px}
+.empty-state .empty-icon{font-size:36px;margin-bottom:8px}
+
+/* ─── Animations ───────────────────────────────────── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .3s ease}
+</style>
+</head>
+<body>
+
+<!-- Breadcrumb -->
+<div id="breadcrumb"></div>
+
+<!-- Zone 1: Goals -->
+<div id="goals-bar"></div>
+
+<!-- Zone 2: Tree -->
+<div id="tree-zone"></div>
+
+<!-- Zone 3: Tasks -->
+<div id="task-zone" class="hidden"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA — Hard-coded demo data for all 7 goals
+// ═══════════════════════════════════════════════════════
+
+const data = {
+  goals: [
+    { id: 1, name: "Automation Engine", icon: "🤖", status: "in-progress" },
+    { id: 2, name: "HR & Recruitment", icon: "👥", status: "in-progress" },
+    { id: 3, name: "Sales & Advisory", icon: "💼", status: "in-progress" },
+    { id: 4, name: "Project Brokerage", icon: "🏗️", status: "planned" },
+    { id: 5, name: "Company Brokerage", icon: "🏢", status: "planned" },
+    { id: 6, name: "Finance & Accounting", icon: "💰", status: "backlog" },
+    { id: 7, name: "Platform & Infrastructure", icon: "⚙️", status: "in-progress" },
+  ],
+
+  portfolios: [
+    { id: 101, name: "Supabase Engine", goal_id: 1, status: "in-progress" },
+    { id: 102, name: "n8n Workflows", goal_id: 1, status: "in-progress" },
+    { id: 103, name: "Origami Sync", goal_id: 1, status: "planned" },
+    { id: 201, name: "Talent Profiles", goal_id: 2, status: "in-progress" },
+    { id: 202, name: "Job Board", goal_id: 2, status: "planned" },
+    { id: 203, name: "Matching 2.5", goal_id: 2, status: "backlog" },
+    { id: 301, name: "CRM Pipeline", goal_id: 3, status: "in-progress" },
+    { id: 302, name: "Lead Management", goal_id: 3, status: "in-progress" },
+    { id: 401, name: "Contractor Registry", goal_id: 4, status: "planned" },
+    { id: 402, name: "Project Listings", goal_id: 4, status: "backlog" },
+    { id: 501, name: "Company Listings", goal_id: 5, status: "backlog" },
+    { id: 502, name: "Buyer Profiles", goal_id: 5, status: "backlog" },
+    { id: 601, name: "iCount Integration", goal_id: 6, status: "backlog" },
+    { id: 701, name: "Auth & Security", goal_id: 7, status: "done" },
+    { id: 702, name: "Dashboard Shell", goal_id: 7, status: "done" },
+    { id: 703, name: "AI Hub", goal_id: 7, status: "in-progress" },
+    { id: 704, name: "Import / Export", goal_id: 7, status: "in-progress" },
+  ],
+
+  projects: [
+    // Automation Engine → Supabase Engine
+    { id: 1001, name: "Realtime Subscriptions", portfolio_id: 101, status: "done" },
+    { id: 1002, name: "RLS Policies", portfolio_id: 101, status: "done" },
+    { id: 1003, name: "Edge Functions", portfolio_id: 101, status: "planned" },
+    // Automation Engine → n8n
+    { id: 1004, name: "Webhook Receivers", portfolio_id: 102, status: "in-progress" },
+    { id: 1005, name: "Scheduled Jobs", portfolio_id: 102, status: "planned" },
+    // Automation Engine → Origami
+    { id: 1006, name: "Entity Sync", portfolio_id: 103, status: "planned" },
+    // HR
+    { id: 2001, name: "Profile Builder", portfolio_id: 201, status: "in-progress" },
+    { id: 2002, name: "CV Parser", portfolio_id: 201, status: "planned" },
+    { id: 2003, name: "Job Posting Engine", portfolio_id: 202, status: "planned" },
+    { id: 2004, name: "Matching Algorithm", portfolio_id: 203, status: "backlog" },
+    // Sales
+    { id: 3001, name: "Stream Management", portfolio_id: 301, status: "in-progress" },
+    { id: 3002, name: "Lead Capture", portfolio_id: 302, status: "in-progress" },
+    { id: 3003, name: "Follow-up Automation", portfolio_id: 302, status: "planned" },
+    // Project Brokerage
+    { id: 4001, name: "Contractor DB", portfolio_id: 401, status: "planned" },
+    { id: 4002, name: "Project Listings UI", portfolio_id: 402, status: "backlog" },
+    // Company Brokerage
+    { id: 5001, name: "Seller Profiles", portfolio_id: 501, status: "backlog" },
+    { id: 5002, name: "Buyer Matching", portfolio_id: 502, status: "backlog" },
+    // Finance
+    { id: 6001, name: "Invoice Automation", portfolio_id: 601, status: "backlog" },
+    // Platform
+    { id: 7001, name: "Login + Session", portfolio_id: 701, status: "done" },
+    { id: 7002, name: "Sidebar + TopBar", portfolio_id: 702, status: "done" },
+    { id: 7003, name: "Widget System", portfolio_id: 702, status: "done" },
+    { id: 7004, name: "Chat Modes", portfolio_id: 703, status: "done" },
+    { id: 7005, name: "Work Manager Agents", portfolio_id: 703, status: "in-progress" },
+    { id: 7006, name: "CSV/Excel Import", portfolio_id: 704, status: "in-progress" },
+    { id: 7007, name: "Matching Engine", portfolio_id: 704, status: "in-progress" },
+  ],
+
+  sprints: [
+    // Realtime Subscriptions
+    { id: 10001, name: "Sprint 1", project_id: 1001, start: "2026-02-28", end: "2026-03-04", status: "done" },
+    { id: 10002, name: "Sprint 2", project_id: 1001, start: "2026-03-05", end: "2026-03-09", status: "done" },
+    // RLS Policies
+    { id: 10003, name: "Sprint 1", project_id: 1002, start: "2026-03-03", end: "2026-03-07", status: "done" },
+    // Webhook Receivers
+    { id: 10004, name: "Sprint 1", project_id: 1004, start: "2026-03-08", end: "2026-03-12", status: "in-progress" },
+    // Profile Builder
+    { id: 10005, name: "Sprint 1", project_id: 2001, start: "2026-03-10", end: "2026-03-14", status: "in-progress" },
+    // Stream Management
+    { id: 10006, name: "Sprint 1", project_id: 3001, start: "2026-03-06", end: "2026-03-10", status: "in-progress" },
+    // Lead Capture
+    { id: 10007, name: "Sprint 1", project_id: 3002, start: "2026-03-08", end: "2026-03-12", status: "in-progress" },
+    // Login + Session
+    { id: 10008, name: "Sprint 1", project_id: 7001, start: "2026-02-28", end: "2026-03-02", status: "done" },
+    // Sidebar + TopBar
+    { id: 10009, name: "Sprint 1", project_id: 7002, start: "2026-02-28", end: "2026-03-03", status: "done" },
+    // Widget System
+    { id: 10010, name: "Sprint 1", project_id: 7003, start: "2026-03-04", end: "2026-03-08", status: "done" },
+    { id: 10011, name: "Sprint 2", project_id: 7003, start: "2026-03-09", end: "2026-03-12", status: "in-progress" },
+    // Chat Modes
+    { id: 10012, name: "Sprint 1", project_id: 7004, start: "2026-03-02", end: "2026-03-06", status: "done" },
+    // Work Manager
+    { id: 10013, name: "Sprint 1", project_id: 7005, start: "2026-03-07", end: "2026-03-11", status: "in-progress" },
+    // Import
+    { id: 10014, name: "Sprint 1", project_id: 7006, start: "2026-03-11", end: "2026-03-13", status: "in-progress" },
+    // Matching
+    { id: 10015, name: "Sprint 1", project_id: 7007, start: "2026-03-11", end: "2026-03-13", status: "in-progress" },
+  ],
+
+  tasks: [
+    // Sprint 10001 — Realtime Subscriptions S1
+    { id: 20001, name: "Set up Supabase Realtime channel", sprint_id: 10001, status: "done" },
+    { id: 20002, name: "Editor live sync", sprint_id: 10001, status: "done" },
+    { id: 20003, name: "Story Map Realtime", sprint_id: 10001, status: "done" },
+    // Sprint 10002 — Realtime S2
+    { id: 20004, name: "Functional Map Realtime", sprint_id: 10002, status: "done" },
+    { id: 20005, name: "Plan phases Realtime", sprint_id: 10002, status: "done" },
+    // Sprint 10003 — RLS
+    { id: 20006, name: "Write RLS policies", sprint_id: 10003, status: "done" },
+    { id: 20007, name: "pgTAP tests", sprint_id: 10003, status: "done" },
+    // Sprint 10004 — Webhooks
+    { id: 20008, name: "Origami webhook endpoint", sprint_id: 10004, status: "done" },
+    { id: 20009, name: "RSS feed cron job", sprint_id: 10004, status: "done" },
+    { id: 20010, name: "n8n trigger setup", sprint_id: 10004, status: "in-progress" },
+    { id: 20011, name: "Error handling & retries", sprint_id: 10004, status: "backlog" },
+    // Sprint 10005 — Profile Builder
+    { id: 20012, name: "Entity type: Talent", sprint_id: 10005, status: "done" },
+    { id: 20013, name: "Field templates", sprint_id: 10005, status: "in-progress" },
+    { id: 20014, name: "Bulk import CSV", sprint_id: 10005, status: "in-progress" },
+    { id: 20015, name: "Profile card view", sprint_id: 10005, status: "backlog" },
+    // Sprint 10006 — Stream
+    { id: 20016, name: "Stream entity schema", sprint_id: 10006, status: "done" },
+    { id: 20017, name: "Pipeline board view", sprint_id: 10006, status: "in-progress" },
+    { id: 20018, name: "Activity log", sprint_id: 10006, status: "backlog" },
+    // Sprint 10007 — Lead Capture
+    { id: 20019, name: "Lead form integration", sprint_id: 10007, status: "in-progress" },
+    { id: 20020, name: "Auto-assign rules", sprint_id: 10007, status: "backlog" },
+    { id: 20021, name: "Notification triggers", sprint_id: 10007, status: "backlog" },
+    // Sprint 10008 — Login
+    { id: 20022, name: "GitHub OAuth flow", sprint_id: 10008, status: "done" },
+    { id: 20023, name: "JWT session management", sprint_id: 10008, status: "done" },
+    { id: 20024, name: "Middleware auth guard", sprint_id: 10008, status: "done" },
+    // Sprint 10009 — Sidebar
+    { id: 20025, name: "Sidebar navigation", sprint_id: 10009, status: "done" },
+    { id: 20026, name: "TopBar with widgets", sprint_id: 10009, status: "done" },
+    { id: 20027, name: "Responsive layout", sprint_id: 10009, status: "done" },
+    // Sprint 10010 — Widgets S1
+    { id: 20028, name: "Widget registry", sprint_id: 10010, status: "done" },
+    { id: 20029, name: "Drag & resize", sprint_id: 10010, status: "done" },
+    { id: 20030, name: "Widget folders", sprint_id: 10010, status: "done" },
+    { id: 20031, name: "10 core widgets", sprint_id: 10010, status: "done" },
+    // Sprint 10011 — Widgets S2
+    { id: 20032, name: "RSS widget", sprint_id: 10011, status: "done" },
+    { id: 20033, name: "Matching widget", sprint_id: 10011, status: "done" },
+    { id: 20034, name: "Leads widget", sprint_id: 10011, status: "in-progress" },
+    { id: 20035, name: "Widget profiles", sprint_id: 10011, status: "backlog" },
+    // Sprint 10012 — Chat Modes
+    { id: 20036, name: "Chat mode", sprint_id: 10012, status: "done" },
+    { id: 20037, name: "Analyze mode", sprint_id: 10012, status: "done" },
+    { id: 20038, name: "Write mode", sprint_id: 10012, status: "done" },
+    { id: 20039, name: "Decompose mode", sprint_id: 10012, status: "done" },
+    // Sprint 10013 — Work Manager
+    { id: 20040, name: "Agent orchestrator", sprint_id: 10013, status: "done" },
+    { id: 20041, name: "PM + Dev agents", sprint_id: 10013, status: "done" },
+    { id: 20042, name: "Strategy agent", sprint_id: 10013, status: "in-progress" },
+    { id: 20043, name: "QA agent", sprint_id: 10013, status: "backlog" },
+    // Sprint 10014 — Import
+    { id: 20044, name: "CSV parser", sprint_id: 10014, status: "done" },
+    { id: 20045, name: "Column auto-mapper", sprint_id: 10014, status: "done" },
+    { id: 20046, name: "Wizard UI", sprint_id: 10014, status: "in-progress" },
+    { id: 20047, name: "Import history log", sprint_id: 10014, status: "backlog" },
+    // Sprint 10015 — Matching
+    { id: 20048, name: "Scoring algorithm", sprint_id: 10015, status: "done" },
+    { id: 20049, name: "Match dashboard", sprint_id: 10015, status: "done" },
+    { id: 20050, name: "Match filters", sprint_id: 10015, status: "in-progress" },
+    { id: 20051, name: "Batch scoring API", sprint_id: 10015, status: "backlog" },
+  ],
+
+  subtasks: [
+    // Task 20008 — Origami webhook
+    { id: 30001, name: "POST /api/origami/sync route", task_id: 20008, status: "done" },
+    { id: 30002, name: "Field extraction helper", task_id: 20008, status: "done" },
+    { id: 30003, name: "Health score calculation", task_id: 20008, status: "done" },
+    // Task 20009 — RSS cron
+    { id: 30004, name: "Feed parser integration", task_id: 20009, status: "done" },
+    { id: 30005, name: "Vercel Cron schedule", task_id: 20009, status: "done" },
+    { id: 30006, name: "Keyword filter logic", task_id: 20009, status: "done" },
+    // Task 20010 — n8n trigger
+    { id: 30007, name: "n8n webhook URL config", task_id: 20010, status: "done" },
+    { id: 30008, name: "Payload schema validation", task_id: 20010, status: "in-progress" },
+    { id: 30009, name: "Test with live n8n instance", task_id: 20010, status: "backlog" },
+    // Task 20013 — Field templates
+    { id: 30010, name: "Template schema design", task_id: 20013, status: "done" },
+    { id: 30011, name: "Default field sets per type", task_id: 20013, status: "in-progress" },
+    { id: 30012, name: "Template picker UI", task_id: 20013, status: "backlog" },
+    // Task 20014 — Bulk import
+    { id: 30013, name: "File upload component", task_id: 20014, status: "done" },
+    { id: 30014, name: "Parse & validate rows", task_id: 20014, status: "done" },
+    { id: 30015, name: "Batch insert with progress", task_id: 20014, status: "in-progress" },
+    { id: 30016, name: "Error report display", task_id: 20014, status: "backlog" },
+    // Task 20017 — Pipeline board
+    { id: 30017, name: "Kanban column layout", task_id: 20017, status: "done" },
+    { id: 30018, name: "Drag between columns", task_id: 20017, status: "in-progress" },
+    { id: 30019, name: "Card detail popup", task_id: 20017, status: "backlog" },
+    // Task 20019 — Lead form
+    { id: 30020, name: "Jotform webhook receiver", task_id: 20019, status: "done" },
+    { id: 30021, name: "Lead dedup logic", task_id: 20019, status: "in-progress" },
+    { id: 30022, name: "Auto-create vb_record", task_id: 20019, status: "backlog" },
+    // Task 20042 — Strategy agent
+    { id: 30023, name: "Agent prompt design", task_id: 20042, status: "done" },
+    { id: 30024, name: "Context injection pipeline", task_id: 20042, status: "in-progress" },
+    { id: 30025, name: "Knowledge base integration", task_id: 20042, status: "backlog" },
+    // Task 20046 — Wizard UI
+    { id: 30026, name: "4-step wizard component", task_id: 20046, status: "done" },
+    { id: 30027, name: "Column mapping UI", task_id: 20046, status: "in-progress" },
+    { id: 30028, name: "Preview table with validation", task_id: 20046, status: "backlog" },
+    // Task 20050 — Match filters
+    { id: 30029, name: "Filter panel component", task_id: 20050, status: "in-progress" },
+    { id: 30030, name: "Score range slider", task_id: 20050, status: "backlog" },
+    { id: 30031, name: "Entity type filter", task_id: 20050, status: "backlog" },
+    // Task 20034 — Leads widget
+    { id: 30032, name: "Widget layout", task_id: 20034, status: "done" },
+    { id: 30033, name: "Pipeline summary data", task_id: 20034, status: "in-progress" },
+    { id: 30034, name: "Click-to-expand", task_id: 20034, status: "backlog" },
+  ],
+};
+
+// ═══════════════════════════════════════════════════════
+// CALCULATIONS — Bubble-up percentages
+// ═══════════════════════════════════════════════════════
+
+function computePercentages() {
+  // Task % = subtask done / subtask total (or 100% if done, 0% if no subtasks & not done)
+  for (const task of data.tasks) {
+    const subs = data.subtasks.filter(s => s.task_id === task.id);
+    if (subs.length > 0) {
+      task._pct = Math.round((subs.filter(s => s.status === 'done').length / subs.length) * 100);
+    } else {
+      task._pct = task.status === 'done' ? 100 : task.status === 'in-progress' ? 50 : 0;
+    }
+  }
+
+  // Sprint % = average of task %
+  for (const sprint of data.sprints) {
+    const tasks = data.tasks.filter(t => t.sprint_id === sprint.id);
+    sprint._pct = tasks.length > 0
+      ? Math.round(tasks.reduce((a, t) => a + t._pct, 0) / tasks.length)
+      : (sprint.status === 'done' ? 100 : 0);
+    sprint._tasksDone = tasks.filter(t => t._pct === 100).length;
+    sprint._tasksTotal = tasks.length;
+  }
+
+  // Project % = average of sprint %
+  for (const proj of data.projects) {
+    const sprints = data.sprints.filter(s => s.project_id === proj.id);
+    proj._pct = sprints.length > 0
+      ? Math.round(sprints.reduce((a, s) => a + s._pct, 0) / sprints.length)
+      : (proj.status === 'done' ? 100 : 0);
+  }
+
+  // Portfolio % = average of project %
+  for (const port of data.portfolios) {
+    const projs = data.projects.filter(p => p.portfolio_id === port.id);
+    port._pct = projs.length > 0
+      ? Math.round(projs.reduce((a, p) => a + p._pct, 0) / projs.length)
+      : (port.status === 'done' ? 100 : 0);
+  }
+
+  // Goal % = average of portfolio %
+  for (const goal of data.goals) {
+    const ports = data.portfolios.filter(p => p.goal_id === goal.id);
+    goal._pct = ports.length > 0
+      ? Math.round(ports.reduce((a, p) => a + p._pct, 0) / ports.length)
+      : (goal.status === 'done' ? 100 : 0);
+  }
+}
+
+computePercentages();
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+
+const state = {
+  goalId: null,
+  portfolioId: null,
+  projectId: null,
+  sprintId: null,
+};
+
+function loadStateFromURL() {
+  const p = new URLSearchParams(window.location.search);
+  state.goalId = p.get('goal') ? +p.get('goal') : null;
+  state.sprintId = p.get('sprint') ? +p.get('sprint') : null;
+
+  // Resolve parents from sprint
+  if (state.sprintId) {
+    const sprint = data.sprints.find(s => s.id === state.sprintId);
+    if (sprint) {
+      const proj = data.projects.find(p => p.id === sprint.project_id);
+      if (proj) {
+        state.projectId = proj.id;
+        const port = data.portfolios.find(p => p.id === proj.portfolio_id);
+        if (port) {
+          state.portfolioId = port.id;
+          state.goalId = port.goal_id;
+        }
+      }
+    }
+  }
+}
+
+function saveStateToURL() {
+  const p = new URLSearchParams();
+  if (state.goalId) p.set('goal', state.goalId);
+  if (state.sprintId) p.set('sprint', state.sprintId);
+  const qs = p.toString();
+  const url = window.location.pathname + (qs ? '?' + qs : '');
+  window.history.replaceState(null, '', url);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — Breadcrumb
+// ═══════════════════════════════════════════════════════
+
+function renderBreadcrumb() {
+  const el = document.getElementById('breadcrumb');
+  const parts = [{ label: 'GAM', action: () => { state.goalId = null; state.portfolioId = null; state.projectId = null; state.sprintId = null; renderAll(); } }];
+
+  if (state.goalId) {
+    const goal = data.goals.find(g => g.id === state.goalId);
+    if (goal) parts.push({ label: `${goal.icon} ${goal.name}`, action: () => { state.portfolioId = null; state.projectId = null; state.sprintId = null; renderAll(); } });
+  }
+  if (state.portfolioId) {
+    const port = data.portfolios.find(p => p.id === state.portfolioId);
+    if (port) parts.push({ label: port.name, action: () => { state.projectId = null; state.sprintId = null; renderAll(); } });
+  }
+  if (state.projectId) {
+    const proj = data.projects.find(p => p.id === state.projectId);
+    if (proj) parts.push({ label: proj.name, action: () => { state.sprintId = null; renderAll(); } });
+  }
+  if (state.sprintId) {
+    const sprint = data.sprints.find(s => s.id === state.sprintId);
+    if (sprint) parts.push({ label: sprint.name, action: null });
+  }
+
+  el.innerHTML = '';
+  parts.forEach((p, i) => {
+    if (i > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'sep';
+      sep.textContent = '›';
+      el.appendChild(sep);
+    }
+    const span = document.createElement('span');
+    span.textContent = p.label;
+    if (i === parts.length - 1) span.className = 'active';
+    if (p.action) span.addEventListener('click', p.action);
+    el.appendChild(span);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — Goals Bar
+// ═══════════════════════════════════════════════════════
+
+function renderGoals() {
+  const bar = document.getElementById('goals-bar');
+  bar.innerHTML = '';
+
+  data.goals.forEach(goal => {
+    const card = document.createElement('div');
+    card.className = 'goal-card' + (state.goalId === goal.id ? ' selected' : '');
+
+    const badgeClass = 'badge badge-' + goal.status;
+
+    card.innerHTML = `
+      <div class="icon">${goal.icon}</div>
+      <div class="name">${goal.name}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${goal._pct}%"></div></div>
+      <div class="meta">
+        <span class="pct">${goal._pct}%</span>
+        <span class="${badgeClass}">${statusLabel(goal.status)}</span>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      if (state.goalId === goal.id) {
+        state.goalId = null;
+      } else {
+        state.goalId = goal.id;
+      }
+      state.portfolioId = null;
+      state.projectId = null;
+      state.sprintId = null;
+      renderAll();
+    });
+
+    bar.appendChild(card);
+  });
+}
+
+function statusLabel(s) {
+  const map = { 'backlog': 'Backlog', 'in-progress': 'In Progress', 'done': 'Done', 'blocked': 'Blocked', 'planned': 'Planned' };
+  return map[s] || s;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — Roadmap Tree
+// ═══════════════════════════════════════════════════════
+
+function renderTree() {
+  const zone = document.getElementById('tree-zone');
+  zone.innerHTML = '';
+
+  if (!state.goalId) {
+    zone.innerHTML = '<div class="empty-state fade-in"><div class="empty-icon">🎯</div>Select a goal above to explore its roadmap</div>';
+    return;
+  }
+
+  const portfolios = data.portfolios.filter(p => p.goal_id === state.goalId);
+
+  if (portfolios.length === 0) {
+    zone.innerHTML = '<div class="empty-state fade-in"><div class="empty-icon">📂</div>No portfolios in this goal yet</div>';
+    return;
+  }
+
+  // Portfolio level
+  const portLabel = document.createElement('div');
+  portLabel.className = 'tree-level-label label-portfolio';
+  portLabel.textContent = 'Portfolios';
+  zone.appendChild(portLabel);
+
+  const portItems = document.createElement('div');
+  portItems.className = 'tree-items fade-in';
+  portfolios.forEach(port => {
+    portItems.appendChild(createTreeNode(port, 'portfolio', () => {
+      state.portfolioId = state.portfolioId === port.id ? null : port.id;
+      state.projectId = null;
+      state.sprintId = null;
+      renderAll();
+    }));
+  });
+  zone.appendChild(portItems);
+
+  // Project level (if portfolio selected)
+  if (state.portfolioId) {
+    const projects = data.projects.filter(p => p.portfolio_id === state.portfolioId);
+    if (projects.length > 0) {
+      const projLabel = document.createElement('div');
+      projLabel.className = 'tree-level-label label-project';
+      projLabel.textContent = 'Projects';
+      projLabel.style.marginTop = '16px';
+      zone.appendChild(projLabel);
+
+      const projItems = document.createElement('div');
+      projItems.className = 'tree-items fade-in';
+      projects.forEach(proj => {
+        projItems.appendChild(createTreeNode(proj, 'project', () => {
+          state.projectId = state.projectId === proj.id ? null : proj.id;
+          state.sprintId = null;
+          renderAll();
+        }));
+      });
+      zone.appendChild(projItems);
+    }
+  }
+
+  // Sprint level (if project selected)
+  if (state.projectId) {
+    const sprints = data.sprints.filter(s => s.project_id === state.projectId);
+    if (sprints.length > 0) {
+      const spLabel = document.createElement('div');
+      spLabel.className = 'tree-level-label label-sprint';
+      spLabel.textContent = 'Sprints';
+      spLabel.style.marginTop = '16px';
+      zone.appendChild(spLabel);
+
+      const spItems = document.createElement('div');
+      spItems.className = 'tree-items fade-in';
+      sprints.forEach(sprint => {
+        const isActive = sprint.status === 'in-progress';
+        const node = createTreeNode(sprint, 'sprint', () => {
+          state.sprintId = state.sprintId === sprint.id ? null : sprint.id;
+          renderAll();
+        }, isActive);
+        // Add dates
+        const dateDiv = node.querySelector('.node-meta');
+        if (dateDiv) {
+          dateDiv.textContent = `${sprint.start} → ${sprint.end} · ${sprint._tasksDone}/${sprint._tasksTotal} tasks`;
+        }
+        spItems.appendChild(node);
+      });
+      zone.appendChild(spItems);
+    }
+  }
+}
+
+function createTreeNode(item, type, onClick, isActive = false) {
+  const node = document.createElement('div');
+  const isSelected =
+    (type === 'portfolio' && state.portfolioId === item.id) ||
+    (type === 'project' && state.projectId === item.id) ||
+    (type === 'sprint' && state.sprintId === item.id);
+
+  node.className = `tree-node node-${type}${isSelected ? ' selected' : ''}${isActive ? ' is-active' : ''}`;
+
+  const badgeClass = 'badge badge-' + item.status;
+
+  node.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div class="node-name">${item.name}</div>
+      <span class="${badgeClass}" style="flex-shrink:0">${statusLabel(item.status)}</span>
+    </div>
+    <div class="node-meta">${item._pct}%</div>
+    <div class="node-progress"><div class="node-progress-fill" style="width:${item._pct}%"></div></div>
+  `;
+
+  node.addEventListener('click', onClick);
+  return node;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER — Task List
+// ═══════════════════════════════════════════════════════
+
+function renderTasks() {
+  const zone = document.getElementById('task-zone');
+
+  if (!state.sprintId) {
+    zone.classList.add('hidden');
+    return;
+  }
+
+  zone.classList.remove('hidden');
+  zone.innerHTML = '';
+
+  const sprint = data.sprints.find(s => s.id === state.sprintId);
+  if (!sprint) return;
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'task-header fade-in';
+  header.innerHTML = `
+    <span style="color:var(--sprint)">●</span>
+    ${sprint.name}
+    <span class="sprint-dates">${sprint.start} → ${sprint.end}</span>
+    <span class="sprint-dates" style="margin-inline-start:auto">${sprint._tasksDone}/${sprint._tasksTotal} done · ${sprint._pct}%</span>
+  `;
+  zone.appendChild(header);
+
+  // Tasks
+  const tasks = data.tasks.filter(t => t.sprint_id === state.sprintId);
+
+  tasks.forEach(task => {
+    const subtasks = data.subtasks.filter(s => s.task_id === task.id);
+    const hasSubtasks = subtasks.length > 0;
+
+    const item = document.createElement('div');
+    item.className = 'task-item fade-in';
+
+    const badgeClass = 'badge badge-' + task.status;
+
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    row.innerHTML = `
+      <div class="task-color"></div>
+      <div class="task-name">${task.name}</div>
+      <span class="${badgeClass}">${statusLabel(task.status)}</span>
+      <span class="task-pct">${task._pct}%</span>
+      ${hasSubtasks ? '<span class="expand-icon">▶</span>' : '<span style="width:20px"></span>'}
+    `;
+
+    item.appendChild(row);
+
+    // Subtask list
+    if (hasSubtasks) {
+      const subList = document.createElement('div');
+      subList.className = 'subtask-list';
+
+      subtasks.forEach(st => {
+        const stBadge = 'badge badge-' + st.status;
+        const stItem = document.createElement('div');
+        stItem.className = 'subtask-item';
+        stItem.innerHTML = `
+          <div class="st-color"></div>
+          <span class="st-name">${st.name}</span>
+          <span class="st-status ${stBadge}">${statusLabel(st.status)}</span>
+        `;
+        subList.appendChild(stItem);
+      });
+
+      item.appendChild(subList);
+
+      row.addEventListener('click', () => {
+        const icon = row.querySelector('.expand-icon');
+        const isOpen = subList.classList.contains('open');
+        subList.classList.toggle('open');
+        if (icon) icon.classList.toggle('open');
+      });
+    }
+
+    zone.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════
+
+function renderAll() {
+  saveStateToURL();
+  renderBreadcrumb();
+  renderGoals();
+  renderTree();
+  renderTasks();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+
+loadStateFromURL();
+renderAll();
+
+// Handle back/forward navigation
+window.addEventListener('popstate', () => {
+  loadStateFromURL();
+  renderAll();
+});
+</script>
+</body>
+</html>
