@@ -245,6 +245,18 @@ export const boardRoomSchema = z.object({
 
 export type BoardRoomInput = z.infer<typeof boardRoomSchema>;
 
+// ─── Automation Run Job ─────────────────────────────────────
+
+const VALID_JOBS = ["origami-sync", "health-check", "test-notification"] as const;
+
+export const automationRunJobSchema = z.object({
+  job: z.enum(VALID_JOBS, {
+    error: `Invalid job — must be one of: ${VALID_JOBS.join(", ")}`,
+  }),
+});
+
+export type AutomationRunJobInput = z.infer<typeof automationRunJobSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.
