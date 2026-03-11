@@ -21,6 +21,9 @@ export const SYSTEM_FIELDS: {
   { key: 'sys_last_edited_at', noteField: 'last_edited_at', label: { he: 'עודכן לאחרונה', en: 'Last Edited', ru: 'Последнее изменение' }, icon: 'Clock' },
 ];
 
+// Universal fields — always shown on every entity, regardless of field_refs
+export const UNIVERSAL_FIELD_KEYS = ['status', 'assignee', 'priority'] as const;
+
 export const BUILTIN_FIELDS: GlobalFieldInsert[] = [
   // ─── System Fields (always present, cannot be deleted) ──
   {

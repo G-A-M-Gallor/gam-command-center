@@ -15,6 +15,7 @@ import {
   fetchStakeholders,
 } from '@/lib/supabase/entityQueries';
 import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel, TemplateConfig, TemplateSection, VisibilityRule, ColorRule } from '@/lib/entities/types';
+import { UNIVERSAL_FIELD_KEYS } from '@/lib/entities/builtinFields';
 
 interface Props {
   noteId: string;
@@ -370,7 +371,16 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
         const et = types.find(t => t.slug === entityType);
         if (et) {
           setEtInfo(et);
-          let filteredFields = allF.filter(f => et.field_refs.includes(f.meta_key));
+          // Always include universal fields (status, assignee, priority) + type-specific fields
+          const universalSet = new Set<string>(UNIVERSAL_FIELD_KEYS);
+          let filteredFields = allF.filter(f => et.field_refs.includes(f.meta_key) || universalSet.has(f.meta_key));
+          // Sort: universal fields first, then type-specific in original order
+          filteredFields.sort((a, b) => {
+            const aUniv = universalSet.has(a.meta_key) ? 0 : 1;
+            const bUniv = universalSet.has(b.meta_key) ? 0 : 1;
+            if (aUniv !== bUniv) return aUniv - bUniv;
+            return 0; // preserve original order within each group
+          });
 
           // RBAC: if user is external/viewer, check stakeholder visible_fields
           if (user && (permissions.role === 'external' || permissions.role === 'viewer')) {
