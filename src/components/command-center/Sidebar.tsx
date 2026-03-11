@@ -27,6 +27,8 @@ import {
   Share,
   Database,
   BookOpen,
+  Sheet,
+  Presentation,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -86,6 +88,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
       { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
       { href: "/roadmap", key: "roadmap", icon: Compass, status: "active" },
+      { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
+      { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
     ],
   },
   {

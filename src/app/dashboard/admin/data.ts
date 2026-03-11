@@ -257,6 +257,34 @@ export const routes: RouteEntry[] = [
     contexts: ['SettingsContext'], supabaseTables: ['wiki_entries'], visible: true, sidebarTab: true,
     connectedTo: ['ai-hub'],
   },
+  {
+    id: 'grid', path: '/dashboard/grid', name: 'Grid', nameHe: 'גיליון', icon: Grid3X3,
+    phase: 2, status: 'active', version: '0.1.0', addedDate: '2026-03-11',
+    descriptionHe: 'גיליון אלקטרוני עם נוסחאות, צביעת תאים, עמודות קפואות, גרירה ושחרור, ייצוא CSV',
+    descriptionEn: 'Spreadsheet with formulas, cell coloring, frozen columns, drag & drop, CSV export',
+    components: [
+      { id: 'grid-page', name: 'GridPage', file: 'app/dashboard/grid/page.tsx', status: 'active' },
+      { id: 'grid-canvas', name: 'GridCanvas', file: 'components/grid/GridCanvas.tsx', status: 'active' },
+      { id: 'grid-toolbar', name: 'GridToolbar', file: 'components/grid/GridToolbar.tsx', status: 'active' },
+      { id: 'grid-cell', name: 'GridCell', file: 'components/grid/GridCell.tsx', status: 'active' },
+      { id: 'sheet-tabs', name: 'SheetTabs', file: 'components/grid/SheetTabs.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'slides', path: '/dashboard/slides', name: 'Slides', nameHe: 'מצגת', icon: Calendar,
+    phase: 2, status: 'active', version: '0.1.0', addedDate: '2026-03-11',
+    descriptionHe: 'בונה מצגות עם תמונות רקע, שכבות טקסט, צורות ומצב הצגה במסך מלא',
+    descriptionEn: 'Presentation builder with image backgrounds, text overlays, shapes, and fullscreen presenter mode',
+    components: [
+      { id: 'slides-page', name: 'SlidesPage', file: 'app/dashboard/slides/page.tsx', status: 'active' },
+      { id: 'slide-canvas', name: 'SlideCanvas', file: 'components/slides/SlideCanvas.tsx', status: 'active' },
+      { id: 'slide-toolbar', name: 'SlideToolbar', file: 'components/slides/SlideToolbar.tsx', status: 'active' },
+      { id: 'slide-thumbnails', name: 'SlideThumbnails', file: 'components/slides/SlideThumbnails.tsx', status: 'active' },
+      { id: 'slide-presenter', name: 'SlidePresenter', file: 'components/slides/SlidePresenter.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+  },
 ];
 
 export const standalonePages: RouteEntry[] = [

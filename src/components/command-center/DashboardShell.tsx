@@ -34,6 +34,8 @@ const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
   "/dashboard/plan": { he: "תוכנית", en: "Plan", ru: "План" },
   "/dashboard/settings": { he: "הגדרות", en: "Settings", ru: "Настройки" },
   "/dashboard/automations": { he: "אוטומציות", en: "Automations", ru: "Автоматизация" },
+  "/dashboard/grid": { he: "גיליון", en: "Grid", ru: "Таблица" },
+  "/dashboard/slides": { he: "מצגת", en: "Slides", ru: "Слайды" },
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

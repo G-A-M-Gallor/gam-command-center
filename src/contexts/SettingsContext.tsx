@@ -246,13 +246,31 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = language;
   }, [language, mounted]);
 
-  // Apply theme data attributes
+  // Apply theme data attributes + inline accent variables
   useEffect(() => {
     if (!mounted) return;
-    document.documentElement.dataset.accent = accentColor;
-    document.documentElement.dataset.font = fontFamily;
-    document.documentElement.dataset.radius = borderRadius;
-    document.documentElement.dataset.density = density;
+    const root = document.documentElement;
+    root.dataset.accent = accentColor;
+    root.dataset.font = fontFamily;
+    root.dataset.radius = borderRadius;
+    root.dataset.density = density;
+
+    // For preset accent colors, set inline --cc-accent-* variables so they
+    // reliably override any theme-set values (inline > CSS selector specificity).
+    const presetHex = PRESET_HEX_MAP[accentColor];
+    if (presetHex) {
+      const palette = generateAccentPalette(presetHex);
+      root.style.setProperty("--cc-accent-300", palette["300"]);
+      root.style.setProperty("--cc-accent-400", palette["400"]);
+      root.style.setProperty("--cc-accent-500", palette["500"]);
+      root.style.setProperty("--cc-accent-600", palette["600"]);
+      root.style.setProperty("--cc-accent-600-20", palette["600-20"]);
+      root.style.setProperty("--cc-accent-600-30", palette["600-30"]);
+      root.style.setProperty("--cc-accent-500-15", palette["500-15"]);
+      root.style.setProperty("--cc-accent-500-30", palette["500-30"]);
+      root.style.setProperty("--cc-accent-500-50", palette["500-50"]);
+    }
+    // "custom" and "brand" accents are handled by their own useEffects below
   }, [accentColor, fontFamily, borderRadius, density, mounted]);
 
   // Apply skin CSS variables
@@ -281,12 +299,24 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--cc-brand-500-15", palette["500-15"]);
       root.style.setProperty("--cc-brand-500-30", palette["500-30"]);
       root.style.setProperty("--cc-brand-500-50", palette["500-50"]);
+      // Also set --cc-accent-* directly when brand is active
+      if (accentColor === "brand") {
+        root.style.setProperty("--cc-accent-300", palette["300"]);
+        root.style.setProperty("--cc-accent-400", palette["400"]);
+        root.style.setProperty("--cc-accent-500", palette["500"]);
+        root.style.setProperty("--cc-accent-600", palette["600"]);
+        root.style.setProperty("--cc-accent-600-20", palette["600-20"]);
+        root.style.setProperty("--cc-accent-600-30", palette["600-30"]);
+        root.style.setProperty("--cc-accent-500-15", palette["500-15"]);
+        root.style.setProperty("--cc-accent-500-30", palette["500-30"]);
+        root.style.setProperty("--cc-accent-500-50", palette["500-50"]);
+      }
     } else {
       // Clean up brand vars if no primary color
       const vars = ["300", "400", "500", "600", "600-20", "600-30", "500-15", "500-30", "500-50"];
       vars.forEach((v) => root.style.removeProperty(`--cc-brand-${v}`));
     }
-  }, [brandProfile.brandPrimary, mounted]);
+  }, [brandProfile.brandPrimary, accentColor, mounted]);
 
   // Apply custom accent CSS vars
   useEffect(() => {
@@ -303,11 +333,23 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--cc-custom-500-15", palette["500-15"]);
       root.style.setProperty("--cc-custom-500-30", palette["500-30"]);
       root.style.setProperty("--cc-custom-500-50", palette["500-50"]);
+      // Also set --cc-accent-* directly when custom is active
+      if (accentColor === "custom") {
+        root.style.setProperty("--cc-accent-300", palette["300"]);
+        root.style.setProperty("--cc-accent-400", palette["400"]);
+        root.style.setProperty("--cc-accent-500", palette["500"]);
+        root.style.setProperty("--cc-accent-600", palette["600"]);
+        root.style.setProperty("--cc-accent-600-20", palette["600-20"]);
+        root.style.setProperty("--cc-accent-600-30", palette["600-30"]);
+        root.style.setProperty("--cc-accent-500-15", palette["500-15"]);
+        root.style.setProperty("--cc-accent-500-30", palette["500-30"]);
+        root.style.setProperty("--cc-accent-500-50", palette["500-50"]);
+      }
     } else {
       const vars = ["300", "400", "500", "600", "600-20", "600-30", "500-15", "500-30", "500-50"];
       vars.forEach((v) => root.style.removeProperty(`--cc-custom-${v}`));
     }
-  }, [customAccentHex, mounted]);
+  }, [customAccentHex, accentColor, mounted]);
 
   // Apply gradient + glow accent effects
   useEffect(() => {

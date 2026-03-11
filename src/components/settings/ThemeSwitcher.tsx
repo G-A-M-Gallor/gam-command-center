@@ -1,52 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { DARK_THEMES, LIGHT_THEMES, type ThemePalette } from '@/lib/themes'
+import { DARK_THEMES, type ThemePalette } from '@/lib/themes'
 import { useThemeStore } from '@/lib/theme-store'
 
 export function ThemeSwitcher() {
   const { activeThemeId, setTheme } = useThemeStore()
-  const [tab, setTab] = useState<'dark' | 'light'>('dark')
-  const themes = tab === 'dark' ? DARK_THEMES : LIGHT_THEMES
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--theme-border)', gap: 2 }}>
-        {(['dark', 'light'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            style={{
-              padding: '6px 14px',
-              fontSize: 13,
-              fontWeight: 500,
-              background: 'none',
-              border: 'none',
-              borderBottom: tab === t ? '2px solid var(--theme-primary)' : '2px solid transparent',
-              marginBottom: -1,
-              color: tab === t ? 'var(--theme-text)' : 'var(--theme-text-muted)',
-              cursor: 'pointer',
-              transition: 'color 120ms ease',
-              textTransform: 'capitalize',
-            }}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-        {themes.map((theme) => (
-          <ThemeCard
-            key={theme.id}
-            theme={theme}
-            isActive={activeThemeId === theme.id}
-            onSelect={() => setTheme(theme.id)}
-          />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 gap-2.5">
+      {DARK_THEMES.map((theme) => (
+        <ThemeCard
+          key={theme.id}
+          theme={theme}
+          isActive={activeThemeId === theme.id}
+          onSelect={() => setTheme(theme.id)}
+        />
+      ))}
     </div>
   )
 }
@@ -63,43 +32,36 @@ function ThemeCard({
   const { colors } = theme
   return (
     <button
+      type="button"
       onClick={onSelect}
       title={theme.name}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 0,
-        background: 'none',
-        border: `1px solid ${isActive ? 'var(--theme-primary)' : 'var(--theme-border)'}`,
-        borderRadius: 8,
-        cursor: 'pointer',
-        overflow: 'hidden',
-        textAlign: 'left',
-        boxShadow: isActive ? '0 0 0 2px var(--theme-primary)30' : 'none',
-        transition: 'border-color 120ms ease',
-      }}
+      className={`flex flex-col overflow-hidden rounded-lg border text-left transition-all cursor-pointer ${
+        isActive
+          ? 'border-[var(--cc-accent-500)] ring-2 ring-[var(--cc-accent-500)]/20'
+          : 'border-white/[0.06] hover:border-white/[0.12]'
+      }`}
     >
       {/* Preview */}
-      <div style={{ display: 'flex', height: 72, background: colors.background }}>
-        <div style={{ width: 28, background: colors.surface, borderRight: `1px solid ${colors.text}18` }} />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ height: 18, display: 'flex', alignItems: 'center', padding: '0 6px', borderBottom: `1px solid ${colors.text}18` }}>
-            <div style={{ width: 20, height: 4, borderRadius: 2, background: colors.primary }} />
+      <div className="flex h-[72px]" style={{ background: colors.background }}>
+        <div className="w-7" style={{ background: colors.surface, borderRight: `1px solid ${colors.text}18` }} />
+        <div className="flex flex-1 flex-col">
+          <div className="flex h-[18px] items-center px-1.5" style={{ borderBottom: `1px solid ${colors.text}18` }}>
+            <div className="h-1 w-5 rounded-sm" style={{ background: colors.primary }} />
           </div>
-          <div style={{ display: 'flex', gap: 4, padding: '8px 6px' }}>
+          <div className="flex gap-1 p-1.5">
             {[colors.primary, colors.secondary, colors.accent].map((c, i) => (
-              <span key={i} style={{ width: 14, height: 14, borderRadius: 3, background: c, display: 'block' }} />
+              <span key={i} className="block h-3.5 w-3.5 rounded-sm" style={{ background: c }} />
             ))}
           </div>
         </div>
       </div>
       {/* Name */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 8px', gap: 6 }}>
-        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--theme-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+      <div className="flex items-center justify-between gap-1.5 px-2.5 py-1.5">
+        <span className="truncate text-xs font-medium text-slate-200">
           {theme.name}
         </span>
         {isActive && (
-          <span style={{ fontSize: 10, fontWeight: 500, color: 'var(--theme-primary)', background: 'var(--theme-primary)18', border: '1px solid var(--theme-primary)40', borderRadius: 4, padding: '1px 5px', flexShrink: 0 }}>
+          <span className="shrink-0 rounded border border-[var(--cc-accent-500)]/30 bg-[var(--cc-accent-600-20)] px-1.5 py-px text-[10px] font-medium text-[var(--cc-accent-400)]">
             Active
           </span>
         )}
