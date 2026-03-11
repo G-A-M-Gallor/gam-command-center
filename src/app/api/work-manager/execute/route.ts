@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { workManagerExecuteSchema } from "@/lib/api/schemas";
+import { createNotionTask } from "@/lib/notion/client";
 
 // ─── Supabase admin client (service role for DB writes) ─────
 
@@ -117,14 +118,67 @@ function handleInvokePersona(
   title: string,
   details: Record<string, string>
 ) {
-  // Stub — log and acknowledge for now
-  const persona = details.persona || "claude";
+  const personaId = details.persona || details.persona_id || "ceo-advisor";
   return {
-    persona,
+    persona: personaId,
     title,
-    status: "stub",
-    message: `Persona "${persona}" invocation logged — not yet implemented`,
+    status: "active",
+    message: `Persona "${personaId}" activated. Subsequent messages will use this persona's expertise.`,
   };
+}
+
+// ─── Notion Task Handler ────────────────────────────────────
+
+async function handleCreateNotionTask(
+  title: string,
+  details: Record<string, string>,
+  userId: string
+) {
+  const result = await createNotionTask({
+    title,
+    type: details.type,
+    priority: details.priority,
+    effort: details.effort,
+    layer: details.layer,
+    owner: details.owner || "Claude",
+    notes: details.notes,
+    acceptanceCriteria: details.acceptance_criteria,
+  });
+
+  if (!result) throw new Error("Notion API not configured (missing NOTION_API_KEY or NOTION_TASKS_DB_ID)");
+
+  return { notion_id: result.id, url: result.url, title, created_by: userId };
+}
+
+// ─── Entity Handler ─────────────────────────────────────────
+
+async function handleCreateEntity(
+  title: string,
+  details: Record<string, string>,
+  userId: string
+) {
+  const supabase = getSupabase();
+  const entityType = details.entity_type || "note";
+  const meta: Record<string, unknown> = {};
+
+  // Copy all details except entity_type into meta
+  for (const [key, value] of Object.entries(details)) {
+    if (key !== "entity_type") meta[key] = value;
+  }
+
+  const { data, error } = await supabase
+    .from("vb_records")
+    .insert({
+      title,
+      entity_type: entityType,
+      meta,
+      created_by: userId,
+    })
+    .select("id, title, entity_type")
+    .single();
+
+  if (error) throw new Error(`Failed to create entity: ${error.message}`);
+  return { id: data.id, title: data.title, entity_type: data.entity_type };
 }
 
 // ─── Route Handler ──────────────────────────────────────────
@@ -179,6 +233,12 @@ export async function POST(request: Request) {
         break;
       case "invoke_persona":
         result = handleInvokePersona(title, details);
+        break;
+      case "create_notion_task":
+        result = await handleCreateNotionTask(title, details, userId);
+        break;
+      case "create_entity":
+        result = await handleCreateEntity(title, details, userId);
         break;
       default:
         return NextResponse.json(

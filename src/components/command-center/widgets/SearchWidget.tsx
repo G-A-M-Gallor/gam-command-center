@@ -14,6 +14,11 @@ import {
   CornerDownLeft,
   Sparkles,
   StickyNote,
+  Zap,
+  LayoutGrid,
+  BookOpen,
+  FolderKanban,
+  Command,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -21,12 +26,17 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { supabase } from "@/lib/supabaseClient";
 import { searchNotes } from "@/lib/supabase/entityQueries";
 import { fetchEntityTypes } from "@/lib/supabase/entityQueries";
+import { SYSTEM_SHORTCUTS } from "@/lib/shortcuts/shortcutRegistry";
+import { SHORTCUT_EVENT_MAP, SHORTCUT_NAV_MAP } from "@/contexts/ShortcutsContext";
+import { widgetRegistry } from "./WidgetRegistry";
 import type { EntityType, NoteRecord } from "@/lib/entities/types";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
 const RECENT_SEARCHES_KEY = "cc-recent-searches";
 const MAX_RECENT = 5;
+
+// ─── Types ──────────────────────────────────────────────────
 
 interface RecentPage {
   href: string;
@@ -43,13 +53,19 @@ interface DbDocument {
 interface SearchItem {
   id: string;
   label: string;
-  type: "page" | "document" | "action" | "semantic" | "entity";
+  type: "page" | "document" | "action" | "semantic" | "entity" | "command" | "widget" | "project" | "wiki";
   href?: string;
   icon: typeof Search;
   similarity?: number;
   entityIcon?: string;
   entityTypeLabel?: string;
+  /** Keyboard shortcut hint displayed on the right (e.g. "Cmd+K") */
+  shortcutHint?: string;
+  /** Custom event to dispatch on select (for commands/widgets) */
+  eventName?: string;
 }
+
+// ─── Helpers ────────────────────────────────────────────────
 
 function getRecentPages(): RecentPage[] {
   try {
@@ -76,17 +92,39 @@ function saveRecentSearch(term: string) {
   localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
 }
 
-// Tab route icons for recent pages
-const routeIcons: Record<string, typeof Search> = {
-  "/dashboard/layers": Layers,
-  "/dashboard/editor": FileText,
-  "/dashboard/story-map": Layers,
-  "/dashboard/functional-map": Layers,
-  "/dashboard/ai-hub": Bot,
-  "/dashboard/design-system": Layers,
-  "/dashboard/architecture": Layers,
-  "/dashboard/plan": Layers,
-};
+// ─── Route & Page Data ──────────────────────────────────────
+
+/** Full routes list for navigation search — replaces the old routeIcons + tabLabels */
+const DASHBOARD_PAGES: {
+  path: string;
+  icon: typeof Search;
+  label: { he: string; en: string; ru: string };
+}[] = [
+  { path: "/dashboard", icon: Layers, label: { he: "דשבורד", en: "Dashboard", ru: "Панель" } },
+  { path: "/dashboard/layers", icon: Layers, label: { he: "האב", en: "Command Hub", ru: "Командный центр" } },
+  { path: "/dashboard/editor", icon: FileText, label: { he: "עורך", en: "Editor", ru: "Редактор" } },
+  { path: "/dashboard/story-map", icon: Layers, label: { he: "מפת סיפור", en: "Story Map", ru: "Карта историй" } },
+  { path: "/dashboard/functional-map", icon: Layers, label: { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" } },
+  { path: "/dashboard/ai-hub", icon: Bot, label: { he: "מרכז AI", en: "AI Hub", ru: "AI Центр" } },
+  { path: "/dashboard/design-system", icon: Layers, label: { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" } },
+  { path: "/dashboard/architecture", icon: Layers, label: { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" } },
+  { path: "/dashboard/plan", icon: Layers, label: { he: "תוכנית", en: "Plan", ru: "План" } },
+  { path: "/dashboard/settings", icon: Layers, label: { he: "הגדרות", en: "Settings", ru: "Настройки" } },
+  { path: "/dashboard/admin", icon: Layers, label: { he: "לוג פיתוח", en: "Admin", ru: "Админ" } },
+  { path: "/dashboard/wiki", icon: BookOpen, label: { he: "ויקי", en: "Wiki", ru: "Вики" } },
+  { path: "/dashboard/automations", icon: Zap, label: { he: "אוטומציות", en: "Automations", ru: "Автоматизации" } },
+  { path: "/dashboard/entities/fields", icon: Layers, label: { he: "ספריית שדות", en: "Field Library", ru: "Библиотека полей" } },
+  { path: "/dashboard/grid", icon: LayoutGrid, label: { he: "גיליון", en: "Grid", ru: "Таблица" } },
+  { path: "/dashboard/boardroom", icon: Bot, label: { he: "חדר דיונים", en: "Board Room", ru: "Зал заседаний" } },
+  { path: "/dashboard/feeds", icon: Layers, label: { he: "פידים", en: "Feeds", ru: "Ленты" } },
+];
+
+/** Legacy routeIcons lookup — used for recent pages icon mapping */
+const routeIcons: Record<string, typeof Search> = Object.fromEntries(
+  DASHBOARD_PAGES.map((p) => [p.path, p.icon])
+);
+
+// ─── SearchPanel ────────────────────────────────────────────
 
 interface SearchPanelProps {
   onClose: () => void;
@@ -98,6 +136,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const router = useRouter();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
+  const lang = language === "he" ? "he" : language === "ru" ? "ru" : "en";
 
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -106,9 +145,16 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const [semanticResults, setSemanticResults] = useState<DbDocument[]>([]);
   const [entityResults, setEntityResults] = useState<NoteRecord[]>([]);
   const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
+  const [projectResults, setProjectResults] = useState<{ id: string; name: string }[]>([]);
+  const [wikiResults, setWikiResults] = useState<{ id: string; question: string }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // ── Prefix mode detection ─────────────────────────────────
+  const isCommandMode = query.startsWith(">");
+  const isPageMode = query.startsWith("/");
+  const effectiveQuery = (isCommandMode || isPageMode) ? query.slice(1).trim() : query.trim();
 
   // Focus input on mount + load recent documents + entity types
   useEffect(() => {
@@ -123,43 +169,77 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
           .order('last_edited_at', { ascending: false })
           .limit(20);
         if (data) setDbDocuments(data);
-      } catch { /* silent — search still works with pages */ }
+      } catch { /* silent -- search still works with pages */ }
     }
     loadDocs();
     fetchEntityTypes().then(setEntityTypes);
   }, []);
 
-  // Server-side search via RPC (debounced) + semantic fallback + entity search
+  // Server-side search via RPC (debounced) + semantic fallback + entity search + projects + wiki
   useEffect(() => {
-    if (!query.trim()) {
+    if (!effectiveQuery) {
       setSearchResults([]);
       setSemanticResults([]);
       setEntityResults([]);
+      setProjectResults([]);
+      setWikiResults([]);
       return;
     }
+
+    // Skip DB searches in command-only or page-only mode
+    if (isCommandMode || isPageMode) {
+      setSearchResults([]);
+      setSemanticResults([]);
+      setEntityResults([]);
+      setProjectResults([]);
+      setWikiResults([]);
+      return;
+    }
+
     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     searchTimeoutRef.current = setTimeout(async () => {
       setSemanticResults([]);
+
       // Entity search in parallel with document search
-      searchNotes(query.trim()).then(notes => {
-        // Filter out documents (already covered by doc search)
+      searchNotes(effectiveQuery).then(notes => {
         setEntityResults(notes.filter(n => n.entity_type && n.record_type !== 'document'));
       });
+
+      // Projects search
+      supabase
+        .from('projects')
+        .select('id, name')
+        .ilike('name', `%${effectiveQuery}%`)
+        .limit(5)
+        .then(({ data }) => {
+          if (data) setProjectResults(data);
+        });
+
+      // Wiki search
+      supabase
+        .from('wiki_entries')
+        .select('id, question')
+        .ilike('question', `%${effectiveQuery}%`)
+        .limit(5)
+        .then(({ data }) => {
+          if (data) setWikiResults(data);
+        });
+
       try {
         const { data } = await supabase.rpc('search_documents', {
-          query: query.trim(),
+          query: effectiveQuery,
           max_results: 20,
         });
         const ftsResults = (data as DbDocument[]) || [];
         setSearchResults(ftsResults);
 
         // Semantic fallback when FTS returns no results
-        if (ftsResults.length === 0 && query.trim().length >= 3) {
+        if (ftsResults.length === 0 && effectiveQuery.length >= 3) {
           try {
             const res = await fetch('/api/embeddings/search', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ query: query.trim(), max_results: 10 }),
+              body: JSON.stringify({ query: effectiveQuery, max_results: 10 }),
             });
             if (res.ok) {
               const { results } = await res.json();
@@ -167,11 +247,11 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                 setSemanticResults(results as DbDocument[]);
               }
             }
-          } catch { /* semantic search unavailable — silent */ }
+          } catch { /* semantic search unavailable -- silent */ }
         }
       } catch {
         // Fallback: client-side filter if RPC not available yet
-        const q = query.toLowerCase();
+        const q = effectiveQuery.toLowerCase();
         setSearchResults(
           dbDocuments.filter((d) => (d.title || '').toLowerCase().includes(q))
         );
@@ -180,16 +260,87 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     return () => {
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     };
-  }, [query, dbDocuments]);
+  }, [effectiveQuery, isCommandMode, isPageMode, dbDocuments]);
+
+  // ── Build command items from shortcuts ────────────────────
+  const commandItems = useMemo((): SearchItem[] => {
+    const q = effectiveQuery.toLowerCase();
+    return SYSTEM_SHORTCUTS
+      .filter((sc) => sc.scope === "global" && sc.isSystem)
+      .filter((sc) => {
+        if (!q) return true;
+        const name = sc.displayName[lang].toLowerCase();
+        const slug = sc.actionSlug.replace(/_/g, " ");
+        return name.includes(q) || slug.includes(q) || sc.keyCombo.toLowerCase().includes(q);
+      })
+      .map((sc) => {
+        const navPath = SHORTCUT_NAV_MAP[sc.actionSlug];
+        const eventName = SHORTCUT_EVENT_MAP[sc.actionSlug];
+        return {
+          id: `cmd-${sc.id}`,
+          label: sc.displayName[lang],
+          type: "command" as const,
+          href: navPath || undefined,
+          icon: Zap,
+          shortcutHint: sc.keyCombo,
+          eventName: eventName || undefined,
+        };
+      });
+  }, [effectiveQuery, lang]);
+
+  // ── Build page items ──────────────────────────────────────
+  const pageItems = useMemo((): SearchItem[] => {
+    const q = effectiveQuery.toLowerCase();
+    return DASHBOARD_PAGES
+      .filter((p) => {
+        if (!q) return true;
+        return (
+          p.label.he.toLowerCase().includes(q) ||
+          p.label.en.toLowerCase().includes(q) ||
+          p.label.ru.toLowerCase().includes(q) ||
+          p.path.toLowerCase().includes(q)
+        );
+      })
+      .map((p) => ({
+        id: `page-${p.path}`,
+        label: p.label[lang],
+        type: "page" as const,
+        href: p.path,
+        icon: p.icon,
+      }));
+  }, [effectiveQuery, lang]);
+
+  // ── Build widget items ────────────────────────────────────
+  const widgetItems = useMemo((): SearchItem[] => {
+    const q = effectiveQuery.toLowerCase();
+    return widgetRegistry
+      .filter((w) => w.status === "active")
+      .filter((w) => {
+        if (!q) return true;
+        return (
+          w.label.he.toLowerCase().includes(q) ||
+          w.label.en.toLowerCase().includes(q) ||
+          w.label.ru.toLowerCase().includes(q) ||
+          w.id.includes(q)
+        );
+      })
+      .map((w) => ({
+        id: `widget-${w.id}`,
+        label: w.label[lang],
+        type: "widget" as const,
+        icon: w.icon,
+        eventName: `cc-widget-panel-toggle`,
+      }));
+  }, [effectiveQuery, lang]);
 
   // Build items list
   const items = useMemo((): SearchItem[] => {
+    // ── Empty state: recent pages + recent searches ─────────
     if (!query.trim()) {
-      // Empty state: recent pages + recent searches
       const recentPages = getRecentPages().slice(0, MAX_RECENT);
       const recentSearches = getRecentSearches().slice(0, MAX_RECENT);
 
-      const pageItems: SearchItem[] = recentPages.map((p) => ({
+      const rpItems: SearchItem[] = recentPages.map((p) => ({
         id: `page-${p.href}`,
         label: p.label,
         type: "page" as const,
@@ -204,7 +355,6 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         icon: Clock,
       }));
 
-      // Show recent documents too
       const docItems: SearchItem[] = dbDocuments.slice(0, 5).map((d) => ({
         id: `doc-${d.id}`,
         label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
@@ -213,41 +363,44 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         icon: FileText,
       }));
 
-      return [...pageItems, ...docItems, ...searchItems];
+      return [...rpItems, ...docItems, ...searchItems];
     }
 
-    // Search state: use server-side results + pages + entities + actions
-    const q = query.toLowerCase();
-    const documents: SearchItem[] = searchResults
-      .map((d) => ({
-        id: `doc-${d.id}`,
-        label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
-        type: "document" as const,
-        href: `/dashboard/editor?id=${d.id}`,
-        icon: FileText,
-      }));
+    // ── Prefix mode: > for commands only ────────────────────
+    if (isCommandMode) {
+      return commandItems;
+    }
 
-    // Dashboard pages as searchable items
-    const pageEntries = Object.entries(routeIcons);
-    const pages: SearchItem[] = pageEntries
-      .filter(([href]) => {
-        const labels = tabLabels[href];
-        if (!labels) return false;
-        return labels.he.toLowerCase().includes(q) || labels.en.toLowerCase().includes(q);
-      })
-      .map(([href, icon]) => ({
-        id: `page-${href}`,
-        label: tabLabels[href]?.[language] || href,
-        type: "page" as const,
-        href,
-        icon,
-      }));
+    // ── Prefix mode: / for pages only ───────────────────────
+    if (isPageMode) {
+      return pageItems;
+    }
 
-    // Entity results — grouped by entity_type
+    // ── Mixed search: all sources ───────────────────────────
+    const q = effectiveQuery.toLowerCase();
+
+    // Commands (filtered, max 5 in mixed mode)
+    const cmds = commandItems.slice(0, 5);
+
+    // Pages
+    const pages = pageItems.slice(0, 8);
+
+    // Widgets
+    const widgets = widgetItems.slice(0, 5);
+
+    // Documents from DB
+    const documents: SearchItem[] = searchResults.map((d) => ({
+      id: `doc-${d.id}`,
+      label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
+      type: "document" as const,
+      href: `/dashboard/editor?id=${d.id}`,
+      icon: FileText,
+    }));
+
+    // Entity results -- grouped by entity_type
     const entityTypeMap = new Map(entityTypes.map(et => [et.slug, et]));
     const entities: SearchItem[] = entityResults.slice(0, 15).map((n) => {
       const et = n.entity_type ? entityTypeMap.get(n.entity_type) : undefined;
-      const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
       return {
         id: `entity-${n.id}`,
         label: n.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
@@ -269,12 +422,31 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       similarity: d.similarity,
     }));
 
+    // Projects
+    const projects: SearchItem[] = projectResults.map((p) => ({
+      id: `project-${p.id}`,
+      label: p.name,
+      type: "project" as const,
+      href: `/dashboard/layers`,
+      icon: FolderKanban,
+    }));
+
+    // Wiki
+    const wiki: SearchItem[] = wikiResults.map((w) => ({
+      id: `wiki-${w.id}`,
+      label: w.question,
+      type: "wiki" as const,
+      href: `/dashboard/wiki/${w.id}`,
+      icon: BookOpen,
+    }));
+
+    // Quick create action
     const actions: SearchItem[] = [
       { id: "action-document", label: t.widgets.newDocument, type: "action" as const, href: "__new-doc__", icon: Plus },
     ];
 
-    return [...pages, ...documents, ...entities, ...semantic, ...actions];
-  }, [query, language, t, dbDocuments, searchResults, semanticResults, entityResults, entityTypes]);
+    return [...cmds, ...pages, ...widgets, ...documents, ...entities, ...semantic, ...projects, ...wiki, ...actions];
+  }, [query, language, lang, t, dbDocuments, searchResults, semanticResults, entityResults, entityTypes, commandItems, pageItems, widgetItems, projectResults, wikiResults, isCommandMode, isPageMode, effectiveQuery]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -290,8 +462,23 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
   const handleSelect = useCallback(
     async (item: SearchItem) => {
-      if (query.trim()) {
+      if (query.trim() && !isCommandMode && !isPageMode) {
         saveRecentSearch(query.trim());
+      }
+
+      // Command: dispatch event
+      if (item.type === "command" && item.eventName) {
+        window.dispatchEvent(new CustomEvent(item.eventName));
+        onClose();
+        return;
+      }
+
+      // Widget: dispatch toggle event with widget id
+      if (item.type === "widget") {
+        const widgetId = item.id.replace("widget-", "");
+        window.dispatchEvent(new CustomEvent("cc-widget-panel-toggle", { detail: { widgetId } }));
+        onClose();
+        return;
       }
 
       // Create new document
@@ -329,19 +516,19 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         return;
       }
 
-      // Navigate to href
+      // Navigate to href (commands with nav path, pages, documents, etc.)
       if (item.href) {
         router.push(item.href);
         onClose();
         return;
       }
 
-      // Recent search without href — fill the input
+      // Recent search without href -- fill the input
       if (item.type === "page" && !item.href) {
         setQuery(item.label);
       }
     },
-    [router, onClose, query, language]
+    [router, onClose, query, language, isCommandMode, isPageMode]
   );
 
   const handleKeyDown = useCallback(
@@ -368,20 +555,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     [items, selectedIndex, handleSelect, query, onClose]
   );
 
-  // Tab labels for page search
-  const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
-    "/dashboard/layers": { he: "שכבות", en: "Layers", ru: "Слои" },
-    "/dashboard/editor": { he: "עורך", en: "Editor", ru: "Редактор" },
-    "/dashboard/story-map": { he: "מפת סיפור", en: "Story Map", ru: "Карта историй" },
-    "/dashboard/functional-map": { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" },
-    "/dashboard/ai-hub": { he: "מרכז AI", en: "AI Hub", ru: "AI Центр" },
-    "/dashboard/design-system": { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" },
-    "/dashboard/architecture": { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" },
-    "/dashboard/plan": { he: "תוכנית", en: "Plan", ru: "План" },
-    "/dashboard/settings": { he: "הגדרות", en: "Settings", ru: "Настройки" },
-  };
-
-  // Group items by type for display
+  // ── Group items by type for display ───────────────────────
   const groupedSections = useMemo(() => {
     if (!query.trim()) {
       const recentPages = items.filter(
@@ -407,17 +581,44 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       return sections;
     }
 
+    // Prefix modes show a single section
+    if (isCommandMode) {
+      const sections: { title: string; items: SearchItem[] }[] = [];
+      if (items.length > 0) {
+        sections.push({ title: t.widgets.commandsSection, items });
+      }
+      return sections;
+    }
+
+    if (isPageMode) {
+      const sections: { title: string; items: SearchItem[] }[] = [];
+      if (items.length > 0) {
+        sections.push({ title: t.widgets.pagesSection, items });
+      }
+      return sections;
+    }
+
+    // Mixed mode: group by type in defined order
+    const commands = items.filter((i) => i.type === "command");
     const pages = items.filter((i) => i.type === "page");
+    const widgets = items.filter((i) => i.type === "widget");
     const documents = items.filter((i) => i.type === "document");
     const entityItems = items.filter((i) => i.type === "entity");
     const semanticItems = items.filter((i) => i.type === "semantic");
+    const projectItems = items.filter((i) => i.type === "project");
+    const wikiItems = items.filter((i) => i.type === "wiki");
     const actions = items.filter((i) => i.type === "action");
 
     const sections: { title: string; items: SearchItem[] }[] = [];
-    if (pages.length > 0) sections.push({ title: t.widgets.recent, items: pages });
-    if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
+
+    // 1. Actions (commands)
+    if (commands.length > 0) sections.push({ title: t.widgets.commandsSection, items: commands });
+    // 2. Pages
+    if (pages.length > 0) sections.push({ title: t.widgets.pagesSection, items: pages });
+    // 3. Widgets
+    if (widgets.length > 0) sections.push({ title: t.widgets.widgetsSection, items: widgets });
+    // 4. Entities (grouped by type)
     if (entityItems.length > 0) {
-      // Group entities by type for cleaner display
       const byType = new Map<string, SearchItem[]>();
       for (const item of entityItems) {
         const typeLabel = item.entityTypeLabel || 'entities';
@@ -428,10 +629,19 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         sections.push({ title: typeLabel, items: typeItems });
       }
     }
+    // 5. Documents
+    if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
+    // 6. Projects
+    if (projectItems.length > 0) sections.push({ title: t.widgets.projectsSection, items: projectItems });
+    // 7. Wiki
+    if (wikiItems.length > 0) sections.push({ title: t.widgets.wikiSection, items: wikiItems });
+    // Semantic
     if (semanticItems.length > 0) sections.push({ title: language === 'he' ? 'תוצאות סמנטיות' : language === 'ru' ? 'Семантические результаты' : 'Semantic Results', items: semanticItems });
+    // Quick actions
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
+
     return sections;
-  }, [items, query, t, language]);
+  }, [items, query, t, language, isCommandMode, isPageMode]);
 
   // Compute global index for each item across sections
   let globalIndex = 0;
@@ -460,7 +670,13 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       >
         {/* Search input */}
         <div className="flex items-center gap-3 border-b border-slate-700 px-4 py-3">
-          <Search className="h-5 w-5 shrink-0 text-slate-400" />
+          {isCommandMode ? (
+            <Zap className="h-5 w-5 shrink-0 text-amber-400" />
+          ) : isPageMode ? (
+            <Command className="h-5 w-5 shrink-0 text-blue-400" />
+          ) : (
+            <Search className="h-5 w-5 shrink-0 text-slate-400" />
+          )}
           <input
             ref={inputRef}
             type="text"
@@ -506,15 +722,25 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                       {item.entityIcon ? (
                         <span className="shrink-0 text-sm">{item.entityIcon}</span>
                       ) : (
-                        <Icon className={`h-4 w-4 shrink-0 ${item.type === 'semantic' ? 'text-purple-400' : 'text-slate-400'}`} />
+                        <Icon className={`h-4 w-4 shrink-0 ${
+                          item.type === 'semantic' ? 'text-purple-400' :
+                          item.type === 'command' ? 'text-amber-400' :
+                          item.type === 'widget' ? 'text-blue-400' :
+                          'text-slate-400'
+                        }`} />
                       )}
                       <span className="flex-1 truncate text-start">{item.label}</span>
+                      {item.shortcutHint && (
+                        <kbd className="shrink-0 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                          {item.shortcutHint}
+                        </kbd>
+                      )}
                       {item.similarity != null && (
                         <span className="shrink-0 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
                           {Math.round(item.similarity * 100)}%
                         </span>
                       )}
-                      {idx === selectedIndex && (
+                      {idx === selectedIndex && !item.shortcutHint && (
                         <CornerDownLeft className="h-3 w-3 shrink-0 text-slate-500" />
                       )}
                     </button>
@@ -540,11 +766,16 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
             <kbd className="rounded border border-slate-600 px-1 text-[10px]">ESC</kbd>
             {language === "he" ? "סגירה" : language === "ru" ? "Закрыть" : "Close"}
           </span>
+          <span className="ms-auto text-slate-600">
+            {t.widgets.typeCommandHint}
+          </span>
         </div>
       </div>
     </div>
   );
 }
+
+// ─── SearchBarContent (collapsed widget bar) ────────────────
 
 export function SearchBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
@@ -553,8 +784,11 @@ export function SearchBarContent({ size }: { size: WidgetSize }) {
   if (size < 2) return null;
 
   return (
-    <span className="truncate text-xs text-slate-400">
-      {t.widgets.searchPlaceholder}
+    <span className="flex items-center gap-2 truncate text-xs text-slate-400">
+      <span className="truncate">{t.widgets.searchPlaceholder}</span>
+      <kbd className="hidden sm:inline-flex shrink-0 h-4 items-center rounded border border-slate-600 bg-slate-700/60 px-1 text-[9px] font-medium text-slate-500">
+        {"\u2318"}K
+      </kbd>
     </span>
   );
 }

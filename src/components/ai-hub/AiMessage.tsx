@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Copy, Check, Reply, RefreshCw, RotateCcw } from "lucide-react";
+import { useState } from "react";
+import { Copy, Check, Reply, RotateCcw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { parseAction, parseConfidence, type ConfidenceLevel } from "@/lib/work-manager/parseAction";
 import { AGENT_LABELS, AGENT_ICONS, type AgentType } from "@/lib/work-manager/agentPrompts";
@@ -56,13 +56,11 @@ export function AiMessage({
 
   const msgAgent = message.agent || (isAssistant && isWorkMode ? currentAgent : null);
   const agentKey = msgAgent ? (msgAgent as AgentType) : null;
-  const AgentIconComponent = agentKey ? AGENT_ICON_COMPONENTS[AGENT_ICONS[agentKey]] : null;
+  const iconName = agentKey ? AGENT_ICONS[agentKey] : undefined;
+  const AgentIconComponent = iconName && iconName in AGENT_ICON_COMPONENTS ? AGENT_ICON_COMPONENTS[iconName] : null;
   const agentLabel = agentKey
     ? AGENT_LABELS[agentKey]?.[language] ?? AGENT_LABELS[agentKey]?.en
     : null;
-
-  const modeColor = MODE_COLORS[mode];
-  const MsgIcon = isAssistant ? (agentKey ? AgentIconComponent : null) : null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content);
@@ -176,7 +174,6 @@ export function AiMessage({
             action={action}
             lang={language}
             onConfirm={async () => {
-              onDismiss(dismissKey);
               try {
                 const supabase = createBrowserClient();
                 const { data: { session } } = await supabase.auth.getSession();
@@ -194,9 +191,13 @@ export function AiMessage({
                     session_id: activeId || "unknown",
                   }),
                 });
-                await res.json();
-              } catch {
-                // silently fail
+                const data = await res.json();
+                if (data.success) {
+                  return { success: true, message: data.result?.url || data.result?.project_name || data.result?.title || "Done" };
+                }
+                return { success: false, message: data.error || "Failed" };
+              } catch (err) {
+                return { success: false, message: err instanceof Error ? err.message : "Network error" };
               }
             }}
             onCancel={() => onDismiss(dismissKey)}

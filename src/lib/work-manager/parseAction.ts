@@ -1,5 +1,5 @@
 export interface WorkAction {
-  type: "create_task" | "update_status" | "add_note" | "invoke_persona";
+  type: "create_task" | "update_status" | "add_note" | "invoke_persona" | "create_notion_task" | "create_entity";
   title: string;
   details: Record<string, string>;
 }

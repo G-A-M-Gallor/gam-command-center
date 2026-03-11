@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Plus, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, FileText, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import {
+  Plus, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
+  FileText, Sparkles, UserCircle, ChevronDown,
+  ClipboardList, HardHat, ShoppingCart, SearchCheck,
+  Calculator, Receipt, Scale, Shield, Users, Megaphone,
+  Handshake, Code2, LineChart, Crown, AlertTriangle, Rocket,
+  PenLine, Languages,
+} from "lucide-react";
 import { getTranslations } from "@/lib/i18n";
 import { MAX_CONVERSATION_MESSAGES, MODE_MODELS, type AIMode } from "@/lib/ai/prompts";
+import { PERSONAS, PERSONA_DOMAINS, getPersonaById } from "@/lib/ai/personas";
 import { AiMessage, StreamingMessage, TypingIndicator } from "./AiMessage";
 import { AiInputBar } from "./AiInputBar";
 import { AiEntityMention } from "./AiEntityMention";
@@ -49,6 +57,9 @@ interface AiChatAreaProps {
   attachments: ImageAttachment[];
   onAddAttachment: (att: ImageAttachment) => void;
   onRemoveAttachment: (idx: number) => void;
+  // Persona
+  selectedPersona: string | null;
+  onPersonaChange: (id: string | null) => void;
   // Entity mention
   mentionOpen: boolean;
   onMentionOpen: (caretPos: number) => void;
@@ -137,6 +148,146 @@ function ModeTabBar({
   );
 }
 
+// ─── Persona Icon Map ────────────────────────────────────────────
+
+const PERSONA_ICON_MAP: Record<string, typeof ClipboardList> = {
+  ClipboardList,
+  HardHat,
+  ShoppingCart,
+  SearchCheck,
+  Calculator,
+  Receipt,
+  Scale,
+  Shield,
+  Users,
+  Megaphone,
+  Handshake,
+  Code2,
+  LineChart,
+  Crown,
+  AlertTriangle,
+  Rocket,
+  PenLine,
+  Languages,
+};
+
+function getPersonaIcon(iconName: string) {
+  return PERSONA_ICON_MAP[iconName] || UserCircle;
+}
+
+// ─── Persona Selector ────────────────────────────────────────────
+
+function PersonaSelector({
+  selectedPersona, onPersonaChange, t, language,
+}: {
+  selectedPersona: string | null;
+  onPersonaChange: (id: string | null) => void;
+  t: ReturnType<typeof getTranslations>;
+  language: "he" | "en" | "ru";
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [open]);
+
+  const persona = selectedPersona ? getPersonaById(selectedPersona) : null;
+  const PersonaIcon = persona ? getPersonaIcon(persona.icon) : UserCircle;
+
+  return (
+    <div className="relative" ref={ref}>
+      {/* Trigger button */}
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium transition-all ${
+          persona
+            ? `bg-${persona.color}-500/15 text-${persona.color}-300 border border-${persona.color}-500/30`
+            : "border border-dashed border-slate-600 text-slate-500 hover:border-slate-500 hover:text-slate-400"
+        }`}
+      >
+        <PersonaIcon size={12} />
+        {persona ? persona.name[language] : t.aiHub.noPersona}
+        <ChevronDown size={10} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div className="absolute top-full start-0 z-50 mt-1.5 w-[320px] max-h-[400px] overflow-y-auto rounded-xl border border-slate-700/50 bg-slate-800/95 shadow-xl backdrop-blur-md">
+          {/* Header */}
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-700/50 bg-slate-800/95 px-3 py-2 backdrop-blur-md">
+            <span className="text-[12px] font-medium text-slate-300">{t.aiHub.selectPersona}</span>
+            {persona && (
+              <button
+                type="button"
+                onClick={() => { onPersonaChange(null); setOpen(false); }}
+                className="rounded px-2 py-0.5 text-[10px] text-slate-500 transition-colors hover:bg-slate-700/50 hover:text-slate-400"
+              >
+                {t.aiHub.clearPersona}
+              </button>
+            )}
+          </div>
+
+          {/* Grouped personas */}
+          <div className="p-2">
+            {PERSONA_DOMAINS.map((domain) => {
+              const domainPersonas = PERSONAS.filter((p) => p.domain === domain.id);
+              if (domainPersonas.length === 0) return null;
+              return (
+                <div key={domain.id} className="mb-2 last:mb-0">
+                  <div className="mb-1 px-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-600">
+                    {domain.label[language]}
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {domainPersonas.map((p) => {
+                      const Icon = getPersonaIcon(p.icon);
+                      const isSelected = selectedPersona === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => { onPersonaChange(p.id); setOpen(false); }}
+                          className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-start transition-all ${
+                            isSelected
+                              ? `bg-${p.color}-500/15 text-${p.color}-300 ring-1 ring-${p.color}-500/30`
+                              : "text-slate-400 hover:bg-slate-700/50 hover:text-slate-300"
+                          }`}
+                        >
+                          <Icon size={14} className={`shrink-0 ${isSelected ? `text-${p.color}-400` : "text-slate-500"}`} />
+                          <span className="truncate text-[12px]">{p.name[language]}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AiChatArea(props: AiChatAreaProps) {
   const {
     sidebarOpen, onToggleSidebar, docPanelOpen, onToggleDocPanel, docTitle,
@@ -146,6 +297,7 @@ export function AiChatArea(props: AiChatAreaProps) {
     input, onInputChange, onSend, onStop,
     replyingTo, onReply, onCancelReply, onRegenerate,
     attachments, onAddAttachment, onRemoveAttachment,
+    selectedPersona, onPersonaChange,
     mentionOpen, onMentionOpen, onMentionClose, onMentionSelect,
     dismissedActions, onDismissAction, onNewChat, cloudStatus,
     textareaRef, t, isHe, language,
@@ -242,6 +394,12 @@ export function AiChatArea(props: AiChatAreaProps) {
             {docTitle}
           </span>
         )}
+        <PersonaSelector
+          selectedPersona={selectedPersona}
+          onPersonaChange={onPersonaChange}
+          t={t}
+          language={language}
+        />
         <button
           type="button"
           onClick={onAddContext}

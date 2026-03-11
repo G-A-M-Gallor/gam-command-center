@@ -12,13 +12,13 @@
 
 - **Repo:** `G-A-M-Gallor/vBrain.io`
 - **Stack:** Next.js 16.1.6 (Turbopack) on Vercel
-- **DB:** Supabase (Auth, Realtime, Storage, 49 migrations)
+- **DB:** Supabase (Auth, Realtime, Storage, 51 migrations)
 - **AI:** Claude API (5 chat modes + 6 Work Manager agents)
 - **Operational SOT:** Origami CRM (synced via n8n)
 - **Knowledge SOT:** Notion (specs, procedures, roadmap)
 - **Team:** Gal (CEO/architect), Claude (AI dev), n8n (automation)
-- **Scale:** 16 pages, 15 widgets, 21 API routes, 9 contexts, 291 source files
-- **Built in:** 11 days (2026-02-28 → 2026-03-10), 91 commits
+- **Scale:** 17 pages, 16 widgets, 26 API routes, 9 contexts, 301 source files
+- **Built in:** 12 days (2026-02-28 → 2026-03-11), 93 commits
 
 ---
 
@@ -82,7 +82,8 @@ Full architecture with data flows: **[memory/ARCHITECTURE.md](memory/ARCHITECTUR
 
 | Feature | Status | Key Files |
 |---------|--------|-----------|
-| Auth (GitHub OAuth + JWT + allowlist) | ✅ | `AuthContext.tsx`, `lib/api/auth.ts` |
+| Auth (GitHub OAuth + JWT + universal allowlist) | ✅ | `AuthContext.tsx`, `lib/api/auth.ts`, `middleware.ts` |
+| RSS Feed Reader (5 Israeli feeds, Vercel Cron) | ✅ | `api/rss/`, `dashboard/feeds/`, `RssWidget.tsx` |
 | Security (Zod validation, RLS, execFileSync) | ✅ | `lib/api/schemas.ts`, migrations |
 | i18n (Hebrew + English + Russian, 5514 lines) | ✅ | `lib/i18n.ts` |
 | Supabase (49 migrations, Realtime, audit log) | ✅ | `supabase/migrations/` |

@@ -1,9 +1,50 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { X, Search, FileText } from "lucide-react";
 import { searchNotes, fetchNote } from "@/lib/supabase/entityQueries";
 import { getTranslations } from "@/lib/i18n";
+
+// ─── Tiptap JSON → plain text ───────────────────────────────────
+
+function extractNodeText(node: unknown): string {
+  if (!node || typeof node !== "object") return "";
+  const n = node as Record<string, unknown>;
+  if (typeof n.text === "string") return n.text;
+  if (Array.isArray(n.content)) {
+    return n.content.map(extractNodeText).join("");
+  }
+  return "";
+}
+
+function tiptapJsonToText(content: Record<string, unknown>): string {
+  if (!Array.isArray(content.content)) return "";
+  return (content.content as unknown[])
+    .map((node) => {
+      const text = extractNodeText(node);
+      const n = node as Record<string, unknown>;
+      // Add line breaks for block-level nodes
+      if (n.type === "paragraph" || n.type === "heading" || n.type === "blockquote") {
+        return text + "\n";
+      }
+      if (n.type === "bulletList" || n.type === "orderedList") {
+        if (Array.isArray(n.content)) {
+          return (n.content as unknown[])
+            .map((item, i) => {
+              const itemText = extractNodeText(item);
+              const prefix = n.type === "orderedList" ? `${i + 1}. ` : "- ";
+              return prefix + itemText;
+            })
+            .join("\n") + "\n";
+        }
+      }
+      return text;
+    })
+    .join("")
+    .trim();
+}
+
+// ─── Component ──────────────────────────────────────────────────
 
 interface DocPanelProps {
   isOpen: boolean;
@@ -22,7 +63,7 @@ export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
     content: string;
     entityType: string | null;
   } | null>(null);
-  const [searchTimer, setSearchTimer] = useState<ReturnType<typeof setTimeout>>();
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const doSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -47,21 +88,28 @@ export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
 
   const handleSearchChange = useCallback((v: string) => {
     setSearchQuery(v);
-    if (searchTimer) clearTimeout(searchTimer);
-    setSearchTimer(setTimeout(() => doSearch(v), 300));
-  }, [doSearch, searchTimer]);
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => doSearch(v), 300);
+  }, [doSearch]);
 
   const handleSelectDoc = useCallback(async (id: string) => {
     setLoading(true);
     try {
       const note = await fetchNote(id);
       if (note) {
-        // Convert Tiptap JSON content to plain text
-        const contentStr = note.content
-          ? typeof note.content === "string"
-            ? note.content
-            : JSON.stringify(note.content, null, 2)
-          : "";
+        // Extract readable text from Tiptap JSON content
+        let contentStr = "";
+        if (note.content) {
+          if (typeof note.content === "string") {
+            contentStr = note.content;
+          } else {
+            contentStr = tiptapJsonToText(note.content);
+            // Fallback to JSON if extraction yields nothing
+            if (!contentStr.trim()) {
+              contentStr = JSON.stringify(note.content, null, 2);
+            }
+          }
+        }
         const doc = {
           id: note.id,
           title: note.title,
@@ -152,17 +200,8 @@ export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
       {/* Document content */}
       <div className="flex-1 overflow-y-auto p-4">
         {selectedDoc ? (
-          <div className="prose prose-sm prose-invert max-w-none text-slate-300">
-            <div
-              className="text-sm leading-relaxed whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{
-                __html: selectedDoc.content
-                  .replace(/&/g, "&amp;")
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")
-                  .replace(/\n/g, "<br/>"),
-              }}
-            />
+          <div className="text-sm leading-relaxed whitespace-pre-wrap text-slate-300">
+            {selectedDoc.content}
           </div>
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3">

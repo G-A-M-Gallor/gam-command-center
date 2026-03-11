@@ -153,6 +153,87 @@ export async function POST(request: Request) {
   }
   systemPrompt += sessionBlock;
 
+  // ─── Entity Verification (pre-flight Supabase lookup) ───
+  let entityVerificationBlock = "";
+  try {
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUserMsg) {
+      // Extract potential entity names from the message:
+      // 1. Quoted strings (Hebrew or English)
+      // 2. Names passed in contexts array that look like entity references
+      const quotedNames: string[] = [];
+      const quoteRegex = /["״""«»]([^"״""«»]{2,60})["״""«»]/g;
+      let match: RegExpExecArray | null;
+      while ((match = quoteRegex.exec(lastUserMsg.content)) !== null) {
+        quotedNames.push(match[1].trim());
+      }
+
+      // Also check contexts for entity-like references (lines starting with "- " or containing entity type hints)
+      for (const ctx of contexts) {
+        const entityRefMatch = /(?:project|entity|client|contact|deal|עסקה|לקוח|פרויקט|איש קשר)[:\s]+["״]?([^"\n,]{2,60})["״]?/gi;
+        while ((match = entityRefMatch.exec(ctx)) !== null) {
+          quotedNames.push(match[1].trim());
+        }
+      }
+
+      // Deduplicate
+      const uniqueNames = [...new Set(quotedNames)].slice(0, 5);
+
+      if (uniqueNames.length > 0) {
+        // Query vb_records for each name using ILIKE
+        const { data: foundEntities } = await supabaseCtx
+          .from("vb_records")
+          .select("id, title, entity_type, status, meta")
+          .eq("is_deleted", false)
+          .or(uniqueNames.map((n) => `title.ilike.%${n}%`).join(","))
+          .limit(10);
+
+        const foundLines: string[] = [];
+        const notFoundNames: string[] = [];
+
+        if (foundEntities && foundEntities.length > 0) {
+          for (const entity of foundEntities) {
+            const meta = (entity.meta as Record<string, unknown>) ?? {};
+            const stage = meta.stage || meta.status || entity.status || "—";
+            const assignee = meta.assignee || meta.owner || "—";
+            foundLines.push(
+              `  - "${entity.title}" | type: ${entity.entity_type ?? "note"} | stage: ${stage} | assignee: ${assignee}`
+            );
+          }
+
+          // Check which searched names were NOT found
+          for (const name of uniqueNames) {
+            const nameLower = name.toLowerCase();
+            const wasFound = foundEntities.some((e) =>
+              e.title.toLowerCase().includes(nameLower)
+            );
+            if (!wasFound) {
+              notFoundNames.push(name);
+            }
+          }
+        } else {
+          notFoundNames.push(...uniqueNames);
+        }
+
+        const parts: string[] = [];
+        if (foundLines.length > 0) {
+          parts.push(`Found entities:\n${foundLines.join("\n")}`);
+        }
+        if (notFoundNames.length > 0) {
+          parts.push(
+            `NOT FOUND in system: ${notFoundNames.map((n) => `"${n}"`).join(", ")}`
+          );
+        }
+        if (parts.length > 0) {
+          entityVerificationBlock = `\n\n--- Entity Verification ---\n${parts.join("\n")}`;
+        }
+      }
+    }
+  } catch {
+    // Entity verification is best-effort — don't block the chat
+  }
+  systemPrompt += entityVerificationBlock;
+
   // Inject GAM knowledge base from CLAUDE.md
   const knowledgeBlock = getKnowledgeContext();
   if (knowledgeBlock) {

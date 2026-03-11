@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -51,6 +51,9 @@ const TeamBarContent = dynamic(() => import("./TeamWidget").then((m) => ({ defau
 
 const RssPanel = dynamic(() => import("./RssWidget").then((m) => ({ default: m.RssPanel })), { ssr: false }) as ComponentType<any>;
 const RssBarContent = dynamic(() => import("./RssWidget").then((m) => ({ default: m.RssBarContent })), { ssr: false }) as ComponentType<any>;
+
+const LeadsPipelinePanel = dynamic(() => import("./LeadsPipelineWidget").then((m) => ({ default: m.LeadsPipelinePanel })), { ssr: false }) as ComponentType<any>;
+const LeadsPipelineBarContent = dynamic(() => import("./LeadsPipelineWidget").then((m) => ({ default: m.LeadsPipelineBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -340,6 +343,23 @@ export const widgetRegistry: WidgetDefinition[] = [
     isRemovable: true,
     component: KPIPanel,
     renderBar: KPIBarContent,
+  },
+  {
+    id: "leads-pipeline",
+    icon: TrendingUp,
+    label: { he: "צנרת לידים", en: "Leads Pipeline", ru: "Воронка лидов" },
+    description: {
+      he: "שלבי צנרת מכירות — תצוגת פאנל אופקית",
+      en: "Sales pipeline stages — horizontal funnel view",
+      ru: "Этапы воронки продаж — горизонтальный вид воронки",
+    },
+    defaultSize: 2,
+    status: "active",
+    category: "analytics",
+    tier: "free",
+    isRemovable: true,
+    component: LeadsPipelinePanel,
+    renderBar: LeadsPipelineBarContent,
   },
   {
     id: "rss",

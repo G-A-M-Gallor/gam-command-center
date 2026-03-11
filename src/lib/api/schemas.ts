@@ -129,8 +129,8 @@ export type WorkManagerInput = z.infer<typeof workManagerSchema>;
 // ─── Work Manager Execute ──────────────────────────────────
 
 export const workManagerExecuteSchema = z.object({
-  action_type: z.enum(["create_task", "update_status", "add_note", "invoke_persona"], {
-    error: 'action_type must be one of: create_task, update_status, add_note, invoke_persona',
+  action_type: z.enum(["create_task", "update_status", "add_note", "invoke_persona", "create_notion_task", "create_entity"], {
+    error: 'action_type must be one of: create_task, update_status, add_note, invoke_persona, create_notion_task, create_entity',
   }),
   title: z.string().min(1, "title is required"),
   details: z.record(z.string(), z.string()),

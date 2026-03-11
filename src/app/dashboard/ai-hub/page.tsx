@@ -9,6 +9,7 @@ import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { streamChat, streamWorkManager } from "@/lib/ai/client";
 import { addUsage, isOverBudget } from "@/lib/ai/tokenTracker";
+import { getPersonaById } from "@/lib/ai/personas";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { fetchNote } from "@/lib/supabase/entityQueries";
 import { MODE_MODELS, MAX_CONVERSATION_MESSAGES, type AIMode } from "@/lib/ai/prompts";
@@ -117,6 +118,7 @@ export default function AIHubPage() {
   const [docPanelOpen, setDocPanelOpen] = useState(false);
   const [docContext, setDocContext] = useState<{ id: string; title: string; content: string; entityType: string | null } | null>(null);
   const [knowledgeOpen, setKnowledgeOpen] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -390,22 +392,32 @@ export default function AIHubPage() {
     // Add entity contexts
     richContexts.push(...entityContexts);
 
-    // Add knowledge URL contexts
+    // Add persona context
+    if (selectedPersona) {
+      const persona = getPersonaById(selectedPersona);
+      if (persona) {
+        richContexts.unshift(`🎭 Active Persona: ${persona.name.he}\n${persona.instructions}`);
+      }
+    }
+
+    // Add knowledge URL contexts (parallel fetch)
     const knowledgeUrls = getKnowledgeUrlsForMode(mode);
     if (knowledgeUrls.length > 0) {
-      for (const url of knowledgeUrls) {
-        try {
+      const results = await Promise.allSettled(
+        knowledgeUrls.map(async (url) => {
           const res = await fetch("/api/ai/fetch-url", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url }),
           });
-          if (res.ok) {
-            const data = await res.json();
-            richContexts.push(`📎 Knowledge (${url}): ${data.content?.slice(0, 1500) || ""}`);
-          }
-        } catch {
-          // skip
+          if (!res.ok) return null;
+          const data = await res.json();
+          return `📎 Knowledge (${url}): ${data.content?.slice(0, 1500) || ""}`;
+        })
+      );
+      for (const r of results) {
+        if (r.status === "fulfilled" && r.value) {
+          richContexts.push(r.value);
         }
       }
     }
@@ -513,7 +525,7 @@ export default function AIHubPage() {
     }
   }, [input, isStreaming, activeId, conversations, mode, contexts, messages.length,
       updateConversations, debouncedCloudSave, pathname, buildRichContexts,
-      replyingTo, attachments, mentionEntities, docContext]);
+      replyingTo, attachments, mentionEntities, docContext, selectedPersona]);
 
   // ─── Regenerate last message ────────────────────────────────
 
@@ -609,6 +621,8 @@ export default function AIHubPage() {
           onMentionOpen={() => setMentionOpen(true)}
           onMentionClose={() => setMentionOpen(false)}
           onMentionSelect={handleMentionSelect}
+          selectedPersona={selectedPersona}
+          onPersonaChange={setSelectedPersona}
           dismissedActions={dismissedActions}
           onDismissAction={(key) => setDismissedActions((prev) => new Set(prev).add(key))}
           onNewChat={createNewChat}

@@ -25,6 +25,52 @@ import {
 } from "@/lib/shortcuts/shortcutEngine";
 import { toHebrew, toEnglish, replaceSelection } from "@/lib/gibberish";
 
+// ─── Exported Action Maps (used by SearchWidget command palette) ─────
+
+/** Maps action slugs → dashboard routes for navigation shortcuts */
+export const SHORTCUT_NAV_MAP: Record<string, string> = {
+  nav_layers: "/dashboard/layers",
+  nav_editor: "/dashboard/editor",
+  nav_story_map: "/dashboard/story-map",
+  nav_functional_map: "/dashboard/functional-map",
+  nav_ai_hub: "/dashboard/ai-hub",
+  nav_design_system: "/dashboard/design-system",
+  nav_architecture: "/dashboard/architecture",
+  nav_plan: "/dashboard/plan",
+  nav_home: "/dashboard",
+};
+
+/** Maps action slugs → custom DOM event names for non-navigation shortcuts */
+export const SHORTCUT_EVENT_MAP: Record<string, string> = {
+  search_open: "cc-open-search",
+  shortcuts_open: "cc-open-shortcuts",
+  ai_toggle: "cc-open-ai",
+  quick_create: "cc-open-quick-create",
+  toggle_sidebar: "cc-toggle-sidebar",
+  toggle_edit_mode: "cc-toggle-edit-mode",
+  open_wati: "cc-open-wati",
+  open_notifications: "cc-open-notifications",
+  filter_toggle: "cc-filter-toggle",
+  filter_by_status: "cc-filter-status",
+  filter_by_layer: "cc-filter-layer",
+  filter_clear: "cc-filter-clear",
+  ai_chat_mode: "cc-ai-mode-chat",
+  ai_analyze_mode: "cc-ai-mode-analyze",
+  ai_write_mode: "cc-ai-mode-write",
+  ai_clear_chat: "cc-ai-clear",
+  view_grid: "cc-view-grid",
+  view_list: "cc-view-list",
+  view_board: "cc-view-board",
+  fullscreen: "cc-fullscreen",
+  new_document: "cc-new-document",
+  new_project: "cc-new-project",
+  card_next: "cc-card-next",
+  card_prev: "cc-card-prev",
+  card_open: "cc-card-open",
+  card_expand: "cc-card-expand",
+  card_archive: "cc-card-archive",
+};
+
 // ─── Storage ────────────────────────────────────────────────
 
 const OVERRIDES_KEY = "cc-shortcut-overrides";
@@ -175,54 +221,21 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
   const routerRef = useRef(router);
   routerRef.current = router;
 
+  // ── Action Dispatch Maps (exported for SearchWidget command palette) ──
+
   const executeAction = useCallback((actionSlug: string) => {
     const r = routerRef.current;
-    const NAV: Record<string, string> = {
-      nav_layers: "/dashboard/layers",
-      nav_editor: "/dashboard/editor",
-      nav_story_map: "/dashboard/story-map",
-      nav_functional_map: "/dashboard/functional-map",
-      nav_ai_hub: "/dashboard/ai-hub",
-      nav_design_system: "/dashboard/design-system",
-      nav_architecture: "/dashboard/architecture",
-      nav_plan: "/dashboard/plan",
-      nav_home: "/dashboard",
-    };
 
-    if (NAV[actionSlug]) {
-      r.push(NAV[actionSlug]);
+    if (SHORTCUT_NAV_MAP[actionSlug]) {
+      r.push(SHORTCUT_NAV_MAP[actionSlug]);
       return;
     }
 
-    const EVENTS: Record<string, string> = {
-      search_open: "cc-open-search",
-      shortcuts_open: "cc-open-shortcuts",
-      ai_toggle: "cc-open-ai",
-      quick_create: "cc-open-quick-create",
-      toggle_sidebar: "cc-toggle-sidebar",
-      toggle_edit_mode: "cc-toggle-edit-mode",
-      open_wati: "cc-open-wati",
-      open_notifications: "cc-open-notifications",
-      filter_toggle: "cc-filter-toggle",
-      filter_by_status: "cc-filter-status",
-      filter_by_layer: "cc-filter-layer",
-      filter_clear: "cc-filter-clear",
-      ai_chat_mode: "cc-ai-mode-chat",
-      ai_analyze_mode: "cc-ai-mode-analyze",
-      ai_write_mode: "cc-ai-mode-write",
-      ai_clear_chat: "cc-ai-clear",
-      view_grid: "cc-view-grid",
-      view_list: "cc-view-list",
-      view_board: "cc-view-board",
-      fullscreen: "cc-fullscreen",
-      new_document: "cc-new-document",
-      new_project: "cc-new-project",
-      card_next: "cc-card-next",
-      card_prev: "cc-card-prev",
-      card_open: "cc-card-open",
-      card_expand: "cc-card-expand",
-      card_archive: "cc-card-archive",
-    };
+    const eventName = SHORTCUT_EVENT_MAP[actionSlug];
+    if (eventName) {
+      window.dispatchEvent(new CustomEvent(eventName));
+      return;
+    }
 
     // ── Gibberish Converter ────────────────────────────────
     if (actionSlug === "gibberish_to_he") {
@@ -232,11 +245,6 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
     if (actionSlug === "gibberish_to_en") {
       replaceSelection(toEnglish);
       return;
-    }
-
-    const eventName = EVENTS[actionSlug];
-    if (eventName) {
-      window.dispatchEvent(new CustomEvent(eventName));
     }
   }, []);
 

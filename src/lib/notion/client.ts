@@ -132,6 +132,45 @@ export async function getProjectStatus(): Promise<ProjectStatus> {
   return { total: all.length, byStatus, byPriority, inProgress };
 }
 
+// ─── Create Task ────────────────────────────────────
+
+export interface CreateNotionTaskInput {
+  title: string;
+  type?: string;       // Feature, Bug, Tech Debt, etc.
+  priority?: string;   // P0, P1, P2, P3
+  effort?: string;     // XS, S, M, L, XL
+  layer?: string;      // L0-L5
+  owner?: string;
+  notes?: string;
+  acceptanceCriteria?: string;
+}
+
+export async function createNotionTask(input: CreateNotionTaskInput): Promise<{ id: string; url: string } | null> {
+  const client = getClient();
+  const dbId = process.env.NOTION_TASKS_DB_ID;
+  if (!client || !dbId) return null;
+
+  const properties: Record<string, unknown> = {
+    Task: { title: [{ text: { content: input.title } }] },
+    Status: { status: { name: "Backlog" } },
+  };
+
+  if (input.type) properties.Type = { select: { name: input.type } };
+  if (input.priority) properties.Priority = { select: { name: input.priority } };
+  if (input.effort) properties.Effort = { select: { name: input.effort } };
+  if (input.layer) properties.Layer = { select: { name: input.layer } };
+  if (input.owner) properties.Owner = { rich_text: [{ text: { content: input.owner } }] };
+  if (input.notes) properties.Notes = { rich_text: [{ text: { content: input.notes } }] };
+  if (input.acceptanceCriteria) properties["Acceptance Criteria"] = { rich_text: [{ text: { content: input.acceptanceCriteria } }] };
+
+  const page = await client.pages.create({
+    parent: { database_id: dbId },
+    properties: properties as Parameters<typeof client.pages.create>[0]["properties"],
+  });
+
+  return { id: page.id, url: (page as unknown as { url?: string }).url || `https://notion.so/${page.id.replace(/-/g, '')}` };
+}
+
 export async function getTasksSummaryForPrompt(): Promise<string> {
   const status = await getProjectStatus();
   if (status.total === 0) return "";
