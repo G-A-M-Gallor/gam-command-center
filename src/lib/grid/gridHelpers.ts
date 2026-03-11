@@ -115,6 +115,8 @@ export function createDefaultSheet(id: string, name: string, cols = 10, rows = 2
   const rowOrder = Array.from({ length: rows }, (_, i) => String(i + 1));
   const colWidths: Record<string, number> = {};
   colOrder.forEach((c) => { colWidths[c] = 120; });
+  const rowHeights: Record<string, number> = {};
+  rowOrder.forEach((r) => { rowHeights[r] = 32; });
 
   return {
     id,
@@ -123,6 +125,7 @@ export function createDefaultSheet(id: string, name: string, cols = 10, rows = 2
     colOrder,
     rowOrder,
     colWidths,
+    rowHeights,
     frozenCols: 1,
   };
 }

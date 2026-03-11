@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { GridSheet, GridCell, CellAddress, SelectionRange } from "./types";
-import { DEFAULT_COL_WIDTH } from "./types";
+import { DEFAULT_COL_WIDTH, DEFAULT_ROW_HEIGHT } from "./types";
 import { createDefaultSheet, colIndexToLabel, parseCellAddress, buildCellAddress } from "./gridHelpers";
 import { evaluateFormula } from "./formulaEngine";
 
@@ -52,6 +52,7 @@ interface GridStore {
   addRow: () => void;
   removeRow: (row: string) => void;
   setColumnWidth: (col: string, width: number) => void;
+  setRowHeight: (row: string, height: number) => void;
   reorderColumns: (fromIdx: number, toIdx: number) => void;
   reorderRows: (fromIdx: number, toIdx: number) => void;
   setFrozenCols: (count: number) => void;
@@ -279,7 +280,7 @@ export const useGridStore = create<GridStore>()(
         return {
           ...hist,
           sheets: s.sheets.map((sh) => sh.id === s.activeSheetId
-            ? { ...sh, rowOrder: [...sh.rowOrder, nextRow] }
+            ? { ...sh, rowOrder: [...sh.rowOrder, nextRow], rowHeights: { ...sh.rowHeights, [nextRow]: DEFAULT_ROW_HEIGHT } }
             : sh),
         };
       }),
@@ -292,10 +293,12 @@ export const useGridStore = create<GridStore>()(
         for (const colId of sheet.colOrder) {
           delete newCells[buildCellAddress(colId, row)];
         }
+        const newHeights = { ...sheet.rowHeights };
+        delete newHeights[row];
         return {
           ...hist,
           sheets: s.sheets.map((sh) => sh.id === s.activeSheetId
-            ? { ...sh, rowOrder: sh.rowOrder.filter((r) => r !== row), cells: newCells }
+            ? { ...sh, rowOrder: sh.rowOrder.filter((r) => r !== row), cells: newCells, rowHeights: newHeights }
             : sh),
         };
       }),
@@ -303,6 +306,12 @@ export const useGridStore = create<GridStore>()(
       setColumnWidth: (col, width) => set((s) => ({
         sheets: s.sheets.map((sh) => sh.id === s.activeSheetId
           ? { ...sh, colWidths: { ...sh.colWidths, [col]: Math.max(40, width) } }
+          : sh),
+      })),
+
+      setRowHeight: (row, height) => set((s) => ({
+        sheets: s.sheets.map((sh) => sh.id === s.activeSheetId
+          ? { ...sh, rowHeights: { ...sh.rowHeights, [row]: Math.max(24, height) } }
           : sh),
       })),
 

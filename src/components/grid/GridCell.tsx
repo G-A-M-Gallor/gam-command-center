@@ -2,7 +2,6 @@
 
 import { useState, useRef, useCallback } from "react";
 import type { GridCell as GridCellType, CellAddress } from "@/lib/grid/types";
-import { DEFAULT_ROW_HEIGHT } from "@/lib/grid/types";
 import { getCellDisplayValue } from "@/lib/grid/gridHelpers";
 import { ExternalLink, Image as ImageIcon } from "lucide-react";
 
@@ -10,6 +9,7 @@ interface GridCellProps {
   addr: CellAddress;
   cell: GridCellType | undefined;
   width: number;
+  height: number;
   isActive: boolean;
   isEditing: boolean;
   isSelected: boolean;
@@ -23,6 +23,7 @@ export function GridCellComponent({
   addr,
   cell,
   width,
+  height,
   isActive,
   isEditing,
   isSelected,
@@ -92,7 +93,7 @@ export function GridCellComponent({
       } ${isSelected && !isActive ? "bg-[var(--cc-accent-600)]/10" : ""}`}
       style={{
         width,
-        height: DEFAULT_ROW_HEIGHT,
+        height,
         backgroundColor: cell?.bg || undefined,
         color: cell?.fg || undefined,
         fontWeight: cell?.bold ? 700 : undefined,
@@ -111,7 +112,7 @@ export function GridCellComponent({
           onKeyDown={handleKeyDown}
           onBlur={() => onEndEdit(addr, editValue)}
           className="absolute inset-0 w-full bg-slate-800 px-1.5 text-xs text-slate-100 outline-none"
-          style={{ height: DEFAULT_ROW_HEIGHT }}
+          style={{ height }}
         />
       ) : (
         <div className="flex h-full items-center overflow-hidden px-1.5 text-xs text-slate-200">

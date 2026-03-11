@@ -29,6 +29,8 @@ export interface GridSheet {
   rowOrder: string[];
   /** Column widths in px */
   colWidths: Record<string, number>;
+  /** Row heights in px */
+  rowHeights: Record<string, number>;
   /** Number of frozen columns from the start */
   frozenCols: number;
 }

@@ -24,6 +24,7 @@ export function GridCanvas() {
   const setCellValue = useGridStore((s) => s.setCellValue);
   const clearCells = useGridStore((s) => s.clearCells);
   const setColumnWidth = useGridStore((s) => s.setColumnWidth);
+  const setRowHeight = useGridStore((s) => s.setRowHeight);
   const undo = useGridStore((s) => s.undo);
   const redo = useGridStore((s) => s.redo);
   const recomputeFormulas = useGridStore((s) => s.recomputeFormulas);
@@ -223,7 +224,7 @@ export function GridCanvas() {
         {/* Data Rows */}
         {sheet.rowOrder.map((rowId) => (
           <div key={rowId} className="flex">
-            <GridRowHeader rowNum={rowId} />
+            <GridRowHeader rowNum={rowId} height={sheet.rowHeights?.[rowId] || DEFAULT_ROW_HEIGHT} onResize={setRowHeight} />
             {sheet.colOrder.map((col, colIdx) => {
               const addr = buildCellAddress(col, rowId);
               const isFrozen = colIdx < sheet.frozenCols;
@@ -243,6 +244,7 @@ export function GridCanvas() {
                     addr={addr}
                     cell={cell}
                     width={sheet.colWidths[col] || DEFAULT_COL_WIDTH}
+                    height={sheet.rowHeights?.[rowId] || DEFAULT_ROW_HEIGHT}
                     isActive={activeCell === addr}
                     isEditing={editingCell === addr}
                     isSelected={isCellSelected(addr)}
