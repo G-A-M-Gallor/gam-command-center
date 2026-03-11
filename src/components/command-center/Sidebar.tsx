@@ -17,6 +17,7 @@ import {
   Compass,
   Users,
   Zap,
+  Rss,
   Settings,
   Shield,
   X,
@@ -99,6 +100,7 @@ export const NAV_GROUPS: NavGroup[] = [
     id: "system",
     labelKey: "groupSystem",
     items: [
+      { href: "/dashboard/feeds", key: "feeds", icon: Rss, status: "active" },
       { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
       { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
       { href: "/dashboard/settings", key: "settings", icon: Settings, status: "active" },

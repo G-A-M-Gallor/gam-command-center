@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Network, Clock, Webhook, Lightbulb, Activity, History } from 'lucide-react';
+import { Network, Clock, Webhook, Lightbulb, Activity, History, Rss } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
@@ -13,16 +13,18 @@ import { WebhooksPanel } from '@/components/automations/WebhooksPanel';
 import { AutomationSuggestionsPanel } from '@/components/automations/AutomationSuggestionsPanel';
 import { ActivityFeedPanel } from '@/components/automations/ActivityFeedPanel';
 import { RunHistoryPanel } from '@/components/automations/RunHistoryPanel';
+import { RssFeedsPanel } from '@/components/automations/RssFeedsPanel';
 
-type TabKey = 'endpoints' | 'jobs' | 'webhooks' | 'suggestions' | 'activity' | 'runHistory';
+type TabKey = 'endpoints' | 'jobs' | 'webhooks' | 'suggestions' | 'activity' | 'runHistory' | 'rssFeeds';
 
-const TAB_LABELS: Record<TabKey, 'tabEndpoints' | 'tabJobs' | 'tabWebhooks' | 'tabSuggestions' | 'tabActivity' | 'tabRunHistory'> = {
+const TAB_LABELS: Record<TabKey, 'tabEndpoints' | 'tabJobs' | 'tabWebhooks' | 'tabSuggestions' | 'tabActivity' | 'tabRunHistory' | 'tabRssFeeds'> = {
   endpoints: 'tabEndpoints',
   jobs: 'tabJobs',
   webhooks: 'tabWebhooks',
   suggestions: 'tabSuggestions',
   activity: 'tabActivity',
   runHistory: 'tabRunHistory',
+  rssFeeds: 'tabRssFeeds',
 };
 
 const TAB_ICONS: Record<TabKey, typeof Network> = {
@@ -32,9 +34,10 @@ const TAB_ICONS: Record<TabKey, typeof Network> = {
   suggestions: Lightbulb,
   activity: Activity,
   runHistory: History,
+  rssFeeds: Rss,
 };
 
-const TAB_KEYS: TabKey[] = ['endpoints', 'jobs', 'webhooks', 'suggestions', 'activity', 'runHistory'];
+const TAB_KEYS: TabKey[] = ['endpoints', 'jobs', 'webhooks', 'suggestions', 'activity', 'runHistory', 'rssFeeds'];
 
 export default function AutomationsPage() {
   const { language } = useSettings();
@@ -85,6 +88,7 @@ export default function AutomationsPage() {
           {activeTab === 'suggestions' && <AutomationSuggestionsPanel t={a} />}
           {activeTab === 'activity' && <ActivityFeedPanel t={a} />}
           {activeTab === 'runHistory' && <RunHistoryPanel t={a} />}
+          {activeTab === 'rssFeeds' && <RssFeedsPanel t={a} rssT={t.rss as Record<string, string>} />}
         </div>
       </div>
     </div>

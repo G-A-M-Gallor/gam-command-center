@@ -64,6 +64,20 @@ export async function POST(request: Request) {
         break;
       }
 
+      case 'rss-sync': {
+        const origin = new URL(request.url).origin;
+        const res = await fetch(`${origin}/api/rss/sync`, {
+          method: 'POST',
+          headers: {
+            Authorization: request.headers.get('authorization') || '',
+            'Content-Type': 'application/json',
+          },
+        });
+        result = await res.json();
+        success = res.ok;
+        break;
+      }
+
       case 'test-notification': {
         const origin = new URL(request.url).origin;
         const res = await fetch(`${origin}/api/push/send`, {

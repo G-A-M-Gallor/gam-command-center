@@ -247,7 +247,7 @@ export type BoardRoomInput = z.infer<typeof boardRoomSchema>;
 
 // ─── Automation Run Job ─────────────────────────────────────
 
-const VALID_JOBS = ["origami-sync", "health-check", "test-notification"] as const;
+const VALID_JOBS = ["origami-sync", "health-check", "test-notification", "rss-sync"] as const;
 
 export const automationRunJobSchema = z.object({
   job: z.enum(VALID_JOBS, {
@@ -256,6 +256,24 @@ export const automationRunJobSchema = z.object({
 });
 
 export type AutomationRunJobInput = z.infer<typeof automationRunJobSchema>;
+
+// ─── RSS Feed ───────────────────────────────────────────────
+
+export const rssFeedCreateSchema = z.object({
+  url: z.string().url("url must be a valid URL"),
+  title: z.string().min(1, "title is required").max(200, "title exceeds 200 characters"),
+  keywords: z.array(z.string().max(100)).max(20, "maximum 20 keywords").optional().default([]),
+});
+
+export type RssFeedCreateInput = z.infer<typeof rssFeedCreateSchema>;
+
+export const rssFeedUpdateSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  is_active: z.boolean().optional(),
+  keywords: z.array(z.string().max(100)).max(20).optional(),
+});
+
+export type RssFeedUpdateInput = z.infer<typeof rssFeedUpdateSchema>;
 
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —

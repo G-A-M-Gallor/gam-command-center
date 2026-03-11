@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -48,6 +48,9 @@ const WATIBarContent = dynamic(() => import("./WATIWidget").then((m) => ({ defau
 
 const TeamPanel = dynamic(() => import("./TeamWidget").then((m) => ({ default: m.TeamPanel })), { ssr: false }) as ComponentType<any>;
 const TeamBarContent = dynamic(() => import("./TeamWidget").then((m) => ({ default: m.TeamBarContent })), { ssr: false }) as ComponentType<any>;
+
+const RssPanel = dynamic(() => import("./RssWidget").then((m) => ({ default: m.RssPanel })), { ssr: false }) as ComponentType<any>;
+const RssBarContent = dynamic(() => import("./RssWidget").then((m) => ({ default: m.RssBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -337,6 +340,23 @@ export const widgetRegistry: WidgetDefinition[] = [
     isRemovable: true,
     component: KPIPanel,
     renderBar: KPIBarContent,
+  },
+  {
+    id: "rss",
+    icon: Rss,
+    label: { he: "עדכוני RSS", en: "RSS Feeds", ru: "RSS-ленты" },
+    description: {
+      he: "חדשות נדל\"ן ובנייה — כותרות אחרונות",
+      en: "Construction & real estate news — latest headlines",
+      ru: "Новости строительства и недвижимости — последние заголовки",
+    },
+    defaultSize: 1,
+    status: "active",
+    category: "integrations",
+    tier: "free",
+    isRemovable: true,
+    component: RssPanel,
+    renderBar: RssBarContent,
   },
   {
     id: "shortcuts",

@@ -1,6 +1,6 @@
 import {
   Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
-  Bot, Palette, Network, Calendar, Zap, Settings, Globe, Code2,
+  Bot, Palette, Network, Calendar, Zap, Rss, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2,
@@ -173,6 +173,14 @@ export const routes: RouteEntry[] = [
     descriptionEn: 'n8n iframe + 3 Supabase automation types with code examples',
     components: [{ id: 'page-header-auto', name: 'PageHeader', file: 'components/command-center/PageHeader.tsx', status: 'active' }],
     contexts: ['SettingsContext'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'feeds', path: '/dashboard/feeds', name: 'RSS Feeds', nameHe: 'עדכוני RSS', icon: Rss,
+    phase: 1, status: 'active', version: '0.1.0', addedDate: '2026-03-11',
+    descriptionHe: 'קורא RSS מקצועי — חדשות נדל"ן ובנייה מהמקורות המובילים בישראל',
+    descriptionEn: 'Professional RSS reader — Israeli construction & real estate news from leading sources',
+    components: [{ id: 'page-header-feeds', name: 'PageHeader', file: 'components/command-center/PageHeader.tsx', status: 'active' }],
+    contexts: ['SettingsContext'], supabaseTables: ['rss_feeds', 'rss_articles'], visible: true, sidebarTab: true,
   },
   {
     id: 'settings', path: '/dashboard/settings', name: 'Settings', nameHe: 'הגדרות', icon: Settings,
