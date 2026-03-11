@@ -1,6 +1,6 @@
 import {
   Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
-  Bot, Palette, Network, Calendar, Zap, Rss, Settings, Globe, Code2,
+  Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2,
@@ -183,6 +183,34 @@ export const routes: RouteEntry[] = [
     contexts: ['SettingsContext'], supabaseTables: ['rss_feeds', 'rss_articles'], visible: true, sidebarTab: true,
   },
   {
+    id: 'import', path: '/dashboard/import', name: 'Import Engine', nameHe: 'מנוע ייבוא', icon: Upload,
+    phase: 2, status: 'active', version: '0.1.0', addedDate: '2026-03-11',
+    descriptionHe: 'ייבוא קבצי CSV/Excel — מיפוי עמודות אוטומטי, תצוגה מקדימה, אימות ושמירה לישויות',
+    descriptionEn: 'CSV/Excel import engine — auto column mapping, preview, validation & bulk import into entities',
+    components: [
+      { id: 'upload-zone', name: 'UploadZone', file: 'components/import/UploadZone.tsx', status: 'active' },
+      { id: 'column-mapper', name: 'ColumnMapper', file: 'components/import/ColumnMapper.tsx', status: 'active' },
+      { id: 'preview-table', name: 'PreviewTable', file: 'components/import/PreviewTable.tsx', status: 'active' },
+      { id: 'import-progress', name: 'ImportProgress', file: 'components/import/ImportProgress.tsx', status: 'active' },
+      { id: 'import-history', name: 'ImportHistory', file: 'components/import/ImportHistory.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['import_logs', 'vb_records'], visible: true, sidebarTab: true,
+    connectedTo: ['entity-view', 'entity-fields'],
+  },
+  {
+    id: 'matching', path: '/dashboard/matching', name: 'Matching Engine', nameHe: 'מנוע התאמות', icon: Brain,
+    phase: 4, status: 'active', version: '1.0.0', addedDate: '2026-03-11',
+    descriptionHe: 'מנוע התאמות AI — סימון תאימות בין ישויות (עובדים, פרויקטים, קבלנים, לידים)',
+    descriptionEn: 'AI matching engine — scores compatibility between entities (workers, projects, contractors, leads)',
+    components: [
+      { id: 'match-board', name: 'MatchBoard', file: 'components/matching/MatchBoard.tsx', status: 'active' },
+      { id: 'match-card', name: 'MatchCard', file: 'components/matching/MatchCard.tsx', status: 'active' },
+      { id: 'match-profile-editor', name: 'MatchProfileEditor', file: 'components/matching/MatchProfileEditor.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext', 'AuthContext'], supabaseTables: ['matching_scores', 'vb_records', 'entity_types', 'global_fields'], visible: true, sidebarTab: true,
+    connectedTo: ['entity-view', 'entity-fields', 'entity-types'],
+  },
+  {
     id: 'settings', path: '/dashboard/settings', name: 'Settings', nameHe: 'הגדרות', icon: Settings,
     phase: 1, status: 'active', version: '0.6.0', addedDate: '2026-02-15',
     descriptionHe: 'צבעי מבטא, גופנים, סקינים, צפיפות, פרופיל מותג, עקיפות סגנון',
@@ -339,6 +367,7 @@ export const widgets: WidgetEntry[] = [
   { id: 'wati', name: 'WATI Messages', nameHe: 'הודעות WATI', file: 'WATIWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '0.1.0', addedDate: '2026-03-08' },
   { id: 'team', name: 'Team', nameHe: 'צוות', file: 'TeamWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '0.1.0', addedDate: '2026-03-08' },
   { id: 'leads-pipeline', name: 'Leads Pipeline', nameHe: 'צנרת לידים', file: 'LeadsPipelineWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '0.1.0', addedDate: '2026-03-11' },
+  { id: 'matching', name: 'Matching', nameHe: 'התאמות', file: 'MatchingWidget.tsx', defaultSize: '2x', panelMode: 'side-panel', status: 'active', version: '1.0.0', addedDate: '2026-03-11' },
 ];
 
 // ─── Context Data ────────────────────────────────────────

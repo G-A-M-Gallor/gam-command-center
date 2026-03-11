@@ -275,6 +275,39 @@ export const rssFeedUpdateSchema = z.object({
 
 export type RssFeedUpdateInput = z.infer<typeof rssFeedUpdateSchema>;
 
+// ─── Matching Engine ────────────────────────────────────────
+
+export const matchingScoreSchema = z.object({
+  source_id: z.string().uuid("source_id must be a valid UUID"),
+  target_type: z.string().optional(),
+  limit: z.number().int().min(1).max(100).optional().default(20),
+  force_refresh: z.boolean().optional().default(false),
+});
+export type MatchingScoreInput = z.infer<typeof matchingScoreSchema>;
+
+export const matchingBatchSchema = z.object({
+  source_ids: z.array(z.string().uuid()).min(1).max(20, "Maximum 20 sources per batch"),
+  target_type: z.string().optional(),
+  limit: z.number().int().min(1).max(50).optional().default(10),
+});
+export type MatchingBatchInput = z.infer<typeof matchingBatchSchema>;
+
+// ─── Import Engine ─────────────────────────────────────────
+
+export const importExecuteSchema = z.object({
+  entity_type: z.string().min(1, "entity_type is required"),
+  mappings: z.array(z.object({
+    sourceIndex: z.number().int().min(0),
+    sourceHeader: z.string(),
+    targetField: z.string().min(1),
+    confidence: z.number().min(0).max(1).optional(),
+  })).min(1, "At least one column mapping is required"),
+  rows: z.array(z.array(z.string())).min(1).max(5000, "Maximum 5,000 rows per import"),
+  file_name: z.string().min(1),
+  file_size: z.number().int().min(0),
+});
+export type ImportExecuteInput = z.infer<typeof importExecuteSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

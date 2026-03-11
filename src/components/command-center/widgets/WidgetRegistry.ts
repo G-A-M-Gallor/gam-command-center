@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -54,6 +54,9 @@ const RssBarContent = dynamic(() => import("./RssWidget").then((m) => ({ default
 
 const LeadsPipelinePanel = dynamic(() => import("./LeadsPipelineWidget").then((m) => ({ default: m.LeadsPipelinePanel })), { ssr: false }) as ComponentType<any>;
 const LeadsPipelineBarContent = dynamic(() => import("./LeadsPipelineWidget").then((m) => ({ default: m.LeadsPipelineBarContent })), { ssr: false }) as ComponentType<any>;
+
+const MatchingPanel = dynamic(() => import("./MatchingWidget").then((m) => ({ default: m.MatchingPanel })), { ssr: false }) as ComponentType<any>;
+const MatchingBarContent = dynamic(() => import("./MatchingWidget").then((m) => ({ default: m.MatchingBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -360,6 +363,24 @@ export const widgetRegistry: WidgetDefinition[] = [
     isRemovable: true,
     component: LeadsPipelinePanel,
     renderBar: LeadsPipelineBarContent,
+  },
+  {
+    id: "matching",
+    icon: Sparkles,
+    label: { he: "התאמות", en: "Matching", ru: "Совпадения" },
+    description: {
+      he: "התאמות AI בין ישויות — עובדים, פרויקטים, קבלנים",
+      en: "AI matching between entities — workers, projects, contractors",
+      ru: "AI-сопоставление сущностей — работники, проекты, подрядчики",
+    },
+    defaultSize: 2,
+    status: "active",
+    category: "analytics",
+    tier: "pro",
+    isRemovable: true,
+    component: MatchingPanel,
+    renderBar: MatchingBarContent,
+    panelMode: "side-panel",
   },
   {
     id: "rss",

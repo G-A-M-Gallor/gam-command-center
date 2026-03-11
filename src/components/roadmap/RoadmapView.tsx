@@ -2,527 +2,566 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, X } from "lucide-react";
+import { ArrowLeft, ExternalLink, X, CheckCircle2, Circle, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { supabase } from "@/lib/supabaseClient";
+import type { NotionTask } from "@/lib/notion/client";
 
-// ─── Island Data ─────────────────────────────────────────
+// ─── Island Config (static styling + descriptions) ────────
 
-interface Island {
-  phase: number;
+interface IslandConfig {
+  layerKey: string; // matches Notion "Layer" field prefix
   emoji: string;
   labelEn: string;
   labelHe: string;
-  tasks: number;
   ring: string;
   bg: string;
   text: string;
-  description: {
-    en: string;
-    he: string;
-    ru: string;
-  };
+  description: { en: string; he: string; ru: string };
 }
 
-const ISLANDS: Island[] = [
+const ISLAND_CONFIGS: IslandConfig[] = [
   {
-    phase: 0,
+    layerKey: "0",
     emoji: "\u{1F534}",
-    labelEn: "Security Blockers",
-    labelHe: "\u05D7\u05E1\u05D9\u05DE\u05D5\u05EA \u05D0\u05D1\u05D8\u05D7\u05D4",
-    tasks: 6,
+    labelEn: "Foundation",
+    labelHe: "תשתית",
     ring: "ring-red-500",
     bg: "bg-red-500/20",
     text: "text-red-400",
     description: {
-      en: "Critical security issues that must be resolved before any deployment. Auth hardening, RLS policies, API protection.",
-      he: "\u05D1\u05E2\u05D9\u05D5\u05EA \u05D0\u05D1\u05D8\u05D7\u05D4 \u05E7\u05E8\u05D9\u05D8\u05D9\u05D5\u05EA \u05E9\u05D7\u05D9\u05D9\u05D1\u05D5\u05EA \u05E4\u05EA\u05E8\u05D5\u05DF \u05DC\u05E4\u05E0\u05D9 \u05DB\u05DC \u05E4\u05E8\u05D9\u05E1\u05D4. \u05D7\u05D9\u05D6\u05D5\u05E7 \u05D0\u05D9\u05DE\u05D5\u05EA, \u05DE\u05D3\u05D9\u05E0\u05D9\u05D5\u05EA RLS, \u05D4\u05D2\u05E0\u05EA API.",
-      ru: "\u041A\u0440\u0438\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u043F\u0440\u043E\u0431\u043B\u0435\u043C\u044B \u0431\u0435\u0437\u043E\u043F\u0430\u0441\u043D\u043E\u0441\u0442\u0438, \u043A\u043E\u0442\u043E\u0440\u044B\u0435 \u043D\u0435\u043E\u0431\u0445\u043E\u0434\u0438\u043C\u043E \u0440\u0435\u0448\u0438\u0442\u044C \u043F\u0435\u0440\u0435\u0434 \u0440\u0430\u0437\u0432\u0451\u0440\u0442\u044B\u0432\u0430\u043D\u0438\u0435\u043C.",
+      en: "Core infrastructure: auth, env vars, CI/CD, DB schema, monitoring.",
+      he: "תשתית ליבה: אימות, משתני סביבה, CI/CD, סכמת DB, ניטור.",
+      ru: "Базовая инфраструктура: аутентификация, переменные среды, CI/CD, схема БД.",
     },
   },
   {
-    phase: 1,
-    emoji: "\u2699\uFE0F",
-    labelEn: "Foundation",
-    labelHe: "\u05EA\u05E9\u05EA\u05D9\u05EA",
-    tasks: 19,
-    ring: "ring-slate-400",
-    bg: "bg-slate-500/20",
-    text: "text-slate-300",
-    description: {
-      en: "Core infrastructure setup. Database schema, auth system, CI/CD pipeline, monitoring, and project scaffolding.",
-      he: "\u05D4\u05E7\u05DE\u05EA \u05EA\u05E9\u05EA\u05D9\u05EA \u05D1\u05E1\u05D9\u05E1\u05D9\u05EA. \u05E1\u05DB\u05DE\u05EA \u05D1\u05E1\u05D9\u05E1 \u05E0\u05EA\u05D5\u05E0\u05D9\u05DD, \u05DE\u05E2\u05E8\u05DB\u05EA \u05D0\u05D9\u05DE\u05D5\u05EA, CI/CD, \u05E0\u05D9\u05D8\u05D5\u05E8.",
-      ru: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0430 \u0431\u0430\u0437\u043E\u0432\u043E\u0439 \u0438\u043D\u0444\u0440\u0430\u0441\u0442\u0440\u0443\u043A\u0442\u0443\u0440\u044B. \u0421\u0445\u0435\u043C\u0430 \u0411\u0414, \u0430\u0443\u0442\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u044F, CI/CD.",
-    },
-  },
-  {
-    phase: 2,
+    layerKey: "1",
     emoji: "\u{1F9F1}",
     labelEn: "Entity Engine",
-    labelHe: "\u05DE\u05E0\u05D5\u05E2 \u05D9\u05E9\u05D5\u05D9\u05D5\u05EA",
-    tasks: 24,
+    labelHe: "מנוע ישויות",
     ring: "ring-blue-500",
     bg: "bg-blue-500/20",
     text: "text-blue-400",
     description: {
-      en: "Entity management system. CRUD operations, Origami sync, real-time updates, and data validation layer.",
-      he: "\u05DE\u05E2\u05E8\u05DB\u05EA \u05E0\u05D9\u05D4\u05D5\u05DC \u05D9\u05E9\u05D5\u05D9\u05D5\u05EA. \u05E4\u05E2\u05D5\u05DC\u05D5\u05EA CRUD, \u05E1\u05E0\u05DB\u05E8\u05D5\u05DF \u05DE Origami, \u05E2\u05D3\u05DB\u05D5\u05E0\u05D9\u05DD \u05D1\u05D6\u05DE\u05DF \u05D0\u05DE\u05EA.",
-      ru: "\u0421\u0438\u0441\u0442\u0435\u043C\u0430 \u0443\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u044F \u0441\u0443\u0449\u043D\u043E\u0441\u0442\u044F\u043C\u0438. CRUD, \u0441\u0438\u043D\u0445\u0440\u043E\u043D\u0438\u0437\u0430\u0446\u0438\u044F Origami, \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F \u0432 \u0440\u0435\u0430\u043B\u044C\u043D\u043E\u043C \u0432\u0440\u0435\u043C\u0435\u043D\u0438.",
+      en: "Entity management: CRUD, fields, types, templates, Origami sync.",
+      he: "ניהול ישויות: CRUD, שדות, סוגים, תבניות, סנכרון Origami.",
+      ru: "Управление сущностями: CRUD, поля, типы, шаблоны, синхронизация Origami.",
     },
   },
   {
-    phase: 3,
-    emoji: "\u{1F4DD}",
-    labelEn: "Note + UI",
-    labelHe: "\u05E4\u05EA\u05E7\u05D9\u05DD + UI",
-    tasks: 40,
+    layerKey: "2",
+    emoji: "\u{1F517}",
+    labelEn: "Views & Relations",
+    labelHe: "תצוגות וקשרים",
     ring: "ring-emerald-500",
     bg: "bg-emerald-500/20",
     text: "text-emerald-400",
     description: {
-      en: "Document editor, story map, functional map, and core UI components. Rich text editing with templates.",
-      he: "\u05E2\u05D5\u05E8\u05DA \u05DE\u05E1\u05DE\u05DB\u05D9\u05DD, \u05DE\u05E4\u05EA \u05E1\u05D9\u05E4\u05D5\u05E8, \u05DE\u05E4\u05D4 \u05E4\u05D5\u05E0\u05E7\u05E6\u05D9\u05D5\u05E0\u05DC\u05D9\u05EA \u05D5\u05E7\u05D5\u05DE\u05E4\u05D5\u05E0\u05E0\u05D8\u05D5\u05EA UI \u05DE\u05E8\u05DB\u05D6\u05D9\u05D5\u05EA.",
-      ru: "\u0420\u0435\u0434\u0430\u043A\u0442\u043E\u0440 \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u043E\u0432, \u043A\u0430\u0440\u0442\u0430 \u0438\u0441\u0442\u043E\u0440\u0438\u0439, \u0444\u0443\u043D\u043A\u0446\u0438\u043E\u043D\u0430\u043B\u044C\u043D\u0430\u044F \u043A\u0430\u0440\u0442\u0430 \u0438 \u043A\u043E\u043C\u043F\u043E\u043D\u0435\u043D\u0442\u044B UI.",
+      en: "Views, relations, Work Manager agents, Notion write-back, personas.",
+      he: "תצוגות, קשרים, סוכני Work Manager, כתיבה ל-Notion, פרסונות.",
+      ru: "Представления, связи, агенты Work Manager, запись в Notion, персоны.",
     },
   },
   {
-    phase: 4,
+    layerKey: "3",
     emoji: "\u{1F3E2}",
     labelEn: "Business Module",
-    labelHe: "\u05DE\u05D5\u05D3\u05D5\u05DC \u05E2\u05E1\u05E7\u05D9",
-    tasks: 46,
+    labelHe: "מודול עסקי",
     ring: "ring-amber-500",
     bg: "bg-amber-500/20",
     text: "text-amber-400",
     description: {
-      en: "Business logic layer. Client management, pipeline tracking, reporting, and Origami deep integration.",
-      he: "\u05E9\u05DB\u05D1\u05EA \u05DC\u05D5\u05D2\u05D9\u05E7\u05D4 \u05E2\u05E1\u05E7\u05D9\u05EA. \u05E0\u05D9\u05D4\u05D5\u05DC \u05DC\u05E7\u05D5\u05D7\u05D5\u05EA, \u05DE\u05E2\u05E7\u05D1 \u05E6\u05E0\u05E8\u05EA, \u05D3\u05D5\u05D7\u05D5\u05EA \u05D5\u05D0\u05D9\u05E0\u05D8\u05D2\u05E8\u05E6\u05D9\u05D4 \u05E2\u05DE\u05D5\u05E7\u05D4 \u05E2\u05DD Origami.",
-      ru: "\u0411\u0438\u0437\u043D\u0435\u0441-\u043B\u043E\u0433\u0438\u043A\u0430. \u0423\u043F\u0440\u0430\u0432\u043B\u0435\u043D\u0438\u0435 \u043A\u043B\u0438\u0435\u043D\u0442\u0430\u043C\u0438, \u043E\u0442\u0441\u043B\u0435\u0436\u0438\u0432\u0430\u043D\u0438\u0435 \u043F\u0430\u0439\u043F\u043B\u0430\u0439\u043D\u0430, \u043E\u0442\u0447\u0451\u0442\u043D\u043E\u0441\u0442\u044C.",
+      en: "Business logic: chat, intent detection, advisor AI, Mattermost, testing.",
+      he: "לוגיקה עסקית: צ'אט, זיהוי כוונה, AI ייעוצי, Mattermost, בדיקות.",
+      ru: "Бизнес-логика: чат, определение намерений, AI-консультант, тестирование.",
     },
   },
   {
-    phase: 5,
+    layerKey: "4",
     emoji: "\u{1F310}",
     labelEn: "Platform",
-    labelHe: "\u05E4\u05DC\u05D8\u05E4\u05D5\u05E8\u05DE\u05D4",
-    tasks: 29,
+    labelHe: "פלטפורמה",
     ring: "ring-purple-500",
     bg: "bg-purple-500/20",
     text: "text-purple-400",
     description: {
-      en: "Platform features. Multi-tenant architecture, API gateway, webhooks, third-party integrations, and analytics.",
-      he: "\u05EA\u05DB\u05D5\u05E0\u05D5\u05EA \u05E4\u05DC\u05D8\u05E4\u05D5\u05E8\u05DE\u05D4. \u05D0\u05E8\u05DB\u05D9\u05D8\u05E7\u05D8\u05D5\u05E8\u05EA multi-tenant, \u05E9\u05E2\u05E8 API, webhooks, \u05D0\u05D9\u05E0\u05D8\u05D2\u05E8\u05E6\u05D9\u05D5\u05EA \u05D5\u05D0\u05E0\u05DC\u05D9\u05D8\u05D9\u05E7\u05D4.",
-      ru: "\u0424\u0443\u043D\u043A\u0446\u0438\u0438 \u043F\u043B\u0430\u0442\u0444\u043E\u0440\u043C\u044B. \u041C\u0443\u043B\u044C\u0442\u0438-\u0442\u0435\u043D\u0430\u043D\u0442\u043D\u0430\u044F \u0430\u0440\u0445\u0438\u0442\u0435\u043A\u0442\u0443\u0440\u0430, API \u0448\u043B\u044E\u0437, \u0432\u0435\u0431\u0445\u0443\u043A\u0438, \u0438\u043D\u0442\u0435\u0433\u0440\u0430\u0446\u0438\u0438.",
+      en: "Platform: multi-tenant, API gateway, self-building, model router.",
+      he: "פלטפורמה: multi-tenant, שער API, בנייה עצמית, ניתוב מודלים.",
+      ru: "Платформа: мультитенантность, API шлюз, самосборка, маршрутизация моделей.",
     },
   },
   {
-    phase: 6,
+    layerKey: "5",
     emoji: "\u{1F680}",
-    labelEn: "SaaS Launch",
-    labelHe: "\u05D4\u05E9\u05E7\u05EA SaaS",
-    tasks: 26,
+    labelEn: "SaaS",
+    labelHe: "SaaS",
     ring: "ring-yellow-400",
     bg: "bg-yellow-500/20",
     text: "text-yellow-400",
     description: {
-      en: "SaaS launch preparation. Billing, onboarding flows, documentation, marketing site, and public API.",
-      he: "\u05D4\u05DB\u05E0\u05D4 \u05DC\u05D4\u05E9\u05E7\u05EA SaaS. \u05D7\u05D9\u05D5\u05D1\u05D9\u05DD, \u05EA\u05D4\u05DC\u05D9\u05DB\u05D9 \u05D4\u05E6\u05D8\u05E8\u05E4\u05D5\u05EA, \u05EA\u05D9\u05E2\u05D5\u05D3, \u05D0\u05EA\u05E8 \u05E9\u05D9\u05D5\u05D5\u05E7 \u05D5-API \u05E6\u05D9\u05D1\u05D5\u05E8\u05D9.",
-      ru: "\u041F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u043A\u0430 \u043A \u0437\u0430\u043F\u0443\u0441\u043A\u0443 SaaS. \u0411\u0438\u043B\u043B\u0438\u043D\u0433, \u043E\u043D\u0431\u043E\u0440\u0434\u0438\u043D\u0433, \u0434\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430\u0446\u0438\u044F, \u043C\u0430\u0440\u043A\u0435\u0442\u0438\u043D\u0433\u043E\u0432\u044B\u0439 \u0441\u0430\u0439\u0442.",
+      en: "SaaS launch: public APIs, client widgets, market index.",
+      he: "השקת SaaS: ממשקי API ציבוריים, ווידג'טים ללקוחות, מדד שוק.",
+      ru: "Запуск SaaS: публичные API, виджеты клиентов, рыночный индекс.",
     },
   },
 ];
 
-const TOTAL_TASKS = ISLANDS.reduce((sum, i) => sum + i.tasks, 0);
-const CURRENT_PHASE = 0;
+// ─── Derived types ────────────────────────────────────────
 
-type DetailLevel = "goal" | "epic" | "sprint" | "task";
+interface PhaseData {
+  config: IslandConfig;
+  tasks: NotionTask[];
+  total: number;
+  done: number;
+  inProgress: number;
+  blocked: number;
+}
 
-// ─── Component ───────────────────────────────────────────
+const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
+  Done: { bg: "bg-emerald-500/20", text: "text-emerald-400" },
+  "In Progress": { bg: "bg-blue-500/20", text: "text-blue-400" },
+  "Ready for QA": { bg: "bg-purple-500/20", text: "text-purple-400" },
+  Blocked: { bg: "bg-red-500/20", text: "text-red-400" },
+  Backlog: { bg: "bg-slate-500/20", text: "text-slate-400" },
+};
+
+const PRIORITY_COLORS: Record<string, string> = {
+  "P0 Blocker": "text-red-400",
+  "P1 Critical": "text-amber-400",
+  "P2 Important": "text-blue-400",
+  "P3 Nice": "text-slate-400",
+};
+
+// ─── Component ────────────────────────────────────────────
 
 export function RoadmapView() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const rt = (t as Record<string, unknown>).roadmapPage as Record<string, string>;
+  const rt = (t as Record<string, unknown>).roadmapPage as Record<string, string> | undefined;
 
-  const [selectedIsland, setSelectedIsland] = useState<number | null>(null);
-  const [detailLevel, setDetailLevel] = useState<DetailLevel>("goal");
+  const [selectedPhase, setSelectedPhase] = useState<number | null>(null);
+  const [allTasks, setAllTasks] = useState<NotionTask[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   const isRTL = language === "he";
 
-  // ── Stars (stable random positions) ─────────────────
+  // ── Fetch tasks from Notion ────────────────────────
+  const fetchTasks = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError("Not authenticated");
+        return;
+      }
+      const res = await fetch("/api/notion/tasks", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setAllTasks(json.tasks ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load tasks");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+
+  // ── Group tasks by layer ───────────────────────────
+  const phases: PhaseData[] = useMemo(() => {
+    return ISLAND_CONFIGS.map((config) => {
+      const layerTasks = allTasks.filter((task) => {
+        const layerNum = task.layer?.match(/^(\d)/)?.[1];
+        return layerNum === config.layerKey;
+      });
+      return {
+        config,
+        tasks: layerTasks,
+        total: layerTasks.length,
+        done: layerTasks.filter((t) => t.status === "Done").length,
+        inProgress: layerTasks.filter((t) => t.status === "In Progress" || t.status === "Ready for QA").length,
+        blocked: layerTasks.filter((t) => t.status === "Blocked").length,
+      };
+    });
+  }, [allTasks]);
+
+  // Unassigned tasks (no layer)
+  const unassignedTasks = useMemo(() => {
+    return allTasks.filter((task) => {
+      const layerNum = task.layer?.match(/^(\d)/)?.[1];
+      return !layerNum || !ISLAND_CONFIGS.some((c) => c.layerKey === layerNum);
+    });
+  }, [allTasks]);
+
+  const totalTasks = allTasks.length;
+  const totalDone = allTasks.filter((t) => t.status === "Done").length;
+  const overallProgress = totalTasks > 0 ? totalDone / totalTasks : 0;
+
+  // Current phase = highest phase with any "Done" tasks
+  const currentPhase = useMemo(() => {
+    let highest = -1;
+    for (let i = 0; i < phases.length; i++) {
+      if (phases[i].done > 0) highest = i;
+    }
+    return highest;
+  }, [phases]);
+
+  // ── Stars ──────────────────────────────────────────
   const stars = useMemo(() => {
     const result: { x: number; y: number; size: number; delay: number; opacity: number }[] = [];
-    // Seeded pseudo-random
     let seed = 42;
-    const rand = () => {
-      seed = (seed * 16807 + 0) % 2147483647;
-      return seed / 2147483647;
-    };
+    const rand = () => { seed = (seed * 16807 + 0) % 2147483647; return seed / 2147483647; };
     for (let i = 0; i < 35; i++) {
-      result.push({
-        x: rand() * 100,
-        y: rand() * 40,
-        size: rand() > 0.7 ? 3 : 2,
-        delay: rand() * 4,
-        opacity: 0.3 + rand() * 0.7,
-      });
+      result.push({ x: rand() * 100, y: rand() * 40, size: rand() > 0.7 ? 3 : 2, delay: rand() * 4, opacity: 0.3 + rand() * 0.7 });
     }
     return result;
   }, []);
 
-  // ── Keyboard navigation ─────────────────────────────
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setSelectedIsland(null);
-        return;
-      }
-      if (e.key === "ArrowRight") {
-        setSelectedIsland((prev) =>
-          prev === null ? 0 : (prev + 1) % ISLANDS.length
-        );
-        return;
-      }
-      if (e.key === "ArrowLeft") {
-        setSelectedIsland((prev) =>
-          prev === null ? ISLANDS.length - 1 : (prev - 1 + ISLANDS.length) % ISLANDS.length
-        );
-      }
-    },
-    []
-  );
+  // ── Keyboard ───────────────────────────────────────
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") { setSelectedPhase(null); return; }
+    if (e.key === "ArrowRight") { setSelectedPhase((p) => p === null ? 0 : (p + 1) % phases.length); }
+    if (e.key === "ArrowLeft") { setSelectedPhase((p) => p === null ? phases.length - 1 : (p - 1 + phases.length) % phases.length); }
+  }, [phases.length]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // ── Helpers ─────────────────────────────────────────
-  const getLabel = (island: Island) =>
-    language === "he" ? island.labelHe : island.labelEn;
+  // ── Helpers ────────────────────────────────────────
+  const getLabel = (config: IslandConfig) => language === "he" ? config.labelHe : config.labelEn;
+  const getDescription = (config: IslandConfig) =>
+    config.description[language as keyof typeof config.description] || config.description.en;
 
-  const getDescription = (island: Island) =>
-    island.description[language as keyof typeof island.description] || island.description.en;
-
-  const selected = selectedIsland !== null ? ISLANDS[selectedIsland] : null;
-
-  // ── Island positions (evenly spaced across viewport) ─
   const getIslandX = (index: number) => {
-    const padding = 8; // percentage
-    return padding + (index / (ISLANDS.length - 1)) * (100 - 2 * padding);
+    const padding = 8;
+    return padding + (index / (ISLAND_CONFIGS.length - 1)) * (100 - 2 * padding);
   };
+  const getIslandY = (index: number) => 45 + Math.sin(index * 0.9) * 12;
 
-  const getIslandY = (index: number) => {
-    // Sine wave for vertical variation
-    return 45 + Math.sin(index * 0.9) * 12;
-  };
+  const selected = selectedPhase !== null ? phases[selectedPhase] : null;
+
+  // Filter tasks in selected phase
+  const filteredTasks = useMemo(() => {
+    if (!selected) return [];
+    if (!statusFilter) return selected.tasks;
+    return selected.tasks.filter((t) => t.status === statusFilter);
+  }, [selected, statusFilter]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0a0f1e]">
-      {/* Inline keyframes */}
       <style>{`
-        @keyframes wave {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(-25%); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-        @keyframes shipBob {
-          0%, 100% { transform: translateY(0) rotate(-2deg); }
-          50% { transform: translateY(-6px) rotate(2deg); }
-        }
+        @keyframes wave { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-25%); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        @keyframes shipBob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(2deg); } }
       `}</style>
 
-      {/* ── Stars ───────────────────────────────────── */}
+      {/* Stars */}
       <div className="pointer-events-none absolute inset-0">
         {stars.map((star, i) => (
-          <div
-            key={i}
-            className="absolute animate-pulse rounded-full"
-            style={{
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: star.size,
-              height: star.size,
-              backgroundColor: i % 5 === 0 ? "#93c5fd" : "#ffffff",
-              opacity: star.opacity,
-              animationDelay: `${star.delay}s`,
-              animationDuration: `${2 + star.delay}s`,
-            }}
-          />
+          <div key={i} className="absolute animate-pulse rounded-full"
+            style={{ left: `${star.x}%`, top: `${star.y}%`, width: star.size, height: star.size,
+              backgroundColor: i % 5 === 0 ? "#93c5fd" : "#ffffff", opacity: star.opacity,
+              animationDelay: `${star.delay}s`, animationDuration: `${2 + star.delay}s` }} />
         ))}
       </div>
 
-      {/* ── Back button ─────────────────────────────── */}
-      <Link
-        href="/dashboard"
-        className="fixed top-6 left-6 z-50 flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-2 text-sm text-slate-300 backdrop-blur-sm transition-colors hover:bg-slate-700/80 hover:text-white"
-      >
+      {/* Back button */}
+      <Link href="/dashboard"
+        className="fixed top-6 left-6 z-50 flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-2 text-sm text-slate-300 backdrop-blur-sm transition-colors hover:bg-slate-700/80 hover:text-white">
         <ArrowLeft className="h-4 w-4" />
         {rt?.back || "Back"}
       </Link>
 
-      {/* ── Title ───────────────────────────────────── */}
+      {/* Refresh button */}
+      <button type="button" onClick={fetchTasks} disabled={loading}
+        className="fixed top-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-slate-800/80 px-3 py-2 text-sm text-slate-300 backdrop-blur-sm transition-colors hover:bg-slate-700/80 hover:text-white disabled:opacity-50">
+        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+      </button>
+
+      {/* Title + Stats */}
       <div className="relative z-10 pt-6 text-center">
-        <h1 className="text-3xl font-bold text-white">
-          {rt?.title || "Roadmap"}
-        </h1>
-        <p className="mt-1 text-sm text-slate-400">
-          {rt?.description || "Development phases for vBrain.io"}
-        </p>
+        <h1 className="text-3xl font-bold text-white">{rt?.title || "Roadmap"}</h1>
+        {loading ? (
+          <p className="mt-1 flex items-center justify-center gap-2 text-sm text-slate-400">
+            <Loader2 className="h-3 w-3 animate-spin" /> Loading from Notion...
+          </p>
+        ) : error ? (
+          <p className="mt-1 flex items-center justify-center gap-2 text-sm text-red-400">
+            <AlertTriangle className="h-3 w-3" /> {error}
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-slate-400">
+            {totalDone}/{totalTasks} tasks done ({Math.round(overallProgress * 100)}%)
+            {unassignedTasks.length > 0 && ` · ${unassignedTasks.length} unassigned`}
+          </p>
+        )}
       </div>
 
-      {/* ── Ocean + Islands area ─────────────────────── */}
+      {/* Ocean + Islands */}
       <div className="relative mx-auto mt-8" style={{ height: "55vh", maxWidth: 1200 }}>
-        {/* SVG dotted path connecting islands */}
-        <svg
-          className="pointer-events-none absolute inset-0 h-full w-full"
-          viewBox="0 0 1200 600"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          {ISLANDS.slice(0, -1).map((_, i) => {
-            const x1 = (getIslandX(i) / 100) * 1200;
-            const y1 = (getIslandY(i) / 100) * 600;
-            const x2 = (getIslandX(i + 1) / 100) * 1200;
-            const y2 = (getIslandY(i + 1) / 100) * 600;
-            const cx1 = x1 + (x2 - x1) * 0.4;
-            const cy1 = y1 - 30;
-            const cx2 = x1 + (x2 - x1) * 0.6;
-            const cy2 = y2 - 30;
+        {/* SVG dotted path */}
+        <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid meet">
+          {ISLAND_CONFIGS.slice(0, -1).map((_, i) => {
+            const x1 = (getIslandX(i) / 100) * 1200, y1 = (getIslandY(i) / 100) * 600;
+            const x2 = (getIslandX(i + 1) / 100) * 1200, y2 = (getIslandY(i + 1) / 100) * 600;
             return (
-              <path
-                key={i}
-                d={`M ${x1} ${y1} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${x2} ${y2}`}
-                fill="none"
-                stroke="rgba(148, 163, 184, 0.3)"
-                strokeWidth="2"
-                strokeDasharray="8,8"
-              />
+              <path key={i}
+                d={`M ${x1} ${y1} C ${x1 + (x2 - x1) * 0.4} ${y1 - 30}, ${x1 + (x2 - x1) * 0.6} ${y2 - 30}, ${x2} ${y2}`}
+                fill="none" stroke={i <= currentPhase ? "rgba(52, 211, 153, 0.4)" : "rgba(148, 163, 184, 0.3)"}
+                strokeWidth="2" strokeDasharray="8,8" />
             );
           })}
         </svg>
 
-        {/* Ship at Phase 0 */}
-        <div
-          className="absolute z-20 text-3xl"
-          style={{
-            left: `${getIslandX(0)}%`,
-            top: `${getIslandY(0) - 10}%`,
-            transform: "translateX(-50%)",
-            animation: "shipBob 2.5s ease-in-out infinite",
-          }}
-        >
-          {"\u{1F6A2}"}
-        </div>
+        {/* Ship at current phase */}
+        {currentPhase >= 0 && (
+          <div className="absolute z-20 text-3xl"
+            style={{ left: `${getIslandX(currentPhase)}%`, top: `${getIslandY(currentPhase) - 10}%`,
+              transform: "translateX(-50%)", animation: "shipBob 2.5s ease-in-out infinite" }}>
+            {"\u{1F6A2}"}
+          </div>
+        )}
 
         {/* Islands */}
-        {ISLANDS.map((island, i) => (
-          <button
-            key={island.phase}
-            type="button"
-            onClick={() =>
-              setSelectedIsland(selectedIsland === i ? null : i)
-            }
-            className={`absolute z-20 flex flex-col items-center transition-transform duration-200 hover:scale-110 focus:outline-none focus-visible:outline-2 focus-visible:outline-[var(--cc-accent-500)]`}
-            style={{
-              left: `${getIslandX(i)}%`,
-              top: `${getIslandY(i)}%`,
-              transform: "translate(-50%, -50%)",
-              animation: `float 3s ease-in-out infinite`,
-              animationDelay: `${i * 0.4}s`,
-            }}
-          >
-            {/* Island circle */}
-            <div
-              className={`flex h-20 w-20 items-center justify-center rounded-full ring-2 ${island.ring} ${island.bg} ${
-                selectedIsland === i ? "ring-4 scale-110" : ""
-              } transition-all duration-200 sm:h-24 sm:w-24`}
-            >
-              <span className="text-3xl sm:text-4xl">{island.emoji}</span>
-            </div>
+        {phases.map((phase, i) => {
+          const progress = phase.total > 0 ? phase.done / phase.total : 0;
+          return (
+            <button key={i} type="button"
+              onClick={() => { setSelectedPhase(selectedPhase === i ? null : i); setStatusFilter(null); }}
+              className="absolute z-20 flex flex-col items-center transition-transform duration-200 hover:scale-110 focus:outline-none focus-visible:outline-2 focus-visible:outline-[var(--cc-accent-500)]"
+              style={{ left: `${getIslandX(i)}%`, top: `${getIslandY(i)}%`, transform: "translate(-50%, -50%)",
+                animation: "float 3s ease-in-out infinite", animationDelay: `${i * 0.4}s` }}>
+              {/* Island circle with progress ring */}
+              <div className="relative">
+                <div className={`flex h-20 w-20 items-center justify-center rounded-full ring-2 ${phase.config.ring} ${phase.config.bg} ${
+                  selectedPhase === i ? "ring-4 scale-110" : ""} transition-all duration-200 sm:h-24 sm:w-24`}>
+                  <span className="text-3xl sm:text-4xl">{phase.config.emoji}</span>
+                </div>
+                {/* Mini progress arc */}
+                {phase.total > 0 && (
+                  <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+                    <circle cx="50" cy="50" r="46" fill="none"
+                      stroke={progress === 1 ? "#34d399" : progress > 0.5 ? "#60a5fa" : "#94a3b8"}
+                      strokeWidth="3" strokeLinecap="round"
+                      strokeDasharray={`${progress * 289} 289`}
+                      transform="rotate(-90 50 50)" />
+                  </svg>
+                )}
+              </div>
 
-            {/* Label */}
-            <span
-              className={`mt-2 whitespace-nowrap text-xs font-medium sm:text-sm ${island.text}`}
-            >
-              {getLabel(island)}
-            </span>
+              {/* Label */}
+              <span className={`mt-2 whitespace-nowrap text-xs font-medium sm:text-sm ${phase.config.text}`}>
+                {getLabel(phase.config)}
+              </span>
 
-            {/* Task count badge */}
-            <span className="mt-1 rounded-full bg-slate-800/80 px-2 py-0.5 text-[10px] text-slate-400">
-              {island.tasks} {rt?.taskCount || "tasks"}
-            </span>
-          </button>
-        ))}
+              {/* Task count badge */}
+              <span className="mt-1 rounded-full bg-slate-800/80 px-2 py-0.5 text-[10px] text-slate-400">
+                {loading ? "..." : `${phase.done}/${phase.total}`}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* ── Waves ────────────────────────────────────── */}
+      {/* Waves */}
       <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 overflow-hidden">
-        <div
-          className="absolute bottom-0 h-16 w-[200%] rounded-t-[40%] bg-blue-500/30"
-          style={{ animation: "wave 8s ease-in-out infinite" }}
-        />
-        <div
-          className="absolute bottom-0 h-20 w-[200%] rounded-t-[35%] bg-blue-600/20"
-          style={{ animation: "wave 12s ease-in-out infinite reverse" }}
-        />
-        <div
-          className="absolute bottom-0 h-24 w-[200%] rounded-t-[45%] bg-blue-700/10"
-          style={{ animation: "wave 16s ease-in-out infinite" }}
-        />
+        <div className="absolute bottom-0 h-16 w-[200%] rounded-t-[40%] bg-blue-500/30" style={{ animation: "wave 8s ease-in-out infinite" }} />
+        <div className="absolute bottom-0 h-20 w-[200%] rounded-t-[35%] bg-blue-600/20" style={{ animation: "wave 12s ease-in-out infinite reverse" }} />
+        <div className="absolute bottom-0 h-24 w-[200%] rounded-t-[45%] bg-blue-700/10" style={{ animation: "wave 16s ease-in-out infinite" }} />
       </div>
 
-      {/* ── Quick Nav + Progress Bar ─────────────────── */}
+      {/* Quick Nav + Progress Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-700/50 bg-slate-900/95 px-6 py-3 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center gap-4">
-          {/* Phase buttons */}
           <div className="flex gap-1">
-            {ISLANDS.map((island, i) => (
-              <button
-                key={island.phase}
-                type="button"
-                onClick={() => setSelectedIsland(i)}
-                className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors ${
-                  selectedIsland === i
-                    ? `${island.bg} ${island.text} ring-1 ${island.ring}`
-                    : i <= CURRENT_PHASE
-                      ? "bg-slate-700 text-white"
-                      : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-                }`}
-              >
-                {island.phase}
-              </button>
-            ))}
+            {phases.map((phase, i) => {
+              const progress = phase.total > 0 ? phase.done / phase.total : 0;
+              return (
+                <button key={i} type="button" onClick={() => { setSelectedPhase(i); setStatusFilter(null); }}
+                  className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium transition-colors ${
+                    selectedPhase === i
+                      ? `${phase.config.bg} ${phase.config.text} ring-1 ${phase.config.ring}`
+                      : progress === 1
+                        ? "bg-emerald-900/50 text-emerald-400"
+                        : i <= currentPhase
+                          ? "bg-slate-700 text-white"
+                          : "bg-slate-800 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+                  }`}>
+                  {progress === 1 ? "✓" : i}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Progress bar */}
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-emerald-500 transition-all duration-500"
-                  style={{
-                    width: `${((CURRENT_PHASE + 1) / ISLANDS.length) * 100}%`,
-                  }}
-                />
+                <div className="h-full rounded-full bg-gradient-to-r from-red-500 via-blue-500 to-emerald-500 transition-all duration-500"
+                  style={{ width: `${overallProgress * 100}%` }} />
               </div>
               <span className="text-xs text-slate-500">
-                {CURRENT_PHASE}/{ISLANDS.length - 1}
+                {totalDone}/{totalTasks}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Detail Panel (slide-in) ──────────────────── */}
-      <div
-        className={`fixed top-0 z-50 h-full w-96 max-w-[90vw] border-l border-slate-700/50 bg-slate-900/95 backdrop-blur-sm transition-transform duration-300 ease-out ${
-          isRTL ? "left-0 border-r border-l-0" : "right-0"
-        } ${
-          selected
-            ? "translate-x-0"
-            : isRTL
-              ? "-translate-x-full"
-              : "translate-x-full"
-        }`}
-      >
+      {/* Detail Panel */}
+      <div className={`fixed top-0 z-50 h-full w-[28rem] max-w-[90vw] border-l border-slate-700/50 bg-slate-900/95 backdrop-blur-sm transition-transform duration-300 ease-out ${
+        isRTL ? "left-0 border-r border-l-0" : "right-0"
+      } ${selected ? "translate-x-0" : isRTL ? "-translate-x-full" : "translate-x-full"}`}>
         {selected && (
-          <div className="flex h-full flex-col overflow-y-auto p-6">
+          <div className="flex h-full flex-col overflow-y-auto p-6 pb-20">
             {/* Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl ${selected.bg} ring-1 ${selected.ring}`}
-                >
-                  <span className="text-2xl">{selected.emoji}</span>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${selected.config.bg} ring-1 ${selected.config.ring}`}>
+                  <span className="text-2xl">{selected.config.emoji}</span>
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-white">
-                    Phase {selected.phase}: {getLabel(selected)}
+                    L{selected.config.layerKey}: {getLabel(selected.config)}
                   </h2>
-                  <span
-                    className={`inline-block rounded-full px-2 py-0.5 text-xs ${
-                      selected.phase <= CURRENT_PHASE
-                        ? "bg-amber-500/20 text-amber-400"
+                  <span className={`inline-block rounded-full px-2 py-0.5 text-xs ${
+                    selected.done === selected.total && selected.total > 0
+                      ? "bg-emerald-500/20 text-emerald-400"
+                      : selected.inProgress > 0
+                        ? "bg-blue-500/20 text-blue-400"
                         : "bg-slate-700 text-slate-400"
-                    }`}
-                  >
-                    {selected.phase <= CURRENT_PHASE
-                      ? rt?.inProgress || "In Progress"
-                      : rt?.notStarted || "Not Started"}
+                  }`}>
+                    {selected.done === selected.total && selected.total > 0
+                      ? "Complete"
+                      : selected.inProgress > 0
+                        ? "In Progress"
+                        : "Not Started"}
                   </span>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedIsland(null)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
-              >
+              <button type="button" onClick={() => setSelectedPhase(null)}
+                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Level tabs */}
-            <div className="mt-6 flex rounded-lg bg-slate-800/50 p-1">
-              {(["goal", "epic", "sprint", "task"] as DetailLevel[]).map(
-                (level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    onClick={() => setDetailLevel(level)}
-                    className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                      detailLevel === level
+            {/* Stats */}
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              <div className="rounded-lg bg-slate-800/50 p-2 text-center">
+                <div className={`text-lg font-bold ${selected.config.text}`}>{selected.total}</div>
+                <div className="text-[10px] text-slate-500">Total</div>
+              </div>
+              <div className="rounded-lg bg-slate-800/50 p-2 text-center">
+                <div className="text-lg font-bold text-emerald-400">{selected.done}</div>
+                <div className="text-[10px] text-slate-500">Done</div>
+              </div>
+              <div className="rounded-lg bg-slate-800/50 p-2 text-center">
+                <div className="text-lg font-bold text-blue-400">{selected.inProgress}</div>
+                <div className="text-[10px] text-slate-500">Active</div>
+              </div>
+              <div className="rounded-lg bg-slate-800/50 p-2 text-center">
+                <div className="text-lg font-bold text-slate-400">{selected.total - selected.done - selected.inProgress}</div>
+                <div className="text-[10px] text-slate-500">Backlog</div>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            {selected.total > 0 && (
+              <div className="mt-3">
+                <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">
+                  <div className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${(selected.done / selected.total) * 100}%` }} />
+                </div>
+                <div className="mt-1 text-right text-[10px] text-slate-500">
+                  {Math.round((selected.done / selected.total) * 100)}%
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            <p className="mt-3 text-xs leading-relaxed text-slate-400">
+              {getDescription(selected.config)}
+            </p>
+
+            {/* Status filter tabs */}
+            <div className="mt-4 flex gap-1">
+              {[null, "Done", "In Progress", "Backlog", "Blocked"].map((status) => {
+                const count = status === null
+                  ? selected.total
+                  : selected.tasks.filter((t) => t.status === status).length;
+                if (count === 0 && status !== null) return null;
+                return (
+                  <button key={status ?? "all"} type="button"
+                    onClick={() => setStatusFilter(status)}
+                    className={`rounded-md px-2 py-1 text-[10px] font-medium transition-colors ${
+                      statusFilter === status
                         ? "bg-slate-700 text-white"
-                        : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    {rt?.[level] || level.charAt(0).toUpperCase() + level.slice(1)}
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}>
+                    {status ?? "All"} ({count})
                   </button>
-                )
+                );
+              })}
+            </div>
+
+            {/* Task list */}
+            <div className="mt-3 flex flex-col gap-1.5">
+              {filteredTasks.length === 0 ? (
+                <div className="py-8 text-center text-sm text-slate-500">
+                  {selected.total === 0 ? "No tasks in this layer" : "No tasks match filter"}
+                </div>
+              ) : (
+                filteredTasks.map((task) => {
+                  const statusStyle = STATUS_COLORS[task.status] ?? STATUS_COLORS.Backlog;
+                  const priorityColor = PRIORITY_COLORS[task.priority] ?? "text-slate-500";
+                  return (
+                    <a key={task.id} href={task.url} target="_blank" rel="noopener noreferrer"
+                      className="group flex items-start gap-2 rounded-lg bg-slate-800/40 p-2.5 transition-colors hover:bg-slate-800/80">
+                      {/* Status icon */}
+                      {task.status === "Done" ? (
+                        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                      ) : task.status === "In Progress" ? (
+                        <Loader2 className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin text-blue-400" />
+                      ) : (
+                        <Circle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-medium text-slate-200 group-hover:text-white">
+                          {task.task}
+                        </div>
+                        <div className="mt-0.5 flex items-center gap-2">
+                          <span className={`rounded px-1 py-0.5 text-[9px] ${statusStyle.bg} ${statusStyle.text}`}>
+                            {task.status}
+                          </span>
+                          {task.priority && (
+                            <span className={`text-[9px] ${priorityColor}`}>{task.priority}</span>
+                          )}
+                          {task.effort && (
+                            <span className="text-[9px] text-slate-600">{task.effort}</span>
+                          )}
+                        </div>
+                      </div>
+                      <ExternalLink className="mt-0.5 h-3 w-3 shrink-0 text-slate-600 opacity-0 transition-opacity group-hover:opacity-100" />
+                    </a>
+                  );
+                })
               )}
             </div>
 
-            {/* Stats */}
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <div className="rounded-lg bg-slate-800/50 p-3">
-                <div className={`text-2xl font-bold ${selected.text}`}>
-                  {selected.tasks}
-                </div>
-                <div className="text-xs text-slate-500">
-                  {rt?.taskCount || "Tasks"}
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-800/50 p-3">
-                <div className="text-2xl font-bold text-slate-300">
-                  {Math.round((selected.tasks / TOTAL_TASKS) * 100)}%
-                </div>
-                <div className="text-xs text-slate-500">
-                  {rt?.effort || "Effort"}
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="mt-6">
-              <p className="text-sm leading-relaxed text-slate-300">
-                {getDescription(selected)}
-              </p>
-            </div>
-
             {/* Open in Notion */}
-            <div className="mt-auto pt-6">
-              <button
-                type="button"
+            <div className="mt-auto pt-4">
+              <button type="button"
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm text-slate-300 transition-colors hover:bg-slate-700 hover:text-white"
-                onClick={() =>
-                  window.open(
-                    "https://www.notion.so/3158f27212f881639507feab50d68d44",
-                    "_blank"
-                  )
-                }
-              >
+                onClick={() => window.open("https://www.notion.so/25a2ef6028654c6abbe57c6fb97504ed?v=9d21d5dfefd848d1a2b0a087d3202cce", "_blank")}>
                 <ExternalLink className="h-4 w-4" />
                 {rt?.openInNotion || "Open in Notion"}
               </button>

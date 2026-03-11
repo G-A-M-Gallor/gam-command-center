@@ -18,6 +18,8 @@ import {
   Users,
   Zap,
   Rss,
+  Upload,
+  Sparkles,
   Settings,
   Shield,
   X,
@@ -94,12 +96,14 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
       { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },
+      { href: "/dashboard/matching", key: "matching", icon: Sparkles, status: "active" },
     ],
   },
   {
     id: "system",
     labelKey: "groupSystem",
     items: [
+      { href: "/dashboard/import", key: "import", icon: Upload, status: "active" },
       { href: "/dashboard/feeds", key: "feeds", icon: Rss, status: "active" },
       { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
       { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
