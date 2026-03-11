@@ -51,6 +51,14 @@ function LoginForm() {
     if (stored) setLanguage(stored);
   }, []);
 
+  // Show error from URL params (e.g., ?error=unauthorized from middleware)
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam === "unauthorized") {
+      setError(t.auth.unauthorized);
+    }
+  }, [searchParams, t.auth.unauthorized]);
+
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     setError("");

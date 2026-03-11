@@ -76,12 +76,10 @@ export async function requireAdmin(request: Request): Promise<AuthResult> {
   const user = result.user!;
   const role = user.app_metadata?.role;
 
-  // If roles are configured, enforce admin
-  if (role && role !== 'admin') {
+  if (role !== 'admin') {
     return { user: null, error: "Admin access required" };
   }
 
-  // No role configured = legacy mode, allow any authenticated user
   return result;
 }
 
@@ -100,10 +98,7 @@ export async function requireRole(
   }
 
   const u = result.user!;
-  const role = u.app_metadata?.role;
-
-  // No role configured = legacy mode, allow
-  if (!role) return result;
+  const role = u.app_metadata?.role || 'member';
 
   // Admin always passes
   if (role === 'admin') return result;

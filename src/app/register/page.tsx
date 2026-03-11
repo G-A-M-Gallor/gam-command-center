@@ -91,32 +91,30 @@ function RegisterForm() {
     setLoading(false);
   }
 
-  // Step 3: Set up profile
+  // Step 3: Set up profile (server-side role assignment)
   async function handleProfileSetup(e: React.FormEvent) {
     e.preventDefault();
     if (!displayName.trim()) return;
     setError("");
     setLoading(true);
 
-    // Update auth user metadata
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: { display_name: displayName.trim() },
-    });
+    try {
+      const res = await fetch("/api/auth/complete-registration", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName: displayName.trim() }),
+      });
 
-    if (updateError) {
-      setError(updateError.message);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || "Registration failed");
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setError("Network error");
       setLoading(false);
       return;
-    }
-
-    // Update user_profiles if the trigger created a row
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from("user_profiles").upsert({
-        id: user.id,
-        display_name: displayName.trim(),
-        role: "client",
-      }, { onConflict: "id" });
     }
 
     router.push(redirectTo);

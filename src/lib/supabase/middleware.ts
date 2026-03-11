@@ -40,6 +40,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Universal allowlist — enforce on all auth methods (password, OTP, OAuth)
+  if (user && pathname.startsWith("/dashboard")) {
+    const allowedEmails = (process.env.ALLOWED_EMAILS || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    const email = user.email?.toLowerCase() || "";
+
+    if (allowedEmails.length > 0 && !allowedEmails.includes(email)) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("error", "unauthorized");
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Has session + login page → redirect to dashboard
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
