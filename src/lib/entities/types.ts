@@ -71,6 +71,7 @@ export interface GlobalField {
   meta_key: string;
   label: I18nLabel;
   description: I18nLabel;
+  client_display_name: I18nLabel;
   field_type: FieldType;
   is_composite: boolean;
   sub_fields: SubField[];
@@ -88,11 +89,12 @@ export interface GlobalField {
   created_at: string;
 }
 
-export type GlobalFieldInsert = Omit<GlobalField, 'id' | 'created_at' | 'aliases' | 'read_only' | 'visibility_rules' | 'color_rules'> & {
+export type GlobalFieldInsert = Omit<GlobalField, 'id' | 'created_at' | 'aliases' | 'read_only' | 'visibility_rules' | 'color_rules' | 'client_display_name'> & {
   aliases?: string[];
   read_only?: boolean;
   visibility_rules?: VisibilityRule[];
   color_rules?: ColorRule[];
+  client_display_name?: I18nLabel;
 };
 
 // ─── Field Group (repeating) ────────────────────────

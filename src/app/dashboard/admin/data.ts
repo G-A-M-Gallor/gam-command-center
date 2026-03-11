@@ -1,7 +1,7 @@
 import {
   Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Settings, Globe, Code2,
-  Shield, HelpCircle, BookOpen, Brain,
+  Shield, HelpCircle, BookOpen, Brain, Users,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2,
 } from 'lucide-react';
@@ -282,6 +282,16 @@ export const routes: RouteEntry[] = [
       { id: 'slide-presenter', name: 'SlidePresenter', file: 'components/slides/SlidePresenter.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'boardroom', path: '/dashboard/boardroom', name: 'Board Room', nameHe: 'חדר דיונים', icon: Users,
+    phase: 4, status: 'active', version: '1.0.0', addedDate: '2026-03-11',
+    descriptionHe: 'פאנל ייעוצי מרובה פרסונות — 8 יועצים AI מומחים עם סטרימינג מקבילי',
+    descriptionEn: 'Multi-persona advisory panel — 8 AI expert advisors with parallel streaming',
+    components: [
+      { id: 'boardroom-page', name: 'BoardRoomPage', file: 'app/dashboard/boardroom/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext', 'AuthContext'], supabaseTables: ['ai_usage', 'ai_conversations'], visible: true, sidebarTab: true,
   },
 ];
 

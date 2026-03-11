@@ -23,6 +23,7 @@ export const translations = {
       wiki: "ויקי",
       grid: "גיליון",
       slides: "מצגת",
+      boardroom: "חדר דיונים",
     },
     pages: {
       dashboard: {
@@ -96,6 +97,10 @@ export const translations = {
       slides: {
         title: "מצגת",
         description: "בונה מצגות עם תמונות רקע, טקסט ואלמנטים גרפיים",
+      },
+      boardroom: {
+        title: "חדר דיונים",
+        description: "פאנל ייעוצי מרובה פרסונות — 8 יועצים מומחים ב-AI",
       },
     },
     roadmapPage: {
@@ -557,6 +562,23 @@ export const translations = {
       colorRuleSave: "שמור",
       colorRuleRemove: "הסר כלל",
       linkCopied: "קישור הועתק",
+    },
+    boardroom: {
+      selectAdvisors: "בחר יועצים",
+      quickSelect: "בחירה מהירה",
+      presetAll: "⚡ כולם",
+      presetBusiness: "🏛️ עסקי",
+      presetTechnical: "💻 טכני",
+      readyQuestions: "שאלות מוכנות",
+      selectAndAsk: "בחר יועצים ושאל שאלה",
+      advisorsSelected: "יועצים נבחרו",
+      advisors: "יועצים",
+      newQuestion: "שאלה חדשה",
+      askPlaceholder: "שאל את",
+      toSend: "לשליחה",
+      newLine: "לשורה חדשה",
+      send: "שאל",
+      responses: "תשובות",
     },
     layers: {
       product: "מוצר",
@@ -1695,6 +1717,9 @@ export const translations = {
       dragToReorder: "גרור לשינוי סדר",
       descriptionHe: "תיאור (עברית)",
       descriptionEn: "תיאור (אנגלית)",
+      clientDisplayNameHe: "שם תצוגה ללקוח (עברית)",
+      clientDisplayNameEn: "שם תצוגה ללקוח (אנגלית)",
+      clientDisplayNameHint: "השם שהלקוח יראה בטפסים ובאזור האישי. ברירת מחדל: שם השדה",
       systemFields: "שדות מערכת",
       systemField: "שדה מערכת",
       systemFieldLocked: "שדה מערכת — לא ניתן למחיקה",
@@ -2001,6 +2026,7 @@ export const translations = {
       wiki: "Wiki",
       grid: "Grid",
       slides: "Slides",
+      boardroom: "Board Room",
     },
     pages: {
       dashboard: {
@@ -2074,6 +2100,10 @@ export const translations = {
       slides: {
         title: "Slides",
         description: "Presentation builder with image backgrounds, text overlays, and shapes",
+      },
+      boardroom: {
+        title: "Board Room",
+        description: "Multi-persona advisory panel — 8 AI expert advisors",
       },
     },
     roadmapPage: {
@@ -2530,6 +2560,23 @@ export const translations = {
       colorRuleSave: "Save",
       colorRuleRemove: "Remove Rule",
       linkCopied: "Link copied",
+    },
+    boardroom: {
+      selectAdvisors: "Select Advisors",
+      quickSelect: "Quick Select",
+      presetAll: "⚡ All",
+      presetBusiness: "🏛️ Business",
+      presetTechnical: "💻 Technical",
+      readyQuestions: "Ready Questions",
+      selectAndAsk: "Select advisors and ask a question",
+      advisorsSelected: "advisors selected",
+      advisors: "advisors",
+      newQuestion: "New Question",
+      askPlaceholder: "Ask",
+      toSend: "to send",
+      newLine: "new line",
+      send: "Ask",
+      responses: "responses",
     },
     layers: {
       product: "product",
@@ -3668,6 +3715,9 @@ export const translations = {
       dragToReorder: "Drag to reorder",
       descriptionHe: "Description (Hebrew)",
       descriptionEn: "Description (English)",
+      clientDisplayNameHe: "Client Display Name (Hebrew)",
+      clientDisplayNameEn: "Client Display Name (English)",
+      clientDisplayNameHint: "The name clients will see in forms and their personal area. Default: field name",
       systemFields: "System Fields",
       systemField: "System Field",
       systemFieldLocked: "System field — cannot be deleted",
@@ -3974,6 +4024,7 @@ export const translations = {
       wiki: "Вики",
       grid: "Таблица",
       slides: "Слайды",
+      boardroom: "Совет",
     },
     pages: {
       dashboard: {
@@ -4047,6 +4098,10 @@ export const translations = {
       slides: {
         title: "Слайды",
         description: "Конструктор презентаций с фоновыми изображениями, текстом и фигурами",
+      },
+      boardroom: {
+        title: "Совет",
+        description: "Мульти-персональная консультационная панель — 8 AI-экспертов",
       },
     },
     roadmapPage: {
@@ -4503,6 +4558,23 @@ export const translations = {
       colorRuleSave: "Сохранить",
       colorRuleRemove: "Удалить правило",
       linkCopied: "Ссылка скопирована",
+    },
+    boardroom: {
+      selectAdvisors: "Выберите советников",
+      quickSelect: "Быстрый выбор",
+      presetAll: "⚡ Все",
+      presetBusiness: "🏛️ Бизнес",
+      presetTechnical: "💻 Технический",
+      readyQuestions: "Готовые вопросы",
+      selectAndAsk: "Выберите советников и задайте вопрос",
+      advisorsSelected: "советников выбрано",
+      advisors: "советников",
+      newQuestion: "Новый вопрос",
+      askPlaceholder: "Спросите",
+      toSend: "отправить",
+      newLine: "новая строка",
+      send: "Спросить",
+      responses: "ответов",
     },
     layers: {
       product: "продукт",
@@ -5627,6 +5699,9 @@ export const translations = {
       dragToReorder: "Перетащите для сортировки",
       descriptionHe: "Описание (иврит)",
       descriptionEn: "Описание (английский)",
+      clientDisplayNameHe: "Имя для клиента (иврит)",
+      clientDisplayNameEn: "Имя для клиента (английский)",
+      clientDisplayNameHint: "Имя, которое клиент увидит в формах и личном кабинете. По умолчанию: название поля",
       systemFields: "Системные поля",
       systemField: "Системное поле",
       systemFieldLocked: "Системное поле — нельзя удалить",

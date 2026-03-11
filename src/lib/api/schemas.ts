@@ -222,6 +222,21 @@ export const contractorSubmitSchema = z.object({
 
 export type ContractorSubmitInput = z.infer<typeof contractorSubmitSchema>;
 
+// ─── Board Room ─────────────────────────────────────────────
+
+const VALID_PERSONAS = [
+  "legal", "hr", "construction", "ux", "automation", "fullstack", "strategy", "pm",
+] as const;
+
+export const boardRoomSchema = z.object({
+  question: z.string().min(1, "Question is required").max(5_000, "Question exceeds 5,000 character limit"),
+  personaId: z.enum(VALID_PERSONAS, {
+    error: `Invalid persona — must be one of: ${VALID_PERSONAS.join(", ")}`,
+  }),
+});
+
+export type BoardRoomInput = z.infer<typeof boardRoomSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

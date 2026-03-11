@@ -271,6 +271,33 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
                 </div>
               </div>
 
+              {/* Client Display Name */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-slate-400">{te.clientDisplayNameHe}</label>
+                  <input
+                    type="text"
+                    value={draft.client_display_name?.he ?? ''}
+                    onChange={e => setDraft(d => ({ ...d, client_display_name: { he: e.target.value, en: d.client_display_name?.en ?? '', ru: d.client_display_name?.ru ?? '' } }))}
+                    placeholder={draft.label?.he ?? ''}
+                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:border-purple-500/50 focus:outline-none"
+                    dir="rtl"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-400">{te.clientDisplayNameEn}</label>
+                  <input
+                    type="text"
+                    value={draft.client_display_name?.en ?? ''}
+                    onChange={e => setDraft(d => ({ ...d, client_display_name: { he: d.client_display_name?.he ?? '', en: e.target.value, ru: d.client_display_name?.ru ?? '' } }))}
+                    placeholder={draft.label?.en ?? ''}
+                    className="mt-1 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:border-purple-500/50 focus:outline-none"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-600">{te.clientDisplayNameHint}</p>
+
               {/* Type + Category */}
               <div className="grid grid-cols-2 gap-3">
                 <div>

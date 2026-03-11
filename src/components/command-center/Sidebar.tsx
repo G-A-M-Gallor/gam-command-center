@@ -15,6 +15,7 @@ import {
   Network,
   Calendar,
   Compass,
+  Users,
   Zap,
   Settings,
   Shield,
@@ -91,6 +92,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/roadmap", key: "roadmap", icon: Compass, status: "active" },
       { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
+      { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },
     ],
   },
   {
