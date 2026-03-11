@@ -184,8 +184,8 @@ export function applyTheme(themeId: string): void {
     '--theme-blue':          colors.blue ?? '#7dd3fc',
     '--theme-shadow-sm':     isDark ? '0 1px 3px rgba(0,0,0,0.35)' : '0 1px 3px rgba(0,0,0,0.08)',
     '--theme-shadow-md':     isDark ? '0 2px 8px rgba(0,0,0,0.45)' : '0 2px 8px rgba(0,0,0,0.1)',
-    // Bridge: set --cc-accent-* from theme primary so all components pick it up
-    ...generateAccentVars(colors.primary),
+    // Accent colors are controlled independently via [data-accent] CSS selectors
+    // (see globals.css). No inline accent override here.
   }
   const root = document.documentElement
   Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v))

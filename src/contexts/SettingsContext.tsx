@@ -24,6 +24,7 @@ const STORAGE_KEYS = {
   accentEffect: "cc-accent-effect",
   archivedColors: "cc-archived-colors",
   gibberishDetect: "cc-gibberish-detect",
+  navColor: "cc-nav-color",
 } as const;
 
 export type Language = "he" | "en" | "ru";
@@ -76,6 +77,7 @@ interface Settings {
   savedColors: SavedColor[];
   archivedColors: SavedColor[];
   accentEffect: AccentEffect;
+  navColor: string;
   gibberishDetect: boolean;
   setLanguage: (lang: Language) => void;
   setSidebarPosition: (pos: SidebarPosition) => void;
@@ -89,6 +91,7 @@ interface Settings {
   setSavedColors: (colors: SavedColor[]) => void;
   setArchivedColors: (colors: SavedColor[]) => void;
   setAccentEffect: (effect: AccentEffect) => void;
+  setNavColor: (color: string) => void;
   setGibberishDetect: (enabled: boolean) => void;
 }
 
@@ -128,6 +131,7 @@ const defaultSettings: Settings = {
   savedColors: [],
   archivedColors: [],
   accentEffect: defaultAccentEffect,
+  navColor: "",
   gibberishDetect: true,
   setLanguage: () => {},
   setSidebarPosition: () => {},
@@ -141,6 +145,7 @@ const defaultSettings: Settings = {
   setSavedColors: () => {},
   setArchivedColors: () => {},
   setAccentEffect: () => {},
+  setNavColor: () => {},
   setGibberishDetect: () => {},
 };
 
@@ -170,6 +175,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [savedColors, setSavedColorsState] = useState<SavedColor[]>([]);
   const [archivedColors, setArchivedColorsState] = useState<SavedColor[]>([]);
   const [accentEffect, setAccentEffectState] = useState<AccentEffect>(defaultAccentEffect);
+  const [navColor, setNavColorState] = useState("");
   const [gibberishDetect, setGibberishDetectState] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -219,6 +225,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setAccentEffectState({ ...defaultAccentEffect, ...parsed });
       }
     } catch { /* ignore */ }
+
+    const storedNavColor = localStorage.getItem(STORAGE_KEYS.navColor);
+    if (storedNavColor) setNavColorState(storedNavColor);
 
     const storedGibberish = localStorage.getItem(STORAGE_KEYS.gibberishDetect);
     if (storedGibberish !== null) setGibberishDetectState(storedGibberish !== "false");
@@ -315,6 +324,19 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [accentEffect, accentColor, customAccentHex, brandProfile.brandPrimary, mounted]);
 
+  // Apply navigation color override
+  useEffect(() => {
+    if (!mounted) return;
+    const root = document.documentElement;
+    if (navColor) {
+      root.style.setProperty("--nav-bg", navColor);
+      root.style.setProperty("--nav-border", `color-mix(in srgb, ${navColor} 85%, white)`);
+    } else {
+      root.style.removeProperty("--nav-bg");
+      root.style.removeProperty("--nav-border");
+    }
+  }, [navColor, mounted]);
+
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEYS.language, lang);
@@ -375,6 +397,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.accentEffect, JSON.stringify(effect));
   }, []);
 
+  const setNavColor = useCallback((color: string) => {
+    setNavColorState(color);
+    if (color) {
+      localStorage.setItem(STORAGE_KEYS.navColor, color);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.navColor);
+    }
+  }, []);
+
   const setGibberishDetect = useCallback((enabled: boolean) => {
     setGibberishDetectState(enabled);
     localStorage.setItem(STORAGE_KEYS.gibberishDetect, String(enabled));
@@ -394,6 +425,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       savedColors,
       archivedColors,
       accentEffect,
+      navColor,
       gibberishDetect,
       setLanguage,
       setSidebarPosition,
@@ -407,6 +439,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSavedColors,
       setArchivedColors,
       setAccentEffect,
+      setNavColor,
       setGibberishDetect,
     }),
     [
@@ -422,6 +455,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       savedColors,
       archivedColors,
       accentEffect,
+      navColor,
       setLanguage,
       setSidebarPosition,
       setSidebarVisibility,
@@ -434,6 +468,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSavedColors,
       setArchivedColors,
       setAccentEffect,
+      setNavColor,
       gibberishDetect,
       setGibberishDetect,
     ]

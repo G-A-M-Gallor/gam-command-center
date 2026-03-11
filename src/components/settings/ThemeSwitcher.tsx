@@ -1,21 +1,63 @@
 'use client'
 
-import { DARK_THEMES, type ThemePalette } from '@/lib/themes'
+import { useCallback } from 'react'
+import { DARK_THEMES, LIGHT_THEMES, applyTheme, type ThemePalette } from '@/lib/themes'
 import { useThemeStore } from '@/lib/theme-store'
+import { useSettings } from '@/contexts/SettingsContext'
+import { getTranslations } from '@/lib/i18n'
 
 export function ThemeSwitcher() {
   const { activeThemeId, setTheme } = useThemeStore()
+  const { language } = useSettings()
+  const t = getTranslations(language)
+
+  const handlePreview = useCallback((themeId: string) => {
+    applyTheme(themeId)
+  }, [])
+
+  const handleRestore = useCallback(() => {
+    applyTheme(activeThemeId)
+  }, [activeThemeId])
 
   return (
-    <div className="grid grid-cols-2 gap-2.5">
-      {DARK_THEMES.map((theme) => (
-        <ThemeCard
-          key={theme.id}
-          theme={theme}
-          isActive={activeThemeId === theme.id}
-          onSelect={() => setTheme(theme.id)}
-        />
-      ))}
+    <div className="space-y-4">
+      {/* Dark themes */}
+      <div>
+        <h4 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+          {t.settings.darkThemes}
+        </h4>
+        <div className="grid grid-cols-2 gap-2.5">
+          {DARK_THEMES.map((theme) => (
+            <ThemeCard
+              key={theme.id}
+              theme={theme}
+              isActive={activeThemeId === theme.id}
+              onSelect={() => setTheme(theme.id)}
+              onPreview={() => handlePreview(theme.id)}
+              onRestore={handleRestore}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Light themes */}
+      <div>
+        <h4 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+          {t.settings.lightThemes}
+        </h4>
+        <div className="grid grid-cols-2 gap-2.5">
+          {LIGHT_THEMES.map((theme) => (
+            <ThemeCard
+              key={theme.id}
+              theme={theme}
+              isActive={activeThemeId === theme.id}
+              onSelect={() => setTheme(theme.id)}
+              onPreview={() => handlePreview(theme.id)}
+              onRestore={handleRestore}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
@@ -24,16 +66,22 @@ function ThemeCard({
   theme,
   isActive,
   onSelect,
+  onPreview,
+  onRestore,
 }: {
   theme: ThemePalette
   isActive: boolean
   onSelect: () => void
+  onPreview: () => void
+  onRestore: () => void
 }) {
   const { colors } = theme
   return (
     <button
       type="button"
       onClick={onSelect}
+      onMouseEnter={onPreview}
+      onMouseLeave={onRestore}
       title={theme.name}
       className={`flex flex-col overflow-hidden rounded-lg border text-left transition-all cursor-pointer ${
         isActive
@@ -49,8 +97,17 @@ function ThemeCard({
             <div className="h-1 w-5 rounded-sm" style={{ background: colors.primary }} />
           </div>
           <div className="flex gap-1 p-1.5">
-            {[colors.primary, colors.secondary, colors.accent].map((c, i) => (
-              <span key={i} className="block h-3.5 w-3.5 rounded-sm" style={{ background: c }} />
+            {[
+              { color: colors.background, label: 'bg' },
+              { color: colors.surface, label: 'srf' },
+              { color: colors.primary, label: 'pri' },
+            ].map((c, i) => (
+              <div key={i} className="flex flex-col items-center gap-0.5">
+                <span className="block h-3.5 w-3.5 rounded-sm" style={{ background: c.color }} />
+                <span className="text-[7px] leading-none" style={{ color: colors.text, opacity: 0.4 }}>
+                  {c.label}
+                </span>
+              </div>
             ))}
           </div>
         </div>

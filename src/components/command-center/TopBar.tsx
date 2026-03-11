@@ -637,8 +637,8 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
         {/* Minimal top bar — no buttons, navigation moved to bottom bar */}
         <div
           data-cc-id="topbar.root"
-          className="fixed top-0 z-40 flex h-10 items-center border-b border-slate-700/50 bg-slate-800/80 backdrop-blur-sm"
-          style={{ left: 0, right: 0 }}
+          className="fixed top-0 z-40 flex h-10 items-center border-b border-slate-700/50 backdrop-blur-sm"
+          style={{ left: 0, right: 0, backgroundColor: "color-mix(in srgb, var(--nav-bg) 80%, transparent)" }}
         >
           <div className="flex-1" />
         </div>
@@ -780,8 +780,8 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     <>
       <div
         data-cc-id="topbar.root"
-        className={`fixed top-0 z-40 flex ${BAR_HEIGHT} items-center border-b border-slate-700 bg-slate-800`}
-        style={{ left: 0, right: 0 }}
+        className={`fixed top-0 z-40 flex ${BAR_HEIGHT} items-center border-b border-slate-700`}
+        style={{ left: 0, right: 0, backgroundColor: "var(--nav-bg)" }}
       >
         {/* Hamburger — left side */}
         {sidebarPosition === "left" && sidebarVisibility === "hidden" && onSidebarOpen && (

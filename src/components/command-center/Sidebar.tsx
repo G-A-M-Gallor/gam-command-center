@@ -274,8 +274,8 @@ export function Sidebar({
         height: "calc(100vh - 48px)",
         transition: isFloat ? "width 300ms ease" : undefined,
         backgroundColor: isCollapsed
-          ? "rgba(15, 23, 42, 0.8)"
-          : "rgb(15, 23, 42)",
+          ? "color-mix(in srgb, var(--nav-bg) 80%, transparent)"
+          : "var(--nav-bg)",
       }}
       onMouseEnter={isFloat ? () => setHovered(true) : undefined}
       onMouseLeave={isFloat ? () => setHovered(false) : undefined}

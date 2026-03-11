@@ -299,6 +299,7 @@ function ThemeTab() {
     savedColors,
     archivedColors,
     accentEffect,
+    navColor,
     setAccentColor,
     setFontFamily,
     setBorderRadius,
@@ -308,6 +309,7 @@ function ThemeTab() {
     setSavedColors,
     setArchivedColors,
     setAccentEffect,
+    setNavColor,
   } = useSettings();
   const t = getTranslations(language);
   const [pickerColor, setPickerColor] = useState(customAccentHex || "#9333ea");
@@ -385,8 +387,44 @@ function ThemeTab() {
   return (
     <div className="max-w-2xl space-y-4">
       {/* 0. Color Theme (Uncodixfy palettes) */}
-      <Section label={language === "he" ? "ערכת צבעים" : "Color Theme"} ccId="settings.colorTheme">
+      <Section label={t.settings.colorTheme} ccId="settings.colorTheme">
         <ThemeSwitcher />
+      </Section>
+
+      {/* 0.5 Navigation Color */}
+      <Section label={t.settings.navColor} ccId="settings.navColor">
+        <p className="mb-2 text-[11px] text-slate-500">{t.settings.navColorHint}</p>
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            value={navColor || "#1e293b"}
+            onChange={(e) => setNavColor(e.target.value)}
+            className="h-9 w-9 cursor-pointer rounded border-0 bg-transparent p-0"
+          />
+          <input
+            type="text"
+            value={navColor}
+            onChange={(e) => {
+              if (/^#[0-9a-fA-F]{0,6}$/.test(e.target.value)) {
+                setNavColor(e.target.value);
+              }
+            }}
+            placeholder="#1e293b"
+            className="w-24 rounded bg-slate-700 px-2 py-1.5 text-xs font-mono text-slate-300 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
+          />
+          {/* Preview stripe */}
+          <div className="h-6 flex-1 rounded" style={{ backgroundColor: navColor || "var(--theme-surface)" }} />
+          {navColor && (
+            <button
+              type="button"
+              onClick={() => setNavColor("")}
+              className="rounded bg-slate-700 px-2.5 py-1.5 text-xs text-slate-400 transition-colors hover:bg-slate-600 hover:text-slate-200"
+            >
+              <RotateCcw className="inline h-3 w-3 me-1" />
+              {t.settings.resetNavColor}
+            </button>
+          )}
+        </div>
       </Section>
 
       {/* 1. Accent Color Presets */}

@@ -268,6 +268,10 @@ body {
   --theme-shadow-sm:     0 1px 3px rgba(0,0,0,0.35);
   --theme-shadow-md:     0 2px 8px rgba(0,0,0,0.45);
 
+  /* ── Navigation defaults (follow theme unless overridden) ── */
+  --nav-bg: var(--theme-surface);
+  --nav-border: var(--theme-border-high);
+
   /* ── Bridge: remap Tailwind slate scale to theme vars ──
      When applyTheme() overrides --theme-* via inline styles,
      ALL bg-slate-*, text-slate-*, border-slate-* across the
