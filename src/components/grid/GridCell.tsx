@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import type { GridCell as GridCellType, CellAddress } from "@/lib/grid/types";
 import { DEFAULT_ROW_HEIGHT } from "@/lib/grid/types";
 import { getCellDisplayValue } from "@/lib/grid/gridHelpers";
@@ -32,18 +32,20 @@ export function GridCellComponent({
   onCancelEdit,
 }: GridCellProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [editValue, setEditValue] = useState("");
+  const [editValue, setEditValue] = useState(cell?.value || "");
 
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      setEditValue(cell?.value || "");
-      inputRef.current.focus();
+  // Reset edit value when entering edit mode via callback ref on input
+  const setInputRef = useCallback((node: HTMLInputElement | null) => {
+    (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
+    if (node) {
+      node.focus();
     }
-  }, [isEditing, cell?.value]);
+  }, []);
 
   const handleDoubleClick = useCallback(() => {
+    setEditValue(cell?.value || "");
     onStartEdit(addr);
-  }, [addr, onStartEdit]);
+  }, [addr, onStartEdit, cell?.value]);
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     onSelect(addr, e.shiftKey);
@@ -103,7 +105,7 @@ export function GridCellComponent({
     >
       {isEditing ? (
         <input
-          ref={inputRef}
+          ref={setInputRef}
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           onKeyDown={handleKeyDown}

@@ -3,7 +3,7 @@
 import { useCallback, useRef, useEffect } from "react";
 import { useGridStore } from "@/lib/grid/gridStore";
 import { DEFAULT_ROW_HEIGHT, DEFAULT_COL_WIDTH } from "@/lib/grid/types";
-import { buildCellAddress, parseCellAddress, colIndexToLabel, copyCellsToClipboard } from "@/lib/grid/gridHelpers";
+import { buildCellAddress, parseCellAddress, copyCellsToClipboard } from "@/lib/grid/gridHelpers";
 import { GridCellComponent } from "./GridCell";
 import { GridColumnHeader } from "./GridColumnHeader";
 import { GridRowHeader } from "./GridRowHeader";

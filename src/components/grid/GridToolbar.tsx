@@ -12,6 +12,23 @@ interface GridToolbarProps {
   t: Record<string, string>;
 }
 
+function ToolbarBtn({ onClick, title, active, children }: { onClick: () => void; title: string; active?: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`rounded p-1.5 transition-colors ${
+        active
+          ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+          : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function GridToolbar({ t }: GridToolbarProps) {
   const sheet = useGridStore((s) => s.sheets.find((sh) => sh.id === s.activeSheetId) || s.sheets[0]);
   const activeCell = useGridStore((s) => s.activeCell);
@@ -58,21 +75,6 @@ export function GridToolbar({ t }: GridToolbarProps) {
     setFrozenCols(sheet.frozenCols > 0 ? 0 : 1);
   };
 
-  const Btn = ({ onClick, title, active, children }: { onClick: () => void; title: string; active?: boolean; children: React.ReactNode }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`rounded p-1.5 transition-colors ${
-        active
-          ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-          : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-      }`}
-    >
-      {children}
-    </button>
-  );
-
   return (
     <div className="flex items-center gap-1 border-b border-slate-700/50 bg-slate-800/50 px-2 py-1">
       {/* Cell address */}
@@ -102,12 +104,12 @@ export function GridToolbar({ t }: GridToolbarProps) {
       <div className="mx-1 h-5 w-px bg-slate-700/50" />
 
       {/* Formatting */}
-      <Btn onClick={handleBold} title={t.bold || "Bold"} active={currentCell?.bold}>
+      <ToolbarBtn onClick={handleBold} title={t.bold || "Bold"} active={currentCell?.bold}>
         <Bold className="h-3.5 w-3.5" />
-      </Btn>
-      <Btn onClick={handleItalic} title={t.italic || "Italic"} active={currentCell?.italic}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={handleItalic} title={t.italic || "Italic"} active={currentCell?.italic}>
         <Italic className="h-3.5 w-3.5" />
-      </Btn>
+      </ToolbarBtn>
 
       {/* Cell color */}
       <ColorPickerPopover
@@ -154,35 +156,35 @@ export function GridToolbar({ t }: GridToolbarProps) {
       <div className="mx-1 h-5 w-px bg-slate-700/50" />
 
       {/* Structure */}
-      <Btn onClick={addColumn} title={t.addColumn || "Add Column"}>
+      <ToolbarBtn onClick={addColumn} title={t.addColumn || "Add Column"}>
         <div className="flex items-center"><Columns className="h-3 w-3" /><Plus className="h-2.5 w-2.5" /></div>
-      </Btn>
-      <Btn onClick={() => { const col = sheet.colOrder[sheet.colOrder.length - 1]; if (col) removeColumn(col); }} title={t.removeColumn || "Remove Column"}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={() => { const col = sheet.colOrder[sheet.colOrder.length - 1]; if (col) removeColumn(col); }} title={t.removeColumn || "Remove Column"}>
         <div className="flex items-center"><Columns className="h-3 w-3" /><Minus className="h-2.5 w-2.5" /></div>
-      </Btn>
-      <Btn onClick={addRow} title={t.addRow || "Add Row"}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={addRow} title={t.addRow || "Add Row"}>
         <div className="flex items-center"><Rows className="h-3 w-3" /><Plus className="h-2.5 w-2.5" /></div>
-      </Btn>
-      <Btn onClick={() => { const row = sheet.rowOrder[sheet.rowOrder.length - 1]; if (row) removeRow(row); }} title={t.removeRow || "Remove Row"}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={() => { const row = sheet.rowOrder[sheet.rowOrder.length - 1]; if (row) removeRow(row); }} title={t.removeRow || "Remove Row"}>
         <div className="flex items-center"><Rows className="h-3 w-3" /><Minus className="h-2.5 w-2.5" /></div>
-      </Btn>
+      </ToolbarBtn>
 
-      <Btn onClick={handleFreezeToggle} title={t.freezeColumn || "Freeze Column"} active={sheet.frozenCols > 0}>
+      <ToolbarBtn onClick={handleFreezeToggle} title={t.freezeColumn || "Freeze Column"} active={sheet.frozenCols > 0}>
         <Snowflake className="h-3.5 w-3.5" />
-      </Btn>
+      </ToolbarBtn>
 
       <div className="mx-1 h-5 w-px bg-slate-700/50" />
 
       {/* History + Export */}
-      <Btn onClick={undo} title={t.undo || "Undo"}>
+      <ToolbarBtn onClick={undo} title={t.undo || "Undo"}>
         <Undo2 className="h-3.5 w-3.5" />
-      </Btn>
-      <Btn onClick={redo} title={t.redo || "Redo"}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={redo} title={t.redo || "Redo"}>
         <Redo2 className="h-3.5 w-3.5" />
-      </Btn>
-      <Btn onClick={handleExport} title={t.exportCSV || "Export CSV"}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={handleExport} title={t.exportCSV || "Export CSV"}>
         <Download className="h-3.5 w-3.5" />
-      </Btn>
+      </ToolbarBtn>
     </div>
   );
 }

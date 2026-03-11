@@ -13,6 +13,23 @@ interface SlideToolbarProps {
   t: Record<string, string>;
 }
 
+function ToolbarBtn({ onClick, title, children, active }: { onClick: () => void; title: string; children: React.ReactNode; active?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={`rounded p-1.5 transition-colors ${
+        active
+          ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+          : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function SlideToolbar({ t }: SlideToolbarProps) {
   const addTextElement = useSlidesStore((s) => s.addTextElement);
   const addShapeElement = useSlidesStore((s) => s.addShapeElement);
@@ -52,36 +69,21 @@ export function SlideToolbar({ t }: SlideToolbarProps) {
     { type: "line", icon: Minus, label: t.line || "Line" },
   ];
 
-  const Btn = ({ onClick, title, children, active }: { onClick: () => void; title: string; children: React.ReactNode; active?: boolean }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={`rounded p-1.5 transition-colors ${
-        active
-          ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-          : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-      }`}
-    >
-      {children}
-    </button>
-  );
-
   return (
     <div className="flex items-center gap-1 border-b border-slate-700/50 bg-slate-800/50 px-3 py-1">
       {/* Insert tools */}
-      <Btn onClick={addTextElement} title={t.addText || "Add Text"}>
+      <ToolbarBtn onClick={addTextElement} title={t.addText || "Add Text"}>
         <Type className="h-4 w-4" />
-      </Btn>
-      <Btn onClick={handleImageUpload} title={t.addImage || "Add Image"}>
+      </ToolbarBtn>
+      <ToolbarBtn onClick={handleImageUpload} title={t.addImage || "Add Image"}>
         <ImagePlus className="h-4 w-4" />
-      </Btn>
+      </ToolbarBtn>
 
       {/* Shapes dropdown */}
       <div className="relative">
-        <Btn onClick={() => setShowShapes(!showShapes)} title={t.addShape || "Add Shape"} active={showShapes}>
+        <ToolbarBtn onClick={() => setShowShapes(!showShapes)} title={t.addShape || "Add Shape"} active={showShapes}>
           <Square className="h-4 w-4" />
-        </Btn>
+        </ToolbarBtn>
         {showShapes && (
           <div className="absolute top-full left-0 z-50 mt-1 rounded-lg border border-white/[0.08] bg-slate-900 p-1 shadow-xl">
             {shapes.map(({ type, icon: Icon, label }) => (
@@ -162,15 +164,15 @@ export function SlideToolbar({ t }: SlideToolbarProps) {
             </ColorPickerPopover>
           )}
 
-          <Btn onClick={() => bringForward(selectedElementId)} title={t.bringForward || "Bring Forward"}>
+          <ToolbarBtn onClick={() => bringForward(selectedElementId)} title={t.bringForward || "Bring Forward"}>
             <ArrowUp className="h-3.5 w-3.5" />
-          </Btn>
-          <Btn onClick={() => sendBackward(selectedElementId)} title={t.sendBackward || "Send Backward"}>
+          </ToolbarBtn>
+          <ToolbarBtn onClick={() => sendBackward(selectedElementId)} title={t.sendBackward || "Send Backward"}>
             <ArrowDown className="h-3.5 w-3.5" />
-          </Btn>
-          <Btn onClick={() => removeElement(selectedElementId)} title={t.deleteElement || "Delete"}>
+          </ToolbarBtn>
+          <ToolbarBtn onClick={() => removeElement(selectedElementId)} title={t.deleteElement || "Delete"}>
             <Trash2 className="h-3.5 w-3.5 text-red-400" />
-          </Btn>
+          </ToolbarBtn>
         </>
       )}
 

@@ -122,7 +122,6 @@ export function evaluateFormula(
 
     // Safe eval for basic arithmetic only (+-*/)
     if (/^[\d\s+\-*/().]+$/.test(resolved)) {
-      // eslint-disable-next-line no-new-func
       const result = new Function(`return (${resolved})`)();
       return typeof result === "number" && isFinite(result) ? result : "#ERROR";
     }
