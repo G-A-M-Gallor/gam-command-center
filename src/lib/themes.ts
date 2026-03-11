@@ -10,10 +10,22 @@ export interface ThemePalette {
   colors: {
     background: string
     surface: string
+    surface2?: string
+    surface3?: string
     primary: string
     secondary: string
     accent: string
     text: string
+    textMuted?: string
+    textFaint?: string
+    border?: string
+    borderHigh?: string
+    accentHigh?: string
+    accentLow?: string
+    accentBg?: string
+    green?: string
+    red?: string
+    blue?: string
   }
 }
 
@@ -28,6 +40,14 @@ export const DARK_THEMES: ThemePalette[] = [
   { id: 'void-space',       name: 'Void Space',       mode: 'dark',  colors: { background: '#0d1117', surface: '#161b22', primary: '#58a6ff', secondary: '#79c0ff', accent: '#f78166', text: '#c9d1d9' } },
   { id: 'twilight-mist',    name: 'Twilight Mist',    mode: 'dark',  colors: { background: '#1a1625', surface: '#2d2438', primary: '#9d7cd8', secondary: '#7aa2f7', accent: '#ff9e64', text: '#dcd7e8' } },
   { id: 'onyx-matrix',      name: 'Onyx Matrix',      mode: 'dark',  colors: { background: '#0e0e10', surface: '#1c1c21', primary: '#00ff9f', secondary: '#00e0ff', accent: '#ff0080', text: '#f0f0f0' } },
+  { id: 'gam-dna', name: 'GAM DNA', mode: 'dark', colors: {
+    background: '#0b0b09', surface: '#111110', surface2: '#181816', surface3: '#1f1f1d',
+    primary: '#D08010', secondary: '#B8720C', accent: '#E8960E',
+    text: '#e8e8e2', textMuted: '#858578', textFaint: '#5a5a52',
+    border: 'rgba(255,255,255,0.06)', borderHigh: 'rgba(255,255,255,0.11)',
+    accentHigh: '#E8960E', accentLow: '#B8720C', accentBg: 'rgba(184,114,12,0.08)',
+    green: '#4ade80', red: '#f87171', blue: '#7dd3fc',
+  }},
 ]
 
 export const LIGHT_THEMES: ThemePalette[] = [
@@ -74,14 +94,24 @@ export function applyTheme(themeId: string): void {
   const vars: Record<string, string> = {
     '--theme-bg':            colors.background,
     '--theme-surface':       colors.surface,
+    '--theme-surface-2':     colors.surface2 ?? (isDark ? lighten(colors.surface, 0.04) : darken(colors.surface, 0.02)),
+    '--theme-surface-3':     colors.surface3 ?? (isDark ? lighten(colors.surface, 0.08) : darken(colors.surface, 0.04)),
     '--theme-primary':       colors.primary,
     '--theme-secondary':     colors.secondary,
     '--theme-accent':        colors.accent,
     '--theme-text':          colors.text,
-    '--theme-text-muted':    alpha(colors.text, isDark ? 0.5 : 0.55),
-    '--theme-border':        alpha(colors.text, isDark ? 0.1 : 0.12),
-    '--theme-surface-hover': isDark ? lighten(colors.surface, 0.05) : darken(colors.surface, 0.03),
+    '--theme-text-muted':    colors.textMuted ?? alpha(colors.text, isDark ? 0.5 : 0.55),
+    '--theme-text-faint':    colors.textFaint ?? alpha(colors.text, isDark ? 0.3 : 0.35),
+    '--theme-border':        colors.border ?? alpha(colors.text, isDark ? 0.1 : 0.12),
+    '--theme-border-high':   colors.borderHigh ?? alpha(colors.text, isDark ? 0.18 : 0.2),
+    '--theme-surface-hover': colors.surface2 ?? (isDark ? lighten(colors.surface, 0.05) : darken(colors.surface, 0.03)),
     '--theme-primary-hover': alpha(colors.primary, 0.85),
+    '--theme-accent-high':   colors.accentHigh ?? colors.accent,
+    '--theme-accent-low':    colors.accentLow ?? colors.secondary,
+    '--theme-accent-bg':     colors.accentBg ?? alpha(colors.primary, 0.08),
+    '--theme-green':         colors.green ?? '#4ade80',
+    '--theme-red':           colors.red ?? '#f87171',
+    '--theme-blue':          colors.blue ?? '#7dd3fc',
     '--theme-shadow-sm':     isDark ? '0 1px 3px rgba(0,0,0,0.35)' : '0 1px 3px rgba(0,0,0,0.08)',
     '--theme-shadow-md':     isDark ? '0 2px 8px rgba(0,0,0,0.45)' : '0 2px 8px rgba(0,0,0,0.1)',
   }

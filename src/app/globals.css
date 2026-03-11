@@ -246,16 +246,180 @@ body {
 :root {
   --theme-bg:            #0d1117;
   --theme-surface:       #161b22;
+  --theme-surface-2:     #1c2128;
+  --theme-surface-3:     #21262d;
   --theme-primary:       #58a6ff;
   --theme-secondary:     #79c0ff;
   --theme-accent:        #f78166;
   --theme-text:          #c9d1d9;
   --theme-text-muted:    rgba(201,209,217,0.5);
+  --theme-text-faint:    rgba(201,209,217,0.3);
   --theme-border:        rgba(201,209,217,0.1);
+  --theme-border-high:   rgba(201,209,217,0.18);
   --theme-surface-hover: #1c2128;
   --theme-primary-hover: rgba(88,166,255,0.85);
+  --theme-accent-high:   #f78166;
+  --theme-accent-low:    #79c0ff;
+  --theme-accent-bg:     rgba(88,166,255,0.08);
+  --theme-green:         #4ade80;
+  --theme-red:           #f87171;
+  --theme-blue:          #7dd3fc;
   --theme-shadow-sm:     0 1px 3px rgba(0,0,0,0.35);
   --theme-shadow-md:     0 2px 8px rgba(0,0,0,0.45);
 }
 
 /* NOTE: prefix is --theme-* (not --color-*) to avoid clashing with existing vars */
+
+/* ═══════════════════════════════════════════════════════════════
+   GAM DNA THEME — scoped to [data-theme="gam-dna"]
+   Deep amber + double-ring cards + amber top-line signature
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Card DNA ── */
+
+[data-theme="gam-dna"] .gam-card {
+  position: relative;
+  background: var(--theme-surface);
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px var(--theme-border),
+    inset 0 0 0 1px rgba(255,255,255,0.032),
+    0 4px 20px rgba(0,0,0,0.35);
+  overflow: hidden;
+  transition: box-shadow 220ms ease, transform 160ms ease;
+}
+
+[data-theme="gam-dna"] .gam-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 16px; right: 16px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--theme-accent-low) 30%,
+    var(--theme-accent-high) 55%,
+    var(--theme-accent-low) 75%,
+    transparent
+  );
+  opacity: 0.5;
+  z-index: 2;
+  transition: opacity 220ms;
+  pointer-events: none;
+}
+
+[data-theme="gam-dna"] .gam-card:hover {
+  box-shadow:
+    0 0 0 1px rgba(184,114,12,0.22),
+    inset 0 0 0 1px rgba(255,255,255,0.05),
+    0 8px 36px rgba(0,0,0,0.5),
+    0 0 0 4px rgba(184,114,12,0.04);
+}
+
+[data-theme="gam-dna"] .gam-card:hover::before { opacity: 0.85; }
+
+[data-theme="gam-dna"] .gam-card-click { cursor: pointer; }
+[data-theme="gam-dna"] .gam-card-click:hover { transform: translateY(-2px); }
+[data-theme="gam-dna"] .gam-card-click:active {
+  transform: scale(0.975) translateY(1px) !important;
+  transition: transform 80ms;
+}
+
+/* ── Sidebar amber rail ── */
+
+[data-theme="gam-dna"] .sidebar {
+  position: relative;
+}
+
+[data-theme="gam-dna"] .sidebar::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 5%,
+    var(--theme-accent) 35%,
+    var(--theme-accent-high) 65%,
+    transparent 95%
+  );
+  opacity: 0.28;
+}
+
+[data-theme="gam-dna"] .nav-item-active::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 22%; bottom: 22%;
+  width: 2px;
+  background: var(--theme-accent);
+  border-radius: 2px;
+  box-shadow: 0 0 7px var(--theme-accent-low), 0 0 14px rgba(184,114,12,0.26);
+}
+
+/* ── Primary Button ── */
+
+[data-theme="gam-dna"] .btn-primary {
+  background: var(--theme-accent) !important;
+  color: #0b0b09 !important;
+  font-weight: 600;
+  box-shadow:
+    0 0 0 1px rgba(184,114,12,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    0 3px 10px rgba(184,114,12,0.25);
+}
+
+[data-theme="gam-dna"] .btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 5px 18px rgba(184,114,12,0.35),
+    0 0 0 1px rgba(184,114,12,0.55);
+}
+
+/* ── Status dot pulse ── */
+
+[data-theme="gam-dna"] .status-dot-active {
+  animation: gam-pulse 2.2s ease-out infinite;
+}
+
+@keyframes gam-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(74,222,128,0.45); }
+  70%  { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+  100% { box-shadow: 0 0 0 0   rgba(74,222,128,0); }
+}
+
+/* ── Input focus ── */
+
+[data-theme="gam-dna"] input:focus {
+  box-shadow:
+    0 0 0 1px rgba(184,114,12,0.3),
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    0 0 0 4px rgba(184,114,12,0.06) !important;
+}
+
+/* ── Divider ── */
+
+[data-theme="gam-dna"] .gam-divider {
+  position: relative;
+  height: 1px;
+  background: transparent;
+  margin: 0 14px;
+}
+
+[data-theme="gam-dna"] .gam-divider::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--theme-accent), transparent);
+  opacity: 0.25;
+}
+
+/* ── Logo pulse ── */
+
+[data-theme="gam-dna"] .logo-hex {
+  animation: gam-hex-pulse 4s ease-in-out infinite;
+}
+
+@keyframes gam-hex-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px  rgba(184,114,12,0.4)); }
+  50%      { filter: drop-shadow(0 0 11px rgba(208,128,16,0.7)); }
+}
