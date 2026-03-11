@@ -9,7 +9,6 @@ import {
   useMemo,
 } from "react";
 import { generateAccentPalette, generateGlowShadow } from "@/lib/colorUtils";
-import { type SkinName, getSkinById } from "@/lib/skins";
 
 const STORAGE_KEYS = {
   language: "cc-language",
@@ -24,7 +23,6 @@ const STORAGE_KEYS = {
   savedColors: "cc-saved-colors",
   accentEffect: "cc-accent-effect",
   archivedColors: "cc-archived-colors",
-  skin: "cc-skin",
   gibberishDetect: "cc-gibberish-detect",
 } as const;
 
@@ -61,7 +59,6 @@ export interface BrandProfile {
   brandSecondary: string;
   brandTertiary: string;
 }
-export type { SkinName } from "@/lib/skins";
 export type FontFamily = "geist" | "inter" | "system";
 export type BorderRadius = "sharp" | "default" | "round";
 export type Density = "compact" | "default" | "spacious";
@@ -79,7 +76,6 @@ interface Settings {
   savedColors: SavedColor[];
   archivedColors: SavedColor[];
   accentEffect: AccentEffect;
-  skin: SkinName;
   gibberishDetect: boolean;
   setLanguage: (lang: Language) => void;
   setSidebarPosition: (pos: SidebarPosition) => void;
@@ -93,7 +89,6 @@ interface Settings {
   setSavedColors: (colors: SavedColor[]) => void;
   setArchivedColors: (colors: SavedColor[]) => void;
   setAccentEffect: (effect: AccentEffect) => void;
-  setSkin: (skin: SkinName) => void;
   setGibberishDetect: (enabled: boolean) => void;
 }
 
@@ -133,7 +128,6 @@ const defaultSettings: Settings = {
   savedColors: [],
   archivedColors: [],
   accentEffect: defaultAccentEffect,
-  skin: "dark" as SkinName,
   gibberishDetect: true,
   setLanguage: () => {},
   setSidebarPosition: () => {},
@@ -147,7 +141,6 @@ const defaultSettings: Settings = {
   setSavedColors: () => {},
   setArchivedColors: () => {},
   setAccentEffect: () => {},
-  setSkin: () => {},
   setGibberishDetect: () => {},
 };
 
@@ -177,7 +170,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [savedColors, setSavedColorsState] = useState<SavedColor[]>([]);
   const [archivedColors, setArchivedColorsState] = useState<SavedColor[]>([]);
   const [accentEffect, setAccentEffectState] = useState<AccentEffect>(defaultAccentEffect);
-  const [skin, setSkinState] = useState<SkinName>("dark");
   const [gibberishDetect, setGibberishDetectState] = useState(true);
   const [mounted, setMounted] = useState(false);
 
@@ -228,11 +220,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       }
     } catch { /* ignore */ }
 
-    const storedSkin = localStorage.getItem(STORAGE_KEYS.skin) as SkinName | null;
-    if (storedSkin && ["dark", "light", "midnight", "forest", "royal"].includes(storedSkin)) {
-      setSkinState(storedSkin);
-    }
-
     const storedGibberish = localStorage.getItem(STORAGE_KEYS.gibberishDetect);
     if (storedGibberish !== null) setGibberishDetectState(storedGibberish !== "false");
 
@@ -254,35 +241,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     root.dataset.font = fontFamily;
     root.dataset.radius = borderRadius;
     root.dataset.density = density;
-
-    // For preset accent colors, set inline --cc-accent-* variables so they
-    // reliably override any theme-set values (inline > CSS selector specificity).
-    const presetHex = PRESET_HEX_MAP[accentColor];
-    if (presetHex) {
-      const palette = generateAccentPalette(presetHex);
-      root.style.setProperty("--cc-accent-300", palette["300"]);
-      root.style.setProperty("--cc-accent-400", palette["400"]);
-      root.style.setProperty("--cc-accent-500", palette["500"]);
-      root.style.setProperty("--cc-accent-600", palette["600"]);
-      root.style.setProperty("--cc-accent-600-20", palette["600-20"]);
-      root.style.setProperty("--cc-accent-600-30", palette["600-30"]);
-      root.style.setProperty("--cc-accent-500-15", palette["500-15"]);
-      root.style.setProperty("--cc-accent-500-30", palette["500-30"]);
-      root.style.setProperty("--cc-accent-500-50", palette["500-50"]);
-    }
-    // "custom" and "brand" accents are handled by their own useEffects below
+    // Accent colors are applied via CSS selectors [data-accent="purple"] etc.
+    // and by applyTheme() — no inline writes needed here.
   }, [accentColor, fontFamily, borderRadius, density, mounted]);
-
-  // Apply skin CSS variables
-  useEffect(() => {
-    if (!mounted) return;
-    const root = document.documentElement;
-    const skinDef = getSkinById(skin);
-    root.dataset.skin = skin;
-    Object.entries(skinDef.vars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-  }, [skin, mounted]);
 
   // Apply brand color CSS vars when brand colors change
   useEffect(() => {
@@ -299,18 +260,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--cc-brand-500-15", palette["500-15"]);
       root.style.setProperty("--cc-brand-500-30", palette["500-30"]);
       root.style.setProperty("--cc-brand-500-50", palette["500-50"]);
-      // Also set --cc-accent-* directly when brand is active
-      if (accentColor === "brand") {
-        root.style.setProperty("--cc-accent-300", palette["300"]);
-        root.style.setProperty("--cc-accent-400", palette["400"]);
-        root.style.setProperty("--cc-accent-500", palette["500"]);
-        root.style.setProperty("--cc-accent-600", palette["600"]);
-        root.style.setProperty("--cc-accent-600-20", palette["600-20"]);
-        root.style.setProperty("--cc-accent-600-30", palette["600-30"]);
-        root.style.setProperty("--cc-accent-500-15", palette["500-15"]);
-        root.style.setProperty("--cc-accent-500-30", palette["500-30"]);
-        root.style.setProperty("--cc-accent-500-50", palette["500-50"]);
-      }
+      // --cc-accent-* mapping handled via CSS [data-accent="brand"] selector
     } else {
       // Clean up brand vars if no primary color
       const vars = ["300", "400", "500", "600", "600-20", "600-30", "500-15", "500-30", "500-50"];
@@ -333,18 +283,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty("--cc-custom-500-15", palette["500-15"]);
       root.style.setProperty("--cc-custom-500-30", palette["500-30"]);
       root.style.setProperty("--cc-custom-500-50", palette["500-50"]);
-      // Also set --cc-accent-* directly when custom is active
-      if (accentColor === "custom") {
-        root.style.setProperty("--cc-accent-300", palette["300"]);
-        root.style.setProperty("--cc-accent-400", palette["400"]);
-        root.style.setProperty("--cc-accent-500", palette["500"]);
-        root.style.setProperty("--cc-accent-600", palette["600"]);
-        root.style.setProperty("--cc-accent-600-20", palette["600-20"]);
-        root.style.setProperty("--cc-accent-600-30", palette["600-30"]);
-        root.style.setProperty("--cc-accent-500-15", palette["500-15"]);
-        root.style.setProperty("--cc-accent-500-30", palette["500-30"]);
-        root.style.setProperty("--cc-accent-500-50", palette["500-50"]);
-      }
+      // --cc-accent-* mapping handled via CSS [data-accent="custom"] selector
     } else {
       const vars = ["300", "400", "500", "600", "600-20", "600-30", "500-15", "500-30", "500-50"];
       vars.forEach((v) => root.style.removeProperty(`--cc-custom-${v}`));
@@ -436,11 +375,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.accentEffect, JSON.stringify(effect));
   }, []);
 
-  const setSkin = useCallback((s: SkinName) => {
-    setSkinState(s);
-    localStorage.setItem(STORAGE_KEYS.skin, s);
-  }, []);
-
   const setGibberishDetect = useCallback((enabled: boolean) => {
     setGibberishDetectState(enabled);
     localStorage.setItem(STORAGE_KEYS.gibberishDetect, String(enabled));
@@ -460,7 +394,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       savedColors,
       archivedColors,
       accentEffect,
-      skin,
       gibberishDetect,
       setLanguage,
       setSidebarPosition,
@@ -474,7 +407,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSavedColors,
       setArchivedColors,
       setAccentEffect,
-      setSkin,
       setGibberishDetect,
     }),
     [
@@ -490,7 +422,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       savedColors,
       archivedColors,
       accentEffect,
-      skin,
       setLanguage,
       setSidebarPosition,
       setSidebarVisibility,
@@ -503,7 +434,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setSavedColors,
       setArchivedColors,
       setAccentEffect,
-      setSkin,
       gibberishDetect,
       setGibberishDetect,
     ]

@@ -30,6 +30,14 @@ export interface ThemePalette {
 }
 
 export const DARK_THEMES: ThemePalette[] = [
+  { id: 'default-slate', name: 'Default', mode: 'dark', colors: {
+    background: '#0f172a', surface: '#1e293b', surface2: '#334155', surface3: '#475569',
+    primary: '#a855f7', secondary: '#9333ea', accent: '#f97316',
+    text: '#f1f5f9', textMuted: '#94a3b8', textFaint: '#64748b',
+    border: 'rgba(255,255,255,0.1)', borderHigh: 'rgba(255,255,255,0.18)',
+    accentHigh: '#f97316', accentLow: '#9333ea', accentBg: 'rgba(168,85,247,0.08)',
+    green: '#4ade80', red: '#f87171', blue: '#7dd3fc',
+  }},
   { id: 'midnight-canvas',  name: 'Midnight Canvas',  mode: 'dark',  colors: { background: '#0a0e27', surface: '#151b3d', primary: '#6c8eff', secondary: '#a78bfa', accent: '#f472b6', text: '#e2e8f0' } },
   { id: 'obsidian-depth',   name: 'Obsidian Depth',   mode: 'dark',  colors: { background: '#0f0f0f', surface: '#1a1a1a', primary: '#00d4aa', secondary: '#00a3cc', accent: '#ff6b9d', text: '#f5f5f5' } },
   { id: 'slate-noir',       name: 'Slate Noir',       mode: 'dark',  colors: { background: '#0f172a', surface: '#1e293b', primary: '#38bdf8', secondary: '#818cf8', accent: '#fb923c', text: '#f1f5f9' } },
@@ -64,7 +72,7 @@ export const LIGHT_THEMES: ThemePalette[] = [
 ]
 
 export const ALL_THEMES: ThemePalette[] = [...DARK_THEMES, ...LIGHT_THEMES]
-export const DEFAULT_THEME_ID = 'void-space'
+export const DEFAULT_THEME_ID = 'default-slate'
 
 export function getThemeById(id: string): ThemePalette {
   return ALL_THEMES.find((t) => t.id === id) ?? ALL_THEMES.find((t) => t.id === DEFAULT_THEME_ID)!

@@ -238,37 +238,56 @@ body {
 }
 
 /* ============================================================
-   UNCODIXFY THEME SYSTEM — appended, do not remove
-   Variables are set dynamically by applyTheme() in src/lib/themes.ts
-   Fallback = Void Space (dark)
+   THEME SYSTEM — bridge between --theme-* vars and Tailwind slate
+   Variables set dynamically by applyTheme() in src/lib/themes.ts
+   Defaults match standard Tailwind slate → zero visual change
    ============================================================ */
 
 :root {
-  --theme-bg:            #0d1117;
-  --theme-surface:       #161b22;
-  --theme-surface-2:     #1c2128;
-  --theme-surface-3:     #21262d;
-  --theme-primary:       #58a6ff;
-  --theme-secondary:     #79c0ff;
-  --theme-accent:        #f78166;
-  --theme-text:          #c9d1d9;
-  --theme-text-muted:    rgba(201,209,217,0.5);
-  --theme-text-faint:    rgba(201,209,217,0.3);
-  --theme-border:        rgba(201,209,217,0.1);
-  --theme-border-high:   rgba(201,209,217,0.18);
-  --theme-surface-hover: #1c2128;
-  --theme-primary-hover: rgba(88,166,255,0.85);
-  --theme-accent-high:   #f78166;
-  --theme-accent-low:    #79c0ff;
-  --theme-accent-bg:     rgba(88,166,255,0.08);
+  /* Theme defaults — match standard Tailwind slate so existing styles look identical */
+  --theme-bg:            #0f172a;  /* = slate-900 */
+  --theme-surface:       #1e293b;  /* = slate-800 */
+  --theme-surface-2:     #334155;  /* = slate-700 */
+  --theme-surface-3:     #475569;  /* = slate-600 */
+  --theme-primary:       #a855f7;  /* = purple-500 (default accent) */
+  --theme-secondary:     #9333ea;  /* = purple-600 */
+  --theme-accent:        #f97316;  /* = orange-500 */
+  --theme-text:          #f1f5f9;  /* = slate-100 */
+  --theme-text-muted:    #94a3b8;  /* = slate-400 */
+  --theme-text-faint:    #64748b;  /* = slate-500 */
+  --theme-border:        rgba(255,255,255,0.1);
+  --theme-border-high:   rgba(255,255,255,0.18);
+  --theme-surface-hover: #334155;  /* = slate-700 */
+  --theme-primary-hover: rgba(168,85,247,0.85);
+  --theme-accent-high:   #f97316;
+  --theme-accent-low:    #9333ea;
+  --theme-accent-bg:     rgba(168,85,247,0.08);
   --theme-green:         #4ade80;
   --theme-red:           #f87171;
   --theme-blue:          #7dd3fc;
   --theme-shadow-sm:     0 1px 3px rgba(0,0,0,0.35);
   --theme-shadow-md:     0 2px 8px rgba(0,0,0,0.45);
-}
 
-/* NOTE: prefix is --theme-* (not --color-*) to avoid clashing with existing vars */
+  /* ── Bridge: remap Tailwind slate scale to theme vars ──
+     When applyTheme() overrides --theme-* via inline styles,
+     ALL bg-slate-*, text-slate-*, border-slate-* across the
+     entire app automatically pick up the new colors. */
+  --color-slate-950: var(--theme-bg);
+  --color-slate-900: var(--theme-bg);
+  --color-slate-800: var(--theme-surface);
+  --color-slate-700: var(--theme-surface-2);
+  --color-slate-600: var(--theme-surface-3);
+  --color-slate-500: var(--theme-text-faint);
+  --color-slate-400: var(--theme-text-muted);
+  --color-slate-300: var(--theme-text-muted);
+  --color-slate-200: var(--theme-text);
+  --color-slate-100: var(--theme-text);
+  --color-slate-50:  var(--theme-text);
+
+  /* Override body vars so <body> also respects themes */
+  --background: var(--theme-bg);
+  --foreground: var(--theme-text);
+}
 
 /* ═══════════════════════════════════════════════════════════════
    GAM DNA THEME — scoped to [data-theme="gam-dna"]
