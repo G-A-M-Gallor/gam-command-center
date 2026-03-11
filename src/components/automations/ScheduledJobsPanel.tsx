@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { Clock, ExternalLink, RefreshCw, Loader2, Play } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Clock, ExternalLink, RefreshCw, Loader2, Play, CheckCircle2, XCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface ScheduledJobsPanelProps {
   t: Record<string, string>;
@@ -13,6 +14,14 @@ interface CronJob {
   cron: string;
   scheduleKey: string;
   active: boolean;
+}
+
+interface CronHistoryEntry {
+  jobname: string;
+  status: string;
+  start_time: string;
+  end_time: string | null;
+  return_message: string | null;
 }
 
 const CRON_JOBS: CronJob[] = [
@@ -39,17 +48,85 @@ const CRON_JOBS: CronJob[] = [
   },
 ];
 
+// Map pg_cron job names to our display names
+const CRON_NAME_MAP: Record<string, string> = {
+  'daily-health-recalc': 'clean-old-notifications',
+  'weekly-soft-delete-cleanup': 'weekly-recurring-tasks',
+  'monthly-audit-cleanup': 'origami-sync',
+};
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  const d = Math.floor(h / 24);
+  return `${d}d`;
+}
+
+const supabaseClient = createClient();
+
 export function ScheduledJobsPanel({ t }: ScheduledJobsPanelProps) {
   const [showIframe, setShowIframe] = useState(false);
   const [runningJob, setRunningJob] = useState<string | null>(null);
+  const [cronHistory, setCronHistory] = useState<Record<string, CronHistoryEntry>>({});
   const n8nUrl = process.env.NEXT_PUBLIC_N8N_URL;
 
-  const handleRunJob = async (jobName: string) => {
+  // Fetch cron history on mount
+  useEffect(() => {
+    async function fetchCronHistory() {
+      try {
+        const res = await fetch('/api/automations/cron-history');
+        const data = await res.json();
+        if (data.jobs && Array.isArray(data.jobs)) {
+          const map: Record<string, CronHistoryEntry> = {};
+          for (const entry of data.jobs) {
+            const displayName = CRON_NAME_MAP[entry.jobname] || entry.jobname;
+            // Keep only the most recent run per job
+            if (!map[displayName] || new Date(entry.start_time) > new Date(map[displayName].start_time)) {
+              map[displayName] = entry;
+            }
+          }
+          setCronHistory(map);
+        }
+      } catch {
+        // Graceful — cron history is optional
+      }
+    }
+    fetchCronHistory();
+  }, []);
+
+  const handleRunJob = useCallback(async (jobName: string) => {
     setRunningJob(jobName);
-    // Simulate — in reality this would call pg_cron or a specific API
-    await new Promise((r) => setTimeout(r, 1500));
-    setRunningJob(null);
-  };
+
+    // Map display job names to API job names
+    const apiJobMap: Record<string, string> = {
+      'origami-sync': 'origami-sync',
+      'clean-old-notifications': 'health-check',
+      'weekly-recurring-tasks': 'test-notification',
+    };
+    const apiJob = apiJobMap[jobName] || jobName;
+
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const token = session?.access_token;
+      await fetch('/api/automations/run-job', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ job: apiJob }),
+      });
+    } catch {
+      // Error handled by run-job route recording
+    } finally {
+      setRunningJob(null);
+    }
+  }, []);
 
   return (
     <div className="space-y-6" data-cc-id="automations.scheduledJobs">
@@ -71,12 +148,14 @@ export function ScheduledJobsPanel({ t }: ScheduledJobsPanelProps) {
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.jobName}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.schedule}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.status}</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.lastRun || 'Last Run'}</th>
                 <th className="w-20 px-4 py-2.5" />
               </tr>
             </thead>
             <tbody>
               {CRON_JOBS.map((job, i) => {
                 const isRunning = runningJob === job.name;
+                const lastRun = cronHistory[job.name];
                 return (
                   <tr key={job.name} className={`border-b border-slate-700/20 ${i % 2 === 0 ? 'bg-slate-800/10' : ''}`}>
                     <td className="px-4 py-2.5">
@@ -96,6 +175,20 @@ export function ScheduledJobsPanel({ t }: ScheduledJobsPanelProps) {
                         <span className={`h-1.5 w-1.5 rounded-full ${job.active ? 'bg-emerald-400' : 'bg-slate-400'}`} />
                         {job.active ? t.active : t.paused}
                       </span>
+                    </td>
+                    <td className="px-4 py-2.5">
+                      {lastRun ? (
+                        <span className="flex items-center gap-1.5 text-[10px]">
+                          {lastRun.status === 'succeeded' ? (
+                            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                          ) : (
+                            <XCircle className="h-3 w-3 text-red-400" />
+                          )}
+                          <span className="font-mono text-slate-500">{timeAgo(lastRun.start_time)}</span>
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-600">{t.lastRunNever || 'Never'}</span>
+                      )}
                     </td>
                     <td className="px-4 py-2.5">
                       <button
