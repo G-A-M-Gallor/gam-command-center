@@ -174,6 +174,35 @@ Required fields per task:
 
 If you see an empty field during any operation (reading, querying, reporting) — fill it before moving on. No orphan tasks. No empty rows.
 
+### Mobile Mode — No Terminal Required
+
+When running from **Claude.ai app or web** (not Claude Code CLI), you have FULL access to Notion but NO access to filesystem/git/build. Operate accordingly:
+
+**CAN do (Notion MCP):**
+- Read/update any Notion DB (tasks, CEO Intake, roadmap, memory log)
+- Fill empty fields, change statuses, add rows, link relations
+- Generate documentation, retro summaries, sprint plans
+- Run CEO Protocol (`ceo` keyword)
+- Assign code names, organize hierarchy
+- Respond to questions, give advisor opinions
+- Plan sprints, prioritize tasks
+
+**CANNOT do (needs Claude Code CLI):**
+- Write/edit code files
+- Run build, tests, git commands
+- Supabase migrations
+- Verify code existence (file checks)
+- Deploy
+
+**Code Names** are the primary way Gal communicates about tasks from mobile. When Gal says a code name (e.g., "Falcon Eye", "Shapeshifter"), look it up in the relevant Notion DB's שם קוד field and act on that task.
+
+**Quick Commands from mobile:**
+- `ceo` → full CEO Intake protocol
+- `status [code-name]` → show task status + details
+- `sprint` → current sprint overview
+- `retro` → generate sprint retrospective
+- `next` → what should we work on next
+
 ### Sprint Methodology
 
 Sprints are **sequential work batches** — NOT time-boxed. Finish Sprint N → move to Sprint N+1.
