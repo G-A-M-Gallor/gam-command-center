@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -57,6 +57,9 @@ const LeadsPipelineBarContent = dynamic(() => import("./LeadsPipelineWidget").th
 
 const MatchingPanel = dynamic(() => import("./MatchingWidget").then((m) => ({ default: m.MatchingPanel })), { ssr: false }) as ComponentType<any>;
 const MatchingBarContent = dynamic(() => import("./MatchingWidget").then((m) => ({ default: m.MatchingBarContent })), { ssr: false }) as ComponentType<any>;
+
+const CeoQueuePanel = dynamic(() => import("./CeoQueueWidget").then((m) => ({ default: m.CeoQueuePanel })), { ssr: false }) as ComponentType<any>;
+const CeoQueueBarContent = dynamic(() => import("./CeoQueueWidget").then((m) => ({ default: m.CeoQueueBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -398,6 +401,23 @@ export const widgetRegistry: WidgetDefinition[] = [
     isRemovable: true,
     component: RssPanel,
     renderBar: RssBarContent,
+  },
+  {
+    id: "ceo-queue",
+    icon: ListTodo,
+    label: { he: "תור CEO", en: "CEO Queue", ru: "Очередь CEO" },
+    description: {
+      he: "תור הנחיות מנכ״ל — בקשות, עדיפויות, סטטוס ביצוע",
+      en: "CEO directive queue — requests, priorities, execution status",
+      ru: "Очередь директив CEO — запросы, приоритеты, статус выполнения",
+    },
+    defaultSize: 1,
+    status: "active",
+    category: "analytics",
+    tier: "free",
+    isRemovable: true,
+    component: CeoQueuePanel,
+    renderBar: CeoQueueBarContent,
   },
   {
     id: "shortcuts",

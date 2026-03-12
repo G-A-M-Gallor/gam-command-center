@@ -144,6 +144,13 @@ export const translations = {
       drillDown: "הצג",
       breadcrumbHome: "יעדים",
     },
+    ceoQueue: {
+      waiting: "בתור",
+      inProgress: "בעבודה",
+      forReview: "לבדיקה",
+      empty: "התור ריק",
+      openInNotion: "פתח ב-Notion",
+    },
     common: {
       close: "סגור",
       cancel: "ביטול",
@@ -2456,6 +2463,13 @@ export const translations = {
       drillDown: "View",
       breadcrumbHome: "Goals",
     },
+    ceoQueue: {
+      waiting: "Waiting",
+      inProgress: "In Progress",
+      forReview: "For Review",
+      empty: "Queue is empty",
+      openInNotion: "Open in Notion",
+    },
     common: {
       close: "Close",
       cancel: "Cancel",
@@ -4754,6 +4768,13 @@ export const translations = {
       noItems: "Нет элементов на этом уровне",
       drillDown: "Показать",
       breadcrumbHome: "Цели",
+    },
+    ceoQueue: {
+      waiting: "В очереди",
+      inProgress: "В работе",
+      forReview: "На проверке",
+      empty: "Очередь пуста",
+      openInNotion: "Открыть в Notion",
     },
     common: {
       close: "Закрыть",
