@@ -159,6 +159,21 @@ When the user types **"ceo"** (or "סטטוס ceo", "ceo update"), execute this 
 - Claude's: תגובת Claude, סטטוס ביצוע, תאריך השלמה
 - Auto: #, ציון תור, תאריך
 
+### Task Hygiene Rule — MANDATORY
+
+**Whenever you encounter a Notion task row with empty fields — FILL THEM IN.** This applies to ALL Notion databases in the project (Dev Tasks, CEO Intake, Roadmap layers).
+
+Required fields per task:
+- **Title** — clear, specific, actionable
+- **Status** — correct current status (not stale)
+- **Priority/Urgency** — P0-P3 or דחיפות level
+- **Category/Type** — what kind of work
+- **Sprint link** — which sprint does this belong to (if applicable)
+- **שם קוד** — fun code name (CEO Intake only)
+- **תגובת Claude** — Claude's current response/status (CEO Intake only)
+
+If you see an empty field during any operation (reading, querying, reporting) — fill it before moving on. No orphan tasks. No empty rows.
+
 ### Sprint Methodology
 
 Sprints are **sequential work batches** — NOT time-boxed. Finish Sprint N → move to Sprint N+1.
