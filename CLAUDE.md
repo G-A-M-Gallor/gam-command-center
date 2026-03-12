@@ -125,6 +125,40 @@ Full architecture with data flows: **[memory/ARCHITECTURE.md](memory/ARCHITECTUR
 
 ## Work Rules
 
+### CEO Intake Protocol — keyword: `ceo`
+
+When the user types **"ceo"** (or "סטטוס ceo", "ceo update"), execute this FULL protocol:
+
+**1. Read the CEO Intake DB** (Data Source: `938f1761-465b-4541-aa27-e7bc1a327375`)
+   - Fetch all rows where סטטוס ביצוע ≠ ✅ אושר and ≠ 🚫 בוטל
+   - Sort by ציון תור ascending (lowest = highest priority)
+
+**2. Report to CEO** — show a clear summary table:
+   - How many in each status (⏳ בתור, 🔵 בעבודה, ❓ שאלה לגל, ⏸️ חסום, 🟡 לבדיקת CEO)
+   - List items sorted by queue score
+   - Flag any ⚡ immediate items
+
+**3. Act on pending items** — in queue score order:
+   - ⏳ בתור → pick next item, set to 🔵 בעבודה, start working
+   - ❓ שאלה לגל → show the question, wait for answer
+   - 🔄 לתיקון → read Gal's feedback, fix and resubmit
+   - ⏸️ חסום → explain what's blocking, suggest unblock path
+
+**4. Update Notion** — after completing work on each item:
+   - Set סטטוס ביצוע (🟡 לבדיקת CEO when done)
+   - Fill תגובת Claude with: `[status] what was done | what's next | question if any`
+   - Fill תאריך השלמה when moving to ✅ אושר
+
+**5. Session Start** — at the beginning of EVERY new session:
+   - Read CEO Intake DB automatically
+   - If there are ⏳ בתור or 🔄 לתיקון items → mention them to the user
+   - If there are ❓ שאלה לגל items → ask the questions immediately
+
+**CEO Intake DB columns:**
+- Gal's: בקשה, ⚡ מיידי, דחיפות, סדר עדיפות, קטגוריה, אימפקט, סוג הנחיה, הערות גל, תוצר צפוי, תלוי ב-
+- Claude's: תגובת Claude, סטטוס ביצוע, תאריך השלמה
+- Auto: #, ציון תור, תאריך
+
 ### Sprint Methodology
 
 Sprints are **sequential work batches** — NOT time-boxed. Finish Sprint N → move to Sprint N+1.
