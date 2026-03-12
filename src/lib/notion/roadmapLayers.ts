@@ -112,7 +112,9 @@ export async function queryLayer(
   parentId?: string,
 ): Promise<RoadmapRecord[]> {
   const client = getClient();
-  if (!client) return [];
+  if (!client) {
+    throw new Error("Notion not configured — NOTION_API_KEY missing");
+  }
 
   const config = LAYER_CONFIG[layer];
 
