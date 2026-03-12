@@ -174,6 +174,17 @@ Required fields per task:
 
 If you see an empty field during any operation (reading, querying, reporting) — fill it before moving on. No orphan tasks. No empty rows.
 
+### Links Index Rule — MANDATORY
+
+**Whenever you create or connect a new source — update the Links Index DB.**
+
+This applies to: new API routes, new Notion DBs, new Supabase tables, new external services, new ENV vars, new critical files.
+
+- **Links Index Data Source:** `52bc97e4-60d1-4585-9e25-9cf8bf309879`
+- **Location:** CEO Control Page → 🔗 אינדקס לינקים — מקורות מחוברים
+- **Required fields:** שם המקור, סוג, רמת חשיבות, תחום, למה חשוב, מחובר ל, סטטוס
+- **When to update:** After every feature that adds/modifies a source. Part of Post-Task Protocol.
+
 ### Mobile Mode — No Terminal Required
 
 When running from **Claude.ai app or web** (not Claude Code CLI), you have FULL access to Notion but NO access to filesystem/git/build. Operate accordingly:
