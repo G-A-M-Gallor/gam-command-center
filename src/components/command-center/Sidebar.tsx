@@ -92,7 +92,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
       { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
       { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
-      { href: "/roadmap", key: "roadmap", icon: Compass, status: "active" },
+      { href: "/dashboard/roadmap", key: "roadmap", icon: Compass, status: "active" },
       { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
       { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },

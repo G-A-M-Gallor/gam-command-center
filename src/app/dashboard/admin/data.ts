@@ -1,7 +1,7 @@
 import {
   Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
-  Shield, HelpCircle, BookOpen, Brain, Users,
+  Shield, HelpCircle, BookOpen, Brain, Users, Compass,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2,
 } from 'lucide-react';
@@ -328,6 +328,16 @@ export const routes: RouteEntry[] = [
       { id: 'boardroom-page', name: 'BoardRoomPage', file: 'app/dashboard/boardroom/page.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext', 'AuthContext'], supabaseTables: ['ai_usage', 'ai_conversations'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'roadmap', path: '/dashboard/roadmap', name: 'Roadmap', nameHe: 'מפת דרכים', icon: Compass,
+    phase: 5, status: 'active', version: '1.0.0', addedDate: '2026-03-12',
+    descriptionHe: 'מפת דרכים עסקית — 6 שכבות Notion (יעדים → תיקים → פרויקטים → ספרינטים → משימות → תתי-משימות) עם ניווט drill-down',
+    descriptionEn: 'Business roadmap — 6 Notion layers (Goals → Portfolios → Projects → Sprints → Tasks → Sub-tasks) with drill-down navigation',
+    components: [
+      { id: 'roadmap-page', name: 'RoadmapPage', file: 'app/dashboard/roadmap/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext', 'AuthContext'], supabaseTables: [], visible: true, sidebarTab: true,
   },
 ];
 

@@ -32,7 +32,8 @@ type PageKey =
   | "grid"
   | "slides"
   | "boardroom"
-  | "feeds";
+  | "feeds"
+  | "roadmap";
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
@@ -55,6 +56,7 @@ const pageRoutes: Record<PageKey, string> = {
   slides: "/dashboard/slides",
   boardroom: "/dashboard/boardroom",
   feeds: "/dashboard/feeds",
+  roadmap: "/dashboard/roadmap",
 };
 
 interface PageHeaderProps {

@@ -12,7 +12,7 @@ import type {
 
 let _client: Client | null = null;
 
-function getClient(): Client | null {
+export function getClient(): Client | null {
   if (!process.env.NOTION_API_KEY) return null;
   if (!_client) {
     _client = new Client({ auth: process.env.NOTION_API_KEY });
@@ -44,7 +44,7 @@ export interface ProjectStatus {
 
 // ─── Helpers ─────────────────────────────────────────
 
-function extractPlainText(prop: unknown): string {
+export function extractPlainText(prop: unknown): string {
   if (!prop || typeof prop !== "object") return "";
   const p = prop as Record<string, unknown>;
 

@@ -308,6 +308,19 @@ export const importExecuteSchema = z.object({
 });
 export type ImportExecuteInput = z.infer<typeof importExecuteSchema>;
 
+// ─── Roadmap Layers ─────────────────────────────────────────
+
+const VALID_LAYERS = ["goals", "portfolios", "projects", "sprints", "tasks", "subtasks"] as const;
+
+export const roadmapLayersSchema = z.object({
+  layer: z.enum(VALID_LAYERS, {
+    error: `Invalid layer — must be one of: ${VALID_LAYERS.join(", ")}`,
+  }),
+  parentId: z.string().optional(),
+});
+
+export type RoadmapLayersInput = z.infer<typeof roadmapLayersSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.
