@@ -174,6 +174,23 @@ Required fields per task:
 
 If you see an empty field during any operation (reading, querying, reporting) — fill it before moving on. No orphan tasks. No empty rows.
 
+### System Sync Checklist — MANDATORY
+
+**Whenever you build something new, check ALL 6 registries:**
+
+| # | Registry | When to update | File |
+|---|----------|---------------|------|
+| 1 | **admin/data.ts** | New page, widget, API route, or context | `src/app/dashboard/admin/data.ts` |
+| 2 | **i18n.ts** | Any new user-facing text | `src/lib/i18n.ts` (he + en + ru) |
+| 3 | **WidgetRegistry.ts** | New widget | `src/components/command-center/widgets/WidgetRegistry.ts` |
+| 4 | **schemas.ts** | New POST/PUT API route | `src/lib/api/schemas.ts` (Zod) |
+| 5 | **Sidebar.tsx** | New dashboard page | `src/components/command-center/Sidebar.tsx` |
+| 6 | **RLS policies** | New Supabase table | In the migration file itself |
+
+**Rule:** After building ANY feature, mentally walk through all 6. If even one applies — update it. This is NOT optional.
+
+A feature that builds code but skips registries is **incomplete**. It happened with CEO Queue Widget (missing from admin/data.ts) — never again.
+
 ### Links Index Rule — MANDATORY
 
 **Whenever you create or connect a new source — update the Links Index DB.**
