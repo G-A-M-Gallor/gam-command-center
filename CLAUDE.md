@@ -203,6 +203,30 @@ When running from **Claude.ai app or web** (not Claude Code CLI), you have FULL 
 - `retro` → generate sprint retrospective
 - `next` → what should we work on next
 
+### Smart Routing — Task Mode System
+
+Every task has a **mode** that determines where to work:
+- `📱 mobile` — Notion only: docs, planning, status, fields, hierarchy
+- `💻 terminal` — Code required: write files, build, deploy, git
+- `🔀 hybrid` — Plan on mobile → execute on CLI
+
+**When at computer (CLI session):**
+1. **Notion-first** — do ALL Notion work first (fill fields, update statuses, organize). This is fast, no build needed.
+2. **Code batch** — then do all code changes together.
+3. **Single build** — run build ONCE at the end, not after every small change.
+4. **Single commit** — group related changes into one meaningful commit.
+
+**When on mobile and sprint needs terminal:**
+1. Claude says: "⚠️ [code-name] needs terminal — preparing plan"
+2. Claude writes the full plan + acceptance criteria in Notion
+3. Claude marks the task: `📋 Ready for CLI`
+4. When Gal reaches computer and types `sprint` — Claude picks up all `📋 Ready for CLI` tasks and executes them in order
+
+**When on computer but task doesn't need terminal:**
+1. Claude uses Notion MCP directly — no build, no git
+2. Faster, no waiting for compilation
+3. Use CLI tools only when filesystem access is actually needed
+
 ### Sprint Methodology
 
 Sprints are **sequential work batches** — NOT time-boxed. Finish Sprint N → move to Sprint N+1.
