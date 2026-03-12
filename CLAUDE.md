@@ -2,7 +2,7 @@
 
 > This file is read by the internal AI assistant on every conversation.
 > It's also read by Claude Code at session start.
-> Last updated: 2026-03-10
+> Last updated: 2026-03-12
 
 ---
 
@@ -125,6 +125,16 @@ Full architecture with data flows: **[memory/ARCHITECTURE.md](memory/ARCHITECTUR
 
 ## Work Rules
 
+### Sprint Methodology
+
+Sprints are **sequential work batches** — NOT time-boxed. Finish Sprint N → move to Sprint N+1.
+
+- **Hierarchy:** Goal → Portfolio → Project → Sprint → Task → Sub-task
+- **Sprint = next batch to execute**, ordered by priority
+- **Roadmap page** (`/dashboard/roadmap`) visualizes the full chain from 6 Notion DBs
+- **Tasks** are linked to Sprints via `Sprint (Roadmap)` relation in Notion
+- When starting a new sprint: create it in Notion Sprints DB, link relevant tasks, execute in order
+
 ### Post-Task Protocol (8 steps — MANDATORY)
 
 Master document: **https://www.notion.so/31f8f27212f881fca47ce9680e169931**
@@ -163,7 +173,7 @@ Master document: **https://www.notion.so/31f8f27212f881fca47ce9680e169931**
 
 - Form Builder from scratch — use Origami native + Jotform
 - Dynamic architecture viz — Mermaid in Notion
-- Full roadmap tool — Notion Projects handles this
+- ~~Full roadmap tool~~ — BUILT: `/dashboard/roadmap` with 6 Notion DB drill-down
 - Custom auth — Supabase Auth already in repo
 - Multi-theme — dark mode only
 
