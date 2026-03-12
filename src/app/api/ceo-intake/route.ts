@@ -10,6 +10,7 @@ export interface CeoIntakeItem {
   url: string;
   number: string;
   title: string;
+  codeName: string;
   urgency: string;
   impact: string;
   status: string;
@@ -77,6 +78,7 @@ export async function GET(request: Request) {
           url: page.url,
           number: extractPlainText(p["#"]),
           title: extractPlainText(p["בקשה"]),
+          codeName: extractPlainText(p["שם קוד"]),
           urgency: extractPlainText(p["דחיפות"]),
           impact: extractPlainText(p["אימפקט"]),
           status: extractPlainText(p["סטטוס ביצוע"]),

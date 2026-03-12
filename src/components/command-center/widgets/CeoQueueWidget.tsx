@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ListTodo,
   Zap,
@@ -10,6 +10,8 @@ import {
   CheckCircle2,
   Clock,
   HelpCircle,
+  Bell,
+  History,
 } from "lucide-react";
 import type { WidgetSize } from "./WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -30,6 +32,7 @@ interface QueueItem {
   url: string;
   number: string;
   title: string;
+  codeName: string;
   urgency: string;
   status: string;
   immediate: boolean;
@@ -39,6 +42,8 @@ interface QueueItem {
 const NOTION_TABLE_URL =
   "https://www.notion.so/3218f27212f8810ebf87f25267047840";
 
+const STORAGE_KEY = "cc-ceo-queue-seen";
+
 function statusIcon(status: string) {
   if (status.includes("בתור")) return <Clock className="h-3 w-3 text-slate-400" />;
   if (status.includes("בעבודה")) return <Loader2 className="h-3 w-3 text-blue-400 animate-spin" />;
@@ -47,6 +52,24 @@ function statusIcon(status: string) {
   if (status.includes("חסום")) return <AlertCircle className="h-3 w-3 text-red-400" />;
   if (status.includes("לתיקון")) return <AlertCircle className="h-3 w-3 text-purple-400" />;
   return <Clock className="h-3 w-3 text-slate-500" />;
+}
+
+/** Track which item IDs the user has already seen */
+function getSeenIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function markAllSeen(items: QueueItem[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items.map((i) => i.id)));
+  } catch {
+    // silent
+  }
 }
 
 // ─── Panel ─────────────────────────────────────────
@@ -61,6 +84,8 @@ export function CeoQueuePanel() {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [counts, setCounts] = useState<QueueCounts | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"queue" | "updates">("queue");
+  const seenRef = useRef<Set<string>>(getSeenIds());
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -76,7 +101,8 @@ export function CeoQueuePanel() {
       if (!res.ok) return;
 
       const data = await res.json();
-      setItems(data.items?.slice(0, 8) ?? []);
+      const fetched: QueueItem[] = data.items?.slice(0, 12) ?? [];
+      setItems(fetched);
       setCounts(data.counts ?? null);
     } catch {
       // silent
@@ -91,11 +117,26 @@ export function CeoQueuePanel() {
     return () => clearInterval(interval);
   }, [fetchQueue]);
 
+  // Mark all as seen when panel opens
+  useEffect(() => {
+    if (items.length > 0) {
+      markAllSeen(items);
+      seenRef.current = new Set(items.map((i) => i.id));
+    }
+  }, [items]);
+
+  const reviewItems = items.filter((i) => i.status.includes("לבדיקת"));
+  const questionItems = items.filter((i) => i.status.includes("שאלה"));
+  const needsAttention = [...reviewItems, ...questionItems];
+  const queueItems = items.filter(
+    (i) => !i.status.includes("לבדיקת") && !i.status.includes("שאלה"),
+  );
+
   return (
     <div
       dir={isRtl ? "rtl" : "ltr"}
       data-cc-id="widget.ceo-queue.panel"
-      className="w-80 max-h-[420px] overflow-y-auto"
+      className="w-80 max-h-[480px] overflow-y-auto"
     >
       {/* Header counts */}
       {counts && (
@@ -127,7 +168,38 @@ export function CeoQueuePanel() {
         </div>
       )}
 
-      {/* Items */}
+      {/* Tabs */}
+      <div className="flex border-b border-slate-700/50">
+        <button
+          onClick={() => setTab("queue")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium transition-colors ${
+            tab === "queue"
+              ? "text-slate-200 border-b-2 border-blue-500"
+              : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <ListTodo className="h-3 w-3" />
+          {cq.queueTab || "Queue"}
+        </button>
+        <button
+          onClick={() => setTab("updates")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium transition-colors ${
+            tab === "updates"
+              ? "text-slate-200 border-b-2 border-yellow-500"
+              : "text-slate-500 hover:text-slate-300"
+          }`}
+        >
+          <Bell className="h-3 w-3" />
+          {cq.updatesTab || "Updates"}
+          {needsAttention.length > 0 && (
+            <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-yellow-500 px-1 text-[9px] font-bold text-black">
+              {needsAttention.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Tab content */}
       <div className="p-2">
         {loading && (
           <div className="flex items-center justify-center py-6">
@@ -135,51 +207,109 @@ export function CeoQueuePanel() {
           </div>
         )}
 
-        {!loading && items.length === 0 && (
-          <div className="py-6 text-center text-xs text-slate-500">
-            {cq.empty || "Queue is empty"}
-          </div>
+        {!loading && tab === "updates" && (
+          <>
+            {needsAttention.length === 0 ? (
+              <div className="py-6 text-center text-xs text-slate-500">
+                {cq.noUpdates || "No pending updates"}
+              </div>
+            ) : (
+              <>
+                {reviewItems.length > 0 && (
+                  <div className="mb-2">
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-semibold text-yellow-400 uppercase tracking-wider">
+                      <CheckCircle2 className="h-3 w-3" />
+                      {cq.readyForReview || "Ready for your review"}
+                    </div>
+                    {reviewItems.map((item) => (
+                      <ItemRow key={item.id} item={item} />
+                    ))}
+                  </div>
+                )}
+                {questionItems.length > 0 && (
+                  <div className="mb-2">
+                    <div className="flex items-center gap-1.5 px-2 py-1.5 text-[10px] font-semibold text-amber-400 uppercase tracking-wider">
+                      <HelpCircle className="h-3 w-3" />
+                      {cq.questionsForYou || "Claude has questions"}
+                    </div>
+                    {questionItems.map((item) => (
+                      <ItemRow key={item.id} item={item} />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </>
         )}
 
-        {items.map((item) => (
-          <a
-            key={item.id}
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-start gap-2 rounded-lg px-2.5 py-2 text-start transition-colors hover:bg-slate-800/60"
-          >
-            {statusIcon(item.status)}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                {item.immediate && (
-                  <Zap className="h-3 w-3 text-amber-400 shrink-0" />
-                )}
-                <span className="text-xs font-medium text-slate-200 truncate">
-                  {item.title}
-                </span>
+        {!loading && tab === "queue" && (
+          <>
+            {queueItems.length === 0 && needsAttention.length === 0 && (
+              <div className="py-6 text-center text-xs text-slate-500">
+                {cq.empty || "Queue is empty"}
               </div>
-              <span className="text-[10px] text-slate-500">
-                {item.number} · {item.status}
-              </span>
-            </div>
-          </a>
-        ))}
+            )}
+            {items.map((item) => (
+              <ItemRow key={item.id} item={item} />
+            ))}
+          </>
+        )}
       </div>
 
       {/* Footer */}
-      <div className="border-t border-slate-700/50 p-2">
+      <div className="border-t border-slate-700/50 p-2 flex gap-1">
         <a
           href={NOTION_TABLE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] text-slate-400 transition-colors hover:bg-slate-800/60 hover:text-slate-200"
+          className="flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] text-slate-400 transition-colors hover:bg-slate-800/60 hover:text-slate-200"
         >
           <ExternalLink className="h-3 w-3" />
           {cq.openInNotion || "Open in Notion"}
         </a>
+        <a
+          href={NOTION_TABLE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-[11px] text-slate-400 transition-colors hover:bg-slate-800/60 hover:text-slate-200"
+        >
+          <History className="h-3 w-3" />
+        </a>
       </div>
     </div>
+  );
+}
+
+function ItemRow({ item }: { item: QueueItem }) {
+  return (
+    <a
+      href={item.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-start gap-2 rounded-lg px-2.5 py-2 text-start transition-colors hover:bg-slate-800/60"
+    >
+      <div className="mt-0.5">{statusIcon(item.status)}</div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          {item.immediate && (
+            <Zap className="h-3 w-3 text-amber-400 shrink-0" />
+          )}
+          <span className="text-xs font-medium text-slate-200 truncate">
+            {item.title}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-slate-500">
+            {item.number} · {item.status}
+          </span>
+          {item.codeName && (
+            <span className="text-[9px] text-purple-400/80 font-mono truncate">
+              {item.codeName}
+            </span>
+          )}
+        </div>
+      </div>
+    </a>
   );
 }
 
@@ -189,6 +319,8 @@ export function CeoQueueBarContent({ size }: { size: WidgetSize }) {
   const supabase = createClient();
   const [count, setCount] = useState(0);
   const [urgent, setUrgent] = useState(0);
+  const [forReview, setForReview] = useState(0);
+  const [hasNew, setHasNew] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -208,8 +340,17 @@ export function CeoQueueBarContent({ size }: { size: WidgetSize }) {
 
         const data = await res.json();
         if (mounted) {
-          setCount(data.counts?.total ?? 0);
+          const newTotal = data.counts?.total ?? 0;
+          const newReview = data.counts?.forReview ?? 0;
+          setCount(newTotal);
           setUrgent(data.counts?.immediate ?? 0);
+          setForReview(newReview);
+
+          // Detect new items needing attention
+          const seen = getSeenIds();
+          const currentIds: string[] = (data.items ?? []).map((i: { id: string }) => i.id);
+          const hasUnseen = currentIds.some((id: string) => !seen.has(id));
+          setHasNew(hasUnseen || newReview > 0);
         }
       } catch {
         // silent
@@ -240,6 +381,11 @@ export function CeoQueueBarContent({ size }: { size: WidgetSize }) {
       </div>
       {size >= 2 && (
         <span className="text-xs text-slate-400">CEO</span>
+      )}
+      {hasNew && forReview > 0 && (
+        <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-yellow-500 px-1 text-[9px] font-bold text-black animate-pulse">
+          {forReview}
+        </span>
       )}
     </div>
   );
