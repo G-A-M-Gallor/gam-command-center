@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -60,6 +60,9 @@ const MatchingBarContent = dynamic(() => import("./MatchingWidget").then((m) => 
 
 const CeoQueuePanel = dynamic(() => import("./CeoQueueWidget").then((m) => ({ default: m.CeoQueuePanel })), { ssr: false }) as ComponentType<any>;
 const CeoQueueBarContent = dynamic(() => import("./CeoQueueWidget").then((m) => ({ default: m.CeoQueueBarContent })), { ssr: false }) as ComponentType<any>;
+
+const CommunicationWidgetPanel = dynamic(() => import("./CommunicationWidget").then((m) => ({ default: m.CommunicationWidgetPanel })), { ssr: false }) as ComponentType<any>;
+const CommunicationBarContent = dynamic(() => import("./CommunicationWidget").then((m) => ({ default: m.CommunicationBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -418,6 +421,24 @@ export const widgetRegistry: WidgetDefinition[] = [
     isRemovable: true,
     component: CeoQueuePanel,
     renderBar: CeoQueueBarContent,
+  },
+  {
+    id: "communication",
+    icon: MessagesSquare,
+    label: { he: "תקשורת", en: "Communication", ru: "Коммуникация" },
+    description: {
+      he: "ציר זמן תקשורת — וואטסאפ, טלפון, מייל, הערות",
+      en: "Communication timeline — WhatsApp, phone, email, notes",
+      ru: "Лента коммуникации — WhatsApp, телефон, почта, заметки",
+    },
+    defaultSize: 2,
+    status: "active",
+    category: "ai_comms",
+    tier: "pro",
+    isRemovable: true,
+    component: CommunicationWidgetPanel,
+    renderBar: CommunicationBarContent,
+    panelMode: "side-panel",
   },
   {
     id: "shortcuts",

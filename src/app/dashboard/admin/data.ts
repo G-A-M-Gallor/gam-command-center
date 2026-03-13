@@ -379,6 +379,7 @@ export const widgets: WidgetEntry[] = [
   { id: 'leads-pipeline', name: 'Leads Pipeline', nameHe: 'צנרת לידים', file: 'LeadsPipelineWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '0.1.0', addedDate: '2026-03-11' },
   { id: 'matching', name: 'Matching', nameHe: 'התאמות', file: 'MatchingWidget.tsx', defaultSize: '2x', panelMode: 'side-panel', status: 'active', version: '1.0.0', addedDate: '2026-03-11' },
   { id: 'ceo-queue', name: 'CEO Queue', nameHe: 'תור CEO', file: 'CeoQueueWidget.tsx', defaultSize: '1x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-12' },
+  { id: 'communication', name: 'Communication', nameHe: 'תקשורת', file: 'CommunicationWidget.tsx', defaultSize: '2x', panelMode: 'side-panel', status: 'active', version: '1.0.0', addedDate: '2026-03-13' },
 ];
 
 // ─── Context Data ────────────────────────────────────────

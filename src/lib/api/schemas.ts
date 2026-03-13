@@ -321,6 +321,23 @@ export const roadmapLayersSchema = z.object({
 
 export type RoadmapLayersInput = z.infer<typeof roadmapLayersSchema>;
 
+// ─── Communication: Send ────────────────────────────────────
+
+export const commSendSchema = z.object({
+  phone: z.string().min(9, "phone is required").max(20),
+  message: z.string().max(5000).optional(),
+  template_name: z.string().max(200).optional(),
+  template_params: z.array(z.object({
+    name: z.string(),
+    value: z.string(),
+  })).optional(),
+  entity_id: z.string().uuid("entity_id must be a valid UUID").optional(),
+}).refine((data) => data.message || data.template_name, {
+  message: "Provide message text or template_name",
+});
+
+export type CommSendInput = z.infer<typeof commSendSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

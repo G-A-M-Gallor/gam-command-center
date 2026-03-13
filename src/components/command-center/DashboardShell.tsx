@@ -16,6 +16,12 @@ import { useWidgets } from "@/contexts/WidgetContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { GibberishDetector } from "./GibberishDetector";
 import { SpeedDial } from "./SpeedDial";
+import dynamic from "next/dynamic";
+
+const CommunicationPanel = dynamic(
+  () => import("./CommunicationPanel").then((m) => ({ default: m.CommunicationPanel })),
+  { ssr: false },
+);
 
 const SIDEBAR_WIDTH = "15rem";
 const STRIP_WIDTH = "48px";
@@ -161,6 +167,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* FAB Speed Dial — desktop only */}
       {!isMobile && <SpeedDial />}
+
+      {/* Communication timeline panel — lazy loaded */}
+      <CommunicationPanel />
 
       {/* Guide mode overlay */}
       <GuideOverlay />

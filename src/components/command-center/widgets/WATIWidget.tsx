@@ -1,45 +1,59 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MessageCircle, ExternalLink, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { timeAgo } from "@/lib/utils/timeAgo";
+import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
-
-interface WATIMessage {
-  id: string;
-  name: string;
-  preview: string;
-  timestamp: number;
-  unread: boolean;
-}
-
-function createDemoMessages(): WATIMessage[] {
-  return [
-    { id: "1", name: "אבי כהן", preview: "שלום, אשמח לקבל עדכון על הפרויקט", timestamp: Date.now() - 300000, unread: true },
-    { id: "2", name: "מיכל לוי", preview: "תודה, קיבלתי את המסמכים", timestamp: Date.now() - 1800000, unread: true },
-    { id: "3", name: "יוסי דהן", preview: "מתי הפגישה הבאה?", timestamp: Date.now() - 7200000, unread: false },
-  ];
-}
+import type { CommMessage } from "@/lib/wati/types";
 
 export function WATIPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const [messages, setMessages] = useState<WATIMessage[]>([]);
+  const [messages, setMessages] = useState<CommMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const watiUrl = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_WATI_URL : null;
 
   useEffect(() => {
-    // TODO: Replace with real WATI API when configured
-    const timer = setTimeout(() => {
-      setMessages(createDemoMessages());
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    async function load() {
+      try {
+        const { data } = await supabase
+          .from("comm_messages")
+          .select("*")
+          .eq("channel", "whatsapp")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (data && data.length > 0) {
+          setMessages(data as CommMessage[]);
+        } else {
+          // Fallback to demo data when table is empty or doesn't exist
+          setMessages(createDemoMessages());
+        }
+      } catch {
+        setMessages(createDemoMessages());
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
   }, []);
 
-  const unread = messages.filter((m) => m.unread).length;
+  const handleOpenPanel = useCallback((msg: CommMessage) => {
+    window.dispatchEvent(
+      new CustomEvent("cc-open-comms-panel", {
+        detail: {
+          entityId: msg.entity_id,
+          entityName: msg.sender_name ?? msg.entity_phone ?? "WhatsApp",
+          phone: msg.entity_phone,
+        },
+      }),
+    );
+  }, []);
+
+  const unread = messages.filter((m) => !m.is_read && m.direction !== "outbound").length;
 
   return (
     <div className="space-y-3">
@@ -78,10 +92,12 @@ export function WATIPanel() {
       ) : (
         <div className="space-y-1">
           {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-slate-700/30 ${
-                msg.unread ? "" : "opacity-60"
+            <button
+              key={msg.id ?? msg.external_id}
+              type="button"
+              onClick={() => handleOpenPanel(msg)}
+              className={`flex w-full items-start gap-2.5 rounded-lg px-2 py-2 text-start transition-colors hover:bg-slate-700/30 ${
+                msg.is_read ? "opacity-60" : ""
               }`}
             >
               <div className="w-7 h-7 rounded-full bg-green-500/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -89,15 +105,19 @@ export function WATIPanel() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-slate-200 truncate">{msg.name}</span>
-                  <span className="text-[10px] text-slate-500 shrink-0">{timeAgo(msg.timestamp, language)}</span>
+                  <span className="text-sm font-medium text-slate-200 truncate">
+                    {msg.sender_name ?? msg.entity_phone ?? "WhatsApp"}
+                  </span>
+                  <span className="text-[10px] text-slate-500 shrink-0">
+                    {timeAgo(new Date(msg.created_at ?? Date.now()).getTime(), language)}
+                  </span>
                 </div>
-                <p className="text-xs text-slate-400 truncate">{msg.preview}</p>
+                <p className="text-xs text-slate-400 truncate">{msg.body}</p>
               </div>
-              {msg.unread && (
+              {!msg.is_read && msg.direction === "inbound" && (
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0 mt-2" />
               )}
-            </div>
+            </button>
           ))}
         </div>
       )}
@@ -112,11 +132,58 @@ export function WATIPanel() {
 }
 
 export function WATIBarContent({ size }: { size: WidgetSize }) {
-  const { language } = useSettings();
   if (size < 2) return null;
   return (
     <span className="truncate text-xs text-slate-400">
       WhatsApp
     </span>
   );
+}
+
+// Demo data fallback when comm_messages is empty
+function createDemoMessages(): CommMessage[] {
+  return [
+    {
+      id: "demo-1",
+      entity_id: null,
+      entity_phone: "972501234567",
+      channel: "whatsapp",
+      direction: "inbound",
+      sender_name: "אבי כהן",
+      body: "שלום, אשמח לקבל עדכון על הפרויקט",
+      channel_meta: {},
+      session_id: null,
+      external_id: "demo-1",
+      is_read: false,
+      created_at: new Date(Date.now() - 300000).toISOString(),
+    },
+    {
+      id: "demo-2",
+      entity_id: null,
+      entity_phone: "972521234567",
+      channel: "whatsapp",
+      direction: "inbound",
+      sender_name: "מיכל לוי",
+      body: "תודה, קיבלתי את המסמכים",
+      channel_meta: {},
+      session_id: null,
+      external_id: "demo-2",
+      is_read: false,
+      created_at: new Date(Date.now() - 1800000).toISOString(),
+    },
+    {
+      id: "demo-3",
+      entity_id: null,
+      entity_phone: "972531234567",
+      channel: "whatsapp",
+      direction: "inbound",
+      sender_name: "יוסי דהן",
+      body: "מתי הפגישה הבאה?",
+      channel_meta: {},
+      session_id: null,
+      external_id: "demo-3",
+      is_read: true,
+      created_at: new Date(Date.now() - 7200000).toISOString(),
+    },
+  ];
 }
