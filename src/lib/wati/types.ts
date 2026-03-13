@@ -40,12 +40,18 @@ export interface WATITemplate {
   params: string[];
 }
 
+/** Message type for sub-categorization */
+export type MessageType = 'regular' | 'otp' | 'marketing' | 'transactional';
+
+/** Provider / service that sent or received */
+export type CommProvider = 'wati' | 'slng' | '019' | 'voicenter' | 'manual' | string;
+
 /** Normalized comm_messages row for DB insert */
 export interface CommMessage {
   id?: string;
   entity_id: string | null;
   entity_phone: string | null;
-  channel: 'whatsapp' | 'phone' | 'email' | 'note' | 'reminder';
+  channel: 'whatsapp' | 'phone' | 'email' | 'sms' | 'note' | 'reminder';
   direction: 'inbound' | 'outbound' | 'internal';
   sender_name: string | null;
   body: string;
@@ -53,13 +59,15 @@ export interface CommMessage {
   session_id: string | null;
   external_id: string | null;
   is_read: boolean;
+  provider: CommProvider | null;
+  message_type: MessageType;
   created_at?: string;
 }
 
 /** comm_templates row */
 export interface CommTemplate {
   id: string;
-  channel: 'whatsapp' | 'phone' | 'email';
+  channel: 'whatsapp' | 'phone' | 'email' | 'sms';
   name: string;
   body: string;
   params: string[];
@@ -82,4 +90,4 @@ export interface WATISendResponse {
 }
 
 /** Channel filter type for UI */
-export type ChannelFilter = 'all' | 'whatsapp' | 'phone' | 'email' | 'note' | 'reminder';
+export type ChannelFilter = 'all' | 'whatsapp' | 'phone' | 'email' | 'sms' | 'note' | 'reminder';

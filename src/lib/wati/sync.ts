@@ -30,6 +30,8 @@ export function watiMessageToCommRow(
     session_id: null,
     external_id: msg.id,
     is_read: msg.owner || msg.statusString === 'READ',
+    provider: 'wati',
+    message_type: 'regular',
     created_at: msg.timestamp,
   };
 }

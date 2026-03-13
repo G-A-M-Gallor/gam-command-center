@@ -155,6 +155,8 @@ function createDemoMessages(): CommMessage[] {
       session_id: null,
       external_id: "demo-1",
       is_read: false,
+      provider: "wati",
+      message_type: "regular",
       created_at: new Date(Date.now() - 300000).toISOString(),
     },
     {
@@ -169,6 +171,8 @@ function createDemoMessages(): CommMessage[] {
       session_id: null,
       external_id: "demo-2",
       is_read: false,
+      provider: "wati",
+      message_type: "regular",
       created_at: new Date(Date.now() - 1800000).toISOString(),
     },
     {
@@ -183,6 +187,8 @@ function createDemoMessages(): CommMessage[] {
       session_id: null,
       external_id: "demo-3",
       is_read: true,
+      provider: "wati",
+      message_type: "regular",
       created_at: new Date(Date.now() - 7200000).toISOString(),
     },
   ];

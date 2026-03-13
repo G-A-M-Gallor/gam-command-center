@@ -70,6 +70,8 @@ export async function POST(request: NextRequest) {
       session_id: null,
       external_id: callId || null,
       is_read: false,
+      provider: "voicenter",
+      message_type: "regular" as const,
       created_at: timestamp,
     };
 

@@ -43,7 +43,7 @@ async function getToken(): Promise<string | null> {
 
 // ─── Types ──────────────────────────────────────────────
 
-type CommTab = 'calls' | 'messages' | 'contacts' | 'docs';
+type CommTab = 'calls' | 'messages' | 'whatsapp_personal' | 'contacts' | 'docs';
 
 interface ContactGroup {
   phone: string;
@@ -59,6 +59,7 @@ interface ContactGroup {
 const CHANNEL_ICON: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
   whatsapp: { icon: MessageSquare, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   phone: { icon: Phone, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+  sms: { icon: MessageSquare, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
   email: { icon: Mail, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   note: { icon: StickyNote, color: 'text-purple-400', bg: 'bg-purple-500/10' },
   reminder: { icon: Bell, color: 'text-rose-400', bg: 'bg-rose-500/10' },
@@ -116,7 +117,8 @@ function formatDuration(seconds: number | undefined): string {
 
 const TAB_CHANNELS: Record<CommTab, string[] | null> = {
   calls: ['phone'],
-  messages: ['whatsapp', 'email'],
+  messages: ['whatsapp', 'email', 'sms'],
+  whatsapp_personal: ['whatsapp_personal'], // future — personal WhatsApp
   contacts: null, // all — grouped differently
   docs: ['note', 'reminder'],
 };
@@ -157,6 +159,8 @@ function AddCallModal({ c, isRtl, onClose, onSave }: AddCallModalProps) {
       session_id: null,
       external_id: null,
       is_read: true,
+      provider: 'manual',
+      message_type: 'regular' as const,
       created_at: new Date(dateTime).toISOString(),
     });
     setSaving(false);
@@ -304,6 +308,16 @@ function MessageCard({ msg, c, lang, onClick }: { msg: CommMessage; c: Record<st
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${ch.bg} ${ch.color}`}>
               {c[msg.channel] || msg.channel}
             </span>
+            {msg.provider ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-700/50 text-slate-400">
+                {msg.provider}
+              </span>
+            ) : null}
+            {msg.message_type && msg.message_type !== 'regular' ? (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400">
+                {msg.message_type}
+              </span>
+            ) : null}
             <span className="text-[10px] text-slate-600">{formatTime(msg.created_at)}</span>
           </div>
         </div>
@@ -615,9 +629,10 @@ export default function CommsPage() {
   }, [filteredMessages, showTimeline, activeTabs]);
 
   // Tab definitions
-  const tabs: { id: CommTab; icon: React.ElementType; label: string }[] = [
+  const tabs: { id: CommTab; icon: React.ElementType; label: string; disabled?: boolean }[] = [
     { id: 'calls', icon: Phone, label: language === 'he' ? 'שיחות' : language === 'ru' ? 'Звонки' : 'Calls' },
     { id: 'messages', icon: MessageSquare, label: language === 'he' ? 'הודעות' : language === 'ru' ? 'Сообщения' : 'Messages' },
+    { id: 'whatsapp_personal', icon: MessageSquare, label: 'WhatsApp גל', disabled: true },
     { id: 'contacts', icon: Users, label: language === 'he' ? 'אנשי קשר' : language === 'ru' ? 'Контакты' : 'Contacts' },
     { id: 'docs', icon: FileText, label: language === 'he' ? 'מסמכים' : language === 'ru' ? 'Документы' : 'Docs' },
   ];
@@ -660,8 +675,17 @@ export default function CommsPage() {
       <div className="shrink-0 border-b border-slate-700/50 px-6 py-2.5">
         <div className="flex items-center gap-2">
           <span className="text-xs text-slate-500 me-1">{language === 'he' ? 'הצג:' : language === 'ru' ? 'Показать:' : 'Show:'}</span>
-          {tabs.map(({ id, icon: TabIcon, label }) => {
+          {tabs.map(({ id, icon: TabIcon, label, disabled }) => {
             const isOn = activeTabs.has(id);
+            if (disabled) {
+              return (
+                <span key={id} title={language === 'he' ? 'בקרוב — עדיין לא מחובר' : 'Coming soon — not connected yet'}
+                  className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-slate-700/30 bg-slate-800/20 text-slate-600 cursor-not-allowed opacity-50 select-none">
+                  <TabIcon className="h-3.5 w-3.5" />
+                  {label}
+                </span>
+              );
+            }
             return (
               <button key={id} type="button" onClick={() => toggleTab(id)}
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
