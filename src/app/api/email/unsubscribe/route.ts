@@ -83,17 +83,6 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true, subscribed: false });
 }
 
-/**
- * Generate unsubscribe token for email links.
- */
-export async function generateUnsubscribeToken(email: string, tenantId: string): Promise<string> {
-  const secret = new TextEncoder().encode(JWT_SECRET);
-  return await new jose.SignJWT({ email, tenant_id: tenantId })
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("30d")
-    .sign(secret);
-}
-
 function htmlPage(title: string, message: string): string {
   return `<!DOCTYPE html>
 <html lang="he" dir="rtl">
