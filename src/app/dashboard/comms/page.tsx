@@ -38,6 +38,8 @@ import {
 } from '@/lib/supabase/commQueries';
 import type { CommMessage } from '@/lib/wati/types';
 import { createClient } from '@/lib/supabase/client';
+import { SendEmailModal } from '@/components/email/SendEmailModal';
+import { EmailDetailPanel } from '@/components/email/EmailDetailPanel';
 
 const supabase = createClient();
 
@@ -48,7 +50,34 @@ async function getToken(): Promise<string | null> {
 
 // ─── Types ──────────────────────────────────────────────
 
-type CommTab = 'calls' | 'messages' | 'whatsapp_personal' | 'contacts' | 'docs' | 'notifications';
+type CommTab = 'calls' | 'messages' | 'whatsapp_personal' | 'contacts' | 'docs' | 'notifications' | 'emails';
+
+interface EmailSendRow {
+  id: string;
+  tenant_id: string | null;
+  template_id: string | null;
+  resend_id: string | null;
+  from_email: string;
+  to_email: string;
+  cc: string[] | null;
+  bcc: string[] | null;
+  subject: string;
+  html_body: string | null;
+  variables: Record<string, string> | null;
+  entity_id: string | null;
+  status: string;
+  opened_count: number;
+  clicked_count: number;
+  first_opened_at: string | null;
+  last_opened_at: string | null;
+  first_clicked_at: string | null;
+  clicked_links: Array<{ url: string; count: number; first_at: string }> | null;
+  bounce_reason: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+  email_templates?: { name: string; category: string } | null;
+}
 
 interface ContactGroup {
   phone: string;
@@ -127,6 +156,7 @@ const TAB_CHANNELS: Record<CommTab, string[] | null> = {
   contacts: null, // all — grouped differently
   docs: ['note', 'reminder'],
   notifications: null, // separate data source
+  emails: null, // separate data source (email_sends table)
 };
 
 // ─── Add Call Modal ─────────────────────────────────────
@@ -415,6 +445,62 @@ function ContactCard({ group, c, lang, onClick }: { group: ContactGroup; c: Reco
   );
 }
 
+const EMAIL_STATUS: Record<string, { color: string; bg: string; label: Record<string, string> }> = {
+  queued: { color: 'text-slate-400', bg: 'bg-slate-500/10', label: { he: 'בתור', en: 'Queued', ru: 'В очереди' } },
+  sent: { color: 'text-blue-400', bg: 'bg-blue-500/10', label: { he: 'נשלח', en: 'Sent', ru: 'Отправлено' } },
+  delivered: { color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: { he: 'נמסר', en: 'Delivered', ru: 'Доставлено' } },
+  opened: { color: 'text-amber-400', bg: 'bg-amber-500/10', label: { he: 'נפתח', en: 'Opened', ru: 'Открыто' } },
+  clicked: { color: 'text-purple-400', bg: 'bg-purple-500/10', label: { he: 'נלחץ', en: 'Clicked', ru: 'Клик' } },
+  bounced: { color: 'text-red-400', bg: 'bg-red-500/10', label: { he: 'חזר', en: 'Bounced', ru: 'Отклонено' } },
+  failed: { color: 'text-red-400', bg: 'bg-red-500/10', label: { he: 'נכשל', en: 'Failed', ru: 'Ошибка' } },
+};
+
+function EmailCard({ email, lang, onClick }: { email: EmailSendRow; lang: string; onClick: () => void }) {
+  const st = EMAIL_STATUS[email.status] || EMAIL_STATUS.queued;
+
+  return (
+    <div onClick={onClick}
+      className="group cursor-pointer rounded-xl border border-slate-700/50 p-4 transition-all hover:border-slate-600 hover:bg-slate-800/30">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
+          <Mail className="h-4 w-4 text-amber-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 truncate">{email.subject}</span>
+            <span className="text-xs text-slate-500 whitespace-nowrap">{timeAgo(email.created_at, lang)}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-1">
+            <ArrowUpRight className="h-3 w-3 text-blue-400 shrink-0" />
+            <span className="text-xs text-slate-400 truncate">{email.to_email}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${st.bg} ${st.color}`}>
+              {st.label[lang] || st.label.en}
+            </span>
+            {email.email_templates && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-700/50 text-slate-400">
+                {email.email_templates.name}
+              </span>
+            )}
+            {email.opened_count > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400">
+                👁 {email.opened_count}
+              </span>
+            )}
+            {email.clicked_count > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/10 text-purple-400">
+                🔗 {email.clicked_count}
+              </span>
+            )}
+            <span className="text-[10px] text-slate-600">{formatTime(email.created_at)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function NotificationCard({ notif, lang }: { notif: NotificationLogRow; lang: string }) {
   const isSent = notif.delivery_status === 'sent';
   const StatusIcon = isSent ? CheckCircle2 : XCircle;
@@ -490,6 +576,13 @@ export default function CommsPage() {
   const [notifLoading, setNotifLoading] = useState(false);
   const [notifCursor, setNotifCursor] = useState<string | null>(null);
 
+  // Email state
+  const [emailSends, setEmailSends] = useState<EmailSendRow[]>([]);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailCursor, setEmailCursor] = useState<string | null>(null);
+  const [showSendEmail, setShowSendEmail] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState<EmailSendRow | null>(null);
+
   // Load notifications when tab is active
   useEffect(() => {
     if (!activeTabs.has('notifications')) return;
@@ -500,6 +593,30 @@ export default function CommsPage() {
       setNotifLoading(false);
     });
   }, [activeTabs]);
+
+  // Load emails when tab is active
+  useEffect(() => {
+    if (!activeTabs.has('emails')) return;
+    setEmailLoading(true);
+    fetch('/api/email/sends?limit=50')
+      .then((r) => r.json())
+      .then((res) => {
+        setEmailSends(res.sends || []);
+        setEmailCursor(res.nextCursor || null);
+        setEmailLoading(false);
+      })
+      .catch(() => setEmailLoading(false));
+  }, [activeTabs]);
+
+  const reloadEmails = useCallback(() => {
+    fetch('/api/email/sends?limit=50')
+      .then((r) => r.json())
+      .then((res) => {
+        setEmailSends(res.sends || []);
+        setEmailCursor(res.nextCursor || null);
+      })
+      .catch(() => {});
+  }, []);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -684,6 +801,7 @@ export default function CommsPage() {
   const showTimeline = activeTabs.has('calls') || activeTabs.has('messages') || activeTabs.has('docs');
   const showContactsSection = activeTabs.has('contacts');
   const showNotifications = activeTabs.has('notifications');
+  const showEmails = activeTabs.has('emails');
 
   // Non-contact messages for the timeline
   const timelineMessages = useMemo(() => {
@@ -701,6 +819,7 @@ export default function CommsPage() {
     { id: 'whatsapp_personal', icon: MessageSquare, label: 'WhatsApp גל', disabled: true },
     { id: 'contacts', icon: Users, label: language === 'he' ? 'אנשי קשר' : language === 'ru' ? 'Контакты' : 'Contacts' },
     { id: 'docs', icon: FileText, label: language === 'he' ? 'מסמכים' : language === 'ru' ? 'Документы' : 'Docs' },
+    { id: 'emails', icon: Mail, label: language === 'he' ? 'מיילים' : language === 'ru' ? 'Почта' : 'Emails' },
     { id: 'notifications', icon: BellRing, label: language === 'he' ? 'התראות' : language === 'ru' ? 'Уведомления' : 'Notifications' },
   ];
 
@@ -734,6 +853,11 @@ export default function CommsPage() {
             className="flex items-center gap-1.5 rounded-lg bg-[var(--cc-accent-600)] px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--cc-accent-500)] transition-colors">
             <Plus className="h-4 w-4" />
             {c.addCall}
+          </button>
+          <button type="button" onClick={() => setShowSendEmail(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-300 hover:bg-amber-500/20 transition-colors">
+            <Mail className="h-4 w-4" />
+            {language === 'he' ? 'שלח מייל' : 'Send Email'}
           </button>
         </div>
       </PageHeader>
@@ -842,6 +966,47 @@ export default function CommsPage() {
               </div>
             )}
 
+            {/* Emails section */}
+            {showEmails && (
+              <div>
+                {(showTimeline || showContactsSection) && (
+                  <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
+                    <Mail className="h-3.5 w-3.5" />
+                    {language === 'he' ? 'מיילים' : 'Emails'}
+                    <span className="text-slate-600">({emailSends.length})</span>
+                  </h3>
+                )}
+                {emailLoading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
+                  </div>
+                ) : emailSends.length === 0 ? (
+                  <EmptyState icon={Mail} text={language === 'he' ? 'אין מיילים' : 'No emails sent'} />
+                ) : (
+                  <div className="space-y-2">
+                    {emailSends.map((email) => (
+                      <EmailCard key={email.id} email={email} lang={language}
+                        onClick={() => setSelectedEmail(email)} />
+                    ))}
+                  </div>
+                )}
+                {emailCursor && !emailLoading && (
+                  <div className="flex justify-center py-3">
+                    <button type="button" onClick={() => {
+                      fetch(`/api/email/sends?limit=50&cursor=${emailCursor}`)
+                        .then((r) => r.json())
+                        .then((res) => {
+                          setEmailSends((prev) => [...prev, ...(res.sends || [])]);
+                          setEmailCursor(res.nextCursor || null);
+                        });
+                    }} className="flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
+                      {c.loadMore}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Notifications section */}
             {showNotifications && (
               <div>
@@ -881,7 +1046,7 @@ export default function CommsPage() {
             )}
 
             {/* Edge case: nothing active (shouldn't happen, but fallback) */}
-            {!showTimeline && !showContactsSection && !showNotifications && (
+            {!showTimeline && !showContactsSection && !showNotifications && !showEmails && (
               <EmptyState icon={MessageSquare} text={c.noMessages} />
             )}
           </div>
@@ -902,6 +1067,22 @@ export default function CommsPage() {
       {/* Add call modal */}
       {showAddModal && (
         <AddCallModal c={c} isRtl={isRtl} onClose={() => setShowAddModal(false)} onSave={handleAddCall} />
+      )}
+
+      {/* Send email modal */}
+      {showSendEmail && (
+        <SendEmailModal
+          onClose={() => setShowSendEmail(false)}
+          onSent={reloadEmails}
+        />
+      )}
+
+      {/* Email detail panel */}
+      {selectedEmail && (
+        <EmailDetailPanel
+          emailSend={selectedEmail}
+          onClose={() => setSelectedEmail(null)}
+        />
       )}
     </div>
   );

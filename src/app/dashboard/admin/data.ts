@@ -341,13 +341,16 @@ export const routes: RouteEntry[] = [
   },
   {
     id: 'comms', path: '/dashboard/comms', name: 'Communication', nameHe: 'תקשורת', icon: MessagesSquare,
-    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-13',
-    descriptionHe: 'עמוד תקשורת מרכזי — טבלת הודעות, חיפוש, סינון, הוספת שיחה ידנית, Voicenter webhook',
-    descriptionEn: 'Central communication page — message table, search, filters, manual call entry, Voicenter webhook',
+    phase: 2, status: 'active', version: '1.1.0', addedDate: '2026-03-13',
+    descriptionHe: 'עמוד תקשורת מרכזי — טבלת הודעות, חיפוש, סינון, שיחות, מיילים (Resend), התראות, Voicenter webhook',
+    descriptionEn: 'Central communication page — messages, calls, emails (Resend), notifications, search, filters, Voicenter webhook',
     components: [
       { id: 'comms-page', name: 'CommsPage', file: 'app/dashboard/comms/page.tsx', status: 'active' },
+      { id: 'send-email-modal', name: 'SendEmailModal', file: 'components/email/SendEmailModal.tsx', status: 'active' },
+      { id: 'email-detail-panel', name: 'EmailDetailPanel', file: 'components/email/EmailDetailPanel.tsx', status: 'active' },
+      { id: 'email-stats-widget', name: 'EmailStatsWidget', file: 'components/email/EmailStatsWidget.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates', 'notification_log'], visible: true, sidebarTab: true,
+    contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates', 'notification_log', 'email_sends', 'email_events', 'email_tenants', 'email_templates', 'email_unsubscribes'], visible: true, sidebarTab: true,
   },
 ];
 
@@ -390,6 +393,7 @@ export const widgets: WidgetEntry[] = [
   { id: 'matching', name: 'Matching', nameHe: 'התאמות', file: 'MatchingWidget.tsx', defaultSize: '2x', panelMode: 'side-panel', status: 'active', version: '1.0.0', addedDate: '2026-03-11' },
   { id: 'ceo-queue', name: 'CEO Queue', nameHe: 'תור CEO', file: 'CeoQueueWidget.tsx', defaultSize: '1x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-12' },
   { id: 'communication', name: 'Communication', nameHe: 'תקשורת', file: 'CommunicationWidget.tsx', defaultSize: '2x', panelMode: 'side-panel', status: 'active', version: '1.0.0', addedDate: '2026-03-13' },
+  { id: 'email-stats', name: 'Email Stats', nameHe: 'סטטיסטיקות מייל', file: 'EmailStatsWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-14' },
 ];
 
 // ─── Context Data ────────────────────────────────────────

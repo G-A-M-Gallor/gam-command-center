@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare, Mail } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -63,6 +63,9 @@ const CeoQueueBarContent = dynamic(() => import("./CeoQueueWidget").then((m) => 
 
 const CommunicationWidgetPanel = dynamic(() => import("./CommunicationWidget").then((m) => ({ default: m.CommunicationWidgetPanel })), { ssr: false }) as ComponentType<any>;
 const CommunicationBarContent = dynamic(() => import("./CommunicationWidget").then((m) => ({ default: m.CommunicationBarContent })), { ssr: false }) as ComponentType<any>;
+
+const EmailStatsPanel = dynamic(() => import("@/components/email/EmailStatsWidget").then((m) => ({ default: m.EmailStatsPanel })), { ssr: false }) as ComponentType<any>;
+const EmailStatsBarContent = dynamic(() => import("@/components/email/EmailStatsWidget").then((m) => ({ default: m.EmailStatsBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -439,6 +442,23 @@ export const widgetRegistry: WidgetDefinition[] = [
     component: CommunicationWidgetPanel,
     renderBar: CommunicationBarContent,
     panelMode: "side-panel",
+  },
+  {
+    id: "email-stats",
+    icon: Mail,
+    label: { he: "סטטיסטיקות מייל", en: "Email Stats", ru: "Статистика почты" },
+    description: {
+      he: "סטטיסטיקות שליחת מיילים — נשלחו, נפתחו, קליקים, חזרות",
+      en: "Email sending stats — sent, opened, clicked, bounced",
+      ru: "Статистика рассылки — отправлено, открыто, клик, отклонено",
+    },
+    defaultSize: 2,
+    status: "active",
+    category: "analytics",
+    tier: "pro",
+    isRemovable: true,
+    component: EmailStatsPanel,
+    renderBar: EmailStatsBarContent,
   },
   {
     id: "shortcuts",
