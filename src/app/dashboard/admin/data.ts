@@ -1,7 +1,7 @@
 import {
   Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
-  Shield, HelpCircle, BookOpen, Brain, Users, Compass,
+  Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2,
 } from 'lucide-react';
@@ -338,6 +338,16 @@ export const routes: RouteEntry[] = [
       { id: 'roadmap-page', name: 'RoadmapPage', file: 'app/dashboard/roadmap/page.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext', 'AuthContext'], supabaseTables: [], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'comms', path: '/dashboard/comms', name: 'Communication', nameHe: 'תקשורת', icon: MessagesSquare,
+    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-13',
+    descriptionHe: 'עמוד תקשורת מרכזי — טבלת הודעות, חיפוש, סינון, הוספת שיחה ידנית, Voicenter webhook',
+    descriptionEn: 'Central communication page — message table, search, filters, manual call entry, Voicenter webhook',
+    components: [
+      { id: 'comms-page', name: 'CommsPage', file: 'app/dashboard/comms/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates'], visible: true, sidebarTab: true,
   },
 ];
 

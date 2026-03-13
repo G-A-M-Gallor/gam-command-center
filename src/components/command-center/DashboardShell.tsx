@@ -42,6 +42,7 @@ const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
   "/dashboard/automations": { he: "אוטומציות", en: "Automations", ru: "Автоматизация" },
   "/dashboard/grid": { he: "גיליון", en: "Grid", ru: "Таблица" },
   "/dashboard/slides": { he: "מצגת", en: "Slides", ru: "Слайды" },
+  "/dashboard/comms": { he: "תקשורת", en: "Communication", ru: "Коммуникация" },
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

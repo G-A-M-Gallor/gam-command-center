@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { createClient } from "@supabase/supabase-js";
-import { getMessages } from "@/lib/wati/client";
+import { getMessages, getContacts } from "@/lib/wati/client";
 import { syncWatiMessages } from "@/lib/wati/sync";
 
 function getServiceClient() {
@@ -12,42 +12,77 @@ function getServiceClient() {
 }
 
 /**
+ * Sync messages for a single phone number. Returns count of upserted rows.
+ */
+async function syncPhone(
+  supabase: ReturnType<typeof getServiceClient>,
+  phone: string,
+): Promise<number> {
+  const watiMessages = await getMessages(phone, 100);
+  const rows = await syncWatiMessages(supabase, watiMessages, phone);
+  if (rows.length === 0) return 0;
+
+  const { error, count } = await supabase
+    .from("comm_messages")
+    .upsert(rows, { onConflict: "channel,external_id", count: "exact" });
+
+  if (error) {
+    console.error(`Sync error for ${phone}:`, error.message);
+    return 0;
+  }
+  return count ?? rows.length;
+}
+
+/**
  * POST /api/comms/sync
- * Manual sync — pull messages from WATI for a phone number.
+ *
+ * Body: { phone?: string }
+ * - With phone → sync messages for that specific number
+ * - Without phone → bulk sync: fetch all WATI contacts, sync each one
  */
 export async function POST(request: NextRequest) {
   const { error: authError } = await requireAuth(request);
   if (authError) return NextResponse.json({ error: authError }, { status: 401 });
 
   try {
-    const body = await request.json();
-    const phone: string = body.phone;
-
-    if (!phone) {
-      return NextResponse.json({ error: "phone is required" }, { status: 400 });
-    }
-
-    // Fetch from WATI
-    const watiMessages = await getMessages(phone, 100);
-
-    // Convert to comm_messages rows
+    const body = await request.json().catch(() => ({}));
+    const phone: string | undefined = body.phone;
     const supabase = getServiceClient();
-    const rows = await syncWatiMessages(supabase, watiMessages, phone);
 
-    if (rows.length === 0) {
-      return NextResponse.json({ synced: 0 });
+    // ── Single phone sync ───────────────────────────
+    if (phone) {
+      const synced = await syncPhone(supabase, phone);
+      return NextResponse.json({ synced, contacts: 1 });
     }
 
-    // Upsert to avoid duplicates
-    const { error: upsertError, count } = await supabase
-      .from("comm_messages")
-      .upsert(rows, { onConflict: "channel,external_id", count: "exact" });
+    // ── Bulk sync: all WATI contacts ────────────────
+    const contacts = await getContacts(100);
 
-    if (upsertError) {
-      return NextResponse.json({ error: upsertError.message }, { status: 500 });
+    let totalSynced = 0;
+    let contactsSynced = 0;
+    const errors: string[] = [];
+
+    // Process contacts sequentially to avoid WATI rate limits
+    for (const contact of contacts) {
+      const contactPhone = contact.phone || contact.wAid;
+      if (!contactPhone) continue;
+
+      try {
+        const count = await syncPhone(supabase, contactPhone);
+        totalSynced += count;
+        contactsSynced++;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        errors.push(`${contactPhone}: ${msg}`);
+      }
     }
 
-    return NextResponse.json({ synced: count ?? rows.length });
+    return NextResponse.json({
+      synced: totalSynced,
+      contacts: contactsSynced,
+      totalContacts: contacts.length,
+      errors: errors.length > 0 ? errors : undefined,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal server error";
     return NextResponse.json({ error: message }, { status: 500 });
