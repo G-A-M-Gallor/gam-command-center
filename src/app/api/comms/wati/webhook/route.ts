@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { watiMessageToCommRow } from "@/lib/wati/sync";
 import { findEntityByPhone } from "@/lib/wati/sync";
 import type { WATIMessage } from "@/lib/wati/types";
+import { sendCommPush } from "@/lib/push/sendCommPush";
 
 function getServiceClient() {
   return createClient(
@@ -64,6 +65,11 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error("Webhook insert error:", insertError.message);
       return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    // Send push notification for inbound messages
+    if (!watiMsg.owner) {
+      sendCommPush(supabase, row).catch(() => {});
     }
 
     return NextResponse.json({ success: true });

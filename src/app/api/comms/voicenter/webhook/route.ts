@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { findEntityByPhone } from "@/lib/wati/sync";
+import { sendCommPush } from "@/lib/push/sendCommPush";
 
 function getServiceClient() {
   return createClient(
@@ -82,6 +83,11 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error("Voicenter webhook insert error:", insertError.message);
       return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    // Send push notification for inbound calls
+    if (direction === "inbound") {
+      sendCommPush(supabase, row).catch(() => {});
     }
 
     return NextResponse.json({ success: true });

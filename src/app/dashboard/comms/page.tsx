@@ -21,6 +21,9 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Clock,
+  BellRing,
+  CheckCircle2,
+  XCircle,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
@@ -29,7 +32,9 @@ import {
   fetchAllCommMessages,
   insertCommMessage,
   getGlobalUnreadCount,
+  fetchNotificationLog,
   type FetchAllCommOptions,
+  type NotificationLogRow,
 } from '@/lib/supabase/commQueries';
 import type { CommMessage } from '@/lib/wati/types';
 import { createClient } from '@/lib/supabase/client';
@@ -43,7 +48,7 @@ async function getToken(): Promise<string | null> {
 
 // ─── Types ──────────────────────────────────────────────
 
-type CommTab = 'calls' | 'messages' | 'whatsapp_personal' | 'contacts' | 'docs';
+type CommTab = 'calls' | 'messages' | 'whatsapp_personal' | 'contacts' | 'docs' | 'notifications';
 
 interface ContactGroup {
   phone: string;
@@ -121,6 +126,7 @@ const TAB_CHANNELS: Record<CommTab, string[] | null> = {
   whatsapp_personal: ['whatsapp_personal'], // future — personal WhatsApp
   contacts: null, // all — grouped differently
   docs: ['note', 'reminder'],
+  notifications: null, // separate data source
 };
 
 // ─── Add Call Modal ─────────────────────────────────────
@@ -409,6 +415,49 @@ function ContactCard({ group, c, lang, onClick }: { group: ContactGroup; c: Reco
   );
 }
 
+function NotificationCard({ notif, lang }: { notif: NotificationLogRow; lang: string }) {
+  const isSent = notif.delivery_status === 'sent';
+  const StatusIcon = isSent ? CheckCircle2 : XCircle;
+  const statusColor = isSent ? 'text-emerald-400' : 'text-red-400';
+  const meta = notif.meta as Record<string, string> | null;
+  const channel = meta?.channel || '';
+  const chConf = channel ? CHANNEL_ICON[channel] : null;
+
+  return (
+    <div className="group rounded-xl border border-slate-700/50 p-4 transition-all hover:bg-slate-800/30">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/10">
+          <BellRing className="h-4 w-4 text-amber-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium text-slate-200 truncate">{notif.title}</span>
+            <span className="text-xs text-slate-500 whitespace-nowrap">{timeAgo(notif.created_at, lang)}</span>
+          </div>
+          {notif.body && (
+            <p className="mt-1 text-sm text-slate-400 line-clamp-2">{notif.body}</p>
+          )}
+          <div className="flex items-center gap-2 mt-2">
+            <StatusIcon className={`h-3 w-3 ${statusColor}`} />
+            <span className={`text-[10px] ${statusColor}`}>
+              {isSent ? (lang === 'he' ? 'נמסר' : 'Sent') : (lang === 'he' ? 'נכשל' : 'Failed')}
+            </span>
+            {chConf && (
+              <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] ${chConf.bg} ${chConf.color}`}>
+                <chConf.icon className="h-2.5 w-2.5" />
+              </span>
+            )}
+            {meta?.type === 'sync_summary' && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400">sync</span>
+            )}
+            <span className="text-[10px] text-slate-600">{formatTime(notif.created_at)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ──────────────────────────────────────────
 
 export default function CommsPage() {
@@ -435,6 +484,22 @@ export default function CommsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  // Notifications state
+  const [notifications, setNotifications] = useState<NotificationLogRow[]>([]);
+  const [notifLoading, setNotifLoading] = useState(false);
+  const [notifCursor, setNotifCursor] = useState<string | null>(null);
+
+  // Load notifications when tab is active
+  useEffect(() => {
+    if (!activeTabs.has('notifications')) return;
+    setNotifLoading(true);
+    fetchNotificationLog({ limit: 50 }).then((res) => {
+      setNotifications(res.data);
+      setNotifCursor(res.nextCursor);
+      setNotifLoading(false);
+    });
+  }, [activeTabs]);
 
   // Search debounce
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -618,6 +683,7 @@ export default function CommsPage() {
   const onlyContacts = activeTabs.size === 1 && activeTabs.has('contacts');
   const showTimeline = activeTabs.has('calls') || activeTabs.has('messages') || activeTabs.has('docs');
   const showContactsSection = activeTabs.has('contacts');
+  const showNotifications = activeTabs.has('notifications');
 
   // Non-contact messages for the timeline
   const timelineMessages = useMemo(() => {
@@ -635,6 +701,7 @@ export default function CommsPage() {
     { id: 'whatsapp_personal', icon: MessageSquare, label: 'WhatsApp גל', disabled: true },
     { id: 'contacts', icon: Users, label: language === 'he' ? 'אנשי קשר' : language === 'ru' ? 'Контакты' : 'Contacts' },
     { id: 'docs', icon: FileText, label: language === 'he' ? 'מסמכים' : language === 'ru' ? 'Документы' : 'Docs' },
+    { id: 'notifications', icon: BellRing, label: language === 'he' ? 'התראות' : language === 'ru' ? 'Уведомления' : 'Notifications' },
   ];
 
   // Render the correct card type based on the message's channel
@@ -775,8 +842,46 @@ export default function CommsPage() {
               </div>
             )}
 
+            {/* Notifications section */}
+            {showNotifications && (
+              <div>
+                {(showTimeline || showContactsSection) && (
+                  <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
+                    <BellRing className="h-3.5 w-3.5" />
+                    {language === 'he' ? 'התראות' : 'Notifications'}
+                    <span className="text-slate-600">({notifications.length})</span>
+                  </h3>
+                )}
+                {notifLoading ? (
+                  <div className="flex items-center justify-center py-10">
+                    <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <EmptyState icon={BellRing} text={language === 'he' ? 'אין התראות' : 'No notifications'} />
+                ) : (
+                  <div className="space-y-2">
+                    {notifications.map((n) => (
+                      <NotificationCard key={n.id} notif={n} lang={language} />
+                    ))}
+                  </div>
+                )}
+                {notifCursor && !notifLoading && (
+                  <div className="flex justify-center py-3">
+                    <button type="button" onClick={() => {
+                      fetchNotificationLog({ cursor: notifCursor, limit: 50 }).then((res) => {
+                        setNotifications((prev) => [...prev, ...res.data]);
+                        setNotifCursor(res.nextCursor);
+                      });
+                    }} className="flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
+                      {c.loadMore}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Edge case: nothing active (shouldn't happen, but fallback) */}
-            {!showTimeline && !showContactsSection && (
+            {!showTimeline && !showContactsSection && !showNotifications && (
               <EmptyState icon={MessageSquare} text={c.noMessages} />
             )}
           </div>

@@ -347,7 +347,7 @@ export const routes: RouteEntry[] = [
     components: [
       { id: 'comms-page', name: 'CommsPage', file: 'app/dashboard/comms/page.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates'], visible: true, sidebarTab: true,
+    contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates', 'notification_log'], visible: true, sidebarTab: true,
   },
 ];
 
@@ -1872,8 +1872,10 @@ export const changelogEntries: ChangelogEntry[] = [
       'public/icons/icon-512.png',
       'public/icons/apple-touch-icon.png',
       'supabase/migrations/20260362_push_subscriptions.sql',
+      'supabase/migrations/20260369_notification_log.sql',
+      'src/lib/push/sendCommPush.ts',
     ],
-    notes: 'Full PWA stack: Serwist service worker (precache, runtime caching, navigation preload, offline fallback), manifest.ts with maskable icons, push notification handlers (subscribe/unsubscribe/click), app badge via message event, install prompt hook, device capability hooks (camera, contacts, wake lock). Push subscriptions stored in Supabase (push_subscriptions table with RLS). Settings page includes PWA tab. Offline page at /~offline.',
+    notes: 'Full PWA stack: Serwist service worker (precache, runtime caching, navigation preload, offline fallback), manifest.ts with maskable icons, push notification handlers (subscribe/unsubscribe/click), app badge via message event, install prompt hook, device capability hooks (camera, contacts, wake lock). Push subscriptions stored in Supabase (push_subscriptions table with RLS). Settings page includes PWA tab. Offline page at /~offline. sendCommPush helper sends push notifications when new comm_messages arrive (WATI/Voicenter webhooks). notification_log table tracks all sent notifications.',
     notesHe: 'מערכת PWA מלאה: Serwist service worker (precache, runtime caching, navigation preload, fallback אופליין), manifest.ts עם אייקוני maskable, הנדלרים להתראות push (הרשמה/ביטול/לחיצה), badge אפליקציה, hook התקנה, hooks יכולות מכשיר (מצלמה, אנשי קשר, wake lock). הרשמות push נשמרות ב-Supabase (טבלת push_subscriptions עם RLS). דף הגדרות כולל טאב PWA. דף אופליין ב-/~offline.',
     purpose: 'Complete PWA infrastructure making vBrain.io fully installable with offline support, push notifications, and native-like capabilities. Serwist handles caching strategies (cache-first for static, network-first for navigation, stale-while-revalidate for API GETs, network-only for AI/git). Push subscriptions persisted in Supabase with per-user RLS.',
     purposeHe: 'תשתית PWA מלאה שהופכת את vBrain.io לאפליקציה מותקנת עם תמיכת אופליין, התראות push, ויכולות native. Serwist מנהל אסטרטגיות cache (cache-first לסטטי, network-first לניווט, stale-while-revalidate ל-API GETs, network-only ל-AI/git). הרשמות push נשמרות ב-Supabase עם RLS לכל משתמש.',

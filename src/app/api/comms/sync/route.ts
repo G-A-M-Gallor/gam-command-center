@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/api/auth";
 import { createClient } from "@supabase/supabase-js";
 import { getMessages, getContacts } from "@/lib/wati/client";
 import { syncWatiMessages } from "@/lib/wati/sync";
+import { sendSummaryPush } from "@/lib/push/sendCommPush";
 
 function getServiceClient() {
   return createClient(
@@ -75,6 +76,15 @@ export async function POST(request: NextRequest) {
         const msg = err instanceof Error ? err.message : "Unknown error";
         errors.push(`${contactPhone}: ${msg}`);
       }
+    }
+
+    // Send summary push if new messages were synced
+    if (totalSynced > 0) {
+      sendSummaryPush(
+        supabase,
+        "סנכרון WATI הושלם",
+        `${totalSynced} הודעות חדשות מ-${contactsSynced} אנשי קשר`,
+      ).catch(() => {});
     }
 
     return NextResponse.json({

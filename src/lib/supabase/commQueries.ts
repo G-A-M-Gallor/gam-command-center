@@ -198,6 +198,51 @@ export async function fetchAllCommMessages(
   return { data: messages, nextCursor, total: count ?? 0 };
 }
 
+// ─── Notification Log ───────────────────────────────
+
+export interface NotificationLogRow {
+  id: number;
+  user_id: string | null;
+  comm_message_id: string | null;
+  title: string;
+  body: string | null;
+  source_type: 'comm' | 'system' | 'manual';
+  device_type: string | null;
+  delivery_status: 'sent' | 'failed' | 'clicked';
+  url: string | null;
+  meta: Record<string, unknown>;
+  created_at: string;
+}
+
+export async function fetchNotificationLog(
+  options: { cursor?: string | null; limit?: number; deviceType?: string | null } = {},
+): Promise<{ data: NotificationLogRow[]; nextCursor: string | null }> {
+  const { cursor, limit = 50, deviceType } = options;
+
+  let query = supabase
+    .from('notification_log')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (deviceType) {
+    query = query.eq('device_type', deviceType);
+  }
+  if (cursor) {
+    query = query.lt('created_at', cursor);
+  }
+
+  const { data, error } = await query;
+  if (error) { console.error('fetchNotificationLog:', error.message); return { data: [], nextCursor: null }; }
+
+  const rows = (data ?? []) as NotificationLogRow[];
+  const nextCursor = rows.length === limit
+    ? rows[rows.length - 1].created_at ?? null
+    : null;
+
+  return { data: rows, nextCursor };
+}
+
 // ─── Unread Count (Global) ──────────────────────────
 
 export async function getGlobalUnreadCount(): Promise<number> {
