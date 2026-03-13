@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+import { useState, useEffect, useCallback, useRef } from "react";
 
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -19,20 +17,41 @@ export type PushState = "unsupported" | "denied" | "prompt" | "subscribed" | "lo
 
 export function usePushSubscription() {
   const [state, setState] = useState<PushState>("loading");
+  const vapidKeyRef = useRef<string | null>(
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null,
+  );
 
-  const isSupported =
+  const browserSupported =
     typeof window !== "undefined" &&
     "serviceWorker" in navigator &&
-    "PushManager" in window &&
-    !!VAPID_PUBLIC_KEY;
+    "PushManager" in window;
 
+  // Fetch VAPID key from server if not available at build time
   useEffect(() => {
-    if (!isSupported) {
+    if (!browserSupported) {
       setState("unsupported");
       return;
     }
 
-    async function check() {
+    async function init() {
+      // If key wasn't baked in at build time, fetch from server
+      if (!vapidKeyRef.current) {
+        try {
+          const res = await fetch("/api/push/config");
+          const data = await res.json();
+          if (data.vapidPublicKey) {
+            vapidKeyRef.current = data.vapidPublicKey;
+          }
+        } catch {
+          // Server unreachable — push unsupported
+        }
+      }
+
+      if (!vapidKeyRef.current) {
+        setState("unsupported");
+        return;
+      }
+
       const permission = Notification.permission;
       if (permission === "denied") {
         setState("denied");
@@ -44,17 +63,18 @@ export function usePushSubscription() {
       setState(sub ? "subscribed" : "prompt");
     }
 
-    check();
-  }, [isSupported]);
+    init();
+  }, [browserSupported]);
 
   const subscribe = useCallback(async () => {
-    if (!isSupported || !VAPID_PUBLIC_KEY) return false;
+    if (!browserSupported || !vapidKeyRef.current) return false;
 
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
+        applicationServerKey: urlBase64ToUint8Array(vapidKeyRef.current)
+          .buffer as ArrayBuffer,
       });
 
       const json = sub.toJSON();
@@ -76,13 +96,12 @@ export function usePushSubscription() {
       }
       return false;
     } catch {
-      // User denied or other error
       if (Notification.permission === "denied") {
         setState("denied");
       }
       return false;
     }
-  }, [isSupported]);
+  }, [browserSupported]);
 
   const unsubscribe = useCallback(async () => {
     try {
@@ -104,5 +123,10 @@ export function usePushSubscription() {
     }
   }, []);
 
-  return { state, isSupported, subscribe, unsubscribe };
+  return {
+    state,
+    isSupported: browserSupported && !!vapidKeyRef.current,
+    subscribe,
+    unsubscribe,
+  };
 }
