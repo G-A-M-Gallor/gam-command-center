@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { Webhook } from "svix";
 
 // Resend webhook events for email tracking
 // Events: email.sent, email.delivered, email.opened, email.clicked, email.bounced, email.complained
@@ -20,8 +21,10 @@ interface ResendWebhookPayload {
 }
 
 export async function POST(request: Request) {
-  // Validate webhook signature (Resend uses Svix)
   const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+  const body = await request.text();
+
+  // Validate webhook signature using Svix
   if (webhookSecret) {
     const svixId = request.headers.get("svix-id");
     const svixSignature = request.headers.get("svix-signature");
@@ -29,12 +32,21 @@ export async function POST(request: Request) {
     if (!svixId || !svixSignature || !svixTimestamp) {
       return NextResponse.json({ error: "Missing webhook headers" }, { status: 401 });
     }
-    // For production: validate using @svix/webhooks. For now, presence check suffices.
+    try {
+      const wh = new Webhook(webhookSecret);
+      wh.verify(body, {
+        "svix-id": svixId,
+        "svix-signature": svixSignature,
+        "svix-timestamp": svixTimestamp,
+      });
+    } catch {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
   }
 
   let payload: ResendWebhookPayload;
   try {
-    payload = await request.json() as ResendWebhookPayload;
+    payload = JSON.parse(body) as ResendWebhookPayload;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
