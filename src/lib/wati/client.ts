@@ -4,7 +4,7 @@
 // Server-side client for WATI WhatsApp Business API.
 // Requires: WATI_API_URL + WATI_API_TOKEN env vars.
 
-import type { WATIContact, WATIMessage, WATITemplate, WATISendResponse, WATIApiResponse } from './types';
+import type { WATIContact, WATIMessage, WATITemplate, WATISendResponse } from './types';
 
 function getConfig() {
   const baseUrl = process.env.WATI_API_URL;
@@ -36,19 +36,19 @@ async function watiRequest<T>(path: string, options?: RequestInit): Promise<T> {
 
 /** Fetch contacts list */
 export async function getContacts(pageSize = 50, pageNumber = 1): Promise<WATIContact[]> {
-  const data = await watiRequest<WATIApiResponse<WATIContact[]>>(
+  const data = await watiRequest<{ result?: string; contact_list?: WATIContact[] }>(
     `/api/v1/getContacts?pageSize=${pageSize}&pageNumber=${pageNumber}`
   );
-  return data.result ?? [];
+  return data.contact_list ?? [];
 }
 
 /** Fetch messages for a phone number */
 export async function getMessages(phone: string, pageSize = 50, pageNumber = 1): Promise<WATIMessage[]> {
   const normalized = normalizePhone(phone);
-  const data = await watiRequest<WATIApiResponse<WATIMessage[]>>(
+  const data = await watiRequest<{ result?: string; messages?: { items?: WATIMessage[] } }>(
     `/api/v1/getMessages/${normalized}?pageSize=${pageSize}&pageNumber=${pageNumber}`
   );
-  return data.result ?? [];
+  return data.messages?.items ?? [];
 }
 
 /** Send a free-text WhatsApp message */
@@ -85,10 +85,10 @@ export async function sendTemplateMessage(
 
 /** Fetch approved message templates */
 export async function getMessageTemplates(): Promise<WATITemplate[]> {
-  const data = await watiRequest<WATIApiResponse<WATITemplate[]>>(
+  const data = await watiRequest<{ result?: string; messageTemplates?: WATITemplate[] }>(
     '/api/v1/getMessageTemplates'
   );
-  return data.result ?? [];
+  return data.messageTemplates ?? [];
 }
 
 // ─── Phone Normalization ────────────────────────────────────

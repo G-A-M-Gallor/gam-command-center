@@ -32,7 +32,9 @@ export function watiMessageToCommRow(
     is_read: msg.owner || msg.statusString === 'READ',
     provider: 'wati',
     message_type: 'regular',
-    created_at: msg.timestamp,
+    created_at: /^\d+$/.test(msg.timestamp)
+      ? new Date(Number(msg.timestamp) * 1000).toISOString()
+      : msg.timestamp,
   };
 }
 
