@@ -106,6 +106,20 @@ export const pushSubscribersDeleteSchema = z.object({
 
 export type PushSubscribersDeleteInput = z.infer<typeof pushSubscribersDeleteSchema>;
 
+// ─── Push Preferences ──────────────────────────────────────
+
+export const pushPreferencesSchema = z.object({
+  whatsapp: z.boolean().optional(),
+  phone: z.boolean().optional(),
+  sms: z.boolean().optional(),
+  email: z.boolean().optional(),
+  note: z.boolean().optional(),
+  reminder: z.boolean().optional(),
+  sync_summary: z.boolean().optional(),
+}).strict();
+
+export type PushPreferencesInput = z.infer<typeof pushPreferencesSchema>;
+
 // ─── Work Manager ──────────────────────────────────────────
 
 export const workManagerSchema = z.object({

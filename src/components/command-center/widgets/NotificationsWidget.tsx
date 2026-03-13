@@ -13,6 +13,14 @@ import {
   BellOff,
   Loader2,
   FileText,
+  MessageCircle,
+  Phone,
+  Mail,
+  StickyNote,
+  AlarmClock,
+  RefreshCw,
+  MessageSquare,
+  Settings2,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -108,6 +116,18 @@ const typeColors = {
   entity: "text-purple-400",
 };
 
+type NotifPreferences = Record<string, boolean>;
+
+const PREF_CHANNELS = [
+  { key: "whatsapp", icon: MessageCircle, color: "text-green-400" },
+  { key: "phone", icon: Phone, color: "text-blue-400" },
+  { key: "sms", icon: MessageSquare, color: "text-cyan-400" },
+  { key: "email", icon: Mail, color: "text-amber-400" },
+  { key: "note", icon: StickyNote, color: "text-purple-400" },
+  { key: "reminder", icon: AlarmClock, color: "text-red-400" },
+  { key: "sync_summary", icon: RefreshCw, color: "text-slate-400" },
+] as const;
+
 export function NotificationsPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
@@ -115,6 +135,33 @@ export function NotificationsPanel() {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const { state: pushState, subscribe, unsubscribe } = usePushSubscription();
   const [pushLoading, setPushLoading] = useState(false);
+  const [prefs, setPrefs] = useState<NotifPreferences>({});
+  const [prefsOpen, setPrefsOpen] = useState(false);
+  const [prefsSaving, setPrefsSaving] = useState(false);
+
+  // Load preferences when push is subscribed
+  useEffect(() => {
+    if (pushState !== "subscribed") return;
+    fetch("/api/push/preferences")
+      .then((r) => r.json())
+      .then((d) => { if (d.preferences) setPrefs(d.preferences); })
+      .catch(() => {});
+  }, [pushState]);
+
+  const togglePref = useCallback(async (key: string) => {
+    const current = prefs[key] !== false; // undefined/true = on
+    const updated = { ...prefs, [key]: !current };
+    setPrefs(updated);
+    setPrefsSaving(true);
+    try {
+      await fetch("/api/push/preferences", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: !current }),
+      });
+    } catch { /* revert on failure */ setPrefs(prefs); }
+    setPrefsSaving(false);
+  }, [prefs]);
 
   const handlePushToggle = useCallback(async () => {
     setPushLoading(true);
@@ -258,6 +305,47 @@ export function NotificationsPanel() {
               <BellRing className="h-3.5 w-3.5 text-[var(--cc-accent-400)]" />
             )}
           </button>
+        </div>
+      )}
+
+      {/* Notification preferences */}
+      {pushState === "subscribed" && (
+        <div className="rounded-lg bg-slate-700/20">
+          <button
+            type="button"
+            onClick={() => setPrefsOpen((v) => !v)}
+            className="flex w-full items-center justify-between px-2.5 py-2 text-xs text-slate-400 transition-colors hover:text-slate-300"
+          >
+            <span className="flex items-center gap-1.5">
+              <Settings2 className="h-3.5 w-3.5" />
+              {t.pwa.notifPreferences}
+            </span>
+            {prefsSaving && <Loader2 className="h-3 w-3 animate-spin text-slate-500" />}
+          </button>
+          {prefsOpen && (
+            <div className="space-y-0.5 px-2.5 pb-2">
+              {PREF_CHANNELS.map(({ key, icon: Icon, color }) => {
+                const isOn = prefs[key] !== false;
+                const label = t.pwa[`notif${key.charAt(0).toUpperCase() + key.slice(1)}` as keyof typeof t.pwa] || key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => togglePref(key)}
+                    className="flex w-full items-center justify-between rounded px-2 py-1.5 text-xs transition-colors hover:bg-slate-600/30"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon className={`h-3.5 w-3.5 ${isOn ? color : "text-slate-600"}`} />
+                      <span className={isOn ? "text-slate-300" : "text-slate-500"}>{label}</span>
+                    </span>
+                    <span className={`h-4 w-7 rounded-full transition-colors ${isOn ? "bg-[var(--cc-accent-500)]" : "bg-slate-600"} relative`}>
+                      <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-transform ${isOn ? "left-3.5" : "left-0.5"}`} />
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

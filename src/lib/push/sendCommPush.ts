@@ -57,6 +57,15 @@ export async function sendCommPush(
     return { sent: 0, failed: 0 };
   }
 
+  // Filter by user preferences — false = opted out, true/undefined = opted in
+  const eligibleSubs = subs.filter(
+    (sub) => sub.preferences?.[msg.channel] !== false,
+  );
+
+  if (eligibleSubs.length === 0) {
+    return { sent: 0, failed: 0 };
+  }
+
   const { title, body } = buildNotification(msg);
   const url = "/dashboard/comms";
   const payload = JSON.stringify({ title, body, url, tag: `comm-${msg.channel}` });
@@ -67,7 +76,7 @@ export async function sendCommPush(
   let failed = 0;
 
   await Promise.allSettled(
-    subs.map(async (sub) => {
+    eligibleSubs.map(async (sub) => {
       try {
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -119,13 +128,20 @@ export async function sendSummaryPush(
 
   if (!subs || subs.length === 0) return;
 
+  // Filter by sync_summary preference
+  const eligibleSubs = subs.filter(
+    (sub) => sub.preferences?.sync_summary !== false,
+  );
+
+  if (eligibleSubs.length === 0) return;
+
   const url = "/dashboard/comms";
   const payload = JSON.stringify({ title, body, url, tag: "comm-sync" });
 
   const expiredEndpoints: string[] = [];
 
   await Promise.allSettled(
-    subs.map(async (sub) => {
+    eligibleSubs.map(async (sub) => {
       try {
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -147,9 +163,9 @@ export async function sendSummaryPush(
   }
 
   // Log summary notification
-  if (subs.length > 0) {
+  if (eligibleSubs.length > 0) {
     await supabase.from("notification_log").insert(
-      subs.map((sub) => ({
+      eligibleSubs.map((sub) => ({
         user_id: sub.user_id,
         title,
         body,
@@ -169,6 +185,7 @@ interface PushSub {
   endpoint: string;
   p256dh: string;
   auth: string;
+  preferences?: Record<string, boolean> | null;
 }
 
 interface NotifLogRow {
