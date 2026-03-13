@@ -120,6 +120,53 @@ export const pushPreferencesSchema = z.object({
 
 export type PushPreferencesInput = z.infer<typeof pushPreferencesSchema>;
 
+// ─── Email Send ─────────────────────────────────────────────
+
+export const emailSendSchema = z.object({
+  to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
+  subject: z.string().min(1).max(500).optional(),
+  template_id: z.string().uuid().optional(),
+  template_name: z.string().optional(),
+  variables: z.record(z.string(), z.string()).optional(),
+  tenant_id: z.string().uuid().optional(),
+  entity_id: z.string().uuid().optional(),
+  cc: z.array(z.string().email()).optional(),
+  bcc: z.array(z.string().email()).optional(),
+});
+
+export type EmailSendInput = z.infer<typeof emailSendSchema>;
+
+// ─── Email Template ─────────────────────────────────────────
+
+export const emailTemplateSchema = z.object({
+  name: z.string().min(1).max(100),
+  subject: z.string().min(1).max(500),
+  category: z.enum(["system", "transactional", "marketing"]),
+  engine: z.enum(["react", "unlayer"]).optional().default("react"),
+  react_component: z.string().optional(),
+  unlayer_json: z.record(z.string(), z.unknown()).optional(),
+  html_compiled: z.string().optional(),
+  variables: z.array(z.string()).optional(),
+  tenant_id: z.string().uuid().optional(),
+});
+
+export type EmailTemplateInput = z.infer<typeof emailTemplateSchema>;
+
+// ─── Email Tenant ───────────────────────────────────────────
+
+export const emailTenantSchema = z.object({
+  name: z.string().min(1).max(200),
+  domain: z.string().min(1).max(200),
+  from_name: z.string().min(1).max(200),
+  from_email: z.string().email(),
+  reply_to: z.string().email().optional(),
+  logo_url: z.string().url().optional(),
+  signature_html: z.string().max(5000).optional(),
+  brand_color: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
+});
+
+export type EmailTenantInput = z.infer<typeof emailTenantSchema>;
+
 // ─── Work Manager ──────────────────────────────────────────
 
 export const workManagerSchema = z.object({
