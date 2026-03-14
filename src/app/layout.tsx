@@ -6,6 +6,8 @@ import { WidgetProvider } from "@/contexts/WidgetContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeInit } from "@/components/ThemeInit";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -99,6 +101,8 @@ try{var vm=localStorage.getItem('cc-style-view-mode');if(vm!=='system'){var so=J
             </AuthProvider>
           </ToastProvider>
         </SettingsProvider>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
