@@ -6548,6 +6548,12 @@ export const translations = {
       shortcutsScopeEditor: "Редактор",
       shortcutsScopeCardBrowser: "Браузер карточек",
       shortcutsScopeTable: "Таблица",
+      shortcutsReserved: "Системная",
+      // Common widget strings
+      allClear: "Всё в порядке",
+      soon: "Скоро",
+      savedLocally: "сохранено локально",
+      langFlag: "RU",
       weeklyPlanner: "Недельный планировщик",
       weeklyPlannerDesc: "Недельное планирование, ежедневные задачи и повторяющиеся шаблоны",
       plannerToday: "Сегодня",

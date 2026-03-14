@@ -48,13 +48,13 @@ interface RecentView {
 
 type ColumnStatus = "draft" | "sent" | "viewed" | "partially_signed" | "signed" | "archived";
 
-const COLUMNS: { status: ColumnStatus; label: string; labelEn: string; icon: React.ElementType; color: string }[] = [
-  { status: "draft", label: "טיוטה", labelEn: "Draft", icon: FileText, color: "text-slate-400" },
-  { status: "sent", label: "נשלח", labelEn: "Sent", icon: Send, color: "text-blue-400" },
-  { status: "viewed", label: "נצפה", labelEn: "Viewed", icon: Eye, color: "text-amber-400" },
-  { status: "partially_signed", label: "חתום חלקי", labelEn: "Partial", icon: PenTool, color: "text-orange-400" },
-  { status: "signed", label: "חתום", labelEn: "Signed", icon: CheckCircle2, color: "text-emerald-400" },
-  { status: "archived", label: "ארכיון", labelEn: "Archived", icon: Archive, color: "text-slate-500" },
+const COLUMNS: { status: ColumnStatus; i18nKey: string; icon: React.ElementType; color: string }[] = [
+  { status: "draft", i18nKey: "draft", icon: FileText, color: "text-slate-400" },
+  { status: "sent", i18nKey: "sent", icon: Send, color: "text-blue-400" },
+  { status: "viewed", i18nKey: "viewed", icon: Eye, color: "text-amber-400" },
+  { status: "partially_signed", i18nKey: "partiallySigned", icon: PenTool, color: "text-orange-400" },
+  { status: "signed", i18nKey: "signedStatus", icon: CheckCircle2, color: "text-emerald-400" },
+  { status: "archived", i18nKey: "archived", icon: Archive, color: "text-slate-500" },
 ];
 
 // ── Main Component ───────────────────────────────────────────
@@ -62,7 +62,8 @@ const COLUMNS: { status: ColumnStatus; label: string; labelEn: string; icon: Rea
 export default function DocumentsPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
+  const dp = t.documentsPage;
+  const isRtl = language === "he";
 
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,7 +174,7 @@ export default function DocumentsPage() {
   }, [filtered]);
 
   return (
-    <div className="flex h-full flex-col" dir={isHe ? "rtl" : "ltr"}>
+    <div className="flex h-full flex-col" dir={isRtl ? "rtl" : "ltr"}>
       <PageHeader pageKey="documents">
         <div className="flex items-center gap-2">
           <div className="relative">
@@ -181,14 +182,14 @@ export default function DocumentsPage() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={isHe ? "חיפוש מסמך..." : "Search documents..."}
+              placeholder={dp.searchDocuments}
               className="h-8 rounded-lg border border-slate-700 bg-slate-800/50 pe-3 ps-9 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500 focus:outline-none"
             />
           </div>
           <button
             onClick={fetchData}
             className="rounded-lg border border-slate-700 p-1.5 text-slate-400 hover:border-slate-600 hover:text-slate-300"
-            title={isHe ? "רענן" : "Refresh"}
+            title={dp.refresh}
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
@@ -196,7 +197,7 @@ export default function DocumentsPage() {
             className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-500"
           >
             <Plus className="h-4 w-4" />
-            {isHe ? "מסמך חדש" : "New Document"}
+            {dp.newDocument}
           </button>
         </div>
       </PageHeader>
@@ -216,7 +217,7 @@ export default function DocumentsPage() {
                 <div className="flex items-center gap-2 border-b border-slate-800 px-3 py-2.5">
                   <Icon className={`h-4 w-4 ${col.color}`} />
                   <span className="text-sm font-medium text-slate-300">
-                    {isHe ? col.label : col.labelEn}
+                    {dp[col.i18nKey as keyof typeof dp]}
                   </span>
                   <span className="ms-auto rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-500">
                     {items.length}
@@ -227,11 +228,11 @@ export default function DocumentsPage() {
                 <div className="flex-1 space-y-2 overflow-y-auto p-2">
                   {items.length === 0 && (
                     <div className="py-8 text-center text-xs text-slate-600">
-                      {isHe ? "אין מסמכים" : "No documents"}
+                      {dp.noDocuments}
                     </div>
                   )}
                   {items.map((sub) => (
-                    <SubmissionCard key={sub.id} submission={sub} isHe={isHe} />
+                    <SubmissionCard key={sub.id} submission={sub} dp={dp} language={language} />
                   ))}
                 </div>
               </div>
@@ -243,13 +244,13 @@ export default function DocumentsPage() {
       {/* Stats bar */}
       <div className="border-t border-slate-800 px-4 py-2">
         <div className="flex items-center gap-4 text-xs text-slate-500">
-          <span>{isHe ? "סה\"כ" : "Total"}: {submissions.length}</span>
+          <span>{dp.total}: {submissions.length}</span>
           {COLUMNS.map((col) => {
             const count = columns.get(col.status)?.length || 0;
             if (count === 0) return null;
             return (
               <span key={col.status} className={col.color}>
-                {isHe ? col.label : col.labelEn}: {count}
+                {dp[col.i18nKey as keyof typeof dp]}: {count}
               </span>
             );
           })}
@@ -261,7 +262,7 @@ export default function DocumentsPage() {
 
 // ── Submission Card ──────────────────────────────────────────
 
-function SubmissionCard({ submission: sub, isHe }: { submission: Submission; isHe: boolean }) {
+function SubmissionCard({ submission: sub, dp, language }: { submission: Submission; dp: ReturnType<typeof getTranslations>["documentsPage"]; language: string }) {
   const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
 
   return (
@@ -275,7 +276,7 @@ function SubmissionCard({ submission: sub, isHe }: { submission: Submission; isH
           {sub.name}
         </span>
         {sub.recently_viewed && (
-          <span className="shrink-0 animate-pulse text-sm" title={isHe ? "צופים עכשיו" : "Currently viewing"}>
+          <span className="shrink-0 animate-pulse text-sm" title={dp.currentlyViewing}>
             👁️
           </span>
         )}
@@ -286,7 +287,7 @@ function SubmissionCard({ submission: sub, isHe }: { submission: Submission; isH
         <div className="mb-2">
           <div className="mb-1 flex items-center justify-between text-[10px] text-slate-500">
             <span>
-              {sub.signed_count}/{sub.submitter_count} {isHe ? "חתמו" : "signed"}
+              {sub.signed_count}/{sub.submitter_count} {dp.signed}
             </span>
             <span>{Math.round((sub.signed_count / sub.submitter_count) * 100)}%</span>
           </div>
@@ -302,11 +303,11 @@ function SubmissionCard({ submission: sub, isHe }: { submission: Submission; isH
       {/* Meta row */}
       <div className="flex items-center gap-2 text-[10px] text-slate-500">
         <Clock className="h-3 w-3" />
-        <span>{formatRelative(sub.created_at, isHe)}</span>
+        <span>{formatRelative(sub.created_at, dp, language)}</span>
         {isExpired && (
           <span className="flex items-center gap-0.5 text-red-400">
             <XCircle className="h-3 w-3" />
-            {isHe ? "פג תוקף" : "Expired"}
+            {dp.expired}
           </span>
         )}
         {sub.origami_entity_type && (
@@ -321,14 +322,14 @@ function SubmissionCard({ submission: sub, isHe }: { submission: Submission; isH
 
 // ── Helpers ──────────────────────────────────────────────────
 
-function formatRelative(iso: string, isHe: boolean): string {
+function formatRelative(iso: string, dp: ReturnType<typeof getTranslations>["documentsPage"], language: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return isHe ? "עכשיו" : "now";
-  if (mins < 60) return isHe ? `לפני ${mins} דק׳` : `${mins}m ago`;
+  if (mins < 1) return dp.now;
+  if (mins < 60) return dp.minutesAgo.replace("{n}", String(mins));
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return isHe ? `לפני ${hours} שע׳` : `${hours}h ago`;
+  if (hours < 24) return dp.hoursAgo.replace("{n}", String(hours));
   const days = Math.floor(hours / 24);
-  if (days < 30) return isHe ? `לפני ${days} ימים` : `${days}d ago`;
-  return new Date(iso).toLocaleDateString(isHe ? "he-IL" : "en-IL");
+  if (days < 30) return dp.daysAgo.replace("{n}", String(days));
+  return new Date(iso).toLocaleDateString(language === "he" ? "he-IL" : language === "ru" ? "ru-RU" : "en-IL");
 }
