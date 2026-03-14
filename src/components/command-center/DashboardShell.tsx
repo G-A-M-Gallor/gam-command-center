@@ -133,8 +133,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }
       : undefined;
 
-  // TopBar always renders — when topbarVisible=false it uses hover mode automatically
-  const topbarInHoverMode = !isMobile && (shellPrefs.topbarHover || !shellPrefs.topbarVisible);
+  // topbarVisible ON → always visible (permanent). topbarVisible OFF → hover mode (safety).
+  const topbarInHoverMode = !isMobile && !shellPrefs.topbarVisible;
   const topbarEffectivelyHidden = topbarInHoverMode && !topbarHovered;
 
   // TabBar visibility (desktop only)
