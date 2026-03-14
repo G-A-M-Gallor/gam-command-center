@@ -22,11 +22,10 @@ const DEFAULTS = {
 
 export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
   const [prefs, setPrefs, updatePref] = useShellPrefs();
-  const { language, sidebarPosition } = useSettings();
+  const { language } = useSettings();
   const t = getTranslations(language);
   const sp = t.shellPrefs as Record<string, string>;
   const panelRef = useRef<HTMLDivElement>(null);
-  const onRight = sidebarPosition === "right";
 
   // Close on click outside
   useEffect(() => {
@@ -63,11 +62,9 @@ export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
   return (
     <div
       ref={panelRef}
-      className={`fixed z-50 w-72 rounded-xl border border-slate-700 bg-slate-850 shadow-2xl ${
-        onRight ? "right-14" : "left-14"
-      }`}
+      className="fixed z-50 w-72 rounded-xl border border-slate-700 shadow-2xl right-2"
       style={{
-        bottom: 48,
+        top: 52,
         backgroundColor: "var(--nav-bg)",
       }}
     >

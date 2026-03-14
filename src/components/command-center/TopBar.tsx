@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings } from "lucide-react";
+import { Store, Pencil, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings, SlidersHorizontal } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -37,6 +37,7 @@ import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { getTranslations } from "@/lib/i18n";
+import { ShellPrefsPanel } from "./ShellPrefsPanel";
 
 const UNIT = 48;
 
@@ -102,6 +103,8 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
 
   const [mounted, setMounted] = useState(false);
   const [topbarHovered, setTopbarHovered] = useState(false);
+  const [shellPrefsOpen, setShellPrefsOpen] = useState(false);
+  const shellPrefsBtnRef = useRef<HTMLButtonElement>(null);
   const [mobileWidgetPanelOpen, setMobileWidgetPanelOpen] = useState(false);
   const [mobileActiveWidgetId, setMobileActiveWidgetId] = useState<string | null>(null);
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null);
@@ -1068,6 +1071,22 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
           <Settings className="h-4 w-4" />
         </button>
 
+        {/* Shell Preferences */}
+        <button
+          ref={shellPrefsBtnRef}
+          type="button"
+          onClick={() => setShellPrefsOpen((v) => !v)}
+          aria-label={(t.shellPrefs as Record<string, string>).title}
+          className={`mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors ${
+            shellPrefsOpen
+              ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+              : "text-slate-500 hover:bg-slate-700 hover:text-slate-300"
+          }`}
+          title={(t.shellPrefs as Record<string, string>).title}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+        </button>
+
         {/* Widget Store button */}
         <button
           type="button"
@@ -1114,6 +1133,14 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
 
       {/* Quick Settings Panel */}
       {settingsOpen && <SettingsFolderPanel onClose={() => setSettingsOpen(false)} />}
+
+      {/* Shell Preferences Panel */}
+      {shellPrefsOpen && (
+        <ShellPrefsPanel
+          onClose={() => setShellPrefsOpen(false)}
+          anchorRef={shellPrefsBtnRef}
+        />
+      )}
 
       {/* Search modal */}
       {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}

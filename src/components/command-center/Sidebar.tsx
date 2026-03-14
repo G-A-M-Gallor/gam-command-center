@@ -35,9 +35,7 @@ import {
   BookOpen,
   Sheet,
   Presentation,
-  SlidersHorizontal,
 } from "lucide-react";
-import { ShellPrefsPanel } from "./ShellPrefsPanel";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -213,10 +211,6 @@ export function Sidebar({
   const [resizing, setResizing] = useState(false);
   const resizeStartX = useRef(0);
   const resizeStartW = useRef(expandedWidth);
-
-  // ShellPrefs panel state
-  const [shellPrefsOpen, setShellPrefsOpen] = useState(false);
-  const shellPrefsBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!resizing) return;
@@ -730,47 +724,10 @@ export function Sidebar({
         )}
 
         {/* Footer */}
-        {!isCollapsed ? (
-          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-3 py-2 flex items-center justify-between">
+        {!isCollapsed && (
+          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-3 py-2">
             <span data-cc-id="sidebar.footer.tagline" data-cc-text="true" className="text-[10px] text-slate-600">{brandProfile.tagline || "GAM v1.0"}</span>
-            <button
-              ref={shellPrefsBtnRef}
-              type="button"
-              onClick={() => setShellPrefsOpen((v) => !v)}
-              className="rounded p-1 text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
-              title={(t.shellPrefs as Record<string, string>).title}
-              aria-label={(t.shellPrefs as Record<string, string>).title}
-            >
-              <SlidersHorizontal className="h-3 w-3" />
-            </button>
           </footer>
-        ) : (
-          <footer className="shrink-0 border-t border-slate-700/50 p-2 flex justify-center">
-            <button
-              ref={shellPrefsBtnRef}
-              type="button"
-              onClick={() => setShellPrefsOpen((v) => !v)}
-              className="group relative rounded p-1.5 text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
-              aria-label={(t.shellPrefs as Record<string, string>).title}
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              <span
-                className={`absolute ${
-                  onRight ? "right-full mr-2" : "left-full ml-2"
-                } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
-              >
-                {(t.shellPrefs as Record<string, string>).title}
-              </span>
-            </button>
-          </footer>
-        )}
-
-        {/* ShellPrefs popover */}
-        {shellPrefsOpen && (
-          <ShellPrefsPanel
-            onClose={() => setShellPrefsOpen(false)}
-            anchorRef={shellPrefsBtnRef}
-          />
         )}
       </div>
 
