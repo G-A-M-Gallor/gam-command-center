@@ -190,6 +190,15 @@ export const translations = {
       emptySlot: "ריק",
       removeSlot: "הסר",
     },
+    smartBar: {
+      more: "עוד",
+      overflow: "ווידג׳טים נוספים",
+      lockWidget: "נעל ווידג׳ט",
+      unlockWidget: "שחרר נעילה",
+      pinnedSettings: "הגדרות",
+      pinnedStore: "חנות ווידג׳טים",
+      searchShortcuts: "חיפוש...",
+    },
     comingSoon: "בקרוב בשלב",
     auth: {
       signIn: "התחברות",
@@ -2615,6 +2624,15 @@ export const translations = {
       emptySlot: "Empty",
       removeSlot: "Remove",
     },
+    smartBar: {
+      more: "More",
+      overflow: "More widgets",
+      lockWidget: "Lock widget",
+      unlockWidget: "Unlock widget",
+      pinnedSettings: "Settings",
+      pinnedStore: "Widget Store",
+      searchShortcuts: "Search...",
+    },
     comingSoon: "Coming in Phase",
     auth: {
       signIn: "Sign In",
@@ -5026,6 +5044,15 @@ export const translations = {
       longPressToEdit: "Долгое нажатие для редактирования",
       emptySlot: "Пусто",
       removeSlot: "Удалить",
+    },
+    smartBar: {
+      more: "Ещё",
+      overflow: "Ещё виджеты",
+      lockWidget: "Закрепить виджет",
+      unlockWidget: "Открепить виджет",
+      pinnedSettings: "Настройки",
+      pinnedStore: "Магазин виджетов",
+      searchShortcuts: "Поиск...",
     },
     comingSoon: "Скоро в Фазе",
     auth: {
