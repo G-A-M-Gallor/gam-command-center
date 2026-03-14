@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
   profiles: "cc-widget-profiles",
   activeProfile: "cc-widget-active-profile",
   labels: "cc-widget-labels",
+  icons: "cc-widget-icons",
   displayMode: "cc-topbar-display-mode",
   panelModes: "cc-widget-panel-modes",
 } as const;
@@ -126,6 +127,10 @@ interface WidgetState {
   widgetLabels: Record<string, I18nLabel>;
   setWidgetLabel: (id: string, labels: I18nLabel) => void;
   clearWidgetLabel: (id: string) => void;
+  // Custom icons
+  widgetIcons: Record<string, string>;
+  setWidgetIcon: (id: string, iconValue: string) => void;
+  clearWidgetIcon: (id: string) => void;
   // Display mode
   displayMode: TopBarDisplayMode;
   setDisplayMode: (mode: TopBarDisplayMode) => void;
@@ -158,6 +163,9 @@ const defaultState: WidgetState = {
   widgetLabels: {},
   setWidgetLabel: () => {},
   clearWidgetLabel: () => {},
+  widgetIcons: {},
+  setWidgetIcon: () => {},
+  clearWidgetIcon: () => {},
   displayMode: "normal",
   setDisplayMode: () => {},
   widgetPanelModes: {},
@@ -229,6 +237,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const [widgetLabels, setWidgetLabelsState] = useState<Record<string, I18nLabel>>({});
   const [displayMode, setDisplayModeState] = useState<TopBarDisplayMode>("normal");
   const [widgetPanelModes, setWidgetPanelModesState] = useState<Record<string, WidgetPanelMode>>({});
+  const [widgetIcons, setWidgetIconsState] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setWidgetPositionsState(
@@ -275,6 +284,12 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
     setWidgetPanelModesState(
       parseJson<Record<string, WidgetPanelMode>>(
         localStorage.getItem(STORAGE_KEYS.panelModes),
+        {}
+      )
+    );
+    setWidgetIconsState(
+      parseJson<Record<string, string>>(
+        localStorage.getItem(STORAGE_KEYS.icons),
         {}
       )
     );
@@ -382,6 +397,25 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       const next = { ...prev };
       delete next[id];
       localStorage.setItem(STORAGE_KEYS.labels, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  // ─── Custom icons ─────────────────────────────────────────
+
+  const setWidgetIcon = useCallback((id: string, iconValue: string) => {
+    setWidgetIconsState((prev) => {
+      const next = { ...prev, [id]: iconValue };
+      localStorage.setItem(STORAGE_KEYS.icons, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const clearWidgetIcon = useCallback((id: string) => {
+    setWidgetIconsState((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      localStorage.setItem(STORAGE_KEYS.icons, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -559,6 +593,9 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       widgetLabels,
       setWidgetLabel,
       clearWidgetLabel,
+      widgetIcons,
+      setWidgetIcon,
+      clearWidgetIcon,
       displayMode,
       setDisplayMode,
       widgetPanelModes,
@@ -588,6 +625,9 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       widgetLabels,
       setWidgetLabel,
       clearWidgetLabel,
+      widgetIcons,
+      setWidgetIcon,
+      clearWidgetIcon,
       displayMode,
       setDisplayMode,
       widgetPanelModes,

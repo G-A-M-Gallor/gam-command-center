@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, HelpCircle, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings } from "lucide-react";
+import { Store, Pencil, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -86,10 +86,11 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     displayMode,
     setDisplayMode,
     widgetPanelModes,
+    widgetIcons,
   } = useWidgets();
   const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language } = useSettings();
   const pathname = usePathname();
-  const { editMode, setEditMode, guideMode, setGuideMode } = useDashboardMode();
+  const { editMode, setEditMode } = useDashboardMode();
   const router = useRouter();
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
@@ -143,12 +144,19 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
 
   useEffect(() => setMounted(true), []);
 
-  // Load widget locks from localStorage
+  // Load widget locks from localStorage + listen for changes from AppStorePanel
   useEffect(() => {
     try {
       const raw = localStorage.getItem("cc-widget-locks");
       if (raw) setWidgetLocks(JSON.parse(raw));
     } catch { /* ignore */ }
+
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail) setWidgetLocks(detail);
+    };
+    window.addEventListener("cc-widget-locks-change", handler);
+    return () => window.removeEventListener("cc-widget-locks-change", handler);
   }, []);
 
   // Track container width → total columns via ResizeObserver
@@ -943,6 +951,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                     onCustomClick={customClick}
                     locked={widgetLocks[widget.id]}
                     onToggleLock={toggleWidgetLock}
+                    customIcon={widgetIcons[widget.id]}
                   />
                 );
               })}
@@ -1016,22 +1025,6 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
             <AlignHorizontalJustifyStart className="h-4 w-4" />
           </button>
         )}
-
-        {/* Guide Mode toggle */}
-        <button
-          type="button"
-          onClick={() => setGuideMode(!guideMode)}
-          aria-label={t.widgets.guideMode || "Guide"}
-          aria-pressed={guideMode}
-          className={`mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors ${
-            guideMode
-              ? "bg-[var(--cc-accent-600)] text-white"
-              : "text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-          }`}
-          title={t.widgets.guideMode || "Guide"}
-        >
-          <HelpCircle className="h-4 w-4" />
-        </button>
 
         {/* Display Mode cycle */}
         <button

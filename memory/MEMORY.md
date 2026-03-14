@@ -102,6 +102,14 @@ Technical checklist: **[qa-checklist.md](./qa-checklist.md)** (Phases 1-5 detail
 ## Completed Features (2026-03-10)
 - **EntityCanvas:** Integrated into entity detail page. 3 modes (Frame/Graph/History), @dnd-kit DnD, Supabase persistence via `meta.__canvas_blocks`, block type picker (folder/field/field_group/note/plugin), field block reads meta values, folder block queries note_relations. Dynamic import for code splitting.
 
+## Completed Features (2026-03-14)
+- **Email Platform (vBrain Email):** Full email system with Resend. See [email-system.md](./email-system.md) for details.
+  - Layer 1: DB (5 tables), Resend client, 9 React Email templates, 6 API routes, multi-tenant
+  - Layer 2: Email tab in comms page, SendEmailModal, EmailDetailPanel, EmailStatsWidget
+  - Layer 3: Svix webhook signature verification, full tracking pipeline
+  - Domain: vbrain.io verified, webhook active
+  - Commits: `53e0ddb`, `deaf251`, `d28a037`
+
 ## Known Tech Debt
 - **isHe anti-pattern:** 57+ instances of `isHe ? "עברית" : "English"` instead of `t.section.key`. Breaks Russian. Main files: DocumentListView, VersionHistory, TeamWidget, WATIWidget, KPIWidget. Needs gradual i18n migration.
 - **console.log in production:** 2 instances in ai-hub/page.tsx (WorkManager action logs, lines ~991/1000). Not harmful, just noisy in DevTools.

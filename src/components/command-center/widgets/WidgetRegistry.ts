@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare, Mail } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare, Mail, Inbox } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -66,6 +66,12 @@ const CommunicationBarContent = dynamic(() => import("./CommunicationWidget").th
 
 const EmailStatsPanel = dynamic(() => import("@/components/email/EmailStatsWidget").then((m) => ({ default: m.EmailStatsPanel })), { ssr: false }) as ComponentType<any>;
 const EmailStatsBarContent = dynamic(() => import("@/components/email/EmailStatsWidget").then((m) => ({ default: m.EmailStatsBarContent })), { ssr: false }) as ComponentType<any>;
+
+const GmailPanel = dynamic(() => import("./GmailWidget").then((m) => ({ default: m.GmailPanel })), { ssr: false }) as ComponentType<any>;
+const GmailBarContent = dynamic(() => import("./GmailWidget").then((m) => ({ default: m.GmailBarContent })), { ssr: false }) as ComponentType<any>;
+
+const CalendarWidgetPanel = dynamic(() => import("./CalendarWidget").then((m) => ({ default: m.CalendarPanel })), { ssr: false }) as ComponentType<any>;
+const CalendarBarContent = dynamic(() => import("./CalendarWidget").then((m) => ({ default: m.CalendarBarContent })), { ssr: false }) as ComponentType<any>;
 
 
 export type WidgetSize = 1 | 2 | 3 | 4;
@@ -459,6 +465,40 @@ export const widgetRegistry: WidgetDefinition[] = [
     isRemovable: true,
     component: EmailStatsPanel,
     renderBar: EmailStatsBarContent,
+  },
+  {
+    id: "gmail",
+    icon: Inbox,
+    label: { he: "Gmail", en: "Gmail", ru: "Gmail" },
+    description: {
+      he: "תיבת דואר Gmail — הודעות אחרונות ותקצירים",
+      en: "Gmail inbox — recent messages and summaries",
+      ru: "Почта Gmail — последние письма и сводки",
+    },
+    defaultSize: 2,
+    status: "active",
+    category: "integrations",
+    tier: "pro",
+    isRemovable: true,
+    component: GmailPanel,
+    renderBar: GmailBarContent,
+  },
+  {
+    id: "google-calendar",
+    icon: CalendarDays,
+    label: { he: "Google Calendar", en: "Google Calendar", ru: "Google Календарь" },
+    description: {
+      he: "לוח שנה Google — פגישות ואירועים קרובים",
+      en: "Google Calendar — upcoming meetings and events",
+      ru: "Google Календарь — предстоящие встречи и события",
+    },
+    defaultSize: 2,
+    status: "active",
+    category: "integrations",
+    tier: "pro",
+    isRemovable: true,
+    component: CalendarWidgetPanel,
+    renderBar: CalendarBarContent,
   },
   {
     id: "shortcuts",

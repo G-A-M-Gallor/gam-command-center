@@ -394,6 +394,8 @@ export const widgets: WidgetEntry[] = [
   { id: 'ceo-queue', name: 'CEO Queue', nameHe: 'תור CEO', file: 'CeoQueueWidget.tsx', defaultSize: '1x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-12' },
   { id: 'communication', name: 'Communication', nameHe: 'תקשורת', file: 'CommunicationWidget.tsx', defaultSize: '2x', panelMode: 'side-panel', status: 'active', version: '1.0.0', addedDate: '2026-03-13' },
   { id: 'email-stats', name: 'Email Stats', nameHe: 'סטטיסטיקות מייל', file: 'EmailStatsWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-14' },
+  { id: 'gmail', name: 'Gmail', nameHe: 'Gmail', file: 'GmailWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-14' },
+  { id: 'google-calendar', name: 'Google Calendar', nameHe: 'Google Calendar', file: 'CalendarWidget.tsx', defaultSize: '2x', panelMode: 'dropdown', status: 'active', version: '1.0.0', addedDate: '2026-03-14' },
 ];
 
 // ─── Context Data ────────────────────────────────────────

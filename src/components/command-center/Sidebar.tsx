@@ -272,7 +272,7 @@ export function Sidebar({
   return (
     <aside
       data-cc-id="sidebar.root"
-      className={`sidebar fixed top-12 z-50 shrink-0 overflow-hidden ${
+      className={`sidebar fixed top-12 z-[35] shrink-0 overflow-hidden ${
         onRight ? "right-0 border-l" : "left-0 border-r"
       } border-slate-700/50 ${
         isFloat ? "shadow-lg" : ""

@@ -9,6 +9,7 @@ import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { IconDisplay } from "@/components/ui/IconPicker";
 
 const UNIT = 48;
 const MARGIN = 8;
@@ -138,6 +139,8 @@ interface WidgetWrapperProps {
   locked?: boolean;
   /** Callback to toggle lock state */
   onToggleLock?: (widgetId: string) => void;
+  /** Custom icon value (emoji / "lucide:X" / "img:url") */
+  customIcon?: string;
 }
 
 export function WidgetWrapper({
@@ -148,6 +151,7 @@ export function WidgetWrapper({
   aiPanelOffset,
   locked,
   onToggleLock,
+  customIcon,
 }: WidgetWrapperProps) {
   const { widgetSizes, hoverDelay, widgetLabels, displayMode } = useWidgets();
   const { language, sidebarPosition, sidebarVisibility } = useSettings();
@@ -343,7 +347,11 @@ export function WidgetWrapper({
         title={label}
       >
         <span className="relative shrink-0">
-          <widget.icon className={iconSize} />
+          {customIcon ? (
+            <IconDisplay value={customIcon} size={displayMode === "icons-only" ? 14 : 16} />
+          ) : (
+            <widget.icon className={iconSize} />
+          )}
           {BarContent && !showLabel && <BarContent size={size} />}
         </span>
         {BarContent && showLabel && <BarContent size={size} />}

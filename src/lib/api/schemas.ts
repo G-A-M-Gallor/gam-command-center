@@ -399,6 +399,23 @@ export const commSendSchema = z.object({
 
 export type CommSendInput = z.infer<typeof commSendSchema>;
 
+// ─── Google Account Toggle ──────────────────────────────────
+
+export const googleAccountToggleSchema = z.object({
+  accountId: z.string().uuid("accountId must be a valid UUID"),
+  isActive: z.boolean(),
+});
+
+export type GoogleAccountToggleInput = z.infer<typeof googleAccountToggleSchema>;
+
+// ─── Google Account Delete ──────────────────────────────────
+
+export const googleAccountDeleteSchema = z.object({
+  id: z.string().uuid("id must be a valid UUID"),
+});
+
+export type GoogleAccountDeleteInput = z.infer<typeof googleAccountDeleteSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

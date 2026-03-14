@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { ColorPicker } from "@/components/command-center/ColorPicker";
 import {
@@ -26,6 +27,7 @@ import { getTranslations } from "@/lib/i18n";
 import {
   Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload,
   Smartphone, Bell, Camera, Users, Wifi, WifiOff, Share2, Moon, Vibrate, MapPin, BadgeCheck, RefreshCw, Send, ScanLine, Trash, Image,
+  Link2, Power, Loader2, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -63,14 +65,15 @@ const DENSITY_OPTIONS: { value: Density; key: "compact" | "default" | "spacious"
   { value: "spacious", key: "spacious" },
 ];
 
-type SettingsTab = "general" | "theme" | "brand" | "widgetBar" | "pwa";
+type SettingsTab = "general" | "theme" | "brand" | "widgetBar" | "pwa" | "accounts";
 
-const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" | "tabPwa" }[] = [
+const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" | "tabPwa" | "tabAccounts" }[] = [
   { tab: "general", tKey: "tabGeneral" },
   { tab: "theme", tKey: "tabTheme" },
   { tab: "brand", tKey: "tabBrand" },
   { tab: "widgetBar", tKey: "tabWidgetBar" },
   { tab: "pwa", tKey: "tabPwa" },
+  { tab: "accounts", tKey: "tabAccounts" },
 ];
 
 // --- Shared button classes ---
@@ -1695,12 +1698,201 @@ function QRScannerModal({ onClose, onResult }: { onClose: () => void; onResult: 
   );
 }
 
+// ─── Accounts Tab ─────────────────────────────────────────────
+
+interface GoogleAccountSafe {
+  id: string;
+  google_email: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  scopes: string[];
+  is_active: boolean;
+  last_synced_at: string | null;
+  created_at: string;
+}
+
+function AccountsTab() {
+  const { language } = useSettings();
+  const t = getTranslations(language);
+  const [accounts, setAccounts] = useState<GoogleAccountSafe[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null);
+
+  const fetchAccounts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/google/accounts");
+      if (res.ok) {
+        const data = await res.json();
+        setAccounts(data.accounts ?? []);
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchAccounts(); }, [fetchAccounts]);
+
+  const handleToggle = async (id: string, isActive: boolean) => {
+    setToggling(id);
+    try {
+      const res = await fetch("/api/google/accounts/toggle", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountId: id, isActive }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAccounts((prev) => prev.map((a) => (a.id === id ? data.account : a)));
+      }
+    } catch {
+      // silent
+    } finally {
+      setToggling(null);
+    }
+  };
+
+  const handleDisconnect = async (id: string) => {
+    try {
+      const res = await fetch(`/api/google/accounts?id=${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setAccounts((prev) => prev.filter((a) => a.id !== id));
+        setConfirmDisconnect(null);
+      }
+    } catch {
+      // silent
+    }
+  };
+
+  const hasGmail = (scopes: string[]) => scopes.some((s) => s.includes("gmail"));
+  const hasCalendar = (scopes: string[]) => scopes.some((s) => s.includes("calendar"));
+
+  return (
+    <div className="mx-auto max-w-2xl space-y-6" data-cc-id="settings.accounts">
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-medium text-slate-200">{t.settings.connectedAccounts}</h3>
+        <a
+          href="/api/google/connect"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--cc-accent-600)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)]"
+        >
+          <Link2 className="h-4 w-4" />
+          {t.settings.connectGoogle}
+        </a>
+      </div>
+
+      {/* Google section */}
+      <div className="space-y-3">
+        <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500">{t.settings.googleSection}</h4>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-8 text-slate-400">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : accounts.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-slate-700 py-8 text-center">
+            <p className="text-sm text-slate-400">{t.settings.noAccounts}</p>
+            <p className="mt-1 text-xs text-slate-500">{t.settings.noAccountsHint}</p>
+          </div>
+        ) : (
+          accounts.map((account) => (
+            <div
+              key={account.id}
+              className={`rounded-lg border p-4 transition-colors ${
+                account.is_active ? "border-slate-700 bg-slate-800/50" : "border-slate-800 bg-slate-900/50 opacity-60"
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                {account.avatar_url ? (
+                  <img src={account.avatar_url} alt="" className="h-10 w-10 rounded-full" />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-slate-300 text-sm font-medium">
+                    {(account.display_name || account.google_email)[0]?.toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-slate-200">
+                    {account.display_name || account.google_email}
+                  </p>
+                  <p className="truncate text-xs text-slate-400">{account.google_email}</p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {hasGmail(account.scopes) && (
+                      <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{t.settings.scopeGmail}</span>
+                    )}
+                    {hasCalendar(account.scopes) && (
+                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{t.settings.scopeCalendar}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {/* Toggle */}
+                  <button
+                    type="button"
+                    onClick={() => handleToggle(account.id, !account.is_active)}
+                    disabled={toggling === account.id}
+                    className="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none"
+                    style={{ backgroundColor: account.is_active ? "var(--cc-accent-500)" : "#475569" }}
+                    title={account.is_active ? t.settings.active : t.settings.inactive}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                        account.is_active ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                  {/* Disconnect */}
+                  {confirmDisconnect === account.id ? (
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => handleDisconnect(account.id)}
+                        className="rounded px-2 py-1 text-xs text-red-400 hover:bg-red-500/10"
+                      >
+                        {t.common.confirm}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirmDisconnect(null)}
+                        className="rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-700"
+                      >
+                        {t.common.cancel}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDisconnect(account.id)}
+                      className="rounded p-1.5 text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                      title={t.settings.disconnect}
+                    >
+                      <Power className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Settings Page ────────────────────────────────────────────
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const { language } = useSettings();
   const t = getTranslations(language);
+  const searchParams = useSearchParams();
+
+  // Auto-switch to accounts tab when redirected from Google OAuth
+  useEffect(() => {
+    if (searchParams.get("tab") === "accounts") {
+      setActiveTab("accounts");
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex min-h-full flex-col">
@@ -1731,6 +1923,7 @@ export default function SettingsPage() {
         {activeTab === "brand" && <BrandTab />}
         {activeTab === "widgetBar" && <WidgetBarTab />}
         {activeTab === "pwa" && <PWATab />}
+        {activeTab === "accounts" && <AccountsTab />}
       </div>
     </div>
   );

@@ -148,9 +148,11 @@ export function SpeedDial() {
   const sd = t.speedDial;
   const router = useRouter();
 
-  // Long-press state
+  // Long-press state (main button)
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pressStartRef = useRef<number>(0);
+  // Long-press state (individual slot buttons)
+  const slotPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load slots from localStorage on mount
   useEffect(() => {
@@ -239,6 +241,22 @@ export function SpeedDial() {
     setEditMode(false);
     setPickerIndex(null);
     setOpen(false);
+  }, []);
+
+  // ── Slot long-press handlers ────────────────────────
+  const onSlotPointerDown = useCallback((index: number) => {
+    if (editMode) return;
+    slotPressTimerRef.current = setTimeout(() => {
+      setEditMode(true);
+      setPickerIndex(index);
+    }, LONG_PRESS_MS);
+  }, [editMode]);
+
+  const onSlotPointerUp = useCallback(() => {
+    if (slotPressTimerRef.current) {
+      clearTimeout(slotPressTimerRef.current);
+      slotPressTimerRef.current = null;
+    }
   }, []);
 
   // ── Long-press progress indicator ─────────────────
@@ -341,10 +359,15 @@ export function SpeedDial() {
                   if (editMode) {
                     setPickerIndex(i);
                   } else {
+                    onSlotPointerUp(); // Cancel any pending long-press
                     handleSlotClick(slot, router);
                     setOpen(false);
                   }
                 }}
+                onPointerDown={() => onSlotPointerDown(i)}
+                onPointerUp={onSlotPointerUp}
+                onPointerLeave={onSlotPointerUp}
+                onPointerCancel={onSlotPointerUp}
                 className={`flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-white shadow-md transition-all duration-150 hover:scale-110 hover:shadow-lg ${
                   editMode
                     ? 'bg-slate-600 ring-2 ring-dashed ring-[var(--cc-accent-400)]/50'

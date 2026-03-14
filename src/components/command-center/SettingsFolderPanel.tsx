@@ -7,13 +7,10 @@ import {
   Languages,
   PanelLeftClose,
   PanelRightClose,
-  LayoutList,
   Keyboard,
-  Timer,
   Settings,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useWidgets, type TopBarDisplayMode, type HoverDelay } from "@/contexts/WidgetContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { getTranslations } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
@@ -31,7 +28,6 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
     sidebarVisibility,
     setSidebarVisibility,
   } = useSettings();
-  const { displayMode, setDisplayMode, hoverDelay, setHoverDelay } = useWidgets();
   const { editMode, setEditMode } = useDashboardMode();
   const router = useRouter();
   const t = getTranslations(language);
@@ -152,53 +148,6 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
                   </button>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Display Mode */}
-          <div className={sectionClass}>
-            <label className={labelClass}>
-              <LayoutList size={14} />
-              {language === "he" ? "מצב תצוגה" : language === "ru" ? "Режим отображения" : "Display Mode"}
-            </label>
-            <div className="flex gap-2">
-              {(["normal", "compact", "icons-only"] as TopBarDisplayMode[]).map((mode) => {
-                const mLabel = mode === "normal"
-                  ? (language === "he" ? "רגיל" : language === "ru" ? "Обычный" : "Normal")
-                  : mode === "compact"
-                    ? (language === "he" ? "צפוף" : language === "ru" ? "Компактный" : "Compact")
-                    : (language === "he" ? "אייקונים" : language === "ru" ? "Иконки" : "Icons");
-                return (
-                  <button
-                    key={mode}
-                    type="button"
-                    onClick={() => setDisplayMode(mode)}
-                    className={`${btnBase} ${displayMode === mode ? btnActive : btnInactive}`}
-                  >
-                    {mLabel}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Hover Delay */}
-          <div className={sectionClass}>
-            <label className={labelClass}>
-              <Timer size={14} />
-              {language === "he" ? "השהיית ריחוף" : language === "ru" ? "Задержка наведения" : "Hover Delay"}
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {(["none", 0.1, 0.3, 0.5, 1, 2] as HoverDelay[]).map((d) => (
-                <button
-                  key={String(d)}
-                  type="button"
-                  onClick={() => setHoverDelay(d)}
-                  className={`${btnBase} ${hoverDelay === d ? btnActive : btnInactive}`}
-                >
-                  {d === "none" ? "Off" : `${d}s`}
-                </button>
-              ))}
             </div>
           </div>
 
