@@ -19,13 +19,15 @@ function getServiceClient() {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook secret if configured
+    // Verify webhook secret — always required
     const webhookSecret = process.env.WATI_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      const providedSecret = request.headers.get("x-wati-secret");
-      if (providedSecret !== webhookSecret) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    if (!webhookSecret) {
+      console.error("WATI_WEBHOOK_SECRET not configured");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+    const providedSecret = request.headers.get("x-wati-secret");
+    if (providedSecret !== webhookSecret) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();

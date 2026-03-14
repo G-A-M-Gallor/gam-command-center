@@ -41,6 +41,33 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // CORS — restrict API routes to our own domains
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "https://vbrain.io" },
+          { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
+          { key: "Access-Control-Max-Age", value: "86400" },
+        ],
+      },
+      {
+        // Webhooks — allow external services to call us
+        source: "/api/comms/:path*/webhook",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "POST, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, x-wati-secret, x-voicenter-secret, svix-id, svix-signature, svix-timestamp" },
+        ],
+      },
+      {
+        source: "/api/email/webhook/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "POST, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, svix-id, svix-signature, svix-timestamp" },
+        ],
+      },
+      {
         source: "/sw.js",
         headers: [
           { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },

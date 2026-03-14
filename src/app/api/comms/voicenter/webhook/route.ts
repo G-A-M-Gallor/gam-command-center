@@ -17,13 +17,15 @@ function getServiceClient() {
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify webhook secret
+    // Verify webhook secret — always required
     const secret = process.env.VOICENTER_WEBHOOK_SECRET;
-    if (secret) {
-      const provided = request.headers.get("x-voicenter-secret");
-      if (provided !== secret) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+    if (!secret) {
+      console.error("VOICENTER_WEBHOOK_SECRET not configured");
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
+    const provided = request.headers.get("x-voicenter-secret");
+    if (provided !== secret) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
