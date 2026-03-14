@@ -102,7 +102,11 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
   const isMobile = breakpoint === "mobile";
 
   const [mounted, setMounted] = useState(false);
-  const [topbarHovered, setTopbarHovered] = useState(false);
+  const [topbarHovered, setTopbarHoveredRaw] = useState(false);
+  const setTopbarHovered = useCallback((v: boolean) => {
+    setTopbarHoveredRaw(v);
+    window.dispatchEvent(new CustomEvent("cc-topbar-hover", { detail: v }));
+  }, []);
   const [shellPrefsOpen, setShellPrefsOpen] = useState(false);
   const shellPrefsBtnRef = useRef<HTMLButtonElement>(null);
   const [mobileWidgetPanelOpen, setMobileWidgetPanelOpen] = useState(false);

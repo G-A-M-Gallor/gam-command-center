@@ -55,6 +55,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isMobile = breakpoint === "mobile";
   const [floatOpen, setFloatOpen] = useState(false);
   const [shellPrefs, , updatePref] = useShellPrefs();
+  const [topbarHovered, setTopbarHovered] = useState(false);
+
+  // Listen for topbar hover state changes
+  useEffect(() => {
+    const handler = (e: Event) => setTopbarHovered((e as CustomEvent<boolean>).detail);
+    window.addEventListener("cc-topbar-hover", handler);
+    return () => window.removeEventListener("cc-topbar-hover", handler);
+  }, []);
 
   // Bottom bar callbacks
   const handleBottomBarSidebarToggle = useCallback(() => setFloatOpen((prev) => !prev), []);
@@ -127,6 +135,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   // TopBar visibility
   const showTopBar = isMobile || shellPrefs.topbarVisible;
+  // TopBar is effectively hidden when in hover mode and not hovered
+  const topbarEffectivelyHidden = !isMobile && shellPrefs.topbarHover && !topbarHovered;
 
   // TabBar visibility (desktop only)
   const showTabBar = !isMobile && shellPrefs.tabbarVisible;
@@ -180,21 +190,31 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <TabBar
           contentMarginLeft={contentMargin?.marginLeft}
           contentMarginRight={contentMargin?.marginRight}
+          topbarHover={!isMobile && shellPrefs.topbarHover}
+          topbarVisible={!shellPrefs.topbarHover || topbarHovered}
         />
       )}
 
       <main
         data-cc-id="content.main"
-        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] ${
+        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] transition-[padding-top] duration-200 ${
           isMobile ? "pt-12"
-            : !showTopBar ? ""
+            : !showTopBar || topbarEffectivelyHidden ? ""
             : displayMode === "compact" ? "pt-14"
             : displayMode === "icons-only" ? "pt-12"
             : "pt-16"
         }`}
         style={{
           ...contentMargin,
-          ...(showTabBar ? { paddingTop: `calc(${!showTopBar ? "0px" : displayMode === "compact" ? "3.5rem" : displayMode === "icons-only" ? "3rem" : "4rem"} + ${tabBarOffset}px)` } : undefined),
+          ...(!isMobile && showTabBar ? {
+            paddingTop: `calc(${
+              topbarEffectivelyHidden ? "0px"
+                : !showTopBar ? "0px"
+                : displayMode === "compact" ? "3.5rem"
+                : displayMode === "icons-only" ? "3rem"
+                : "4rem"
+            } + ${tabBarOffset}px)`
+          } : undefined),
           ...(isMobile ? { paddingBottom: "calc(3.5rem + var(--safe-area-bottom, 0px) + 1rem)" } : undefined),
         }}
       >

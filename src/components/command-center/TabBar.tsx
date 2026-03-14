@@ -16,9 +16,13 @@ interface RecentPage {
 interface TabBarProps {
   contentMarginLeft?: string | number;
   contentMarginRight?: string | number;
+  /** When true, TopBar is in hover mode (hidden by default) — TabBar sticks to top and moves with TopBar */
+  topbarHover?: boolean;
+  /** Whether TopBar is currently visible (always true if topbarHover is false) */
+  topbarVisible?: boolean;
 }
 
-export function TabBar({ contentMarginLeft, contentMarginRight }: TabBarProps) {
+export function TabBar({ contentMarginLeft, contentMarginRight, topbarHover = false, topbarVisible = true }: TabBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { language } = useSettings();
@@ -59,12 +63,19 @@ export function TabBar({ contentMarginLeft, contentMarginRight }: TabBarProps) {
 
   if (pages.length === 0) return null;
 
+  // When topbar is in hover mode:
+  // - If topbar hidden → tabbar sticks to top (0)
+  // - If topbar visible (hovered) → tabbar sits below topbar (48px)
+  // When topbar is normal → always below topbar (48px)
+  const topbarHidden = topbarHover && !topbarVisible;
+  const tabTop = topbarHidden ? 0 : 48;
+
   return (
     <div
       data-cc-id="tabbar.root"
-      className="fixed z-30 flex h-8 items-center border-b border-slate-700/50 backdrop-blur-sm"
+      className="fixed z-30 flex h-8 items-center border-b border-slate-700/50 backdrop-blur-sm transition-all duration-200 ease-out"
       style={{
-        top: 48,
+        top: tabTop,
         left: contentMarginLeft ?? 0,
         right: contentMarginRight ?? 0,
         backgroundColor: "color-mix(in srgb, var(--nav-bg) 90%, transparent)",
