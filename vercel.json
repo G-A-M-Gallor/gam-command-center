@@ -8,5 +8,19 @@
       "path": "/api/rss/sync",
       "schedule": "0 12 * * *"
     }
+  ],
+  "routes": [
+    {
+      "src": "/\\.(env|git|aws|ssh|htaccess|htpasswd)(.*)",
+      "mitigate": { "action": "deny" }
+    },
+    {
+      "src": "/(wp-admin|wp-login|wp-content|wordpress|phpMyAdmin|phpmyadmin|pma)(.*)",
+      "mitigate": { "action": "deny" }
+    },
+    {
+      "src": "/(cgi-bin|admin\\.php|xmlrpc\\.php|wp-cron\\.php|setup\\.php|config\\.php|server-status|actuator|solr|console)(.*)",
+      "mitigate": { "action": "deny" }
+    }
   ]
 }

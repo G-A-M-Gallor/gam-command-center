@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/api/auth";
 import { matchingScoreSchema } from "@/lib/api/schemas";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 import { extractMatchProfile } from "@/lib/matching/matchProfiles";
 import { computeMatchScores } from "@/lib/matching/scoring";
 import type { MatchConfig, MatchScore, ENTITY_PAIR_CONFIGS } from "@/lib/matching/types";
@@ -16,6 +17,9 @@ function getServiceClient() {
 }
 
 export async function POST(request: NextRequest) {
+  const rl = checkRateLimit(request, RATE_LIMITS.ai);
+  if (rl.limited) return rl.response;
+
   const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });

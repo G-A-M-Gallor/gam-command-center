@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { workManagerExecuteSchema } from "@/lib/api/schemas";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 import { createNotionTask } from "@/lib/notion/client";
 
 // ─── Supabase admin client (service role for DB writes) ─────
@@ -184,6 +185,10 @@ async function handleCreateEntity(
 // ─── Route Handler ──────────────────────────────────────────
 
 export async function POST(request: Request) {
+  // Rate limit
+  const rl = checkRateLimit(request, RATE_LIMITS.workManager);
+  if (rl.limited) return rl.response;
+
   // Auth
   const authResult = await requireAuth(request);
   if (authResult.error !== null) {

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/api/auth";
 import { boardRoomSchema } from "@/lib/api/schemas";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 import { PERSONAS, TIMEOS_CONTEXT } from "@/lib/ai/boardroom";
 
 const DAILY_TOKEN_LIMIT = 100_000;
@@ -61,6 +62,9 @@ async function checkAndUpdateBudget(
 }
 
 export async function POST(request: Request) {
+  const rl = checkRateLimit(request, RATE_LIMITS.ai);
+  if (rl.limited) return rl.response;
+
   const authResult = await requireAuth(request);
   if (authResult.error !== null) {
     return new Response(

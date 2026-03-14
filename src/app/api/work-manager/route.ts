@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { workManagerSchema } from "@/lib/api/schemas";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 import { detectAgent } from "@/lib/work-manager/detectAgent";
 import { AGENT_PROMPTS, AGENT_CONFIGS, type AgentType } from "@/lib/work-manager/agentPrompts";
 import { getTasksSummaryForPrompt } from "@/lib/notion/client";
@@ -212,6 +213,10 @@ ${sessionContext.last_decisions.length > 0
 // ─── Route Handler ──────────────────────────────────────────
 
 export async function POST(request: Request) {
+  // Rate limit — Work Manager runs multi-agent chains
+  const rl = checkRateLimit(request, RATE_LIMITS.workManager);
+  if (rl.limited) return rl.response;
+
   const authResult = await requireAuth(request);
   if (authResult.error !== null) {
     return new Response(

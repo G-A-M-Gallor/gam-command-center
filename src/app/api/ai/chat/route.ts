@@ -10,6 +10,7 @@ import {
 } from "@/lib/ai/prompts";
 import { requireAuth } from "@/lib/api/auth";
 import { aiChatSchema } from "@/lib/api/schemas";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 import { getTasksSummaryForPrompt } from "@/lib/notion/client";
 import { getKnowledgeContext } from "@/lib/ai/knowledgeBase";
 
@@ -74,6 +75,10 @@ async function checkAndUpdateBudget(
 }
 
 export async function POST(request: Request) {
+  // Rate limit — AI routes are expensive (Claude API tokens)
+  const rl = checkRateLimit(request, RATE_LIMITS.ai);
+  if (rl.limited) return rl.response;
+
   // Authenticate the request
   const authResult = await requireAuth(request);
   if (authResult.error !== null) {

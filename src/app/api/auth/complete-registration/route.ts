@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 
 const completeRegistrationSchema = z.object({
   displayName: z.string().min(1, 'Display name is required').max(100).trim(),
 });
 
 export async function POST(request: Request) {
+  // Rate limit — auth routes get brute-force protection
+  const rl = checkRateLimit(request, RATE_LIMITS.auth);
+  if (rl.limited) return rl.response;
+
   // Verify the user is authenticated via cookie session
   const supabase = await createServerClient();
   const {
