@@ -52,7 +52,6 @@ export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
   }, [onClose]);
 
   const toggleItems: { key: keyof typeof DEFAULTS; label: string; hint?: string }[] = [
-    { key: "sidebarHover", label: sp.sidebarHover, hint: sp.hoverHint },
     { key: "topbarVisible", label: sp.topbarVisible },
     { key: "topbarHover", label: sp.topbarHover, hint: sp.hoverHint },
     { key: "tabbarVisible", label: sp.tabbarVisible },
@@ -81,8 +80,45 @@ export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
         </button>
       </div>
 
-      {/* Toggle switches */}
       <div className="space-y-1 px-4 py-3">
+        {/* 1. Sidebar hover toggle */}
+        <label className="flex cursor-pointer items-center justify-between rounded-lg px-2 py-2 transition-colors hover:bg-slate-800/50">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-medium text-slate-300">{sp.sidebarHover}</span>
+            <span className="text-[10px] text-slate-600">{sp.hoverHint}</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={prefs.sidebarHover}
+            onClick={() => updatePref("sidebarHover", !prefs.sidebarHover)}
+            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ${
+              prefs.sidebarHover ? "bg-[var(--cc-accent-500)]" : "bg-slate-700"
+            }`}
+          >
+            <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+              prefs.sidebarHover ? "translate-x-4" : "translate-x-0.5"
+            } mt-0.5`} />
+          </button>
+        </label>
+
+        {/* 2. Sidebar width slider — right after hover */}
+        <div className="rounded-lg px-2 py-2">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-medium text-slate-300">{sp.sidebarWidth}</span>
+            <span className="text-[10px] tabular-nums text-slate-500">{prefs.sidebarWidth}px</span>
+          </div>
+          <input
+            type="range"
+            min={SIDEBAR_MIN_WIDTH}
+            max={SIDEBAR_MAX_WIDTH}
+            value={prefs.sidebarWidth}
+            onChange={(e) => updatePref("sidebarWidth", Number(e.target.value))}
+            className="w-full accent-[var(--cc-accent-500)]"
+          />
+        </div>
+
+        {/* 3+ Rest of toggles */}
         {toggleItems.map(({ key, label, hint }) => (
           <label
             key={key}
@@ -111,22 +147,6 @@ export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
             </button>
           </label>
         ))}
-
-        {/* Sidebar width slider */}
-        <div className="rounded-lg px-2 py-2">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-300">{sp.sidebarWidth}</span>
-            <span className="text-[10px] tabular-nums text-slate-500">{prefs.sidebarWidth}px</span>
-          </div>
-          <input
-            type="range"
-            min={SIDEBAR_MIN_WIDTH}
-            max={SIDEBAR_MAX_WIDTH}
-            value={prefs.sidebarWidth}
-            onChange={(e) => updatePref("sidebarWidth", Number(e.target.value))}
-            className="w-full accent-[var(--cc-accent-500)]"
-          />
-        </div>
       </div>
 
       {/* Reset */}

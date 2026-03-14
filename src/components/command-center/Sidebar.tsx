@@ -434,12 +434,21 @@ export function Sidebar({
               }`} />
             </button>
 
-            {/* Dropdown menu */}
+            {/* Dropdown menu — opens to the SIDE of the sidebar, never overlapping */}
             {userMenuOpen && (() => {
               const um = t.userMenu as Record<string, string>;
               const roleName = permissions.role === "admin" ? um.admin : permissions.role === "viewer" ? um.viewer : um.member;
               return (
-                <div className="absolute left-2 right-2 top-full z-50 mt-1 rounded-xl border border-slate-700 shadow-2xl overflow-hidden" style={{ backgroundColor: "var(--nav-bg)" }}>
+                <div
+                  className="fixed z-50 w-56 rounded-xl border border-slate-700 shadow-2xl overflow-hidden"
+                  style={{
+                    backgroundColor: "var(--nav-bg)",
+                    top: navRef.current ? navRef.current.getBoundingClientRect().top - 8 : 120,
+                    ...(onRight
+                      ? { right: expandedWidth + 8 }
+                      : { left: expandedWidth + 8 }),
+                  }}
+                >
                   {/* Role badge */}
                   <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700/50">
                     <CircleDot className="h-3 w-3 text-emerald-500" />
