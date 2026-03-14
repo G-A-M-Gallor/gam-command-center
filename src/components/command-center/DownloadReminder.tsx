@@ -16,7 +16,7 @@ const DOWNLOAD_LINKS = {
   iphone: "#",  // Apple App Store
 };
 
-const SOCIAL_LINKS = {
+export const SOCIAL_LINKS = {
   facebook: "#",
   instagram: "#",
   linkedin: "#",
@@ -155,7 +155,7 @@ export function DownloadReminderPopup() {
 
 // ─── Simple SVG social icons ────────────────────────────
 
-function SocialIcon({ name }: { name: string }) {
+export function SocialIcon({ name }: { name: string }) {
   const cls = "h-4 w-4";
   switch (name) {
     case "facebook":

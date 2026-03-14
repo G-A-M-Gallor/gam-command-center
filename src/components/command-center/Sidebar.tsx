@@ -47,6 +47,7 @@ import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import type { FavoriteItem } from "./widgets/FavoritesWidget";
+import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
 
 const FULL_WIDTH = 240;
 const MOBILE_WIDTH = 280;
@@ -170,7 +171,9 @@ export function Sidebar({
   const isMobile = breakpoint === "mobile";
   const [hovered, setHovered] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [socialMenuOpen, setSocialMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const socialMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
@@ -189,6 +192,18 @@ export function Sidebar({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [userMenuOpen]);
+
+  // Close social menu on outside click
+  useEffect(() => {
+    if (!socialMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (socialMenuRef.current && !socialMenuRef.current.contains(e.target as Node)) {
+        setSocialMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [socialMenuOpen]);
 
   // Hydrate from localStorage + listen for cross-component favorites sync
   useEffect(() => {
@@ -494,12 +509,10 @@ export function Sidebar({
             })()}
           </div>
         )}
-        {/* Collapsed: user avatar only */}
+        {/* Collapsed: user avatar only (tooltip on hover, no menu) */}
         {user && isCollapsed && (
           <div className="shrink-0 border-b border-slate-700/50 py-2 flex justify-center">
-            <button
-              type="button"
-              onClick={() => setUserMenuOpen((v) => !v)}
+            <div
               className="group relative"
             >
               <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
@@ -515,7 +528,7 @@ export function Sidebar({
               >
                 {user.email}
               </span>
-            </button>
+            </div>
           </div>
         )}
 
@@ -775,7 +788,7 @@ export function Sidebar({
 
         {/* Footer — Downloads + Social */}
         {!isCollapsed && (
-          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
+          <footer ref={socialMenuRef} data-cc-id="sidebar.footer" className="relative shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
@@ -789,7 +802,7 @@ export function Sidebar({
             <div className="h-3 w-px bg-slate-700/50" />
             <button
               type="button"
-              onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
+              onClick={() => setSocialMenuOpen((v) => !v)}
               className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-medium text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300 ${
                 onRight ? "flex-row-reverse" : ""
               }`}
@@ -797,6 +810,41 @@ export function Sidebar({
               <Globe className="h-3 w-3 shrink-0" />
               {(t.downloads as Record<string, string>).gamOnline}
             </button>
+
+            {/* Social links popup */}
+            {socialMenuOpen && (
+              <div
+                className="absolute z-50 rounded-xl border border-slate-700 shadow-2xl overflow-hidden"
+                style={{
+                  backgroundColor: "var(--nav-bg)",
+                  bottom: "100%",
+                  marginBottom: 6,
+                  ...(onRight ? { right: 0 } : { left: 0 }),
+                  width: expandedWidth - 16,
+                }}
+              >
+                <div className="px-3 py-2 border-b border-slate-700/50">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
+                    {(t.downloads as Record<string, string>).gamOnline}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center gap-2 px-3 py-3">
+                  {Object.entries(SOCIAL_LINKS).map(([name, href]) => (
+                    <a
+                      key={name}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setSocialMenuOpen(false)}
+                      className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300"
+                      title={name}
+                    >
+                      <SocialIcon name={name} />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </footer>
         )}
         {isCollapsed && (

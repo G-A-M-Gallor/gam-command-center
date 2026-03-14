@@ -8,7 +8,6 @@ export interface ShellPrefs {
   sidebarHover: boolean;
   sidebarWidth: number;
   topbarVisible: boolean;
-  topbarHover: boolean;
   tabbarVisible: boolean;
   speedDialVisible: boolean;
 }
@@ -20,7 +19,6 @@ const DEFAULTS: ShellPrefs = {
   sidebarHover: false,
   sidebarWidth: 240,
   topbarVisible: true,
-  topbarHover: false,
   tabbarVisible: false,
   speedDialVisible: true,
 };
