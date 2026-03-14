@@ -16,8 +16,9 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
   SELECT workspace_id
-  FROM public.user_profiles
+  FROM public.vb_workspace_users
   WHERE user_id = (SELECT auth.uid())
+  AND is_active = true
   LIMIT 1;
 $$;
 
@@ -41,7 +42,7 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS document_media (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id  UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   name          TEXT NOT NULL,
   type          TEXT NOT NULL CHECK (type IN ('logo', 'image', 'watermark', 'stamp', 'background')),
   storage_path  TEXT NOT NULL,
@@ -64,7 +65,7 @@ CREATE INDEX idx_doc_media_created_at  ON document_media(created_at DESC);
 
 CREATE TABLE IF NOT EXISTS document_signatures (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id  UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   user_id       UUID REFERENCES auth.users(id),
   name          TEXT NOT NULL,
   type          TEXT NOT NULL CHECK (type IN ('drawn', 'typed', 'uploaded')),
@@ -83,7 +84,7 @@ CREATE INDEX idx_doc_signatures_user      ON document_signatures(user_id);
 
 CREATE TABLE IF NOT EXISTS document_layouts (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id  UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   name          TEXT NOT NULL,
   header_html   TEXT,
   footer_html   TEXT,
@@ -108,7 +109,7 @@ CREATE INDEX idx_doc_layouts_workspace ON document_layouts(workspace_id);
 
 CREATE TABLE IF NOT EXISTS document_blocks (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id  UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   title         TEXT NOT NULL,
   category      TEXT NOT NULL CHECK (category IN ('legal', 'company_info', 'conditions', 'safety', 'custom')),
   content       JSONB NOT NULL DEFAULT '{}',
@@ -132,7 +133,7 @@ CREATE INDEX idx_doc_blocks_created_at ON document_blocks(created_at DESC);
 
 CREATE TABLE IF NOT EXISTS document_templates (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id  UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id  UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   name          TEXT NOT NULL,
   description   TEXT,
   layout_id     UUID REFERENCES document_layouts(id) ON DELETE SET NULL,
@@ -202,7 +203,7 @@ CREATE UNIQUE INDEX idx_doc_tversions_unique ON document_template_versions(templ
 
 CREATE TABLE IF NOT EXISTS document_submissions (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id    UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id    UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   template_id     UUID REFERENCES document_templates(id) ON DELETE SET NULL,
   template_ver    INTEGER,
   name            TEXT NOT NULL,
@@ -337,7 +338,7 @@ CREATE INDEX idx_doc_messages_created_at ON document_messages(created_at DESC);
 
 CREATE TABLE IF NOT EXISTS document_automations (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id    UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id    UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   submission_id   UUID REFERENCES document_submissions(id) ON DELETE CASCADE,
   event           TEXT NOT NULL,
   action          TEXT NOT NULL,
@@ -365,7 +366,7 @@ CREATE INDEX idx_doc_automations_next_run   ON document_automations(next_run_at)
 
 CREATE TABLE IF NOT EXISTS document_audit_log (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id    UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id    UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   submission_id   UUID REFERENCES document_submissions(id) ON DELETE SET NULL,
   actor_type      TEXT NOT NULL CHECK (actor_type IN ('user', 'submitter', 'system', 'automation')),
   actor_id        TEXT,
@@ -439,7 +440,7 @@ CREATE INDEX idx_doc_cuploads_status     ON document_checklist_uploads(status);
 
 CREATE TABLE IF NOT EXISTS document_archive (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  workspace_id    UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  workspace_id    UUID NOT NULL REFERENCES vb_workspaces(id) ON DELETE CASCADE,
   submission_id   UUID REFERENCES document_submissions(id) ON DELETE SET NULL,
   direction       TEXT NOT NULL CHECK (direction IN ('inbound', 'outbound', 'internal')),
   title           TEXT NOT NULL,

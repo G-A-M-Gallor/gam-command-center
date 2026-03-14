@@ -237,7 +237,7 @@ async function getTenantInfo(
 ): Promise<TenantInfo> {
   // Try workspace settings
   const { data: workspace } = await supabase
-    .from("workspaces")
+    .from("vb_workspaces")
     .select("name, owner_id, settings")
     .eq("id", workspaceId)
     .single();
@@ -249,7 +249,7 @@ async function getTenantInfo(
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("email, display_name")
-      .eq("user_id", workspace.owner_id)
+      .eq("id", workspace.owner_id)
       .single();
     ownerEmail = profile?.email || "";
     ownerName = profile?.display_name || "";
@@ -260,7 +260,7 @@ async function getTenantInfo(
     const { data: profile } = await supabase
       .from("user_profiles")
       .select("email, display_name")
-      .eq("user_id", createdBy)
+      .eq("id", createdBy)
       .single();
     ownerEmail = profile?.email || "";
     ownerName = profile?.display_name || "";
