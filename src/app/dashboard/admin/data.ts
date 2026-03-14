@@ -212,10 +212,13 @@ export const routes: RouteEntry[] = [
   },
   {
     id: 'settings', path: '/dashboard/settings', name: 'Settings', nameHe: 'הגדרות', icon: Settings,
-    phase: 1, status: 'active', version: '0.6.0', addedDate: '2026-02-15',
-    descriptionHe: 'צבעי מבטא, גופנים, סקינים, צפיפות, פרופיל מותג, עקיפות סגנון',
-    descriptionEn: 'Accent colors, fonts, themes, density, brand profile, style overrides',
-    components: [{ id: 'color-picker', name: 'ColorPicker', file: 'components/command-center/ColorPicker.tsx', status: 'active' }],
+    phase: 1, status: 'active', version: '0.7.0', addedDate: '2026-02-15',
+    descriptionHe: 'צבעי מבטא, גופנים, סקינים, צפיפות, פרופיל מותג, עקיפות סגנון, חיבורים ואינטגרציות',
+    descriptionEn: 'Accent colors, fonts, themes, density, brand profile, style overrides, integrations hub',
+    components: [
+      { id: 'color-picker', name: 'ColorPicker', file: 'components/command-center/ColorPicker.tsx', status: 'active' },
+      { id: 'integrations-tab', name: 'IntegrationsTab', file: 'components/settings/IntegrationsTab.tsx', status: 'active' },
+    ],
     contexts: ['SettingsContext', 'StyleOverrideContext'], visible: true, sidebarTab: false,
   },
   {
