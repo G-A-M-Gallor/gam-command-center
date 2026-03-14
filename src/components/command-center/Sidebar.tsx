@@ -764,9 +764,9 @@ export function Sidebar({
           ))}
         </nav>
 
-        {/* Downloads + Social — compact footer buttons */}
+        {/* Footer — Downloads + Social */}
         {!isCollapsed && (
-          <div className="shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
+          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
@@ -788,10 +788,10 @@ export function Sidebar({
               <Globe className="h-3 w-3 shrink-0" />
               {(t.downloads as Record<string, string>).gamOnline}
             </button>
-          </div>
+          </footer>
         )}
         {isCollapsed && (
-          <div className="shrink-0 border-t border-slate-700/50 p-1 flex flex-col items-center gap-0.5">
+          <footer className="shrink-0 border-t border-slate-700/50 p-1 flex flex-col items-center gap-0.5">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
@@ -807,13 +807,6 @@ export function Sidebar({
                 {(t.downloads as Record<string, string>).title}
               </span>
             </button>
-          </div>
-        )}
-
-        {/* Footer */}
-        {!isCollapsed && (
-          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-3 py-2">
-            <span data-cc-id="sidebar.footer.tagline" data-cc-text="true" className="text-[10px] text-slate-600">{brandProfile.tagline || "GAM v1.0"}</span>
           </footer>
         )}
       </div>
