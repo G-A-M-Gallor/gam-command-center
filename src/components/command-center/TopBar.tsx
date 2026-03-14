@@ -36,6 +36,7 @@ import { UniversalSidePanel } from "./widgets/UniversalSidePanel";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { ShellPrefsPanel } from "./ShellPrefsPanel";
 
@@ -94,6 +95,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     widgetIcons,
   } = useWidgets();
   const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language, brandProfile } = useSettings();
+  const { user } = useAuth();
   const pathname = usePathname();
   const { editMode, setEditMode } = useDashboardMode();
   const router = useRouter();
@@ -878,19 +880,36 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
           </button>
         )}
 
-        {/* Brand logo — left side (when sidebar is on left) */}
+        {/* Brand + User — left side (when sidebar is on left) */}
         {sidebarPosition === "left" && (
-          <div className="flex h-full shrink-0 items-center gap-1.5 border-r border-slate-700/50 px-3">
-            {brandProfile?.logoDataUrl ? (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
-                <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
-              </div>
-            ) : (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
-                <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
+          <div className="flex h-full shrink-0 items-center border-r border-slate-700/50">
+            {/* G.A.M logo */}
+            <div className="flex items-center gap-1.5 px-2.5 border-r border-slate-700/30">
+              {brandProfile?.logoDataUrl ? (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
+                  <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
+                  <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
+                </div>
+              )}
+              <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
+            </div>
+            {/* User avatar + name */}
+            {user && (
+              <div className="flex items-center gap-1.5 px-2.5">
+                <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
+                  <span className="text-[10px] font-semibold text-[var(--cc-accent-400)]">
+                    {(user.email?.[0] || "?").toUpperCase()}
+                  </span>
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-slate-900 bg-emerald-500" />
+                </div>
+                <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
+                  {user.user_metadata?.full_name || user.email?.split("@")[0] || ""}
+                </span>
               </div>
             )}
-            <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
           </div>
         )}
 
@@ -1118,19 +1137,36 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
           <Store className="h-4 w-4" />
         </button>
 
-        {/* Brand logo — right side (when sidebar is on right) */}
+        {/* User + Brand — right side (when sidebar is on right) */}
         {sidebarPosition === "right" && (
-          <div className="flex h-full shrink-0 items-center gap-1.5 border-l border-slate-700/50 px-3">
-            <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
-            {brandProfile?.logoDataUrl ? (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
-                <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
-              </div>
-            ) : (
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
-                <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
+          <div className="flex h-full shrink-0 items-center border-l border-slate-700/50">
+            {/* User avatar + name */}
+            {user && (
+              <div className="flex items-center gap-1.5 px-2.5">
+                <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
+                  {user.user_metadata?.full_name || user.email?.split("@")[0] || ""}
+                </span>
+                <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
+                  <span className="text-[10px] font-semibold text-[var(--cc-accent-400)]">
+                    {(user.email?.[0] || "?").toUpperCase()}
+                  </span>
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-slate-900 bg-emerald-500" />
+                </div>
               </div>
             )}
+            {/* G.A.M logo */}
+            <div className="flex items-center gap-1.5 border-l border-slate-700/30 px-2.5">
+              <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
+              {brandProfile?.logoDataUrl ? (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
+                  <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
+                </div>
+              ) : (
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
+                  <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
+                </div>
+              )}
+            </div>
           </div>
         )}
 
