@@ -227,6 +227,11 @@ body {
   50% { box-shadow: 0 0 16px var(--cc-accent-500-50), 0 -4px 20px var(--cc-accent-600-30); }
 }
 
+@keyframes sd-edit-pulse {
+  0%, 100% { box-shadow: 0 0 16px var(--cc-accent-500-50), 0 -4px 20px var(--cc-accent-600-30); }
+  50% { box-shadow: 0 0 24px var(--cc-accent-400-60), 0 -6px 28px var(--cc-accent-500-40); }
+}
+
 /* ── Safe area insets (iPhone notch/home bar) ── */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   :root {
