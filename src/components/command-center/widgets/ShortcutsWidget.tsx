@@ -353,7 +353,7 @@ function ShortcutRow({
       {/* Reserved badge */}
       {shortcut.isReserved && (
         <span className="shrink-0 rounded bg-amber-900/40 px-1.5 py-0.5 text-[9px] text-amber-400/80">
-          {language === "he" ? "שמור למערכת" : language === "ru" ? "Системная" : "System"}
+          {getTranslations(language).widgets.shortcutsReserved}
         </span>
       )}
 
@@ -431,12 +431,8 @@ function AiSuggestionBar({ language }: { language: "he" | "en" | "ru" }) {
         ? AI_STUB_RESPONSES[match]
         : [{ combo: "Cmd+Shift+?", label: { he: "פעולה מותאמת", en: "Custom Action", ru: "Пользовательское действие" } }];
 
-      const text =
-        language === "he"
-          ? `💡 נסה ${result[0].combo} — ${result[0].label.he}`
-          : language === "ru"
-            ? `💡 Попробуйте ${result[0].combo} — ${result[0].label.ru}`
-            : `💡 Try ${result[0].combo} — ${result[0].label.en}`;
+      const tryWord = { he: "נסה", en: "Try", ru: "Попробуйте" }[language] || "Try";
+      const text = `💡 ${tryWord} ${result[0].combo} — ${result[0].label[language]}`;
 
       // Typing animation
       let i = 0;

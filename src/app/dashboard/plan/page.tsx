@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { routes } from "@/app/dashboard/admin/data";
 import { Check, Clock, Circle, ChevronDown, ChevronUp, Wifi, WifiOff, FileText } from "lucide-react";
@@ -305,7 +305,7 @@ export default function PlanPage() {
                                   <div key={route.id} className="flex items-center gap-2.5 text-sm">
                                     <RouteIcon className={`w-3.5 h-3.5 ${isActive ? "text-emerald-400" : "text-slate-600"}`} />
                                     <span className={isActive ? "text-slate-300" : "text-slate-600"}>
-                                      {language === "he" ? route.nameHe : route.name}
+                                      {loc(route, "name", language)}
                                     </span>
                                     <span className={`text-[10px] ms-auto ${isActive ? "text-emerald-500" : "text-slate-600"}`}>
                                       v{route.version}

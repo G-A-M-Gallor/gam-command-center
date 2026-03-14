@@ -51,7 +51,7 @@ export function CanvasToolbar({
         className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
       >
         <ArrowRight className="h-3.5 w-3.5" />
-        <span>{language === 'he' ? 'מסמכים' : 'Documents'}</span>
+        <span>{ct?.documents || 'Documents'}</span>
       </button>
 
       {/* Add fields button */}
@@ -64,7 +64,7 @@ export function CanvasToolbar({
         }`}
       >
         <Plus className="h-3.5 w-3.5" />
-        <span>{language === 'he' ? 'שדות' : 'Fields'}</span>
+        <span>{ct?.fields || 'Fields'}</span>
       </button>
 
       <div className="mx-1 h-4 w-px bg-slate-700" />
@@ -76,21 +76,21 @@ export function CanvasToolbar({
         onChange={(e) => onTitleChange(e.target.value)}
         onBlur={onTitleBlur}
         onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-        placeholder={language === 'he' ? 'כותרת המסמך' : 'Document title'}
+        placeholder={ct?.documentTitle || 'Document title'}
         dir="auto"
         className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-200 outline-none placeholder:text-slate-600"
       />
 
       {/* Save status */}
       <span className="text-[11px] text-slate-500">
-        {saveStatus === 'saving' && (language === 'he' ? 'שומר...' : 'Saving...')}
-        {saveStatus === 'saved' && (language === 'he' ? '✓ נשמר' : '✓ Saved')}
-        {saveStatus === 'retrying' && (language === 'he' ? 'מנסה שוב...' : 'Retrying...')}
-        {saveStatus === 'error' && (language === 'he' ? '⚠ שגיאה בשמירה' : '⚠ Save error')}
+        {saveStatus === 'saving' && (ct?.saving || 'Saving...')}
+        {saveStatus === 'saved' && (ct?.saved || '✓ Saved')}
+        {saveStatus === 'retrying' && (ct?.retrying || 'Retrying...')}
+        {saveStatus === 'error' && (ct?.saveError || '⚠ Save error')}
         {saveStatus === 'conflict' && (
-          <span className="text-amber-400">{language === 'he' ? '⚠ המסמך עודכן בטאב אחר' : '⚠ Conflict'}</span>
+          <span className="text-amber-400">{ct?.conflict || '⚠ Conflict'}</span>
         )}
-        {saveStatus === 'offline' && (language === 'he' ? '☁ אופליין — נשמר מקומית' : '☁ Offline — saved locally')}
+        {saveStatus === 'offline' && (ct?.offline || '☁ Offline — saved locally')}
       </span>
 
       <div className="mx-1 h-4 w-px bg-slate-700" />

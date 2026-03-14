@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { Loader2, Send, Plus } from "lucide-react";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import {
   PERSONAS,
@@ -315,8 +315,8 @@ function PersonaChip({
   language: string;
   onClick: () => void;
 }) {
-  const name = language === "he" ? persona.nameHe : persona.nameEn;
-  const role = language === "he" ? persona.roleHe : persona.roleEn;
+  const name = loc(persona, "name", language as "he" | "en" | "ru");
+  const role = loc(persona, "role", language as "he" | "en" | "ru");
 
   return (
     <button
@@ -370,8 +370,8 @@ function ResponseCard({
   state?: ResponseState;
   language: string;
 }) {
-  const name = language === "he" ? persona.nameHe : persona.nameEn;
-  const role = language === "he" ? persona.roleHe : persona.roleEn;
+  const name = loc(persona, "name", language as "he" | "en" | "ru");
+  const role = loc(persona, "role", language as "he" | "en" | "ru");
   const isLoading = state?.loading ?? true;
   const text = state?.text ?? "";
   const error = state?.error;
@@ -405,7 +405,7 @@ function ResponseCard({
             style={{ color: persona.color }}
           >
             <Loader2 className="h-3 w-3 animate-spin" />
-            {language === "he" ? "חושב..." : "Thinking..."}
+            {getTranslations(language as "he" | "en" | "ru").boardroom.thinking}
           </div>
         )}
       </div>

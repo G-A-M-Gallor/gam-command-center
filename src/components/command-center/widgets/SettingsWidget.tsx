@@ -69,7 +69,7 @@ export function SettingsPanel() {
 export function SettingsBarContent({ size }: { size: WidgetSize }) {
   const { language, sidebarPosition, sidebarVisibility } = useSettings();
 
-  const langFlag = language === "he" ? "עב" : "EN";
+  const langFlag = getTranslations(language).widgets.langFlag;
   const posLabel = sidebarPosition === "right" ? "R" : "L";
   const visLabel =
     sidebarVisibility === "visible"

@@ -40,16 +40,14 @@ function isTomorrow(dateStr: string): boolean {
   return d.getFullYear() === tom.getFullYear() && d.getMonth() === tom.getMonth() && d.getDate() === tom.getDate();
 }
 
-function startsIn(dateStr: string, language: string): string | null {
+function startsIn(dateStr: string, rt: { now: string; inMinutes: string; inHours: string }): string | null {
   const diff = new Date(dateStr).getTime() - Date.now();
   if (diff < 0 || diff > 24 * 60 * 60 * 1000) return null;
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return language === 'he' ? 'עכשיו' : language === 'ru' ? 'сейчас' : 'now';
-  if (mins < 60) {
-    return language === 'he' ? `בעוד ${mins} דק׳` : language === 'ru' ? `через ${mins} мин` : `in ${mins}m`;
-  }
+  if (mins < 1) return rt.now;
+  if (mins < 60) return rt.inMinutes.replace('{n}', String(mins));
   const hours = Math.floor(mins / 60);
-  return language === 'he' ? `בעוד ${hours} שע׳` : language === 'ru' ? `через ${hours} ч` : `in ${hours}h`;
+  return rt.inHours.replace('{n}', String(hours));
 }
 
 export function CalendarPanel() {
@@ -240,6 +238,7 @@ export function CalendarPanel() {
 
 export function CalendarBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
+  const rt = getTranslations(language).relativeTime;
   const [nextEvent, setNextEvent] = useState<string | null>(null);
   const [accountId, setAccountId] = useState<string | null>(null);
 
@@ -267,7 +266,7 @@ export function CalendarBarContent({ size }: { size: WidgetSize }) {
             (e: CalendarEvent) => !e.isAllDay && new Date(e.start).getTime() > Date.now()
           );
           if (upcoming) {
-            setNextEvent(startsIn(upcoming.start, language));
+            setNextEvent(startsIn(upcoming.start, rt));
           } else {
             setNextEvent(null);
           }

@@ -337,7 +337,7 @@ function StoryMapContent() {
   const handleAddEpic = useCallback(() => {
     const maxCol = cards.reduce((max, c) => Math.max(max, c.col), -1);
     const newCol = maxCol + 1;
-    const epicText = language === 'he' ? `אפיק ${newCol + 1}` : `Epic ${newCol + 1}`;
+    const epicText = `${storyMapT.defaultEpic} ${newCol + 1}`;
 
     const newCard: StoryCard = {
       id: isDemo ? `demo-epic-${Date.now()}` : crypto.randomUUID(),
@@ -384,7 +384,7 @@ function StoryMapContent() {
     (col: number) => {
       const colNonEpics = cards.filter((c) => c.col === col && c.type !== 'epic');
       const nextOrder = colNonEpics.length;
-      const featureText = language === 'he' ? 'פיצ׳ר חדש' : 'New Feature';
+      const featureText = storyMapT.defaultFeature;
 
       const newCard: StoryCard = {
         id: isDemo ? `demo-feature-${Date.now()}` : crypto.randomUUID(),
@@ -454,7 +454,7 @@ function StoryMapContent() {
         }
       }
 
-      const storyText = language === 'he' ? 'סיפור חדש' : 'New story';
+      const storyText = storyMapT.defaultStory;
 
       // Shift cards at >= insertAt up by 1
       setCards((prev) => {

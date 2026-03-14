@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, X, CheckCircle2, Circle, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { NotionTask } from "@/lib/notion/client";
 
@@ -237,7 +237,7 @@ export function RoadmapView() {
   }, [handleKeyDown]);
 
   // ── Helpers ────────────────────────────────────────
-  const getLabel = (config: IslandConfig) => language === "he" ? config.labelHe : config.labelEn;
+  const getLabel = (config: IslandConfig) => loc(config, "label", language);
   const getDescription = (config: IslandConfig) =>
     config.description[language as keyof typeof config.description] || config.description.en;
 

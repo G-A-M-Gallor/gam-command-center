@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { Monitor, Database, Building2, BookOpen, Cog, MessageSquare, Lock } from "lucide-react";
 
@@ -239,10 +239,10 @@ export default function ArchitecturePage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-slate-400">
-                        {language === "he" ? tool.roleHe : tool.role}
+                        {loc(tool, "role", language)}
                       </td>
                       <td className="px-4 py-3 text-slate-500">
-                        {language === "he" ? tool.doesNotHe : tool.doesNot}
+                        {loc(tool, "doesNot", language)}
                       </td>
                     </tr>
                   );

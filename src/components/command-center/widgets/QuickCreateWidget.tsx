@@ -87,7 +87,7 @@ export function QuickCreatePanel() {
     } catch {
       saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
       toast({
-        message: `${label}: ${title.trim()} (${language === "he" ? "שמור מקומית" : "saved locally"})`,
+        message: `${label}: ${title.trim()} (${t.widgets.savedLocally})`,
         type: "warning",
       });
     }

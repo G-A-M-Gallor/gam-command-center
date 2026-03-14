@@ -54,7 +54,7 @@ export function EditToolbar() {
                 <span>{tab.label[language]}</span>
                 {!tab.enabled && (
                   <span className="rounded bg-slate-700 px-1 py-0.5 text-[10px] text-slate-500">
-                    {language === 'he' ? 'בקרוב' : language === 'ru' ? 'Скоро' : 'Soon'}
+                    {t.widgets.soon}
                   </span>
                 )}
               </button>

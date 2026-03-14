@@ -467,7 +467,7 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
   if (top2.length === 0) {
     return (
       <span className="truncate text-xs text-slate-500">
-        {language === "he" ? "אין חדשות" : language === "ru" ? "Всё в порядке" : "All clear"}
+        {getTranslations(language).widgets.allClear}
       </span>
     );
   }

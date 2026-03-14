@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useSettings } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import {
   getFieldType,
@@ -47,6 +48,7 @@ export function FieldConfigModal({
   onDefinitionCreated,
 }: FieldConfigModalProps) {
   const { language } = useSettings();
+  const fc = getTranslations(language).fieldConfig;
   const typeDef = getFieldType(fieldType);
   const [config, setConfig] = useState<FieldConfig>(
     initialConfig || { ...defaultConfigs[fieldType] }
@@ -179,10 +181,10 @@ export function FieldConfigModal({
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 border-t border-slate-700/50 px-4 py-3">
           <Button variant="ghost" size="sm" onClick={onClose}>
-            {language === 'he' ? 'ביטול' : language === 'ru' ? 'Отмена' : 'Cancel'}
+            {fc.cancel}
           </Button>
           <Button variant="primary" size="sm" onClick={handleSave} loading={saving}>
-            {language === 'he' ? 'שמור' : language === 'ru' ? 'Сохранить' : 'Save'}
+            {fc.save}
           </Button>
         </div>
       </div>
@@ -202,26 +204,26 @@ function FieldConfigForm({
   update: (key: string, value: unknown) => void;
   language: 'he' | 'en' | 'ru';
 }) {
-  const l = (he: string, en: string, ru?: string) => (language === 'he' ? he : language === 'ru' ? (ru || en) : en);
+  const fc = getTranslations(language).fieldConfig;
 
   switch (fieldType) {
     case 'short-text': {
       const c = config as ShortTextConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Field label={l('טקסט ברירת מחדל', 'Placeholder')}>
-            <TextInput value={c.placeholder} onChange={(v) => update('placeholder', v)} placeholder={l('טקסט לדוגמה...', 'Example text...')} />
+          <Field label={fc.placeholder}>
+            <TextInput value={c.placeholder} onChange={(v) => update('placeholder', v)} placeholder={fc.exampleText} />
           </Field>
-          <Field label={l('ערך ברירת מחדל', 'Default value')}>
+          <Field label={fc.defaultValue}>
             <TextInput value={c.defaultValue} onChange={(v) => update('defaultValue', v)} />
           </Field>
           <div className="flex items-center gap-4">
-            <Toggle label={l('חובה', 'Required')} checked={c.required} onChange={(v) => update('required', v)} />
+            <Toggle label={fc.required} checked={c.required} onChange={(v) => update('required', v)} />
           </div>
-          <Field label={l('אורך מקסימלי', 'Max length')}>
+          <Field label={fc.maxLength}>
             <NumberInput value={c.maxLength} onChange={(v) => update('maxLength', v)} min={1} max={10000} />
           </Field>
         </div>
@@ -232,10 +234,10 @@ function FieldConfigForm({
       const c = config as CheckboxConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Toggle label={l('מסומן כברירת מחדל', 'Default checked')} checked={c.defaultChecked} onChange={(v) => update('defaultChecked', v)} />
+          <Toggle label={fc.defaultChecked} checked={c.defaultChecked} onChange={(v) => update('defaultChecked', v)} />
         </div>
       );
     }
@@ -244,11 +246,11 @@ function FieldConfigForm({
       const c = config as DropdownConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Toggle label={l('חובה', 'Required')} checked={c.required} onChange={(v) => update('required', v)} />
-          <Field label={l('ערך ברירת מחדל', 'Default value')}>
+          <Toggle label={fc.required} checked={c.required} onChange={(v) => update('required', v)} />
+          <Field label={fc.defaultValue}>
             <TextInput value={c.defaultValue} onChange={(v) => update('defaultValue', v)} />
           </Field>
           <OptionsList
@@ -264,13 +266,13 @@ function FieldConfigForm({
       const c = config as MultiSelectConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Toggle label={l('חובה', 'Required')} checked={c.required} onChange={(v) => update('required', v)} />
-          <Field label={l('מקסימום בחירות', 'Max selections')}>
+          <Toggle label={fc.required} checked={c.required} onChange={(v) => update('required', v)} />
+          <Field label={fc.maxSelections}>
             <NumberInput value={c.maxSelections} onChange={(v) => update('maxSelections', v)} min={0} max={100} />
-            <span className="text-[10px] text-slate-500">{l('0 = ללא הגבלה', '0 = unlimited')}</span>
+            <span className="text-[10px] text-slate-500">{fc.unlimited}</span>
           </Field>
           <OptionsList
             options={c.options}
@@ -285,10 +287,10 @@ function FieldConfigForm({
       const c = config as DateConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Field label={l('פורמט', 'Format')}>
+          <Field label={fc.format}>
             <select
               value={c.format}
               onChange={(e) => update('format', e.target.value)}
@@ -307,10 +309,10 @@ function FieldConfigForm({
       const c = config as DateTimeConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Field label={l('פורמט', 'Format')}>
+          <Field label={fc.format}>
             <select
               value={c.format}
               onChange={(e) => update('format', e.target.value)}
@@ -329,10 +331,10 @@ function FieldConfigForm({
       const c = config as TimeConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Field label={l('פורמט', 'Format')}>
+          <Field label={fc.format}>
             <div className="flex gap-2">
               <button
                 onClick={() => update('format', '24h')}
@@ -348,7 +350,7 @@ function FieldConfigForm({
               </button>
             </div>
           </Field>
-          <Field label={l('ערך ברירת מחדל', 'Default value')}>
+          <Field label={fc.defaultValue}>
             <TextInput value={c.defaultValue} onChange={(v) => update('defaultValue', v)} placeholder="HH:mm" />
           </Field>
         </div>
@@ -359,18 +361,18 @@ function FieldConfigForm({
       const c = config as TagsConfig;
       return (
         <div className="flex flex-col gap-3">
-          <Field label={l('תווית', 'Label')}>
-            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={l('שם השדה', 'Field name')} />
+          <Field label={fc.label}>
+            <TextInput value={c.label} onChange={(v) => update('label', v)} placeholder={fc.fieldName} />
           </Field>
-          <Toggle label={l('אפשר תגיות חופשיות', 'Allow custom tags')} checked={c.allowCustom} onChange={(v) => update('allowCustom', v)} />
-          <Field label={l('מקסימום תגיות', 'Max tags')}>
+          <Toggle label={fc.allowCustomTags} checked={c.allowCustom} onChange={(v) => update('allowCustom', v)} />
+          <Field label={fc.maxTags}>
             <NumberInput value={c.maxTags} onChange={(v) => update('maxTags', v)} min={1} max={100} />
           </Field>
           <OptionsList
             options={c.predefinedTags}
             onChange={(v) => update('predefinedTags', v)}
             language={language}
-            addLabel={l('הוסף תגית', 'Add tag')}
+            addLabel={fc.addTag}
           />
         </div>
       );
@@ -459,7 +461,7 @@ function OptionsList({
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-[11px] font-medium text-slate-400">
-        {language === 'he' ? 'אפשרויות' : language === 'ru' ? 'Варианты' : 'Options'}
+        {getTranslations(language).fieldConfig.options}
       </label>
       <div className="flex flex-col gap-1 rounded-lg border border-slate-700/50 bg-slate-900/50 p-2">
         {options.map((opt, i) => (
@@ -490,7 +492,7 @@ function OptionsList({
             value={newOption}
             onChange={(e) => setNewOption(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(); } }}
-            placeholder={addLabel || (language === 'he' ? 'הוסף אפשרות' : language === 'ru' ? 'Добавить вариант' : 'Add option')}
+            placeholder={addLabel || getTranslations(language).fieldConfig.addOption}
             dir="auto"
             className="flex-1 rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300 placeholder-slate-600 outline-none"
           />
