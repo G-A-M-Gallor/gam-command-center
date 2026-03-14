@@ -35,7 +35,10 @@ import {
   BookOpen,
   Sheet,
   Presentation,
+  SlidersHorizontal,
 } from "lucide-react";
+import { ShellPrefsPanel } from "./ShellPrefsPanel";
+import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
@@ -140,6 +143,12 @@ interface SidebarProps {
   isFloating?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
+  /** Custom width from ShellPrefs (replaces FULL_WIDTH) */
+  customWidth?: number;
+  /** When true, sidebar collapses to strip and expands on hover (for "visible" mode) */
+  sidebarHoverMode?: boolean;
+  /** Callback when sidebar width changes via drag resize */
+  onWidthChange?: (width: number) => void;
 }
 
 export function Sidebar({
@@ -147,6 +156,9 @@ export function Sidebar({
   isFloating = false,
   isOpen = true,
   onClose,
+  customWidth,
+  sidebarHoverMode = false,
+  onWidthChange,
 }: SidebarProps = {}) {
   const pathname = usePathname();
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
@@ -191,9 +203,38 @@ export function Sidebar({
   // Fall back to raw sidebarVisibility for backwards compatibility.
   const mode = effectiveMode ?? sidebarVisibility;
   const isFloat = mode === "float";
-  const isCollapsed = isFloat && !hovered;
+  // Hover-reveal: in visible mode with sidebarHoverMode, collapse to strip and expand on hover
+  const isHoverReveal = mode === "visible" && sidebarHoverMode && !isMobile;
+  const isCollapsed = isFloat ? !hovered : isHoverReveal ? !hovered : false;
   const onRight = sidebarPosition === "right";
-  const expandedWidth = isMobile ? MOBILE_WIDTH : FULL_WIDTH;
+  const expandedWidth = isMobile ? MOBILE_WIDTH : (customWidth ?? FULL_WIDTH);
+
+  // Resize drag state
+  const [resizing, setResizing] = useState(false);
+  const resizeStartX = useRef(0);
+  const resizeStartW = useRef(expandedWidth);
+
+  // ShellPrefs panel state
+  const [shellPrefsOpen, setShellPrefsOpen] = useState(false);
+  const shellPrefsBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!resizing) return;
+    const handleMove = (e: MouseEvent) => {
+      const delta = onRight
+        ? resizeStartX.current - e.clientX
+        : e.clientX - resizeStartX.current;
+      const newWidth = Math.min(SIDEBAR_MAX_WIDTH, Math.max(SIDEBAR_MIN_WIDTH, resizeStartW.current + delta));
+      onWidthChange?.(newWidth);
+    };
+    const handleUp = () => setResizing(false);
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseup", handleUp);
+    return () => {
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseup", handleUp);
+    };
+  }, [resizing, onRight, onWidthChange]);
 
   const isHidden = mode === "hidden";
   const shouldCloseOnNav = isHidden && isFloating && onClose;
@@ -283,13 +324,13 @@ export function Sidebar({
         width: isCollapsed ? STRIP_WIDTH : expandedWidth,
         maxWidth: isMobile ? "100vw" : undefined,
         height: "calc(100vh - 48px)",
-        transition: isFloat ? "width 300ms ease" : undefined,
+        transition: (isFloat || isHoverReveal) ? "width 300ms ease" : undefined,
         backgroundColor: isCollapsed
           ? "color-mix(in srgb, var(--nav-bg) 80%, transparent)"
           : "var(--nav-bg)",
       }}
-      onMouseEnter={isFloat ? () => setHovered(true) : undefined}
-      onMouseLeave={isFloat ? () => setHovered(false) : undefined}
+      onMouseEnter={(isFloat || isHoverReveal) ? () => setHovered(true) : undefined}
+      onMouseLeave={(isFloat || isHoverReveal) ? () => setHovered(false) : undefined}
     >
       <div className="flex h-full flex-col">
         {/* Header */}
@@ -689,12 +730,64 @@ export function Sidebar({
         )}
 
         {/* Footer */}
-        {!isCollapsed && (
-          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-3 py-2">
+        {!isCollapsed ? (
+          <footer data-cc-id="sidebar.footer" className="shrink-0 border-t border-slate-700/50 px-3 py-2 flex items-center justify-between">
             <span data-cc-id="sidebar.footer.tagline" data-cc-text="true" className="text-[10px] text-slate-600">{brandProfile.tagline || "GAM v1.0"}</span>
+            <button
+              ref={shellPrefsBtnRef}
+              type="button"
+              onClick={() => setShellPrefsOpen((v) => !v)}
+              className="rounded p-1 text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
+              title={(t.shellPrefs as Record<string, string>).title}
+              aria-label={(t.shellPrefs as Record<string, string>).title}
+            >
+              <SlidersHorizontal className="h-3 w-3" />
+            </button>
+          </footer>
+        ) : (
+          <footer className="shrink-0 border-t border-slate-700/50 p-2 flex justify-center">
+            <button
+              ref={shellPrefsBtnRef}
+              type="button"
+              onClick={() => setShellPrefsOpen((v) => !v)}
+              className="group relative rounded p-1.5 text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
+              aria-label={(t.shellPrefs as Record<string, string>).title}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              <span
+                className={`absolute ${
+                  onRight ? "right-full mr-2" : "left-full ml-2"
+                } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+              >
+                {(t.shellPrefs as Record<string, string>).title}
+              </span>
+            </button>
           </footer>
         )}
+
+        {/* ShellPrefs popover */}
+        {shellPrefsOpen && (
+          <ShellPrefsPanel
+            onClose={() => setShellPrefsOpen(false)}
+            anchorRef={shellPrefsBtnRef}
+          />
+        )}
       </div>
+
+      {/* Resize handle */}
+      {!isMobile && !isCollapsed && (
+        <div
+          className={`absolute top-0 bottom-0 w-1 cursor-col-resize transition-colors hover:bg-[var(--cc-accent-500)]/30 active:bg-[var(--cc-accent-500)]/50 ${
+            onRight ? "left-0" : "right-0"
+          } ${resizing ? "bg-[var(--cc-accent-500)]/50" : ""}`}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            resizeStartX.current = e.clientX;
+            resizeStartW.current = expandedWidth;
+            setResizing(true);
+          }}
+        />
+      )}
     </aside>
   );
 }

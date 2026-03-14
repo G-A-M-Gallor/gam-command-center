@@ -69,9 +69,13 @@ function isOverlapping(
 
 interface TopBarProps {
   onSidebarOpen?: () => void;
+  /** When true, topbar hides and reveals on hover over top edge */
+  topbarHover?: boolean;
+  /** Optional top offset in px (for stacking below other fixed elements) */
+  topOffset?: number;
 }
 
-export function TopBar({ onSidebarOpen }: TopBarProps) {
+export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBarProps) {
   const {
     widgetPositions,
     widgetSizes,
@@ -97,6 +101,7 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   const isMobile = breakpoint === "mobile";
 
   const [mounted, setMounted] = useState(false);
+  const [topbarHovered, setTopbarHovered] = useState(false);
   const [mobileWidgetPanelOpen, setMobileWidgetPanelOpen] = useState(false);
   const [mobileActiveWidgetId, setMobileActiveWidgetId] = useState<string | null>(null);
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null);
@@ -835,12 +840,24 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   }
 
   // ─── Desktop: full widget grid (existing behavior) ─────────────────
+  const hoverHidden = topbarHover && !topbarHovered;
   return (
     <>
+      {/* Hover trigger zone — invisible 8px strip at the top */}
+      {topbarHover && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[41] h-2"
+          onMouseEnter={() => setTopbarHovered(true)}
+        />
+      )}
       <div
         data-cc-id="topbar.root"
-        className={`fixed top-0 z-40 flex ${BAR_HEIGHT} items-center border-b border-slate-700`}
-        style={{ left: 0, right: 0, backgroundColor: "var(--nav-bg)" }}
+        className={`fixed z-40 flex ${BAR_HEIGHT} items-center border-b border-slate-700 transition-all duration-200 ease-out ${
+          hoverHidden ? "opacity-0 -translate-y-full pointer-events-none" : "opacity-100 translate-y-0"
+        }`}
+        style={{ top: topOffset ?? 0, left: 0, right: 0, backgroundColor: "var(--nav-bg)" }}
+        onMouseEnter={topbarHover ? () => setTopbarHovered(true) : undefined}
+        onMouseLeave={topbarHover ? () => setTopbarHovered(false) : undefined}
       >
         {/* Hamburger — left side */}
         {sidebarPosition === "left" && sidebarVisibility === "hidden" && onSidebarOpen && (

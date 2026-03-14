@@ -1643,6 +1643,27 @@ export const changelogEntries: ChangelogEntry[] = [
     purposeHe: 'ניווט מסך מפוצל נותן למשתמשים הקשר לפני ניווט — תצוגה מקדימה של מה בתוך כל לשונית בלי לאבד את הדף הנוכחי. מפחית חיכוך ניווט.',
     connectedTo: ['sidebar-redesign', 'DashboardShell.tsx'],
   },
+  {
+    id: 'shell-prefs',
+    feature: 'ShellPrefs — frame display control system',
+    featureHe: 'העדפות מסגרת — שליטה בתצוגת המסגרת',
+    status: 'working', commitStatus: 'uncommitted', workflowStatus: 'inProgress',
+    date: '2026-03-14', phase: 1,
+    files: [
+      'src/lib/hooks/useShellPrefs.ts',
+      'src/components/command-center/ShellPrefsPanel.tsx',
+      'src/components/command-center/TabBar.tsx',
+      'src/components/command-center/DashboardShell.tsx',
+      'src/components/command-center/Sidebar.tsx',
+      'src/components/command-center/TopBar.tsx',
+    ],
+    route: '/dashboard',
+    notes: 'Standalone useShellPrefs hook with localStorage persistence and cc-shell-prefs-change DOM event. Controls: sidebar hover-reveal, sidebar drag-resize (180-400px), topbar show/hide, topbar hover-reveal, tabbar toggle, speed dial toggle. ShellPrefsPanel popover accessible from sidebar footer. TabBar shows recent pages below TopBar. All features gated behind !isMobile.',
+    notesHe: 'הוק useShellPrefs עצמאי עם שמירה ב-localStorage ואירוע DOM. פקדים: סיידבר בריחוף, שינוי גודל סיידבר בגרירה, הצגה/הסתרה של סרגל עליון, סרגל עליון בריחוף, סרגל לשוניות, חוגה מהירה.',
+    purpose: 'Gives users granular control over the dashboard frame — which panels are visible, how they behave (hover vs fixed), and how much space they take. Orthogonal to SettingsContext theme/appearance settings.',
+    purposeHe: 'נותן למשתמשים שליטה מדויקת על מסגרת הדשבורד — אילו פאנלים נראים, איך הם מתנהגים (ריחוף לעומת קבוע), וכמה מקום הם תופסים.',
+    connectedTo: ['DashboardShell.tsx', 'Sidebar.tsx', 'TopBar.tsx', 'SettingsContext', 'SpeedDial'],
+  },
 
   // ── Libraries ──
 

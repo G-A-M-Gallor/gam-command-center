@@ -14,8 +14,10 @@ import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
 import { ShortcutsProvider } from "@/contexts/ShortcutsContext";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
+import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 import { GibberishDetector } from "./GibberishDetector";
 import { SpeedDial } from "./SpeedDial";
+import { TabBar } from "./TabBar";
 import dynamic from "next/dynamic";
 
 const CommunicationPanel = dynamic(
@@ -23,7 +25,6 @@ const CommunicationPanel = dynamic(
   { ssr: false },
 );
 
-const SIDEBAR_WIDTH = "15rem";
 const STRIP_WIDTH = "48px";
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
@@ -52,6 +53,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
   const [floatOpen, setFloatOpen] = useState(false);
+  const [shellPrefs, , updatePref] = useShellPrefs();
 
   // Bottom bar callbacks
   const handleBottomBarSidebarToggle = useCallback(() => setFloatOpen((prev) => !prev), []);
@@ -99,17 +101,43 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   // Backdrop only for hidden mode
   const showBackdrop = isHidden && floatOpen;
 
+  // Compute sidebar pixel width from ShellPrefs
+  const sidebarPx = `${shellPrefs.sidebarWidth}px`;
+
+  // For hover-reveal mode in visible: sidebar collapses to strip, so use strip width for margins
+  const sidebarHoverActive = isVisible && shellPrefs.sidebarHover && !isMobile;
+
   const contentMargin = isVisible
-    ? {
-        marginLeft: sidebarPosition === "left" ? SIDEBAR_WIDTH : 0,
-        marginRight: sidebarPosition === "right" ? SIDEBAR_WIDTH : 0,
-      }
+    ? sidebarHoverActive
+      ? {
+          marginLeft: sidebarPosition === "left" ? STRIP_WIDTH : 0,
+          marginRight: sidebarPosition === "right" ? STRIP_WIDTH : 0,
+        }
+      : {
+          marginLeft: sidebarPosition === "left" ? sidebarPx : 0,
+          marginRight: sidebarPosition === "right" ? sidebarPx : 0,
+        }
     : isFloat
       ? {
           marginLeft: sidebarPosition === "left" ? STRIP_WIDTH : 0,
           marginRight: sidebarPosition === "right" ? STRIP_WIDTH : 0,
         }
       : undefined;
+
+  // TopBar visibility
+  const showTopBar = isMobile || shellPrefs.topbarVisible;
+
+  // TabBar visibility (desktop only)
+  const showTabBar = !isMobile && shellPrefs.tabbarVisible;
+
+  // Extra top padding for tabbar (32px)
+  const tabBarOffset = showTabBar ? 32 : 0;
+
+  // Sidebar width change handler
+  const handleSidebarWidthChange = useCallback(
+    (width: number) => updatePref("sidebarWidth", width),
+    [updatePref],
+  );
 
   return (
     <DashboardModeProvider>
@@ -133,21 +161,39 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         isFloating={isFloat || isHidden}
         isOpen={isFloat ? true : floatOpen}
         onClose={() => setFloatOpen(false)}
+        customWidth={shellPrefs.sidebarWidth}
+        sidebarHoverMode={shellPrefs.sidebarHover}
+        onWidthChange={handleSidebarWidthChange}
       />
 
       {/* Top Bar */}
-      <TopBar onSidebarOpen={isHidden ? () => setFloatOpen(true) : undefined} />
+      {showTopBar && (
+        <TopBar
+          onSidebarOpen={isHidden ? () => setFloatOpen(true) : undefined}
+          topbarHover={!isMobile && shellPrefs.topbarHover}
+        />
+      )}
+
+      {/* Tab Bar — horizontal page tabs below TopBar */}
+      {showTabBar && (
+        <TabBar
+          contentMarginLeft={contentMargin?.marginLeft}
+          contentMarginRight={contentMargin?.marginRight}
+        />
+      )}
 
       <main
         data-cc-id="content.main"
         className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] ${
           isMobile ? "pt-12"
+            : !showTopBar ? ""
             : displayMode === "compact" ? "pt-14"
             : displayMode === "icons-only" ? "pt-12"
             : "pt-16"
         }`}
         style={{
           ...contentMargin,
+          ...(showTabBar ? { paddingTop: `calc(${!showTopBar ? "0px" : displayMode === "compact" ? "3.5rem" : displayMode === "icons-only" ? "3rem" : "4rem"} + ${tabBarOffset}px)` } : undefined),
           ...(isMobile ? { paddingBottom: "calc(3.5rem + var(--safe-area-bottom, 0px) + 1rem)" } : undefined),
         }}
       >
@@ -167,7 +213,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <GibberishDetector />
 
       {/* FAB Speed Dial — desktop only */}
-      {!isMobile && <SpeedDial />}
+      {!isMobile && shellPrefs.speedDialVisible && <SpeedDial />}
 
       {/* Communication timeline panel — lazy loaded */}
       <CommunicationPanel />
