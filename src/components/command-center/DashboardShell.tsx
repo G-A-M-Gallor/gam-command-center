@@ -18,6 +18,7 @@ import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 import { GibberishDetector } from "./GibberishDetector";
 import { SpeedDial } from "./SpeedDial";
 import { TabBar } from "./TabBar";
+import { DownloadReminderPopup } from "./DownloadReminder";
 import dynamic from "next/dynamic";
 
 const CommunicationPanel = dynamic(
@@ -217,6 +218,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Communication timeline panel — lazy loaded */}
       <CommunicationPanel />
+
+      {/* Download reminder popup — every 10 days + manual trigger */}
+      <DownloadReminderPopup />
 
       {/* Guide mode overlay */}
       <GuideOverlay />

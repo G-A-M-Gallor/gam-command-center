@@ -30,18 +30,17 @@ import {
   AlignJustify,
   Star,
   Download,
-  Share,
   Database,
   BookOpen,
   Sheet,
   Presentation,
+  Globe,
 } from "lucide-react";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
-import { useInstallPrompt } from "@/lib/pwa/useInstallPrompt";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import type { FavoriteItem } from "./widgets/FavoritesWidget";
 
@@ -161,7 +160,6 @@ export function Sidebar({
   const pathname = usePathname();
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
   const { user, signOut, permissions } = useAuth();
-  const { state: installState, canInstall, install: triggerInstall } = useInstallPrompt();
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
@@ -641,45 +639,49 @@ export function Sidebar({
           ))}
         </nav>
 
-        {/* Install app button */}
-        {canInstall && (
-          <div className="shrink-0 border-t border-slate-700/50 p-2">
-            {isCollapsed ? (
-              <button
-                type="button"
-                onClick={installState === "ios" ? undefined : triggerInstall}
-                className="group relative flex w-full items-center justify-center rounded-lg p-2.5 text-[var(--cc-accent-400)] transition-colors hover:bg-[var(--cc-accent-600-20)]"
-                title={t.pwa.installTitle}
+        {/* Downloads + Social — compact footer buttons */}
+        {!isCollapsed && (
+          <div className="shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-medium text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300 ${
+                onRight ? "flex-row-reverse" : ""
+              }`}
+            >
+              <Download className="h-3 w-3 shrink-0" />
+              {(t.downloads as Record<string, string>).title}
+            </button>
+            <div className="h-3 w-px bg-slate-700/50" />
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-medium text-slate-500 transition-colors hover:bg-slate-800 hover:text-slate-300 ${
+                onRight ? "flex-row-reverse" : ""
+              }`}
+            >
+              <Globe className="h-3 w-3 shrink-0" />
+              {(t.downloads as Record<string, string>).gamOnline}
+            </button>
+          </div>
+        )}
+        {isCollapsed && (
+          <div className="shrink-0 border-t border-slate-700/50 p-1 flex flex-col items-center gap-0.5">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
+              className="group relative rounded p-1.5 text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
+              title={(t.downloads as Record<string, string>).title}
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span
+                className={`absolute ${
+                  onRight ? "right-full mr-2" : "left-full ml-2"
+                } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
               >
-                {installState === "ios" ? <Share className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-                <span
-                  className={`absolute ${
-                    onRight ? "right-full mr-2" : "left-full ml-2"
-                  } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
-                >
-                  {t.pwa.installTitle}
-                </span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={installState === "ios" ? undefined : triggerInstall}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors text-[var(--cc-accent-400)] hover:bg-[var(--cc-accent-600-20)] ${
-                  onRight ? "flex-row-reverse" : ""
-                }`}
-              >
-                {installState === "ios" ? <Share className="h-[18px] w-[18px] shrink-0" /> : <Download className="h-[18px] w-[18px] shrink-0" />}
-                <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>
-                  {t.pwa.installTitle}
-                </span>
-              </button>
-            )}
-            {/* iOS share guide (expanded only) */}
-            {installState === "ios" && !isCollapsed && (
-              <p className="mt-1 px-3 text-[10px] text-slate-500 leading-relaxed">
-                {t.pwa.iosShareGuide}
-              </p>
-            )}
+                {(t.downloads as Record<string, string>).title}
+              </span>
+            </button>
           </div>
         )}
 
