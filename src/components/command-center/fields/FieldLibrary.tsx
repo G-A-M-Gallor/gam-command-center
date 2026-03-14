@@ -263,12 +263,12 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
     <div className="flex-1 overflow-y-auto">
       {loadingDefs ? (
         <div className="py-8 text-center text-xs text-slate-500">
-          {language === 'he' ? '⏳ טוען...' : language === 'ru' ? '⏳ Загрузка...' : '⏳ Loading...'}
+          {fl.loading}
         </div>
       ) : filteredDefinitions.length === 0 ? (
         <div className="px-4 py-8 text-center text-xs text-slate-500">
           {query.trim()
-            ? (language === 'he' ? 'לא נמצאו שדות' : language === 'ru' ? 'Поля не найдены' : 'No fields found')
+            ? (fl.noResults)
             : fl.noDefinitions}
         </div>
       ) : (
@@ -364,7 +364,7 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
         <div className="flex flex-col gap-0.5 px-2">
           {filteredTypes.length === 0 && (
             <div className="py-6 text-center text-xs text-slate-500">
-              {language === 'he' ? 'לא נמצאו שדות' : language === 'ru' ? 'Поля не найдены' : 'No fields found'}
+              {fl.noResults}
             </div>
           )}
           {filteredTypes.map((field) => (
@@ -404,7 +404,7 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
           inputSize="sm"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={language === 'he' ? 'חיפוש שדה...' : language === 'ru' ? 'Поиск поля...' : 'Search fields...'}
+          placeholder={fl.search}
           dir="auto"
           iconStart={<Search className="h-3.5 w-3.5" />}
         />
@@ -426,7 +426,7 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
           <button
             onClick={() => switchMode('side-panel')}
             className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-            title={language === 'he' ? 'הצג במצב מלא' : language === 'ru' ? 'Боковая панель' : 'Side panel'}
+            title={fl.expandPanel}
           >
             {sidebarPosition === 'right' ? (
               <PanelLeftOpen className="h-3.5 w-3.5" />
@@ -439,7 +439,7 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
           <button
             onClick={() => switchMode('dropdown')}
             className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-            title={language === 'he' ? 'מצב קטן' : language === 'ru' ? 'Выпадающий список' : 'Dropdown'}
+            title={fl.dropdownMode}
           >
             <Minimize2 className="h-3.5 w-3.5" />
           </button>
@@ -448,7 +448,7 @@ export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTo
           <button
             onClick={() => switchMode('floating')}
             className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
-            title={language === 'he' ? 'חלון צף' : language === 'ru' ? 'Плавающее окно' : 'Floating'}
+            title={fl.floatingMode}
           >
             <Maximize2 className="h-3.5 w-3.5" />
           </button>

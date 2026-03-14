@@ -136,7 +136,8 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const router = useRouter();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
-  const lang = language === "he" ? "he" : language === "ru" ? "ru" : "en";
+  const lang = language;
+  const wt = t.widgets as Record<string, string>;
 
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -357,7 +358,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
       const docItems: SearchItem[] = dbDocuments.slice(0, 5).map((d) => ({
         id: `doc-${d.id}`,
-        label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
+        label: d.title || (wt.untitled || 'Untitled'),
         type: "document" as const,
         href: `/dashboard/editor?id=${d.id}`,
         icon: FileText,
@@ -391,7 +392,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     // Documents from DB
     const documents: SearchItem[] = searchResults.map((d) => ({
       id: `doc-${d.id}`,
-      label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
+      label: d.title || (wt.untitled || 'Untitled'),
       type: "document" as const,
       href: `/dashboard/editor?id=${d.id}`,
       icon: FileText,
@@ -403,7 +404,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       const et = n.entity_type ? entityTypeMap.get(n.entity_type) : undefined;
       return {
         id: `entity-${n.id}`,
-        label: n.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
+        label: n.title || (wt.untitled || 'Untitled'),
         type: "entity" as const,
         href: `/dashboard/entities/${n.entity_type}/${n.id}`,
         icon: StickyNote,
@@ -415,7 +416,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     // Semantic results (shown when FTS has no matches)
     const semantic: SearchItem[] = semanticResults.map((d) => ({
       id: `sem-${d.id}`,
-      label: d.title || (language === 'he' ? 'ללא כותרת' : language === 'ru' ? 'Без названия' : 'Untitled'),
+      label: d.title || (wt.untitled || 'Untitled'),
       type: "semantic" as const,
       href: `/dashboard/editor?id=${d.id}`,
       icon: Sparkles,
@@ -497,7 +498,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                 workspace_id: existing.workspace_id,
                 entity_id: existing.entity_id,
                 created_by: existing.created_by,
-                title: language === 'he' ? 'מסמך חדש' : language === 'ru' ? 'Новый документ' : 'New Document',
+                title: wt.newDocument || 'New Document',
                 content: { type: 'doc', content: [{ type: 'paragraph' }] },
                 record_type: 'document',
                 source: 'manual',
@@ -636,7 +637,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     // 7. Wiki
     if (wikiItems.length > 0) sections.push({ title: t.widgets.wikiSection, items: wikiItems });
     // Semantic
-    if (semanticItems.length > 0) sections.push({ title: language === 'he' ? 'תוצאות סמנטיות' : language === 'ru' ? 'Семантические результаты' : 'Semantic Results', items: semanticItems });
+    if (semanticItems.length > 0) sections.push({ title: wt.semanticResults, items: semanticItems });
     // Quick actions
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
 
@@ -756,15 +757,15 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
           <span className="flex items-center gap-1">
             <ArrowUp className="h-3 w-3" />
             <ArrowDown className="h-3 w-3" />
-            {language === "he" ? "ניווט" : language === "ru" ? "Навигация" : "Navigate"}
+            {wt.searchNavigate}
           </span>
           <span className="flex items-center gap-1">
             <CornerDownLeft className="h-3 w-3" />
-            {language === "he" ? "בחירה" : language === "ru" ? "Выбрать" : "Select"}
+            {wt.searchSelect}
           </span>
           <span className="flex items-center gap-1">
             <kbd className="rounded border border-slate-600 px-1 text-[10px]">ESC</kbd>
-            {language === "he" ? "סגירה" : language === "ru" ? "Закрыть" : "Close"}
+            {wt.searchClose}
           </span>
           <span className="ms-auto text-slate-600">
             {t.widgets.typeCommandHint}

@@ -191,7 +191,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
           <div className="flex gap-1 overflow-x-auto px-4 pb-2">
             {categories.map((cat) => {
               const label = cat === "all"
-                ? (language === "he" ? "הכל" : language === "ru" ? "Все" : "All")
+                ? (t.widgets as Record<string, string>).categoryAll
                 : CATEGORY_LABELS[cat][language];
               return (
                 <button
@@ -273,15 +273,16 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
               <div>
                 <label className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-400">
                   <LayoutList size={13} />
-                  {language === "he" ? "מצב תצוגה" : language === "ru" ? "Режим" : "Display Mode"}
+                  {(t.widgets as Record<string, string>).displayMode}
                 </label>
                 <div className="flex gap-2">
                   {(["normal", "compact", "icons-only"] as TopBarDisplayMode[]).map((mode) => {
+                    const wtl = t.widgets as Record<string, string>;
                     const mLabel = mode === "normal"
-                      ? (language === "he" ? "רגיל" : language === "ru" ? "Обычный" : "Normal")
+                      ? wtl.displayNormal
                       : mode === "compact"
-                        ? (language === "he" ? "צפוף" : language === "ru" ? "Компактный" : "Compact")
-                        : (language === "he" ? "אייקונים" : language === "ru" ? "Иконки" : "Icons");
+                        ? wtl.displayCompact
+                        : wtl.displayIconsOnly;
                     return (
                       <button
                         key={mode}
@@ -304,7 +305,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
               <div>
                 <label className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-400">
                   <Timer size={13} />
-                  {language === "he" ? "השהיית ריחוף" : language === "ru" ? "Задержка" : "Hover Delay"}
+                  {(t.widgets as Record<string, string>).hoverDelay}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {(["none", 0.1, 0.3, 0.5, 1, 2] as HoverDelay[]).map((d) => (
@@ -359,7 +360,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
             />
           ) : (
             <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
-              {language === "he" ? "בחר ווידג׳ט לצפייה בהגדרות" : language === "ru" ? "Выберите виджет" : "Select a widget to configure"}
+              {(t.widgets as Record<string, string>).selectWidgetToConfigure}
             </div>
           )}
         </div>
@@ -407,6 +408,7 @@ function WidgetSettingsPane({
   translations: sb,
 }: WidgetSettingsPaneProps) {
   const Icon = widget.icon;
+  const wt = getTranslations(language).widgets as Record<string, string>;
 
   return (
     <div className="flex flex-1 flex-col">
@@ -435,7 +437,7 @@ function WidgetSettingsPane({
           {widget.isRemovable && (
             <div>
               <label className="mb-1.5 block text-xs font-medium text-slate-400">
-                {language === "he" ? "מיקום" : language === "ru" ? "Расположение" : "Placement"}
+                {wt.widgetPlacement}
               </label>
               <div className="flex gap-2">
                 {(["toolbar", "apps", "disabled"] as WidgetPlacement[]).map((p) => (
@@ -459,7 +461,7 @@ function WidgetSettingsPane({
           {/* Size */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-slate-400">
-              {language === "he" ? "גודל" : language === "ru" ? "Размер" : "Size"}
+              {wt.widgetSize}
             </label>
             <div className="flex gap-2">
               {([1, 2, 3, 4] as WidgetSize[]).map((s) => (
@@ -482,15 +484,15 @@ function WidgetSettingsPane({
           {/* Panel Mode */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-slate-400">
-              {language === "he" ? "מצב פאנל" : language === "ru" ? "Режим панели" : "Panel Mode"}
+              {wt.panelMode}
             </label>
             <div className="flex gap-2">
               {(["dropdown", "side-panel", "popup"] as const).map((m) => {
                 const mLabel = m === "dropdown"
-                  ? (language === "he" ? "נפתח" : language === "ru" ? "Меню" : "Dropdown")
+                  ? wt.panelModeDropdown
                   : m === "side-panel"
-                    ? (language === "he" ? "צד" : language === "ru" ? "Боковая" : "Side")
-                    : (language === "he" ? "חלון" : language === "ru" ? "Окно" : "Popup");
+                    ? wt.panelModeSidePanel
+                    : wt.panelModePopup;
                 return (
                   <button
                     key={m}
@@ -512,7 +514,7 @@ function WidgetSettingsPane({
           {/* Custom Label */}
           <div>
             <label className="mb-1.5 block text-xs font-medium text-slate-400">
-              {language === "he" ? "שם מותאם" : language === "ru" ? "Название" : "Custom Label"}
+              {wt.customLabel}
             </label>
             <input
               type="text"
@@ -550,9 +552,7 @@ function WidgetSettingsPane({
               }`}
             >
               {isLocked ? <Lock size={12} /> : <Unlock size={12} />}
-              {isLocked
-                ? (language === "he" ? "נעול" : language === "ru" ? "Закреплён" : "Locked")
-                : (language === "he" ? "פתוח" : language === "ru" ? "Открыт" : "Unlocked")}
+              {isLocked ? wt.widgetLocked : wt.widgetUnlocked}
             </button>
           </div>
         </div>
@@ -571,9 +571,7 @@ function WidgetSettingsPane({
           <div className="flex justify-between">
             <span className="text-slate-500">{sb?.status || "Status"}</span>
             <span className={widget.status === "active" ? "text-emerald-400" : "text-slate-500"}>
-              {widget.status === "active"
-                ? (language === "he" ? "פעיל" : language === "ru" ? "Активен" : "Active")
-                : (language === "he" ? "בקרוב" : language === "ru" ? "Скоро" : "Coming Soon")}
+              {widget.status === "active" ? wt.widgetActive : wt.widgetComingSoon}
             </span>
           </div>
           <div className="flex justify-between">

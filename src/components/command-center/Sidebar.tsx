@@ -39,6 +39,7 @@ import {
   User as UserIcon,
   Settings as SettingsIcon,
   CircleDot,
+  FileSignature,
 } from "lucide-react";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -88,6 +89,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot, status: "active" },
       { href: "/dashboard/entities", key: "entities", icon: Database, status: "active" },
       { href: "/dashboard/comms", key: "comms", icon: MessagesSquare, status: "active" },
+      { href: "/dashboard/documents", key: "documents", icon: FileSignature, status: "active" },
       { href: "/dashboard/wiki", key: "wiki", icon: BookOpen, status: "active" },
     ],
   },

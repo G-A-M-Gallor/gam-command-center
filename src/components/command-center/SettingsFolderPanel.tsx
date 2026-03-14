@@ -86,7 +86,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
           <div className={sectionClass}>
             <label className={labelClass}>
               <Languages size={14} />
-              {language === "he" ? "שפה" : language === "ru" ? "Язык" : "Language"}
+              {t.settings.language}
             </label>
             <div className="flex gap-2">
               {(["he", "en", "ru"] as const).map((lang) => (
@@ -106,7 +106,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
           <div className={sectionClass}>
             <label className={labelClass}>
               <PanelLeftClose size={14} />
-              {language === "he" ? "מיקום סיידבר" : language === "ru" ? "Позиция бокового меню" : "Sidebar Position"}
+              {t.settings.sidebarPosition}
             </label>
             <div className="flex gap-2">
               {(["left", "right"] as const).map((pos) => (
@@ -116,9 +116,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
                   onClick={() => setSidebarPosition(pos)}
                   className={`${btnBase} ${sidebarPosition === pos ? btnActive : btnInactive}`}
                 >
-                  {pos === "left"
-                    ? (language === "he" ? "שמאל" : language === "ru" ? "Слева" : "Left")
-                    : (language === "he" ? "ימין" : language === "ru" ? "Справа" : "Right")}
+                  {pos === "left" ? t.settings.left : t.settings.right}
                 </button>
               ))}
             </div>
@@ -128,15 +126,15 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
           <div className={sectionClass}>
             <label className={labelClass}>
               <PanelRightClose size={14} />
-              {language === "he" ? "נראות סיידבר" : language === "ru" ? "Видимость меню" : "Sidebar Visibility"}
+              {t.settings.sidebarVisibility}
             </label>
             <div className="flex gap-2">
               {(["visible", "float", "hidden"] as const).map((vis) => {
                 const vLabel = vis === "visible"
-                  ? (language === "he" ? "גלוי" : language === "ru" ? "Видимый" : "Visible")
+                  ? t.settings.visible
                   : vis === "float"
-                    ? (language === "he" ? "צף" : language === "ru" ? "Плавающий" : "Float")
-                    : (language === "he" ? "מוסתר" : language === "ru" ? "Скрытый" : "Hidden");
+                    ? t.settings.float
+                    : t.settings.hidden;
                 return (
                   <button
                     key={vis}
@@ -162,7 +160,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
               className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             >
               <Keyboard size={14} />
-              {language === "he" ? "קיצורי מקלדת" : language === "ru" ? "Горячие клавиши" : "Keyboard Shortcuts"}
+              {(t.widgets as Record<string, string>).keyboardShortcuts}
             </button>
             <button
               type="button"
@@ -173,7 +171,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
               className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             >
               <Settings size={14} />
-              {language === "he" ? "כל ההגדרות" : language === "ru" ? "Все настройки" : "All Settings"}
+              {(t.widgets as Record<string, string>).allSettings}
             </button>
           </div>
         </div>

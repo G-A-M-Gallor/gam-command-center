@@ -248,7 +248,7 @@ function CategoryChips({
   language: Language;
   counts: Partial<Record<WidgetCategory, number>>;
 }) {
-  const allLabel = language === "he" ? "הכל" : language === "ru" ? "Все" : "All";
+  const allLabel = (getTranslations(language).widgets as Record<string, string>).categoryAll;
   const totalCount = Object.values(counts).reduce((s, n) => s + (n ?? 0), 0);
 
   return (
@@ -326,7 +326,7 @@ function WidgetCard({
         />
         {!widget.isRemovable && (
           <span className="text-[9px] text-slate-600">
-            {language === "he" ? "מערכת" : "System"}
+            {(getTranslations(language).widgets as Record<string, string>).storeSystem}
           </span>
         )}
       </div>
@@ -433,11 +433,7 @@ function WidgetRow({
         />
         {!widget.isRemovable && (
           <span className="shrink-0 text-[10px] text-slate-600">
-            {language === "he"
-              ? "מערכת"
-              : language === "ru"
-                ? "Системный"
-                : "System"}
+            {(getTranslations(language).widgets as Record<string, string>).storeSystem}
           </span>
         )}
       </div>
@@ -802,11 +798,7 @@ function InstalledContent({
         <div className="mb-6">
           <h3 className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             📁{" "}
-            {language === "he"
-              ? "תיקיות"
-              : language === "ru"
-                ? "Папки"
-                : "Folders"}
+            {(getTranslations(language).widgets as Record<string, string>).storeFolders}
             <span className="text-slate-600">({folders.length})</span>
           </h3>
           {viewMode === "grid" ? (
@@ -914,12 +906,7 @@ function InstalledContent({
         className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-600 py-3 text-sm text-slate-500 transition-colors hover:border-slate-400 hover:text-slate-300"
       >
         <Plus className="h-3.5 w-3.5" />
-        {ft?.createFolder ||
-          (language === "he"
-            ? "צור תיקיה"
-            : language === "ru"
-              ? "Создать папку"
-              : "Create Folder")}
+        {ft?.createFolder || (getTranslations(language).widgets as Record<string, string>).storeCreateFolder}
       </button>
 
       {showFolderCreator && (
@@ -1182,11 +1169,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
             </h2>
             <span className="rounded-full bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
               {installedCount}{" "}
-              {language === "he"
-                ? "פעילים"
-                : language === "ru"
-                  ? "активных"
-                  : "active"}
+              {t.widgets.storeActiveCount}
             </span>
           </div>
         )}

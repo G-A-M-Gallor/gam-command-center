@@ -50,6 +50,11 @@ import {
 } from "@/lib/weeklyPlanner/utils";
 import type { WidgetSize } from "./WidgetRegistry";
 
+/** Helper: get widget translations for a given language */
+function getWidgetT(language: "he" | "en" | "ru") {
+  return getTranslations(language).widgets as Record<string, string>;
+}
+
 // ─── Full-Screen Panel ──────────────────────────────────────
 
 export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
@@ -350,7 +355,7 @@ function DayColumn({ date, language }: { date: Date; language: "he" | "en" | "ru
       <div className="flex-1 space-y-1.5 p-2">
         {sorted.length === 0 && !past ? (
           <div className="flex h-32 items-center justify-center text-xs text-slate-600">
-            {language === "he" ? "יום פנוי 🎉" : language === "ru" ? "Свободный день 🎉" : "Free day 🎉"}
+            {getWidgetT(language).plannerFreeDay}
           </div>
         ) : (
           sorted.map((item) => (
@@ -462,7 +467,7 @@ function ItemCard({
                 onClick={(e) => { e.stopPropagation(); markDone(item.id); }}
                 className="flex items-center gap-1 rounded px-2 py-1 text-[10px] text-emerald-400 transition-colors hover:bg-emerald-950/30"
               >
-                <Check className="h-3 w-3" /> {language === "he" ? "בוצע" : language === "ru" ? "Готово" : "Done"}
+                <Check className="h-3 w-3" /> {getWidgetT(language).plannerDone}
               </button>
             )}
             {!isDone && !isDeadline && (
@@ -471,7 +476,7 @@ function ItemCard({
                 onClick={(e) => { e.stopPropagation(); moveToTomorrow(item.id); }}
                 className="flex items-center gap-1 rounded px-2 py-1 text-[10px] text-amber-400 transition-colors hover:bg-amber-950/30"
               >
-                <ArrowRight className="h-3 w-3" /> {language === "he" ? "מחר" : language === "ru" ? "Завтра" : "Tomorrow"}
+                <ArrowRight className="h-3 w-3" /> {getWidgetT(language).plannerMoveToTomorrow}
               </button>
             )}
             <button
@@ -511,7 +516,7 @@ function AssigneeSelector({
         className="flex items-center gap-1.5 rounded bg-slate-700/50 px-2 py-1 text-[10px] text-slate-400 transition-colors hover:bg-slate-700"
       >
         <User className="h-3 w-3" />
-        {current?.name || (language === "he" ? "ללא" : language === "ru" ? "Нет" : "None")}
+        {current?.name || getWidgetT(language).plannerNone}
         <ChevronDown className="h-2.5 w-2.5" />
       </button>
       {open && (
@@ -571,7 +576,7 @@ function PrioritySelector({
           }`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${p.color}`} />
-          {language === "he" ? p.he : language === "ru" ? p.ru : p.en}
+          {p[language]}
         </button>
       ))}
     </div>
@@ -612,7 +617,7 @@ function QuickAddInput({ dateStr, language }: { dateStr: string; language: "he" 
         className="flex w-full items-center justify-center gap-1.5 border-t border-slate-800 bg-slate-900/50 py-2.5 text-xs text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
       >
         <Plus className="h-3.5 w-3.5" />
-        {language === "he" ? "הוסף משימה" : language === "ru" ? "Добавить задачу" : "Add task"}
+        {getWidgetT(language).plannerAddTask}
       </button>
     );
   }
@@ -628,7 +633,7 @@ function QuickAddInput({ dateStr, language }: { dateStr: string; language: "he" 
           if (e.key === "Enter") handleSubmit();
           if (e.key === "Escape") { setText(""); setOpen(false); }
         }}
-        placeholder={language === "he" ? 'כתוב משימה... (למשל "שיחה עם דני 10:00")' : language === "ru" ? 'Напишите задачу... (напр. "Позвонить Дане 10:00")' : 'Write a task... (e.g. "Call Danny 10:00")'}
+        placeholder={getWidgetT(language).plannerTaskPlaceholder}
         className="w-full rounded-lg bg-slate-800 px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
       />
       <div className="flex items-center gap-2">
@@ -638,7 +643,7 @@ function QuickAddInput({ dateStr, language }: { dateStr: string; language: "he" 
           onChange={(e) => setAssignee(e.target.value || undefined)}
           className="rounded bg-slate-800 px-2 py-1 text-[10px] text-slate-400"
         >
-          <option value="">{language === "he" ? "👤 מוקצה לי" : language === "ru" ? "👤 Назначить мне" : "👤 Assign to me"}</option>
+          <option value="">{getWidgetT(language).plannerAssignMe}</option>
           {team.map((m) => (
             <option key={m.id} value={m.id}>👤 {m.name}</option>
           ))}
@@ -649,7 +654,7 @@ function QuickAddInput({ dateStr, language }: { dateStr: string; language: "he" 
           onClick={() => { setText(""); setOpen(false); }}
           className="rounded px-2 py-1 text-[10px] text-slate-500 hover:text-slate-400"
         >
-          {language === "he" ? "ביטול" : language === "ru" ? "Отмена" : "Cancel"}
+          {getWidgetT(language).plannerCancel}
         </button>
         <button
           type="button"
@@ -657,7 +662,7 @@ function QuickAddInput({ dateStr, language }: { dateStr: string; language: "he" 
           disabled={!text.trim()}
           className="rounded-md bg-[var(--cc-accent-600)] px-3 py-1 text-[10px] font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)] disabled:opacity-30"
         >
-          {language === "he" ? "הוסף" : language === "ru" ? "Добавить" : "Add"}
+          {getWidgetT(language).plannerAdd}
         </button>
       </div>
     </div>
@@ -682,7 +687,7 @@ function TeamView({
         <thead>
           <tr>
             <th className="w-28 border-b border-slate-700 px-3 py-3 text-start text-sm font-medium text-slate-400">
-              {language === "he" ? "עובד" : language === "ru" ? "Сотрудник" : "Member"}
+              {getWidgetT(language).plannerMember}
             </th>
             {weekDates.map((d) => {
               const ds = toDateString(d);
@@ -710,7 +715,7 @@ function TeamView({
                   <span>{member.name}</span>
                   {member.id === currentUserId && (
                     <span className="text-[10px] text-[var(--cc-accent-400)]">
-                      ({language === "he" ? "אני" : language === "ru" ? "я" : "me"})
+                      ({getWidgetT(language).plannerMe})
                     </span>
                   )}
                 </div>
@@ -749,7 +754,7 @@ function TeamView({
                       </div>
                       <span className="text-xs text-slate-400">
                         {count === 0
-                          ? language === "he" ? "פנוי" : language === "ru" ? "свободен" : "free"
+                          ? getWidgetT(language).plannerFree
                           : count}
                       </span>
                     </button>
@@ -834,14 +839,10 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
   return (
     <div className="mx-auto max-w-2xl p-6 space-y-4">
       <h3 className="text-sm font-semibold text-slate-200">
-        {language === "he" ? "📋 תבניות שבועיות" : language === "ru" ? "📋 Шаблоны на неделю" : "📋 Weekly Templates"}
+        {"📋 " + getWidgetT(language).plannerTemplates}
       </h3>
       <p className="text-xs text-slate-500">
-        {language === "he"
-          ? "צור תבנית שבועית עם משימות חוזרות. החל על השבוע הנוכחי בלחיצה."
-          : language === "ru"
-            ? "Создайте шаблон недели с повторяющимися задачами. Применяйте к текущей неделе в один клик."
-            : "Create a weekly template with recurring tasks. Apply to the current week in one click."}
+        {getWidgetT(language).plannerTemplateDesc}
       </p>
 
       {templates.map((tpl) => (
@@ -854,7 +855,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
                 onClick={() => applyTemplate(tpl.id, weekStart)}
                 className="rounded-lg bg-[var(--cc-accent-600)] px-3 py-1 text-xs text-white transition-colors hover:bg-[var(--cc-accent-500)]"
               >
-                {language === "he" ? "החל על השבוע" : language === "ru" ? "Применить к неделе" : "Apply to week"}
+                {getWidgetT(language).plannerApplyToWeek}
               </button>
               <button
                 type="button"
@@ -870,7 +871,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
           <div className="mt-3 space-y-1">
             {tpl.items.length === 0 ? (
               <p className="text-xs text-slate-600">
-                {language === "he" ? "אין פריטים. הוסף פריטים לתבנית." : language === "ru" ? "Нет элементов. Добавьте элементы в шаблон." : "No items. Add items to template."}
+                {getWidgetT(language).plannerNoItems}
               </p>
             ) : (
               tpl.items
@@ -926,7 +927,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
                   if (e.key === "Enter") handleAddItem(tpl.id);
                   if (e.key === "Escape") setAddingTo(null);
                 }}
-                placeholder={language === "he" ? "כותרת..." : language === "ru" ? "Заголовок..." : "Title..."}
+                placeholder={getWidgetT(language).plannerTitlePlaceholder}
                 className="flex-1 rounded-lg bg-slate-700 px-2 py-1.5 text-xs text-slate-300 placeholder-slate-600"
                 autoFocus
               />
@@ -945,7 +946,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
               className="mt-2 flex items-center gap-1.5 text-xs text-slate-500 transition-colors hover:text-slate-300"
             >
               <Plus className="h-3 w-3" />
-              {language === "he" ? "הוסף פריט לתבנית" : language === "ru" ? "Добавить элемент в шаблон" : "Add item to template"}
+              {getWidgetT(language).plannerAddToTemplate}
             </button>
           )}
         </div>
@@ -957,7 +958,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddTemplate()}
-          placeholder={language === "he" ? "שם תבנית חדשה..." : language === "ru" ? "Название нового шаблона..." : "New template name..."}
+          placeholder={getWidgetT(language).plannerNewTemplate}
           className="flex-1 rounded-xl bg-slate-800 px-4 py-2.5 text-sm text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-[var(--cc-accent-500)]"
         />
         <button
@@ -965,7 +966,7 @@ function TemplateManager({ language }: { language: "he" | "en" | "ru" }) {
           onClick={handleAddTemplate}
           className="rounded-xl bg-[var(--cc-accent-600)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--cc-accent-500)]"
         >
-          {language === "he" ? "צור תבנית" : language === "ru" ? "Создать" : "Create"}
+          {getWidgetT(language).plannerCreate}
         </button>
       </div>
     </div>

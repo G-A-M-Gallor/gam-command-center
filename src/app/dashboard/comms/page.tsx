@@ -103,14 +103,15 @@ const CHANNEL_ICON: Record<string, { icon: React.ElementType; color: string; bg:
 
 function timeAgo(dateStr: string | undefined, lang: string): string {
   if (!dateStr) return '—';
+  const ct = getTranslations(lang as "he" | "en" | "ru").comms as Record<string, string>;
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return lang === 'he' ? 'עכשיו' : lang === 'ru' ? 'сейчас' : 'now';
+  if (mins < 1) return ct.timeNow;
   if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h`;
   const days = Math.floor(hours / 24);
-  if (days === 1) return lang === 'he' ? 'אתמול' : lang === 'ru' ? 'вчера' : 'yesterday';
+  if (days === 1) return ct.timeYesterday;
   return `${days}d`;
 }
 
@@ -121,7 +122,8 @@ function formatTime(dateStr: string | undefined): string {
 
 function formatFullDate(dateStr: string | undefined, lang: string): string {
   if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString(lang === 'he' ? 'he-IL' : lang === 'ru' ? 'ru-RU' : 'en-US', {
+  const localeMap: Record<string, string> = { he: 'he-IL', ru: 'ru-RU', en: 'en-US' };
+  return new Date(dateStr).toLocaleDateString(localeMap[lang] || 'en-US', {
     day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   });
 }
@@ -301,7 +303,7 @@ function CallCard({ msg, c, lang, onClick }: { msg: CommMessage; c: Record<strin
           )}
           <div className="flex items-center gap-2 mt-2">
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${answered ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-              {answered ? (isIn ? c.inbound : c.outbound) : (lang === 'he' ? 'לא נענתה' : 'Missed')}
+              {answered ? (isIn ? c.inbound : c.outbound) : c.missedCall}
             </span>
             <span className="text-[10px] text-slate-600">{formatTime(msg.created_at)}</span>
           </div>
@@ -378,7 +380,7 @@ function DocCard({ msg, c, lang, onClick }: { msg: CommMessage; c: Record<string
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
             <span className="text-sm text-slate-200 truncate">
-              {msg.sender_name || (lang === 'he' ? 'הערה' : 'Note')}
+              {msg.sender_name || c.noteLabel}
             </span>
             <span className="text-xs text-slate-500 whitespace-nowrap">{timeAgo(msg.created_at, lang)}</span>
           </div>
@@ -427,7 +429,7 @@ function ContactCard({ group, c, lang, onClick }: { group: ContactGroup; c: Reco
                 </span>
               );
             })}
-            <span className="text-[10px] text-slate-500">{msgCount} {lang === 'he' ? 'הודעות' : 'msgs'}</span>
+            <span className="text-[10px] text-slate-500">{msgCount} {c.messagesCount}</span>
             {unreadCount > 0 && (
               <span className="rounded-full bg-red-500/20 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
                 {unreadCount}
@@ -502,6 +504,7 @@ function EmailCard({ email, lang, onClick }: { email: EmailSendRow; lang: string
 }
 
 function NotificationCard({ notif, lang }: { notif: NotificationLogRow; lang: string }) {
+  const c = getTranslations(lang as "he" | "en" | "ru").comms as Record<string, string>;
   const isSent = notif.delivery_status === 'sent';
   const StatusIcon = isSent ? CheckCircle2 : XCircle;
   const statusColor = isSent ? 'text-emerald-400' : 'text-red-400';
@@ -526,7 +529,7 @@ function NotificationCard({ notif, lang }: { notif: NotificationLogRow; lang: st
           <div className="flex items-center gap-2 mt-2">
             <StatusIcon className={`h-3 w-3 ${statusColor}`} />
             <span className={`text-[10px] ${statusColor}`}>
-              {isSent ? (lang === 'he' ? 'נמסר' : 'Sent') : (lang === 'he' ? 'נכשל' : 'Failed')}
+              {isSent ? c.statusSent : c.statusFailed}
             </span>
             {chConf && (
               <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] ${chConf.bg} ${chConf.color}`}>
@@ -814,13 +817,13 @@ export default function CommsPage() {
 
   // Tab definitions
   const tabs: { id: CommTab; icon: React.ElementType; label: string; disabled?: boolean }[] = [
-    { id: 'calls', icon: Phone, label: language === 'he' ? 'שיחות' : language === 'ru' ? 'Звонки' : 'Calls' },
-    { id: 'messages', icon: MessageSquare, label: language === 'he' ? 'הודעות' : language === 'ru' ? 'Сообщения' : 'Messages' },
+    { id: 'calls', icon: Phone, label: c.tabCalls },
+    { id: 'messages', icon: MessageSquare, label: c.tabMessages },
     { id: 'whatsapp_personal', icon: MessageSquare, label: 'WhatsApp גל', disabled: true },
-    { id: 'contacts', icon: Users, label: language === 'he' ? 'אנשי קשר' : language === 'ru' ? 'Контакты' : 'Contacts' },
-    { id: 'docs', icon: FileText, label: language === 'he' ? 'מסמכים' : language === 'ru' ? 'Документы' : 'Docs' },
-    { id: 'emails', icon: Mail, label: language === 'he' ? 'מיילים' : language === 'ru' ? 'Почта' : 'Emails' },
-    { id: 'notifications', icon: BellRing, label: language === 'he' ? 'התראות' : language === 'ru' ? 'Уведомления' : 'Notifications' },
+    { id: 'contacts', icon: Users, label: c.tabContacts },
+    { id: 'docs', icon: FileText, label: c.tabDocs },
+    { id: 'emails', icon: Mail, label: c.tabEmails },
+    { id: 'notifications', icon: BellRing, label: c.tabNotifications },
   ];
 
   // Render the correct card type based on the message's channel
@@ -857,7 +860,7 @@ export default function CommsPage() {
           <button type="button" onClick={() => setShowSendEmail(true)}
             className="flex items-center gap-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-sm font-medium text-amber-300 hover:bg-amber-500/20 transition-colors">
             <Mail className="h-4 w-4" />
-            {language === 'he' ? 'שלח מייל' : 'Send Email'}
+            {t.email.sendEmail}
           </button>
         </div>
       </PageHeader>
@@ -865,12 +868,12 @@ export default function CommsPage() {
       {/* Source toggles — multi-select chips */}
       <div className="shrink-0 border-b border-slate-700/50 px-6 py-2.5">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 me-1">{language === 'he' ? 'הצג:' : language === 'ru' ? 'Показать:' : 'Show:'}</span>
+          <span className="text-xs text-slate-500 me-1">{c.showLabel}</span>
           {tabs.map(({ id, icon: TabIcon, label, disabled }) => {
             const isOn = activeTabs.has(id);
             if (disabled) {
               return (
-                <span key={id} title={language === 'he' ? 'בקרוב — עדיין לא מחובר' : 'Coming soon — not connected yet'}
+                <span key={id} title={c.comingSoonTab}
                   className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-slate-700/30 bg-slate-800/20 text-slate-600 cursor-not-allowed opacity-50 select-none">
                   <TabIcon className="h-3.5 w-3.5" />
                   {label}
@@ -929,7 +932,7 @@ export default function CommsPage() {
                 {!onlyContacts && (
                   <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
                     <Users className="h-3.5 w-3.5" />
-                    {language === 'he' ? 'אנשי קשר' : 'Contacts'}
+                    {c.sectionContacts}
                     <span className="text-slate-600">({contactGroups.length})</span>
                   </h3>
                 )}
@@ -952,7 +955,7 @@ export default function CommsPage() {
                 {showContactsSection && (
                   <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
                     <Clock className="h-3.5 w-3.5" />
-                    {language === 'he' ? 'ציר זמן' : 'Timeline'}
+                    {c.sectionTimeline}
                     <span className="text-slate-600">({timelineMessages.length})</span>
                   </h3>
                 )}
@@ -972,7 +975,7 @@ export default function CommsPage() {
                 {(showTimeline || showContactsSection) && (
                   <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
                     <Mail className="h-3.5 w-3.5" />
-                    {language === 'he' ? 'מיילים' : 'Emails'}
+                    {c.sectionEmails}
                     <span className="text-slate-600">({emailSends.length})</span>
                   </h3>
                 )}
@@ -981,7 +984,7 @@ export default function CommsPage() {
                     <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
                   </div>
                 ) : emailSends.length === 0 ? (
-                  <EmptyState icon={Mail} text={language === 'he' ? 'אין מיילים' : 'No emails sent'} />
+                  <EmptyState icon={Mail} text={c.noEmails} />
                 ) : (
                   <div className="space-y-2">
                     {emailSends.map((email) => (
@@ -1013,7 +1016,7 @@ export default function CommsPage() {
                 {(showTimeline || showContactsSection) && (
                   <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
                     <BellRing className="h-3.5 w-3.5" />
-                    {language === 'he' ? 'התראות' : 'Notifications'}
+                    {c.sectionNotifications}
                     <span className="text-slate-600">({notifications.length})</span>
                   </h3>
                 )}
@@ -1022,7 +1025,7 @@ export default function CommsPage() {
                     <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
                   </div>
                 ) : notifications.length === 0 ? (
-                  <EmptyState icon={BellRing} text={language === 'he' ? 'אין התראות' : 'No notifications'} />
+                  <EmptyState icon={BellRing} text={c.noNotifications} />
                 ) : (
                   <div className="space-y-2">
                     {notifications.map((n) => (
