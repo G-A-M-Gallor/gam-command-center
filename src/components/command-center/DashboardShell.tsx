@@ -133,10 +133,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }
       : undefined;
 
-  // TopBar visibility
-  const showTopBar = isMobile || shellPrefs.topbarVisible;
+  // TopBar visibility:
+  // - mobile: always show
+  // - topbarVisible=true: always show (may use hover mode)
+  // - topbarVisible=false but topbarHover=true: show with hover behavior
+  // - topbarVisible=false and topbarHover=false: fully hidden
+  const showTopBar = isMobile || shellPrefs.topbarVisible || shellPrefs.topbarHover;
   // TopBar is effectively hidden when in hover mode and not hovered
-  const topbarEffectivelyHidden = !isMobile && shellPrefs.topbarHover && !topbarHovered;
+  const topbarInHoverMode = !isMobile && (shellPrefs.topbarHover || !shellPrefs.topbarVisible);
+  const topbarEffectivelyHidden = topbarInHoverMode && !topbarHovered;
 
   // TabBar visibility (desktop only)
   const showTabBar = !isMobile && shellPrefs.tabbarVisible;
@@ -181,7 +186,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {showTopBar && (
         <TopBar
           onSidebarOpen={isHidden ? () => setFloatOpen(true) : undefined}
-          topbarHover={!isMobile && shellPrefs.topbarHover}
+          topbarHover={!isMobile && (shellPrefs.topbarHover || !shellPrefs.topbarVisible)}
+        />
+      )}
+
+      {/* TopBar recovery strip — when fully hidden, hover top edge to get ShellPrefs */}
+      {!isMobile && !showTopBar && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[41] h-1 bg-transparent hover:bg-[var(--cc-accent-500-30)] transition-colors cursor-pointer"
+          title="Hover to show toolbar"
+          onClick={() => updatePref("topbarVisible", true)}
         />
       )}
 
@@ -190,8 +204,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <TabBar
           contentMarginLeft={contentMargin?.marginLeft}
           contentMarginRight={contentMargin?.marginRight}
-          topbarHover={!isMobile && shellPrefs.topbarHover}
-          topbarVisible={!shellPrefs.topbarHover || topbarHovered}
+          topbarHover={!isMobile && (shellPrefs.topbarHover || !shellPrefs.topbarVisible)}
+          topbarVisible={!(shellPrefs.topbarHover || !shellPrefs.topbarVisible) || topbarHovered}
         />
       )}
 

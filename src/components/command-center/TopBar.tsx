@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings, SlidersHorizontal } from "lucide-react";
+import { Store, Pencil, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings, SlidersHorizontal, Layers } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -93,7 +93,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     widgetPanelModes,
     widgetIcons,
   } = useWidgets();
-  const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language } = useSettings();
+  const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language, brandProfile } = useSettings();
   const pathname = usePathname();
   const { editMode, setEditMode } = useDashboardMode();
   const router = useRouter();
@@ -878,6 +878,22 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
           </button>
         )}
 
+        {/* Brand logo — left side (when sidebar is on left) */}
+        {sidebarPosition === "left" && (
+          <div className="flex h-full shrink-0 items-center gap-1.5 border-r border-slate-700/50 px-3">
+            {brandProfile?.logoDataUrl ? (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
+                <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
+              </div>
+            ) : (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
+                <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
+              </div>
+            )}
+            <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
+          </div>
+        )}
+
         <div ref={containerRef} className="relative h-full flex-1">
           {!mounted ? (
             <span className="px-3 text-xs text-slate-500">&nbsp;</span>
@@ -1101,6 +1117,22 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
         >
           <Store className="h-4 w-4" />
         </button>
+
+        {/* Brand logo — right side (when sidebar is on right) */}
+        {sidebarPosition === "right" && (
+          <div className="flex h-full shrink-0 items-center gap-1.5 border-l border-slate-700/50 px-3">
+            <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
+            {brandProfile?.logoDataUrl ? (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
+                <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
+              </div>
+            ) : (
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
+                <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Hamburger — right side */}
         {sidebarPosition === "right" && sidebarVisibility === "hidden" && onSidebarOpen && (
