@@ -91,7 +91,7 @@ export default function AIHubPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const pathname = usePathname();
-  const isHe = language === "he";
+  const isRtl = language === "he";
 
   // ─── State ──────────────────────────────────────────────────
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -552,7 +552,7 @@ export default function AIHubPage() {
   // ─── Render ─────────────────────────────────────────────────
 
   return (
-    <div className="flex h-[calc(100vh-48px)] flex-col" dir={isHe ? "rtl" : "ltr"} data-cc-id="aihub.root">
+    <div className="flex h-[calc(100vh-48px)] flex-col" dir={isRtl ? "rtl" : "ltr"} data-cc-id="aihub.root">
       <PageHeader pageKey="aiHub">
         <div className="mt-2 flex items-center gap-3">
           <div data-cc-id="aihub.livemode" className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-400">
@@ -629,7 +629,7 @@ export default function AIHubPage() {
           cloudStatus={cloudStatus}
           textareaRef={textareaRef}
           t={t}
-          isHe={isHe}
+          isRtl={isRtl}
           language={language}
         />
 

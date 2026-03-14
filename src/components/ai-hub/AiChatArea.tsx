@@ -75,7 +75,7 @@ interface AiChatAreaProps {
   // Misc
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   t: ReturnType<typeof getTranslations>;
-  isHe: boolean;
+  isRtl: boolean;
   language: "he" | "en" | "ru";
 }
 
@@ -300,7 +300,7 @@ export function AiChatArea(props: AiChatAreaProps) {
     selectedPersona, onPersonaChange,
     mentionOpen, onMentionOpen, onMentionClose, onMentionSelect,
     dismissedActions, onDismissAction, onNewChat, cloudStatus,
-    textareaRef, t, isHe, language,
+    textareaRef, t, isRtl, language,
   } = props;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -510,7 +510,7 @@ export function AiChatArea(props: AiChatAreaProps) {
         onAtTrigger={onMentionOpen}
         textareaRef={textareaRef}
         t={t}
-        isHe={isHe}
+        isRtl={isRtl}
         language={language}
       />
     </div>

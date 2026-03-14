@@ -27,7 +27,7 @@ interface AiInputBarProps {
   onAtTrigger: (caretPos: number) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   t: ReturnType<typeof getTranslations>;
-  isHe: boolean;
+  isRtl: boolean;
   language: "he" | "en" | "ru";
 }
 
@@ -63,7 +63,7 @@ function fileToAttachment(file: File): Promise<ImageAttachment> {
 export function AiInputBar({
   input, onInputChange, onSend, onStop, isStreaming, mode, atLimit,
   replyingTo, onCancelReply, attachments, onAddAttachment, onRemoveAttachment,
-  onAtTrigger, textareaRef, t, isHe, language,
+  onAtTrigger, textareaRef, t, isRtl, language,
 }: AiInputBarProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -224,7 +224,7 @@ export function AiInputBar({
             placeholder={atLimit ? t.aiHub.conversationLimit : t.aiHub.typePlaceholder}
             rows={1}
             disabled={atLimit}
-            dir={isHe ? "rtl" : "ltr"}
+            dir={isRtl ? "rtl" : "ltr"}
             className={`w-full resize-none rounded-b-lg rounded-t-none border border-slate-600 border-t-0 bg-slate-700/50 px-3 py-2.5 pe-10 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors disabled:opacity-40 ${
               input ? "focus:border-[var(--cc-accent-500)] focus:shadow-sm focus:shadow-[var(--cc-accent-500)]/10" : "focus:border-slate-500"
             }`}

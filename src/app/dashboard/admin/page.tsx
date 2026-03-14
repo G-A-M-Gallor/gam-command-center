@@ -32,7 +32,7 @@ function StatCard({ label, value, color, suffix }: { label: string; value: numbe
 export default function AdminDevLogPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const ta = t.admin;
 
   const [activeSection, setActiveSection] = useState<'routes' | 'widgets' | 'contexts' | 'changelog' | 'storymap'>('routes');
@@ -110,7 +110,7 @@ export default function AdminDevLogPage() {
                   <div className="h-full rounded-full transition-all"
                     style={{ width: `${p.pct}%`, background: p.pct === 100 ? '#34d399' : p.pct > 0 ? '#60a5fa' : '#374151' }} />
                 </div>
-                <span className="w-20 text-[11px] text-slate-500" dir="ltr" style={{ textAlign: isHe ? 'left' : 'right' }}>
+                <span className="w-20 text-[11px] text-slate-500" dir="ltr" style={{ textAlign: isRtl ? 'left' : 'right' }}>
                   {p.active}/{p.total} ({p.pct}%)
                 </span>
               </div>
@@ -135,11 +135,11 @@ export default function AdminDevLogPage() {
         </div>
 
         {/* Tab Content */}
-        {activeSection === 'routes' && <RoutesSection isHe={isHe} ta={ta} />}
-        {activeSection === 'widgets' && <WidgetsSection isHe={isHe} ta={ta} />}
-        {activeSection === 'contexts' && <ContextsSection isHe={isHe} ta={ta} />}
-        {activeSection === 'changelog' && <ChangelogTab isHe={isHe} ta={ta} />}
-        {activeSection === 'storymap' && <StoryMapTab isHe={isHe} ta={ta} />}
+        {activeSection === 'routes' && <RoutesSection language={language} ta={ta} />}
+        {activeSection === 'widgets' && <WidgetsSection language={language} ta={ta} />}
+        {activeSection === 'contexts' && <ContextsSection language={language} ta={ta} />}
+        {activeSection === 'changelog' && <ChangelogTab isRtl={isRtl} language={language} ta={ta} />}
+        {activeSection === 'storymap' && <StoryMapTab language={language} ta={ta} />}
 
         {/* Architecture Summary */}
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">

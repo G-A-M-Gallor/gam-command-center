@@ -27,7 +27,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
+  const isRtl = language === "he";
 
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onCancel, enabled: open });
 
@@ -41,7 +41,7 @@ export function ConfirmDialog({
       <div
         ref={trapRef}
         className="w-full max-w-sm rounded-xl border border-slate-700 bg-slate-800 shadow-2xl"
-        dir={isHe ? "rtl" : "ltr"}
+        dir={isRtl ? "rtl" : "ltr"}
       >
         <div className="px-5 pt-5 pb-3">
           <h3 className="text-sm font-semibold text-slate-100">{title}</h3>

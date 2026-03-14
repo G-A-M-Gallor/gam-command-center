@@ -47,7 +47,7 @@ interface ChangelogToolbarProps {
   onWorkflowToggle: (status: WorkflowStatus) => void;
   onPhaseChange: (phase: Phase | 'all') => void;
   onTechStatusChange: (status: FeatureStatus | 'all') => void;
-  isHe: boolean;
+  isRtl: boolean;
   ta: ReturnType<typeof getTranslations>['admin'];
 }
 
@@ -56,9 +56,9 @@ export default function ChangelogToolbar({
   clFilterWorkflow, clFilterPhase, clFilterTechStatus,
   onSortChange, onSortDirToggle, onGroupChange,
   onWorkflowToggle, onPhaseChange, onTechStatusChange,
-  isHe, ta,
+  isRtl, ta,
 }: ChangelogToolbarProps) {
-  const dir = isHe ? 'rtl' : 'ltr';
+  const dir = isRtl ? 'rtl' : 'ltr';
   const wfLabels = getWfLabels(ta);
 
   const sortOptions: { field: SortField; label: string }[] = [

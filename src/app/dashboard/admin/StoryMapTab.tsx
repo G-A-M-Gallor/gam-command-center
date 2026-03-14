@@ -8,7 +8,8 @@ import {
   Map, Layers, FileEdit, Bot, Grid3X3, Settings,
   Lock,
 } from 'lucide-react';
-import { getTranslations } from '@/lib/i18n';
+import { getTranslations, loc } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { StoryStatus, RiskLevel, Effort, UserJourneyStep, MLPTier } from './types';
 import {
   userJourneySteps, walkingSkeleton, mvp, mlpTiers,
@@ -58,11 +59,11 @@ const STEP_ICONS: Record<string, React.ElementType> = {
 
 // ─── Sub-components ─────────────────────────────────────
 
-function Collapsible({ title, defaultOpen, count, children, isHe }: {
-  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isHe: boolean;
+function Collapsible({ title, defaultOpen, count, children, isRtl }: {
+  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isRtl: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen ?? false);
-  const Arrow = open ? ChevronDown : (isHe ? ChevronLeft : ChevronRight);
+  const Arrow = open ? ChevronDown : (isRtl ? ChevronLeft : ChevronRight);
   return (
     <div>
       <button type="button" onClick={() => setOpen(!open)}
@@ -117,7 +118,8 @@ function ProgressBar({ done, total, height = 'h-2' }: { done: number; total: num
 
 // ─── Journey Step Card ──────────────────────────────────
 
-function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: boolean; ta: AdminTranslations }) {
+function JourneyStepCard({ step, language, ta }: { step: UserJourneyStep; language: Language; ta: AdminTranslations }) {
+  const isRtl = language === 'he';
   const [expanded, setExpanded] = useState(false);
   const Icon = STEP_ICONS[step.id] || Circle;
   const doneCount = step.stories.filter(s => s.status === 'done').length;
@@ -137,7 +139,7 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">{step.step}</span>
-            <span className="text-sm font-medium text-slate-200 truncate">{isHe ? step.nameHe : step.name}</span>
+            <span className="text-sm font-medium text-slate-200 truncate">{loc(step, 'name', language)}</span>
             {hasCritical && <span className="rounded bg-red-500/10 px-1.5 py-0.5 text-[9px] font-bold text-red-400 uppercase">CRITICAL</span>}
           </div>
           <div className="mt-1 flex items-center gap-3">
@@ -152,7 +154,7 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
             <code key={p} className="rounded bg-white/5 px-1.5 py-0.5 text-[9px] text-slate-600" dir="ltr">{p}</code>
           ))}
           {expanded ? <ChevronDown size={14} className="text-slate-500" /> :
-            (isHe ? <ChevronLeft size={14} className="text-slate-500" /> : <ChevronRight size={14} className="text-slate-500" />)}
+            (isRtl ? <ChevronLeft size={14} className="text-slate-500" /> : <ChevronRight size={14} className="text-slate-500" />)}
         </div>
       </button>
 
@@ -163,15 +165,15 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
           <div className="grid grid-cols-3 gap-2 text-[11px]">
             <div className="rounded-lg bg-pink-500/5 border border-pink-500/10 px-2.5 py-2">
               <div className="flex items-center gap-1 text-pink-400 mb-1"><Heart size={10} /> {ta.smEmotion}</div>
-              <div className="text-slate-400">{isHe ? step.emotionHe : step.emotion}</div>
+              <div className="text-slate-400">{loc(step, 'emotion', language)}</div>
             </div>
             <div className="rounded-lg bg-amber-500/5 border border-amber-500/10 px-2.5 py-2">
               <div className="flex items-center gap-1 text-amber-400 mb-1"><Zap size={10} /> {ta.smFriction}</div>
-              <div className="text-slate-400">{isHe ? step.frictionHe : step.friction}</div>
+              <div className="text-slate-400">{loc(step, 'friction', language)}</div>
             </div>
             <div className="rounded-lg bg-purple-500/5 border border-purple-500/10 px-2.5 py-2">
               <div className="flex items-center gap-1 text-purple-400 mb-1"><TrendingUp size={10} /> {ta.smAha}</div>
-              <div className="text-slate-400">{step.ahamoment ? (isHe ? step.ahamomentHe : step.ahamoment) : '—'}</div>
+              <div className="text-slate-400">{step.ahamoment ? loc(step, 'ahamoment', language) : '—'}</div>
             </div>
           </div>
 
@@ -180,19 +182,19 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
             <table className="w-full text-[11px]">
               <thead>
                 <tr className="bg-white/[0.02] text-slate-500">
-                  <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smThStory}</th>
+                  <th className={`px-3 py-1.5 font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{ta.smThStory}</th>
                   <th className="px-2 py-1.5 font-medium text-center w-20">{ta.smThStatus}</th>
                   <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smThRisk}</th>
-                  <th className={`px-2 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'} w-48`}>{ta.smThFile}</th>
+                  <th className={`px-2 py-1.5 font-medium ${isRtl ? 'text-right' : 'text-left'} w-48`}>{ta.smThFile}</th>
                 </tr>
               </thead>
               <tbody>
                 {step.stories.map((story, i) => (
                   <tr key={i} className={`border-t border-white/[0.03] ${story.status === 'broken' || story.risk === 'critical' ? 'bg-red-500/[0.03]' : ''}`}>
                     <td className="px-3 py-1.5">
-                      <span className="text-slate-300">{isHe ? story.nameHe : story.name}</span>
+                      <span className="text-slate-300">{loc(story, 'name', language)}</span>
                       {story.note && (
-                        <span className="ml-2 text-[10px] text-slate-600">({isHe ? story.noteHe : story.note})</span>
+                        <span className="ml-2 text-[10px] text-slate-600">({loc(story, 'note', language)})</span>
                       )}
                     </td>
                     <td className="px-2 py-1.5 text-center"><StatusBadge status={story.status} ta={ta} /></td>
@@ -213,7 +215,7 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
                 <AlertTriangle size={10} /> {ta.smUnhappyPaths}
               </div>
               <ul className="space-y-0.5">
-                {(isHe ? step.unhappyPathsHe : step.unhappyPaths).map((p, i) => (
+                {loc<string[]>(step, 'unhappyPaths', language).map((p, i) => (
                   <li key={i} className="text-[10px] text-slate-500">• {p}</li>
                 ))}
               </ul>
@@ -223,7 +225,7 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
                 <Target size={10} /> KPIs
               </div>
               <ul className="space-y-0.5">
-                {(isHe ? step.kpisHe : step.kpis).map((k, i) => (
+                {loc<string[]>(step, 'kpis', language).map((k, i) => (
                   <li key={i} className="text-[10px] text-slate-500">• {k}</li>
                 ))}
               </ul>
@@ -237,25 +239,26 @@ function JourneyStepCard({ step, isHe, ta }: { step: UserJourneyStep; isHe: bool
 
 // ─── Release Tier Section ───────────────────────────────
 
-function ReleaseTierSection({ tier, isHe, accent, ta }: {
-  tier: typeof walkingSkeleton; isHe: boolean; accent: string; ta: AdminTranslations;
+function ReleaseTierSection({ tier, language, accent, ta }: {
+  tier: typeof walkingSkeleton; language: Language; accent: string; ta: AdminTranslations;
 }) {
+  const isRtl = language === 'he';
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded-full" style={{ background: accent }} />
-          <h4 className="text-sm font-semibold text-slate-200">{isHe ? tier.nameHe : tier.name}</h4>
+          <h4 className="text-sm font-semibold text-slate-200">{loc(tier, 'name', language)}</h4>
         </div>
         <span className="text-[10px] text-slate-500">{tier.tasks.length} {ta.smTasks}</span>
       </div>
-      <p className="text-xs text-slate-400 mb-3">{isHe ? tier.goalHe : tier.goal}</p>
+      <p className="text-xs text-slate-400 mb-3">{loc(tier, 'goal', language)}</p>
 
       <div className="rounded-lg border border-white/[0.04] overflow-hidden">
         <table className="w-full text-[11px]">
           <thead>
             <tr className="bg-white/[0.02] text-slate-500">
-              <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smThTask}</th>
+              <th className={`px-3 py-1.5 font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{ta.smThTask}</th>
               <th className="px-2 py-1.5 font-medium text-center w-20">{ta.smThStatus}</th>
               <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smThEffort}</th>
               <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smThRisk}</th>
@@ -264,14 +267,14 @@ function ReleaseTierSection({ tier, isHe, accent, ta }: {
           <tbody>
             {tier.tasks.map((task, i) => (
               <tr key={i} className="border-t border-white/[0.03]">
-                <td className="px-3 py-1.5 text-slate-300">{isHe ? task.nameHe : task.name}</td>
+                <td className="px-3 py-1.5 text-slate-300">{loc(task, 'name', language)}</td>
                 <td className="px-2 py-1.5 text-center">
                   <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
                     task.status === 'CRITICAL' ? 'bg-red-500/10 text-red-400' :
                     task.status === 'Missing' || task.status === 'Broken' ? 'bg-amber-500/10 text-amber-400' :
                     'bg-slate-500/10 text-slate-400'
                   }`}>
-                    {isHe ? task.statusHe : task.status}
+                    {loc(task, 'status', language)}
                   </span>
                 </td>
                 <td className="px-2 py-1.5 text-center text-slate-500">{task.effort}</td>
@@ -284,7 +287,7 @@ function ReleaseTierSection({ tier, isHe, accent, ta }: {
 
       {tier.kpis.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {(isHe ? tier.kpisHe : tier.kpis).map((kpi, i) => (
+          {loc<string[]>(tier, 'kpis', language).map((kpi, i) => (
             <span key={i} className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">{kpi}</span>
           ))}
         </div>
@@ -295,16 +298,16 @@ function ReleaseTierSection({ tier, isHe, accent, ta }: {
 
 // ─── MLP Tier Card ──────────────────────────────────────
 
-function MLPTierCard({ tier, isHe, ta }: { tier: MLPTier; isHe: boolean; ta: AdminTranslations }) {
+function MLPTierCard({ tier, language, ta }: { tier: MLPTier; language: Language; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-      <h4 className="text-sm font-semibold text-slate-200 mb-3">{isHe ? tier.nameHe : tier.name}</h4>
+      <h4 className="text-sm font-semibold text-slate-200 mb-3">{loc(tier, 'name', language)}</h4>
       <div className="space-y-1.5">
         {tier.features.map((feat, i) => (
           <div key={i} className="flex items-center gap-2 rounded-lg bg-white/[0.01] px-3 py-2 text-[11px]">
-            <span className="flex-1 text-slate-300">{isHe ? feat.nameHe : feat.name}</span>
-            <span className="text-slate-600 max-w-[140px] truncate" title={isHe ? feat.whyHe : feat.why}>
-              {isHe ? feat.whyHe : feat.why}
+            <span className="flex-1 text-slate-300">{loc(feat, 'name', language)}</span>
+            <span className="text-slate-600 max-w-[140px] truncate" title={loc(feat, 'why', language)}>
+              {loc(feat, 'why', language)}
             </span>
             <EffortBadge effort={feat.effort} />
             <RiskBadge level={feat.risk} ta={ta} />
@@ -317,7 +320,8 @@ function MLPTierCard({ tier, isHe, ta }: { tier: MLPTier; isHe: boolean; ta: Adm
 
 // ─── Risk Matrix ────────────────────────────────────────
 
-function RiskMatrixSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
+function RiskMatrixSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
+  const isRtl = language === 'he';
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -328,21 +332,21 @@ function RiskMatrixSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations 
         <table className="w-full text-[11px]">
           <thead>
             <tr className="bg-white/[0.02] text-slate-500">
-              <th className={`px-3 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smRiskCol}</th>
+              <th className={`px-3 py-1.5 font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{ta.smRiskCol}</th>
               <th className="px-2 py-1.5 font-medium text-center w-20">{ta.smType}</th>
               <th className="px-2 py-1.5 font-medium text-center w-16">{ta.smLevel}</th>
-              <th className={`px-2 py-1.5 font-medium ${isHe ? 'text-right' : 'text-left'}`}>{ta.smMitigation}</th>
+              <th className={`px-2 py-1.5 font-medium ${isRtl ? 'text-right' : 'text-left'}`}>{ta.smMitigation}</th>
             </tr>
           </thead>
           <tbody>
             {riskMatrix.map((r, i) => (
               <tr key={i} className={`border-t border-white/[0.03] ${r.level === 'critical' ? 'bg-red-500/[0.03]' : ''}`}>
-                <td className="px-3 py-1.5 text-slate-300">{isHe ? r.riskHe : r.risk}</td>
+                <td className="px-3 py-1.5 text-slate-300">{loc(r, 'risk', language)}</td>
                 <td className="px-2 py-1.5 text-center">
-                  <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-500">{isHe ? r.typeHe : r.type}</span>
+                  <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-500">{loc(r, 'type', language)}</span>
                 </td>
                 <td className="px-2 py-1.5 text-center"><RiskBadge level={r.level} ta={ta} /></td>
-                <td className="px-2 py-1.5 text-slate-500">{isHe ? r.mitigationHe : r.mitigation}</td>
+                <td className="px-2 py-1.5 text-slate-500">{loc(r, 'mitigation', language)}</td>
               </tr>
             ))}
           </tbody>
@@ -354,7 +358,7 @@ function RiskMatrixSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations 
 
 // ─── Implementation Timeline ────────────────────────────
 
-function TimelineSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
+function TimelineSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -369,9 +373,9 @@ function TimelineSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations })
               {i < implementationSequence.length - 1 && <div className="w-px flex-1 bg-white/[0.06]" />}
             </div>
             <div className="pb-3">
-              <div className="text-xs font-medium text-slate-200">{isHe ? week.weekHe : week.week}</div>
+              <div className="text-xs font-medium text-slate-200">{loc(week, 'week', language)}</div>
               <ul className="mt-1 space-y-0.5">
-                {(isHe ? week.tasksHe : week.tasks).map((t, j) => (
+                {loc<string[]>(week, 'tasks', language).map((t, j) => (
                   <li key={j} className="text-[11px] text-slate-500">• {t}</li>
                 ))}
               </ul>
@@ -385,8 +389,8 @@ function TimelineSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations })
 
 // ─── Main Export ─────────────────────────────────────────
 
-export default function StoryMapTab({ isHe, ta }: {
-  isHe: boolean;
+export default function StoryMapTab({ language, ta }: {
+  language: Language;
   ta: AdminTranslations;
 }) {
   const stats = useMemo(() => getJourneyStats(), []);
@@ -442,7 +446,7 @@ export default function StoryMapTab({ isHe, ta }: {
       {viewMode === 'journey' && (
         <div className="space-y-2">
           {userJourneySteps.map(step => (
-            <JourneyStepCard key={step.id} step={step} isHe={isHe} ta={ta} />
+            <JourneyStepCard key={step.id} step={step} language={language} ta={ta} />
           ))}
         </div>
       )}
@@ -450,8 +454,8 @@ export default function StoryMapTab({ isHe, ta }: {
       {/* Releases View */}
       {viewMode === 'releases' && (
         <div className="space-y-4">
-          <ReleaseTierSection tier={walkingSkeleton} isHe={isHe} accent="#ef4444" ta={ta} />
-          <ReleaseTierSection tier={mvp} isHe={isHe} accent="#f59e0b" ta={ta} />
+          <ReleaseTierSection tier={walkingSkeleton} language={language} accent="#ef4444" ta={ta} />
+          <ReleaseTierSection tier={mvp} language={language} accent="#f59e0b" ta={ta} />
 
           <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 p-4">
             <div className="flex items-center gap-2 mb-1">
@@ -463,7 +467,7 @@ export default function StoryMapTab({ isHe, ta }: {
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {mlpTiers.map(tier => (
-                <MLPTierCard key={tier.id} tier={tier} isHe={isHe} ta={ta} />
+                <MLPTierCard key={tier.id} tier={tier} language={language} ta={ta} />
               ))}
             </div>
           </div>
@@ -473,8 +477,8 @@ export default function StoryMapTab({ isHe, ta }: {
       {/* Risks + Timeline View */}
       {viewMode === 'risks' && (
         <div className="space-y-4">
-          <RiskMatrixSection isHe={isHe} ta={ta} />
-          <TimelineSection isHe={isHe} ta={ta} />
+          <RiskMatrixSection language={language} ta={ta} />
+          <TimelineSection language={language} ta={ta} />
 
           {/* Verification Checklist */}
           <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">

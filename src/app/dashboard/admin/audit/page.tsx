@@ -6,8 +6,8 @@ import {
   ChevronDown, ChevronRight, ChevronLeft, CheckCircle2, AlertTriangle,
   XCircle, Info, ArrowLeft, ArrowRight, FileCode, ExternalLink,
 } from 'lucide-react';
-import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { useSettings, type Language } from '@/contexts/SettingsContext';
+import { getTranslations, loc } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import {
   allChecks, getChecksByHat, getHatScore, getOverallScore, hatMeta,
@@ -65,9 +65,9 @@ function ScoreRing({ pct, size = 64 }: { pct: number; size?: number }) {
   );
 }
 
-function CheckCard({ check, isHe, ta }: { check: AuditCheck; isHe: boolean; ta: AuditTranslations }) {
+function CheckCard({ check, isRtl, language, ta }: { check: AuditCheck; isRtl: boolean; language: Language; ta: AuditTranslations }) {
   const [expanded, setExpanded] = useState(false);
-  const Arrow = expanded ? ChevronDown : (isHe ? ChevronLeft : ChevronRight);
+  const Arrow = expanded ? ChevronDown : (isRtl ? ChevronLeft : ChevronRight);
   const resultLabelMap = getResultLabels(ta);
 
   return (
@@ -75,11 +75,11 @@ function CheckCard({ check, isHe, ta }: { check: AuditCheck; isHe: boolean; ta: 
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center gap-3 px-4 py-3 text-left"
-        dir={isHe ? 'rtl' : 'ltr'}
+        dir={isRtl ? 'rtl' : 'ltr'}
       >
         <ResultIcon result={check.result} />
         <span className="flex-1 text-sm font-medium text-slate-200">
-          {isHe ? check.titleHe : check.title}
+          {loc(check, 'title', language)}
         </span>
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
           check.result === 'pass' ? 'bg-emerald-500/20 text-emerald-400' :
@@ -93,8 +93,8 @@ function CheckCard({ check, isHe, ta }: { check: AuditCheck; isHe: boolean; ta: 
       </button>
 
       {expanded && (
-        <div className="border-t border-white/[0.04] px-4 py-3 space-y-2" dir={isHe ? 'rtl' : 'ltr'}>
-          <p className="text-xs text-slate-400">{isHe ? check.detailHe : check.detail}</p>
+        <div className="border-t border-white/[0.04] px-4 py-3 space-y-2" dir={isRtl ? 'rtl' : 'ltr'}>
+          <p className="text-xs text-slate-400">{loc(check, 'detail', language)}</p>
 
           {check.file && (
             <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
@@ -109,7 +109,7 @@ function CheckCard({ check, isHe, ta }: { check: AuditCheck; isHe: boolean; ta: 
                 {ta.recommendation}
               </span>
               <p className="mt-0.5 text-xs text-slate-400">
-                {isHe ? check.recommendationHe : check.recommendation}
+                {loc(check, 'recommendation', language)}
               </p>
             </div>
           )}
@@ -119,8 +119,8 @@ function CheckCard({ check, isHe, ta }: { check: AuditCheck; isHe: boolean; ta: 
   );
 }
 
-function HatSummary({ hat, isHe, isActive, onClick, ta }: {
-  hat: AuditHat; isHe: boolean; isActive: boolean; onClick: () => void; ta: AuditTranslations;
+function HatSummary({ hat, isRtl, language, isActive, onClick, ta }: {
+  hat: AuditHat; isRtl: boolean; language: Language; isActive: boolean; onClick: () => void; ta: AuditTranslations;
 }) {
   const score = getHatScore(hat);
   const meta = hatMeta[hat];
@@ -133,7 +133,7 @@ function HatSummary({ hat, isHe, isActive, onClick, ta }: {
           ? 'border-purple-500/30 bg-purple-500/5 ring-1 ring-purple-500/20'
           : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.1]'
       }`}
-      dir={isHe ? 'rtl' : 'ltr'}
+      dir={isRtl ? 'rtl' : 'ltr'}
     >
       <div className="flex items-center gap-3">
         <ScoreRing pct={score.pct} size={52} />
@@ -141,11 +141,11 @@ function HatSummary({ hat, isHe, isActive, onClick, ta }: {
           <div className="flex items-center gap-2">
             <span className="text-lg">{meta.icon}</span>
             <span className="text-sm font-semibold text-slate-200">
-              {isHe ? meta.labelHe : meta.label}
+              {loc(meta, 'label', language)}
             </span>
           </div>
           <p className="mt-0.5 text-[11px] text-slate-500 truncate">
-            {isHe ? meta.descriptionHe : meta.description}
+            {loc(meta, 'description', language)}
           </p>
           <div className="mt-2 flex items-center gap-2 text-[10px]">
             <span className="text-emerald-400">{score.pass} {ta.passCount}</span>
@@ -171,7 +171,7 @@ function HatSummary({ hat, isHe, isActive, onClick, ta }: {
 export default function AuditPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
 
   const [activeHat, setActiveHat] = useState<AuditHat | 'all'>('all');
   const [filterResult, setFilterResult] = useState<CheckResult | 'all'>('all');
@@ -195,7 +195,7 @@ export default function AuditPage() {
     return { pass, warn, fail, info, total: allChecks.length };
   }, []);
 
-  const BackArrow = isHe ? ArrowRight : ArrowLeft;
+  const BackArrow = isRtl ? ArrowRight : ArrowLeft;
 
   return (
     <div className="min-h-screen">
@@ -213,7 +213,7 @@ export default function AuditPage() {
 
         {/* Overall Score Banner */}
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-6">
-          <div className="flex items-center gap-6 flex-wrap" dir={isHe ? 'rtl' : 'ltr'}>
+          <div className="flex items-center gap-6 flex-wrap" dir={isRtl ? 'rtl' : 'ltr'}>
             <ScoreRing pct={overall} size={80} />
             <div className="flex-1 min-w-0">
               <h2 className="text-xl font-bold text-slate-100">{ta.title}</h2>
@@ -250,7 +250,8 @@ export default function AuditPage() {
             <HatSummary
               key={hat}
               hat={hat}
-              isHe={isHe}
+              isRtl={isRtl}
+              language={language}
               ta={ta}
               isActive={activeHat === hat}
               onClick={() => setActiveHat(activeHat === hat ? 'all' : hat)}
@@ -259,7 +260,7 @@ export default function AuditPage() {
         </div>
 
         {/* Filter Bar */}
-        <div className="flex items-center gap-2 flex-wrap" dir={isHe ? 'rtl' : 'ltr'}>
+        <div className="flex items-center gap-2 flex-wrap" dir={isRtl ? 'rtl' : 'ltr'}>
           <span className="text-xs text-slate-600">{ta.filterBy}:</span>
           {(['all', 'fail', 'warn', 'pass', 'info'] as const).map(r => {
             const labels: Record<string, string> = {
@@ -290,14 +291,14 @@ export default function AuditPage() {
 
         {/* Active Hat Header */}
         {activeHat !== 'all' && (
-          <div className="flex items-center gap-3" dir={isHe ? 'rtl' : 'ltr'}>
+          <div className="flex items-center gap-3" dir={isRtl ? 'rtl' : 'ltr'}>
             <span className="text-xl">{hatMeta[activeHat].icon}</span>
             <div>
               <h3 className="text-sm font-semibold text-slate-200">
-                {isHe ? hatMeta[activeHat].labelHe : hatMeta[activeHat].label}
+                {loc(hatMeta[activeHat], 'label', language)}
               </h3>
               <p className="text-xs text-slate-500">
-                {isHe ? hatMeta[activeHat].descriptionHe : hatMeta[activeHat].description}
+                {loc(hatMeta[activeHat], 'description', language)}
               </p>
             </div>
           </div>
@@ -309,14 +310,14 @@ export default function AuditPage() {
             <div className="py-12 text-center text-sm text-slate-600">{ta.noChecks}</div>
           ) : (
             displayChecks.map(check => (
-              <CheckCard key={check.id} check={check} isHe={isHe} ta={ta} />
+              <CheckCard key={check.id} check={check} isRtl={isRtl} language={language} ta={ta} />
             ))
           )}
         </div>
 
         {/* Summary Table */}
         <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-5">
-          <h3 className="mb-4 text-sm font-semibold text-slate-300" dir={isHe ? 'rtl' : 'ltr'}>
+          <h3 className="mb-4 text-sm font-semibold text-slate-300" dir={isRtl ? 'rtl' : 'ltr'}>
             {ta.summaryTitle}
           </h3>
           <div className="overflow-x-auto">
@@ -341,7 +342,7 @@ export default function AuditPage() {
                       <td className="py-2.5">
                         <span className="flex items-center gap-2">
                           <span>{meta.icon}</span>
-                          <span className="text-slate-300">{isHe ? meta.labelHe : meta.label}</span>
+                          <span className="text-slate-300">{loc(meta, 'label', language)}</span>
                         </span>
                       </td>
                       <td className="py-2.5 text-center">

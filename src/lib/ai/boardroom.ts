@@ -191,6 +191,12 @@ export const QUICK_QUESTIONS_EN = [
   "How much is this worth as SaaS and what's the right price?",
 ];
 
+export const QUICK_QUESTIONS: Record<string, string[]> = {
+  he: QUICK_QUESTIONS_HE,
+  en: QUICK_QUESTIONS_EN,
+  ru: QUICK_QUESTIONS_EN, // fallback to English for now
+};
+
 // ─── Client Streaming ───────────────────────────────
 
 interface StreamBoardRoomOptions {

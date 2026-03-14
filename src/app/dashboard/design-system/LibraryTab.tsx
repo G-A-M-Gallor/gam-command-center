@@ -27,8 +27,8 @@ import {
 // ─── Types ───────────────────────────────────────────────────────────
 
 interface LibraryTabProps {
-  isHe: boolean;
-  language?: "he" | "en" | "ru";
+  isRtl: boolean;
+  language: "he" | "en" | "ru";
   td: Record<string, string>;
 }
 
@@ -43,8 +43,8 @@ const SOURCE_TABS: { id: LibrarySource | "all"; labelKey: string }[] = [
 
 // ─── Component ───────────────────────────────────────────────────────
 
-export function LibraryTab({ isHe, language, td }: LibraryTabProps) {
-  const langKey = isHe ? "he" as const : "en" as const;
+export function LibraryTab({ language, td }: LibraryTabProps) {
+  const langKey = language === "he" ? "he" as const : "en" as const;
   const [activeSource, setActiveSource] = useState<LibrarySource | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<LibraryCategory | "all">("all");

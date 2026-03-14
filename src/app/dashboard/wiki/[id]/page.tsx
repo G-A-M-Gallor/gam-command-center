@@ -32,8 +32,7 @@ export default function WikiDetailPage() {
   const router = useRouter();
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
-  const isRtl = isHe;
+  const isRtl = language === "he";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wikiT = t.wiki as any;
   const tw = wikiT as Record<string, string>;

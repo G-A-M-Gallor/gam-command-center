@@ -247,8 +247,6 @@ export async function POST(request: Request) {
         );
     }
 
-    console.log(`[WorkManager/Execute] ${action_type} by ${userId} session=${session_id}`, result);
-
     return NextResponse.json({
       success: true,
       action_type,

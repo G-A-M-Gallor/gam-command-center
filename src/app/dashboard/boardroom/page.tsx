@@ -10,8 +10,7 @@ import {
   PERSONAS,
   PRESETS,
   DEFAULT_SELECTED,
-  QUICK_QUESTIONS_HE,
-  QUICK_QUESTIONS_EN,
+  QUICK_QUESTIONS,
   streamBoardRoom,
   type Persona,
 } from "@/lib/ai/boardroom";
@@ -31,7 +30,6 @@ export default function BoardRoomPage() {
   const t = getTranslations(language);
   const br = t.boardroom as Record<string, string>;
   const isRtl = language === "he";
-  const isHe = language === "he";
 
   const [selected, setSelected] = useState<string[]>(DEFAULT_SELECTED);
   const [question, setQuestion] = useState("");
@@ -39,7 +37,7 @@ export default function BoardRoomPage() {
   const [asked, setAsked] = useState(false);
   const abortControllers = useRef<Map<string, AbortController>>(new Map());
 
-  const quickQuestions = isHe ? QUICK_QUESTIONS_HE : QUICK_QUESTIONS_EN;
+  const quickQuestions = QUICK_QUESTIONS[language] ?? QUICK_QUESTIONS.en;
 
   const togglePersona = useCallback((id: string) => {
     if (asked) return;

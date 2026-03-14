@@ -69,7 +69,7 @@ interface PageHeaderProps {
 function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
   const t = getTranslations(language);
   const ta = t.admin;
-  const isHe = language === 'he';
+  const isRtl = language === 'he';
   const isDev = process.env.NODE_ENV !== 'production';
 
   const [open, setOpen] = useState(false);
@@ -158,7 +158,7 @@ function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
       {open && (
         <div
           className="absolute top-full z-50 mt-2 w-80 rounded-xl border border-white/[0.08] bg-slate-900 p-3 shadow-2xl"
-          style={{ [isHe ? 'right' : 'left']: 0 }}
+          style={{ [isRtl ? 'right' : 'left']: 0 }}
         >
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[10px] font-medium text-slate-500">{ta.devOnly}</span>
@@ -175,7 +175,7 @@ function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
               value={commitMsg}
               onChange={e => setCommitMsg(e.target.value)}
               placeholder={ta.commitPlaceholder}
-              dir={isHe ? 'rtl' : 'ltr'}
+              dir={isRtl ? 'rtl' : 'ltr'}
               onKeyDown={e => { if (e.key === 'Enter' && commitMsg.trim()) handleCommit(); }}
             />
           </div>

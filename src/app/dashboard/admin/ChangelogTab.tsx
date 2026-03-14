@@ -6,7 +6,8 @@ import {
   GitCommit, Rocket, RefreshCw, Loader2, ClipboardCheck, ExternalLink,
   ChevronDown, ChevronLeft, ChevronRight,
 } from 'lucide-react';
-import { getTranslations } from '@/lib/i18n';
+import { getTranslations, loc } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import { Button, Input, Badge } from '@/components/ui';
 import ChangelogToolbar from './ChangelogToolbar';
 import type {
@@ -22,11 +23,11 @@ import {
 
 // ─── Sub-components ──────────────────────────────────────
 
-function CollapsibleRow({ title, defaultOpen = false, count, children, isHe }: {
-  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isHe: boolean;
+function CollapsibleRow({ title, defaultOpen = false, count, children, isRtl }: {
+  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isRtl: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const Arrow = open ? ChevronDown : (isHe ? ChevronLeft : ChevronRight);
+  const Arrow = open ? ChevronDown : (isRtl ? ChevronLeft : ChevronRight);
   return (
     <div>
       <button type="button" onClick={() => setOpen(!open)}
@@ -35,7 +36,7 @@ function CollapsibleRow({ title, defaultOpen = false, count, children, isHe }: {
         {title}
         {count !== undefined && <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate-500">{count}</span>}
       </button>
-      {open && <div className={isHe ? 'pl-5 pb-2' : 'pr-5 pb-2'}>{children}</div>}
+      {open && <div className={isRtl ? 'pl-5 pb-2' : 'pr-5 pb-2'}>{children}</div>}
     </div>
   );
 }
@@ -49,7 +50,7 @@ function PhaseBadge({ phase }: { phase: Phase }) {
   );
 }
 
-function ChecklistDots({ entryId, isHe, ta }: { entryId: string; isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+function ChecklistDots({ entryId, isRtl, ta }: { entryId: string; isRtl: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [expanded, setExpanded] = useState(false);
   const checklist = CHANGELOG_CHECKLISTS[entryId];
   const score = getChecklistScore(checklist);
@@ -115,7 +116,7 @@ function ChecklistDots({ entryId, isHe, ta }: { entryId: string; isHe: boolean; 
   );
 }
 
-function ChecklistSummary({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+function ChecklistSummary({ isRtl, ta }: { isRtl: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [open, setOpen] = useState(false);
   const overall = getOverallChecklistScoreFromEntries(changelogEntries);
 
@@ -150,7 +151,7 @@ function ChecklistSummary({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof g
           <span className={`text-lg font-bold ${overall.pct >= 80 ? 'text-emerald-400' : 'text-amber-400'}`}>
             {overall.pct}%
           </span>
-          {open ? <ChevronDown size={14} className="text-slate-500" /> : (isHe ? <ChevronLeft size={14} className="text-slate-500" /> : <ChevronRight size={14} className="text-slate-500" />)}
+          {open ? <ChevronDown size={14} className="text-slate-500" /> : (isRtl ? <ChevronLeft size={14} className="text-slate-500" /> : <ChevronRight size={14} className="text-slate-500" />)}
         </div>
       </button>
       {open && (
@@ -168,7 +169,7 @@ function ChecklistSummary({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof g
                     style={{ width: `${pct}%`, background: pct === 100 ? '#34d399' : pct >= 70 ? '#60a5fa' : '#fbbf24' }}
                   />
                 </div>
-                <span className="w-16 shrink-0 text-[11px] text-slate-500" dir="ltr" style={{ textAlign: isHe ? 'left' : 'right' }}>
+                <span className="w-16 shrink-0 text-[11px] text-slate-500" dir="ltr" style={{ textAlign: isRtl ? 'left' : 'right' }}>
                   {item.done}/{item.total}
                 </span>
               </div>
@@ -180,7 +181,7 @@ function ChecklistSummary({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof g
   );
 }
 
-function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+function ChangelogCard({ entry, isRtl, language, ta }: { entry: ChangelogEntry; isRtl: boolean; language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const statusColors: Record<FeatureStatus, { bg: string; text: string; label: string; icon: React.ElementType }> = {
     working: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: ta.working, icon: CheckCircle2 },
     'not-verified': { bg: 'bg-amber-500/10', text: 'text-amber-400', label: ta.notVerified, icon: AlertCircle },
@@ -203,7 +204,7 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
     <div className="rounded-xl border border-white/[0.04] bg-white/[0.015] p-4">
       <div className="flex items-start justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-sm text-slate-200">{isHe ? entry.featureHe : entry.feature}</span>
+          <span className="font-medium text-sm text-slate-200">{loc(entry, 'feature', language)}</span>
           {entry.phase && <PhaseBadge phase={entry.phase} />}
           <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${wf.bg} ${wf.text}`}>
             <WfIcon size={10} />
@@ -226,10 +227,10 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
           </a>
         )}
       </div>
-      <p className="mt-2 text-xs text-slate-400">{isHe ? entry.notesHe : entry.notes}</p>
+      <p className="mt-2 text-xs text-slate-400">{loc(entry, 'notes', language)}</p>
       <div className="mt-2 rounded-lg bg-purple-500/5 border border-purple-500/10 px-3 py-2">
         <span className="text-[10px] font-semibold text-purple-400 uppercase tracking-wider">{ta.whyBuilt}</span>
-        <p className="mt-1 text-xs text-slate-400">{isHe ? entry.purposeHe : entry.purpose}</p>
+        <p className="mt-1 text-xs text-slate-400">{loc(entry, 'purpose', language)}</p>
       </div>
       {entry.connectedTo && entry.connectedTo.length > 0 && (
         <div className="mt-2 flex items-center gap-1.5 flex-wrap">
@@ -253,7 +254,7 @@ function ChangelogCard({ entry, isHe, ta }: { entry: ChangelogEntry; isHe: boole
         )}
       </div>
       <div className="mt-2 border-t border-white/[0.04] pt-2">
-        <ChecklistDots entryId={entry.id} isHe={isHe} ta={ta} />
+        <ChecklistDots entryId={entry.id} isRtl={isRtl} ta={ta} />
       </div>
     </div>
   );
@@ -395,7 +396,7 @@ function MermaidDiagram({ definition, ta }: { definition: string; ta: ReturnType
 
 // ─── Main Export ──────────────────────────────────────────
 
-export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [changelogSearch, setChangelogSearch] = useState('');
   const [clSortBy, setClSortBy] = useState<SortField>('date');
   const [clSortDir, setClSortDir] = useState<'asc' | 'desc'>('desc');
@@ -591,13 +592,13 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
       groupMap[key].entries.push(entry);
     }
     return groups;
-  }, [clGroupBy, directMatches, changelogSearch, isHe]);
+  }, [clGroupBy, directMatches, changelogSearch, isRtl]);
 
   const mermaidDiagram = useMemo(() => generateMermaidDiagram(changelogEntries, allRoutes), [allRoutes]);
 
   return (
     <div className="space-y-6">
-      <ChecklistSummary isHe={isHe} ta={ta} />
+      <ChecklistSummary isRtl={isRtl} ta={ta} />
 
       {/* Search Input */}
       <div className="relative">
@@ -607,12 +608,12 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
           placeholder={ta.searchPlaceholder}
           iconStart={<Search size={16} />}
           inputSize="lg"
-          dir={isHe ? 'rtl' : 'ltr'}
+          dir={isRtl ? 'rtl' : 'ltr'}
         />
         {changelogSearch && (
           <button onClick={() => setChangelogSearch('')}
             className="absolute top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:text-slate-300"
-            style={{ [isHe ? 'left' : 'right']: 8 }}>
+            style={{ [isRtl ? 'left' : 'right']: 8 }}>
             <X size={14} />
           </button>
         )}
@@ -630,7 +631,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
         )}
         onPhaseChange={setClFilterPhase}
         onTechStatusChange={setClFilterTechStatus}
-        isHe={isHe} ta={ta}
+        isRtl={isRtl} ta={ta}
       />
 
       {/* data-cc-id System */}
@@ -663,7 +664,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
                 <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[10px] text-blue-400">text</span>
               )}
               <code className="text-[10px] text-slate-600" dir="ltr">{entry.file}:{entry.line}</code>
-              <span className="text-slate-500">{isHe ? entry.descriptionHe : entry.description}</span>
+              <span className="text-slate-500">{loc(entry, 'description', language)}</span>
             </div>
           ))}
         </div>
@@ -690,7 +691,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
           <div className="space-y-4">
             {groupedEntries.map(group => (
               <CollapsibleRow
-                key={group.label} isHe={isHe} defaultOpen count={group.entries.length}
+                key={group.label} isRtl={isRtl} defaultOpen count={group.entries.length}
                 title={
                   <span className="flex items-center gap-2">
                     <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: group.color }} />
@@ -700,7 +701,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
               >
                 <div className="space-y-3">
                   {group.entries.map(entry => (
-                    <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
+                    <ChangelogCard key={entry.id} entry={entry} isRtl={isRtl} language={language} ta={ta} />
                   ))}
                 </div>
               </CollapsibleRow>
@@ -716,7 +717,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
             )}
             <div className="space-y-3">
               {directMatches.map(entry => (
-                <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
+                <ChangelogCard key={entry.id} entry={entry} isRtl={isRtl} language={language} ta={ta} />
               ))}
             </div>
             {changelogSearch && relatedMatches.length > 0 && (
@@ -728,7 +729,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
                 </div>
                 <div className="space-y-3">
                   {relatedMatches.map(entry => (
-                    <ChangelogCard key={entry.id} entry={entry} isHe={isHe} ta={ta} />
+                    <ChangelogCard key={entry.id} entry={entry} isRtl={isRtl} language={language} ta={ta} />
                   ))}
                 </div>
               </>
@@ -793,7 +794,7 @@ export default function ChangelogTab({ isHe, ta }: { isHe: boolean; ta: ReturnTy
                 value={commitMsg}
                 onChange={e => setCommitMsg(e.target.value)}
                 placeholder={ta.commitPlaceholder}
-                dir={isHe ? 'rtl' : 'ltr'}
+                dir={isRtl ? 'rtl' : 'ltr'}
                 className="flex-1"
                 onKeyDown={e => { if (e.key === 'Enter' && commitMsg.trim()) handleCommit(); }}
               />

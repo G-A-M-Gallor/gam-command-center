@@ -116,7 +116,7 @@ export function useAutoSave({
           (docId, content) => persistToSupabase(docId, content, null).then((r) => r.outcome === 'success'),
         );
         if (flushed > 0) {
-          console.log(`AutoSave: flushed ${flushed} offline saves`);
+          // offline saves flushed successfully
         }
       }
     };

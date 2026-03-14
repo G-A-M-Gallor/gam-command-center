@@ -6,7 +6,8 @@ import {
   ChevronDown, ChevronRight, ChevronLeft,
   Component, Database, Eye, EyeOff, LayoutDashboard, Globe,
 } from 'lucide-react';
-import { getTranslations } from '@/lib/i18n';
+import { getTranslations, loc } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { Status, Phase, RouteEntry } from './types';
 import { routes, standalonePages, widgets, contexts } from './data';
 
@@ -40,11 +41,11 @@ function PhaseBadge({ phase }: { phase: Phase }) {
   );
 }
 
-function CollapsibleRow({ title, defaultOpen = false, count, children, isHe }: {
-  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isHe: boolean;
+function CollapsibleRow({ title, defaultOpen = false, count, children, isRtl }: {
+  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isRtl: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const Arrow = open ? ChevronDown : (isHe ? ChevronLeft : ChevronRight);
+  const Arrow = open ? ChevronDown : (isRtl ? ChevronLeft : ChevronRight);
   return (
     <div>
       <button type="button" onClick={() => setOpen(!open)}
@@ -53,16 +54,17 @@ function CollapsibleRow({ title, defaultOpen = false, count, children, isHe }: {
         {title}
         {count !== undefined && <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate-500">{count}</span>}
       </button>
-      {open && <div className={isHe ? 'pl-5 pb-2' : 'pr-5 pb-2'}>{children}</div>}
+      {open && <div className={isRtl ? 'pl-5 pb-2' : 'pr-5 pb-2'}>{children}</div>}
     </div>
   );
 }
 
-function RouteCard({ route, isHe, ta }: { route: RouteEntry; isHe: boolean; ta: AdminTranslations }) {
+function RouteCard({ route, language, ta }: { route: RouteEntry; language: Language; ta: AdminTranslations }) {
+  const isRtl = language === 'he';
   const Icon = route.icon;
-  const description = isHe ? route.descriptionHe : route.descriptionEn;
-  const displayName = isHe ? route.nameHe : route.name;
-  const secondaryName = isHe ? route.name : route.nameHe;
+  const description = language === 'he' ? route.descriptionHe : route.descriptionEn;
+  const displayName = loc(route, 'name', language);
+  const secondaryName = isRtl ? route.name : route.nameHe;
 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
@@ -96,7 +98,7 @@ function RouteCard({ route, isHe, ta }: { route: RouteEntry; isHe: boolean; ta: 
       <p className="mb-3 text-xs text-slate-500">{description}</p>
 
       {route.components.length > 0 && (
-        <CollapsibleRow isHe={isHe} title={<span className="flex items-center gap-1.5"><Component size={13} className="text-slate-500" /> {ta.routeComponents}</span>} count={route.components.length}>
+        <CollapsibleRow isRtl={isRtl} title={<span className="flex items-center gap-1.5"><Component size={13} className="text-slate-500" /> {ta.routeComponents}</span>} count={route.components.length}>
           <div className="mt-1 space-y-2">
             {route.components.map(comp => (
               <div key={comp.id} className="rounded-lg border border-white/[0.04] bg-white/[0.015] px-3 py-2">
@@ -145,7 +147,7 @@ function RouteCard({ route, isHe, ta }: { route: RouteEntry; isHe: boolean; ta: 
 
 // ─── Routes Tab ──────────────────────────────────────────
 
-export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+export function RoutesSection({ language, ta }: { language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [filterPhase, setFilterPhase] = useState<Phase | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
 
@@ -192,7 +194,7 @@ export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<type
         </h3>
         <div className="space-y-3">
           {filteredRoutes.filter(r => r.path.startsWith('/dashboard')).map(route => (
-            <RouteCard key={route.id} route={route} isHe={isHe} ta={ta} />
+            <RouteCard key={route.id} route={route} language={language} ta={ta} />
           ))}
         </div>
       </div>
@@ -204,7 +206,7 @@ export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<type
           </h3>
           <div className="space-y-3">
             {filteredRoutes.filter(r => !r.path.startsWith('/dashboard')).map(route => (
-              <RouteCard key={route.id} route={route} isHe={isHe} ta={ta} />
+              <RouteCard key={route.id} route={route} language={language} ta={ta} />
             ))}
           </div>
         </div>
@@ -215,7 +217,8 @@ export function RoutesSection({ isHe, ta }: { isHe: boolean; ta: ReturnType<type
 
 // ─── Widgets Tab ─────────────────────────────────────────
 
-export function WidgetsSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
+export function WidgetsSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
+  const isRtl = language === 'he';
   return (
     <div className="space-y-2">
       {widgets.map(w => (
@@ -223,8 +226,8 @@ export function WidgetsSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslati
           <div className="flex items-center gap-3">
             <StatusBadge status={w.status} ta={ta} />
             <div>
-              <span className="text-sm font-medium text-slate-200">{isHe ? w.nameHe : w.name}</span>
-              <span className="mx-2 text-xs text-slate-600">{isHe ? w.name : w.nameHe}</span>
+              <span className="text-sm font-medium text-slate-200">{loc(w, 'name', language)}</span>
+              <span className="mx-2 text-xs text-slate-600">{isRtl ? w.name : w.nameHe}</span>
             </div>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-slate-500 flex-wrap">
@@ -242,7 +245,7 @@ export function WidgetsSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslati
 
 // ─── Contexts Tab ────────────────────────────────────────
 
-export function ContextsSection({ isHe, ta }: { isHe: boolean; ta: AdminTranslations }) {
+export function ContextsSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
   return (
     <div className="space-y-3">
       {contexts.map(ctx => (

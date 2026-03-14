@@ -226,9 +226,8 @@ export default function EditorDemoPage() {
       <TiptapEditor
         content={SAMPLE_CONTENT}
         onChange={setJson}
-        onSave={(data) => {
-          console.log('💾 Saved:', data);
-          alert('נשמר! (בדוק console)');
+        onSave={() => {
+          alert('נשמר!');
         }}
         autoFocus
       />

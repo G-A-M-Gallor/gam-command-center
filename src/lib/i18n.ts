@@ -7634,3 +7634,27 @@ export type TranslationKey = keyof (typeof translations)["he"];
 export function getTranslations(lang: Language) {
   return translations[lang];
 }
+
+/**
+ * Pick the right language variant from a bilingual/trilingual data object.
+ * Supports camelCase (nameHe) and snake_case (name_he) suffixes.
+ * Falls back: requested lang → English → empty string.
+ *
+ * Usage:
+ *   loc(item, 'name', language)        // string
+ *   loc<string[]>(item, 'kpis', language) // array
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function loc<T = string>(
+  obj: Record<string, any>,
+  field: string,
+  language: Language,
+): T {
+  if (language === "he") {
+    return (obj[`${field}He`] ?? obj[`${field}_he`] ?? obj[field] ?? "") as T;
+  }
+  if (language === "ru") {
+    return (obj[`${field}Ru`] ?? obj[`${field}_ru`] ?? obj[field] ?? "") as T;
+  }
+  return (obj[field] ?? "") as T;
+}

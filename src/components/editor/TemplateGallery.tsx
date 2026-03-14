@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, FileText, Briefcase, Code2, BarChart3, File, Pencil, Trash2, Check } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { fetchTemplates, createTemplate, updateTemplate, deleteTemplate, type DocTemplate } from "@/lib/supabase/editorQueries";
 import { ConfirmDialog } from "@/components/command-center/ConfirmDialog";
 import type { JSONContent } from "@tiptap/react";
@@ -364,7 +364,6 @@ export function TemplateGallery({
 }: TemplateGalleryProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isHe = language === "he";
   const isRtl = language === "he";
   const et = t.editor;
 
@@ -539,17 +538,17 @@ export function TemplateGallery({
                         ) : (
                           <button
                             onClick={() => {
-                              onSelect(tmpl.content, isHe ? tmpl.name_he : tmpl.name);
+                              onSelect(tmpl.content, loc(tmpl, 'name', language));
                               onClose();
                             }}
                             className="flex w-full flex-col items-start rounded-lg border border-slate-700 bg-slate-800/50 p-3 text-start transition-colors hover:border-purple-500/40 hover:bg-purple-500/5"
                           >
                             <span className="text-lg">{tmpl.icon}</span>
                             <span className="mt-1 text-sm font-medium text-slate-200">
-                              {isHe ? tmpl.name_he : tmpl.name}
+                              {loc(tmpl, 'name', language)}
                             </span>
                             <span className="mt-0.5 text-[11px] text-slate-500 line-clamp-2">
-                              {isHe ? tmpl.description_he : tmpl.description}
+                              {loc(tmpl, 'description', language)}
                             </span>
                           </button>
                         )}
@@ -560,7 +559,7 @@ export function TemplateGallery({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setEditName(isHe ? tmpl.name_he : tmpl.name);
+                                setEditName(loc(tmpl, 'name', language));
                                 setEditingId(tmpl.id);
                               }}
                               className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
