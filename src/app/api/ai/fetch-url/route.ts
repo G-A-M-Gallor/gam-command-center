@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAuth } from "@/lib/api/auth";
 
 const MAX_CONTENT_CHARS = 3000;
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
@@ -30,6 +31,9 @@ function stripHtmlTags(html: string): string {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireAuth(request);
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
+
   let rawBody: unknown;
   try {
     rawBody = await request.json();

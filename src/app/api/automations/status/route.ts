@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/api/auth';
 
 type ServiceStatus = 'online' | 'offline' | 'configured' | 'unconfigured';
 
@@ -12,7 +13,9 @@ interface StatusResponse {
   timestamp: string;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireAuth(request);
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
   const result: StatusResponse = {
     supabase: { status: 'offline', checks: {} },
     n8n: { status: 'unconfigured' },
