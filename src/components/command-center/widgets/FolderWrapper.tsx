@@ -14,6 +14,7 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 
 const UNIT = 48;
 const MARGIN = 8;
+const TOP_BAR_H = 52; // TopBar height (48px) + gap (4px)
 const SIDEBAR_FULL = 240;
 const SIDEBAR_STRIP = 48;
 const DEFAULT_PANEL_W = 320;
@@ -47,7 +48,7 @@ function calcPosition(
   const zoneLeft = sidebar.left + MARGIN;
   const zoneRight = vw - sidebar.right - MARGIN;
   const zoneBottom = vh - MARGIN;
-  const zoneTop = MARGIN;
+  const zoneTop = TOP_BAR_H;
   const zoneWidth = zoneRight - zoneLeft;
 
   const clampedW = Math.min(panelW, zoneWidth);

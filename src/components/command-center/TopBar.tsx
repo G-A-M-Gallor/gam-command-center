@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, HelpCircle, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart } from "lucide-react";
+import { Store, Pencil, HelpCircle, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -21,6 +21,9 @@ import {
 import { WidgetWrapper } from "./widgets/WidgetWrapper";
 import { WidgetSettings } from "./widgets/WidgetSettings";
 import { WidgetStore } from "./widgets/WidgetStore";
+import { AppStorePanel } from "./AppStorePanel";
+import { SettingsFolderPanel } from "./SettingsFolderPanel";
+import { OverflowMenu } from "./OverflowMenu";
 import { AppsDrawer } from "./widgets/AppsDrawer";
 import { ProfileSwitcher } from "./widgets/ProfileSwitcher";
 import { FolderWrapper } from "./widgets/FolderWrapper";
@@ -104,6 +107,10 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [aiViewMode, setAiViewMode] = useState<AIViewMode>("side-panel");
   const [sidePanelWidgetId, setSidePanelWidgetId] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Widget lock state
+  const [widgetLocks, setWidgetLocks] = useState<Record<string, boolean>>({});
 
   // AI panel offset for widget dropdown positioning
   const aiPanelOffset = useMemo(() => {
@@ -135,6 +142,14 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  // Load widget locks from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("cc-widget-locks");
+      if (raw) setWidgetLocks(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
 
   // Track container width → total columns via ResizeObserver
   useEffect(() => {
@@ -291,6 +306,20 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     }
   }, [modalHandlers]);
 
+  // Handle clicking a widget from the overflow menu
+  const handleOverflowClick = useCallback((widgetId: string) => {
+    if (widgetId === "ai-assistant") {
+      setAiPanelOpen(true);
+      return;
+    }
+    if (modalHandlers[widgetId]) {
+      modalHandlers[widgetId]();
+      return;
+    }
+    // Open as side panel for dropdown widgets
+    setSidePanelWidgetId((prev) => (prev === widgetId ? null : widgetId));
+  }, [modalHandlers]);
+
   // Quick bookmark handler
   const handleQuickBookmark = useCallback(() => {
     const QUICK_BM_ID = "__quick-bookmarks__";
@@ -337,6 +366,15 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     setDisplayMode(modes[(idx + 1) % modes.length]);
   }, [displayMode, setDisplayMode]);
 
+  // Toggle widget lock
+  const toggleWidgetLock = useCallback((widgetId: string) => {
+    setWidgetLocks((prev) => {
+      const next = { ...prev, [widgetId]: !prev[widgetId] };
+      localStorage.setItem("cc-widget-locks", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   // Display mode dimensions
   const UNIT_SIZE = displayMode === "compact" ? 36 : displayMode === "icons-only" ? 32 : UNIT;
   const BAR_HEIGHT = displayMode === "compact" ? "h-9" : displayMode === "icons-only" ? "h-8" : "h-12";
@@ -365,6 +403,19 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
     ];
     return items;
   }, [visibleWidgets, visibleFolders]);
+
+  // Collect overflow widget IDs (widgets that don't fit in the bar)
+  const overflowWidgetIds = useMemo(() => {
+    if (totalColumns === 0) return [];
+    return visibleWidgets
+      .filter((widget) => {
+        const col = widgetPositions[widget.id];
+        if (col === undefined) return false;
+        const wSize = widgetSizes[widget.id] ?? widget.defaultSize;
+        return col + wSize > totalColumns;
+      })
+      .map((w) => w.id);
+  }, [visibleWidgets, widgetPositions, widgetSizes, totalColumns]);
 
   // Auto-pack: removes gaps, preserves relative order
   const handleAutoPack = useCallback(() => {
@@ -890,6 +941,8 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
                     onEditOpen={setEditingWidgetId}
                     aiPanelOffset={aiPanelOffset}
                     onCustomClick={customClick}
+                    locked={widgetLocks[widget.id]}
+                    onToggleLock={toggleWidgetLock}
                   />
                 );
               })}
@@ -991,6 +1044,20 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
           <LayoutList className="h-4 w-4" />
         </button>
 
+        {/* Overflow Menu — widgets that don't fit */}
+        <OverflowMenu widgetIds={overflowWidgetIds} onWidgetClick={handleOverflowClick} />
+
+        {/* Quick Settings */}
+        <button
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+          aria-label={t.smartBar?.pinnedSettings || "Settings"}
+          className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
+          title={t.smartBar?.pinnedSettings || "Settings"}
+        >
+          <Settings className="h-4 w-4" />
+        </button>
+
         {/* Widget Store button */}
         <button
           type="button"
@@ -1032,8 +1099,11 @@ export function TopBar({ onSidebarOpen }: TopBarProps) {
         />
       )}
 
-      {/* Widget Store */}
-      {storeOpen && <WidgetStore onClose={() => setStoreOpen(false)} />}
+      {/* Widget Store — AppStorePanel for desktop */}
+      {storeOpen && <AppStorePanel onClose={() => setStoreOpen(false)} />}
+
+      {/* Quick Settings Panel */}
+      {settingsOpen && <SettingsFolderPanel onClose={() => setSettingsOpen(false)} />}
 
       {/* Search modal */}
       {searchOpen && <SearchPanel onClose={() => setSearchOpen(false)} />}

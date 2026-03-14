@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Pencil, RotateCcw, X } from "lucide-react";
+import { Pencil, X, Lock, Unlock } from "lucide-react";
 import type { WidgetDefinition, WidgetSize } from "./WidgetRegistry";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -12,21 +12,20 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 
 const UNIT = 48;
 const MARGIN = 8;
+const TOP_BAR_H = 52; // TopBar height (48px) + gap (4px)
 const SIDEBAR_FULL = 240;
 const SIDEBAR_STRIP = 48;
-const DEFAULT_PANEL_W = 280;
-const DEFAULT_PANEL_H = 300;
-const MIN_PANEL_W = 240;
-const MIN_PANEL_H = 150;
+
+const PANEL_PRESETS = {
+  S: { width: 280, height: 260 },
+  M: { width: 400, height: 400 },
+  L: { width: 560, height: 520 },
+} as const;
+type PanelPreset = keyof typeof PANEL_PRESETS;
 
 interface PanelPos {
   top: number;
   left: number;
-}
-
-interface PanelSize {
-  width: number;
-  height: number;
 }
 
 function getSidebarOffset(
@@ -65,7 +64,7 @@ function calcPosition(
   const zoneLeft = sidebar.left + MARGIN;
   const zoneRight = vw - sidebar.right - MARGIN;
   const zoneBottom = vh - MARGIN;
-  const zoneTop = MARGIN;
+  const zoneTop = TOP_BAR_H;
   const zoneWidth = zoneRight - zoneLeft;
   const zoneHeight = zoneBottom - zoneTop;
 
@@ -135,6 +134,10 @@ interface WidgetWrapperProps {
   onCustomClick?: () => void;
   /** Extra offset from the AI panel (side-panel mode) */
   aiPanelOffset?: { left: number; right: number };
+  /** Whether this widget is locked in place */
+  locked?: boolean;
+  /** Callback to toggle lock state */
+  onToggleLock?: (widgetId: string) => void;
 }
 
 export function WidgetWrapper({
@@ -143,6 +146,8 @@ export function WidgetWrapper({
   onEditOpen,
   onCustomClick,
   aiPanelOffset,
+  locked,
+  onToggleLock,
 }: WidgetWrapperProps) {
   const { widgetSizes, hoverDelay, widgetLabels, displayMode } = useWidgets();
   const { language, sidebarPosition, sidebarVisibility } = useSettings();
@@ -163,7 +168,7 @@ export function WidgetWrapper({
   const [panelPos, setPanelPos] = useState<PanelPos | null>(null);
   const [panelMaxW, setPanelMaxW] = useState(9999);
   const [panelMaxH, setPanelMaxH] = useState(9999);
-  const [panelSize, setPanelSize] = useState<PanelSize | null>(null);
+  const [panelPreset, setPanelPreset] = useState<PanelPreset>("M");
 
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -172,7 +177,7 @@ export function WidgetWrapper({
   const mouseInPanel = useRef(false);
   const mouseInWrapper = useRef(false);
 
-  const savedSizeKey = `cc-widget-panel-size-${widget.id}`;
+  const savedPresetKey = `cc-widget-panel-preset-${widget.id}`;
 
   const {
     attributes,
@@ -180,7 +185,7 @@ export function WidgetWrapper({
     setNodeRef,
     transform,
     isDragging,
-  } = useDraggable({ id: widget.id });
+  } = useDraggable({ id: widget.id, disabled: !!locked });
 
   const style = {
     position: "absolute" as const,
@@ -208,17 +213,13 @@ export function WidgetWrapper({
     return () => window.removeEventListener(eventName, handler);
   }, [widget.id]);
 
-  // Load saved panel size on mount
+  // Load saved panel preset on mount
   useEffect(() => {
-    const raw = localStorage.getItem(savedSizeKey);
-    if (raw) {
-      try {
-        setPanelSize(JSON.parse(raw));
-      } catch {
-        /* ignore */
-      }
+    const saved = localStorage.getItem(savedPresetKey);
+    if (saved && saved in PANEL_PRESETS) {
+      setPanelPreset(saved as PanelPreset);
     }
-  }, [savedSizeKey]);
+  }, [savedPresetKey]);
 
   // Calculate panel position when it opens or sidebar changes
   useEffect(() => {
@@ -233,13 +234,12 @@ export function WidgetWrapper({
       left: sidebar.left + (aiPanelOffset?.left ?? 0),
       right: sidebar.right + (aiPanelOffset?.right ?? 0),
     };
-    const pw = panelSize?.width ?? DEFAULT_PANEL_W;
-    const ph = panelSize?.height ?? DEFAULT_PANEL_H;
+    const { width: pw, height: ph } = PANEL_PRESETS[panelPreset];
     const result = calcPosition(rect, pw, ph, totalOffset);
     setPanelPos(result.pos);
     setPanelMaxW(result.maxWidth);
     setPanelMaxH(result.maxHeight);
-  }, [panelOpen, sidebarPosition, sidebarVisibility, panelSize, aiPanelOffset]);
+  }, [panelOpen, sidebarPosition, sidebarVisibility, panelPreset, aiPanelOffset]);
 
   const clearTimer = useCallback(() => {
     if (hoverTimer.current) {
@@ -302,18 +302,10 @@ export function WidgetWrapper({
     setPanelOpen((prev) => !prev);
   }, [clearTimer, onCustomClick]);
 
-  const handleResizeEnd = useCallback(() => {
-    if (!panelRef.current) return;
-    const { offsetWidth, offsetHeight } = panelRef.current;
-    const newSize = { width: offsetWidth, height: offsetHeight };
-    setPanelSize(newSize);
-    localStorage.setItem(savedSizeKey, JSON.stringify(newSize));
-  }, [savedSizeKey]);
-
-  const handleResetSize = useCallback(() => {
-    localStorage.removeItem(savedSizeKey);
-    setPanelSize(null);
-  }, [savedSizeKey]);
+  const handlePresetChange = useCallback((preset: PanelPreset) => {
+    setPanelPreset(preset);
+    localStorage.setItem(savedPresetKey, preset);
+  }, [savedPresetKey]);
 
   useEffect(() => {
     return () => {
@@ -335,7 +327,7 @@ export function WidgetWrapper({
         wrapperRef.current = node;
       }}
       style={style}
-      className={`flex ${barHeight} items-center`}
+      className={`group flex ${barHeight} items-center`}
       onMouseEnter={handleWrapperEnter}
       onMouseLeave={handleWrapperLeave}
       {...attributes}
@@ -347,7 +339,7 @@ export function WidgetWrapper({
         onClick={handleClick}
         className={`flex h-full w-full items-center gap-2 px-3 text-slate-400 transition-colors hover:bg-slate-700/50 hover:text-slate-200 ${
           panelOpen ? "bg-slate-700/50 text-slate-200" : ""
-        }`}
+        } ${locked ? "ring-1 ring-inset ring-amber-500/20" : ""}`}
         title={label}
       >
         <span className="relative shrink-0">
@@ -359,6 +351,25 @@ export function WidgetWrapper({
           <span className="truncate text-xs">{label}</span>
         )}
       </button>
+
+      {/* Lock toggle — visible on hover or when locked */}
+      {onToggleLock && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleLock(widget.id);
+          }}
+          className={`absolute -top-0.5 -right-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full text-[9px] transition-all ${
+            locked
+              ? "bg-amber-600/90 text-white"
+              : "bg-slate-700 text-slate-400 opacity-0 group-hover:opacity-100"
+          }`}
+          title={locked ? (t.smartBar?.unlockWidget || "Unlock") : (t.smartBar?.lockWidget || "Lock")}
+        >
+          {locked ? <Lock size={9} /> : <Unlock size={9} />}
+        </button>
+      )}
 
       {/* Mobile fullscreen panel */}
       {panelOpen && isMobile && (
@@ -393,18 +404,16 @@ export function WidgetWrapper({
           style={{
             top: panelPos.top,
             left: panelPos.left,
-            width: Math.min(panelSize?.width ?? DEFAULT_PANEL_W, panelMaxW),
-            minWidth: Math.min(MIN_PANEL_W, panelMaxW),
-            minHeight: MIN_PANEL_H,
+            width: Math.min(PANEL_PRESETS[panelPreset].width, panelMaxW),
+            height: Math.min(PANEL_PRESETS[panelPreset].height, panelMaxH),
             maxWidth: panelMaxW,
-            maxHeight: Math.min(panelMaxH, window.innerHeight - panelPos.top - MARGIN),
-            resize: "both",
+            maxHeight: panelMaxH,
             overflow: "hidden",
             borderRadius: "var(--cc-radius-lg)",
+            transition: "width 200ms ease, height 200ms ease",
           }}
           onMouseEnter={handlePanelEnter}
           onMouseLeave={handlePanelLeave}
-          onMouseUp={handleResizeEnd}
         >
           {/* Panel header */}
           <div className="flex shrink-0 items-center justify-between border-b border-slate-700 px-4 py-3">
@@ -414,21 +423,27 @@ export function WidgetWrapper({
                 {description}
               </p>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
-              {panelSize && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleResetSize();
-                  }}
-                  className="rounded p-1.5 text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
-                  aria-label={t.widgets.resetSize}
-                  title={t.widgets.resetSize}
-                >
-                  <RotateCcw className="h-3 w-3" />
-                </button>
-              )}
+            <div className="flex shrink-0 items-center gap-1.5">
+              {/* Size presets */}
+              <div className="flex items-center gap-0.5 rounded-md bg-slate-900/60 p-0.5">
+                {(["S", "M", "L"] as PanelPreset[]).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePresetChange(p);
+                    }}
+                    className={`rounded px-1.5 py-0.5 text-[10px] font-bold transition-colors ${
+                      panelPreset === p
+                        ? "bg-[var(--cc-accent-600)] text-white"
+                        : "text-slate-500 hover:text-slate-300"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 onClick={(e) => {

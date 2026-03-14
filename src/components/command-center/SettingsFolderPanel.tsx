@@ -45,6 +45,11 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
     return () => window.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
+  // Compute left offset based on sidebar
+  const sidebarWidth = sidebarVisibility === "visible" ? 240
+    : sidebarVisibility === "float" ? 48 : 0;
+  const leftOffset = sidebarPosition === "left" ? sidebarWidth + 16 : 16;
+
   const sectionClass = "space-y-2";
   const labelClass = "flex items-center gap-2 text-xs font-medium text-slate-400";
   const btnBase = "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors";
@@ -62,7 +67,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
       />
 
       {/* Panel */}
-      <div className="fixed left-4 top-14 z-50 w-72 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+      <div className="fixed top-14 z-50 w-72 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl" style={{ left: leftOffset }}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
           <div className="flex items-center gap-2">
