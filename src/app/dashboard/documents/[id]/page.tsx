@@ -24,6 +24,11 @@ import {
   XCircle,
   CheckCircle2,
   AlertTriangle,
+  ClipboardCheck,
+  Upload,
+  FileCheck,
+  FileX,
+  Loader2,
 } from "lucide-react";
 import type {
   DocumentSubmission,
@@ -32,16 +37,19 @@ import type {
   DocumentFieldLock,
   DocumentMessage,
   DocumentAuditEntry,
+  DocumentChecklistItem,
+  DocumentChecklistUpload,
 } from "@/lib/supabase/schema";
 
 // ── Tab types ─────────────────────────────────────────────
-type Tab = "overview" | "views" | "locks" | "messages" | "audit";
+type Tab = "overview" | "views" | "locks" | "messages" | "checklist" | "audit";
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; i18nKey: string }[] = [
   { key: "overview", icon: FileText, i18nKey: "overview" },
   { key: "views", icon: Eye, i18nKey: "viewHistory" },
   { key: "locks", icon: Lock, i18nKey: "fieldLocks" },
   { key: "messages", icon: MessageSquare, i18nKey: "messages" },
+  { key: "checklist", icon: ClipboardCheck, i18nKey: "checklist" },
   { key: "audit", icon: ScrollText, i18nKey: "auditLog" },
 ];
 
@@ -62,6 +70,8 @@ export default function DocumentDetailPage() {
   const [locks, setLocks] = useState<DocumentFieldLock[]>([]);
   const [messages, setMessages] = useState<DocumentMessage[]>([]);
   const [auditLog, setAuditLog] = useState<DocumentAuditEntry[]>([]);
+  const [checklistItems, setChecklistItems] = useState<DocumentChecklistItem[]>([]);
+  const [checklistUploads, setChecklistUploads] = useState<DocumentChecklistUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [msgBody, setMsgBody] = useState("");
   const [sendingMsg, setSendingMsg] = useState(false);
@@ -69,13 +79,14 @@ export default function DocumentDetailPage() {
   // ── Fetch all data ──────────────────────────────────────
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const [subRes, submittersRes, viewsRes, locksRes, msgsRes, auditRes] = await Promise.all([
+    const [subRes, submittersRes, viewsRes, locksRes, msgsRes, auditRes, uploadsRes] = await Promise.all([
       supabase.from("document_submissions").select("*").eq("id", id).single(),
       supabase.from("document_submitters").select("*").eq("submission_id", id).order("sort_order"),
       supabase.from("document_views").select("*").eq("submission_id", id).order("created_at", { ascending: false }),
       supabase.from("document_field_locks").select("*").eq("submission_id", id),
       supabase.from("document_messages").select("*").eq("submission_id", id).order("created_at", { ascending: true }),
       supabase.from("document_audit_log").select("*").eq("submission_id", id).order("created_at", { ascending: false }).limit(100),
+      supabase.from("document_checklist_uploads").select("*").eq("submission_id", id).order("created_at", { ascending: false }),
     ]);
 
     if (subRes.data) setSubmission(subRes.data as DocumentSubmission);
@@ -84,6 +95,18 @@ export default function DocumentDetailPage() {
     if (locksRes.data) setLocks(locksRes.data as DocumentFieldLock[]);
     if (msgsRes.data) setMessages(msgsRes.data as DocumentMessage[]);
     if (auditRes.data) setAuditLog(auditRes.data as DocumentAuditEntry[]);
+    if (uploadsRes.data) setChecklistUploads(uploadsRes.data as DocumentChecklistUpload[]);
+
+    // Fetch checklist items if submission has a template
+    const sub = subRes.data as DocumentSubmission | null;
+    if (sub?.template_id) {
+      const { data: items } = await supabase
+        .from("document_checklist_items")
+        .select("*")
+        .eq("template_id", sub.template_id)
+        .order("sort_order");
+      if (items) setChecklistItems(items as DocumentChecklistItem[]);
+    }
     setLoading(false);
   }, [id]);
 
@@ -229,6 +252,15 @@ export default function DocumentDetailPage() {
               onBodyChange={setMsgBody}
               onSend={handleSendMessage}
               sending={sendingMsg}
+            />
+          )}
+          {tab === "checklist" && (
+            <ChecklistTab
+              items={checklistItems}
+              uploads={checklistUploads}
+              submissionId={id}
+              dc={dc}
+              onUploadComplete={fetchAll}
             />
           )}
           {tab === "audit" && <AuditTab auditLog={auditLog} dc={dc} />}
@@ -554,6 +586,262 @@ function AuditTab({ auditLog, dc }: { auditLog: DocumentAuditEntry[]; dc: Record
       })}
     </div>
   );
+}
+
+// ── Checklist Tab ───────────────────────────────────
+function ChecklistTab({
+  items,
+  uploads,
+  submissionId,
+  dc,
+  onUploadComplete,
+}: {
+  items: DocumentChecklistItem[];
+  uploads: DocumentChecklistUpload[];
+  submissionId: string;
+  dc: Record<string, string>;
+  onUploadComplete: () => void;
+}) {
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+
+  // Map uploads by checklist_item_id
+  const uploadsByItem = useMemo(() => {
+    const map = new Map<string, DocumentChecklistUpload[]>();
+    for (const u of uploads) {
+      const existing = map.get(u.checklist_item_id) || [];
+      existing.push(u);
+      map.set(u.checklist_item_id, existing);
+    }
+    return map;
+  }, [uploads]);
+
+  const handleFileUpload = async (itemId: string, file: File) => {
+    setUploading(itemId);
+    const path = `checklist/${submissionId}/${itemId}/${file.name}`;
+    const { error: storageError } = await supabase.storage
+      .from("documents")
+      .upload(path, file, { upsert: true });
+
+    if (storageError) {
+      console.error("Upload failed:", storageError.message);
+      setUploading(null);
+      return;
+    }
+
+    await supabase.from("document_checklist_uploads").insert([{
+      submission_id: submissionId,
+      checklist_item_id: itemId,
+      storage_path: path,
+      file_name: file.name,
+      mime_type: file.type || null,
+      size_bytes: file.size,
+      status: "pending",
+    }]);
+
+    setUploading(null);
+    onUploadComplete();
+  };
+
+  const handleReview = async (uploadId: string, status: "approved" | "rejected", note?: string) => {
+    await supabase.from("document_checklist_uploads").update({
+      status,
+      review_note: note || null,
+      reviewed_at: new Date().toISOString(),
+    }).eq("id", uploadId);
+    setReviewingId(null);
+    onUploadComplete();
+  };
+
+  if (items.length === 0) {
+    return <EmptyState icon={ClipboardCheck} message={dc.noChecklist} />;
+  }
+
+  const completedCount = items.filter((item) => {
+    const itemUploads = uploadsByItem.get(item.id) || [];
+    return itemUploads.some((u) => u.status === "approved");
+  }).length;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-slate-300">
+          {dc.checklist} ({completedCount}/{items.length})
+        </h3>
+        <div className="h-1.5 w-32 overflow-hidden rounded-full bg-slate-800">
+          <div
+            className="h-full rounded-full bg-emerald-500 transition-all"
+            style={{ width: `${items.length > 0 ? (completedCount / items.length) * 100 : 0}%` }}
+          />
+        </div>
+      </div>
+
+      {items.map((item) => {
+        const itemUploads = uploadsByItem.get(item.id) || [];
+        const hasApproved = itemUploads.some((u) => u.status === "approved");
+        const hasPending = itemUploads.some((u) => u.status === "pending");
+
+        return (
+          <div
+            key={item.id}
+            className={`rounded-xl border p-4 ${
+              hasApproved
+                ? "border-emerald-800/50 bg-emerald-900/10"
+                : item.is_required
+                  ? "border-amber-800/50 bg-slate-900/30"
+                  : "border-slate-800 bg-slate-900/30"
+            }`}
+          >
+            {/* Item header */}
+            <div className="mb-2 flex items-start gap-3">
+              {hasApproved ? (
+                <FileCheck className="mt-0.5 h-5 w-5 text-emerald-400" />
+              ) : (
+                <ClipboardCheck className="mt-0.5 h-5 w-5 text-slate-500" />
+              )}
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-200">{item.label}</span>
+                  {item.is_required && (
+                    <span className="rounded bg-red-900/30 px-1.5 py-0.5 text-[10px] text-red-400">{dc.required}</span>
+                  )}
+                </div>
+                {item.description && (
+                  <p className="mt-0.5 text-xs text-slate-500">{item.description}</p>
+                )}
+                <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-slate-600">
+                  {item.accepted_types.length > 0 && (
+                    <span>{dc.acceptedTypes}: {item.accepted_types.join(", ")}</span>
+                  )}
+                  {item.max_size_mb > 0 && (
+                    <span>{dc.maxSize}: {item.max_size_mb}MB</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Uploaded files */}
+            {itemUploads.length > 0 && (
+              <div className="mb-3 ms-8 space-y-1.5">
+                {itemUploads.map((upload) => (
+                  <div key={upload.id} className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-900/50 p-2">
+                    <UploadStatusIcon status={upload.status} />
+                    <span className="flex-1 truncate text-xs text-slate-300">{upload.file_name}</span>
+                    {upload.size_bytes && (
+                      <span className="text-[10px] text-slate-500">{formatBytes(upload.size_bytes)}</span>
+                    )}
+                    <span className={`rounded px-1.5 py-0.5 text-[10px] ${
+                      upload.status === "approved" ? "bg-emerald-900/30 text-emerald-400" :
+                      upload.status === "rejected" ? "bg-red-900/30 text-red-400" :
+                      "bg-amber-900/30 text-amber-400"
+                    }`}>
+                      {dc[`review_${upload.status}` as keyof typeof dc] || upload.status}
+                    </span>
+
+                    {/* Review actions for pending uploads */}
+                    {upload.status === "pending" && (
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleReview(upload.id, "approved")}
+                          className="rounded p-1 text-emerald-500 hover:bg-emerald-900/30"
+                          title={dc.approve}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setReviewingId(reviewingId === upload.id ? null : upload.id)}
+                          className="rounded p-1 text-red-500 hover:bg-red-900/30"
+                          title={dc.reject}
+                        >
+                          <FileX className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )}
+
+                    {upload.review_note && (
+                      <span className="text-[10px] text-slate-500" title={upload.review_note}>
+                        💬
+                      </span>
+                    )}
+                  </div>
+                ))}
+
+                {/* Reject reason input */}
+                {reviewingId && itemUploads.some((u) => u.id === reviewingId) && (
+                  <RejectInput
+                    dc={dc}
+                    onReject={(note) => handleReview(reviewingId, "rejected", note)}
+                    onCancel={() => setReviewingId(null)}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Upload button */}
+            {!hasApproved && (
+              <div className="ms-8">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-slate-700 px-3 py-2 text-xs text-slate-400 transition-colors hover:border-purple-600 hover:text-purple-400">
+                  {uploading === item.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                  {hasPending ? dc.uploadAnother : dc.uploadFile}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept={item.accepted_types.length > 0 ? item.accepted_types.join(",") : undefined}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload(item.id, file);
+                      e.target.value = "";
+                    }}
+                    disabled={uploading === item.id}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function UploadStatusIcon({ status }: { status: string }) {
+  if (status === "approved") return <FileCheck className="h-3.5 w-3.5 text-emerald-400" />;
+  if (status === "rejected") return <FileX className="h-3.5 w-3.5 text-red-400" />;
+  return <Clock className="h-3.5 w-3.5 text-amber-400" />;
+}
+
+function RejectInput({ dc, onReject, onCancel }: { dc: Record<string, string>; onReject: (note: string) => void; onCancel: () => void }) {
+  const [note, setNote] = useState("");
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder={dc.rejectReason}
+        className="flex-1 rounded border border-slate-700 bg-slate-800/50 px-2 py-1 text-xs text-slate-200 placeholder:text-slate-500 focus:border-red-500 focus:outline-none"
+        autoFocus
+      />
+      <button
+        onClick={() => onReject(note)}
+        className="rounded bg-red-600/80 px-2 py-1 text-xs text-white hover:bg-red-500"
+      >
+        {dc.reject}
+      </button>
+      <button onClick={onCancel} className="text-xs text-slate-500 hover:text-slate-400">
+        {dc.cancelAction}
+      </button>
+    </div>
+  );
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
 // ── Shared Components ────────────────────────────────────
