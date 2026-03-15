@@ -1,7 +1,7 @@
 import {
   Circle, CheckCircle2, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
-  Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare,
+  Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2,
 } from 'lucide-react';
@@ -209,6 +209,18 @@ export const routes: RouteEntry[] = [
     ],
     contexts: ['SettingsContext', 'AuthContext'], supabaseTables: ['matching_scores', 'vb_records', 'record_templates', 'global_fields'], visible: true, sidebarTab: true,
     connectedTo: ['entity-view', 'entity-fields', 'entity-types'],
+  },
+  {
+    id: 'documents', path: '/dashboard/documents', name: 'Documents', nameHe: 'מסמכים', icon: FileSignature,
+    phase: 4, status: 'active', version: '1.0.0', addedDate: '2026-03-14',
+    descriptionHe: 'Document Engine — Pipeline Kanban + עמוד בקרה (צפיות, נעילות, הודעות, audit)',
+    descriptionEn: 'Document Engine — Pipeline Kanban + Control page (views, locks, messages, audit)',
+    components: [
+      { id: 'doc-pipeline', name: 'DocumentsPage', file: 'app/dashboard/documents/page.tsx', status: 'active' },
+      { id: 'doc-control', name: 'DocumentDetailPage', file: 'app/dashboard/documents/[id]/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['document_submissions', 'document_submitters', 'document_views', 'document_field_locks', 'document_messages', 'document_audit_log'], visible: true, sidebarTab: true,
+    connectedTo: ['entity-view', 'document-sign'],
   },
   {
     id: 'settings', path: '/dashboard/settings', name: 'Settings', nameHe: 'הגדרות', icon: Settings,
