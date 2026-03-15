@@ -22,7 +22,6 @@ interface BulkActionBarProps {
 
 export function BulkActionBar({
   selectedIds,
-  entityType,
   fields,
   language,
   onClearSelection,

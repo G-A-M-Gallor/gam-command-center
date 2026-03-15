@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, ChevronDown, ChevronUp, AlertCircle, XCircle } from "lucide-react";
+import { Clock, ChevronDown, ChevronUp, XCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { fetchImportLogs } from "@/lib/supabase/importQueries";

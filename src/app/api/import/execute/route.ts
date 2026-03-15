@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     // Build and validate import rows
     const importRows = buildImportRows(rows, columnMappings, fields);
-    const { valid, invalid, errorRate } = validateImport(importRows);
+    const { invalid, errorRate } = validateImport(importRows);
 
     // Reject if error rate > 10%
     if (errorRate > 0.1) {

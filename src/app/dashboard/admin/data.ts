@@ -1,5 +1,5 @@
 import {
-  Circle, CheckCircle2, AlertCircle, Clock, Activity, Layers, FileEdit, Map, Grid3X3,
+  Circle, CheckCircle2, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,

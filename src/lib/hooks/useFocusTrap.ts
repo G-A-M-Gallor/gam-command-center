@@ -27,7 +27,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 
   // Store onEscape in a ref to avoid re-running the effect
   const onEscapeRef = useRef(onEscape);
-  onEscapeRef.current = onEscape;
+  useEffect(() => { onEscapeRef.current = onEscape; }, [onEscape]);
 
   const getFocusableElements = useCallback(() => {
     if (!containerRef.current) return [];

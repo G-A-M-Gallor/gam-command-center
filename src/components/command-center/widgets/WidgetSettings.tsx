@@ -64,10 +64,10 @@ export function WidgetSettings({
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
 
   const widget = getWidgetById(widgetId);
-  if (!widget) return null;
-
   const currentCustomLabel = widgetLabels[widgetId]?.[language] || "";
   const [customLabelInput, setCustomLabelInput] = useState(currentCustomLabel);
+
+  if (!widget) return null;
   const currentPanelMode = widgetPanelModes[widgetId] || "dropdown";
 
   const currentSize = widgetSizes[widgetId] ?? widget.defaultSize;

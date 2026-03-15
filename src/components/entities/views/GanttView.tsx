@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useMemo, useRef, useCallback } from 'react';
-import { ZoomIn, ZoomOut } from 'lucide-react';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
-import type { NoteRecord, GlobalField, I18nLabel, TemplateConfig } from '@/lib/entities/types';
+import type { NoteRecord, GlobalField, TemplateConfig } from '@/lib/entities/types';
 
 interface Props {
   notes: NoteRecord[];
@@ -58,9 +57,8 @@ interface GanttBar {
   group?: string;
 }
 
-export function GanttView({ notes, fields, onUpdate, language, ganttConfig }: Props) {
+export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
-  const isRtl = language === 'he';
   const [zoom, setZoom] = useState<ZoomLevel>('week');
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<{ noteId: string; edge: 'start' | 'end'; initialX: number; initialDate: Date } | null>(null);
@@ -70,7 +68,7 @@ export function GanttView({ notes, fields, onUpdate, language, ganttConfig }: Pr
   const groupField = ganttConfig?.group_field;
 
   // Build bars
-  const { bars, minDate, maxDate, groups } = useMemo(() => {
+  const { bars, minDate, maxDate } = useMemo(() => {
     const result: GanttBar[] = [];
     let min = new Date(2099, 0, 1);
     let max = new Date(2000, 0, 1);
@@ -137,7 +135,7 @@ export function GanttView({ notes, fields, onUpdate, language, ganttConfig }: Pr
     setDragging({ noteId, edge, initialX: clientX, initialDate: date });
   }, []);
 
-  const handleDragMove = useCallback((e: React.MouseEvent) => {
+  const handleDragMove = useCallback((_e: React.MouseEvent) => {
     if (!dragging || !svgRef.current) return;
     // Handled via onMouseUp for simplicity
   }, [dragging]);
@@ -186,7 +184,7 @@ export function GanttView({ notes, fields, onUpdate, language, ganttConfig }: Pr
           {/* Left label panel */}
           <div className="shrink-0 border-e border-white/[0.06] bg-white/[0.02]" style={{ width: LABEL_WIDTH }}>
             <div className="h-10 border-b border-white/[0.06]" />
-            {sortedBars.map((bar, i) => (
+            {sortedBars.map((bar) => (
               <div
                 key={bar.note.id}
                 className="flex items-center px-3 text-xs text-slate-300 truncate border-b border-white/[0.02]"

@@ -11,7 +11,7 @@ import type { JSONContent } from '@tiptap/react';
 const mockSelect = vi.fn();
 const mockSingle = vi.fn();
 // mockEq returns an object with both eq (for chaining) and select
-const mockQueryBuilder = { eq: null as any, select: mockSelect };
+const mockQueryBuilder: { eq: ReturnType<typeof vi.fn> | null; select: ReturnType<typeof vi.fn> } = { eq: null, select: mockSelect };
 const mockEq = vi.fn(() => mockQueryBuilder);
 mockQueryBuilder.eq = mockEq;
 const mockUpdate = vi.fn(() => ({ eq: mockEq }));

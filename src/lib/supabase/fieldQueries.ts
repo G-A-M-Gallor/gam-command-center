@@ -3,7 +3,7 @@
 // ===================================================
 
 import { supabase } from '@/lib/supabaseClient';
-import type { FieldTypeId, FieldConfig } from '@/components/command-center/fields/fieldTypes';
+import type { FieldTypeId } from '@/components/command-center/fields/fieldTypes';
 
 // ─── Types ───────────────────────────────────────────
 export interface FieldDefinition {

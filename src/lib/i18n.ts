@@ -8029,6 +8029,7 @@ export function getTranslations(lang: Language) {
  *   loc<string[]>(item, 'kpis', language) // array
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function loc<T = string>(
   obj: Record<string, any>,
   field: string,

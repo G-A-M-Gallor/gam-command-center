@@ -6,7 +6,7 @@
 // For text color + background highlight in editor
 // ===================================================
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import type { Editor } from '@tiptap/core';
 
 interface ColorMenuProps {

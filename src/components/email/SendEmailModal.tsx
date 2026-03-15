@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  X, Loader2, Send, Eye, ChevronDown,
-  Mail, Plus, Trash2,
-} from 'lucide-react';
+  X, Loader2, Send, ChevronDown,
+  Mail, } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 
@@ -49,8 +48,6 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
   const [tenantId, setTenantId] = useState('');
   const [variables, setVariables] = useState<Record<string, string>>({});
   const [showCcBcc, setShowCcBcc] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState('');
 
   // Data
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);

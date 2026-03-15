@@ -5,8 +5,7 @@ import {
   ExternalLink,
   Plus,
   X,
-  Globe,
-} from "lucide-react";
+  } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";

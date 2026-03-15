@@ -24,7 +24,7 @@ import {
 import { BUILTIN_FIELDS } from '@/lib/entities/builtinFields';
 import { FieldEditorModal } from '@/components/entities/FieldEditorModal';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
-import type { GlobalField, GlobalFieldInsert, FieldType, FieldCategory, SubField, FieldOption, I18nLabel } from '@/lib/entities/types';
+import type { GlobalField, GlobalFieldInsert, FieldType, FieldCategory, I18nLabel } from '@/lib/entities/types';
 
 type ViewMode = 'list' | 'cards' | 'compact';
 type FieldTab = 'library' | 'system';
@@ -65,23 +65,6 @@ const CATEGORY_LABELS: Record<string, { he: string; en: string; ru: string }> = 
 };
 
 const EMPTY_LABEL: I18nLabel = { he: '', en: '', ru: '' };
-
-// Validation UI: which controls show for which field types
-const VALIDATION_CONFIG: Record<string, { required?: boolean; minMax?: boolean; pattern?: boolean; unique?: boolean }> = {
-  text: { required: true, pattern: true, unique: true },
-  email: { required: true, pattern: true, unique: true },
-  url: { required: true, pattern: true, unique: true },
-  phone: { required: true, pattern: true, unique: true },
-  number: { required: true, minMax: true, unique: true },
-  date: { required: true },
-  select: { required: true },
-  'multi-select': { required: true },
-  person: { required: true },
-  relation: { required: true },
-  composite: { required: true },
-  formula: {},
-  checkbox: {},
-};
 
 function newFieldDefaults(): GlobalFieldInsert {
   return {
@@ -408,7 +391,6 @@ export default function FieldLibraryPage() {
   const [draft, setDraft] = useState<GlobalFieldInsert>(newFieldDefaults());
   const [usageMap, setUsageMap] = useState<Record<string, string[]>>({});
   const [mergeSourceId, setMergeSourceId] = useState<string | null>(null);
-  const [newAlias, setNewAlias] = useState('');
   const [deletingField, setDeletingField] = useState<GlobalField | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     if (typeof window !== 'undefined') return (localStorage.getItem('cc-fields-view') as ViewMode) || 'list';
@@ -419,9 +401,9 @@ export default function FieldLibraryPage() {
     return false;
   });
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  const [_newAlias, setNewAlias] = useState('');
 
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
-  const tips = (te as unknown as { tips: Record<string, string> }).tips ?? {};
 
   // DnD sensors
   const sensors = useSensors(
@@ -495,7 +477,7 @@ export default function FieldLibraryPage() {
   const isDragEnabled = viewMode === 'list' && !search && categoryFilter === 'all' && typeFilter === 'all' && !groupByCategory;
 
   const handleSave = async () => {
-    let finalDraft = { ...draft };
+    const finalDraft = { ...draft };
     if (!editingId) {
       const label = draft.label?.en || draft.label?.he || '';
       if (!label.trim()) return;
@@ -566,45 +548,6 @@ export default function FieldLibraryPage() {
     await loadFields();
   };
 
-  const addAlias = () => {
-    const alias = newAlias.replace(/[^a-z0-9_]/g, '').trim();
-    if (!alias || (draft.aliases ?? []).includes(alias)) return;
-    setDraft(d => ({ ...d, aliases: [...(d.aliases ?? []), alias] }));
-    setNewAlias('');
-  };
-
-  const removeAlias = (alias: string) => {
-    setDraft(d => ({ ...d, aliases: (d.aliases ?? []).filter(a => a !== alias) }));
-  };
-
-  const addSubField = () => {
-    setDraft(d => ({
-      ...d,
-      sub_fields: [...d.sub_fields, { meta_key: '', label: { ...EMPTY_LABEL }, field_type: 'text' as FieldType }],
-    }));
-  };
-
-  const updateSubField = (idx: number, patch: Partial<SubField>) => {
-    setDraft(d => ({
-      ...d,
-      sub_fields: d.sub_fields.map((sf, i) => i === idx ? { ...sf, ...patch } : sf),
-    }));
-  };
-
-  const addOption = () => {
-    setDraft(d => ({
-      ...d,
-      options: [...d.options, { value: '', label: { ...EMPTY_LABEL }, color: '#94a3b8' }],
-    }));
-  };
-
-  const updateOption = (idx: number, patch: Partial<FieldOption>) => {
-    setDraft(d => ({
-      ...d,
-      options: d.options.map((o, i) => i === idx ? { ...o, ...patch } : o),
-    }));
-  };
-
   const changeViewMode = (mode: ViewMode) => {
     setViewMode(mode);
     localStorage.setItem('cc-fields-view', mode);
@@ -656,18 +599,6 @@ export default function FieldLibraryPage() {
     ...Object.keys(FIELD_TYPE_LABELS).map(ft => ({ value: ft, label: FIELD_TYPE_LABELS[ft]?.[lang] ?? ft })),
   ];
 
-  const fieldTypeModalOptions = Object.keys(FIELD_TYPE_LABELS).map(ft => ({
-    value: ft, label: FIELD_TYPE_LABELS[ft]?.[lang] ?? ft,
-  }));
-
-  const categoryModalOptions = CATEGORIES.map(c => ({
-    value: c, label: CATEGORY_LABELS[c]?.[lang] ?? c,
-  }));
-
-  const subFieldTypeOptions = ['text', 'number', 'date', 'email', 'phone'].map(ft => ({
-    value: ft, label: ft,
-  }));
-
   // Group fields by category
   const groupedFields = useMemo(() => {
     if (!groupByCategory) return null;
@@ -680,8 +611,6 @@ export default function FieldLibraryPage() {
   }, [filtered, groupByCategory]);
 
   // Validation config for current field type
-  const valConfig = VALIDATION_CONFIG[draft.field_type] ?? {};
-
   const fieldRowProps = (field: GlobalField): FieldRowProps => ({
     field,
     lang,

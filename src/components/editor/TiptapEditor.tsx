@@ -44,10 +44,10 @@ const DEFAULT_CONTENT: JSONContent = {
 };
 
 // ─── Per-block Placeholder Config (language-aware) ───
-function getPlaceholderMap(et: Record<string, string>): Record<string, string | ((node: any) => string)> {
+function getPlaceholderMap(et: Record<string, string>): Record<string, string | ((node: { attrs?: { level?: number } }) => string)> {
   return {
     paragraph: et.placeholderSlashMenu,
-    heading: (node: any) => {
+    heading: (node: { attrs?: { level?: number } }) => {
       const level = node.attrs?.level || 1;
       const labels: Record<number, string> = {
         1: et.placeholderHeading1,
@@ -236,7 +236,6 @@ function StatusBar({
   editor,
   saveStatus,
   lastSavedAt,
-  language,
   et,
   onConflictReload,
 }: {

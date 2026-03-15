@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Users, Plus, X, Crown, Search, ChevronDown, ChevronRight,
+  Users, Plus, X, Crown, ChevronDown, ChevronRight,
   Bell, BellOff, Eye, Shield, Edit3, Trash2,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -13,8 +13,7 @@ import {
 } from '@/lib/supabase/entityQueries';
 import { BUILTIN_ROLES, ACCESS_LEVELS } from '@/lib/entities/builtinRoles';
 import type {
-  NoteStakeholder, NoteStakeholderInsert,
-  StakeholderRole, AccessLevel, NotifyLevel, NoteRecord, I18nLabel,
+  NoteStakeholder, StakeholderRole, AccessLevel, NotifyLevel, NoteRecord, I18nLabel,
 } from '@/lib/entities/types';
 
 interface Props {

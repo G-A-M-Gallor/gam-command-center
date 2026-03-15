@@ -378,7 +378,6 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     }
 
     // ── Mixed search: all sources ───────────────────────────
-    const q = effectiveQuery.toLowerCase();
 
     // Commands (filtered, max 5 in mixed mode)
     const cmds = commandItems.slice(0, 5);

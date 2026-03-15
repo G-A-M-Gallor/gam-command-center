@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarDays, MapPin, ExternalLink, Loader2, Settings, ChevronDown, Clock } from 'lucide-react';
+import { CalendarDays, MapPin, ExternalLink, Loader2, Settings, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import type { WidgetSize } from './WidgetRegistry';

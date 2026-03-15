@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Circle, Star } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { getTranslations } from '@/lib/i18n';
 import type { NoteRecord, GlobalField, I18nLabel, TemplateConfig } from '@/lib/entities/types';
 

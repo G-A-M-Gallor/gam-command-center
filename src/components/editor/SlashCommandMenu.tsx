@@ -22,8 +22,8 @@ interface SlashCommandMenuProps {
   query: string;
 }
 
-export const SlashCommandMenu = forwardRef<any, SlashCommandMenuProps>(
-  ({ items, command, query }, ref) => {
+export const SlashCommandMenu = forwardRef<{ onKeyDown: (props: { event: KeyboardEvent }) => boolean }, SlashCommandMenuProps>(
+  ({ command, query }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const menuRef = useRef<HTMLDivElement>(null);
 

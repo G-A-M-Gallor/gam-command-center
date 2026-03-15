@@ -4,6 +4,7 @@
 // Converts WATI messages to comm_messages rows and
 // matches phone numbers to entities in vb_records.
 
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { WATIMessage, CommMessage } from './types';
 import { normalizePhone } from './client';
 
@@ -40,7 +41,7 @@ export function watiMessageToCommRow(
 
 /** Find entity_id by phone number in vb_records meta */
 export async function findEntityByPhone(
-  supabase: { from: (table: string) => any },
+  supabase: SupabaseClient,
   phone: string,
 ): Promise<string | null> {
   const normalized = normalizePhone(phone);
@@ -70,7 +71,7 @@ export async function findEntityByPhone(
 
 /** Batch convert WATI messages, resolving entity IDs */
 export async function syncWatiMessages(
-  supabase: { from: (table: string) => any },
+  supabase: SupabaseClient,
   messages: WATIMessage[],
   phone: string,
 ): Promise<CommMessage[]> {

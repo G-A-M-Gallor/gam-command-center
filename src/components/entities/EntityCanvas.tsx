@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Maximize2, Minimize2, Network, Frame, History,
   Star, ExternalLink, Loader2, GripVertical,

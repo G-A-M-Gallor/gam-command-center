@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { Search, Upload, Link2, X, Smile, Shapes, ImageIcon, Circle } from 'lucide-react';
-import { parseIconValue, serializeIcon, type ParsedIcon } from '@/lib/icons/iconValue';
+import { parseIconValue, serializeIcon } from '@/lib/icons/iconValue';
 import { EMOJI_CATEGORIES } from '@/lib/icons/emojiData';
 import { LUCIDE_CATEGORIES, LUCIDE_MAP } from '@/lib/icons/lucideIconList';
 import { useSettings } from '@/contexts/SettingsContext';

@@ -24,7 +24,6 @@ import { addUsage, isOverBudget } from "@/lib/ai/tokenTracker";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const CONVERSATIONS_KEY = "cc-ai-conversations";
-const VIEW_MODE_KEY = "cc-ai-view-mode";
 const PANEL_WIDTH_KEY = "cc-ai-panel-width";
 const BUBBLE_POS_KEY = "cc-ai-bubble-pos";
 
@@ -32,9 +31,6 @@ const TOP_BAR_H = 48;
 const DEFAULT_PANEL_W = 400;
 const MIN_PANEL_W = 300;
 const MAX_PANEL_W = 700;
-const SIDEBAR_FULL = 240;
-const SIDEBAR_STRIP = 48;
-
 const DROPDOWN_W = 320;
 const DROPDOWN_H = 400;
 const FLOATING_W = 350;
@@ -493,12 +489,13 @@ function SidePanelContainer({
   onViewModeChange: (mode: AIViewMode) => void;
   onClose: () => void;
 }) {
-  const { sidebarPosition, sidebarVisibility } = useSettings();
+  const { sidebarPosition } = useSettings();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
   const [visible, setVisible] = useState(false);
   const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_W);
   const isDragging = useRef(false);
+  const [isDraggingState, setIsDraggingState] = useState(false);
   const startX = useRef(0);
   const startWidth = useRef(0);
 
@@ -534,12 +531,12 @@ function SidePanelContainer({
     (e: React.MouseEvent) => {
       e.preventDefault();
       isDragging.current = true;
+      setIsDraggingState(true);
       startX.current = e.clientX;
       startWidth.current = panelWidth;
 
       const handleMove = (ev: MouseEvent) => {
         if (!isDragging.current) return;
-        // When panel is on the left, dragging right = wider; on right, dragging left = wider
         const delta = panelOnLeft
           ? ev.clientX - startX.current
           : startX.current - ev.clientX;
@@ -552,6 +549,7 @@ function SidePanelContainer({
 
       const handleUp = () => {
         isDragging.current = false;
+        setIsDraggingState(false);
         localStorage.setItem(PANEL_WIDTH_KEY, String(panelWidth));
         window.removeEventListener("mousemove", handleMove);
         window.removeEventListener("mouseup", handleUp);
@@ -606,7 +604,7 @@ function SidePanelContainer({
                 : panelOnLeft
                   ? "translateX(-100%)"
                   : "translateX(100%)",
-              transition: isDragging.current
+              transition: isDraggingState
                 ? undefined
                 : "transform 300ms ease",
             }

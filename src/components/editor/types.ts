@@ -3,7 +3,8 @@
 // Phase 1: S2.1
 // ===================================================
 
-import type { JSONContent } from '@tiptap/react';
+import type { JSONContent, Editor } from '@tiptap/react';
+import type { Range } from '@tiptap/core';
 import type { SaveState } from '@/lib/editor/useAutoSave';
 
 export type BlockType =
@@ -20,7 +21,7 @@ export interface SlashCommandItem {
   titleHe: string;
   description: string;
   icon: string;
-  command: (props: { editor: any; range: any }) => void;
+  command: (props: { editor: Editor; range: Range }) => void;
   aliases: string[];
 }
 
@@ -50,7 +51,7 @@ export interface TiptapEditorProps {
 }
 
 export interface FloatingToolbarProps {
-  editor: any;
+  editor: Editor;
 }
 
 export interface SlashCommandMenuProps {

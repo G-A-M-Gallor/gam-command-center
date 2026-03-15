@@ -13,8 +13,7 @@ import type {
   NoteRecord, NoteRelation,
   NoteStakeholder, NoteStakeholderInsert,
   ViewFilter, ViewSort,
-  ActivityLogEntry, ActivityType, NoteEvent,
-} from '@/lib/entities/types';
+  ActivityLogEntry, ActivityType, } from '@/lib/entities/types';
 
 // ─── Field Key Helpers ──────────────────────────────
 

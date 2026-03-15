@@ -24,7 +24,7 @@ function getServiceClient() {
 
 export async function POST(request: Request) {
   // Auth check
-  const { user, error: authError } = await requireAuth(request);
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }

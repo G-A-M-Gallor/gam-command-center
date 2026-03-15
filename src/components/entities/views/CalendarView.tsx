@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getTranslations } from '@/lib/i18n';
-import type { NoteRecord, GlobalField, I18nLabel } from '@/lib/entities/types';
+import type { NoteRecord, GlobalField } from '@/lib/entities/types';
 
 interface Props {
   notes: NoteRecord[];

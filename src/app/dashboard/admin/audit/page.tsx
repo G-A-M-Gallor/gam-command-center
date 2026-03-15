@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   ChevronDown, ChevronRight, ChevronLeft, CheckCircle2, AlertTriangle,
-  XCircle, Info, ArrowLeft, ArrowRight, FileCode, ExternalLink,
+  XCircle, Info, ArrowLeft, ArrowRight, FileCode,
 } from 'lucide-react';
 import { useSettings, type Language } from '@/contexts/SettingsContext';
 import { getTranslations, loc } from '@/lib/i18n';

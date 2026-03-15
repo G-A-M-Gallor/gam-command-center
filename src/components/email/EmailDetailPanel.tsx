@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import {
-  X, Mail, Clock, Eye, MousePointerClick, AlertTriangle,
-  CheckCircle2, Send, Loader2, ExternalLink, ChevronDown, ChevronUp,
+  X, Clock, Eye, MousePointerClick, AlertTriangle,
+  CheckCircle2, Send, ExternalLink, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
@@ -33,16 +33,6 @@ interface EmailSend {
   created_at: string;
   updated_at: string;
   email_templates?: { name: string; category: string } | null;
-}
-
-interface EmailEvent {
-  id: string;
-  event_type: string;
-  payload: Record<string, unknown>;
-  link_url: string | null;
-  user_agent: string | null;
-  ip_address: string | null;
-  created_at: string;
 }
 
 interface EmailDetailPanelProps {
@@ -78,10 +68,8 @@ export function EmailDetailPanel({ emailSend, onClose }: EmailDetailPanelProps) 
   const e = t.email as Record<string, string>;
   const isRtl = language === 'he';
 
-  const [events, setEvents] = useState<EmailEvent[]>([]);
-  const [eventsLoading, setEventsLoading] = useState(true);
+  const [, setEventsLoading] = useState(true);
   const [showHtml, setShowHtml] = useState(false);
-  const [showEvents, setShowEvents] = useState(false);
 
   // Load events for this email
   useEffect(() => {

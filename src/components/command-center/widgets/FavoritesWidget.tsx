@@ -15,8 +15,7 @@ import {
   Calendar,
   Compass,
   GripVertical,
-  Pin,
-} from "lucide-react";
+  } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -206,7 +205,6 @@ export function FavoritesPanel() {
 }
 
 export function FavoritesBarContent({ size }: { size: WidgetSize }) {
-  const { language } = useSettings();
   const favs = loadFavorites();
 
   if (size < 2) return null;

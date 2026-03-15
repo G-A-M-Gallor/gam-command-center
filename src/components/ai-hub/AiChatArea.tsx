@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  Plus, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen,
-  FileText, Sparkles, UserCircle, ChevronDown,
+  Plus, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, FileText, Sparkles, UserCircle, ChevronDown,
   ClipboardList, HardHat, ShoppingCart, SearchCheck,
   Calculator, Receipt, Scale, Shield, Users, Megaphone,
   Handshake, Code2, LineChart, Crown, AlertTriangle, Rocket,

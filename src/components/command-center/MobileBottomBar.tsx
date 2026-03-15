@@ -42,7 +42,7 @@ interface SlotPickerProps {
   language: Language;
 }
 
-function SlotPicker({ slotIndex, onSelect, onClose, language }: SlotPickerProps) {
+function SlotPicker({ onSelect, onClose, language }: SlotPickerProps) {
   const t = getTranslations(language);
   const bb = t.bottomBar as Record<string, string>;
   const tabs = t.tabs as Record<string, string>;

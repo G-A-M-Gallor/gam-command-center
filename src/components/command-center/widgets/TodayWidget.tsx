@@ -51,7 +51,6 @@ const typeColors = {
 export function TodayPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const isRtl = language === "he";
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);

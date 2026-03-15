@@ -44,7 +44,6 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   const {
     layout,
     placements,
-    isDragging,
     dragOverCell,
     setIsDragging,
     setDragOverCell,

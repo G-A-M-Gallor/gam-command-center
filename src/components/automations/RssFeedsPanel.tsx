@@ -39,7 +39,7 @@ function timeAgo(date: string | null): string {
   return `${Math.floor(hours / 24)}d`;
 }
 
-export function RssFeedsPanel({ t, rssT }: RssFeedsPanelProps) {
+export function RssFeedsPanel({ rssT }: RssFeedsPanelProps) {
   const [feeds, setFeeds] = useState<RssFeed[]>([]);
   const [articles, setArticles] = useState<RssArticle[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);

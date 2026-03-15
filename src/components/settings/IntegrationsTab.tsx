@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
   Shield, MessageSquare, Globe, CreditCard, Link2, Power, Loader2,
-  Copy, Check, ExternalLink, KeyRound,
+  Copy, Check, KeyRound,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";

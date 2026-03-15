@@ -47,7 +47,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
-import type { FavoriteItem } from "./widgets/FavoritesWidget";
 import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
 
 const FULL_WIDTH = 240;
@@ -177,6 +176,7 @@ export function Sidebar({
   const userMenuRef = useRef<HTMLDivElement>(null);
   const socialMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const [navTop, setNavTop] = useState(120);
   const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
   const [filter, setFilter] = useState<SidebarFilter>("all");
@@ -193,6 +193,12 @@ export function Sidebar({
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
+  }, [userMenuOpen]);
+
+  useEffect(() => {
+    if (userMenuOpen && navRef.current) {
+      setNavTop(navRef.current.getBoundingClientRect().top - 8);
+    }
   }, [userMenuOpen]);
 
   // Close social menu on outside click
@@ -460,7 +466,7 @@ export function Sidebar({
                   className="fixed z-50 w-56 rounded-xl border border-slate-700 shadow-2xl overflow-hidden"
                   style={{
                     backgroundColor: "var(--nav-bg)",
-                    top: navRef.current ? navRef.current.getBoundingClientRect().top - 8 : 120,
+                    top: navTop,
                     ...(onRight
                       ? { right: expandedWidth + 8 }
                       : { left: expandedWidth + 8 }),

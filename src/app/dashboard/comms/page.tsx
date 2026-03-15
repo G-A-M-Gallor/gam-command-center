@@ -120,14 +120,6 @@ function formatTime(dateStr: string | undefined): string {
   return new Date(dateStr).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatFullDate(dateStr: string | undefined, lang: string): string {
-  if (!dateStr) return '—';
-  const localeMap: Record<string, string> = { he: 'he-IL', ru: 'ru-RU', en: 'en-US' };
-  return new Date(dateStr).toLocaleDateString(localeMap[lang] || 'en-US', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-  });
-}
-
 function truncate(text: string, max = 120): string {
   if (text.length <= max) return text;
   return text.slice(0, max) + '…';

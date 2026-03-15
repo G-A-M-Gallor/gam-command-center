@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useMemo, useEffect, type ReactNode } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { ColorPicker } from "@/components/command-center/ColorPicker";
@@ -8,12 +8,10 @@ import {
   useSettings,
   type AccentColor,
   type AccentEffect,
-  type SavedColor,
   type FontFamily,
   type BorderRadius,
   type Density,
   type BrandProfile,
-  type GlowIntensity,
 } from "@/contexts/SettingsContext";
 import { ThemeSwitcher } from "@/components/settings/ThemeSwitcher";
 import {
@@ -27,7 +25,6 @@ import { getTranslations } from "@/lib/i18n";
 import {
   Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload,
   Smartphone, Bell, Camera, Users, Wifi, WifiOff, Share2, Moon, Vibrate, MapPin, BadgeCheck, RefreshCw, Send, ScanLine, Trash, Image,
-  Loader2, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";

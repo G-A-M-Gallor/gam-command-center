@@ -4,14 +4,14 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Plus, Search, Filter, Table2, Kanban, List, Calendar as CalendarIcon,
-  ArrowUpDown, SlidersHorizontal, ChevronDown, X,
+  ArrowUpDown, ChevronDown, X,
   GanttChart, Clock, Eye, EyeOff, Bookmark, Save, Trash2, Upload,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import {
   fetchEntityTypes, fetchGlobalFields, fetchNotes, createNote,
-  fetchFieldGroups, deactivateNote, reactivateNote,
+  fetchFieldGroups,
 } from '@/lib/supabase/entityQueries';
 import { TableView } from '@/components/entities/views/TableView';
 import { BoardView } from '@/components/entities/views/BoardView';

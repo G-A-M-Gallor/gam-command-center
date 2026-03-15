@@ -212,14 +212,14 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
   // Keep a ref for the keydown handler
   const shortcutsRef = useRef(shortcuts);
-  shortcutsRef.current = shortcuts;
+  useEffect(() => { shortcutsRef.current = shortcuts; }, [shortcuts]);
   const scopeRef = useRef(currentScope);
-  scopeRef.current = currentScope;
+  useEffect(() => { scopeRef.current = currentScope; }, [currentScope]);
 
   // ── Action Dispatch Map ─────────────────────────────────
 
   const routerRef = useRef(router);
-  routerRef.current = router;
+  useEffect(() => { routerRef.current = router; }, [router]);
 
   // ── Action Dispatch Maps (exported for SearchWidget command palette) ──
 
@@ -271,8 +271,6 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
       // Allow single-key shortcuts (J, K, etc.) only outside inputs
       // Modifier shortcuts (Cmd+K) work everywhere
-      const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
-
       const active = shortcutsRef.current.filter((sc) => {
         if (!sc.isActive) return false;
         if (sc.scope !== "global" && sc.scope !== scopeRef.current) return false;

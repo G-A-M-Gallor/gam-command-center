@@ -57,8 +57,8 @@ function DesignCard({
   onPreview: (d: DesignEntry) => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const title = loc(design as any, "title", language);
-  const desc = loc(design as any, "description", language);
+  const title = loc(design, "title", language);
+  const desc = loc(design, "description", language);
   const Arrow = isRtl ? ArrowLeft : ArrowRight;
 
   return (
@@ -146,7 +146,7 @@ function DesignPreview({
   td: Record<string, string>;
   onClose: () => void;
 }) {
-  const title = loc(design as any, "title", language);
+  const title = loc(design, "title", language);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-slate-950">
@@ -273,7 +273,7 @@ function ComponentCard({
 }) {
   const cc = CATEGORY_COLORS[entry.category];
   const name = entry.name;
-  const desc = loc(entry as any, "description", language);
+  const desc = loc(entry, "description", language);
   const catLabel = td[CATEGORY_LABEL_KEYS[entry.category]];
 
   return (
@@ -515,7 +515,7 @@ function HandbookTab({
                   <div>
                     <span className="text-[12px] font-medium text-slate-200">{r.name}</span>
                     <p className="text-[11px] text-slate-500">
-                      {loc(r as any, "description", language)}
+                      {loc(r, "description", language)}
                     </p>
                     <span className="mt-0.5 block font-mono text-[10px] text-slate-600">
                       {r.file}
@@ -623,7 +623,7 @@ function AppPreviewTab({ language, td }: { language: "he" | "en" | "ru"; td: Rec
               .filter((r) => r.visible && r.sidebarTab)
               .map((r) => (
                 <option key={r.id} value={r.path}>
-                  {loc(r as any, "name", language)}
+                  {loc(r, "name", language)}
                 </option>
               ))}
           </select>

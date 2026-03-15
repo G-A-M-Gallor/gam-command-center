@@ -12,7 +12,7 @@ interface Props {
   entityType?: string;
 }
 
-export function ListView({ notes, fields, onUpdate, language, entityType }: Props) {
+export function ListView({ notes, fields, language, entityType }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
 
   // Pick key fields to show as badges

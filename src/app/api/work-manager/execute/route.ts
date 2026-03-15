@@ -220,7 +220,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { action_type, title, details, session_id } = parsed.data;
+  const { action_type, title, details } = parsed.data;
 
   // Execute
   try {

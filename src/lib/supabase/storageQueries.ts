@@ -70,5 +70,5 @@ export async function listUserFiles(
     .list(userId, { sortBy: { column: "created_at", order: "desc" } });
 
   if (error || !data) return [];
-  return data.map((f) => ({ name: f.name, created_at: f.created_at }));
+  return data.map((f) => ({ name: f.name, created_at: f.created_at ?? '' }));
 }

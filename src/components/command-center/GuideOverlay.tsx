@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Info, Eye, Bot } from "lucide-react";
+import { Info, Bot } from "lucide-react";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";

@@ -120,7 +120,6 @@ export default function AIHubPage() {
   const [knowledgeOpen, setKnowledgeOpen] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<string | null>(null);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -245,7 +245,7 @@ export function WidgetsSection({ language, ta }: { language: Language; ta: Admin
 
 // ─── Contexts Tab ────────────────────────────────────────
 
-export function ContextsSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
+export function ContextsSection({ ta }: { language?: Language; ta: AdminTranslations }) {
   return (
     <div className="space-y-3">
       {contexts.map(ctx => (

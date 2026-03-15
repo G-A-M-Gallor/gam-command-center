@@ -138,7 +138,7 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [view, setView] = useState<PlannerView>("personal");
   const [showSaturday, setShowSaturday] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [, setMounted] = useState(false);
 
   // Load from localStorage first (instant), then merge server data
   useEffect(() => {

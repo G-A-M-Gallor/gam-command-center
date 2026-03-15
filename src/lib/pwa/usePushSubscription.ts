@@ -17,6 +17,7 @@ export type PushState = "unsupported" | "denied" | "prompt" | "subscribed" | "lo
 
 export function usePushSubscription() {
   const [state, setState] = useState<PushState>("loading");
+  const [hasVapidKey, setHasVapidKey] = useState(!!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
   const vapidKeyRef = useRef<string | null>(
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || null,
   );
@@ -41,6 +42,7 @@ export function usePushSubscription() {
           const data = await res.json();
           if (data.vapidPublicKey) {
             vapidKeyRef.current = data.vapidPublicKey;
+            setHasVapidKey(true);
           }
         } catch {
           // Server unreachable — push unsupported
@@ -125,7 +127,7 @@ export function usePushSubscription() {
 
   return {
     state,
-    isSupported: browserSupported && !!vapidKeyRef.current,
+    isSupported: browserSupported && hasVapidKey,
     subscribe,
     unsubscribe,
   };

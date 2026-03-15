@@ -11,7 +11,6 @@ import {
   Settings,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { getTranslations } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 
@@ -28,7 +27,6 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
     sidebarVisibility,
     setSidebarVisibility,
   } = useSettings();
-  const { editMode, setEditMode } = useDashboardMode();
   const router = useRouter();
   const t = getTranslations(language);
 

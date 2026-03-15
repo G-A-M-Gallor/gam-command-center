@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, Clock } from "lucide-react";
+import { Search } from "lucide-react";
 import { searchNotes } from "@/lib/supabase/entityQueries";
 import { getTranslations } from "@/lib/i18n";
 

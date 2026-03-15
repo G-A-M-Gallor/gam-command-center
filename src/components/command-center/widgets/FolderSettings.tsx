@@ -34,16 +34,16 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
   const ft = (t as unknown as Record<string, Record<string, string>>).folders;
 
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
-
-  const folder = folders.find((f) => f.id === folderId);
-  if (!folder) return null;
-
   const pathname = usePathname();
-  const size: WidgetSize = widgetSizes[folderId] ?? folder.defaultSize;
   const [addTab, setAddTab] = useState<"widgets" | "actions" | "bookmarks">("widgets");
   const [bmUrl, setBmUrl] = useState("");
   const [bmName, setBmName] = useState("");
   const [bmIcon, setBmIcon] = useState("🔗");
+
+  const folder = folders.find((f) => f.id === folderId);
+  if (!folder) return null;
+
+  const size: WidgetSize = widgetSizes[folderId] ?? folder.defaultSize;
 
   const activeWidgets = widgetRegistry.filter((w) => w.status === "active");
 

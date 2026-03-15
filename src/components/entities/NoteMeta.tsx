@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ChevronDown, ChevronRight, Link2, Plus, X, Loader2, Users, Lock, Paperclip, Star } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ChevronDown, ChevronRight, Link2, X, Loader2, Lock, Paperclip, Star } from 'lucide-react';
 import { StakeholderPanel } from './StakeholderPanel';
 import { ActivityFeed } from './ActivityFeed';
 import { NoteActions } from './NoteActions';
@@ -14,7 +14,7 @@ import {
   searchNotes, fetchFieldGroups, fetchNoteInfoBatch,
   fetchStakeholders,
 } from '@/lib/supabase/entityQueries';
-import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel, TemplateConfig, TemplateSection, VisibilityRule, ColorRule } from '@/lib/entities/types';
+import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel } from '@/lib/entities/types';
 import { UNIVERSAL_FIELD_KEYS } from '@/lib/entities/builtinFields';
 
 interface Props {
@@ -233,9 +233,9 @@ function FieldEditor({
 
 // ─── Repeating Group Editor ──────────────────────────
 function GroupEditor({
-  group, groupFields, values, lang, addRowLabel, onChange,
+  group, values, lang, addRowLabel, onChange,
 }: {
-  group: FieldGroup; groupFields: GlobalField[];
+  group: FieldGroup; groupFields?: GlobalField[];
   values: Record<string, unknown>[]; lang: string;
   addRowLabel: string;
   onChange: (vals: Record<string, unknown>[]) => void;
@@ -354,7 +354,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
   const [linkQuery, setLinkQuery] = useState('');
   const [linkResults, setLinkResults] = useState<NoteRecord[]>([]);
   const [expanded, setExpanded] = useState(true);
-  const [visibleFieldKeys, setVisibleFieldKeys] = useState<Set<string> | null>(null);
+  const [, setVisibleFieldKeys] = useState<Set<string> | null>(null);
   const [savingField, setSavingField] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 

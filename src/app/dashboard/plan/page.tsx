@@ -9,7 +9,6 @@ import { Check, Clock, Circle, ChevronDown, ChevronUp, Wifi, WifiOff, FileText }
 import {
   getPlanPhases,
   updatePlanPhase,
-  type PlanPhase,
 } from "@/lib/supabase/planQueries";
 import {
   subscribeToPlanPhases,

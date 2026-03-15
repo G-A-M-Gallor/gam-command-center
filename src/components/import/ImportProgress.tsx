@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
-import type { ImportResult, ValidationError } from "@/lib/import/types";
+import type { ImportResult } from "@/lib/import/types";
 
 interface ImportProgressProps {
   result: ImportResult | null;

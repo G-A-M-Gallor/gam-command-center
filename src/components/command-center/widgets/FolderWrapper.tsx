@@ -395,7 +395,6 @@ export function FolderWrapper({
 
 function FolderGrid({
   folder,
-  language,
   ft,
   onDragStart,
   onDragEnter,

@@ -59,7 +59,6 @@ export function ChatToolbar({ textareaRef, value, onChange, lang }: ChatToolbarP
     } else {
       // Line prefix — prepend to current line
       const lineStart = value.lastIndexOf("\n", start - 1) + 1;
-      const text = selected || format.placeholder;
       if (start === end) {
         // No selection — prepend prefix to current line
         newValue = value.slice(0, lineStart) + format.prefix + value.slice(lineStart);

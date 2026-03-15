@@ -50,7 +50,7 @@ function PhaseBadge({ phase }: { phase: Phase }) {
   );
 }
 
-function ChecklistDots({ entryId, isRtl, ta }: { entryId: string; isRtl: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
+function ChecklistDots({ entryId, ta }: { entryId: string; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [expanded, setExpanded] = useState(false);
   const checklist = CHANGELOG_CHECKLISTS[entryId];
   const score = getChecklistScore(checklist);
@@ -181,7 +181,7 @@ function ChecklistSummary({ isRtl, ta }: { isRtl: boolean; ta: ReturnType<typeof
   );
 }
 
-function ChangelogCard({ entry, isRtl, language, ta }: { entry: ChangelogEntry; isRtl: boolean; language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
+function ChangelogCard({ entry, language, ta }: { entry: ChangelogEntry; isRtl?: boolean; language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const statusColors: Record<FeatureStatus, { bg: string; text: string; label: string; icon: React.ElementType }> = {
     working: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: ta.working, icon: CheckCircle2 },
     'not-verified': { bg: 'bg-amber-500/10', text: 'text-amber-400', label: ta.notVerified, icon: AlertCircle },
@@ -254,7 +254,7 @@ function ChangelogCard({ entry, isRtl, language, ta }: { entry: ChangelogEntry; 
         )}
       </div>
       <div className="mt-2 border-t border-white/[0.04] pt-2">
-        <ChecklistDots entryId={entry.id} isRtl={isRtl} ta={ta} />
+        <ChecklistDots entryId={entry.id} ta={ta} />
       </div>
     </div>
   );

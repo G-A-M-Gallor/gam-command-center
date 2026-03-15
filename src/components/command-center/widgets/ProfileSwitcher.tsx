@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check, Plus, Settings } from "lucide-react";
+import { ChevronDown, Check, Plus } from "lucide-react";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";

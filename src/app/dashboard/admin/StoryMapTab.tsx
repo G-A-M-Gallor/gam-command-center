@@ -59,24 +59,6 @@ const STEP_ICONS: Record<string, React.ElementType> = {
 
 // ─── Sub-components ─────────────────────────────────────
 
-function Collapsible({ title, defaultOpen, count, children, isRtl }: {
-  title: React.ReactNode; defaultOpen?: boolean; count?: number; children: React.ReactNode; isRtl: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen ?? false);
-  const Arrow = open ? ChevronDown : (isRtl ? ChevronLeft : ChevronRight);
-  return (
-    <div>
-      <button type="button" onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5">
-        <Arrow size={14} />
-        {title}
-        {count !== undefined && <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate-500">{count}</span>}
-      </button>
-      {open && <div className="pb-2">{children}</div>}
-    </div>
-  );
-}
-
 function StatusBadge({ status, ta }: { status: StoryStatus; ta: AdminTranslations }) {
   const cfg = getStatusConfig(ta)[status];
   const Icon = cfg.icon;

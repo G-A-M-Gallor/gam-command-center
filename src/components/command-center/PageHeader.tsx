@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { Pin, GitCommit, Rocket, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -212,7 +211,6 @@ function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
 export function PageHeader({ pageKey, children }: PageHeaderProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const pathname = usePathname();
 
   const href = pageRoutes[pageKey];
   const page = t.pages[pageKey];

@@ -30,7 +30,7 @@ import {
 import { useWeeklyPlanner, WeeklyPlannerProvider } from "@/contexts/WeeklyPlannerContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
-import type { WeeklyItem, ItemPriority, TeamMember } from "@/lib/weeklyPlanner/types";
+import type { WeeklyItem, ItemPriority } from "@/lib/weeklyPlanner/types";
 import {
   PRIORITY_COLORS,
   SOURCE_EMOJI,
@@ -80,7 +80,6 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
     items,
     moveItem,
     currentUserId,
-    team,
   } = planner;
 
   const [dragActiveId, setDragActiveId] = useState<string | null>(null);

@@ -5,10 +5,9 @@ import {
   MessageSquare, Phone, ArrowRight, Plus, Trash2,
   UserPlus, UserMinus, Power, Send,
 } from 'lucide-react';
-import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import { fetchActivityLog, addComment, addCallLogEntry } from '@/lib/supabase/entityQueries';
-import type { ActivityLogEntry, ActivityType, I18nLabel } from '@/lib/entities/types';
+import type { ActivityLogEntry, ActivityType } from '@/lib/entities/types';
 
 interface Props {
   noteId: string;

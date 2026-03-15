@@ -130,7 +130,7 @@ export const FieldBlock = Node.create({
   },
 
   addNodeView() {
-    return ({ node, getPos, editor }) => {
+    return ({ node, getPos }) => {
       const dom = document.createElement('div');
       dom.classList.add('gam-field-block');
       dom.setAttribute('data-type', 'field-block');

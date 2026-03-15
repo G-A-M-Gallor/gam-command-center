@@ -7,9 +7,6 @@ import {
   ArrowRight,
   FileText,
   Map,
-  Activity,
-  Calendar,
-  RefreshCw,
   ExternalLink,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";

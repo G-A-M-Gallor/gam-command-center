@@ -5,7 +5,7 @@ import { matchingScoreSchema } from "@/lib/api/schemas";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
 import { extractMatchProfile } from "@/lib/matching/matchProfiles";
 import { computeMatchScores } from "@/lib/matching/scoring";
-import type { MatchConfig, MatchScore, ENTITY_PAIR_CONFIGS } from "@/lib/matching/types";
+import type { MatchConfig, MatchScore } from "@/lib/matching/types";
 import { DEFAULT_CONFIG } from "@/lib/matching/types";
 import type { NoteRecord, EntityType, GlobalField } from "@/lib/entities/types";
 

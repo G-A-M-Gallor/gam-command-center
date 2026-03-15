@@ -10,7 +10,6 @@ import { Workflow, ClipboardList, Code2, Palette, ShieldCheck, TrendingUp } from
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { getTranslations } from "@/lib/i18n";
 import type { ChatMessage } from "./types";
-import { MODE_COLORS } from "./types";
 import type { AIMode } from "@/lib/ai/prompts";
 
 const AGENT_ICON_COMPONENTS: Record<string, typeof Workflow> = {
@@ -34,7 +33,7 @@ interface AiMessageProps {
 }
 
 export function AiMessage({
-  message, index, isWorkMode, language, currentAgent, mode, activeId,
+  message, index, isWorkMode, language, currentAgent, activeId,
   isDismissed, onDismiss, onReply, onRegenerate, isLast, t,
 }: AiMessageProps) {
   const [copied, setCopied] = useState(false);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   DndContext, PointerSensor, useSensor, useSensors,
   type DragEndEvent,

@@ -94,68 +94,6 @@ function darken(hex: string, amt: number) {
   return `rgb(${rgb.map(c => Math.max(0, Math.round(c - 255 * amt))).join(',')})`
 }
 
-/**
- * Generate a --cc-accent-* palette from a single hex color.
- * The input hex is treated as the 600 (base) shade.
- */
-function generateAccentVars(hex: string): Record<string, string> {
-  const rgb = hexToRgb(hex)
-  if (!rgb) return {}
-  const [r, g, b] = rgb
-  // Convert to HSL for shade generation
-  const rf = r / 255, gf = g / 255, bf = b / 255
-  const max = Math.max(rf, gf, bf), min = Math.min(rf, gf, bf)
-  const l = (max + min) / 2
-  let h = 0, s = 0
-  if (max !== min) {
-    const d = max - min
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-    switch (max) {
-      case rf: h = ((gf - bf) / d + (gf < bf ? 6 : 0)) / 6; break
-      case gf: h = ((bf - rf) / d + 2) / 6; break
-      case bf: h = ((rf - gf) / d + 4) / 6; break
-    }
-  }
-  const hDeg = h * 360, sP = s * 100, lP = l * 100
-
-  // Generate shades via HSL lightness shift
-  const hsl2hex = (hh: number, ss: number, ll: number): [number, number, number] => {
-    const sv = ss / 100, lv = ll / 100
-    if (sv === 0) { const v = Math.round(lv * 255); return [v, v, v] }
-    const q = lv < 0.5 ? lv * (1 + sv) : lv + sv - lv * sv
-    const p = 2 * lv - q
-    const hue2 = (pp: number, qq: number, t: number) => {
-      if (t < 0) t += 1; if (t > 1) t -= 1
-      if (t < 1/6) return pp + (qq - pp) * 6 * t
-      if (t < 1/2) return qq
-      if (t < 2/3) return pp + (qq - pp) * (2/3 - t) * 6
-      return pp
-    }
-    return [
-      Math.round(hue2(p, q, hh / 360 + 1/3) * 255),
-      Math.round(hue2(p, q, hh / 360) * 255),
-      Math.round(hue2(p, q, hh / 360 - 1/3) * 255),
-    ]
-  }
-
-  const rgb500 = hsl2hex(hDeg, Math.min(sP + 5, 100), Math.min(lP + 10, 95))
-  const rgb400 = hsl2hex(hDeg, Math.min(sP + 5, 100), Math.min(lP + 22, 95))
-  const rgb300 = hsl2hex(hDeg, Math.min(sP + 5, 100), Math.min(lP + 34, 95))
-  const toHex = ([rr, gg, bb]: number[]) => `#${[rr, gg, bb].map(v => v.toString(16).padStart(2, '0')).join('')}`
-
-  return {
-    '--cc-accent-300': toHex(rgb300),
-    '--cc-accent-400': toHex(rgb400),
-    '--cc-accent-500': toHex(rgb500),
-    '--cc-accent-600': hex,
-    '--cc-accent-600-20': `rgba(${r},${g},${b},0.2)`,
-    '--cc-accent-600-30': `rgba(${r},${g},${b},0.3)`,
-    '--cc-accent-500-15': `rgba(${rgb500[0]},${rgb500[1]},${rgb500[2]},0.15)`,
-    '--cc-accent-500-30': `rgba(${rgb500[0]},${rgb500[1]},${rgb500[2]},0.3)`,
-    '--cc-accent-500-50': `rgba(${rgb500[0]},${rgb500[1]},${rgb500[2]},0.5)`,
-  }
-}
-
 export function applyTheme(themeId: string): void {
   if (typeof document === 'undefined') return
   const theme = getThemeById(themeId)

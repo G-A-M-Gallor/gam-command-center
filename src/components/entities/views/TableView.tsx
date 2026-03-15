@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowUp, ArrowDown, Check, X } from 'lucide-react';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
 import type { NoteRecord, GlobalField, FieldGroup, ViewSort, I18nLabel } from '@/lib/entities/types';
@@ -184,7 +184,7 @@ function EditableCell({
   );
 }
 
-export function TableView({ notes, fields, groups, sort, onSort, onUpdate, language, entityType, selectedIds: controlledIds, onSelectionChange }: Props) {
+export function TableView({ notes, fields, sort, onSort, onUpdate, language, entityType, selectedIds: controlledIds, onSelectionChange }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
   const [internalIds, setInternalIds] = useState<Set<string>>(new Set());
 

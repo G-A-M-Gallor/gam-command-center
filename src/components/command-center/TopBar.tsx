@@ -398,7 +398,6 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
   }, []);
 
   // Display mode dimensions
-  const UNIT_SIZE = displayMode === "compact" ? 36 : displayMode === "icons-only" ? 32 : UNIT;
   const BAR_HEIGHT = displayMode === "compact" ? "h-9" : displayMode === "icons-only" ? "h-8" : "h-12";
 
   // Visible widgets (placement === "toolbar")

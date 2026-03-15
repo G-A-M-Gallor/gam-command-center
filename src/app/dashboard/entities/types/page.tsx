@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Edit3, Trash2, Search, GripVertical, ArrowRight, Link2 } from 'lucide-react';
+import { Plus, Edit3, Trash2, Search, ArrowRight, Link2 } from 'lucide-react';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import {
   fetchEntityTypes, createEntityType, updateEntityType, deleteEntityType,
-  fetchGlobalFields, fetchEntityConnections, createEntityConnection, deleteEntityConnection,
-  fetchFieldGroups,
+  fetchGlobalFields, fetchEntityConnections, createEntityConnection, fetchFieldGroups,
 } from '@/lib/supabase/entityQueries';
 import { BUILTIN_ENTITY_TYPES, BUILTIN_CONNECTIONS } from '@/lib/entities/builtinEntityTypes';
 import { BUILTIN_FIELD_GROUPS } from '@/lib/entities/builtinFields';

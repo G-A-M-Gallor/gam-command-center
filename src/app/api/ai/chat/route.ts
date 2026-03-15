@@ -6,8 +6,7 @@ import {
   MODE_MODELS,
   MODE_MAX_TOKENS,
   SLIDING_WINDOW_SIZE,
-  type AIMode,
-} from "@/lib/ai/prompts";
+  } from "@/lib/ai/prompts";
 import { requireAuth } from "@/lib/api/auth";
 import { aiChatSchema } from "@/lib/api/schemas";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";

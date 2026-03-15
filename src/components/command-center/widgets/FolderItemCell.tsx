@@ -2,6 +2,7 @@
 
 import { ExternalLink, GripVertical, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSettings } from "@/contexts/SettingsContext";
 import { getWidgetById } from "./WidgetRegistry";
 import {
   ACTION_CONFIG,
@@ -9,8 +10,6 @@ import {
   type QuickActionId,
 } from "./FolderRegistry";
 import { BookmarkItemCell } from "./BookmarkItemCell";
-import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
 
 interface FolderItemCellProps {
   item: FolderItem;
@@ -56,7 +55,6 @@ export function FolderItemCell({
   onDragEnd,
 }: FolderItemCellProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
   const router = useRouter();
 
   const dragProps = {

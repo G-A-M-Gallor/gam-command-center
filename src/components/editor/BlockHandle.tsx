@@ -189,7 +189,7 @@ export function BlockHandle({ editor }: BlockHandleProps) {
 
   // Turn into
   const handleTurnInto = useCallback(
-    (type: string, attrs?: Record<string, any>) => {
+    (type: string, attrs?: Record<string, unknown>) => {
       if (menu.nodePos < 0) return;
 
       editor.chain().focus().setTextSelection(menu.nodePos + 1).run();
@@ -245,7 +245,6 @@ export function BlockHandle({ editor }: BlockHandleProps) {
       } else if (direction === 'down' && nodeEnd < doc.content.size) {
         const nextNode = doc.nodeAt(nodeEnd);
         if (nextNode) {
-          const nextEnd = nodeEnd + nextNode.nodeSize;
           editor
             .chain()
             .focus()

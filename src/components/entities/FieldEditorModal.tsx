@@ -2,21 +2,18 @@
 
 import { useState } from 'react';
 import {
-  X, Lock, Plus, Trash2, ChevronDown, ChevronRight,
-  Hash, Type, Calendar as CalendarIcon, CheckSquare, List,
+  X, Lock, Plus, Trash2, Hash, Type, Calendar as CalendarIcon, CheckSquare, List,
   Link as LinkIcon, Mail, Phone, Users, Tag, Combine,
-  Eye, EyeOff, Palette, GripVertical, Sparkles,
-  Paperclip, FileText, CalendarClock, DollarSign, Star,
+  Eye, EyeOff, Palette, Paperclip, FileText, CalendarClock, DollarSign, Star,
 } from 'lucide-react';
-import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
+import { IconPicker } from '@/components/ui/IconPicker';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
 import type {
-  GlobalFieldInsert, FieldType, FieldCategory, SubField,
-  FieldOption, I18nLabel, VisibilityRule, VisibilityOperator,
-  ColorRule, ColorOperator,
+  GlobalFieldInsert, FieldType, FieldCategory, I18nLabel, VisibilityOperator,
+  ColorOperator,
 } from '@/lib/entities/types';
 
 const EMPTY_LABEL: I18nLabel = { he: '', en: '', ru: '' };

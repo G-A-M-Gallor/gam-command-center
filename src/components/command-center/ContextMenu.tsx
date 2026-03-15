@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X as XIcon, ChevronDown, ChevronUp, Pipette, RotateCcw, Clock } from "lucide-react";
-import { useStyleOverrides, type ElementStyle } from "@/contexts/StyleOverrideContext";
+import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { getTranslations } from "@/lib/i18n";

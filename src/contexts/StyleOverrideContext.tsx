@@ -128,8 +128,8 @@ export function StyleOverrideProvider({ children }: { children: React.ReactNode 
   // Refs for synchronous access in callbacks
   const overridesRef = useRef<OverrideMap>({});
   const textHistoryRef = useRef<TextHistoryMap>({});
-  overridesRef.current = personalOverrides;
-  textHistoryRef.current = textHistory;
+  useEffect(() => { overridesRef.current = personalOverrides; }, [personalOverrides]);
+  useEffect(() => { textHistoryRef.current = textHistory; }, [textHistory]);
 
   // Load from localStorage
   useEffect(() => {

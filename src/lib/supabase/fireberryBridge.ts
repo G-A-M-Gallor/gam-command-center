@@ -5,7 +5,7 @@
 // Read-only bridge — doesn't modify fb_records.
 
 import { supabase } from '@/lib/supabaseClient';
-import type { GlobalField, EntityType } from '@/lib/entities/types';
+import type { GlobalField } from '@/lib/entities/types';
 
 export interface FbRecord {
   id: string;
