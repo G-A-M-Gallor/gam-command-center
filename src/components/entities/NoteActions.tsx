@@ -203,7 +203,7 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
       {/* Status Picker fallback when no status field exists */}
       {activeUI === 'status_picker' && !statusField && (
         <p className="text-[10px] text-slate-500 px-2">
-          {lang === 'he' ? 'לא נמצא שדה סטטוס' : 'No status field found'}
+          {t.entities.noStatusFieldFound}
         </p>
       )}
 
@@ -220,7 +220,7 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
               if (e.key === 'Enter') handleCallLogSubmit();
               if (e.key === 'Escape') setActiveUI(null);
             }}
-            placeholder={lang === 'he' ? 'תקציר שיחה...' : 'Call summary...'}
+            placeholder={t.entities.callSummaryActionPlaceholder}
             className="flex-1 bg-transparent text-xs text-slate-200 placeholder-slate-600 outline-none"
           />
           <button

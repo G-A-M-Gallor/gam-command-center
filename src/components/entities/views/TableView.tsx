@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { ArrowUp, ArrowDown, Check, X } from 'lucide-react';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, GlobalField, FieldGroup, ViewSort, I18nLabel } from '@/lib/entities/types';
 
 interface Props {
@@ -186,6 +188,7 @@ function EditableCell({
 
 export function TableView({ notes, fields, sort, onSort, onUpdate, language, entityType, selectedIds: controlledIds, onSelectionChange }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
+  const t = getTranslations(language as Language);
   const [internalIds, setInternalIds] = useState<Set<string>>(new Set());
 
   // Use controlled mode if props provided, otherwise internal state
@@ -217,7 +220,7 @@ export function TableView({ notes, fields, sort, onSort, onUpdate, language, ent
   if (notes.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-slate-500">
-        {lang === 'he' ? 'אין רשומות' : 'No records'}
+        {t.entities.noRecords}
       </div>
     );
   }
@@ -240,7 +243,7 @@ export function TableView({ notes, fields, sort, onSort, onUpdate, language, ent
               onClick={() => handleSort('title')}
             >
               <div className="flex items-center gap-1">
-                {lang === 'he' ? 'כותרת' : 'Title'}
+                {t.entities.titleColumn}
                 {sort?.field === 'title' && (sort.direction === 'asc' ? <ArrowUp size={10} /> : <ArrowDown size={10} />)}
               </div>
             </th>

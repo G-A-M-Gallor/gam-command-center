@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, GlobalField, TemplateConfig } from '@/lib/entities/types';
 
 interface Props {
@@ -59,6 +61,7 @@ interface GanttBar {
 
 export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
+  const t = getTranslations(language as Language);
   const [zoom, setZoom] = useState<ZoomLevel>('week');
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<{ noteId: string; edge: 'start' | 'end'; initialX: number; initialDate: Date } | null>(null);
@@ -158,7 +161,7 @@ export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
   if (sortedBars.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-sm text-slate-500">
-        {lang === 'he' ? 'אין נתונים להצגה בתצוגת גאנט' : 'No data for Gantt view'}
+        {t.entities.noGanttDataDisplay}
       </div>
     );
   }
@@ -167,14 +170,14 @@ export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
     <div className="rounded-lg border border-white/[0.06] overflow-hidden" dir="ltr">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06] bg-white/[0.02]">
-        <span className="text-[10px] text-slate-500 me-1">{lang === 'he' ? 'זום' : 'Zoom'}:</span>
+        <span className="text-[10px] text-slate-500 me-1">{t.entities.ganttZoom}:</span>
         {(['day', 'week', 'month'] as ZoomLevel[]).map(z => (
           <button
             key={z}
             onClick={() => setZoom(z)}
             className={`text-[10px] px-2 py-1 rounded ${zoom === z ? 'bg-purple-600/20 text-purple-300' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            {z === 'day' ? (lang === 'he' ? 'יום' : 'Day') : z === 'week' ? (lang === 'he' ? 'שבוע' : 'Week') : (lang === 'he' ? 'חודש' : 'Month')}
+            {z === 'day' ? t.entities.ganttDay : z === 'week' ? t.entities.ganttWeek : t.entities.ganttMonth}
           </button>
         ))}
       </div>

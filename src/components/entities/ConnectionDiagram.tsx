@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { EntityType, EntityConnection } from '@/lib/entities/types';
 
 interface Props {
@@ -11,6 +13,7 @@ interface Props {
 
 export function ConnectionDiagram({ types, connections, language }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
+  const tr = getTranslations(language as Language);
 
   const mermaid = useMemo(() => {
     const lines = ['graph LR'];
@@ -32,7 +35,7 @@ export function ConnectionDiagram({ types, connections, language }: Props) {
   if (connections.length === 0) {
     return (
       <div className="py-6 text-center text-sm text-slate-500">
-        {lang === 'he' ? 'אין חיבורים מוגדרים' : 'No connections defined'}
+        {tr.entities.noConnectionsDefined}
       </div>
     );
   }
@@ -40,7 +43,7 @@ export function ConnectionDiagram({ types, connections, language }: Props) {
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-medium text-slate-300">
-        {lang === 'he' ? 'דיאגרמת קשרים' : 'Connection Diagram'}
+        {tr.entities.connectionDiagram}
       </h3>
 
       {/* Visual nodes */}
@@ -55,7 +58,7 @@ export function ConnectionDiagram({ types, connections, language }: Props) {
             >
               <span className="text-xl">{t.icon}</span>
               <span className="text-xs font-medium text-slate-300">{t.label[lang] || t.slug}</span>
-              <span className="text-[9px] text-slate-500">{typeConns.length} {lang === 'he' ? 'קשרים' : 'links'}</span>
+              <span className="text-[9px] text-slate-500">{typeConns.length} {tr.entities.linksCount}</span>
             </div>
           );
         })}

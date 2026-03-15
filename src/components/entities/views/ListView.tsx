@@ -2,6 +2,8 @@
 
 import { ChevronRight } from 'lucide-react';
 import { IconDisplay } from '@/components/ui/IconPicker';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, GlobalField, I18nLabel } from '@/lib/entities/types';
 
 interface Props {
@@ -14,6 +16,7 @@ interface Props {
 
 export function ListView({ notes, fields, language, entityType }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
+  const t = getTranslations(language as Language);
 
   // Pick key fields to show as badges
   const badgeFields = fields.filter(f => f.field_type === 'select' || f.field_type === 'multi-select').slice(0, 3);
@@ -22,7 +25,7 @@ export function ListView({ notes, fields, language, entityType }: Props) {
   if (notes.length === 0) {
     return (
       <div className="py-16 text-center text-sm text-slate-500">
-        {lang === 'he' ? 'אין רשומות' : 'No records'}
+        {t.entities.noRecords}
       </div>
     );
   }

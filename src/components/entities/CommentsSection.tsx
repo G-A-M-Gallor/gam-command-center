@@ -173,7 +173,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
     const d = new Date(iso);
     const now = new Date();
     const diffMin = Math.floor((now.getTime() - d.getTime()) / 60000);
-    if (diffMin < 1) return tc.justNow || (lang === 'he' ? 'עכשיו' : 'now');
+    if (diffMin < 1) return tc.justNow || 'now';
     if (diffMin < 60) return `${diffMin}m`;
     const diffH = Math.floor(diffMin / 60);
     if (diffH < 24) return `${diffH}h`;
@@ -280,7 +280,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
   return (
     <div className="border-t border-white/[0.04] pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
       <h4 className="text-[10px] font-medium text-slate-400 mb-2">
-        {tc.title || (lang === 'he' ? 'תגובות' : 'Comments')}
+        {tc.title || 'Comments'}
       </h4>
 
       {/* Input */}
@@ -288,7 +288,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
         {replyTo && (
           <div className="flex items-center gap-1.5 text-[10px] text-purple-400">
             <Reply size={10} />
-            <span>{tc.replyingTo || (lang === 'he' ? 'מגיב ל...' : 'Replying to...')}</span>
+            <span>{tc.replyingTo || 'Replying to...'}</span>
             <button onClick={() => setReplyTo(null)} className="text-slate-500 hover:text-slate-300">
               <X size={10} />
             </button>
@@ -301,7 +301,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
             value={newComment}
             onChange={e => setNewComment(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-            placeholder={tc.writeComment || (lang === 'he' ? 'כתוב תגובה...' : 'Write a comment...')}
+            placeholder={tc.writeComment || 'Write a comment...'}
             className="flex-1 rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-purple-500/50 focus:outline-none"
           />
           <button
@@ -319,7 +319,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
         <div className="text-[10px] text-slate-600 py-2">{te.loading}</div>
       ) : threads.length === 0 ? (
         <div className="text-[10px] text-slate-600 py-2">
-          {tc.noComments || (lang === 'he' ? 'אין תגובות עדיין' : 'No comments yet')}
+          {tc.noComments || 'No comments yet'}
         </div>
       ) : (
         <div className="space-y-2 max-h-80 overflow-y-auto">

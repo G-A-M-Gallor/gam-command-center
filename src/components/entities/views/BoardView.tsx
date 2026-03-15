@@ -8,6 +8,8 @@ import {
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
 import { IconDisplay } from '@/components/ui/IconPicker';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, GlobalField, I18nLabel } from '@/lib/entities/types';
 
 interface Props {
@@ -90,6 +92,7 @@ function DroppableColumn({
 }
 
 export function BoardView({ notes, fields, onUpdate, language, entityType }: Props) {
+  const t = getTranslations(language as Language);
   const lang = language === 'he' ? 'he' : 'en';
 
   // Find the first select field to use as board columns
@@ -101,14 +104,14 @@ export function BoardView({ notes, fields, onUpdate, language, entityType }: Pro
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const columns = useMemo(() => {
-    if (!groupField) return [{ value: '_all', label: lang === 'he' ? 'הכל' : 'All', color: '#94a3b8' }];
+    if (!groupField) return [{ value: '_all', label: t.entities.boardAll, color: '#94a3b8' }];
     return [
       ...groupField.options.map(o => ({
         value: o.value,
         label: o.label[lang as keyof I18nLabel] || o.value,
         color: o.color ?? '#94a3b8',
       })),
-      { value: '_none', label: lang === 'he' ? 'ללא' : 'None', color: '#475569' },
+      { value: '_none', label: t.entities.boardNone, color: '#475569' },
     ];
   }, [groupField, lang]);
 
