@@ -35,6 +35,7 @@ export function VersionHistory({
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setLoading(true);
       fetchVersions(documentId)
         .then(setVersions)

@@ -277,7 +277,7 @@ export function CalendarBarContent({ size }: { size: WidgetSize }) {
     fetchNext();
     const interval = setInterval(fetchNext, 5 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [accountId, language]);
+  }, [accountId, language, rt]);
 
   return (
     <div className="flex items-center gap-1.5">

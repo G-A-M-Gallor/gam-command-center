@@ -763,7 +763,8 @@ export async function reactivateNote(id: string, actorId?: string | null): Promi
 
   const meta = (current.meta as Record<string, unknown>) ?? {};
   const restoredStatus = (meta.last_active_status as string) || 'active';
-  const { last_active_status: _, ...cleanMeta } = meta;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructure to remove key
+  const { last_active_status: _lastStatus, ...cleanMeta } = meta;
 
   const { error } = await supabase
     .from('vb_records')

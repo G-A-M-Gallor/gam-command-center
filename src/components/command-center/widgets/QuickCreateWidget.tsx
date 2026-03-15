@@ -94,7 +94,7 @@ export function QuickCreatePanel() {
     setSaving(false);
     setTitle("");
     setCreating(null);
-  }, [title, creating, saving, entityTypes, lang, toast, language, router]);
+  }, [title, creating, saving, entityTypes, lang, toast, router, t.widgets.savedLocally]);
 
   const todayCount = getCreatedTodayCount();
 

@@ -30,6 +30,7 @@ export function usePushSubscription() {
   // Fetch VAPID key from server if not available at build time
   useEffect(() => {
     if (!browserSupported) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setState("unsupported");
       return;
     }

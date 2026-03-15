@@ -128,9 +128,7 @@ export default function VideoPromptPage() {
     // Variation: swap in synonyms based on seed
     const atmoKeyword = variationSeed > 0 ? pickRandom(atmo.synonyms) : atmo.keyword;
     const styleLabel = variationSeed > 0 ? pickRandom(style.synonyms) : style.label.toLowerCase();
-    const moodStr = variationSeed > 0
-      ? atmo.mood.split(', ').map(w => Math.random() > 0.5 ? w : w).join(', ')
-      : atmo.mood;
+    const moodStr = atmo.mood;
 
     const cameraText = selectedCameraMovements.length > 0
       ? `${selectedCameraMovements.join(' to ')} camera movement.`
@@ -154,7 +152,6 @@ export default function VideoPromptPage() {
     ].filter(Boolean);
 
     return lines.join('\n');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAtmosphere, selectedStyle, selectedDuration, selectedTransitions, selectedRatio, selectedCameraMovements, subject, brandMessage, variationSeed]);
 
   const handleCopy = useCallback(async () => {

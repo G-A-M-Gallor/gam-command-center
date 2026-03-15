@@ -8028,9 +8028,8 @@ export function getTranslations(lang: Language) {
  *   loc(item, 'name', language)        // string
  *   loc<string[]>(item, 'kpis', language) // array
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function loc<T = string>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- loc() needs to accept any object shape
   obj: Record<string, any>,
   field: string,
   language: Language,

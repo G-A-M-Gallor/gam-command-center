@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { X, Plus, ExternalLink, Loader2, Trash2 } from "lucide-react";
 import { getTranslations } from "@/lib/i18n";
 import type { AIMode } from "@/lib/ai/prompts";
@@ -42,13 +42,14 @@ export function AiKnowledgeDialog({ isOpen, onClose, mode, t }: AiKnowledgeDialo
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setUrls(loadKnowledgeUrls());
       setNewUrl("");
       setError(null);
     }
   }, [isOpen]);
 
-  const currentUrls = urls[mode] || [];
+  const currentUrls = useMemo(() => urls[mode] || [], [urls, mode]);
   const ModeIcon = MODE_ICONS[mode];
   const color = MODE_COLORS[mode];
 

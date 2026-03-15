@@ -240,6 +240,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const [widgetIcons, setWidgetIconsState] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setWidgetPositionsState(
       parseJson<Record<string, number>>(
         localStorage.getItem(STORAGE_KEYS.positions),

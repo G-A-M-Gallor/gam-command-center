@@ -127,16 +127,19 @@ export default function AIHubPage() {
   // ─── Effects ────────────────────────────────────────────────
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (!isMobile) setSidebarOpen(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
 
   // Load conversations on mount
   useEffect(() => {
     const loaded = loadConversationsLocal();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setConversations(loaded);
     if (loaded.length > 0) {
       setActiveId(loaded[0].id);
@@ -176,7 +179,7 @@ export default function AIHubPage() {
     () => conversations.find((c) => c.id === activeId) ?? null,
     [conversations, activeId]
   );
-  const messages = activeConvo?.messages ?? [];
+  const messages = useMemo(() => activeConvo?.messages ?? [], [activeConvo]);
   const currentPageLabel = getPageLabel(pathname, t);
   const currentModel = MODE_MODELS[mode];
   const modelLabel = MODEL_LABELS[currentModel] || currentModel;

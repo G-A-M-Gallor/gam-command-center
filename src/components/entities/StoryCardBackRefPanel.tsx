@@ -21,6 +21,7 @@ export function StoryCardBackRefPanel({ noteId }: Props) {
 
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setLoading(true);
     fetchStoryCardsForEntity(noteId).then((data) => {
       if (!cancelled) {

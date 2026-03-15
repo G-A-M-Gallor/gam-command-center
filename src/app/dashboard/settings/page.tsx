@@ -782,6 +782,7 @@ function BrandTab() {
             title={t.brand.uploadLogo}
           >
             {brandProfile.logoDataUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- dynamic data URL
               <img
                 src={brandProfile.logoDataUrl}
                 alt="Logo"
@@ -1128,6 +1129,7 @@ function PWATab() {
 
   // Notification templates
   const [templates, setTemplates] = useState<NotificationTemplates>(DEFAULT_TEMPLATES);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { setTemplates(loadTemplates()); }, []);
 
   const updateTemplate = useCallback(
@@ -1408,6 +1410,7 @@ function PWATab() {
           {camera.photoUrl && (
             <div className="space-y-2">
               <label className="text-[10px] font-medium text-slate-400">{p.photoPreview}</label>
+              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
               <img src={camera.photoUrl} alt="Captured" className="max-h-48 rounded-lg border border-slate-700" />
               <Button size="sm" variant="ghost" icon={Trash} onClick={camera.clearPhoto}>
                 {p.clearPhoto}
@@ -1707,6 +1710,7 @@ export default function SettingsPage() {
   // Auto-switch to accounts tab when redirected from Google OAuth
   useEffect(() => {
     if (searchParams.get("tab") === "accounts") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setActiveTab("accounts");
     }
   }, [searchParams]);

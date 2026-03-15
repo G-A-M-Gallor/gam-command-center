@@ -30,6 +30,7 @@ export function useDeviceCapabilities(): DeviceCapabilities {
   });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setCaps({
       share: "share" in navigator,
       wakeLock: "wakeLock" in navigator,

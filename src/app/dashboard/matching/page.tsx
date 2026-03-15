@@ -52,6 +52,7 @@ export default function MatchingPage() {
   // ── Load entities when type changes ──
   useEffect(() => {
     if (!selectedType) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setEntities([]);
       return;
     }
@@ -73,6 +74,7 @@ export default function MatchingPage() {
   // ── Extract profile when entity is selected ──
   useEffect(() => {
     if (!selectedEntity) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setProfile(null);
       return;
     }

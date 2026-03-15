@@ -401,7 +401,7 @@ export default function FieldLibraryPage() {
     return false;
   });
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
-  const [_newAlias, setNewAlias] = useState('');
+  const [, setNewAlias] = useState('');
 
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
 
@@ -439,6 +439,7 @@ export default function FieldLibraryPage() {
     setLoading(false);
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadFields(); }, [loadFields]);
 
   useEffect(() => {
@@ -471,7 +472,7 @@ export default function FieldLibraryPage() {
       }
       return true;
     });
-  }, [fields, search, categoryFilter, typeFilter, activeTab, systemFields, libraryFields]);
+  }, [search, categoryFilter, typeFilter, activeTab, systemFields, libraryFields]);
 
   // Drag is only active when viewing unfiltered, ungrouped list view
   const isDragEnabled = viewMode === 'list' && !search && categoryFilter === 'all' && typeFilter === 'all' && !groupByCategory;

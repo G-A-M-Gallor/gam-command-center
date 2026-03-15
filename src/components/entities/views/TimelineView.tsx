@@ -49,7 +49,7 @@ export function TimelineView({ notes, fields, language, timelineConfig }: Props)
   const locale = LOCALE_MAP[lang] ?? 'en-US';
 
   const dateField = timelineConfig?.date_field ?? 'due_date';
-  const milestoneStatuses = timelineConfig?.milestone_statuses ?? [];
+  const milestoneStatuses = useMemo(() => timelineConfig?.milestone_statuses ?? [], [timelineConfig?.milestone_statuses]);
 
   // Build sorted timeline items grouped by month
   const groups = useMemo(() => {

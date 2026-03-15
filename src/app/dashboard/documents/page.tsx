@@ -126,6 +126,7 @@ export default function DocumentsPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     fetchData();
   }, [fetchData]);
 

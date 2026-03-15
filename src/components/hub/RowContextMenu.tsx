@@ -96,6 +96,7 @@ export function RowContextMenu({
       adjustedY = window.innerHeight - rect.height - 8;
     }
     if (adjustedX !== x || adjustedY !== y) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setPos({ x: adjustedX, y: adjustedY });
     }
   }, [x, y]);

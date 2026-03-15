@@ -154,7 +154,7 @@ function StoryMapContent() {
   const { setCurrentScope } = useShortcuts();
   const t = getTranslations(language);
   // Memoize storyMap translations so StoryBoard memo works effectively
-  const storyMapT = useMemo(() => t.storyMap, [language]);
+  const storyMapT = useMemo(() => t.storyMap, [t.storyMap]);
   const isRtl = language === 'he';
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -212,6 +212,7 @@ function StoryMapContent() {
   // ── Load cards when project changes ────────────────
   useEffect(() => {
     if (!selectedProject) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setCards(makeDemoCards());
       setIsDemo(true);
       setRealtimeStatus('disconnected');
@@ -238,6 +239,7 @@ function StoryMapContent() {
       if (channelRef.current) {
         unsubscribeFromStoryCards(channelRef.current);
         channelRef.current = null;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
         setRealtimeStatus('disconnected');
       }
       return;
@@ -288,11 +290,12 @@ function StoryMapContent() {
     // Set connected after short delay (subscription setup)
     const timer = setTimeout(() => setRealtimeStatus('connected'), 1000);
 
+    const timers = debounceTimers.current;
     return () => {
       clearTimeout(timer);
       // Clear pending debounce timers to prevent stale writes after project switch
-      debounceTimers.current.forEach((t) => clearTimeout(t));
-      debounceTimers.current.clear();
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
       unsubscribeFromStoryCards(channel);
       channelRef.current = null;
       setRealtimeStatus('disconnected');
@@ -377,7 +380,7 @@ function StoryMapContent() {
         }
       });
     }
-  }, [cards, isDemo, selectedProject, language]);
+  }, [cards, isDemo, selectedProject, storyMapT.defaultEpic]);
 
   // ── Add Feature (B layer) ─────────────────────────
   const handleAddFeature = useCallback(
@@ -425,7 +428,7 @@ function StoryMapContent() {
         });
       }
     },
-    [cards, isDemo, selectedProject, language]
+    [cards, isDemo, selectedProject, storyMapT.defaultFeature]
   );
 
   // ── Add Story (with featureId for positional insert) ──
@@ -511,7 +514,7 @@ function StoryMapContent() {
         return [...updated, newCard];
       });
     },
-    [cards, isDemo, selectedProject, language]
+    [cards, isDemo, selectedProject, storyMapT.defaultStory]
   );
 
   const handleDeleteColumn = useCallback(

@@ -363,6 +363,7 @@ export function IntegrationsTab() {
               >
                 <div className="flex items-start gap-3">
                   {account.avatar_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- dynamic data URL
                     <img src={account.avatar_url} alt="" className="h-10 w-10 rounded-full" />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-700 text-slate-300 text-sm font-medium">

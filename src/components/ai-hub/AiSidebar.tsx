@@ -63,6 +63,7 @@ function TokenUsageBar({ t }: { t: ReturnType<typeof getTranslations> }) {
   const over = isOverBudget();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setPercent(getUsagePercent());
     const interval = setInterval(() => setPercent(getUsagePercent()), 5000);
     return () => clearInterval(interval);
@@ -127,6 +128,7 @@ function ConversationList({
     );
   }
 
+  // eslint-disable-next-line react-hooks/purity -- Date.now() for relative time display is acceptable
   const now = Date.now();
   function relativeTime(ts: number): string {
     const diff = now - ts;

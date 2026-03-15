@@ -116,6 +116,7 @@ export default function EntityViewPage() {
     setLoading(false);
   }, [entitySlug, entityType, filters, sort, page]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadNotes(); }, [loadNotes]);
 
   // Available views for this entity type
@@ -142,6 +143,7 @@ export default function EntityViewPage() {
 
   // Load saved views from localStorage
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setSavedViews(loadSavedViews(entitySlug));
     setActiveViewId(null);
   }, [entitySlug]);
@@ -190,6 +192,7 @@ export default function EntityViewPage() {
     const filtersMatch = JSON.stringify(activeView.filters) === JSON.stringify(filters);
     const sortMatch = JSON.stringify(activeView.sort) === JSON.stringify(sort);
     if (!filtersMatch || !sortMatch || activeView.view !== view || activeView.showInactive !== showInactive) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setActiveViewId(null);
     }
   }, [filters, sort, view, showInactive, activeView]);

@@ -379,6 +379,7 @@ export function TemplateGallery({
     if (open) {
       fetchTemplates().then(setCustomTemplates).catch(() => {});
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setEditingId(null);
       setDeleteTarget(null);
       setHoveredId(null);

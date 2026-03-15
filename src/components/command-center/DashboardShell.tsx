@@ -79,6 +79,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   // Close sidebar when switching to hidden mode
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (effectiveVisibility === "hidden") setFloatOpen(false);
   }, [effectiveVisibility]);
 

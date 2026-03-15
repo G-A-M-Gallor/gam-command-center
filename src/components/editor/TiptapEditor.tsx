@@ -251,6 +251,7 @@ function StatusBar({
   const charCount = text.length;
   const readingTime = Math.ceil(wordCount / 200);
 
+  /* eslint-disable react-hooks/purity -- Date.now() for relative time display */
   const relativeTime = useMemo(() => {
     if (!lastSavedAt) return '';
     const diff = Math.round((Date.now() - lastSavedAt.getTime()) / 1000);
@@ -261,6 +262,7 @@ function StatusBar({
     const hrs = Math.round(mins / 60);
     return et.timeHoursAgo.replace('{{n}}', String(hrs));
   }, [lastSavedAt, et]);
+  /* eslint-enable react-hooks/purity */
 
   return (
     <div className="gam-editor-statusbar">

@@ -50,6 +50,7 @@ export function StakeholderPanel({ noteId }: Props) {
     setLoading(false);
   }, [noteId]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadStakeholders(); }, [loadStakeholders]);
 
   const handleSearch = useCallback(async (q: string) => {

@@ -51,6 +51,7 @@ export function useInstallPrompt() {
 
   useEffect(() => {
     if (isStandalone() || isInstalled()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setState("standalone");
       return;
     }

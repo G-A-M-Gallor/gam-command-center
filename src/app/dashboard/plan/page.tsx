@@ -127,10 +127,11 @@ export default function PlanPage() {
     channelRef.current = channel;
     const timer = setTimeout(() => setRealtimeStatus('connected'), 1000);
 
+    const timers = debounceTimers.current;
     return () => {
       clearTimeout(timer);
-      debounceTimers.current.forEach((t) => clearTimeout(t));
-      debounceTimers.current.clear();
+      timers.forEach((t) => clearTimeout(t));
+      timers.clear();
       unsubscribeFromPlanPhases(channel);
       channelRef.current = null;
       setRealtimeStatus('disconnected');

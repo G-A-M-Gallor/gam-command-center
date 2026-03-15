@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { X as XIcon, ChevronDown, ChevronUp, Pipette, RotateCcw, Clock } from "lucide-react";
 import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -120,7 +120,7 @@ function ContextMenu({
   const [typographyOpen, setTypographyOpen] = useState(true);
   const [textOpen, setTextOpen] = useState(true);
 
-  const currentStyle = overrides[ccId] || {};
+  const currentStyle = useMemo(() => overrides[ccId] || {}, [overrides, ccId]);
   const cm = t.contextMenu;
   const elLabels = t.elementLabels;
   const label = element ? (elLabels as Record<string, string>)[element.labelKey] || ccId : ccId;
@@ -144,6 +144,7 @@ function ContextMenu({
       if (x + rect.width > vw - 8) adjustedX = x - rect.width;
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setPosition({
       top: Math.max(8, adjustedY),
       left: Math.max(8, adjustedX),

@@ -481,7 +481,7 @@ export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; 
     }
   };
 
-  const allRoutes = [...routes, ...standalonePages];
+  const allRoutes = useMemo(() => [...routes, ...standalonePages], []);
 
   const filteredSortedEntries = useMemo(() => {
     let entries = changelogEntries.filter(entry => {
@@ -592,7 +592,7 @@ export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; 
       groupMap[key].entries.push(entry);
     }
     return groups;
-  }, [clGroupBy, directMatches, changelogSearch, isRtl]);
+  }, [clGroupBy, directMatches, changelogSearch, ta]);
 
   const mermaidDiagram = useMemo(() => generateMermaidDiagram(changelogEntries, allRoutes), [allRoutes]);
 

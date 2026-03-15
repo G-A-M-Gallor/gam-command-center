@@ -658,6 +658,7 @@ export default function FunctionalMapPage() {
   useEffect(() => {
     if (!loaded) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setRealtimeStatus("connecting");
 
     const channel = subscribeFunctionalMap({

@@ -37,6 +37,7 @@ export function ClipboardPanel() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setItems(loadItems());
     function sync() {
       setItems(loadItems());
@@ -159,6 +160,7 @@ export function ClipboardBarContent({ size }: { size: WidgetSize }) {
     function sync() {
       setItems(loadItems());
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setItems(loadItems());
     document.addEventListener("copy", handleCopy);
     window.addEventListener(EVENT_NAME, sync);

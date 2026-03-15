@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Plus, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, FileText, Sparkles, UserCircle, ChevronDown,
   ClipboardList, HardHat, ShoppingCart, SearchCheck,
@@ -210,7 +210,12 @@ function PersonaSelector({
   }, [open]);
 
   const persona = selectedPersona ? getPersonaById(selectedPersona) : null;
-  const PersonaIcon = persona ? getPersonaIcon(persona.icon) : UserCircle;
+  /* eslint-disable react-hooks/static-components -- dynamic icon from persona config */
+  const personaIcon = useMemo(() => {
+    const Icon = persona ? getPersonaIcon(persona.icon) : UserCircle;
+    return <Icon size={12} />;
+  }, [persona]);
+  /* eslint-enable react-hooks/static-components */
 
   return (
     <div className="relative" ref={ref}>
@@ -224,7 +229,7 @@ function PersonaSelector({
             : "border border-dashed border-slate-600 text-slate-500 hover:border-slate-500 hover:text-slate-400"
         }`}
       >
-        <PersonaIcon size={12} />
+        {personaIcon}
         {persona ? persona.name[language] : t.aiHub.noPersona}
         <ChevronDown size={10} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>

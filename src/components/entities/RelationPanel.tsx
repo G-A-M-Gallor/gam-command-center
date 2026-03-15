@@ -69,11 +69,13 @@ export function RelationPanel({ noteId, entityType }: RelationPanelProps) {
     setLoading(false);
   }, [noteId]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadData(); }, [loadData]);
 
   // Build groups whenever connections/relations change
   useEffect(() => {
     if (connections.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setGroups([]);
       return;
     }

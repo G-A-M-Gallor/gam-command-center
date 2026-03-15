@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Download, ChevronDown, FileJson, FileText, Image } from 'lucide-react';
+import { Download, ChevronDown, FileJson, FileText, Image as ImageIcon } from 'lucide-react';
 import type { StoryCard } from '@/lib/supabase/storyCardQueries';
 import { ESTIMATIONS } from '@/components/command-center/StoryCard';
 
@@ -157,7 +157,7 @@ export function StoryMapExport({ cards, boardRef, t }: StoryMapExportProps) {
             onClick={exportPNG}
             className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700/50"
           >
-            <Image size={14} className="text-purple-400" />
+            <ImageIcon size={14} className="text-purple-400" />
             {t.exportPNG}
           </button>
         </div>

@@ -886,6 +886,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
             <div className="flex items-center gap-1.5 px-2.5 border-r border-slate-700/30">
               {brandProfile?.logoDataUrl ? (
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
                   <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : (
@@ -1158,6 +1159,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
               <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
               {brandProfile?.logoDataUrl ? (
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
                   <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : (

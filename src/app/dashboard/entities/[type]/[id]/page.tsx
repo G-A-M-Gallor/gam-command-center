@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, ArrowRight, ChevronRight, Loader2,
@@ -129,9 +129,9 @@ export default function EntityDetailPage() {
     router.push(`/dashboard/entities/${entityTypeSlug}`);
   };
 
-  const headerActions = note
+  const headerActions = useMemo(() => note
     ? resolveActions(etInfo?.template_config, { scope: 'single', position: 'detail_header', note })
-    : [];
+    : [], [note, etInfo?.template_config]);
 
   const handleHeaderAction = useCallback(async (actionId: string) => {
     if (!note) return;

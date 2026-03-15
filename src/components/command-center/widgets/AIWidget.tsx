@@ -121,6 +121,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setMessages(loadMessages());
     const label = getPageLabel(pathname, t);
     setContexts([label]);
@@ -509,6 +510,7 @@ function SidePanelContainer({
       const saved = localStorage.getItem(PANEL_WIDTH_KEY);
       if (saved) {
         const w = parseInt(saved, 10);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
         if (w >= MIN_PANEL_W && w <= MAX_PANEL_W) setPanelWidth(w);
       }
     } catch {
@@ -558,7 +560,7 @@ function SidePanelContainer({
       window.addEventListener("mousemove", handleMove);
       window.addEventListener("mouseup", handleUp);
     },
-    [panelWidth]
+    [panelWidth, panelOnLeft]
   );
 
   // Save width on change (debounced via mouseup)
@@ -733,6 +735,7 @@ function FloatingContainer({
       if (saved) {
         const parsed = JSON.parse(saved);
         if (typeof parsed.x === "number" && typeof parsed.y === "number") {
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
           setPos(parsed);
         }
       }

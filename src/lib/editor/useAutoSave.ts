@@ -98,6 +98,7 @@ export function useAutoSave({
 
   // Optimistic locking — tracks the last_edited_at from the most recent successful save
   const lastKnownTimestamp = useRef<string | null>(null);
+  const executeSaveRef = useRef<(json: JSONContent, attempt?: number) => Promise<void>>(async () => {});
 
   // Cleanup timers
   useEffect(() => {
@@ -174,7 +175,7 @@ export function useAutoSave({
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
         retryTimer.current = setTimeout(() => {
-          executeSave(json, attempt + 1);
+          executeSaveRef.current(json, attempt + 1);
         }, delay);
         return;
       }
@@ -187,6 +188,10 @@ export function useAutoSave({
     },
     [recordId, maxRetries],
   );
+
+  // Keep ref in sync for recursive calls
+  // eslint-disable-next-line react-hooks/refs -- ref must be set synchronously for retry setTimeout to use latest
+  executeSaveRef.current = executeSave;
 
   /** Queue a debounced save (called on every keystroke via onUpdate) */
   const queueSave = useCallback(

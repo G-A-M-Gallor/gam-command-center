@@ -151,7 +151,7 @@ export function RoutesSection({ language, ta }: { language: Language; ta: Return
   const [filterPhase, setFilterPhase] = useState<Phase | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
 
-  const allRoutes = [...routes, ...standalonePages];
+  const allRoutes = useMemo(() => [...routes, ...standalonePages], []);
 
   const filteredRoutes = useMemo(() => {
     return allRoutes.filter(r => {

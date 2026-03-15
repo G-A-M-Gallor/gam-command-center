@@ -37,7 +37,7 @@ export default function AdminDevLogPage() {
 
   const [activeSection, setActiveSection] = useState<'routes' | 'widgets' | 'contexts' | 'changelog' | 'storymap'>('routes');
 
-  const allRoutes = [...routes, ...standalonePages];
+  const allRoutes = useMemo(() => [...routes, ...standalonePages], []);
 
   const stats = useMemo(() => {
     const activeRoutes = allRoutes.filter(r => r.status === 'active').length;

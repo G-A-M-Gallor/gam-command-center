@@ -91,7 +91,7 @@ export function GuideOverlay() {
         expanded: false,
       });
     },
-    [guideMode]
+    [guideMode, setTooltip]
   );
 
   const handleMouseOut = useCallback(
@@ -112,17 +112,18 @@ export function GuideOverlay() {
       currentTarget.current = null;
       setTooltip((prev) => ({ ...prev, visible: false }));
     },
-    [guideMode]
+    [guideMode, setTooltip]
   );
 
   // Close tooltip when mouse leaves the tooltip itself
   const handleTooltipLeave = useCallback(() => {
     currentTarget.current = null;
     setTooltip((prev) => ({ ...prev, visible: false }));
-  }, []);
+  }, [setTooltip]);
 
   useEffect(() => {
     if (!guideMode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setTooltip((prev) => ({ ...prev, visible: false }));
       currentTarget.current = null;
       return;

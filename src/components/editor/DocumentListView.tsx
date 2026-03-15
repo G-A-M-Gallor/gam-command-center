@@ -58,6 +58,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     loadDocs();
     fetchActiveShareDocIds().then(setSharedDocIds).catch(() => {});
   }, [loadDocs]);

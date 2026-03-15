@@ -189,6 +189,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const storedRadius = localStorage.getItem(STORAGE_KEYS.borderRadius) as BorderRadius | null;
     const storedDensity = localStorage.getItem(STORAGE_KEYS.density) as Density | null;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (storedLang === "he" || storedLang === "en" || storedLang === "ru") setLanguageState(storedLang);
     if (storedPos === "right" || storedPos === "left") setSidebarPositionState(storedPos);
     if (storedVis === "visible" || storedVis === "float" || storedVis === "hidden") setSidebarVisibilityState(storedVis);

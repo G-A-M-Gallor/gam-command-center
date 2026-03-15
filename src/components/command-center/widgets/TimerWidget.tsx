@@ -127,6 +127,7 @@ export function TimerPanel() {
   const [, setTick] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setState(loadState());
   }, []);
 
@@ -182,6 +183,7 @@ export function TimerPanel() {
   const progress = totalMs > 0 ? remainingMs / totalMs : 1;
   const offset = CIRCUMFERENCE * (1 - progress);
 
+  /* eslint-disable react-hooks/preserve-manual-memoization -- settings is read-only config */
   const handleStart = useCallback(() => {
     const ms =
       state.status === "paused"
@@ -198,6 +200,7 @@ export function TimerPanel() {
     setState(next);
     saveState(next);
   }, [state, settings]);
+  /* eslint-enable react-hooks/preserve-manual-memoization */
 
   const handlePause = useCallback(() => {
     const remaining = Math.max(0, state.endTime - Date.now());

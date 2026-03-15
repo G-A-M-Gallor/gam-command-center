@@ -77,6 +77,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
     setLoading(false);
   }, [apiBase]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { load(); }, [load]);
 
   const threads = useMemo(() => {

@@ -36,6 +36,7 @@ export function IconDisplay({
     }
     case 'image':
       return (
+        // eslint-disable-next-line @next/next/no-img-element -- dynamic data URL
         <img
           src={parsed.value}
           alt=""
@@ -365,6 +366,7 @@ export function IconPicker({ value, onChange, size = 28 }: IconPickerProps) {
                 {/* Preview */}
                 {parsed?.kind === 'image' && (
                   <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] p-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
                     <img
                       src={parsed.value}
                       alt=""

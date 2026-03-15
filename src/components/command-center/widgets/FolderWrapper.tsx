@@ -126,12 +126,14 @@ export function FolderWrapper({
 
   // Close panel while dragging
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (isDragging && panelOpen) setPanelOpen(false);
   }, [isDragging, panelOpen]);
 
   // Calculate panel position
   useEffect(() => {
     if (!panelOpen || !wrapperRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setPanelPos(null);
       return;
     }

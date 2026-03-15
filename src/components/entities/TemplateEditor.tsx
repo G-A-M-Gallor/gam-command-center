@@ -299,7 +299,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
     b => !(c.action_buttons ?? []).some(existing => existing.id === b.id),
   );
 
-  const PanelToggle = ({ id, label }: { id: string; label: string }) => (
+  const renderPanelToggle = (id: string, label: string) => (
     <button
       onClick={() => setOpenPanel(openPanel === id ? null : id)}
       className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.04] rounded-lg transition-colors"
@@ -314,7 +314,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
   return (
     <div className="space-y-2" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Available Views */}
-      <PanelToggle id="views" label={t.availableViews} />
+      {renderPanelToggle("views", t.availableViews)}
       {openPanel === 'views' && (
         <div className="px-3 pb-3 space-y-3">
           <div className="flex flex-wrap gap-2">
@@ -452,7 +452,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
       )}
 
       {/* Layout — columns + sections */}
-      <PanelToggle id="sections" label={t.sections} />
+      {renderPanelToggle("sections", t.sections)}
       {openPanel === 'sections' && (
         <div className="px-3 pb-3 space-y-3">
           {/* Meta columns */}
@@ -540,7 +540,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
       )}
 
       {/* Toggles */}
-      <PanelToggle id="toggles" label={`${t.trackActivity} / ${t.trackKpi}`} />
+      {renderPanelToggle("toggles", `${t.trackActivity} / ${t.trackKpi}`)}
       {openPanel === 'toggles' && (
         <div className="px-3 pb-3 space-y-2">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -567,7 +567,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
       )}
 
       {/* Action Buttons */}
-      <PanelToggle id="actions" label={t.actionButtons} />
+      {renderPanelToggle("actions", t.actionButtons)}
       {openPanel === 'actions' && (
         <div className="px-3 pb-3 space-y-3">
           {(c.action_buttons ?? []).map((btn, idx) => {

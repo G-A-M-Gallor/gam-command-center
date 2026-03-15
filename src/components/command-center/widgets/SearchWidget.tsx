@@ -446,7 +446,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     ];
 
     return [...cmds, ...pages, ...widgets, ...documents, ...entities, ...semantic, ...projects, ...wiki, ...actions];
-  }, [query, language, lang, t, dbDocuments, searchResults, semanticResults, entityResults, entityTypes, commandItems, pageItems, widgetItems, projectResults, wikiResults, isCommandMode, isPageMode, effectiveQuery]);
+  }, [query, lang, t, wt.untitled, dbDocuments, searchResults, semanticResults, entityResults, entityTypes, commandItems, pageItems, widgetItems, projectResults, wikiResults, isCommandMode, isPageMode]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -528,7 +528,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         setQuery(item.label);
       }
     },
-    [router, onClose, query, language, isCommandMode, isPageMode]
+    [router, onClose, query, isCommandMode, isPageMode, wt.newDocument]
   );
 
   const handleKeyDown = useCallback(
@@ -641,7 +641,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
 
     return sections;
-  }, [items, query, t, language, isCommandMode, isPageMode]);
+  }, [items, query, t, wt.semanticResults, isCommandMode, isPageMode]);
 
   // Compute global index for each item across sections
   let globalIndex = 0;

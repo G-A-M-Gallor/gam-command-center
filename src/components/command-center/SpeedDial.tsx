@@ -156,6 +156,7 @@ export function SpeedDial() {
 
   // Load slots from localStorage on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setSlots(loadSlots());
   }, []);
 

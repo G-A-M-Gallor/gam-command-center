@@ -73,6 +73,7 @@ export function EmailDetailPanel({ emailSend, onClose }: EmailDetailPanelProps) 
 
   // Load events for this email
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setEventsLoading(true);
     fetch(`/api/email/sends?limit=1`) // We don't have a dedicated events endpoint, but events are embedded
       .catch(() => {});

@@ -39,7 +39,6 @@ function evaluateFormula(formula: string, meta: Record<string, unknown>): string
   // Evaluate simple math: only digits, +, -, *, /, ., (, ), spaces
   if (!/^[\d\s+\-*/().]+$/.test(expr)) return '—';
   try {
-    // eslint-disable-next-line no-new-func
     const result = new Function(`"use strict"; return (${expr});`)();
     return typeof result === 'number' && isFinite(result) ? String(Math.round(result * 100) / 100) : '—';
   } catch {
@@ -416,6 +415,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
     }
   }, [noteId]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadRelations(); }, [loadRelations]);
 
   const trackActivity = etInfo?.template_config?.track_activity ?? false;

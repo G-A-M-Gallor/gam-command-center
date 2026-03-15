@@ -153,6 +153,7 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
   // Load overrides on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setOverrides(loadOverrides());
     setMounted(true);
   }, []);

@@ -171,19 +171,17 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
     editor.chain().focus().insertContent(converted).run();
   }, [editor]);
 
-  // Get current alignment icon
-  const getAlignIcon = () => {
-    if (editor.isActive({ textAlign: 'center' })) return AlignCenter;
-    if (editor.isActive({ textAlign: 'left' })) return AlignLeft;
-    return AlignRight;
+  // Get current alignment icon element
+  const getAlignIconElement = () => {
+    if (editor.isActive({ textAlign: 'center' })) return <AlignCenter size={ICON_SIZE} />;
+    if (editor.isActive({ textAlign: 'left' })) return <AlignLeft size={ICON_SIZE} />;
+    return <AlignRight size={ICON_SIZE} />;
   };
 
   // Get current text color for the Type icon underline
   const currentTextColor = editor.getAttributes('textStyle').color || 'var(--cc-accent-400, #a78bfa)';
 
   if (!visible) return null;
-
-  const AlignIcon = getAlignIcon();
 
   return (
     <div
@@ -278,7 +276,7 @@ export function FloatingToolbar({ editor }: FloatingToolbarProps) {
       {/* ─── Alignment ─── */}
       <span className="gam-ftb__color-wrap">
         <ToolbarBtn
-          icon={<AlignIcon size={ICON_SIZE} />}
+          icon={getAlignIconElement()}
           active={showAlign}
           onClick={() => {
             setShowAlign(!showAlign);

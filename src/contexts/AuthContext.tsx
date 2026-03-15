@@ -112,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch action permissions when user loads
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setActionPerms(roleDefaults('viewer'));
       return;
     }
