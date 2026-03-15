@@ -336,8 +336,6 @@ No mobile app yet. Features requiring mobile testing:
 | Issue | Location | Priority |
 |-------|----------|----------|
 | `isHe` anti-pattern | 57+ instances across widgets, editor, story map | Medium — gradual i18n migration |
-| `vb_ai_memory` table | Supabase table exists, no code uses it. Can be dropped. | Low |
-| `console.log` in prod | 2 instances in ai-hub/page.tsx | Low |
 | TeamWidget TODO | Needs Supabase Realtime Presence | Blocked |
 | WATIWidget TODO | Needs real WATI API | Blocked |
 | Sentry auto-fix pipeline | L1-L3 not built (needs PAT workflow scope) | Medium |

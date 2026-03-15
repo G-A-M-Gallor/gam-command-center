@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch entity types and global fields
     const [typesRes, fieldsRes] = await Promise.all([
-      supabase.from("entity_types").select("*"),
+      supabase.from("record_templates").select("*"),
       supabase.from("global_fields").select("*"),
     ]);
 

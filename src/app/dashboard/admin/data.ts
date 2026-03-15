@@ -207,7 +207,7 @@ export const routes: RouteEntry[] = [
       { id: 'match-card', name: 'MatchCard', file: 'components/matching/MatchCard.tsx', status: 'active' },
       { id: 'match-profile-editor', name: 'MatchProfileEditor', file: 'components/matching/MatchProfileEditor.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext', 'AuthContext'], supabaseTables: ['matching_scores', 'vb_records', 'entity_types', 'global_fields'], visible: true, sidebarTab: true,
+    contexts: ['SettingsContext', 'AuthContext'], supabaseTables: ['matching_scores', 'vb_records', 'record_templates', 'global_fields'], visible: true, sidebarTab: true,
     connectedTo: ['entity-view', 'entity-fields', 'entity-types'],
   },
   {
@@ -249,7 +249,7 @@ export const routes: RouteEntry[] = [
       { id: 'entity-types-page', name: 'EntityTypesPage', file: 'app/dashboard/entities/types/page.tsx', status: 'active' },
       { id: 'connection-diagram', name: 'ConnectionDiagram', file: 'components/entities/ConnectionDiagram.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['entity_types', 'entity_connections'], visible: true, sidebarTab: false,
+    contexts: ['SettingsContext'], supabaseTables: ['record_templates', 'entity_connections'], visible: true, sidebarTab: false,
     connectedTo: ['entity-fields', 'entity-view'],
   },
   {
@@ -264,7 +264,7 @@ export const routes: RouteEntry[] = [
       { id: 'calendar-view', name: 'CalendarView', file: 'components/entities/views/CalendarView.tsx', status: 'active' },
       { id: 'note-meta', name: 'NoteMeta', file: 'components/entities/NoteMeta.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['vb_records', 'note_relations'], visible: false, sidebarTab: false,
+    contexts: ['SettingsContext'], supabaseTables: ['vb_records', 'record_relations'], visible: false, sidebarTab: false,
     connectedTo: ['entity-fields', 'entity-types', 'editor'],
   },
   {
@@ -278,7 +278,7 @@ export const routes: RouteEntry[] = [
       { id: 'stakeholder-panel-detail', name: 'StakeholderPanel', file: 'components/entities/StakeholderPanel.tsx', status: 'active' },
       { id: 'activity-feed-detail', name: 'ActivityFeed', file: 'components/entities/ActivityFeed.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['vb_records', 'note_relations', 'note_stakeholders', 'note_activity_log'], visible: false, sidebarTab: false,
+    contexts: ['SettingsContext'], supabaseTables: ['vb_records', 'record_relations', 'note_stakeholders', 'note_activity_log'], visible: false, sidebarTab: false,
     connectedTo: ['entity-view', 'entity-fields', 'entity-types'],
   },
   {

@@ -40,7 +40,7 @@ export default function MatchingPage() {
   useEffect(() => {
     async function load() {
       const [typesRes, fieldsRes] = await Promise.all([
-        supabase.from("entity_types").select("*").order("sort_order"),
+        supabase.from("record_templates").select("*").order("sort_order"),
         supabase.from("global_fields").select("*"),
       ]);
       setEntityTypes((typesRes.data ?? []) as EntityType[]);
