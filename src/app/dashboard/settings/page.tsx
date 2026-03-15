@@ -35,6 +35,7 @@ import { useCamera } from "@/lib/pwa/useCamera";
 import { useContacts } from "@/lib/pwa/useContacts";
 import { useWakeLock } from "@/lib/pwa/useWakeLock";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
+import { EmailTemplatesTab } from "@/components/settings/EmailTemplatesTab";
 
 const ACCENT_OPTIONS: { value: AccentColor; swatch: string }[] = [
   { value: "purple", swatch: "#9333ea" },
@@ -63,15 +64,16 @@ const DENSITY_OPTIONS: { value: Density; key: "compact" | "default" | "spacious"
   { value: "spacious", key: "spacious" },
 ];
 
-type SettingsTab = "general" | "theme" | "brand" | "widgetBar" | "pwa" | "accounts";
+type SettingsTab = "general" | "theme" | "brand" | "widgetBar" | "pwa" | "accounts" | "emailTemplates";
 
-const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" | "tabPwa" | "tabAccounts" }[] = [
+const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" | "tabPwa" | "tabAccounts" | "tabEmailTemplates" }[] = [
   { tab: "general", tKey: "tabGeneral" },
   { tab: "theme", tKey: "tabTheme" },
   { tab: "brand", tKey: "tabBrand" },
   { tab: "widgetBar", tKey: "tabWidgetBar" },
   { tab: "pwa", tKey: "tabPwa" },
   { tab: "accounts", tKey: "tabAccounts" },
+  { tab: "emailTemplates", tKey: "tabEmailTemplates" },
 ];
 
 // --- Shared button classes ---
@@ -1745,6 +1747,7 @@ export default function SettingsPage() {
         {activeTab === "widgetBar" && <WidgetBarTab />}
         {activeTab === "pwa" && <PWATab />}
         {activeTab === "accounts" && <IntegrationsTab />}
+        {activeTab === "emailTemplates" && <EmailTemplatesTab />}
       </div>
     </div>
   );
