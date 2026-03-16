@@ -434,6 +434,33 @@ export const documentPdfSchema = z.object({
 
 export type DocumentPdfInput = z.infer<typeof documentPdfSchema>;
 
+// ─── Document Resend ────────────────────────────────────────
+
+export const documentResendSchema = z.object({
+  submission_id: z.string().uuid("submission_id must be a valid UUID"),
+  expires_in_days: z.number().int().min(1).max(365).optional().default(30),
+});
+
+export type DocumentResendInput = z.infer<typeof documentResendSchema>;
+
+// ─── Document Revoke ────────────────────────────────────────
+
+export const documentRevokeSchema = z.object({
+  submission_id: z.string().uuid("submission_id must be a valid UUID"),
+  reason: z.string().max(500).optional(),
+});
+
+export type DocumentRevokeInput = z.infer<typeof documentRevokeSchema>;
+
+// ─── Document Reminder ──────────────────────────────────────
+
+export const documentReminderSchema = z.object({
+  submission_id: z.string().uuid("submission_id must be a valid UUID"),
+  message: z.string().max(1000).optional(),
+});
+
+export type DocumentReminderInput = z.infer<typeof documentReminderSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

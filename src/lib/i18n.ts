@@ -886,6 +886,9 @@ export const translations = {
       showLess: "הצג פחות",
       showMore: "הצג עוד",
       moreLines: "שורות נוספות",
+      resendLink: "שלח שוב",
+      sendReminder: "תזכורת",
+      revokeDocument: "בטל שליחה",
     },
     docTemplates: {
       searchTemplates: "חיפוש תבניות...",
@@ -3750,6 +3753,9 @@ export const translations = {
       showLess: "Show less",
       showMore: "Show more",
       moreLines: "more lines",
+      resendLink: "Resend Link",
+      sendReminder: "Reminder",
+      revokeDocument: "Revoke",
     },
     docTemplates: {
       searchTemplates: "Search templates...",
@@ -6606,6 +6612,9 @@ export const translations = {
       showLess: "Показать меньше",
       showMore: "Показать больше",
       moreLines: "строк ещё",
+      resendLink: "Отправить снова",
+      sendReminder: "Напоминание",
+      revokeDocument: "Отозвать",
     },
     docTemplates: {
       searchTemplates: "Поиск шаблонов...",

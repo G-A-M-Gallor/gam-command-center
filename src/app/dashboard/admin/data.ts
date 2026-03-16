@@ -214,7 +214,7 @@ export const routes: RouteEntry[] = [
     id: 'documents', path: '/dashboard/documents', name: 'Documents', nameHe: 'מסמכים', icon: FileSignature,
     phase: 4, status: 'active', version: '1.0.0', addedDate: '2026-03-14',
     descriptionHe: 'Document Engine — Pipeline Kanban + עמוד בקרה (צפיות, נעילות, הודעות, audit)',
-    descriptionEn: 'Document Engine — Pipeline Kanban + Control page (views, locks, messages, audit, signer management, send for signing)',
+    descriptionEn: 'Document Engine — Pipeline Kanban + Control page (views, locks, messages, audit, signer management, send/resend/revoke/reminder)',
     components: [
       { id: 'doc-pipeline', name: 'DocumentsPage', file: 'app/dashboard/documents/page.tsx', status: 'active' },
       { id: 'doc-control', name: 'DocumentDetailPage', file: 'app/dashboard/documents/[id]/page.tsx', status: 'active' },

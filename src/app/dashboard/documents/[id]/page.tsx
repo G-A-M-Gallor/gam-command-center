@@ -38,6 +38,9 @@ import {
   Edit3,
   Check,
   X,
+  RefreshCw,
+  Bell,
+  Ban,
 } from "lucide-react";
 import type { SubmitterRole } from "@/lib/supabase/schema";
 import type {
@@ -213,6 +216,52 @@ export default function DocumentDetailPage() {
     setSendingForSign(false);
   };
 
+  const handleResend = async () => {
+    setSendingForSign(true);
+    try {
+      const res = await fetch("/api/documents/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submission_id: id }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSigningUrl(data.signing_url);
+        fetchAll();
+      }
+    } catch (err) {
+      console.error("Resend failed:", err);
+    }
+    setSendingForSign(false);
+  };
+
+  const handleRevoke = async () => {
+    try {
+      const res = await fetch("/api/documents/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submission_id: id }),
+      });
+      const data = await res.json();
+      if (data.ok) fetchAll();
+    } catch (err) {
+      console.error("Revoke failed:", err);
+    }
+  };
+
+  const handleReminder = async () => {
+    try {
+      const res = await fetch("/api/documents/reminder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submission_id: id }),
+      });
+      await res.json();
+    } catch (err) {
+      console.error("Reminder failed:", err);
+    }
+  };
+
   const handleGeneratePdf = async (store = false) => {
     setGeneratingPdf(true);
     try {
@@ -348,6 +397,9 @@ export default function DocumentDetailPage() {
               onUpdate={handleUpdateSubmitter}
               onDelete={handleDeleteSubmitter}
               onSend={handleSendForSigning}
+              onResend={handleResend}
+              onRevoke={handleRevoke}
+              onReminder={handleReminder}
               sending={sendingForSign}
               signingUrl={signingUrl}
             />
@@ -465,6 +517,26 @@ function OverviewTab({
         </div>
       </div>
 
+      {/* Field Values Preview */}
+      {submission.field_values && Object.keys(submission.field_values).length > 0 && (
+        <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+          <h3 className="mb-3 text-sm font-medium text-slate-300">{dc.fieldValues}</h3>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {Object.entries(submission.field_values).map(([key, value]) => (
+              <div key={key} className="rounded-lg border border-slate-800 bg-slate-900/50 p-2">
+                <div className="text-[10px] text-slate-500">{key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</div>
+                <div className="text-xs text-slate-300 mt-0.5 truncate">{String(value ?? "—")}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Content Preview */}
+      {submission.content_snapshot && typeof submission.content_snapshot === "object" && (
+        <ContentPreview content={submission.content_snapshot as TiptapNode} dc={dc} />
+      )}
+
       {/* Submitters */}
       {submitters.length > 0 && (
         <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
@@ -549,6 +621,9 @@ function SignersTab({
   onUpdate,
   onDelete,
   onSend,
+  onResend,
+  onRevoke,
+  onReminder,
   sending,
   signingUrl,
 }: {
@@ -559,6 +634,9 @@ function SignersTab({
   onUpdate: (id: string, updates: Partial<DocumentSubmitter>) => void;
   onDelete: (id: string) => void;
   onSend: () => void;
+  onResend: () => void;
+  onRevoke: () => void;
+  onReminder: () => void;
   sending: boolean;
   signingUrl: string | null;
 }) {
@@ -639,6 +717,34 @@ function SignersTab({
           ) : (
             <p className="text-xs text-slate-500">{dc.documentSentInfo}</p>
           )}
+        </div>
+      )}
+
+      {/* Actions for sent documents */}
+      {isSent && (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onResend}
+            disabled={sending}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:border-blue-600 hover:text-blue-400 disabled:opacity-50"
+          >
+            {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            {dc.resendLink}
+          </button>
+          <button
+            onClick={onReminder}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:border-amber-600 hover:text-amber-400"
+          >
+            <Bell className="h-3.5 w-3.5" />
+            {dc.sendReminder}
+          </button>
+          <button
+            onClick={onRevoke}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-red-400 hover:border-red-600 hover:text-red-300"
+          >
+            <Ban className="h-3.5 w-3.5" />
+            {dc.revokeDocument}
+          </button>
         </div>
       )}
 
@@ -1282,6 +1388,88 @@ function formatBytes(bytes: number): string {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+// ── Content Preview ──────────────────────────────────────
+
+interface TiptapNode {
+  type?: string;
+  text?: string;
+  content?: TiptapNode[];
+  attrs?: Record<string, unknown>;
+  marks?: { type: string }[];
+}
+
+function ContentPreview({ content, dc }: { content: TiptapNode; dc: Record<string, string> }) {
+  const [expanded, setExpanded] = useState(false);
+  const textBlocks = extractPlainText(content);
+  const preview = textBlocks.slice(0, expanded ? textBlocks.length : 5);
+
+  if (textBlocks.length === 0) return null;
+
+  return (
+    <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-medium text-slate-300">{dc.contentPreview}</h3>
+        {textBlocks.length > 5 && (
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-xs text-purple-400 hover:text-purple-300"
+          >
+            {expanded ? dc.showLess : dc.showMore}
+          </button>
+        )}
+      </div>
+      <div className="space-y-1.5">
+        {preview.map((block, i) => (
+          <div key={i} className={`text-xs leading-relaxed ${block.heading ? "font-medium text-slate-200 mt-2" : "text-slate-400"}`}>
+            {block.text}
+          </div>
+        ))}
+        {!expanded && textBlocks.length > 5 && (
+          <div className="text-[10px] text-slate-600">... +{textBlocks.length - 5} {dc.moreLines}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function extractPlainText(node: TiptapNode): { text: string; heading?: boolean }[] {
+  const results: { text: string; heading?: boolean }[] = [];
+
+  function walk(n: TiptapNode) {
+    if (!n) return;
+    if (n.type === "heading") {
+      const text = collectText(n).trim();
+      if (text) results.push({ text, heading: true });
+      return;
+    }
+    if (n.type === "paragraph" || n.type === "listItem") {
+      const text = collectText(n).trim();
+      const prefix = n.type === "listItem" ? "\u2022 " : "";
+      if (text) results.push({ text: prefix + text });
+      return;
+    }
+    if (n.type === "bulletList" || n.type === "orderedList") {
+      (n.content || []).forEach((item, i) => {
+        const text = collectText(item).trim();
+        const prefix = n.type === "orderedList" ? `${i + 1}. ` : "\u2022 ";
+        if (text) results.push({ text: prefix + text });
+      });
+      return;
+    }
+    if (n.content) {
+      for (const child of n.content) walk(child);
+    }
+  }
+
+  function collectText(n: TiptapNode): string {
+    if (n.type === "text") return n.text || "";
+    return (n.content || []).map(collectText).join("");
+  }
+
+  walk(node);
+  return results;
 }
 
 // ── Shared Components ────────────────────────────────────
