@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import type { JSONContent } from "@tiptap/react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { supabase } from "@/lib/supabaseClient";
+
+const TiptapEditor = dynamic(
+  () => import("@/components/editor/TiptapEditor"),
+  { ssr: false },
+);
 import {
   ArrowLeft,
   Eye,
@@ -55,10 +62,11 @@ import type {
 } from "@/lib/supabase/schema";
 
 // ── Tab types ─────────────────────────────────────────────
-type Tab = "overview" | "signers" | "views" | "locks" | "messages" | "checklist" | "audit";
+type Tab = "overview" | "editor" | "signers" | "views" | "locks" | "messages" | "checklist" | "audit";
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; i18nKey: string }[] = [
   { key: "overview", icon: FileText, i18nKey: "overview" },
+  { key: "editor", icon: Edit3, i18nKey: "editContent" },
   { key: "signers", icon: Users, i18nKey: "signers" },
   { key: "views", icon: Eye, i18nKey: "viewHistory" },
   { key: "locks", icon: Lock, i18nKey: "fieldLocks" },
@@ -166,6 +174,36 @@ export default function DocumentDetailPage() {
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [sendingForSign, setSendingForSign] = useState(false);
   const [signingUrl, setSigningUrl] = useState<string | null>(null);
+  const [editorContent, setEditorContent] = useState<JSONContent | null>(null);
+  const [editorSaveState, setEditorSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [editorLastSaved, setEditorLastSaved] = useState<Date | undefined>();
+  const editorSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Initialize editor content from submission
+  useEffect(() => {
+    if (submission?.content_snapshot && typeof submission.content_snapshot === "object") {
+      setEditorContent(submission.content_snapshot as JSONContent);
+    }
+  }, [submission]);
+
+  const handleEditorSave = useCallback(
+    async (json: JSONContent) => {
+      setEditorSaveState("saving");
+      const { error } = await supabase
+        .from("document_submissions")
+        .update({ content_snapshot: json })
+        .eq("id", id);
+      if (error) {
+        setEditorSaveState("error");
+      } else {
+        setEditorSaveState("saved");
+        setEditorLastSaved(new Date());
+        if (editorSaveTimeout.current) clearTimeout(editorSaveTimeout.current);
+        editorSaveTimeout.current = setTimeout(() => setEditorSaveState("idle"), 2000);
+      }
+    },
+    [id],
+  );
 
   const handleAddSubmitter = async (data: { full_name: string; email: string; phone: string; role: SubmitterRole }) => {
     const { data: newSub } = await supabase
@@ -387,6 +425,37 @@ export default function DocumentDetailPage() {
               dc={dc}
               onStatusChange={handleUpdateStatus}
             />
+          )}
+          {tab === "editor" && (
+            <div className="mx-auto max-w-4xl">
+              {submission.status !== "draft" && (
+                <div className="mb-4 flex items-center gap-2 rounded-lg border border-amber-800/50 bg-amber-900/10 px-4 py-2">
+                  <AlertTriangle className="h-4 w-4 text-amber-400" />
+                  <span className="text-xs text-amber-400">{dc.editWarning}</span>
+                </div>
+              )}
+              {editorContent ? (
+                <TiptapEditor
+                  content={editorContent}
+                  onChange={setEditorContent}
+                  onSave={handleEditorSave}
+                  editable={submission.status === "draft"}
+                  autoFocus
+                  saveStatus={editorSaveState}
+                  lastSavedAt={editorLastSaved}
+                />
+              ) : (
+                <TiptapEditor
+                  content={{ type: "doc", content: [{ type: "paragraph" }] }}
+                  onChange={setEditorContent}
+                  onSave={handleEditorSave}
+                  editable={submission.status === "draft"}
+                  autoFocus
+                  saveStatus={editorSaveState}
+                  lastSavedAt={editorLastSaved}
+                />
+              )}
+            </div>
           )}
           {tab === "signers" && (
             <SignersTab

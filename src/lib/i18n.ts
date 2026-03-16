@@ -889,6 +889,8 @@ export const translations = {
       resendLink: "שלח שוב",
       sendReminder: "תזכורת",
       revokeDocument: "בטל שליחה",
+      editContent: "עריכת תוכן",
+      editWarning: "המסמך כבר נשלח — עריכה אפשרית רק בטיוטות",
     },
     docTemplates: {
       searchTemplates: "חיפוש תבניות...",
@@ -3756,6 +3758,8 @@ export const translations = {
       resendLink: "Resend Link",
       sendReminder: "Reminder",
       revokeDocument: "Revoke",
+      editContent: "Edit Content",
+      editWarning: "Document has been sent — editing is only available for drafts",
     },
     docTemplates: {
       searchTemplates: "Search templates...",
@@ -6615,6 +6619,8 @@ export const translations = {
       resendLink: "Отправить снова",
       sendReminder: "Напоминание",
       revokeDocument: "Отозвать",
+      editContent: "Редактирование",
+      editWarning: "Документ уже отправлен — редактирование доступно только для черновиков",
     },
     docTemplates: {
       searchTemplates: "Поиск шаблонов...",
