@@ -30,6 +30,7 @@ export const translations = {
       comms: "תקשורת",
       documents: "מסמכים",
       audit: "יומן ביקורת",
+      emailTemplates: "תבניות מייל",
     },
     pages: {
       dashboard: {
@@ -135,6 +136,10 @@ export const translations = {
       audit: {
         title: "יומן ביקורת",
         description: "מעקב אחר כל השינויים והפעולות במערכת — עדויות משפטיות",
+      },
+      emailTemplates: {
+        title: "עיצוב תבניות מייל",
+        description: "עורך תבניות מייל — עריכה, משתנים דינמיים ותצוגה מקדימה",
       },
     },
     auditLog: {
@@ -1048,6 +1053,31 @@ export const translations = {
       customCta: "כפתור קריאה לפעולה (CTA)",
       customRtl: "תמיכה ב-RTL",
       customBrand: "לוגו וצבעי מותג",
+    },
+    emailDesigner: {
+      searchTemplates: "חיפוש תבניות...",
+      allCategories: "כל הקטגוריות",
+      newTemplate: "תבנית חדשה",
+      templates: "תבניות",
+      noTemplates: "אין תבניות",
+      selectOrCreate: "בחר תבנית או צור חדשה",
+      untitledTemplate: "תבנית ללא שם",
+      defaultSubject: "נושא המייל",
+      copy: "העתק",
+      duplicate: "שכפול",
+      delete: "מחיקה",
+      subject: "נושא",
+      subjectPlaceholder: "הזן נושא למייל...",
+      insertVariable: "הוסף משתנה",
+      mergeVariables: "משתנים דינמיים",
+      variables: "משתנים",
+      edit: "עריכה",
+      preview: "תצוגה מקדימה",
+      previewMode: "מצב תצוגה מקדימה",
+      previewHint: "משתנים מוצגים עם ערכי דוגמה",
+      catSystem: "מערכת",
+      catTransactional: "טרנזקציוני",
+      catMarketing: "שיווק",
     },
     relativeTime: {
       now: "עכשיו",
@@ -2959,6 +2989,7 @@ export const translations = {
       comms: "Communication",
       documents: "Documents",
       audit: "Audit Log",
+      emailTemplates: "Email Templates",
     },
     pages: {
       dashboard: {
@@ -3064,6 +3095,10 @@ export const translations = {
       audit: {
         title: "Audit Log",
         description: "Track all changes and actions in the system — legal evidence trail",
+      },
+      emailTemplates: {
+        title: "Email Template Designer",
+        description: "Email template editor — edit, dynamic variables, and preview",
       },
     },
     auditLog: {
@@ -3971,6 +4006,31 @@ export const translations = {
       customCta: "Call-to-action button",
       customRtl: "RTL compatibility",
       customBrand: "Company logo and brand colors",
+    },
+    emailDesigner: {
+      searchTemplates: "Search templates...",
+      allCategories: "All categories",
+      newTemplate: "New template",
+      templates: "Templates",
+      noTemplates: "No templates",
+      selectOrCreate: "Select a template or create a new one",
+      untitledTemplate: "Untitled template",
+      defaultSubject: "Email subject",
+      copy: "Copy",
+      duplicate: "Duplicate",
+      delete: "Delete",
+      subject: "Subject",
+      subjectPlaceholder: "Enter email subject...",
+      insertVariable: "Insert variable",
+      mergeVariables: "Merge variables",
+      variables: "Variables",
+      edit: "Edit",
+      preview: "Preview",
+      previewMode: "Preview mode",
+      previewHint: "Variables shown with sample values",
+      catSystem: "System",
+      catTransactional: "Transactional",
+      catMarketing: "Marketing",
     },
     relativeTime: {
       now: "now",
@@ -5874,6 +5934,7 @@ export const translations = {
       comms: "Коммуникация",
       documents: "Документы",
       audit: "Журнал аудита",
+      emailTemplates: "Шаблоны email",
     },
     pages: {
       dashboard: {
@@ -5979,6 +6040,10 @@ export const translations = {
       audit: {
         title: "Журнал аудита",
         description: "Отслеживание всех изменений и действий в системе — юридические доказательства",
+      },
+      emailTemplates: {
+        title: "Дизайнер email шаблонов",
+        description: "Редактор шаблонов email — редактирование, динамические переменные и предпросмотр",
       },
     },
     auditLog: {
@@ -6886,6 +6951,31 @@ export const translations = {
       customCta: "Кнопка призыва к действию",
       customRtl: "Поддержка RTL",
       customBrand: "Логотип и цвета бренда",
+    },
+    emailDesigner: {
+      searchTemplates: "Поиск шаблонов...",
+      allCategories: "Все категории",
+      newTemplate: "Новый шаблон",
+      templates: "Шаблоны",
+      noTemplates: "Нет шаблонов",
+      selectOrCreate: "Выберите шаблон или создайте новый",
+      untitledTemplate: "Без названия",
+      defaultSubject: "Тема письма",
+      copy: "Копия",
+      duplicate: "Дублировать",
+      delete: "Удалить",
+      subject: "Тема",
+      subjectPlaceholder: "Введите тему письма...",
+      insertVariable: "Вставить переменную",
+      mergeVariables: "Переменные слияния",
+      variables: "Переменные",
+      edit: "Редактирование",
+      preview: "Предпросмотр",
+      previewMode: "Режим предпросмотра",
+      previewHint: "Переменные показаны с примерами",
+      catSystem: "Системный",
+      catTransactional: "Транзакционный",
+      catMarketing: "Маркетинг",
     },
     relativeTime: {
       now: "сейчас",

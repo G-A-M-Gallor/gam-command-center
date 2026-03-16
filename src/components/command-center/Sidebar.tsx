@@ -41,6 +41,7 @@ import {
   CircleDot,
   FileSignature,
   ClipboardList,
+  Mail,
 } from "lucide-react";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -106,6 +107,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
       { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },
       { href: "/dashboard/matching", key: "matching", icon: Sparkles, status: "active" },
+      { href: "/dashboard/email-templates", key: "emailTemplates", icon: Mail, status: "active" },
     ],
   },
   {

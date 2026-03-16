@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2,
+  Loader2, Mail,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -378,6 +378,17 @@ export const routes: RouteEntry[] = [
       { id: 'audit-page', name: 'AuditPage', file: 'app/dashboard/audit/page.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: ['audit_log', 'document_audit_log'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'email-templates', path: '/dashboard/email-templates', name: 'Email Template Designer', nameHe: 'עיצוב תבניות מייל', icon: Mail,
+    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'עורך תבניות מייל — עריכה ויזואלית, משתנים דינמיים, תצוגה מקדימה וניהול קטגוריות',
+    descriptionEn: 'Email template designer — visual editing with Tiptap, merge variables, preview mode, and category management',
+    components: [
+      { id: 'email-designer-page', name: 'EmailTemplateDesignerPage', file: 'app/dashboard/email-templates/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['email_templates', 'email_tenants'], visible: true, sidebarTab: true,
+    connectedTo: ['comms'],
   },
 ];
 
