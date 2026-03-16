@@ -5,11 +5,19 @@ import { runSyncCycle } from '@/lib/sync/engine';
 import type { TriggerType } from '@/lib/sync/types';
 
 /**
- * POST /api/sync/run
- * Auth: CRON_SECRET (Vercel Cron) or JWT (manual trigger from admin)
- * Runs a full sync cycle across all active tenants.
+ * GET /api/sync/run  — Vercel Cron (sends GET with Authorization header)
+ * POST /api/sync/run — Manual trigger from admin UI
+ * Auth: CRON_SECRET or JWT
  */
+export async function GET(request: Request) {
+  return handleSyncRun(request);
+}
+
 export async function POST(request: Request) {
+  return handleSyncRun(request);
+}
+
+async function handleSyncRun(request: Request) {
   // Auth: either CRON_SECRET or JWT
   const cronSecret =
     request.headers.get('x-cron-secret') ||
