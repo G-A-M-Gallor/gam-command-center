@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { appendCertificatePage } from "@/lib/documents/certificatePage";
+import { documentPdfSchema } from "@/lib/api/schemas";
 import type { DocumentSubmission, DocumentSubmitter } from "@/lib/supabase/schema";
 
 /**
  * POST /api/documents/pdf
  * Generates a PDF from a document submission.
- * Body: { submission_id: string }
+ * Body: { submission_id: string; store?: boolean }
  * Returns the PDF bytes or stores in Supabase Storage.
  */
 export async function POST(req: NextRequest) {
@@ -18,12 +19,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const { submission_id, store = false } = body as { submission_id: string; store?: boolean };
-
-  if (!submission_id) {
-    return NextResponse.json({ error: "submission_id required" }, { status: 400 });
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+
+  const parsed = documentPdfSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid input" }, { status: 400 });
+  }
+
+  const { submission_id, store } = parsed.data;
 
   // Fetch submission
   const { data: sub, error: subErr } = await supabase

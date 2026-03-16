@@ -9,6 +9,7 @@ import {
   fetchDocTemplates,
   createDocTemplate,
   updateDocTemplate,
+  createSubmissionFromTemplate,
 } from "@/lib/supabase/documentQueries";
 import type { DocumentTemplate, DocTemplateStatus } from "@/lib/supabase/schema";
 import {
@@ -22,6 +23,8 @@ import {
   Tag,
   Clock,
   ArrowLeft,
+  Send,
+  ListChecks,
 } from "lucide-react";
 
 // ── Status badge colors ─────────────────────────────────────
@@ -113,6 +116,16 @@ export default function DocumentTemplatesPage() {
     [loadTemplates],
   );
 
+  const handleUseTemplate = useCallback(
+    async (tpl: DocumentTemplate) => {
+      const sub = await createSubmissionFromTemplate(tpl);
+      if (sub) {
+        router.push(`/dashboard/documents/${sub.id}`);
+      }
+    },
+    [router],
+  );
+
   return (
     <div className="flex h-full flex-col" dir={isRtl ? "rtl" : "ltr"}>
       <PageHeader pageKey="documents">
@@ -182,6 +195,7 @@ export default function DocumentTemplatesPage() {
                 onOpen={() => router.push(`/dashboard/documents/templates/${tpl.id}`)}
                 onDuplicate={() => handleDuplicate(tpl)}
                 onArchive={() => handleArchive(tpl.id)}
+                onUse={() => handleUseTemplate(tpl)}
               />
             ))}
           </div>
@@ -212,12 +226,14 @@ function TemplateCard({
   onOpen,
   onDuplicate,
   onArchive,
+  onUse,
 }: {
   template: DocumentTemplate;
   dt: Record<string, string>;
   onOpen: () => void;
   onDuplicate: () => void;
   onArchive: () => void;
+  onUse: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
 
@@ -243,6 +259,15 @@ function TemplateCard({
               className="absolute end-0 top-8 z-10 w-40 rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
+              {tpl.status === "active" && (
+                <button
+                  onClick={() => { onUse(); setShowMenu(false); }}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm text-purple-400 hover:bg-slate-700"
+                >
+                  <Send className="h-3.5 w-3.5" />
+                  {dt.useTemplate}
+                </button>
+              )}
               <button
                 onClick={() => { onDuplicate(); setShowMenu(false); }}
                 className="flex w-full items-center gap-2 px-3 py-1.5 text-start text-sm text-slate-300 hover:bg-slate-700"
@@ -291,10 +316,18 @@ function TemplateCard({
           <Clock className="h-3 w-3" />
           {new Date(tpl.updated_at).toLocaleDateString()}
         </span>
-        <span className="flex items-center gap-1">
-          <PenLine className="h-3 w-3" />
-          v{tpl.version}
-        </span>
+        <div className="flex items-center gap-2">
+          {Array.isArray(tpl.fields) && tpl.fields.length > 0 && (
+            <span className="flex items-center gap-0.5">
+              <ListChecks className="h-3 w-3" />
+              {tpl.fields.length}
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <PenLine className="h-3 w-3" />
+            v{tpl.version}
+          </span>
+        </div>
       </div>
     </div>
   );
