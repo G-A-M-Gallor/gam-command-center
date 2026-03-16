@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2, Mail,
+  Loader2, Mail, Gauge,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -242,6 +242,17 @@ export const routes: RouteEntry[] = [
     descriptionEn: 'System registry — routes, widgets, contexts, changelog, dev checklist, stats',
     components: [],
     contexts: ['SettingsContext'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'control', path: '/dashboard/control', name: 'Control Center', nameHe: 'מרכז בקרה', icon: Gauge,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'מרכז בקרה — סקירה כללית של מפת דרכים, לוג פיתוח, ארכיטקטורה ועדכונים אחרונים',
+    descriptionEn: 'Control Center — overview of roadmap, dev log, architecture & recent updates',
+    components: [
+      { id: 'control-page', name: 'ControlCenterPage', file: 'app/dashboard/control/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], visible: true, sidebarTab: true,
+    connectedTo: ['admin', 'roadmap', 'architecture', 'audit'],
   },
   {
     id: 'entity-fields', path: '/dashboard/entities/fields', name: 'Field Library', nameHe: 'ספריית שדות', icon: Code2,

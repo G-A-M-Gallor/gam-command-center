@@ -42,6 +42,8 @@ import {
   FileSignature,
   ClipboardList,
   Mail,
+  ChevronRight,
+  Gauge,
 } from "lucide-react";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -72,10 +74,25 @@ export interface NavItem {
   status: "active" | "coming-soon";
 }
 
+export interface NavFolder {
+  type: "folder";
+  href: string;
+  key: string;
+  icon: React.ElementType;
+  status: "active" | "coming-soon";
+  children: NavItem[];
+}
+
+export type NavEntry = NavItem | NavFolder;
+
+function isFolder(entry: NavEntry): entry is NavFolder {
+  return "type" in entry && entry.type === "folder";
+}
+
 export interface NavGroup {
   id: string;
   labelKey: "groupCore" | "groupTools" | "groupSystem";
-  items: NavItem[];
+  items: NavEntry[];
 }
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -100,9 +117,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/dashboard/functional-map", key: "functionalMap", icon: Grid3X3, status: "active" },
       { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
-      { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
       { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
-      { href: "/dashboard/roadmap", key: "roadmap", icon: Compass, status: "active" },
       { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
       { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },
@@ -114,11 +129,22 @@ export const NAV_GROUPS: NavGroup[] = [
     id: "system",
     labelKey: "groupSystem",
     items: [
+      {
+        type: "folder",
+        href: "/dashboard/control",
+        key: "control",
+        icon: Gauge,
+        status: "active",
+        children: [
+          { href: "/dashboard/roadmap", key: "roadmap", icon: Compass, status: "active" },
+          { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
+          { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
+          { href: "/dashboard/audit", key: "audit", icon: ClipboardList, status: "active" },
+        ],
+      },
       { href: "/dashboard/import", key: "import", icon: Upload, status: "active" },
       { href: "/dashboard/feeds", key: "feeds", icon: Rss, status: "active" },
       { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
-      { href: "/dashboard/audit", key: "audit", icon: ClipboardList, status: "active" },
-      { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
       { href: "/dashboard/settings", key: "settings", icon: Settings, status: "active" },
     ],
   },
@@ -186,6 +212,21 @@ export function Sidebar({
   const [filter, setFilter] = useState<SidebarFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [favHrefs, setFavHrefs] = useState<Set<string>>(new Set());
+  const [openFolders, setOpenFolders] = useState<Set<string>>(() => {
+    try {
+      const v = localStorage.getItem("cc-sidebar-folders");
+      return v ? new Set(JSON.parse(v)) : new Set<string>();
+    } catch { return new Set<string>(); }
+  });
+
+  const toggleFolder = useCallback((key: string) => {
+    setOpenFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }, []);
 
   // Close user menu on outside click
   useEffect(() => {
@@ -297,20 +338,44 @@ export function Sidebar({
   };
 
   // ── Compute filtered groups (includes RBAC page visibility) ─
+  const filterEntry = (entry: NavEntry): boolean => {
+    if (permissions.visiblePages && !permissions.visiblePages.includes(entry.key)) return false;
+    if (filter === "all") return true;
+    if (filter === "active") return entry.status === "active";
+    if (filter === "coming-soon") return entry.status === "coming-soon";
+    if (filter === "favorites") {
+      if (isFolder(entry)) return entry.children.some((c) => favHrefs.has(c.href)) || favHrefs.has(entry.href);
+      return favHrefs.has(entry.href);
+    }
+    return true;
+  };
+
   const filteredGroups = NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => {
-      // RBAC: hide pages the user doesn't have access to
-      if (permissions.visiblePages && !permissions.visiblePages.includes(item.key)) {
-        return false;
+    items: group.items.filter(filterEntry).map((entry) => {
+      if (isFolder(entry)) {
+        return { ...entry, children: entry.children.filter(filterEntry) } as NavFolder;
       }
-      if (filter === "all") return true;
-      if (filter === "active") return item.status === "active";
-      if (filter === "coming-soon") return item.status === "coming-soon";
-      if (filter === "favorites") return favHrefs.has(item.href);
-      return true;
+      return entry;
     }),
   })).filter((group) => group.items.length > 0);
+
+  // Auto-open folder if a child page is active
+  useEffect(() => {
+    for (const group of NAV_GROUPS) {
+      for (const entry of group.items) {
+        if (isFolder(entry) && entry.children.some((c) => pathname === c.href || pathname.startsWith(c.href + "/"))) {
+          setOpenFolders((prev) => {
+            if (prev.has(entry.key)) return prev;
+            const next = new Set(prev);
+            next.add(entry.key);
+            try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
+            return next;
+          });
+        }
+      }
+    }
+  }, [pathname]);
 
   // ── Sliding active indicator measurement ─────────────
   useEffect(() => {
@@ -633,45 +698,162 @@ export function Sidebar({
               {/* Items — Grid view */}
               {!isCollapsed && viewMode === "grid" ? (
                 <div className="grid grid-cols-3 gap-1 px-1">
-                  {group.items.map(({ href, key, icon: Icon }) => {
-                    const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
-                    const label = (t.tabs as Record<string, string>)[key];
-                    const isFav = favHrefs.has(href);
-                    return (
-                      <div key={href} className="group/grid relative">
-                        <Link
-                          href={href}
-                          onClick={shouldCloseOnNav ? onClose : undefined}
-                          data-active={isActive || undefined}
-                          className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-colors ${
-                            isActive
-                              ? "nav-item-active bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
-                              : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-                          }`}
-                        >
-                          <Icon className="h-4 w-4 shrink-0" />
-                          <span className="text-[9px] leading-tight truncate w-full">{label}</span>
-                        </Link>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); handleToggleFav(href, label); }}
-                          className={`absolute top-0.5 right-0.5 rounded p-0.5 transition-all ${
-                            isFav
-                              ? "text-amber-400 opacity-100"
-                              : "text-slate-600 opacity-0 group-hover/grid:opacity-100 hover:text-amber-400"
-                          }`}
-                          aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
-                        >
-                          <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
-                        </button>
-                      </div>
-                    );
+                  {group.items.map((entry) => {
+                    // Flatten folders into grid — show folder + children as separate grid items
+                    const flatItems: NavItem[] = isFolder(entry)
+                      ? [{ href: entry.href, key: entry.key, icon: entry.icon, status: entry.status }, ...entry.children]
+                      : [entry];
+                    return flatItems.map(({ href, key, icon: Icon }) => {
+                      const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
+                      const label = (t.tabs as Record<string, string>)[key];
+                      const isFav = favHrefs.has(href);
+                      return (
+                        <div key={href} className="group/grid relative">
+                          <Link
+                            href={href}
+                            onClick={shouldCloseOnNav ? onClose : undefined}
+                            data-active={isActive || undefined}
+                            className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-colors ${
+                              isActive
+                                ? "nav-item-active bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                                : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                            }`}
+                          >
+                            <Icon className="h-4 w-4 shrink-0" />
+                            <span className="text-[9px] leading-tight truncate w-full">{label}</span>
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleToggleFav(href, label); }}
+                            className={`absolute top-0.5 right-0.5 rounded p-0.5 transition-all ${
+                              isFav
+                                ? "text-amber-400 opacity-100"
+                                : "text-slate-600 opacity-0 group-hover/grid:opacity-100 hover:text-amber-400"
+                            }`}
+                            aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
+                          >
+                            <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
+                          </button>
+                        </div>
+                      );
+                    });
                   })}
                 </div>
               ) : (
                 /* Items — List & Compact views */
                 <div className={viewMode === "compact" && !isCollapsed ? "space-y-0" : "space-y-0.5"}>
-                  {group.items.map(({ href, key, icon: Icon }) => {
+                  {group.items.map((entry) => {
+                    // ── Folder rendering ──
+                    if (isFolder(entry)) {
+                      const { href, key, icon: FolderIcon, children } = entry;
+                      const folderLabel = (t.tabs as Record<string, string>)[key];
+                      const isOpen = openFolders.has(key);
+                      const isFolderActive = pathname === href || pathname.startsWith(href + "/");
+                      const hasActiveChild = children.some((c) => pathname === c.href || pathname.startsWith(c.href + "/"));
+                      const isHighlighted = isFolderActive || hasActiveChild;
+
+                      if (isCollapsed) {
+                        return (
+                          <Link
+                            key={href}
+                            href={href}
+                            onClick={shouldCloseOnNav ? onClose : undefined}
+                            data-active={isHighlighted || undefined}
+                            aria-label={folderLabel}
+                            className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
+                              isHighlighted
+                                ? "nav-item-active text-[var(--cc-accent-300)]"
+                                : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                            }`}
+                          >
+                            {isHighlighted && (
+                              <span className={`absolute top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-[var(--cc-accent-500)] ${onRight ? "right-0" : "left-0"}`} aria-hidden />
+                            )}
+                            <FolderIcon className="h-4 w-4 shrink-0" />
+                            <span className={`absolute ${onRight ? "right-full mr-2" : "left-full ml-2"} rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}>
+                              {folderLabel}
+                            </span>
+                          </Link>
+                        );
+                      }
+
+                      return (
+                        <div key={key}>
+                          {/* Folder header */}
+                          <div className="group/item relative flex items-center">
+                            <Link
+                              href={href}
+                              onClick={shouldCloseOnNav ? onClose : undefined}
+                              data-active={isFolderActive || undefined}
+                              className={`relative z-10 flex flex-1 items-center gap-3 rounded-lg ${viewMode === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-2 text-sm"} transition-all duration-150 ${
+                                onRight ? "flex-row-reverse" : ""
+                              } ${
+                                isHighlighted
+                                  ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
+                                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
+                              }`}
+                            >
+                              <FolderIcon className={`${viewMode === "compact" ? "h-3.5 w-3.5" : "h-[18px] w-[18px]"} shrink-0`} />
+                              <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{folderLabel}</span>
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => toggleFolder(key)}
+                              className={`absolute ${onRight ? "left-2" : "right-2"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all text-slate-500 hover:text-slate-300`}
+                              aria-label={isOpen ? "Collapse" : "Expand"}
+                            >
+                              <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
+                            </button>
+                          </div>
+                          {/* Folder children */}
+                          <div
+                            className={`overflow-hidden transition-all duration-200 ease-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+                          >
+                            <div className={`${onRight ? "pr-3" : "pl-3"} ${viewMode === "compact" ? "" : "mt-0.5"}`}>
+                              {children.map(({ href: cHref, key: cKey, icon: CIcon }) => {
+                                const cActive = pathname === cHref || pathname.startsWith(cHref + "/");
+                                const cLabel = (t.tabs as Record<string, string>)[cKey];
+                                const cFav = favHrefs.has(cHref);
+                                return (
+                                  <div key={cHref} className="group/child relative">
+                                    <Link
+                                      href={cHref}
+                                      onClick={shouldCloseOnNav ? onClose : undefined}
+                                      data-active={cActive || undefined}
+                                      className={`relative z-10 flex items-center gap-2.5 rounded-md ${viewMode === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-[13px]"} transition-colors ${
+                                        onRight ? "flex-row-reverse" : ""
+                                      } ${
+                                        cActive
+                                          ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
+                                          : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/30"
+                                      }`}
+                                    >
+                                      <CIcon className={`${viewMode === "compact" ? "h-3 w-3" : "h-3.5 w-3.5"} shrink-0`} />
+                                      <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{cLabel}</span>
+                                    </Link>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleToggleFav(cHref, cLabel)}
+                                      className={`absolute ${onRight ? "left-1" : "right-1"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all ${
+                                        cFav
+                                          ? "text-amber-400 opacity-100"
+                                          : "text-slate-600 opacity-0 group-hover/child:opacity-100 hover:text-amber-400"
+                                      }`}
+                                      aria-label={cFav ? "Remove from favorites" : "Add to favorites"}
+                                    >
+                                      <Star className="h-2.5 w-2.5" fill={cFav ? "currentColor" : "none"} />
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // ── Regular item rendering ──
+                    const { href, key, icon: Icon } = entry;
                     const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
                     const label = (t.tabs as Record<string, string>)[key];
 

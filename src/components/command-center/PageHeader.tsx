@@ -36,7 +36,8 @@ type PageKey =
   | "comms"
   | "documents"
   | "audit"
-  | "emailTemplates";
+  | "emailTemplates"
+  | "control";
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
@@ -64,6 +65,7 @@ const pageRoutes: Record<PageKey, string> = {
   documents: "/dashboard/documents",
   audit: "/dashboard/audit",
   emailTemplates: "/dashboard/email-templates",
+  control: "/dashboard/control",
 };
 
 interface PageHeaderProps {

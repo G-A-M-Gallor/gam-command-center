@@ -16,6 +16,7 @@ export const translations = {
       roadmap: "מפת דרכים",
       settings: "הגדרות",
       automations: "אוטומציות",
+      control: "מרכז בקרה",
       admin: "לוג פיתוח",
       entities: "ישויות",
       entityFields: "ספריית שדות",
@@ -76,6 +77,10 @@ export const translations = {
       automations: {
         title: "מרכז אוטומציות",
         description: "לוח בקרה לחיבורים, משימות מתוזמנות, webhooks ופעולות מהירות",
+      },
+      control: {
+        title: "מרכז בקרה",
+        description: "סקירה כללית — מפת דרכים, לוג פיתוח, ארכיטקטורה ועדכונים אחרונים",
       },
       admin: {
         title: "לוג פיתוח",
@@ -2975,6 +2980,7 @@ export const translations = {
       roadmap: "Roadmap",
       settings: "Settings",
       automations: "Automations",
+      control: "Control Center",
       admin: "Dev Log",
       entities: "Entities",
       entityFields: "Field Library",
@@ -3035,6 +3041,10 @@ export const translations = {
       automations: {
         title: "Automation Hub",
         description: "Control panel for connections, scheduled jobs, webhooks & quick actions",
+      },
+      control: {
+        title: "Control Center",
+        description: "Overview — roadmap, dev log, architecture & recent updates",
       },
       admin: {
         title: "Dev Log",
@@ -5920,6 +5930,7 @@ export const translations = {
       roadmap: "Дорожная карта",
       settings: "Настройки",
       automations: "Автоматизация",
+      control: "Центр управления",
       admin: "Журнал разработки",
       entities: "Сущности",
       entityFields: "Библиотека полей",
@@ -5980,6 +5991,10 @@ export const translations = {
       automations: {
         title: "Центр автоматизации",
         description: "Панель управления подключениями, задачами, вебхуками и быстрыми действиями",
+      },
+      control: {
+        title: "Центр управления",
+        description: "Обзор — дорожная карта, журнал разработки, архитектура и последние обновления",
       },
       admin: {
         title: "Журнал разработки",
