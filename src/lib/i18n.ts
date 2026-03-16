@@ -891,6 +891,8 @@ export const translations = {
       revokeDocument: "בטל שליחה",
       editContent: "עריכת תוכן",
       editWarning: "המסמך כבר נשלח — עריכה אפשרית רק בטיוטות",
+      noFieldValues: "אין ערכי שדות",
+      fieldsReadOnly: "שדות לקריאה בלבד — עריכה אפשרית רק בטיוטות",
     },
     docTemplates: {
       searchTemplates: "חיפוש תבניות...",
@@ -3760,6 +3762,8 @@ export const translations = {
       revokeDocument: "Revoke",
       editContent: "Edit Content",
       editWarning: "Document has been sent — editing is only available for drafts",
+      noFieldValues: "No field values",
+      fieldsReadOnly: "Fields are read-only — editing is only available for drafts",
     },
     docTemplates: {
       searchTemplates: "Search templates...",
@@ -6621,6 +6625,8 @@ export const translations = {
       revokeDocument: "Отозвать",
       editContent: "Редактирование",
       editWarning: "Документ уже отправлен — редактирование доступно только для черновиков",
+      noFieldValues: "Нет значений полей",
+      fieldsReadOnly: "Поля только для чтения — редактирование доступно только для черновиков",
     },
     docTemplates: {
       searchTemplates: "Поиск шаблонов...",

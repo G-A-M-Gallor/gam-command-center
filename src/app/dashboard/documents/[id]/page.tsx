@@ -62,11 +62,22 @@ import type {
 } from "@/lib/supabase/schema";
 
 // ── Tab types ─────────────────────────────────────────────
-type Tab = "overview" | "editor" | "signers" | "views" | "locks" | "messages" | "checklist" | "audit";
+type Tab = "overview" | "editor" | "fields" | "signers" | "views" | "locks" | "messages" | "checklist" | "audit";
+
+interface TemplateFieldDef {
+  id: string;
+  type: string;
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+  sort_order: number;
+}
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; i18nKey: string }[] = [
   { key: "overview", icon: FileText, i18nKey: "overview" },
   { key: "editor", icon: Edit3, i18nKey: "editContent" },
+  { key: "fields", icon: ClipboardCheck, i18nKey: "fieldValues" },
   { key: "signers", icon: Users, i18nKey: "signers" },
   { key: "views", icon: Eye, i18nKey: "viewHistory" },
   { key: "locks", icon: Lock, i18nKey: "fieldLocks" },
@@ -94,6 +105,7 @@ export default function DocumentDetailPage() {
   const [auditLog, setAuditLog] = useState<DocumentAuditEntry[]>([]);
   const [checklistItems, setChecklistItems] = useState<DocumentChecklistItem[]>([]);
   const [checklistUploads, setChecklistUploads] = useState<DocumentChecklistUpload[]>([]);
+  const [templateFields, setTemplateFields] = useState<TemplateFieldDef[]>([]);
   const [loading, setLoading] = useState(true);
   const [msgBody, setMsgBody] = useState("");
   const [sendingMsg, setSendingMsg] = useState(false);
@@ -119,15 +131,15 @@ export default function DocumentDetailPage() {
     if (auditRes.data) setAuditLog(auditRes.data as DocumentAuditEntry[]);
     if (uploadsRes.data) setChecklistUploads(uploadsRes.data as DocumentChecklistUpload[]);
 
-    // Fetch checklist items if submission has a template
+    // Fetch checklist items and template fields if submission has a template
     const sub = subRes.data as DocumentSubmission | null;
     if (sub?.template_id) {
-      const { data: items } = await supabase
-        .from("document_checklist_items")
-        .select("*")
-        .eq("template_id", sub.template_id)
-        .order("sort_order");
-      if (items) setChecklistItems(items as DocumentChecklistItem[]);
+      const [checklistRes, templateRes] = await Promise.all([
+        supabase.from("document_checklist_items").select("*").eq("template_id", sub.template_id).order("sort_order"),
+        supabase.from("document_templates").select("fields").eq("id", sub.template_id).single(),
+      ]);
+      if (checklistRes.data) setChecklistItems(checklistRes.data as DocumentChecklistItem[]);
+      if (templateRes.data?.fields) setTemplateFields(templateRes.data.fields as unknown as TemplateFieldDef[]);
     }
     setLoading(false);
   }, [id]);
@@ -203,6 +215,19 @@ export default function DocumentDetailPage() {
       }
     },
     [id],
+  );
+
+  const handleFieldValueChange = useCallback(
+    async (fieldId: string, value: unknown) => {
+      if (!submission) return;
+      const newValues = { ...submission.field_values, [fieldId]: value };
+      setSubmission((prev) => prev ? { ...prev, field_values: newValues } : prev);
+      await supabase
+        .from("document_submissions")
+        .update({ field_values: newValues })
+        .eq("id", id);
+    },
+    [id, submission],
   );
 
   const handleAddSubmitter = async (data: { full_name: string; email: string; phone: string; role: SubmitterRole }) => {
@@ -456,6 +481,14 @@ export default function DocumentDetailPage() {
                 />
               )}
             </div>
+          )}
+          {tab === "fields" && (
+            <FieldValuesTab
+              submission={submission}
+              templateFields={templateFields}
+              dc={dc}
+              onChange={handleFieldValueChange}
+            />
           )}
           {tab === "signers" && (
             <SignersTab
@@ -1581,6 +1614,155 @@ function ActionBtn({ label, color, onClick }: { label: string; color: string; on
     <button onClick={onClick} className={`rounded-lg border px-3 py-1.5 text-sm ${colors[color] || colors.slate}`}>
       {label}
     </button>
+  );
+}
+
+// ── Field Values Tab ────────────────────────────────────
+
+function FieldValuesTab({
+  submission,
+  templateFields,
+  dc,
+  onChange,
+}: {
+  submission: DocumentSubmission;
+  templateFields: TemplateFieldDef[];
+  dc: Record<string, string>;
+  onChange: (fieldId: string, value: unknown) => void;
+}) {
+  const isDraft = submission.status === "draft";
+  const values = submission.field_values || {};
+
+  // If no template fields, allow free-form key-value editing
+  if (templateFields.length === 0) {
+    const entries = Object.entries(values);
+    return (
+      <div className="space-y-4">
+        {entries.length === 0 ? (
+          <EmptyState icon={ClipboardCheck} message={dc.noFieldValues || "No field values"} />
+        ) : (
+          <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+            <h3 className="mb-3 text-sm font-medium text-slate-300">{dc.fieldValues}</h3>
+            <div className="space-y-3">
+              {entries.map(([key, value]) => (
+                <div key={key}>
+                  <label className="mb-1 block text-xs font-medium text-slate-400">
+                    {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </label>
+                  <input
+                    value={String(value ?? "")}
+                    onChange={(e) => isDraft && onChange(key, e.target.value)}
+                    readOnly={!isDraft}
+                    className={`w-full rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none ${!isDraft ? "opacity-60 cursor-not-allowed" : ""}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {!isDraft && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-800/50 bg-amber-900/10 px-4 py-2">
+          <AlertTriangle className="h-4 w-4 text-amber-400" />
+          <span className="text-xs text-amber-400">{dc.fieldsReadOnly}</span>
+        </div>
+      )}
+
+      <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+        <h3 className="mb-4 text-sm font-medium text-slate-300">
+          {dc.fieldValues}
+          <span className="ms-2 text-xs text-slate-500">
+            ({templateFields.filter((f) => values[f.id] !== undefined && values[f.id] !== "").length}/{templateFields.length})
+          </span>
+        </h3>
+        <div className="space-y-4">
+          {templateFields
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((field) => (
+              <FieldInput
+                key={field.id}
+                field={field}
+                value={values[field.id]}
+                onChange={(v) => onChange(field.id, v)}
+                readOnly={!isDraft}
+              />
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FieldInput({
+  field,
+  value,
+  onChange,
+  readOnly,
+}: {
+  field: TemplateFieldDef;
+  value: unknown;
+  onChange: (v: unknown) => void;
+  readOnly: boolean;
+}) {
+  const baseClass = `w-full rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500 focus:outline-none ${readOnly ? "opacity-60 cursor-not-allowed" : ""}`;
+
+  return (
+    <div>
+      <label className="mb-1 flex items-center gap-1 text-xs font-medium text-slate-400">
+        {field.label || field.id}
+        {field.required && <span className="text-red-400">*</span>}
+      </label>
+
+      {field.type === "textarea" ? (
+        <textarea
+          value={String(value ?? "")}
+          onChange={(e) => !readOnly && onChange(e.target.value)}
+          readOnly={readOnly}
+          placeholder={field.placeholder}
+          rows={3}
+          className={baseClass + " resize-none"}
+        />
+      ) : field.type === "select" ? (
+        <select
+          value={String(value ?? "")}
+          onChange={(e) => !readOnly && onChange(e.target.value)}
+          disabled={readOnly}
+          className={baseClass}
+        >
+          <option value="">{field.placeholder || "—"}</option>
+          {(field.options || []).map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+      ) : field.type === "checkbox" ? (
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={Boolean(value)}
+            onChange={(e) => !readOnly && onChange(e.target.checked)}
+            disabled={readOnly}
+            className="rounded border-slate-600 bg-slate-800 text-purple-500 focus:ring-purple-500"
+          />
+          <span className="text-sm text-slate-300">{field.placeholder || field.label}</span>
+        </label>
+      ) : (
+        <input
+          type={field.type === "number" ? "number" : field.type === "date" ? "date" : field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"}
+          value={String(value ?? "")}
+          onChange={(e) => !readOnly && onChange(field.type === "number" ? Number(e.target.value) : e.target.value)}
+          readOnly={readOnly}
+          placeholder={field.placeholder}
+          className={baseClass}
+        />
+      )}
+    </div>
   );
 }
 
