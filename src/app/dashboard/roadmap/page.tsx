@@ -76,6 +76,7 @@ function statusColor(status: string): string {
   if (
     s.includes("progress") ||
     s.includes("active") ||
+    s.includes("פעיל") ||
     s.includes("בתהליך") ||
     s.includes("בביצוע")
   )
@@ -84,6 +85,8 @@ function statusColor(status: string): string {
     return "bg-red-500/20 text-red-400";
   if (s.includes("review") || s.includes("qa"))
     return "bg-amber-500/20 text-amber-400";
+  if (s.includes("מושהה") || s.includes("hold") || s.includes("מתוכנן") || s.includes("planned"))
+    return "bg-yellow-500/20 text-yellow-400";
   return "bg-slate-500/20 text-slate-400";
 }
 
@@ -91,7 +94,7 @@ function statusColor(status: string): string {
 
 function statusPriority(status: string): number {
   const s = status.toLowerCase();
-  if (s.includes("progress") || s.includes("active") || s.includes("בתהליך") || s.includes("בביצוע")) return 0;
+  if (s.includes("progress") || s.includes("active") || s.includes("פעיל") || s.includes("בתהליך") || s.includes("בביצוע")) return 0;
   if (s.includes("review") || s.includes("qa")) return 1;
   if (s.includes("block") || s.includes("חסום")) return 2;
   if (!s || s.includes("backlog") || s.includes("not started") || s.includes("טרם")) return 3;
