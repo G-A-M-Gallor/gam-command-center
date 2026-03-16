@@ -819,9 +819,13 @@ export function Sidebar({
                           <div className="group/item relative flex items-center">
                             <Link
                               href={href}
-                              onClick={(e) => {
-                                // Also open the folder when navigating
-                                setOpenFolders((prev) => { const next = new Set(prev); next.add(key); return next; });
+                              onClick={() => {
+                                // Toggle folder open/close when navigating
+                                setOpenFolders((prev) => {
+                                  const next = new Set(prev);
+                                  if (next.has(key)) next.delete(key); else next.add(key);
+                                  return next;
+                                });
                                 if (shouldCloseOnNav) onClose?.();
                               }}
                               data-active={isFolderActive || undefined}
