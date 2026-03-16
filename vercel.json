@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/sync/run",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 */4 * * *"
     }
   ],
   "routes": [
