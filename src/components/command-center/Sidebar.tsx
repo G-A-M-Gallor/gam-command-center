@@ -791,11 +791,9 @@ export function Sidebar({
 
                       if (isCollapsed) {
                         return (
-                          <button
+                          <Link
                             key={key}
-                            type="button"
-                            onClick={() => toggleFolder(key)}
-                            onDoubleClick={() => router.push(href)}
+                            href={href}
                             data-active={isHighlighted || undefined}
                             aria-label={folderLabel}
                             className={`group relative flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
@@ -811,18 +809,21 @@ export function Sidebar({
                             <span className={`absolute ${onRight ? "right-full mr-2" : "left-full ml-2"} rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}>
                               {folderLabel}
                             </span>
-                          </button>
+                          </Link>
                         );
                       }
 
                       return (
                         <div key={key}>
-                          {/* Folder header — click to toggle, double-click to navigate */}
+                          {/* Folder header — name navigates + opens, chevron toggles */}
                           <div className="group/item relative flex items-center">
-                            <button
-                              type="button"
-                              onClick={() => toggleFolder(key)}
-                              onDoubleClick={() => { router.push(href); if (shouldCloseOnNav) onClose?.(); }}
+                            <Link
+                              href={href}
+                              onClick={(e) => {
+                                // Also open the folder when navigating
+                                setOpenFolders((prev) => { const next = new Set(prev); next.add(key); return next; });
+                                if (shouldCloseOnNav) onClose?.();
+                              }}
                               data-active={isFolderActive || undefined}
                               className={`relative z-10 flex flex-1 items-center gap-3 rounded-lg ${viewMode === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-2 text-sm"} transition-all duration-150 ${
                                 onRight ? "flex-row-reverse" : ""
@@ -834,7 +835,14 @@ export function Sidebar({
                             >
                               <FolderIcon className={`${viewMode === "compact" ? "h-3.5 w-3.5" : "h-[18px] w-[18px]"} shrink-0`} />
                               <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{folderLabel}</span>
-                              <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => toggleFolder(key)}
+                              className={`${onRight ? "ml-0.5" : "mr-0.5"} rounded p-1 text-slate-500 hover:text-slate-300 hover:bg-slate-700/40 transition-colors`}
+                              aria-label={isOpen ? "Collapse" : "Expand"}
+                            >
+                              <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
                             </button>
                           </div>
                           {/* Folder children */}
