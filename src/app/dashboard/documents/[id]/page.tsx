@@ -29,6 +29,7 @@ import {
   FileCheck,
   FileX,
   Loader2,
+  Download,
 } from "lucide-react";
 import type {
   DocumentSubmission,
@@ -149,6 +150,34 @@ export default function DocumentDetailPage() {
     setSendingMsg(false);
   };
 
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+
+  const handleGeneratePdf = async (store = false) => {
+    setGeneratingPdf(true);
+    try {
+      const res = await fetch("/api/documents/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submission_id: id, store }),
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${submission?.name || "document"}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        if (store) fetchAll(); // refresh to show pdf_path
+      }
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    }
+    setGeneratingPdf(false);
+  };
+
   const handleUpdateStatus = async (status: string) => {
     const updates: Record<string, unknown> = { status };
     if (status === "cancelled") updates.cancelled_at = new Date().toISOString();
@@ -233,6 +262,8 @@ export default function DocumentDetailPage() {
         <div className="flex-1 overflow-y-auto p-6">
           {tab === "overview" && (
             <OverviewTab
+              onGeneratePdf={handleGeneratePdf}
+              generatingPdf={generatingPdf}
               submission={submission}
               submitters={submitters}
               views={views}
@@ -309,6 +340,8 @@ function OverviewTab({
   messages,
   dc,
   onStatusChange,
+  onGeneratePdf,
+  generatingPdf,
 }: {
   submission: DocumentSubmission;
   submitters: DocumentSubmitter[];
@@ -317,6 +350,8 @@ function OverviewTab({
   messages: DocumentMessage[];
   dc: Record<string, string>;
   onStatusChange: (status: string) => void;
+  onGeneratePdf: (store?: boolean) => void;
+  generatingPdf: boolean;
 }) {
   const [showActions, setShowActions] = useState(false);
   const signedCount = submitters.filter((s) => s.status === "signed").length;
@@ -386,6 +421,30 @@ function OverviewTab({
         </button>
         {showActions && (
           <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              onClick={() => onGeneratePdf(false)}
+              disabled={generatingPdf}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:border-slate-600 hover:bg-slate-800 disabled:opacity-50"
+            >
+              {generatingPdf ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {dc.downloadPdf}
+            </button>
+            <button
+              onClick={() => onGeneratePdf(true)}
+              disabled={generatingPdf}
+              className="flex items-center gap-1.5 rounded-lg border border-purple-700 px-3 py-1.5 text-sm text-purple-400 hover:bg-purple-900/30 disabled:opacity-50"
+            >
+              {generatingPdf ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FileCheck className="h-4 w-4" />
+              )}
+              {dc.generateAndStore}
+            </button>
             {submission.status === "draft" && (
               <ActionBtn label={dc.markSent} color="blue" onClick={() => onStatusChange("sent")} />
             )}

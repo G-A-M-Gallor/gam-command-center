@@ -857,6 +857,8 @@ export const translations = {
       review_pending: "ממתין",
       review_approved: "אושר",
       review_rejected: "נדחה",
+      downloadPdf: "הורד PDF",
+      generateAndStore: "צור ושמור PDF",
     },
     docTemplates: {
       searchTemplates: "חיפוש תבניות...",
@@ -3689,6 +3691,8 @@ export const translations = {
       review_pending: "Pending",
       review_approved: "Approved",
       review_rejected: "Rejected",
+      downloadPdf: "Download PDF",
+      generateAndStore: "Generate & Store PDF",
     },
     docTemplates: {
       searchTemplates: "Search templates...",
@@ -6513,6 +6517,8 @@ export const translations = {
       review_pending: "Ожидание",
       review_approved: "Одобрено",
       review_rejected: "Отклонено",
+      downloadPdf: "Скачать PDF",
+      generateAndStore: "Создать и сохранить PDF",
     },
     docTemplates: {
       searchTemplates: "Поиск шаблонов...",
