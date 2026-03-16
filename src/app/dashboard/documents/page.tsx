@@ -20,6 +20,12 @@ import {
   RefreshCw,
   LayoutTemplate,
   X,
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  TrendingUp,
+  AlertTriangle,
+  Timer,
 } from "lucide-react";
 import {
   fetchDocTemplates,
@@ -80,6 +86,7 @@ export default function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -200,6 +207,13 @@ export default function DocumentsPage() {
             />
           </div>
           <button
+            onClick={() => setShowAnalytics(!showAnalytics)}
+            className={`rounded-lg border p-1.5 ${showAnalytics ? "border-purple-600 text-purple-400" : "border-slate-700 text-slate-400 hover:border-slate-600 hover:text-slate-300"}`}
+            title={dp.analytics}
+          >
+            <BarChart3 className="h-4 w-4" />
+          </button>
+          <button
             onClick={fetchData}
             className="rounded-lg border border-slate-700 p-1.5 text-slate-400 hover:border-slate-600 hover:text-slate-300"
             title={dp.refresh}
@@ -222,6 +236,11 @@ export default function DocumentsPage() {
           </button>
         </div>
       </PageHeader>
+
+      {/* Analytics Panel */}
+      {showAnalytics && (
+        <AnalyticsPanel submissions={submissions} dp={dp} />
+      )}
 
       {/* Pipeline Kanban */}
       <div className="flex-1 overflow-x-auto p-4">
@@ -284,6 +303,119 @@ export default function DocumentsPage() {
               </span>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Analytics Panel ──────────────────────────────────────────
+
+function AnalyticsPanel({ submissions, dp }: { submissions: Submission[]; dp: ReturnType<typeof getTranslations>["documentsPage"] }) {
+  const total = submissions.length;
+  const signed = submissions.filter((s) => s.status === "signed").length;
+  const sent = submissions.filter((s) => ["sent", "viewed", "partially_signed"].includes(s.status)).length;
+  const draft = submissions.filter((s) => s.status === "draft").length;
+  const expired = submissions.filter((s) => s.expires_at && new Date(s.expires_at) < new Date() && s.status !== "signed").length;
+
+  // Completion rate (signed / total non-draft)
+  const nonDraft = total - draft;
+  const completionRate = nonDraft > 0 ? Math.round((signed / nonDraft) * 100) : 0;
+
+  // Average time to sign (for signed documents with sent_at)
+  const signedWithTimes = submissions.filter((s) => s.status === "signed" && s.sent_at && s.signed_at);
+  let avgSignTime = 0;
+  if (signedWithTimes.length > 0) {
+    const totalHours = signedWithTimes.reduce((sum, s) => {
+      const diff = new Date(s.signed_at!).getTime() - new Date(s.sent_at!).getTime();
+      return sum + diff / 3600000;
+    }, 0);
+    avgSignTime = Math.round(totalHours / signedWithTimes.length);
+  }
+
+  // Signing progress (total signed submitters / total submitters)
+  const totalSubmitters = submissions.reduce((sum, s) => sum + s.submitter_count, 0);
+  const signedSubmitters = submissions.reduce((sum, s) => sum + s.signed_count, 0);
+  const submitterRate = totalSubmitters > 0 ? Math.round((signedSubmitters / totalSubmitters) * 100) : 0;
+
+  // Expiring soon (within 7 days)
+  const now = Date.now();
+  const week = 7 * 86400000;
+  const expiringSoon = submissions.filter((s) =>
+    s.expires_at && new Date(s.expires_at).getTime() > now && new Date(s.expires_at).getTime() < now + week && s.status !== "signed",
+  ).length;
+
+  return (
+    <div className="border-b border-slate-800 bg-slate-900/50 px-4 py-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {/* Total Documents */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-3">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <FileText className="h-3.5 w-3.5" />
+            {dp.total}
+          </div>
+          <div className="mt-1 text-xl font-semibold text-slate-200">{total}</div>
+          <div className="mt-0.5 text-[10px] text-slate-600">
+            {draft} {dp.draft} · {sent} {dp.pending}
+          </div>
+        </div>
+
+        {/* Completion Rate */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-3">
+          <div className="flex items-center gap-2 text-xs text-emerald-500">
+            <TrendingUp className="h-3.5 w-3.5" />
+            {dp.completionRate}
+          </div>
+          <div className="mt-1 text-xl font-semibold text-emerald-400">{completionRate}%</div>
+          <div className="mt-0.5 text-[10px] text-slate-600">
+            {signed}/{nonDraft} {dp.completed}
+          </div>
+        </div>
+
+        {/* Signer Progress */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-3">
+          <div className="flex items-center gap-2 text-xs text-blue-400">
+            <PenTool className="h-3.5 w-3.5" />
+            {dp.signerProgress}
+          </div>
+          <div className="mt-1 text-xl font-semibold text-blue-400">{submitterRate}%</div>
+          <div className="mt-0.5 text-[10px] text-slate-600">
+            {signedSubmitters}/{totalSubmitters} {dp.signersSigned}
+          </div>
+        </div>
+
+        {/* Avg Sign Time */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-3">
+          <div className="flex items-center gap-2 text-xs text-amber-400">
+            <Timer className="h-3.5 w-3.5" />
+            {dp.avgSignTime}
+          </div>
+          <div className="mt-1 text-xl font-semibold text-amber-400">
+            {avgSignTime < 24 ? `${avgSignTime}h` : `${Math.round(avgSignTime / 24)}d`}
+          </div>
+          <div className="mt-0.5 text-[10px] text-slate-600">
+            {signedWithTimes.length} {dp.documentsAnalyzed}
+          </div>
+        </div>
+
+        {/* Expiring Soon */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-3">
+          <div className="flex items-center gap-2 text-xs text-orange-400">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            {dp.expiringSoon}
+          </div>
+          <div className="mt-1 text-xl font-semibold text-orange-400">{expiringSoon}</div>
+          <div className="mt-0.5 text-[10px] text-slate-600">{dp.within7Days}</div>
+        </div>
+
+        {/* Already Expired */}
+        <div className="rounded-lg border border-slate-800 bg-slate-900/30 p-3">
+          <div className="flex items-center gap-2 text-xs text-red-400">
+            <XCircle className="h-3.5 w-3.5" />
+            {dp.expired}
+          </div>
+          <div className="mt-1 text-xl font-semibold text-red-400">{expired}</div>
+          <div className="mt-0.5 text-[10px] text-slate-600">{dp.needsAttention}</div>
         </div>
       </div>
     </div>
