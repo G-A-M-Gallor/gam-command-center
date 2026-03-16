@@ -16,6 +16,11 @@ import {
   Clock,
   AlertCircle,
   RefreshCw,
+  FileSignature,
+  Send,
+  Eye,
+  CheckCircle2,
+  AlertTriangle as AlertTriangleIcon,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -29,6 +34,16 @@ interface EntityTypeWithCount extends EntityType {
   noteCount: number;
 }
 
+interface DocPipelineItem {
+  id: string;
+  name: string;
+  status: string;
+  created_at: string;
+  sent_at: string | null;
+  signed_at: string | null;
+  expires_at: string | null;
+}
+
 interface DashboardData {
   projectCount: number;
   activeProjects: number;
@@ -38,12 +53,15 @@ interface DashboardData {
   todayEvents: Array<{ time: string; title: { he: string; en: string }; type: string }>;
   entityTypes: EntityTypeWithCount[];
   recentEntities: Array<{ id: string; title: string; entity_type: string; status: string; last_edited_at: string }>;
+  docPipeline: DocPipelineItem[];
+  docStats: { draft: number; sent: number; viewed: number; signed: number; expiringSoon: number };
 }
 
 export default function DashboardPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const d = t.dashboardHome;
+  const dc = t.docControl;
   const router = useRouter();
   const isRtl = language === "he";
 
@@ -55,7 +73,7 @@ export default function DashboardPage() {
     setLoading(true);
     setError(false);
     try {
-      const [projectsRes, docsRes, eventsRes, entityTypesData, recentEntitiesRes] = await Promise.all([
+      const [projectsRes, docsRes, eventsRes, entityTypesData, recentEntitiesRes, docPipelineRes] = await Promise.all([
         supabase.from("projects").select("id, name, health_score, status, updated_at").order("updated_at", { ascending: false }).limit(10),
         supabase.from("vb_records").select("id", { count: "exact", head: true }),
         fetch("/api/events/today").then((r) => {
@@ -68,6 +86,11 @@ export default function DashboardPage() {
           .not("entity_type", "is", null)
           .order("last_edited_at", { ascending: false })
           .limit(5),
+        supabase.from("document_submissions")
+          .select("id, name, status, created_at, sent_at, signed_at, expires_at")
+          .not("status", "in", "(archived,cancelled)")
+          .order("created_at", { ascending: false })
+          .limit(20),
       ]);
 
       const projects = projectsRes.data || [];
@@ -87,6 +110,16 @@ export default function DashboardPage() {
         }),
       );
 
+      const docPipeline = (docPipelineRes.data ?? []) as DocPipelineItem[];
+      const sevenDaysFromNow = Date.now() + 7 * 24 * 60 * 60 * 1000;
+      const docStats = {
+        draft: docPipeline.filter((d) => d.status === "draft").length,
+        sent: docPipeline.filter((d) => ["sent", "viewed", "partially_signed"].includes(d.status)).length,
+        viewed: docPipeline.filter((d) => d.status === "viewed").length,
+        signed: docPipeline.filter((d) => d.status === "signed").length,
+        expiringSoon: docPipeline.filter((d) => d.expires_at && new Date(d.expires_at).getTime() < sevenDaysFromNow && new Date(d.expires_at).getTime() > Date.now()).length,
+      };
+
       setData({
         projectCount: projects.length,
         activeProjects: active.length,
@@ -96,6 +129,8 @@ export default function DashboardPage() {
         todayEvents: eventsRes.events || [],
         entityTypes: entityTypesWithCounts,
         recentEntities: (recentEntitiesRes.data ?? []) as DashboardData["recentEntities"],
+        docPipeline,
+        docStats,
       });
     } catch {
       setError(true);
@@ -239,6 +274,95 @@ export default function DashboardPage() {
                   <ChevronRight size={12} className={`text-slate-700 group-hover:text-slate-500 transition-colors ${isRtl ? "rotate-180" : ""}`} />
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Document Pipeline */}
+        {!loading && (data?.docPipeline.length ?? 0) > 0 && (
+          <div className="gam-card rounded-xl border border-slate-700/50 bg-slate-800/30 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-slate-200">
+                <FileSignature size={14} className="inline me-1.5 text-purple-400" />
+                {d.docPipeline}
+              </h3>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/documents")}
+                className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
+              >
+                {d.viewAll}
+                <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
+              </button>
+            </div>
+
+            {/* Pipeline mini stats */}
+            <div className="grid grid-cols-2 gap-2 mb-4 sm:grid-cols-4">
+              <div className="flex items-center gap-2 rounded-lg border border-slate-700/50 bg-slate-900/30 px-3 py-2">
+                <FileText size={14} className="text-slate-400" />
+                <div>
+                  <div className="text-lg font-bold text-slate-200">{data!.docStats.draft}</div>
+                  <div className="text-[10px] text-slate-500">{d.docDrafts}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border border-blue-800/30 bg-blue-900/10 px-3 py-2">
+                <Send size={14} className="text-blue-400" />
+                <div>
+                  <div className="text-lg font-bold text-blue-300">{data!.docStats.sent}</div>
+                  <div className="text-[10px] text-slate-500">{d.docPending}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-800/30 bg-emerald-900/10 px-3 py-2">
+                <CheckCircle2 size={14} className="text-emerald-400" />
+                <div>
+                  <div className="text-lg font-bold text-emerald-300">{data!.docStats.signed}</div>
+                  <div className="text-[10px] text-slate-500">{d.docSigned}</div>
+                </div>
+              </div>
+              {data!.docStats.expiringSoon > 0 && (
+                <div className="flex items-center gap-2 rounded-lg border border-amber-800/30 bg-amber-900/10 px-3 py-2">
+                  <AlertTriangleIcon size={14} className="text-amber-400" />
+                  <div>
+                    <div className="text-lg font-bold text-amber-300">{data!.docStats.expiringSoon}</div>
+                    <div className="text-[10px] text-slate-500">{d.docExpiring}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Recent documents list */}
+            <div className="space-y-1">
+              {data!.docPipeline.slice(0, 5).map((doc) => {
+                const statusConfig: Record<string, { color: string; icon: typeof FileText }> = {
+                  draft: { color: "text-slate-400", icon: FileText },
+                  sent: { color: "text-blue-400", icon: Send },
+                  viewed: { color: "text-amber-400", icon: Eye },
+                  partially_signed: { color: "text-orange-400", icon: FileSignature },
+                  signed: { color: "text-emerald-400", icon: CheckCircle2 },
+                };
+                const cfg = statusConfig[doc.status] || statusConfig.draft;
+                return (
+                  <button
+                    key={doc.id}
+                    type="button"
+                    onClick={() => router.push(`/dashboard/documents/${doc.id}`)}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start transition-colors hover:bg-slate-700/30"
+                  >
+                    <cfg.icon size={14} className={cfg.color} />
+                    <span className="flex-1 min-w-0 truncate text-sm text-slate-300">{doc.name}</span>
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                      doc.status === "signed" ? "bg-emerald-500/10 text-emerald-400" :
+                      doc.status === "draft" ? "bg-slate-700 text-slate-400" :
+                      "bg-blue-500/10 text-blue-400"
+                    }`}>
+                      {dc[doc.status as keyof typeof dc] || doc.status}
+                    </span>
+                    <span className="shrink-0 text-[10px] text-slate-600">
+                      {new Date(doc.sent_at || doc.created_at).toLocaleDateString(isRtl ? "he-IL" : "en-US", { day: "numeric", month: "short" })}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}

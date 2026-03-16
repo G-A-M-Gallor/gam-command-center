@@ -721,6 +721,11 @@ export const translations = {
       recentEntities: "ישויות אחרונות",
       noEntities: "אין ישויות עדיין",
       items: "פריטים",
+      docPipeline: "צינור מסמכים",
+      docDrafts: "טיוטות",
+      docPending: "ממתינים לחתימה",
+      docSigned: "חתומים",
+      docExpiring: "פג תוקף בקרוב",
     },
     hub: {
       // Quick Stats
@@ -3577,6 +3582,11 @@ export const translations = {
       recentEntities: "Recent Entities",
       noEntities: "No entities yet",
       items: "items",
+      docPipeline: "Document Pipeline",
+      docDrafts: "Drafts",
+      docPending: "Pending Signature",
+      docSigned: "Signed",
+      docExpiring: "Expiring Soon",
     },
     hub: {
       quickStats: "Quick Stats",
@@ -6420,6 +6430,11 @@ export const translations = {
       recentEntities: "Последние сущности",
       noEntities: "Сущностей пока нет",
       items: "элементов",
+      docPipeline: "Документы — конвейер",
+      docDrafts: "Черновики",
+      docPending: "Ожидают подписи",
+      docSigned: "Подписано",
+      docExpiring: "Истекают скоро",
     },
     hub: {
       quickStats: "Быстрая статистика",
