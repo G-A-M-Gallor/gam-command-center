@@ -44,6 +44,8 @@ import {
   Mail,
   ChevronRight,
   Gauge,
+  FolderOpen,
+  ListTree,
 } from "lucide-react";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -59,6 +61,7 @@ const STRIP_WIDTH = 48;
 
 const FILTER_KEY = "cc-sidebar-filter";
 const VIEW_MODE_KEY = "cc-sidebar-view-mode";
+const FOLDER_MODE_KEY = "cc-sidebar-folder-mode";
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -218,12 +221,25 @@ export function Sidebar({
       return v ? new Set(JSON.parse(v)) : new Set<string>();
     } catch { return new Set<string>(); }
   });
+  const [folderMode, setFolderMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(FOLDER_MODE_KEY) !== "flat";
+    } catch { return true; }
+  });
 
   const toggleFolder = useCallback((key: string) => {
     setOpenFolders((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
       try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleFolderModeToggle = useCallback(() => {
+    setFolderMode((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(FOLDER_MODE_KEY, next ? "folders" : "flat"); } catch {}
       return next;
     });
   }, []);
@@ -633,7 +649,7 @@ export function Sidebar({
               ))}
             </div>
 
-            {/* View mode toggle */}
+            {/* View mode toggle + folder mode */}
             <div data-cc-id="sidebar.view-mode" className="flex items-center justify-center gap-0.5">
               {viewModes.map(({ id, icon: ModeIcon, label }) => (
                 <button
@@ -650,6 +666,19 @@ export function Sidebar({
                   <ModeIcon className="h-3.5 w-3.5" />
                 </button>
               ))}
+              <div className="mx-1 h-3 w-px bg-slate-700/50" />
+              <button
+                type="button"
+                onClick={handleFolderModeToggle}
+                title={folderMode ? (sidebarT.viewFlat || "Flat") : (sidebarT.viewFolders || "Folders")}
+                className={`rounded p-1 transition-colors ${
+                  folderMode
+                    ? "text-[var(--cc-accent-300)] bg-[var(--cc-accent-600-20)]"
+                    : "text-slate-600 hover:text-slate-400"
+                }`}
+              >
+                {folderMode ? <ListTree className="h-3.5 w-3.5" /> : <FolderOpen className="h-3.5 w-3.5" />}
+              </button>
             </div>
           </div>
         )}
@@ -742,8 +771,16 @@ export function Sidebar({
               ) : (
                 /* Items — List & Compact views */
                 <div className={viewMode === "compact" && !isCollapsed ? "space-y-0" : "space-y-0.5"}>
-                  {group.items.map((entry) => {
-                    // ── Folder rendering ──
+                  {/* Flatten folders when folderMode is off */}
+                  {(folderMode
+                    ? group.items
+                    : group.items.flatMap((entry): NavEntry[] =>
+                        isFolder(entry)
+                          ? [{ href: entry.href, key: entry.key, icon: entry.icon, status: entry.status }, ...entry.children]
+                          : [entry]
+                      )
+                  ).map((entry) => {
+                    // ── Folder rendering (only when folderMode is on) ──
                     if (isFolder(entry)) {
                       const { href, key, icon: FolderIcon, children } = entry;
                       const folderLabel = (t.tabs as Record<string, string>)[key];
@@ -754,13 +791,14 @@ export function Sidebar({
 
                       if (isCollapsed) {
                         return (
-                          <Link
-                            key={href}
-                            href={href}
-                            onClick={shouldCloseOnNav ? onClose : undefined}
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => toggleFolder(key)}
+                            onDoubleClick={() => router.push(href)}
                             data-active={isHighlighted || undefined}
                             aria-label={folderLabel}
-                            className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
+                            className={`group relative flex w-full items-center justify-center rounded-lg p-2.5 transition-colors ${
                               isHighlighted
                                 ? "nav-item-active text-[var(--cc-accent-300)]"
                                 : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
@@ -773,17 +811,18 @@ export function Sidebar({
                             <span className={`absolute ${onRight ? "right-full mr-2" : "left-full ml-2"} rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}>
                               {folderLabel}
                             </span>
-                          </Link>
+                          </button>
                         );
                       }
 
                       return (
                         <div key={key}>
-                          {/* Folder header */}
+                          {/* Folder header — click to toggle, double-click to navigate */}
                           <div className="group/item relative flex items-center">
-                            <Link
-                              href={href}
-                              onClick={shouldCloseOnNav ? onClose : undefined}
+                            <button
+                              type="button"
+                              onClick={() => toggleFolder(key)}
+                              onDoubleClick={() => { router.push(href); if (shouldCloseOnNav) onClose?.(); }}
                               data-active={isFolderActive || undefined}
                               className={`relative z-10 flex flex-1 items-center gap-3 rounded-lg ${viewMode === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-2 text-sm"} transition-all duration-150 ${
                                 onRight ? "flex-row-reverse" : ""
@@ -795,14 +834,7 @@ export function Sidebar({
                             >
                               <FolderIcon className={`${viewMode === "compact" ? "h-3.5 w-3.5" : "h-[18px] w-[18px]"} shrink-0`} />
                               <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{folderLabel}</span>
-                            </Link>
-                            <button
-                              type="button"
-                              onClick={() => toggleFolder(key)}
-                              className={`absolute ${onRight ? "left-2" : "right-2"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all text-slate-500 hover:text-slate-300`}
-                              aria-label={isOpen ? "Collapse" : "Expand"}
-                            >
-                              <ChevronRight className={`h-3.5 w-3.5 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
+                              <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
                             </button>
                           </div>
                           {/* Folder children */}

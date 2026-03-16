@@ -461,6 +461,8 @@ export const translations = {
       viewList: "רשימה",
       viewGrid: "רשת",
       viewCompact: "מצומצם",
+      viewFolders: "תיקיות",
+      viewFlat: "שטוח",
     },
     shellPrefs: {
       title: "העדפות מסגרת",
@@ -3424,6 +3426,8 @@ export const translations = {
       viewList: "List",
       viewGrid: "Grid",
       viewCompact: "Compact",
+      viewFolders: "Folders",
+      viewFlat: "Flat",
     },
     shellPrefs: {
       title: "Frame Preferences",
@@ -6374,6 +6378,8 @@ export const translations = {
       viewList: "Список",
       viewGrid: "Сетка",
       viewCompact: "Компактно",
+      viewFolders: "Папки",
+      viewFlat: "Плоский",
     },
     shellPrefs: {
       title: "Настройки рамки",
