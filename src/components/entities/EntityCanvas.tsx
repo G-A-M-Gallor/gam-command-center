@@ -170,7 +170,7 @@ function FolderBlockContent({ noteId, l }: { noteId: string; l: Record<string, s
     (async () => {
       setLoading(true);
       const { data } = await supabase
-        .from('record_relations')
+        .from('note_relations')
         .select('source_id, target_id')
         .or(`source_id.eq.${noteId},target_id.eq.${noteId}`);
       if (data && data.length > 0) {
@@ -297,7 +297,7 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
     (async () => {
       setLoadingGraph(true);
       const { data } = await supabase
-        .from('record_relations')
+        .from('note_relations')
         .select('id, source_id, target_id, relation_type')
         .or(`source_id.eq.${noteId},target_id.eq.${noteId}`);
 

@@ -145,7 +145,7 @@ export async function updateFieldGroup(id: string, patch: Partial<FieldGroupInse
 
 export async function fetchEntityTypes(): Promise<EntityType[]> {
   const { data, error } = await supabase
-    .from('record_templates')
+    .from('entity_types')
     .select('*')
     .order('sort_order', { ascending: true });
   if (error) { console.error('fetchEntityTypes:', error.message); return []; }
@@ -154,7 +154,7 @@ export async function fetchEntityTypes(): Promise<EntityType[]> {
 
 export async function createEntityType(type: EntityTypeInsert): Promise<EntityType | null> {
   const { data, error } = await supabase
-    .from('record_templates')
+    .from('entity_types')
     .insert([type])
     .select()
     .single();
@@ -164,7 +164,7 @@ export async function createEntityType(type: EntityTypeInsert): Promise<EntityTy
 
 export async function updateEntityType(id: string, patch: Partial<EntityTypeInsert>): Promise<boolean> {
   const { error } = await supabase
-    .from('record_templates')
+    .from('entity_types')
     .update(patch)
     .eq('id', id);
   if (error) { console.error('updateEntityType:', error.message); return false; }
@@ -173,7 +173,7 @@ export async function updateEntityType(id: string, patch: Partial<EntityTypeInse
 
 export async function deleteEntityType(id: string): Promise<boolean> {
   const { error } = await supabase
-    .from('record_templates')
+    .from('entity_types')
     .delete()
     .eq('id', id);
   if (error) { console.error('deleteEntityType:', error.message); return false; }
@@ -396,7 +396,7 @@ export async function fetchNoteInfoBatch(ids: string[]): Promise<Record<string, 
 
 export async function fetchNoteRelations(noteId: string): Promise<NoteRelation[]> {
   const { data, error } = await supabase
-    .from('record_relations')
+    .from('note_relations')
     .select('*')
     .or(`source_id.eq.${noteId},target_id.eq.${noteId}`);
   if (error) { console.error('fetchNoteRelations:', error.message); return []; }
@@ -409,7 +409,7 @@ export async function createNoteRelation(
   relationType = 'related',
 ): Promise<NoteRelation | null> {
   const { data, error } = await supabase
-    .from('record_relations')
+    .from('note_relations')
     .insert([{ source_id: sourceId, target_id: targetId, relation_type: relationType }])
     .select()
     .single();
@@ -419,7 +419,7 @@ export async function createNoteRelation(
 
 export async function deleteNoteRelation(id: string): Promise<boolean> {
   const { error } = await supabase
-    .from('record_relations')
+    .from('note_relations')
     .delete()
     .eq('id', id);
   if (error) { console.error('deleteNoteRelation:', error.message); return false; }
@@ -656,7 +656,7 @@ export async function addCallLogEntry(
 export async function fetchLinkedTemplates(noteId: string): Promise<NoteRecord[]> {
   // Get relations where this note is the source and relation_type = 'template'
   const { data: rels, error } = await supabase
-    .from('record_relations')
+    .from('note_relations')
     .select('target_id')
     .eq('source_id', noteId)
     .eq('relation_type', 'template');
@@ -675,7 +675,7 @@ export async function fetchLinkedTemplates(noteId: string): Promise<NoteRecord[]
 
 export async function linkTemplate(noteId: string, templateId: string): Promise<boolean> {
   const { error } = await supabase
-    .from('record_relations')
+    .from('note_relations')
     .insert([{ source_id: noteId, target_id: templateId, relation_type: 'template' }]);
   if (error) { console.error('linkTemplate:', error.message); return false; }
   return true;
@@ -683,7 +683,7 @@ export async function linkTemplate(noteId: string, templateId: string): Promise<
 
 export async function unlinkTemplate(noteId: string, templateId: string): Promise<boolean> {
   const { error } = await supabase
-    .from('record_relations')
+    .from('note_relations')
     .delete()
     .eq('source_id', noteId)
     .eq('target_id', templateId)
