@@ -477,6 +477,32 @@ export const exportSchema = z.object({
 
 export type ExportInput = z.infer<typeof exportSchema>;
 
+// ─── Credit Consume ────────────────────────────────────────
+
+export const creditConsumeSchema = z.object({
+  action: z.string().min(1, "action is required").max(100),
+  quantity: z.number().int().min(1).max(10_000).optional().default(1),
+  workspaceId: z.string().uuid("workspaceId must be a valid UUID").optional(),
+  idempotencyKey: z.string().max(200).optional(),
+});
+
+export type CreditConsumeInput = z.infer<typeof creditConsumeSchema>;
+
+// ─── Credit Deposit ────────────────────────────────────────
+
+const VALID_DEPOSIT_TYPES = ["purchase", "grant", "promotion", "refund"] as const;
+
+export const creditDepositSchema = z.object({
+  amount: z.number().min(0.01, "amount must be positive").max(10_000_000),
+  type: z.enum(VALID_DEPOSIT_TYPES).optional().default("purchase"),
+  workspaceId: z.string().uuid("workspaceId must be a valid UUID").optional(),
+  reason: z.string().max(500).optional(),
+  paymentRef: z.string().max(200).optional(),
+  idempotencyKey: z.string().max(200).optional(),
+});
+
+export type CreditDepositInput = z.infer<typeof creditDepositSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.

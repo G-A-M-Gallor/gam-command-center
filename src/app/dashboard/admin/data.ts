@@ -390,6 +390,46 @@ export const routes: RouteEntry[] = [
     contexts: ['SettingsContext'], supabaseTables: ['email_templates', 'email_tenants'], visible: true, sidebarTab: true,
     connectedTo: ['comms'],
   },
+  {
+    id: 'api-sync-run', path: '/api/sync/run', name: 'Sync Engine Cron', nameHe: 'מנוע סנכרון (Cron)', icon: Zap,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'Vercel Cron endpoint — מריץ סנכרון דלתא כל 5 דקות לכל הטננטים',
+    descriptionEn: 'Vercel Cron endpoint — runs delta sync every 5 min for all active tenants',
+    components: [],
+    contexts: [], supabaseTables: ['sync_tenants', 'sync_configs', 'sync_runs', 'sync_events', 'sync_usage_monthly'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-sync-status', path: '/api/sync/status', name: 'Sync Status', nameHe: 'סטטוס סנכרון', icon: Activity,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'GET — מחזיר סטטוס סנכרון, הרצות אחרונות ושימוש חודשי',
+    descriptionEn: 'GET — returns sync configs, recent runs, and monthly usage',
+    components: [],
+    contexts: [], supabaseTables: ['sync_configs', 'sync_runs', 'sync_usage_monthly'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-credits-balance', path: '/api/credits/balance', name: 'Credit Balance', nameHe: 'יתרת קרדיטים', icon: Activity,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'GET — מחזיר יתרת ארנק, שימוש יומי+חודשי, תמחור, חבילות והתראות',
+    descriptionEn: 'GET — returns wallet balance, daily+monthly usage, pricing, packages, alerts',
+    components: [],
+    contexts: [], supabaseTables: ['vb_wallets', 'vb_credit_usage_daily', 'vb_credit_usage_monthly', 'vb_credit_pricing', 'vb_credit_packages', 'vb_credit_alerts'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-credits-consume', path: '/api/credits/consume', name: 'Credit Consume', nameHe: 'צריכת קרדיטים', icon: Zap,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'POST — ניכוי קרדיטים עבור פעולה (action + quantity)',
+    descriptionEn: 'POST — deduct credits for an action (action + quantity)',
+    components: [],
+    contexts: [], supabaseTables: ['vb_wallets', 'vb_wallet_transactions', 'vb_credit_usage_daily'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-credits-deposit', path: '/api/credits/deposit', name: 'Credit Deposit', nameHe: 'הפקדת קרדיטים', icon: Zap,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'POST — הפקדת קרדיטים (רכישה, מענק, קידום, החזר)',
+    descriptionEn: 'POST — deposit credits (purchase, grant, promotion, refund)',
+    components: [],
+    contexts: [], supabaseTables: ['vb_wallets', 'vb_wallet_transactions'], visible: false, sidebarTab: false,
+  },
 ];
 
 export const standalonePages: RouteEntry[] = [

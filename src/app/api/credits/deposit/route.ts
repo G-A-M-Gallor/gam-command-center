@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { depositCredits } from '@/lib/credits/ledger';
+import { creditDepositSchema } from '@/lib/api/schemas';
 
 /**
  * POST /api/credits/deposit
@@ -18,12 +19,12 @@ export async function POST(request: Request) {
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
   const user = auth.user!;
 
-  const body = await request.json();
-  const { amount, type = 'purchase', workspaceId, reason, paymentRef, idempotencyKey } = body;
-
-  if (!amount || amount <= 0) {
-    return NextResponse.json({ error: 'amount must be positive' }, { status: 400 });
+  const raw = await request.json();
+  const parsed = creditDepositSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
+  const { amount, type, workspaceId, reason, paymentRef, idempotencyKey } = parsed.data;
 
   const supabase = createServiceClient();
 

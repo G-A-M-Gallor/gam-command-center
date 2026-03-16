@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth';
 import { createServiceClient } from '@/lib/supabase/server';
 import { consumeCredits } from '@/lib/credits/ledger';
+import { creditConsumeSchema } from '@/lib/api/schemas';
 
 /**
  * POST /api/credits/consume
@@ -16,12 +17,12 @@ export async function POST(request: Request) {
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
   const user = auth.user!;
 
-  const body = await request.json();
-  const { action, quantity = 1, workspaceId, idempotencyKey } = body;
-
-  if (!action) {
-    return NextResponse.json({ error: 'action is required' }, { status: 400 });
+  const raw = await request.json();
+  const parsed = creditConsumeSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
+  const { action, quantity, workspaceId, idempotencyKey } = parsed.data;
 
   const supabase = createServiceClient();
 
