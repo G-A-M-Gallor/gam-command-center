@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Search, ChevronDown, Database } from "lucide-react";
+import { Sparkles, Search, ChevronDown, Database, AlertCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
@@ -31,6 +31,7 @@ export default function MatchingPage() {
   const [loading, setLoading] = useState(false);
   const [loadingEntities, setLoadingEntities] = useState(false);
   const [profile, setProfile] = useState<MatchProfile | null>(null);
+  const [matchError, setMatchError] = useState<string | null>(null);
 
   // Target titles and types for display
   const [targetTitles, setTargetTitles] = useState<Record<string, string>>({});
@@ -90,6 +91,7 @@ export default function MatchingPage() {
       if (!selectedEntity) return;
 
       setLoading(true);
+      setMatchError(null);
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData?.session?.access_token;
@@ -133,9 +135,11 @@ export default function MatchingPage() {
             setTargetTitles(titles);
             setTargetTypes(types);
           }
+        } else {
+          setMatchError(data.error || mt.matchError);
         }
       } catch {
-        // Silent fail
+        setMatchError(mt.matchError);
       }
       setLoading(false);
     },
@@ -146,6 +150,7 @@ export default function MatchingPage() {
   const handleEntitySelect = (entity: NoteRecord) => {
     setSelectedEntity(entity);
     setScores([]);
+    setMatchError(null);
   };
 
   // ── Handle card click → navigate to entity ──
@@ -238,7 +243,7 @@ export default function MatchingPage() {
               onChange={(e) => setTargetType(e.target.value)}
               className="w-full appearance-none rounded-lg border border-slate-700/50 bg-slate-800/50 px-3 py-2 text-sm text-slate-200 focus:border-[var(--cc-accent-500)] focus:outline-none"
             >
-              <option value="">All types</option>
+              <option value="">{mt.allTypes}</option>
               {entityTypes.map((et) => (
                 <option key={et.id} value={et.slug}>
                   {et.label[language] || et.label.en || et.slug}
@@ -327,6 +332,14 @@ export default function MatchingPage() {
       <div className="flex-1 flex flex-col min-w-0">
         {selectedEntity ? (
           <>
+            {/* Error banner */}
+            {matchError && (
+              <div className="shrink-0 flex items-center gap-2 border-b border-red-800/30 bg-red-900/10 px-4 py-2">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <span className="text-sm text-red-400">{matchError}</span>
+              </div>
+            )}
+
             {/* Match Board */}
             <div className="flex-1 min-h-0">
               <MatchBoard

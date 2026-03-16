@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, X, Loader2 } from "lucide-react";
+import { FileText, FileSignature, X, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/contexts/ToastContext";
 import { getTranslations } from "@/lib/i18n";
@@ -110,6 +110,16 @@ export function QuickCreatePanel() {
         >
           <FileText className="h-5 w-5 text-blue-400" />
           <span className="text-[11px]">{t.widgets.newDocAction}</span>
+        </button>
+
+        {/* Formal Document — navigates to document pipeline */}
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/documents")}
+          className="flex flex-col items-center gap-2 rounded-lg border border-slate-700 bg-slate-700/30 p-3 text-slate-300 transition-colors hover:border-slate-600 hover:bg-slate-700/50"
+        >
+          <FileSignature className="h-5 w-5 text-purple-400" />
+          <span className="text-[11px]">{t.widgets.newFormalDoc}</span>
         </button>
 
         {/* Dynamic entity type buttons */}
