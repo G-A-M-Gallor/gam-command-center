@@ -17,7 +17,11 @@ import {
   Plus,
   Search,
   RefreshCw,
+  LayoutTemplate,
+  X,
 } from "lucide-react";
+import { fetchDocTemplates } from "@/lib/supabase/documentQueries";
+import type { DocumentTemplate } from "@/lib/supabase/schema";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -65,9 +69,12 @@ export default function DocumentsPage() {
   const dp = t.documentsPage;
   const isRtl = language === "he";
 
+  const dt = t.docTemplates;
+
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -194,7 +201,15 @@ export default function DocumentsPage() {
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
+          <a
+            href="/dashboard/documents/templates"
+            className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-2.5 py-1.5 text-sm text-slate-400 hover:border-slate-600 hover:text-slate-300"
+          >
+            <LayoutTemplate className="h-4 w-4" />
+            {dt.manageTemplates}
+          </a>
           <button
+            onClick={() => setShowTemplatePicker(true)}
             className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-500"
           >
             <Plus className="h-4 w-4" />
@@ -241,6 +256,14 @@ export default function DocumentsPage() {
           })}
         </div>
       </div>
+
+      {/* Template Picker Modal */}
+      {showTemplatePicker && (
+        <TemplatePicker
+          dt={dt}
+          onClose={() => setShowTemplatePicker(false)}
+        />
+      )}
 
       {/* Stats bar */}
       <div className="border-t border-slate-800 px-4 py-2">
@@ -318,6 +341,87 @@ function SubmissionCard({ submission: sub, dp, language }: { submission: Submiss
         )}
       </div>
     </a>
+  );
+}
+
+// ── Template Picker Modal ────────────────────────────────────
+
+function TemplatePicker({
+  dt,
+  onClose,
+}: {
+  dt: Record<string, string>;
+  onClose: () => void;
+}) {
+  const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const data = await fetchDocTemplates("active");
+      setTemplates(data);
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const handleSelect = (tpl: DocumentTemplate) => {
+    // Navigate to template editor to create a submission from this template
+    window.location.href = `/dashboard/documents/templates/${tpl.id}`;
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
+          <h3 className="text-sm font-medium text-slate-200">{dt.selectTemplate}</h3>
+          <button onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-300">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Template list */}
+        <div className="max-h-80 overflow-y-auto p-3">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {templates.map((tpl) => (
+                <button
+                  key={tpl.id}
+                  onClick={() => handleSelect(tpl)}
+                  className="flex w-full items-center gap-3 rounded-lg border border-slate-800 p-3 text-start transition-colors hover:border-slate-700 hover:bg-slate-800/50"
+                >
+                  <LayoutTemplate className="h-5 w-5 shrink-0 text-purple-400" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium text-slate-200">{tpl.name}</div>
+                    {tpl.description && (
+                      <div className="mt-0.5 truncate text-xs text-slate-500">{tpl.description}</div>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-slate-500">v{tpl.version}</span>
+                </button>
+              ))}
+              {templates.length === 0 && (
+                <div className="py-6 text-center text-sm text-slate-500">
+                  {dt.noTemplates}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-slate-800 px-4 py-3">
+          <p className="text-center text-xs text-slate-500">
+            {dt.orBlank}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

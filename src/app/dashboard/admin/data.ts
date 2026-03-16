@@ -218,8 +218,10 @@ export const routes: RouteEntry[] = [
     components: [
       { id: 'doc-pipeline', name: 'DocumentsPage', file: 'app/dashboard/documents/page.tsx', status: 'active' },
       { id: 'doc-control', name: 'DocumentDetailPage', file: 'app/dashboard/documents/[id]/page.tsx', status: 'active' },
+      { id: 'doc-templates', name: 'DocumentTemplatesPage', file: 'app/dashboard/documents/templates/page.tsx', status: 'active' },
+      { id: 'doc-template-editor', name: 'DocumentTemplateEditorPage', file: 'app/dashboard/documents/templates/[id]/page.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['document_submissions', 'document_submitters', 'document_views', 'document_field_locks', 'document_messages', 'document_audit_log'], visible: true, sidebarTab: true,
+    contexts: ['SettingsContext'], supabaseTables: ['document_submissions', 'document_submitters', 'document_views', 'document_field_locks', 'document_messages', 'document_audit_log', 'document_templates', 'document_template_versions'], visible: true, sidebarTab: true,
     connectedTo: ['entity-view', 'document-sign'],
   },
   {
