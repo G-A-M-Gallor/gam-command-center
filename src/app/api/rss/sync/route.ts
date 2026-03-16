@@ -6,11 +6,19 @@ import Parser from 'rss-parser';
 const parser = new Parser({ timeout: 10_000 });
 
 /**
- * POST /api/rss/sync
- * Auth: JWT (manual trigger) or CRON_SECRET header (Vercel Cron)
- * Fetches all active RSS feeds, filters by keywords, upserts articles.
+ * GET /api/rss/sync  — Vercel Cron (sends GET with Authorization header)
+ * POST /api/rss/sync — Manual trigger
+ * Auth: JWT or CRON_SECRET
  */
+export async function GET(request: Request) {
+  return handleRssSync(request);
+}
+
 export async function POST(request: Request) {
+  return handleRssSync(request);
+}
+
+async function handleRssSync(request: Request) {
   // Auth: either JWT or CRON_SECRET
   const cronSecret = request.headers.get('x-cron-secret') || request.headers.get('authorization')?.replace('Bearer ', '');
   const isVercelCron = process.env.CRON_SECRET && cronSecret === process.env.CRON_SECRET;
