@@ -40,6 +40,7 @@ import {
   Settings as SettingsIcon,
   CircleDot,
   FileSignature,
+  ClipboardList,
 } from "lucide-react";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -114,6 +115,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/import", key: "import", icon: Upload, status: "active" },
       { href: "/dashboard/feeds", key: "feeds", icon: Rss, status: "active" },
       { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
+      { href: "/dashboard/audit", key: "audit", icon: ClipboardList, status: "active" },
       { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
       { href: "/dashboard/settings", key: "settings", icon: Settings, status: "active" },
     ],

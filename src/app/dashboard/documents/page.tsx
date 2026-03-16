@@ -32,6 +32,7 @@ import {
   createSubmissionFromTemplate,
   createBlankSubmission,
 } from "@/lib/supabase/documentQueries";
+import { ExportButton } from "@/components/command-center/ExportButton";
 import type { DocumentTemplate } from "@/lib/supabase/schema";
 
 // ── Types ────────────────────────────────────────────────────
@@ -213,6 +214,7 @@ export default function DocumentsPage() {
           >
             <BarChart3 className="h-4 w-4" />
           </button>
+          <ExportButton table="document_submissions" />
           <button
             onClick={fetchData}
             className="rounded-lg border border-slate-700 p-1.5 text-slate-400 hover:border-slate-600 hover:text-slate-300"

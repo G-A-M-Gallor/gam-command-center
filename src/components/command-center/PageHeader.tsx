@@ -34,7 +34,8 @@ type PageKey =
   | "feeds"
   | "roadmap"
   | "comms"
-  | "documents";
+  | "documents"
+  | "audit";
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
@@ -60,6 +61,7 @@ const pageRoutes: Record<PageKey, string> = {
   roadmap: "/dashboard/roadmap",
   comms: "/dashboard/comms",
   documents: "/dashboard/documents",
+  audit: "/dashboard/audit",
 };
 
 interface PageHeaderProps {

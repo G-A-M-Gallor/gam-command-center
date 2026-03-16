@@ -369,6 +369,16 @@ export const routes: RouteEntry[] = [
     ],
     contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates', 'notification_log', 'email_sends', 'email_events', 'email_tenants', 'email_templates', 'email_unsubscribes'], visible: true, sidebarTab: true,
   },
+  {
+    id: 'audit', path: '/dashboard/audit', name: 'Audit Log', nameHe: 'יומן ביקורת', icon: Shield,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
+    descriptionHe: 'יומן ביקורת מלא — שינויים במערכת ופעולות מסמכים, עם חיפוש, סינון ותצוגת JSON',
+    descriptionEn: 'Full audit log viewer — system changes and document actions, with search, filters and JSON detail view',
+    components: [
+      { id: 'audit-page', name: 'AuditPage', file: 'app/dashboard/audit/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['audit_log', 'document_audit_log'], visible: true, sidebarTab: true,
+  },
 ];
 
 export const standalonePages: RouteEntry[] = [
@@ -3035,5 +3045,29 @@ export const changelogEntries: ChangelogEntry[] = [
     purpose: 'Provides a structured knowledge base that the AI assistant can learn from to better understand business needs. Wiki entries with Q&A pairs serve as training context, bridging business domain knowledge with AI capabilities.',
     purposeHe: 'מספק בסיס ידע מובנה שהעוזר ה-AI לומד ממנו להכיר טוב יותר את צרכי העסק. ערכי ויקי עם זוגות שאלה-תשובה משמשים כהקשר אימון, מגשרים בין ידע תחום עסקי ליכולות AI.',
     connectedTo: ['AI Hub', 'Supabase'],
+  },
+  {
+    id: 'batch-export-csv',
+    feature: 'Batch Export (CSV)',
+    featureHe: 'ייצוא CSV',
+    status: 'working',
+    commitStatus: 'uncommitted',
+    workflowStatus: 'complete',
+    date: '2026-03-16',
+    phase: 2,
+    files: [
+      'src/app/api/export/route.ts',
+      'src/components/command-center/ExportButton.tsx',
+      'src/lib/api/schemas.ts',
+      'src/lib/i18n.ts',
+      'src/app/dashboard/documents/page.tsx',
+      'src/app/dashboard/admin/data.ts',
+    ],
+    route: '/api/export',
+    notes: 'General-purpose CSV export API endpoint supporting document_submissions, vb_records, and document_audit_log. Hebrew column headers, UTF-8 BOM for Excel compatibility, status translations, date formatting. Reusable ExportButton component with loading state and toast notifications. Integrated into Documents page.',
+    notesHe: 'נקודת קצה API לייצוא CSV כללית התומכת ב-document_submissions, vb_records ו-document_audit_log. כותרות עמודות בעברית, UTF-8 BOM לתאימות Excel, תרגום סטטוסים, עיצוב תאריכים. רכיב ExportButton לשימוש חוזר עם מצב טעינה והודעות toast. משולב בדף מסמכים.',
+    purpose: 'Enables data export for compliance, reporting, and offline analysis. Hebrew-first CSV format ensures Excel compatibility for Israeli business users. Reusable button component allows adding export to any page.',
+    purposeHe: 'מאפשר ייצוא נתונים לצורכי ציות, דיווח וניתוח לא מקוון. פורמט CSV בעברית מבטיח תאימות Excel למשתמשים עסקיים ישראליים. רכיב כפתור לשימוש חוזר מאפשר להוסיף ייצוא לכל דף.',
+    connectedTo: ['Documents Page', 'Supabase'],
   },
 ];

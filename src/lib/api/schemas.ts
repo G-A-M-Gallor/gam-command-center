@@ -461,6 +461,22 @@ export const documentReminderSchema = z.object({
 
 export type DocumentReminderInput = z.infer<typeof documentReminderSchema>;
 
+// ─── Export ─────────────────────────────────────────────────
+
+const VALID_EXPORT_TABLES = ["document_submissions", "vb_records", "document_audit_log"] as const;
+
+export const exportSchema = z.object({
+  table: z.enum(VALID_EXPORT_TABLES, {
+    error: `Invalid table — must be one of: ${VALID_EXPORT_TABLES.join(", ")}`,
+  }),
+  format: z.enum(["csv"], {
+    error: 'format must be "csv"',
+  }).optional().default("csv"),
+  filters: z.string().max(2_000, "filters JSON exceeds 2,000 character limit").optional(),
+});
+
+export type ExportInput = z.infer<typeof exportSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.
