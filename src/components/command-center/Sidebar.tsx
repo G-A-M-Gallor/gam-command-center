@@ -46,13 +46,27 @@ import {
   Gauge,
   FolderOpen,
   ListTree,
+  Pencil,
+  Check,
+  EyeOff,
+  Eye,
+  GripVertical,
+  RotateCcw,
+  BarChart3,
 } from "lucide-react";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
+import { useSidebarCustomization } from "@/lib/sidebar/useSidebarCustomization";
+import { buildDisplayGroups } from "@/lib/sidebar/sidebarCustomization";
+import { SidebarContextMenu } from "./SidebarContextMenu";
 import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
 
 const FULL_WIDTH = 240;
@@ -90,6 +104,65 @@ export type NavEntry = NavItem | NavFolder;
 
 function isFolder(entry: NavEntry): entry is NavFolder {
   return "type" in entry && entry.type === "folder";
+}
+
+// ─── Sortable Wrapper ────────────────────────────────────
+
+function SortableNavItem({
+  id,
+  editMode,
+  isHidden,
+  onToggleHide,
+  onRight,
+  children,
+}: {
+  id: string;
+  editMode: boolean;
+  isHidden: boolean;
+  onToggleHide: () => void;
+  onRight: boolean;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !editMode,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : isHidden ? 0.3 : 1,
+  };
+
+  if (!editMode) return <>{children}</>;
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} className="group/sortable relative">
+      <div
+        {...listeners}
+        className={`absolute top-1/2 -translate-y-1/2 z-30 cursor-grab active:cursor-grabbing p-0.5 rounded text-slate-600 hover:text-slate-400 transition-colors ${
+          onRight ? "right-0" : "left-0"
+        }`}
+      >
+        <GripVertical className="h-3 w-3" />
+      </div>
+      <div className={onRight ? "pr-5" : "pl-5"}>
+        {children}
+      </div>
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); onToggleHide(); }}
+        className={`absolute top-1/2 -translate-y-1/2 z-30 rounded p-0.5 transition-all ${
+          onRight ? "left-1" : "right-1"
+        } ${
+          isHidden
+            ? "text-amber-400 opacity-100"
+            : "text-slate-600 opacity-0 group-hover/sortable:opacity-100 hover:text-slate-400"
+        }`}
+      >
+        {isHidden ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+      </button>
+    </div>
+  );
 }
 
 export interface NavGroup {
@@ -227,6 +300,21 @@ export function Sidebar({
     } catch { return true; }
   });
 
+  // ── Sidebar customization (reorder, hide, folders, usage tracking) ──
+  const {
+    customization, editMode, reorder, createFolder: createCustomFolder, deleteFolder,
+    moveToFolder: moveItemToFolder, removeFromFolder, toggleHide, trackUsage,
+    toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, setEditMode,
+  } = useSidebarCustomization();
+
+  // Context menu state
+  const [ctxMenu, setCtxMenu] = useState<{
+    x: number; y: number; itemKey: string; href: string; label: string;
+  } | null>(null);
+
+  // DnD
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
   const toggleFolder = useCallback((key: string) => {
     setOpenFolders((prev) => {
       const next = new Set(prev);
@@ -353,28 +441,35 @@ export function Sidebar({
     try { localStorage.setItem(VIEW_MODE_KEY, v); } catch {}
   };
 
-  // ── Compute filtered groups (includes RBAC page visibility) ─
-  const filterEntry = (entry: NavEntry): boolean => {
-    if (permissions.visiblePages && !permissions.visiblePages.includes(entry.key)) return false;
-    if (filter === "all") return true;
-    if (filter === "active") return entry.status === "active";
-    if (filter === "coming-soon") return entry.status === "coming-soon";
-    if (filter === "favorites") {
-      if (isFolder(entry)) return entry.children.some((c) => favHrefs.has(c.href)) || favHrefs.has(entry.href);
-      return favHrefs.has(entry.href);
-    }
-    return true;
-  };
+  // ── Compute filtered groups (uses customization engine) ─
+  const filteredGroups = buildDisplayGroups(
+    NAV_GROUPS, customization, filter, favHrefs, permissions, editMode,
+  ).map((dg) => ({
+    id: dg.id,
+    labelKey: dg.labelKey as NavGroup["labelKey"],
+    isCustomFolder: dg.isCustomFolder,
+    customFolderName: dg.customFolderName,
+    items: dg.items,
+  }));
 
-  const filteredGroups = NAV_GROUPS.map((group) => ({
-    ...group,
-    items: group.items.filter(filterEntry).map((entry) => {
-      if (isFolder(entry)) {
-        return { ...entry, children: entry.children.filter(filterEntry) } as NavFolder;
+  // DnD handler — reorder items within a group
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    // Find which group contains both items
+    for (const group of filteredGroups) {
+      const flatItemKeys = group.items.flatMap((e) =>
+        isFolder(e) ? [e.key, ...e.children.map((c) => c.key)] : [e.key]
+      );
+      const oldIdx = flatItemKeys.indexOf(active.id as string);
+      const newIdx = flatItemKeys.indexOf(over.id as string);
+      if (oldIdx !== -1 && newIdx !== -1) {
+        const newOrder = arrayMove(flatItemKeys, oldIdx, newIdx);
+        reorder(group.id, newOrder);
+        break;
       }
-      return entry;
-    }),
-  })).filter((group) => group.items.length > 0);
+    }
+  }, [filteredGroups, reorder]);
 
   // Auto-open folder if a child page is active
   useEffect(() => {
@@ -679,7 +774,48 @@ export function Sidebar({
               >
                 {folderMode ? <ListTree className="h-3.5 w-3.5" /> : <FolderOpen className="h-3.5 w-3.5" />}
               </button>
+              <div className="mx-1 h-3 w-px bg-slate-700/50" />
+              <button
+                type="button"
+                onClick={toggleEditMode}
+                title={editMode ? (sidebarT.doneEditing || "Done") : (sidebarT.editMode || "Customize")}
+                className={`rounded p-1 transition-colors ${
+                  editMode
+                    ? "text-amber-400 bg-amber-400/10"
+                    : "text-slate-600 hover:text-slate-400"
+                }`}
+              >
+                {editMode ? <Check className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+              </button>
             </div>
+
+            {/* Edit mode toolbar */}
+            {editMode && (
+              <div className="flex items-center justify-center gap-1 pt-1">
+                <button
+                  type="button"
+                  onClick={handleToggleAutoSort}
+                  title={sidebarT.autoSort || "Sort by usage"}
+                  className={`rounded px-1.5 py-0.5 text-[10px] transition-colors ${
+                    customization.autoSortByUsage
+                      ? "text-[var(--cc-accent-300)] bg-[var(--cc-accent-600-20)]"
+                      : "text-slate-600 hover:text-slate-400"
+                  }`}
+                >
+                  <BarChart3 className="h-3 w-3 inline mr-0.5" />
+                  {sidebarT.autoSort || "Usage"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { if (confirm(sidebarT.resetConfirm || "Reset all customizations?")) resetSidebarCustom(); }}
+                  title={sidebarT.resetOrder || "Reset"}
+                  className="rounded px-1.5 py-0.5 text-[10px] text-slate-600 hover:text-red-400 transition-colors"
+                >
+                  <RotateCcw className="h-3 w-3 inline mr-0.5" />
+                  {sidebarT.resetOrder || "Reset"}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -690,7 +826,7 @@ export function Sidebar({
           className="relative min-h-0 flex-1 overflow-y-auto p-2"
         >
           {/* Sliding active indicator (list mode only) */}
-          {!isCollapsed && viewMode === "list" && indicatorStyle && (
+          {!isCollapsed && viewMode === "list" && indicatorStyle && !editMode && (
             <div
               className="absolute inset-x-2 rounded-lg bg-[var(--cc-accent-600-20)] border border-[var(--cc-accent-500)]/20 pointer-events-none transition-all duration-300 ease-out"
               style={{
@@ -700,8 +836,15 @@ export function Sidebar({
             />
           )}
 
-          {filteredGroups.map((group, gi) => (
-            <div key={group.id}>
+         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          {filteredGroups.map((group, gi) => {
+            // Collect all sortable IDs for this group
+            const sortableIds = group.items.flatMap((e) =>
+              isFolder(e) ? [e.key, ...e.children.map((c) => c.key)] : [e.key]
+            );
+            return (
+            <SortableContext key={group.id} items={sortableIds} strategy={verticalListSortingStrategy}>
+            <div>
               {/* Group label / divider */}
               {gi > 0 && isCollapsed && (
                 <div className="mx-2 my-2 border-t border-slate-700/30" />
@@ -732,15 +875,20 @@ export function Sidebar({
                     const flatItems: NavItem[] = isFolder(entry)
                       ? [{ href: entry.href, key: entry.key, icon: entry.icon, status: entry.status }, ...entry.children]
                       : [entry];
-                    return flatItems.map(({ href, key, icon: Icon }) => {
+                    return flatItems
+                      .filter(({ key: k }) => !customization.hiddenItems.includes(k) || editMode)
+                      .map(({ href, key: itemKey, icon: Icon }) => {
                       const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
-                      const label = (t.tabs as Record<string, string>)[key];
+                      const label = (t.tabs as Record<string, string>)[itemKey];
                       const isFav = favHrefs.has(href);
+                      const isItemHidden = customization.hiddenItems.includes(itemKey);
                       return (
-                        <div key={href} className="group/grid relative">
+                        <div key={href} className={`group/grid relative ${isItemHidden && editMode ? "opacity-30" : ""}`}
+                          onContextMenu={(e) => { if (editMode) return; e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey, href, label }); }}
+                        >
                           <Link
                             href={href}
-                            onClick={shouldCloseOnNav ? onClose : undefined}
+                            onClick={() => { trackUsage(itemKey); if (shouldCloseOnNav) onClose?.(); }}
                             data-active={isActive || undefined}
                             className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-colors ${
                               isActive
@@ -751,6 +899,7 @@ export function Sidebar({
                             <Icon className="h-4 w-4 shrink-0" />
                             <span className="text-[9px] leading-tight truncate w-full">{label}</span>
                           </Link>
+                          {!editMode && (
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleToggleFav(href, label); }}
@@ -763,6 +912,7 @@ export function Sidebar({
                           >
                             <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
                           </button>
+                          )}
                         </div>
                       );
                     });
@@ -820,6 +970,7 @@ export function Sidebar({
                             <Link
                               href={href}
                               onClick={() => {
+                                trackUsage(key);
                                 // Toggle folder open/close when navigating
                                 setOpenFolders((prev) => {
                                   const next = new Set(prev);
@@ -903,18 +1054,20 @@ export function Sidebar({
 
                     // ── Collapsed item ──
                     if (isCollapsed) {
+                      if (customization.hiddenItems.includes(key) && !editMode) return null;
                       return (
                         <Link
                           key={href}
                           href={href}
-                          onClick={shouldCloseOnNav ? onClose : undefined}
+                          onClick={() => { trackUsage(key); if (shouldCloseOnNav) onClose?.(); }}
+                          onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label }); }}
                           data-active={isActive || undefined}
                           aria-label={label}
                           className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
                             isActive
                               ? "nav-item-active text-[var(--cc-accent-300)]"
                               : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-                          }`}
+                          } ${customization.hiddenItems.includes(key) ? "opacity-30" : ""}`}
                         >
                           {isActive && (
                             <span
@@ -942,11 +1095,15 @@ export function Sidebar({
                     // ── Compact item ──
                     if (viewMode === "compact") {
                       const isFav = favHrefs.has(href);
+                      const isItemHidden = customization.hiddenItems.includes(key);
                       return (
-                        <div key={href} className="group/item relative">
+                        <SortableNavItem key={href} id={key} editMode={editMode} isHidden={isItemHidden} onToggleHide={() => toggleHide(key)} onRight={onRight}>
+                        <div className="group/item relative"
+                          onContextMenu={(e) => { if (editMode) return; e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label }); }}
+                        >
                           <Link
                             href={href}
-                            onClick={shouldCloseOnNav ? onClose : undefined}
+                            onClick={() => { trackUsage(key); if (shouldCloseOnNav) onClose?.(); }}
                             data-active={isActive || undefined}
                             className={`relative z-10 flex items-center gap-2 rounded px-2.5 py-1 text-xs transition-colors ${
                               onRight ? "flex-row-reverse" : ""
@@ -954,11 +1111,12 @@ export function Sidebar({
                               isActive
                                 ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
-                            }`}
+                            } ${isItemHidden && editMode ? "line-through" : ""}`}
                           >
                             <Icon className="h-3.5 w-3.5 shrink-0" />
                             <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{label}</span>
                           </Link>
+                          {!editMode && (
                           <button
                             type="button"
                             onClick={() => handleToggleFav(href, label)}
@@ -971,24 +1129,34 @@ export function Sidebar({
                           >
                             <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
                           </button>
+                          )}
                         </div>
+                        </SortableNavItem>
                       );
                     }
 
                     // ── Expanded list item ──
                     const isFav = favHrefs.has(href);
+                    const isItemHidden = customization.hiddenItems.includes(key);
                     return (
-                      <div key={href} className="group/item relative">
+                      <SortableNavItem key={href} id={key} editMode={editMode} isHidden={isItemHidden} onToggleHide={() => toggleHide(key)} onRight={onRight}>
+                      <div className="group/item relative"
+                        onContextMenu={(e) => {
+                          if (editMode) return;
+                          e.preventDefault();
+                          setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label });
+                        }}
+                      >
                         <Link
                           href={href}
-                          onClick={shouldCloseOnNav ? onClose : undefined}
+                          onClick={() => { trackUsage(key); if (shouldCloseOnNav) onClose?.(); }}
                           data-cc-id="sidebar.nav.link"
                           data-active={isActive || undefined}
                           className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
                             isActive
                               ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                               : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
-                          }`}
+                          } ${isItemHidden && editMode ? "line-through" : ""}`}
                         >
                           {onRight ? (
                             <>
@@ -1006,6 +1174,7 @@ export function Sidebar({
                             </>
                           )}
                         </Link>
+                        {!editMode && (
                         <button
                           type="button"
                           onClick={() => handleToggleFav(href, label)}
@@ -1018,14 +1187,51 @@ export function Sidebar({
                         >
                           <Star className="h-3 w-3" fill={isFav ? "currentColor" : "none"} />
                         </button>
+                        )}
                       </div>
+                      </SortableNavItem>
                     );
                   })}
                 </div>
               )}
             </div>
-          ))}
+            </SortableContext>
+          );
+          })}
+         </DndContext>
         </nav>
+
+        {/* Context menu */}
+        {ctxMenu && (
+          <SidebarContextMenu
+            x={ctxMenu.x}
+            y={ctxMenu.y}
+            itemKey={ctxMenu.itemKey}
+            href={ctxMenu.href}
+            label={ctxMenu.label}
+            isHidden={customization.hiddenItems.includes(ctxMenu.itemKey)}
+            customFolders={customization.customFolders}
+            isFavorite={favHrefs.has(ctxMenu.href)}
+            onToggleFav={() => handleToggleFav(ctxMenu.href, ctxMenu.label)}
+            onToggleHide={() => toggleHide(ctxMenu.itemKey)}
+            onMoveToFolder={(fid) => moveItemToFolder(ctxMenu.itemKey, fid)}
+            onRemoveFromFolder={() => removeFromFolder(ctxMenu.itemKey)}
+            onCreateFolder={(name) => createCustomFolder(name, "core")}
+            onClose={() => setCtxMenu(null)}
+            isRtl={language === "he"}
+            labels={{
+              hide: sidebarT.hide || "Hide",
+              show: sidebarT.show || "Show",
+              openNewTab: sidebarT.openNewTab || "Open in new tab",
+              addFav: sidebarT.addFav || "Add to favorites",
+              removeFav: sidebarT.removeFav || "Remove from favorites",
+              moveToFolder: sidebarT.moveToFolder || "Move to folder...",
+              newFolder: sidebarT.newFolder || "New folder...",
+              removeFromFolder: sidebarT.removeFromFolder || "Remove from folder",
+              folderName: sidebarT.folderName || "Folder name",
+            }}
+          />
+        )}
 
         {/* Footer — Downloads + Social */}
         {!isCollapsed && (
