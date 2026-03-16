@@ -251,6 +251,27 @@ export async function addSubmitter(
   return data as DocumentSubmitter;
 }
 
+export async function updateSubmitter(
+  id: string,
+  updates: Partial<Pick<DocumentSubmitter, 'full_name' | 'business_name' | 'email' | 'phone' | 'role' | 'sort_order'>>,
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('document_submitters')
+    .update(updates)
+    .eq('id', id);
+  if (error) { console.error('updateSubmitter:', error.message); return false; }
+  return true;
+}
+
+export async function deleteSubmitter(id: string): Promise<boolean> {
+  const { error } = await supabase
+    .from('document_submitters')
+    .delete()
+    .eq('id', id);
+  if (error) { console.error('deleteSubmitter:', error.message); return false; }
+  return true;
+}
+
 // ─── Media & Layouts ────────────────────────────────
 
 export async function fetchDocMedia(): Promise<DocumentMedia[]> {

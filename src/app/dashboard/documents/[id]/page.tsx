@@ -30,7 +30,16 @@ import {
   FileX,
   Loader2,
   Download,
+  UserPlus,
+  Trash2,
+  Copy,
+  Link,
+  ExternalLink,
+  Edit3,
+  Check,
+  X,
 } from "lucide-react";
+import type { SubmitterRole } from "@/lib/supabase/schema";
 import type {
   DocumentSubmission,
   DocumentSubmitter,
@@ -43,10 +52,11 @@ import type {
 } from "@/lib/supabase/schema";
 
 // ── Tab types ─────────────────────────────────────────────
-type Tab = "overview" | "views" | "locks" | "messages" | "checklist" | "audit";
+type Tab = "overview" | "signers" | "views" | "locks" | "messages" | "checklist" | "audit";
 
 const TAB_CONFIG: { key: Tab; icon: React.ElementType; i18nKey: string }[] = [
   { key: "overview", icon: FileText, i18nKey: "overview" },
+  { key: "signers", icon: Users, i18nKey: "signers" },
   { key: "views", icon: Eye, i18nKey: "viewHistory" },
   { key: "locks", icon: Lock, i18nKey: "fieldLocks" },
   { key: "messages", icon: MessageSquare, i18nKey: "messages" },
@@ -151,6 +161,57 @@ export default function DocumentDetailPage() {
   };
 
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [sendingForSign, setSendingForSign] = useState(false);
+  const [signingUrl, setSigningUrl] = useState<string | null>(null);
+
+  const handleAddSubmitter = async (data: { full_name: string; email: string; phone: string; role: SubmitterRole }) => {
+    const { data: newSub } = await supabase
+      .from("document_submitters")
+      .insert([{
+        submission_id: id,
+        role: data.role,
+        sort_order: submitters.length,
+        full_name: data.full_name || null,
+        email: data.email || null,
+        phone: data.phone || null,
+        status: "pending",
+        otp_verified: false,
+        consent_given: false,
+        meta: {},
+      }])
+      .select()
+      .single();
+    if (newSub) setSubmitters((prev) => [...prev, newSub as DocumentSubmitter]);
+  };
+
+  const handleUpdateSubmitter = async (subId: string, updates: Partial<DocumentSubmitter>) => {
+    await supabase.from("document_submitters").update(updates).eq("id", subId);
+    setSubmitters((prev) => prev.map((s) => s.id === subId ? { ...s, ...updates } : s));
+  };
+
+  const handleDeleteSubmitter = async (subId: string) => {
+    await supabase.from("document_submitters").delete().eq("id", subId);
+    setSubmitters((prev) => prev.filter((s) => s.id !== subId));
+  };
+
+  const handleSendForSigning = async () => {
+    setSendingForSign(true);
+    try {
+      const res = await fetch("/api/documents/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ submission_id: id }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setSigningUrl(data.signing_url);
+        fetchAll();
+      }
+    } catch (err) {
+      console.error("Send failed:", err);
+    }
+    setSendingForSign(false);
+  };
 
   const handleGeneratePdf = async (store = false) => {
     setGeneratingPdf(true);
@@ -246,6 +307,11 @@ export default function DocumentDetailPage() {
             >
               <Icon className="h-4 w-4" />
               <span>{dc[i18nKey as keyof typeof dc]}</span>
+              {key === "signers" && submitters.length > 0 && (
+                <span className="ms-auto rounded-full bg-blue-500/20 px-1.5 py-0.5 text-[10px] text-blue-400">
+                  {submitters.filter((s) => s.status === "signed").length}/{submitters.length}
+                </span>
+              )}
               {key === "messages" && messages.filter((m) => !m.is_read && m.sender_type === "submitter").length > 0 && (
                 <span className="ms-auto rounded-full bg-red-500/20 px-1.5 py-0.5 text-[10px] text-red-400">
                   {messages.filter((m) => !m.is_read && m.sender_type === "submitter").length}
@@ -271,6 +337,19 @@ export default function DocumentDetailPage() {
               messages={messages}
               dc={dc}
               onStatusChange={handleUpdateStatus}
+            />
+          )}
+          {tab === "signers" && (
+            <SignersTab
+              submission={submission}
+              submitters={submitters}
+              dc={dc}
+              onAdd={handleAddSubmitter}
+              onUpdate={handleUpdateSubmitter}
+              onDelete={handleDeleteSubmitter}
+              onSend={handleSendForSigning}
+              sending={sendingForSign}
+              signingUrl={signingUrl}
             />
           )}
           {tab === "views" && <ViewsTab views={views} dc={dc} />}
@@ -457,6 +536,308 @@ function OverviewTab({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Signers Tab ─────────────────────────────────────────
+function SignersTab({
+  submission,
+  submitters,
+  dc,
+  onAdd,
+  onUpdate,
+  onDelete,
+  onSend,
+  sending,
+  signingUrl,
+}: {
+  submission: DocumentSubmission;
+  submitters: DocumentSubmitter[];
+  dc: Record<string, string>;
+  onAdd: (data: { full_name: string; email: string; phone: string; role: SubmitterRole }) => void;
+  onUpdate: (id: string, updates: Partial<DocumentSubmitter>) => void;
+  onDelete: (id: string) => void;
+  onSend: () => void;
+  sending: boolean;
+  signingUrl: string | null;
+}) {
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ full_name: "", email: "", phone: "", role: "signer" as SubmitterRole });
+  const [copied, setCopied] = useState(false);
+
+  const isDraft = submission.status === "draft";
+  const isSent = ["sent", "viewed", "partially_signed"].includes(submission.status);
+
+  const handleSubmitAdd = () => {
+    if (!formData.full_name.trim()) return;
+    onAdd(formData);
+    setFormData({ full_name: "", email: "", phone: "", role: "signer" });
+    setShowForm(false);
+  };
+
+  const handleCopyLink = async (url: string) => {
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Send for Signing Section */}
+      {isDraft && submitters.length > 0 && (
+        <div className="rounded-xl border border-purple-800/50 bg-purple-900/10 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-purple-300">{dc.sendForSigning}</h3>
+              <p className="mt-0.5 text-xs text-slate-500">{dc.sendForSigningDesc}</p>
+            </div>
+            <button
+              onClick={onSend}
+              disabled={sending || submitters.length === 0}
+              className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+            >
+              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {dc.sendNow}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Signing Link */}
+      {(signingUrl || isSent) && (
+        <div className="rounded-xl border border-emerald-800/50 bg-emerald-900/10 p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <Link className="h-4 w-4 text-emerald-400" />
+            <h3 className="text-sm font-medium text-emerald-300">{dc.signingLink}</h3>
+          </div>
+          {signingUrl ? (
+            <div className="flex items-center gap-2">
+              <input
+                readOnly
+                value={signingUrl}
+                className="flex-1 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2 text-xs text-slate-300 font-mono"
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <button
+                onClick={() => handleCopyLink(signingUrl)}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-emerald-600 hover:text-emerald-400"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? dc.copied : dc.copyLink}
+              </button>
+              <a
+                href={signingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:border-blue-600 hover:text-blue-400"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500">{dc.documentSentInfo}</p>
+          )}
+        </div>
+      )}
+
+      {/* Submitter List */}
+      <div className="rounded-xl border border-slate-800 bg-slate-900/30 p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-medium text-slate-300">{dc.signers} ({submitters.length})</h3>
+          {isDraft && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-400 hover:border-purple-600 hover:text-purple-400"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              {dc.addSigner}
+            </button>
+          )}
+        </div>
+
+        {/* Add form */}
+        {showForm && (
+          <div className="mb-4 rounded-lg border border-purple-800/50 bg-purple-900/10 p-3 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <input
+                value={formData.full_name}
+                onChange={(e) => setFormData((p) => ({ ...p, full_name: e.target.value }))}
+                placeholder={dc.fullName}
+                className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500 focus:outline-none"
+              />
+              <input
+                value={formData.email}
+                onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                placeholder={dc.emailAddress}
+                type="email"
+                className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500 focus:outline-none"
+              />
+              <input
+                value={formData.phone}
+                onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+                placeholder={dc.phoneNumber}
+                type="tel"
+                className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-sm text-slate-200 placeholder:text-slate-500 focus:border-purple-500 focus:outline-none"
+              />
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData((p) => ({ ...p, role: e.target.value as SubmitterRole }))}
+                className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+              >
+                <option value="signer">{dc.role_signer}</option>
+                <option value="witness">{dc.role_witness}</option>
+                <option value="approver">{dc.role_approver}</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => { setShowForm(false); setFormData({ full_name: "", email: "", phone: "", role: "signer" }); }}
+                className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-300"
+              >
+                {dc.cancelAction}
+              </button>
+              <button
+                onClick={handleSubmitAdd}
+                disabled={!formData.full_name.trim()}
+                className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs text-white hover:bg-purple-500 disabled:opacity-50"
+              >
+                {dc.addSigner}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Submitter cards */}
+        {submitters.length === 0 ? (
+          <EmptyState icon={Users} message={dc.noSigners} />
+        ) : (
+          <div className="space-y-2">
+            {submitters.map((s) => (
+              <SubmitterCard
+                key={s.id}
+                submitter={s}
+                dc={dc}
+                isDraft={isDraft}
+                editing={editingId === s.id}
+                onEdit={() => setEditingId(editingId === s.id ? null : s.id)}
+                onUpdate={(updates) => { onUpdate(s.id, updates); setEditingId(null); }}
+                onDelete={() => onDelete(s.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SubmitterCard({
+  submitter: s,
+  dc,
+  isDraft,
+  editing,
+  onEdit,
+  onUpdate,
+  onDelete,
+}: {
+  submitter: DocumentSubmitter;
+  dc: Record<string, string>;
+  isDraft: boolean;
+  editing: boolean;
+  onEdit: () => void;
+  onUpdate: (updates: Partial<DocumentSubmitter>) => void;
+  onDelete: () => void;
+}) {
+  const [editForm, setEditForm] = useState({
+    full_name: s.full_name || "",
+    email: s.email || "",
+    phone: s.phone || "",
+    role: s.role,
+  });
+
+  const canModify = isDraft && s.status === "pending";
+  const roleLabel = dc[`role_${s.role}` as keyof typeof dc] || s.role;
+
+  if (editing && canModify) {
+    return (
+      <div className="rounded-lg border border-purple-800/50 bg-purple-900/10 p-3 space-y-2">
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            value={editForm.full_name}
+            onChange={(e) => setEditForm((p) => ({ ...p, full_name: e.target.value }))}
+            placeholder={dc.fullName}
+            className="rounded border border-slate-700 bg-slate-800/50 px-2 py-1 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+          />
+          <input
+            value={editForm.email}
+            onChange={(e) => setEditForm((p) => ({ ...p, email: e.target.value }))}
+            placeholder={dc.emailAddress}
+            type="email"
+            className="rounded border border-slate-700 bg-slate-800/50 px-2 py-1 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+          />
+          <input
+            value={editForm.phone}
+            onChange={(e) => setEditForm((p) => ({ ...p, phone: e.target.value }))}
+            placeholder={dc.phoneNumber}
+            className="rounded border border-slate-700 bg-slate-800/50 px-2 py-1 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+          />
+          <select
+            value={editForm.role}
+            onChange={(e) => setEditForm((p) => ({ ...p, role: e.target.value as SubmitterRole }))}
+            className="rounded border border-slate-700 bg-slate-800/50 px-2 py-1 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+          >
+            <option value="signer">{dc.role_signer}</option>
+            <option value="witness">{dc.role_witness}</option>
+            <option value="approver">{dc.role_approver}</option>
+          </select>
+        </div>
+        <div className="flex justify-end gap-2">
+          <button onClick={onEdit} className="rounded px-2 py-1 text-xs text-slate-400 hover:text-slate-300">
+            {dc.cancelAction}
+          </button>
+          <button
+            onClick={() => onUpdate({
+              full_name: editForm.full_name || null,
+              email: editForm.email || null,
+              phone: editForm.phone || null,
+              role: editForm.role,
+            })}
+            className="rounded bg-purple-600 px-2 py-1 text-xs text-white hover:bg-purple-500"
+          >
+            <Check className="inline h-3 w-3 me-1" />{dc.save}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
+      <SubmitterStatusIcon status={s.status} />
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-slate-200">{s.full_name || s.business_name || dc.unnamed}</span>
+          <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] text-slate-500">{roleLabel}</span>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-slate-500">
+          {s.email && <span>{s.email}</span>}
+          {s.phone && <span>{s.phone}</span>}
+          {s.signed_at && <span className="text-emerald-400">{dc.signedAt}: {fmtDate(s.signed_at)}</span>}
+          {s.status === "declined" && <span className="text-red-400">{dc.declined}</span>}
+        </div>
+      </div>
+      {canModify && (
+        <div className="flex items-center gap-1">
+          <button onClick={onEdit} className="rounded p-1 text-slate-500 hover:text-purple-400" title={dc.edit}>
+            <Edit3 className="h-3.5 w-3.5" />
+          </button>
+          <button onClick={onDelete} className="rounded p-1 text-slate-500 hover:text-red-400" title={dc.delete}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

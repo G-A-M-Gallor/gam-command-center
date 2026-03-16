@@ -416,6 +416,24 @@ export const googleAccountDeleteSchema = z.object({
 
 export type GoogleAccountDeleteInput = z.infer<typeof googleAccountDeleteSchema>;
 
+// ─── Document Send ──────────────────────────────────────────
+
+export const documentSendSchema = z.object({
+  submission_id: z.string().uuid("submission_id must be a valid UUID"),
+  expires_in_days: z.number().int().min(1).max(365).optional().default(30),
+});
+
+export type DocumentSendInput = z.infer<typeof documentSendSchema>;
+
+// ─── Document PDF ───────────────────────────────────────────
+
+export const documentPdfSchema = z.object({
+  submission_id: z.string().uuid("submission_id must be a valid UUID"),
+  store: z.boolean().optional().default(false),
+});
+
+export type DocumentPdfInput = z.infer<typeof documentPdfSchema>;
+
 // ─── Origami Sync ───────────────────────────────────────────
 // The origami/sync POST handler takes no user-supplied body fields —
 // it fetches directly from Origami using server-side env vars.
