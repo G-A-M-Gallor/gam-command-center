@@ -93,9 +93,9 @@ async function syncProject(page: any) {
     portfolio_url: rel(p["Portfolio"]),
     synced_at:     new Date().toISOString(),
   };
-  const { error } = await supabase.from("projects").upsert(row, { onConflict: "notion_url" });
+  const { error } = await supabase.from("roadmap_projects").upsert(row, { onConflict: "notion_url" });
   if (error) throw error;
-  await log("projects", row.notion_url, "upsert", row);
+  await log("roadmap_projects", row.notion_url, "upsert", row);
 }
 
 // ── SPRINTS ──────────────────────────────────────────────────────

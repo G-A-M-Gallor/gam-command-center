@@ -47,6 +47,26 @@ interface AllLayersState {
   loaded: boolean;
 }
 
+// ─── Supabase row → RoadmapRecord ───────────────────
+
+function rowToRecord(row: Record<string, unknown>, layer: LayerKey): RoadmapRecord {
+  const properties: Record<string, string> = {};
+  for (const [key, val] of Object.entries(row)) {
+    if (val != null && key !== "id") {
+      properties[key] = String(val);
+    }
+  }
+
+  return {
+    id: String(row.notion_url ?? row.id),
+    url: (row.notion_url as string) ?? "",
+    title: (row.name as string) ?? "Untitled",
+    status: (row.status as string) ?? "",
+    layer,
+    properties,
+  };
+}
+
 // ─── Status Badge ────────────────────────────────────
 
 function statusColor(status: string): string {
@@ -106,7 +126,6 @@ export default function RoadmapPage() {
     error: null,
   });
 
-  // All-layers state for grouped views
   const [allLayers, setAllLayers] = useState<AllLayersState>({
     data: { goals: [], portfolios: [], projects: [], sprints: [], tasks: [], subtasks: [] },
     loading: false,
@@ -114,41 +133,26 @@ export default function RoadmapPage() {
     loaded: false,
   });
 
-  // ── Fetch single layer ──────────────────────────────
+  // ── Fetch single layer from Supabase ──────────────
 
   const fetchLayer = useCallback(
-    async (layer: LayerKey, parentId?: string) => {
+    async (layer: LayerKey, parentUrl?: string) => {
       setState({ items: [], loading: true, error: null });
 
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const token = session?.access_token;
-        if (!token) {
-          setState({ items: [], loading: false, error: "Not authenticated" });
-          return;
-        }
-        const params = new URLSearchParams({ layer });
-        if (parentId) params.set("parentId", parentId);
+        const config = LAYER_CONFIG[layer];
+        let query = supabase.from(config.table).select("*");
 
-        const res = await fetch(`/api/roadmap/layers?${params}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(
-            data.error || `HTTP ${res.status}`,
-          );
+        if (parentUrl && config.parentFkColumn) {
+          query = query.eq(config.parentFkColumn, parentUrl);
         }
 
-        const data = await res.json();
-        setState({
-          items: data.items ?? [],
-          loading: false,
-          error: null,
-        });
+        const { data, error } = await query.order("name");
+
+        if (error) throw new Error(error.message);
+
+        const items = (data ?? []).map((row: Record<string, unknown>) => rowToRecord(row, layer));
+        setState({ items, loading: false, error: null });
       } catch (err) {
         setState({
           items: [],
@@ -160,30 +164,26 @@ export default function RoadmapPage() {
     [supabase],
   );
 
-  // ── Fetch all layers (for grouped views) ────────────
+  // ── Fetch all layers from Supabase (for grouped views) ─
 
   const fetchAllLayers = useCallback(async () => {
     if (allLayers.loaded) return;
     setAllLayers(prev => ({ ...prev, loading: true, error: null }));
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token) {
-        setAllLayers(prev => ({ ...prev, loading: false, error: "Not authenticated" }));
-        return;
-      }
-
       const results = await Promise.all(
         LAYER_ORDER.map(async (layer) => {
-          const res = await fetch(`/api/roadmap/layers?layer=${layer}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) return { layer, items: [] as RoadmapRecord[] };
-          const data = await res.json();
-          return { layer, items: (data.items ?? []) as RoadmapRecord[] };
+          const config = LAYER_CONFIG[layer];
+          const { data, error } = await supabase
+            .from(config.table)
+            .select("*")
+            .order("name");
+
+          if (error) return { layer, items: [] as RoadmapRecord[] };
+          return {
+            layer,
+            items: (data ?? []).map((row: Record<string, unknown>) => rowToRecord(row, layer)),
+          };
         }),
       );
 
@@ -222,7 +222,6 @@ export default function RoadmapPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch all layers when switching to a grouped view
   useEffect(() => {
     if (viewMode !== "hierarchy" && !allLayers.loaded && !allLayers.loading) {
       fetchAllLayers();
@@ -264,11 +263,11 @@ export default function RoadmapPage() {
 
     const params = new URLSearchParams({
       layer: nextLayer,
-      parent: record.id,
+      parent: record.url,
     });
     router.push(`/dashboard/roadmap?${params}`);
 
-    fetchLayer(nextLayer, record.id);
+    fetchLayer(nextLayer, record.url);
   }
 
   function navigateToBreadcrumb(index: number) {
@@ -297,7 +296,7 @@ export default function RoadmapPage() {
     return portfolios.map(p => ({
       portfolio: p,
       projects: allLayers.data.projects.filter(proj =>
-        proj.properties["Portfolio"]?.includes(p.id),
+        proj.properties["portfolio_url"] === p.url,
       ),
       tasks: allLayers.data.tasks,
     }));
@@ -324,7 +323,7 @@ export default function RoadmapPage() {
     return sprints.map(s => ({
       sprint: s,
       tasks: allLayers.data.tasks.filter(task =>
-        task.properties["Sprint (Roadmap)"]?.includes(s.id),
+        task.properties["sprint_url"] === s.url,
       ),
       subtasks: allLayers.data.subtasks,
     }));
