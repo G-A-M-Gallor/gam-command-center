@@ -440,6 +440,72 @@ export async function archiveDocument(
   return data as DocumentArchiveEntry;
 }
 
+// ─── Submission from Template ───────────────────────
+
+export async function createSubmissionFromTemplate(
+  template: DocumentTemplate,
+  name?: string,
+): Promise<DocumentSubmission | null> {
+  const token = crypto.randomUUID();
+  const submission: Omit<DocumentSubmission, 'id' | 'created_at' | 'updated_at'> = {
+    workspace_id: template.workspace_id,
+    template_id: template.id,
+    template_ver: template.version,
+    name: name || template.name,
+    status: 'draft',
+    content_snapshot: template.content,
+    field_values: {},
+    layout_id: template.layout_id,
+    access_token: token,
+    expires_at: null,
+    pdf_path: null,
+    pdf_hash: null,
+    signed_pdf_path: null,
+    signed_pdf_hash: null,
+    origami_entity_id: null,
+    origami_entity_type: null,
+    sent_via: [],
+    sent_at: null,
+    signed_at: null,
+    cancelled_at: null,
+    cancel_reason: null,
+    created_by: null,
+  };
+  return createSubmission(submission);
+}
+
+export async function createBlankSubmission(
+  name: string,
+  workspaceId = 'default',
+): Promise<DocumentSubmission | null> {
+  const token = crypto.randomUUID();
+  const submission: Omit<DocumentSubmission, 'id' | 'created_at' | 'updated_at'> = {
+    workspace_id: workspaceId,
+    template_id: null,
+    template_ver: null,
+    name,
+    status: 'draft',
+    content_snapshot: { type: 'doc', content: [{ type: 'paragraph' }] },
+    field_values: {},
+    layout_id: null,
+    access_token: token,
+    expires_at: null,
+    pdf_path: null,
+    pdf_hash: null,
+    signed_pdf_path: null,
+    signed_pdf_hash: null,
+    origami_entity_id: null,
+    origami_entity_type: null,
+    sent_via: [],
+    sent_at: null,
+    signed_at: null,
+    cancelled_at: null,
+    cancel_reason: null,
+    created_by: null,
+  };
+  return createSubmission(submission);
+}
+
 // ─── Luhn Validation (Israeli ID) ───────────────────
 // DOC-08: אלגוריתם לוהן — אימות ת.ז ישראלית
 

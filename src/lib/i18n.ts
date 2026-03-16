@@ -883,6 +883,7 @@ export const translations = {
       selectTemplate: "בחר תבנית",
       blankDocument: "מסמך ריק",
       orBlank: "או צור מסמך ריק",
+      startFromScratch: "התחל מאפס ללא תבנית",
     },
     fieldConfig: {
       cancel: "ביטול",
@@ -3702,6 +3703,7 @@ export const translations = {
       selectTemplate: "Select Template",
       blankDocument: "Blank Document",
       orBlank: "or create blank document",
+      startFromScratch: "Start from scratch without a template",
     },
     fieldConfig: {
       cancel: "Cancel",
@@ -6513,6 +6515,7 @@ export const translations = {
       selectTemplate: "Выбрать шаблон",
       blankDocument: "Пустой документ",
       orBlank: "или создать пустой документ",
+      startFromScratch: "Начать с нуля без шаблона",
     },
     fieldConfig: {
       cancel: "Отмена",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
@@ -20,7 +21,11 @@ import {
   LayoutTemplate,
   X,
 } from "lucide-react";
-import { fetchDocTemplates } from "@/lib/supabase/documentQueries";
+import {
+  fetchDocTemplates,
+  createSubmissionFromTemplate,
+  createBlankSubmission,
+} from "@/lib/supabase/documentQueries";
 import type { DocumentTemplate } from "@/lib/supabase/schema";
 
 // ── Types ────────────────────────────────────────────────────
@@ -262,6 +267,7 @@ export default function DocumentsPage() {
         <TemplatePicker
           dt={dt}
           onClose={() => setShowTemplatePicker(false)}
+          onCreated={() => { setShowTemplatePicker(false); fetchData(); }}
         />
       )}
 
@@ -349,12 +355,16 @@ function SubmissionCard({ submission: sub, dp, language }: { submission: Submiss
 function TemplatePicker({
   dt,
   onClose,
+  onCreated,
 }: {
   dt: Record<string, string>;
   onClose: () => void;
+  onCreated: () => void;
 }) {
+  const router = useRouter();
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -365,14 +375,29 @@ function TemplatePicker({
     load();
   }, []);
 
-  const handleSelect = (tpl: DocumentTemplate) => {
-    // Navigate to template editor to create a submission from this template
-    window.location.href = `/dashboard/documents/templates/${tpl.id}`;
+  const handleSelect = async (tpl: DocumentTemplate) => {
+    setCreating(tpl.id);
+    const sub = await createSubmissionFromTemplate(tpl);
+    if (sub) {
+      onCreated();
+      router.push(`/dashboard/documents/${sub.id}`);
+    }
+    setCreating(null);
+  };
+
+  const handleBlank = async () => {
+    setCreating("blank");
+    const sub = await createBlankSubmission(dt.blankDocument);
+    if (sub) {
+      onCreated();
+      router.push(`/dashboard/documents/${sub.id}`);
+    }
+    setCreating(null);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-lg rounded-xl border border-slate-700 bg-slate-900 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
           <h3 className="text-sm font-medium text-slate-200">{dt.selectTemplate}</h3>
@@ -381,44 +406,68 @@ function TemplatePicker({
           </button>
         </div>
 
+        {/* Blank document option */}
+        <div className="border-b border-slate-800 p-3">
+          <button
+            onClick={handleBlank}
+            disabled={creating !== null}
+            className="flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-700 p-3 text-start transition-colors hover:border-slate-600 hover:bg-slate-800/30 disabled:opacity-50"
+          >
+            {creating === "blank" ? (
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+            ) : (
+              <FileText className="h-5 w-5 shrink-0 text-slate-400" />
+            )}
+            <div>
+              <div className="text-sm font-medium text-slate-300">{dt.blankDocument}</div>
+              <div className="text-xs text-slate-500">{dt.startFromScratch}</div>
+            </div>
+          </button>
+        </div>
+
         {/* Template list */}
-        <div className="max-h-80 overflow-y-auto p-3">
+        <div className="max-h-72 overflow-y-auto p-3">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
             </div>
+          ) : templates.length === 0 ? (
+            <div className="py-6 text-center text-sm text-slate-500">
+              {dt.noTemplates}
+            </div>
           ) : (
             <div className="space-y-2">
+              <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                {dt.useTemplate}
+              </div>
               {templates.map((tpl) => (
                 <button
                   key={tpl.id}
                   onClick={() => handleSelect(tpl)}
-                  className="flex w-full items-center gap-3 rounded-lg border border-slate-800 p-3 text-start transition-colors hover:border-slate-700 hover:bg-slate-800/50"
+                  disabled={creating !== null}
+                  className="flex w-full items-center gap-3 rounded-lg border border-slate-800 p-3 text-start transition-colors hover:border-slate-700 hover:bg-slate-800/50 disabled:opacity-50"
                 >
-                  <LayoutTemplate className="h-5 w-5 shrink-0 text-purple-400" />
+                  {creating === tpl.id ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+                  ) : (
+                    <LayoutTemplate className="h-5 w-5 shrink-0 text-purple-400" />
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium text-slate-200">{tpl.name}</div>
                     {tpl.description && (
                       <div className="mt-0.5 truncate text-xs text-slate-500">{tpl.description}</div>
                     )}
                   </div>
-                  <span className="text-[10px] text-slate-500">v{tpl.version}</span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="text-[10px] text-slate-500">v{tpl.version}</span>
+                    {tpl.tags.length > 0 && (
+                      <span className="text-[10px] text-slate-600">{tpl.tags[0]}</span>
+                    )}
+                  </div>
                 </button>
               ))}
-              {templates.length === 0 && (
-                <div className="py-6 text-center text-sm text-slate-500">
-                  {dt.noTemplates}
-                </div>
-              )}
             </div>
           )}
-        </div>
-
-        {/* Footer */}
-        <div className="border-t border-slate-800 px-4 py-3">
-          <p className="text-center text-xs text-slate-500">
-            {dt.orBlank}
-          </p>
         </div>
       </div>
     </div>
