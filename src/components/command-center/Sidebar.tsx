@@ -55,6 +55,20 @@ import {
   BarChart3,
   Plus,
   Trash2,
+  Cpu,
+  Cloud,
+  FolderArchive,
+  Bookmark,
+  BookMarked,
+  Library,
+  DatabaseZap,
+  Lock,
+  KeyRound,
+  ShieldCheck,
+  Image,
+  Video,
+  AudioLines,
+  UserCircle,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -83,7 +97,7 @@ const FOLDER_MODE_KEY = "cc-sidebar-folder-mode";
 
 // ─── Types ──────────────────────────────────────────────
 
-type SidebarFilter = "all" | "active" | "coming-soon" | "favorites";
+type SidebarFilter = "me" | "team" | "hidden" | "favorites";
 type ViewMode = "list" | "grid" | "compact";
 
 // ─── Grouped Navigation ─────────────────────────────────
@@ -196,11 +210,36 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/layers", key: "layers", icon: Activity, status: "active" },
       { href: "/dashboard/editor", key: "editor", icon: FileEdit, status: "active" },
       { href: "/dashboard/story-map", key: "storyMap", icon: Map, status: "active" },
-      { href: "/dashboard/ai-hub", key: "aiHub", icon: Bot, status: "active" },
+      {
+        type: "folder",
+        href: "/dashboard/ai-hub",
+        key: "aiHub",
+        icon: Bot,
+        status: "active",
+        children: [
+          { href: "/dashboard/ai-hub", key: "cliAi", icon: Bot, status: "active" },
+          { href: "/dashboard/boardroom", key: "aiAdvisors", icon: Users, status: "active" },
+          { href: "/dashboard/agents", key: "agents", icon: Cpu, status: "coming-soon" },
+        ],
+      },
       { href: "/dashboard/entities", key: "entities", icon: Database, status: "active" },
       { href: "/dashboard/comms", key: "comms", icon: MessagesSquare, status: "active" },
       { href: "/dashboard/documents", key: "documents", icon: FileSignature, status: "active" },
       { href: "/dashboard/wiki", key: "wiki", icon: BookOpen, status: "active" },
+      {
+        type: "folder",
+        href: "/dashboard/vcloud",
+        key: "vcloud",
+        icon: Cloud,
+        status: "coming-soon",
+        children: [
+          { href: "/dashboard/vcloud/files", key: "vcloudFiles", icon: FolderArchive, status: "coming-soon" },
+          { href: "/dashboard/vcloud/images", key: "vcloudImages", icon: Image, status: "coming-soon" },
+          { href: "/dashboard/vcloud/video", key: "vcloudVideo", icon: Video, status: "coming-soon" },
+          { href: "/dashboard/vcloud/sound", key: "vcloudSound", icon: AudioLines, status: "coming-soon" },
+          { href: "/dashboard/vcloud/personal", key: "vcloudPersonal", icon: UserCircle, status: "coming-soon" },
+        ],
+      },
     ],
   },
   {
@@ -208,13 +247,42 @@ export const NAV_GROUPS: NavGroup[] = [
     labelKey: "groupTools",
     items: [
       { href: "/dashboard/functional-map", key: "functionalMap", icon: Grid3X3, status: "active" },
-      { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
-      { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
-      { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
+      {
+        type: "folder",
+        href: "/dashboard/design-system",
+        key: "libraries",
+        icon: Library,
+        status: "active",
+        children: [
+          { href: "/dashboard/entities/fields", key: "entityFields", icon: ListTree, status: "active" },
+          { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
+          { href: "/dashboard/entities/field-templates", key: "fieldTemplates", icon: Layers, status: "coming-soon" },
+        ],
+      },
+      {
+        type: "folder",
+        href: "/dashboard/grid",
+        key: "databases",
+        icon: DatabaseZap,
+        status: "active",
+        children: [
+          { href: "/dashboard/grid", key: "grid", icon: Sheet, status: "active" },
+          { href: "/dashboard/matching", key: "matching", icon: Sparkles, status: "active" },
+        ],
+      },
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
-      { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },
-      { href: "/dashboard/matching", key: "matching", icon: Sparkles, status: "active" },
       { href: "/dashboard/email-templates", key: "emailTemplates", icon: Mail, status: "active" },
+      {
+        type: "folder",
+        href: "/dashboard/vault",
+        key: "vault",
+        icon: Lock,
+        status: "coming-soon",
+        children: [
+          { href: "/dashboard/vault/passwords", key: "vaultPasswords", icon: KeyRound, status: "coming-soon" },
+          { href: "/dashboard/vault/secrets", key: "vaultSecrets", icon: ShieldCheck, status: "coming-soon" },
+        ],
+      },
     ],
   },
   {
@@ -229,13 +297,24 @@ export const NAV_GROUPS: NavGroup[] = [
         status: "active",
         children: [
           { href: "/dashboard/roadmap", key: "roadmap", icon: Compass, status: "active" },
+          { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
           { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
           { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
           { href: "/dashboard/audit", key: "audit", icon: ClipboardList, status: "active" },
         ],
       },
       { href: "/dashboard/import", key: "import", icon: Upload, status: "active" },
-      { href: "/dashboard/feeds", key: "feeds", icon: Rss, status: "active" },
+      {
+        type: "folder",
+        href: "/dashboard/feeds",
+        key: "bookmarks",
+        icon: Bookmark,
+        status: "active",
+        children: [
+          { href: "/dashboard/feeds", key: "feeds", icon: Rss, status: "active" },
+          { href: "/dashboard/read-list", key: "readList", icon: BookMarked, status: "coming-soon" },
+        ],
+      },
       { href: "/dashboard/automations", key: "automations", icon: Zap, status: "active" },
       { href: "/dashboard/settings", key: "settings", icon: Settings, status: "active" },
     ],
@@ -247,9 +326,9 @@ export const NAV_GROUPS: NavGroup[] = [
 function loadFilter(): SidebarFilter {
   try {
     const v = localStorage.getItem(FILTER_KEY);
-    if (v === "active" || v === "coming-soon" || v === "favorites") return v;
+    if (v === "me" || v === "team" || v === "hidden" || v === "favorites") return v;
   } catch {}
-  return "all";
+  return "me";
 }
 
 function loadViewMode(): ViewMode {
@@ -301,7 +380,7 @@ export function Sidebar({
   const [navTop, setNavTop] = useState(120);
   const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
-  const [filter, setFilter] = useState<SidebarFilter>("all");
+  const [filter, setFilter] = useState<SidebarFilter>("me");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [favHrefs, setFavHrefs] = useState<Set<string>>(new Set());
   const [openFolders, setOpenFolders] = useState<Set<string>>(() => {
@@ -592,9 +671,9 @@ export function Sidebar({
   };
 
   const filterTabs: { id: SidebarFilter; label: string }[] = [
-    { id: "all", label: sidebarT.filterAll },
-    { id: "active", label: sidebarT.filterActive },
-    { id: "coming-soon", label: sidebarT.filterComingSoon },
+    { id: "me", label: sidebarT.filterMe },
+    { id: "team", label: sidebarT.filterTeam },
+    { id: "hidden", label: sidebarT.filterHidden },
     { id: "favorites", label: sidebarT.filterFavorites },
   ];
 

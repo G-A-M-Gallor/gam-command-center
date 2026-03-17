@@ -453,6 +453,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
         showFieldLibrary={showFieldLibrary}
         onToggleFieldLibrary={() => setShowFieldLibrary((v) => !v)}
         content={content ?? undefined}
+        visibleColumns={visibleColumns}
         onShare={() => setShowShare(true)}
         onVersionHistory={() => setShowVersionHistory((v) => !v)}
         onDuplicate={handleDuplicate}
@@ -487,6 +488,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
               recordId={recordId}
               saveStatus={saveState}
               lastSavedAt={lastSavedAt}
+              visibleColumns={visibleColumns}
             />
           )}
 

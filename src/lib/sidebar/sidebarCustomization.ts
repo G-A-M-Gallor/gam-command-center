@@ -202,9 +202,21 @@ export function buildDisplayGroups(
 
     const filtered = sorted.filter((entry) => {
       if (permissions.visiblePages && !permissions.visiblePages.includes(entry.key)) return false;
+
+      // "hidden" filter: show ONLY hidden/disabled items
+      if (filter === "hidden") {
+        return hiddenSet.has(entry.key) || entry.status === "coming-soon";
+      }
+
+      // "me" and "team": hide hidden items (unless edit mode)
       if (hiddenSet.has(entry.key) && !editMode) return false;
-      if (filter === "active" && entry.status !== "active") return false;
-      if (filter === "coming-soon" && entry.status !== "coming-soon") return false;
+
+      // "team": show only active items in default order (ignore user customization)
+      if (filter === "team" && entry.status !== "active") return false;
+
+      // "me": show active items in user's custom order (default behavior)
+      if (filter === "me" && entry.status !== "active") return false;
+
       if (filter === "favorites") {
         if (isFolder(entry)) return entry.children.some((c) => favHrefs.has(c.href)) || favHrefs.has(entry.href);
         return favHrefs.has((entry as NavItem).href);
@@ -216,9 +228,12 @@ export function buildDisplayGroups(
       if (isFolder(entry)) {
         const filteredChildren = entry.children.filter((child) => {
           if (permissions.visiblePages && !permissions.visiblePages.includes(child.key)) return false;
+          if (filter === "hidden") {
+            return hiddenSet.has(child.key) || child.status === "coming-soon";
+          }
           if (hiddenSet.has(child.key) && !editMode) return false;
-          if (filter === "active" && child.status !== "active") return false;
-          if (filter === "coming-soon" && child.status !== "coming-soon") return false;
+          if (filter === "team" && child.status !== "active") return false;
+          if (filter === "me" && child.status !== "active") return false;
           if (filter === "favorites") return favHrefs.has(child.href);
           return true;
         });

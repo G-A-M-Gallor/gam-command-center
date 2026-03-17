@@ -1,6 +1,6 @@
 'use client';
 
-import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, Plus, Copy, Share2, Clock, LayoutTemplate } from 'lucide-react';
+import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, Plus, Copy, Share2, Clock, LayoutTemplate, Columns2, Maximize2 } from 'lucide-react';
 import { useCanvas } from '@/contexts/CanvasContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getTranslations } from '@/lib/i18n';
@@ -17,6 +17,7 @@ interface CanvasToolbarProps {
   showFieldLibrary: boolean;
   onToggleFieldLibrary: () => void;
   content?: JSONContent;
+  visibleColumns?: number;
   onShare?: () => void;
   onVersionHistory?: () => void;
   onDuplicate?: () => void;
@@ -32,16 +33,44 @@ export function CanvasToolbar({
   showFieldLibrary,
   onToggleFieldLibrary,
   content,
+  visibleColumns,
   onShare,
   onVersionHistory,
   onDuplicate,
   onSaveAsTemplate,
 }: CanvasToolbarProps) {
-  const { layout, toggleGrid, toggleSnap, setZoom } = useCanvas();
+  const { layout, toggleGrid, toggleSnap, setZoom, setLayout } = useCanvas();
   const { language } = useSettings();
   const t = getTranslations(language);
   const ct = t.canvas;
   const et = t.editor;
+
+  // Editor width presets: narrow (6), medium (8), wide (10), full (all columns)
+  const currentColSpan = layout.editor_zone.col_span;
+  const maxCols = visibleColumns || 12;
+
+  const cycleEditorWidth = () => {
+    let nextSpan: number;
+    if (currentColSpan <= 6) nextSpan = 8;
+    else if (currentColSpan <= 8) nextSpan = 10;
+    else if (currentColSpan <= 10) nextSpan = Math.max(12, maxCols);
+    else nextSpan = 6; // cycle back to narrow
+    setLayout({
+      editor_zone: {
+        ...layout.editor_zone,
+        col_span: nextSpan,
+        col: 0, // reset to leftmost when resizing
+      },
+    });
+  };
+
+  const widthLabel = currentColSpan <= 6
+    ? (ct?.widthNarrow || 'Narrow')
+    : currentColSpan <= 8
+      ? (ct?.widthMedium || 'Medium')
+      : currentColSpan <= 10
+        ? (ct?.widthWide || 'Wide')
+        : (ct?.widthFull || 'Full');
 
   return (
     <div className="flex h-10 shrink-0 items-center gap-2 border-b border-slate-700/50 bg-slate-800/95 px-3 backdrop-blur-sm">
@@ -145,6 +174,18 @@ export function CanvasToolbar({
           <LayoutTemplate className="h-3.5 w-3.5" />
         </button>
       )}
+
+      <div className="mx-1 h-4 w-px bg-slate-700" />
+
+      {/* Editor width cycle */}
+      <button
+        onClick={cycleEditorWidth}
+        className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-colors"
+        title={ct?.editorWidth || 'Editor Width'}
+      >
+        {currentColSpan > 10 ? <Maximize2 className="h-3.5 w-3.5" /> : <Columns2 className="h-3.5 w-3.5" />}
+        <span className="text-[10px]">{widthLabel}</span>
+      </button>
 
       <div className="mx-1 h-4 w-px bg-slate-700" />
 

@@ -1,10 +1,12 @@
 // ===================================================
-// GAM Command Center — Toggle Extension
-// Simple toggle using <details>/<summary> HTML
+// GAM Command Center — Toggle Extension (v2)
+// Div-based toggle that works in contentEditable
+// Uses NodeView for the toggle arrow click handler
 // Supports: regular toggle + toggle headings (H1/H2/H3)
 // ===================================================
 
 import { Node, mergeAttributes } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -26,18 +28,34 @@ export const ToggleDetails = Node.create({
     return {
       open: {
         default: true,
-        parseHTML: (el) => el.hasAttribute('open'),
-        renderHTML: (attrs) => (attrs.open ? { open: '' } : {}),
+        parseHTML: (el: HTMLElement) =>
+          el.getAttribute('data-open') !== 'false',
+        renderHTML: (attrs) => ({
+          'data-open': attrs.open ? 'true' : 'false',
+        }),
       },
     };
   },
 
   parseHTML() {
-    return [{ tag: 'details' }];
+    return [
+      { tag: 'div[data-type="toggle"]' },
+      { tag: 'details' },
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['details', mergeAttributes({ class: 'gam-toggle' }, HTMLAttributes), 0];
+    return [
+      'div',
+      mergeAttributes(
+        {
+          'data-type': 'toggle',
+          class: `gam-toggle ${HTMLAttributes['data-open'] === 'false' ? 'gam-toggle--closed' : ''}`,
+        },
+        HTMLAttributes
+      ),
+      0,
+    ];
   },
 
   addCommands() {
@@ -51,7 +69,7 @@ export const ToggleDetails = Node.create({
             content: [
               {
                 type: 'detailsSummary',
-                content: [{ type: 'text', text: '' }],
+                content: [{ type: 'text', text: ' ' }],
               },
               {
                 type: 'detailsContent',
@@ -70,7 +88,7 @@ export const ToggleDetails = Node.create({
               {
                 type: 'detailsSummary',
                 attrs: { headingLevel: level },
-                content: [{ type: 'text', text: '' }],
+                content: [{ type: 'text', text: ' ' }],
               },
               {
                 type: 'detailsContent',
@@ -91,12 +109,39 @@ export const ToggleDetails = Node.create({
           $from.parent.type.name === 'detailsSummary' &&
           $from.parentOffset === 0
         ) {
-          // At start of summary — unwrap toggle to paragraph
           return editor.commands.lift('details');
         }
         return false;
       },
     };
+  },
+
+  // Plugin to handle clicking the toggle arrow
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey('toggleClick'),
+        props: {
+          handleClickOn: (view, _pos, node, nodePos, event) => {
+            const target = event.target as HTMLElement;
+            // Check if the click was on the toggle arrow
+            if (
+              target.classList?.contains('gam-toggle__arrow') ||
+              target.closest?.('.gam-toggle__arrow')
+            ) {
+              const tr = view.state.tr;
+              tr.setNodeMarkup(nodePos, undefined, {
+                ...node.attrs,
+                open: !node.attrs.open,
+              });
+              view.dispatch(tr);
+              return true;
+            }
+            return false;
+          },
+        },
+      }),
+    ];
   },
 });
 
@@ -109,8 +154,8 @@ export const DetailsSummary = Node.create({
   addAttributes() {
     return {
       headingLevel: {
-        default: 0, // 0 = regular toggle, 1-3 = heading toggle
-        parseHTML: (el) => {
+        default: 0,
+        parseHTML: (el: HTMLElement) => {
           const cls = el.className;
           if (cls.includes('h1')) return 1;
           if (cls.includes('h2')) return 2;
@@ -122,7 +167,10 @@ export const DetailsSummary = Node.create({
   },
 
   parseHTML() {
-    return [{ tag: 'summary' }];
+    return [
+      { tag: 'div[data-type="toggle-summary"]' },
+      { tag: 'summary' },
+    ];
   },
 
   renderHTML({ node, HTMLAttributes }) {
@@ -130,7 +178,25 @@ export const DetailsSummary = Node.create({
     const classes = ['gam-toggle__summary'];
     if (level > 0) classes.push(`gam-toggle__summary--h${level}`);
 
-    return ['summary', mergeAttributes({ class: classes.join(' ') }, HTMLAttributes), 0];
+    return [
+      'div',
+      mergeAttributes(
+        { 'data-type': 'toggle-summary', class: classes.join(' ') },
+        HTMLAttributes
+      ),
+      // Toggle arrow (non-editable)
+      [
+        'span',
+        {
+          class: 'gam-toggle__arrow',
+          contenteditable: 'false',
+          'data-drag-handle': '',
+        },
+        '▶',
+      ],
+      // Editable content wrapper
+      ['span', { class: 'gam-toggle__summary-text' }, 0],
+    ];
   },
 });
 
@@ -141,14 +207,21 @@ export const DetailsContent = Node.create({
   defining: true,
 
   parseHTML() {
-    return [{ tag: 'div[data-details-content]' }];
+    return [
+      { tag: 'div[data-type="toggle-content"]' },
+      { tag: 'div[data-details-content]' },
+    ];
   },
 
   renderHTML({ HTMLAttributes }) {
     return [
       'div',
       mergeAttributes(
-        { 'data-details-content': '', class: 'gam-toggle__content' },
+        {
+          'data-type': 'toggle-content',
+          'data-details-content': '',
+          class: 'gam-toggle__content',
+        },
         HTMLAttributes
       ),
       0,

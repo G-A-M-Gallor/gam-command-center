@@ -954,6 +954,107 @@
   background: #9333ea26;
 }
 
+/* ─── Toggle / Collapsible ──────────────────────── */
+.gam-toggle {
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  border: 1px solid var(--editor-toggle-border, #e2e8f0);
+  background: var(--editor-toggle-bg, #f8fafc);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.gam-toggle:hover {
+  border-color: var(--editor-toggle-border-hover, #cbd5e1);
+}
+
+/* Summary row */
+.gam-toggle__summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  direction: rtl;
+  cursor: text;
+  min-height: 36px;
+}
+
+/* Toggle arrow */
+.gam-toggle__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  color: var(--editor-toggle-arrow, #94a3b8);
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.15s, background 0.15s;
+  /* Default: pointing left for RTL (collapsed) */
+  transform: rotate(180deg);
+}
+
+.gam-toggle__arrow:hover {
+  color: var(--editor-toggle-arrow-hover, #6366f1);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* When open, arrow points down */
+.gam-toggle:not(.gam-toggle--closed) .gam-toggle__arrow {
+  transform: rotate(90deg);
+}
+
+/* Summary text */
+.gam-toggle__summary-text {
+  flex: 1;
+  min-width: 0;
+  outline: none;
+}
+
+/* Heading variants */
+.gam-toggle__summary--h1 .gam-toggle__summary-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--editor-heading, #0f172a);
+}
+
+.gam-toggle__summary--h2 .gam-toggle__summary-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--editor-heading, #0f172a);
+}
+
+.gam-toggle__summary--h3 .gam-toggle__summary-text {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--editor-heading, #1e293b);
+}
+
+/* Content area */
+.gam-toggle__content {
+  padding: 4px 12px 10px 12px;
+  padding-right: 38px; /* indent past arrow */
+  border-top: 1px solid var(--editor-toggle-border, #e2e8f0);
+}
+
+/* Hide content when closed */
+.gam-toggle--closed .gam-toggle__content {
+  display: none;
+}
+
+/* Dark mode */
+[data-theme='dark'] .gam-toggle,
+.dark .gam-toggle {
+  --editor-toggle-bg: rgba(30, 41, 59, 0.5);
+  --editor-toggle-border: #334155;
+  --editor-toggle-border-hover: #475569;
+  --editor-toggle-arrow: #64748b;
+  --editor-toggle-arrow-hover: #818cf8;
+}
+
 /* ─── Block Handles ─────────────────────────────── */
 .gam-editor-wrapper {
   position: relative;

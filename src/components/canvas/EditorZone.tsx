@@ -14,6 +14,8 @@ interface EditorZoneProps {
   recordId: string;
   saveStatus: SaveState;
   lastSavedAt?: Date;
+  /** Total visible columns — used to detect "full width" mode */
+  visibleColumns?: number;
 }
 
 export function EditorZone({
@@ -25,15 +27,28 @@ export function EditorZone({
   recordId,
   saveStatus,
   lastSavedAt,
+  visibleColumns,
 }: EditorZoneProps) {
-  const style = {
-    position: 'absolute' as const,
-    left: editorZone.col * cellSize,
-    top: editorZone.row * cellSize,
-    width: editorZone.col_span * cellSize,
-    minHeight: editorZone.row_span * cellSize,
-    zIndex: 2,
-  };
+  // Full-width mode: when col_span exceeds visible columns or is >= 12
+  const isFullWidth = visibleColumns ? editorZone.col_span >= visibleColumns : editorZone.col_span >= 12;
+
+  const style: React.CSSProperties = isFullWidth
+    ? {
+        position: 'absolute',
+        left: 0,
+        top: editorZone.row * cellSize,
+        width: '100%',
+        minHeight: editorZone.row_span * cellSize,
+        zIndex: 2,
+      }
+    : {
+        position: 'absolute',
+        left: editorZone.col * cellSize,
+        top: editorZone.row * cellSize,
+        width: editorZone.col_span * cellSize,
+        minHeight: editorZone.row_span * cellSize,
+        zIndex: 2,
+      };
 
   return (
     <div
