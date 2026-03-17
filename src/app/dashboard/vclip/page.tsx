@@ -15,7 +15,9 @@ import {
   Search,
   RefreshCw,
   Film,
+  Circle,
 } from "lucide-react";
+import Link from "next/link";
 
 interface VClip {
   id: string;
@@ -111,12 +113,21 @@ export default function VClipPage() {
             </p>
           </div>
         </div>
-        <button
-          onClick={fetchClips}
-          className="rounded-lg bg-slate-800 p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/vclip/record"
+            className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-slate-200"
+          >
+            <Circle className="h-3 w-3 fill-red-500 text-red-500" />
+            {isRtl ? "הקלט" : "Record"}
+          </Link>
+          <button
+            onClick={fetchClips}
+            className="rounded-lg bg-slate-800 p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Search */}
