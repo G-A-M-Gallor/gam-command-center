@@ -89,8 +89,12 @@ export interface DisplayGroup {
 
 // ─── Constants ─────────────────────────────────────────────
 
-const STORAGE_KEY = "cc-sidebar-custom";
+const STORAGE_KEY_PREFIX = "cc-sidebar-custom";
 const EVENT_NAME = "cc-sidebar-custom-change";
+
+function storageKey(language?: string): string {
+  return language ? `${STORAGE_KEY_PREFIX}-${language}` : STORAGE_KEY_PREFIX;
+}
 
 function defaultCustomization(): SidebarCustomization {
   return {
@@ -108,20 +112,29 @@ function defaultCustomization(): SidebarCustomization {
 
 // ─── Persistence ───────────────────────────────────────────
 
-export function loadCustomization(): SidebarCustomization {
+export function loadCustomization(language?: string): SidebarCustomization {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const key = storageKey(language);
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       return { ...defaultCustomization(), ...parsed };
+    }
+    // Migrate: if language-specific key doesn't exist, try loading the old shared key
+    if (language) {
+      const shared = localStorage.getItem(STORAGE_KEY_PREFIX);
+      if (shared) {
+        const parsed = JSON.parse(shared);
+        return { ...defaultCustomization(), ...parsed };
+      }
     }
   } catch {}
   return defaultCustomization();
 }
 
-export function saveCustomization(data: SidebarCustomization): void {
+export function saveCustomization(data: SidebarCustomization, language?: string): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(storageKey(language), JSON.stringify(data));
     window.dispatchEvent(new Event(EVENT_NAME));
   } catch {}
 }
@@ -498,10 +511,20 @@ export function createSection(
   };
 }
 
+export function isSectionEmpty(
+  customization: SidebarCustomization,
+  sectionId: string,
+): boolean {
+  const cs = customization.customSections.find((s) => s.id === sectionId);
+  return cs ? cs.itemKeys.length === 0 : true;
+}
+
 export function deleteSection(
   customization: SidebarCustomization,
   sectionId: string,
 ): SidebarCustomization {
+  // Only allow deleting empty sections
+  if (!isSectionEmpty(customization, sectionId)) return customization;
   return {
     ...customization,
     customSections: customization.customSections.filter((s) => s.id !== sectionId),

@@ -130,6 +130,25 @@ function isFolder(entry: NavEntry): entry is NavFolder {
   return "type" in entry && entry.type === "folder";
 }
 
+// ─── Sortable Section Wrapper ─────────────────────────────
+
+function SortableSectionDiv({ id, editMode, children }: { id: string; editMode: boolean; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled: !editMode,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...(editMode ? listeners : {})} className={editMode ? "cursor-grab active:cursor-grabbing" : ""}>
+      {children}
+    </div>
+  );
+}
+
 // ─── Sortable Wrapper ────────────────────────────────────
 
 function SortableNavItem({
@@ -431,9 +450,9 @@ export function Sidebar({
     moveToFolder: moveItemToFolder, removeFromFolder, toggleHide, trackUsage,
     toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, setEditMode,
     updateItem, clearItem,
-    toggleSection, renameSection, createSection: createCustomSection, deleteSection,
-    moveItemToSection, removeItemFromSection,
-  } = useSidebarCustomization();
+    toggleSection, renameSection, createSection: createCustomSection, deleteSection, isSectionEmpty,
+    moveItemToSection, removeItemFromSection, updateSection: updateSectionOverride,
+  } = useSidebarCustomization(language);
 
   // Per-item edit popover state
   const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
@@ -626,20 +645,49 @@ export function Sidebar({
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    // Find which group contains both items
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    // Case 1: Section reorder (both IDs are section: prefixed)
+    if (activeId.startsWith("section:") && overId.startsWith("section:")) {
+      const activeSectionId = activeId.replace("section:", "");
+      const overSectionId = overId.replace("section:", "");
+      const sectionIds = filteredGroups.map((g) => g.id);
+      const oldIdx = sectionIds.indexOf(activeSectionId);
+      const newIdx = sectionIds.indexOf(overSectionId);
+      if (oldIdx !== -1 && newIdx !== -1) {
+        const reordered = arrayMove(sectionIds, oldIdx, newIdx);
+        reordered.forEach((id, i) => {
+          updateSectionOverride(id, { sortOrder: i * 10 });
+        });
+      }
+      return;
+    }
+
+    // Case 2: Item dropped onto a section header → move to that section
+    if (!activeId.startsWith("section:") && overId.startsWith("section:")) {
+      const targetSectionId = overId.replace("section:", "");
+      const targetGroup = filteredGroups.find((g) => g.id === targetSectionId);
+      if (targetGroup?.isCustomSection) {
+        moveItemToSection(activeId, targetSectionId);
+      }
+      return;
+    }
+
+    // Case 3: Normal item reorder within same group
     for (const group of filteredGroups) {
       const flatItemKeys = group.items.flatMap((e) =>
         isFolder(e) ? [e.key, ...e.children.map((c) => c.key)] : [e.key]
       );
-      const oldIdx = flatItemKeys.indexOf(active.id as string);
-      const newIdx = flatItemKeys.indexOf(over.id as string);
+      const oldIdx = flatItemKeys.indexOf(activeId);
+      const newIdx = flatItemKeys.indexOf(overId);
       if (oldIdx !== -1 && newIdx !== -1) {
         const newOrder = arrayMove(flatItemKeys, oldIdx, newIdx);
         reorder(group.id, newOrder);
         break;
       }
     }
-  }, [filteredGroups, reorder]);
+  }, [filteredGroups, reorder, moveItemToSection, updateSectionOverride]);
 
   // Auto-open folder if a child page is active
   useEffect(() => {
@@ -775,7 +823,6 @@ export function Sidebar({
                   </button>
                 )}
                 <Link href="/" className="flex flex-1 items-center justify-end gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
-                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-right text-[15px] font-semibold text-slate-100">{nameText}</span>
                   {logoEl}
                 </Link>
               </>
@@ -785,7 +832,6 @@ export function Sidebar({
               <>
                 <Link href="/" className="flex flex-1 items-center gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
                   {logoEl}
-                  <span data-cc-id="sidebar.header.name" data-cc-text="true" className="text-left text-[15px] font-semibold text-slate-100">{nameText}</span>
                 </Link>
                 {isFloating && !isFloat && onClose && (
                   <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
@@ -1024,20 +1070,21 @@ export function Sidebar({
           )}
 
          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={filteredGroups.map((g) => `section:${g.id}`)} strategy={verticalListSortingStrategy}>
           {filteredGroups.map((group, gi) => {
-            // Collect all sortable IDs for this group
-            const sortableIds = group.items.flatMap((e) =>
+            // Collect all sortable IDs for this group (section header + items)
+            const sortableIds = [`section:${group.id}`, ...group.items.flatMap((e) =>
               isFolder(e) ? [e.key, ...e.children.map((c) => c.key)] : [e.key]
-            );
+            )];
             const isSectionCollapsed = collapsedSet.has(group.id);
             const sectionLabel = group.displayName || group.customFolderName || sidebarT[group.labelKey] || group.id;
             const sectionEmoji = group.emoji;
             const isRenamingThis = renamingSectionId === group.id;
-            const canDelete = group.isCustomSection || group.isCustomFolder;
+            const canDelete = (group.isCustomSection || group.isCustomFolder) && isSectionEmpty(group.id);
 
             return (
             <SortableContext key={group.id} items={sortableIds} strategy={verticalListSortingStrategy}>
-            <div>
+            <SortableSectionDiv id={`section:${group.id}`} editMode={editMode}>
               {/* Group label / divider — now interactive toggle */}
               {gi > 0 && isCollapsed && (
                 <div className="mx-2 my-2 border-t border-slate-700/30" />
@@ -1160,9 +1207,9 @@ export function Sidebar({
               )}
 
               {/* Items — collapse wrapper */}
-              <div className={`overflow-hidden transition-all duration-200 ease-out ${
-                isSectionCollapsed && !isCollapsed ? "max-h-0 opacity-0" : "max-h-[2000px] opacity-100"
-              }`}>
+              <div className={`transition-all duration-200 ease-out ${
+                isSectionCollapsed && !isCollapsed ? "max-h-0 opacity-0 overflow-hidden" : "max-h-[2000px] opacity-100"
+              } ${editingItemKey && sortableIds.includes(editingItemKey) ? "overflow-visible" : "overflow-hidden"}`}>
 
               {/* Items — Grid view */}
               {!isCollapsed && viewMode === "grid" ? (
@@ -1578,7 +1625,7 @@ export function Sidebar({
               )}
 
               </div>{/* end collapse wrapper */}
-            </div>
+            </SortableSectionDiv>
             </SortableContext>
           );
           })}
@@ -1624,6 +1671,7 @@ export function Sidebar({
             </div>
           )}
 
+         </SortableContext>
          </DndContext>
         </nav>
 
