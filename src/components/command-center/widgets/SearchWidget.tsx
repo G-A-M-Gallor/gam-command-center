@@ -27,6 +27,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { searchNotes } from "@/lib/supabase/entityQueries";
 import { fetchEntityTypes } from "@/lib/supabase/entityQueries";
 import { SYSTEM_SHORTCUTS } from "@/lib/shortcuts/shortcutRegistry";
+import { formatComboForDisplay } from "@/lib/shortcuts/shortcutEngine";
 import { SHORTCUT_EVENT_MAP, SHORTCUT_NAV_MAP } from "@/contexts/ShortcutsContext";
 import { widgetRegistry } from "./WidgetRegistry";
 import type { EntityType, NoteRecord } from "@/lib/entities/types";
@@ -731,8 +732,8 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
                       )}
                       <span className="flex-1 truncate text-start">{item.label}</span>
                       {item.shortcutHint && (
-                        <kbd className="shrink-0 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
-                          {item.shortcutHint}
+                        <kbd className="shrink-0 flex items-center gap-0.5 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                          {formatComboForDisplay(item.shortcutHint).join("")}
                         </kbd>
                       )}
                       {item.similarity != null && (
