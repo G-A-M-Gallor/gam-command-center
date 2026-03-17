@@ -36,6 +36,7 @@ import { useContacts } from "@/lib/pwa/useContacts";
 import { useWakeLock } from "@/lib/pwa/useWakeLock";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { EmailTemplatesTab } from "@/components/settings/EmailTemplatesTab";
+import { SkinsTab } from "@/components/settings/SkinsTab";
 
 const ACCENT_OPTIONS: { value: AccentColor; swatch: string }[] = [
   { value: "purple", swatch: "#9333ea" },
@@ -64,11 +65,12 @@ const DENSITY_OPTIONS: { value: Density; key: "compact" | "default" | "spacious"
   { value: "spacious", key: "spacious" },
 ];
 
-type SettingsTab = "general" | "theme" | "brand" | "widgetBar" | "pwa" | "accounts" | "emailTemplates";
+type SettingsTab = "general" | "theme" | "skins" | "brand" | "widgetBar" | "pwa" | "accounts" | "emailTemplates";
 
-const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabBrand" | "tabWidgetBar" | "tabPwa" | "tabAccounts" | "tabEmailTemplates" }[] = [
+const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabSkins" | "tabBrand" | "tabWidgetBar" | "tabPwa" | "tabAccounts" | "tabEmailTemplates" }[] = [
   { tab: "general", tKey: "tabGeneral" },
   { tab: "theme", tKey: "tabTheme" },
+  { tab: "skins", tKey: "tabSkins" },
   { tab: "brand", tKey: "tabBrand" },
   { tab: "widgetBar", tKey: "tabWidgetBar" },
   { tab: "pwa", tKey: "tabPwa" },
@@ -1743,6 +1745,7 @@ export default function SettingsPage() {
       <div className="flex-1 pt-6">
         {activeTab === "general" && <GeneralTab />}
         {activeTab === "theme" && <ThemeTab />}
+        {activeTab === "skins" && <SkinsTab />}
         {activeTab === "brand" && <BrandTab />}
         {activeTab === "widgetBar" && <WidgetBarTab />}
         {activeTab === "pwa" && <PWATab />}

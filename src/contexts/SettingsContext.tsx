@@ -9,6 +9,8 @@ import {
   useMemo,
 } from "react";
 import { generateAccentPalette, generateGlowShadow } from "@/lib/colorUtils";
+import type { SkinConfig, ShellSkinId, ContentSkinId, MobileNavSkinId } from "@/lib/skins/types";
+import { DEFAULT_SKIN_CONFIG } from "@/lib/skins/types";
 
 const STORAGE_KEYS = {
   language: "cc-language",
@@ -25,6 +27,7 @@ const STORAGE_KEYS = {
   archivedColors: "cc-archived-colors",
   gibberishDetect: "cc-gibberish-detect",
   navColor: "cc-nav-color",
+  skinConfig: "cc-skin-config",
 } as const;
 
 export type Language = "he" | "en" | "ru";
@@ -79,6 +82,7 @@ interface Settings {
   accentEffect: AccentEffect;
   navColor: string;
   gibberishDetect: boolean;
+  skinConfig: SkinConfig;
   setLanguage: (lang: Language) => void;
   setSidebarPosition: (pos: SidebarPosition) => void;
   setSidebarVisibility: (mode: SidebarVisibility) => void;
@@ -93,6 +97,10 @@ interface Settings {
   setAccentEffect: (effect: AccentEffect) => void;
   setNavColor: (color: string) => void;
   setGibberishDetect: (enabled: boolean) => void;
+  setSkinConfig: (config: SkinConfig) => void;
+  setShellSkin: (skin: ShellSkinId) => void;
+  setContentSkin: (skin: ContentSkinId) => void;
+  setMobileNavSkin: (skin: MobileNavSkinId) => void;
 }
 
 const defaultBrandProfile: BrandProfile = {
@@ -133,6 +141,7 @@ const defaultSettings: Settings = {
   accentEffect: defaultAccentEffect,
   navColor: "",
   gibberishDetect: true,
+  skinConfig: DEFAULT_SKIN_CONFIG,
   setLanguage: () => {},
   setSidebarPosition: () => {},
   setSidebarVisibility: () => {},
@@ -147,6 +156,10 @@ const defaultSettings: Settings = {
   setAccentEffect: () => {},
   setNavColor: () => {},
   setGibberishDetect: () => {},
+  setSkinConfig: () => {},
+  setShellSkin: () => {},
+  setContentSkin: () => {},
+  setMobileNavSkin: () => {},
 };
 
 const ACCENT_COLORS: AccentColor[] = ["purple", "blue", "emerald", "amber", "rose", "cyan", "brand", "custom"];
@@ -177,6 +190,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [accentEffect, setAccentEffectState] = useState<AccentEffect>(defaultAccentEffect);
   const [navColor, setNavColorState] = useState("");
   const [gibberishDetect, setGibberishDetectState] = useState(true);
+  const [skinConfig, setSkinConfigState] = useState<SkinConfig>(DEFAULT_SKIN_CONFIG);
   const [mounted, setMounted] = useState(false);
 
   // Load all settings from localStorage on mount
@@ -233,6 +247,14 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const storedGibberish = localStorage.getItem(STORAGE_KEYS.gibberishDetect);
     if (storedGibberish !== null) setGibberishDetectState(storedGibberish !== "false");
 
+    try {
+      const storedSkin = localStorage.getItem(STORAGE_KEYS.skinConfig);
+      if (storedSkin) {
+        const parsed = JSON.parse(storedSkin);
+        setSkinConfigState({ ...DEFAULT_SKIN_CONFIG, ...parsed });
+      }
+    } catch { /* ignore */ }
+
     setMounted(true);
   }, []);
 
@@ -251,9 +273,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     root.dataset.font = fontFamily;
     root.dataset.radius = borderRadius;
     root.dataset.density = density;
-    // Accent colors are applied via CSS selectors [data-accent="purple"] etc.
-    // and by applyTheme() — no inline writes needed here.
-  }, [accentColor, fontFamily, borderRadius, density, mounted]);
+    root.dataset.shellSkin = skinConfig.shell;
+    root.dataset.contentSkin = skinConfig.content;
+    root.dataset.mobileNav = skinConfig.mobileNav;
+  }, [accentColor, fontFamily, borderRadius, density, skinConfig, mounted]);
 
   // Apply brand color CSS vars when brand colors change
   useEffect(() => {
@@ -412,6 +435,35 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.gibberishDetect, String(enabled));
   }, []);
 
+  const setSkinConfig = useCallback((config: SkinConfig) => {
+    setSkinConfigState(config);
+    localStorage.setItem(STORAGE_KEYS.skinConfig, JSON.stringify(config));
+  }, []);
+
+  const setShellSkin = useCallback((skin: ShellSkinId) => {
+    setSkinConfigState((prev) => {
+      const next = { ...prev, shell: skin };
+      localStorage.setItem(STORAGE_KEYS.skinConfig, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const setContentSkin = useCallback((skin: ContentSkinId) => {
+    setSkinConfigState((prev) => {
+      const next = { ...prev, content: skin };
+      localStorage.setItem(STORAGE_KEYS.skinConfig, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const setMobileNavSkin = useCallback((skin: MobileNavSkinId) => {
+    setSkinConfigState((prev) => {
+      const next = { ...prev, mobileNav: skin };
+      localStorage.setItem(STORAGE_KEYS.skinConfig, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const value = useMemo<Settings>(
     () => ({
       language,
@@ -428,6 +480,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       accentEffect,
       navColor,
       gibberishDetect,
+      skinConfig,
       setLanguage,
       setSidebarPosition,
       setSidebarVisibility,
@@ -442,6 +495,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setAccentEffect,
       setNavColor,
       setGibberishDetect,
+      setSkinConfig,
+      setShellSkin,
+      setContentSkin,
+      setMobileNavSkin,
     }),
     [
       language,
@@ -472,6 +529,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       setNavColor,
       gibberishDetect,
       setGibberishDetect,
+      skinConfig,
+      setSkinConfig,
+      setShellSkin,
+      setContentSkin,
+      setMobileNavSkin,
     ]
   );
 

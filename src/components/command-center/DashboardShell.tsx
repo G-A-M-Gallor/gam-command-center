@@ -48,7 +48,7 @@ const tabLabels: Record<string, { he: string; en: string; ru: string }> = {
 };
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const { sidebarPosition, sidebarVisibility, language } = useSettings();
+  const { sidebarPosition, sidebarVisibility, language, skinConfig } = useSettings();
   const { displayMode } = useWidgets();
   const pathname = usePathname();
   const breakpoint = useBreakpoint();
@@ -212,7 +212,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 : "4rem"
             } + ${tabBarOffset}px)`
           } : undefined),
-          ...(isMobile ? { paddingBottom: "calc(3.5rem + var(--safe-area-bottom, 0px) + 1rem)" } : undefined),
+          ...(isMobile ? {
+            paddingBottom: (skinConfig.mobileNav === "bottom-bar" || skinConfig.mobileNav === "tab-drawer")
+              ? "calc(3.5rem + var(--safe-area-bottom, 0px) + 1rem)"
+              : skinConfig.mobileNav === "bottom-sheet"
+                ? "calc(2rem + var(--safe-area-bottom, 0px) + 0.5rem)"
+                : "calc(var(--safe-area-bottom, 0px) + 0.5rem)",
+          } : undefined),
         }}
       >
         {children}
