@@ -3,7 +3,8 @@ import type { ShortcutDefinition, UserShortcutOverride } from "./shortcutRegistr
 // ─── Parsed Combo ───────────────────────────────────────────
 
 export interface ParsedCombo {
-  meta: boolean;
+  meta: boolean;   // Cmd on Mac, Win/Super on Win/Linux
+  ctrl: boolean;   // Physical Control key (all platforms)
   shift: boolean;
   alt: boolean;
   key: string; // lowercase
@@ -22,23 +23,16 @@ export function isMac(): boolean {
 
 // ─── Parse ──────────────────────────────────────────────────
 
-const MODIFIER_MAP: Record<string, "meta" | "shift" | "alt"> = {
-  cmd: "meta",
-  ctrl: "meta",
-  shift: "shift",
-  alt: "alt",
-  option: "alt",
-};
-
 export function parseCombo(combo: string): ParsedCombo {
   const parts = combo.split("+").map((p) => p.trim().toLowerCase());
-  const parsed: ParsedCombo = { meta: false, shift: false, alt: false, key: "" };
+  const parsed: ParsedCombo = { meta: false, ctrl: false, shift: false, alt: false, key: "" };
 
   for (const part of parts) {
-    const mod = MODIFIER_MAP[part];
-    if (mod) {
-      parsed[mod] = true;
-    } else {
+    if (part === "cmd") parsed.meta = true;
+    else if (part === "ctrl") parsed.ctrl = true;
+    else if (part === "shift") parsed.shift = true;
+    else if (part === "alt" || part === "option") parsed.alt = true;
+    else {
       // Normalize special key names
       parsed.key = part === "enter" ? "enter"
         : part === "escape" || part === "esc" ? "escape"
@@ -59,17 +53,10 @@ export function parseCombo(combo: string): ParsedCombo {
 // ─── Match ──────────────────────────────────────────────────
 
 export function matchesEvent(event: KeyboardEvent, parsed: ParsedCombo): boolean {
-  // On Mac, Cmd = metaKey. On Win/Linux, Cmd = ctrlKey.
-  const metaPressed = isMac() ? event.metaKey : event.ctrlKey;
-
-  if (parsed.meta !== metaPressed) return false;
+  if (parsed.meta !== event.metaKey) return false;
+  if (parsed.ctrl !== event.ctrlKey) return false;
   if (parsed.shift !== event.shiftKey) return false;
   if (parsed.alt !== event.altKey) return false;
-
-  // On Mac, if meta is not required, ensure ctrlKey is not pressed (avoid false matches)
-  if (!parsed.meta && isMac() && event.ctrlKey) return false;
-  // On Win/Linux, if meta is not required, ensure metaKey is not pressed
-  if (!parsed.meta && !isMac() && event.metaKey) return false;
 
   const eventKey = event.key.toLowerCase();
 
@@ -88,6 +75,7 @@ const MAC_SYMBOLS: Record<string, string> = {
   shift: "⇧",
   alt: "⌥",
   option: "⌥",
+  meta: "⌘",
   enter: "↵",
   escape: "Esc",
   esc: "Esc",

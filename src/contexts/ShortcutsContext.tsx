@@ -280,7 +280,7 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
       for (const sc of active) {
         const parsed = parseCombo(sc.keyCombo);
-        const needsModifier = parsed.meta || parsed.alt;
+        const needsModifier = parsed.meta || parsed.ctrl || parsed.alt;
 
         // Skip single-key shortcuts when in input
         if (isInput && !needsModifier) continue;

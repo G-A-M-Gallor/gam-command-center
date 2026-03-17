@@ -73,9 +73,9 @@ export const SHELL_SKINS: ShellSkinMeta[] = [
     id: "command-first",
     name: { he: "Command First", en: "Command First", ru: "Command First" },
     description: {
-      he: "סיידבר מוסתר ברירת מחדל. ⌘K לניווט. מקסימום שטח תוכן",
-      en: "Sidebar hidden by default. ⌘K to navigate. Maximum content area",
-      ru: "Сайдбар скрыт. ⌘K для навигации. Максимум контента",
+      he: "סיידבר מוסתר ברירת מחדל. ⌃K לניווט. מקסימום שטח תוכן",
+      en: "Sidebar hidden by default. Ctrl+K to navigate. Maximum content area",
+      ru: "Сайдбар скрыт. Ctrl+K для навигации. Максимум контента",
     },
     preview: "⌨️",
     features: ["hidden-sidebar", "command-palette", "full-screen", "power-user"],

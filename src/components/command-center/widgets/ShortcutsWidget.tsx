@@ -404,9 +404,9 @@ function ShortcutRow({
 
 const AI_STUB_RESPONSES: Record<string, { combo: string; label: { he: string; en: string; ru: string } }[]> = {
   save: [{ combo: "Cmd+S", label: { he: "שמור מסמך", en: "Save Document", ru: "Сохранить документ" } }],
-  search: [{ combo: "Cmd+K", label: { he: "חיפוש", en: "Search", ru: "Поиск" } }],
+  search: [{ combo: "Ctrl+K", label: { he: "חיפוש", en: "Search", ru: "Поиск" } }],
   undo: [{ combo: "Cmd+Z", label: { he: "בטל", en: "Undo", ru: "Отменить" } }],
-  create: [{ combo: "Cmd+Shift+N", label: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" } }],
+  create: [{ combo: "Ctrl+Shift+N", label: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" } }],
 };
 
 function AiSuggestionBar({ language }: { language: "he" | "en" | "ru" }) {
