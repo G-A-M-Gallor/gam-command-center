@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>vClip — הקלטה</title>
+  <link rel="stylesheet" href="recorder.css">
+</head>
+<body>
+  <!-- ====== Phase: Setup ====== -->
+  <div id="setupPhase" class="phase">
+    <div class="setup-card">
+      <h1 class="title">vClip</h1>
+      <p class="subtitle">הקלט מסך + בועת פנים בלחיצה</p>
+
+      <div class="preview-area">
+        <video id="cameraPreview" autoplay muted playsinline></video>
+        <div class="preview-label">תצוגה מקדימה של המצלמה</div>
+      </div>
+
+      <div class="controls">
+        <button id="startRecording" class="btn btn-record">
+          <span class="rec-icon"></span>
+          התחל הקלטה
+        </button>
+      </div>
+
+      <div id="setupStatus" class="status-text"></div>
+    </div>
+  </div>
+
+  <!-- ====== Phase: Recording ====== -->
+  <div id="recordingPhase" class="phase hidden">
+    <div class="recording-bar">
+      <div class="rec-indicator">
+        <span class="rec-dot-live"></span>
+        <span id="timer">00:00</span>
+      </div>
+      <div class="rec-actions">
+        <button id="pauseBtn" class="btn btn-secondary btn-sm">השהה</button>
+        <button id="stopBtn" class="btn btn-stop btn-sm">עצור</button>
+      </div>
+    </div>
+    <div class="recording-canvas-wrap">
+      <canvas id="compositeCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- ====== Phase: Processing ====== -->
+  <div id="processingPhase" class="phase hidden">
+    <div class="processing-card">
+      <div class="spinner"></div>
+      <h2>מעבד סרטון...</h2>
+      <div id="processingStatus" class="status-text">טוען ffmpeg.wasm</div>
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Phase: Done ====== -->
+  <div id="donePhase" class="phase hidden">
+    <div class="done-card">
+      <div class="done-icon">&#10003;</div>
+      <h2>הסרטון מוכן!</h2>
+
+      <video id="previewVideo" controls playsinline></video>
+
+      <div class="clip-info">
+        <span id="clipDuration"></span>
+        <span id="clipSize"></span>
+      </div>
+
+      <div class="link-box">
+        <input id="clipLink" type="text" readonly>
+        <button id="copyLink" class="btn btn-primary btn-sm">העתק</button>
+      </div>
+
+      <div class="done-actions">
+        <button id="downloadBtn" class="btn btn-secondary">הורד</button>
+        <button id="newRecording" class="btn btn-primary">הקלטה חדשה</button>
+      </div>
+
+      <div id="doneStatus" class="status-text"></div>
+    </div>
+  </div>
+
+  <script src="recorder.js" type="module"></script>
+</body>
+</html>

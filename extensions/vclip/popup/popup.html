@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-area">
+        <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <rect width="24" height="24" rx="6" fill="#fff" fill-opacity="0.08"/>
+          <path d="M9.5 7.5v9l7-4.5-7-4.5z" fill="url(#lg)" stroke="#fff" stroke-opacity="0.2" stroke-width="0.5"/>
+          <defs><linearGradient id="lg" x1="9" y1="7" x2="17" y2="12"><stop stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+        </svg>
+        <div class="logo-text">
+          <span class="logo">vClip</span>
+          <span class="version">v0.1.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Toggle Options -->
+    <div class="toggle-section">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 012-2h6a2 2 0 012 2v1.662"/></svg>
+          <span>בועת פנים</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enableCamera" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          <span>מיקרופון</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enableMic" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.08"/></svg>
+          <span>אודיו מערכת</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="enableSystemAudio">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Device Selectors -->
+    <div class="device-section">
+      <div class="device-row" id="cameraRow">
+        <label class="device-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+          מצלמה
+        </label>
+        <select id="cameraSelect" class="device-select">
+          <option value="">טוען...</option>
+        </select>
+      </div>
+      <div class="device-row" id="micRow">
+        <label class="device-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/></svg>
+          מיקרופון
+        </label>
+        <select id="micSelect" class="device-select">
+          <option value="">טוען...</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Bubble Options -->
+    <div class="bubble-section" id="bubbleOptions">
+      <div class="bubble-row">
+        <span class="device-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          מיקום בועה
+        </span>
+        <div class="position-grid">
+          <button class="pos-btn" data-pos="top-left" title="שמאל למעלה">
+            <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="3" cy="3" r="2.5" fill="#9ca3af"/></svg>
+          </button>
+          <button class="pos-btn" data-pos="top-right" title="ימין למעלה">
+            <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="9" cy="3" r="2.5" fill="#9ca3af"/></svg>
+          </button>
+          <button class="pos-btn" data-pos="bottom-left" title="שמאל למטה">
+            <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="3" cy="9" r="2.5" fill="#9ca3af"/></svg>
+          </button>
+          <button class="pos-btn" data-pos="bottom-right" title="ימין למטה" aria-pressed="true">
+            <svg width="12" height="12" viewBox="0 0 12 12"><circle cx="9" cy="9" r="2.5" fill="#9ca3af"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="bubble-row">
+        <span class="device-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          גודל בועה
+        </span>
+        <input type="range" id="bubbleSize" min="80" max="240" value="150" step="10">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Record Button -->
+    <button id="startBtn" class="record-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r="8" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+        <circle cx="9" cy="9" r="4" fill="#ef4444">
+          <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+      התחל הקלטה
+    </button>
+
+    <!-- Quick Info -->
+    <div class="quick-info">
+      <div class="info-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        מסך + מצלמה
+      </div>
+      <div class="info-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        כיווץ אוטומטי
+      </div>
+      <div class="info-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        לינק מיידי
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
