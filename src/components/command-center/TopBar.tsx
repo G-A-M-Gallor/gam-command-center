@@ -912,9 +912,6 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
                   </span>
                   <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-slate-900 bg-emerald-500" />
                 </div>
-                <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
-                  {user.user_metadata?.full_name || user.email?.split("@")[0] || ""}
-                </span>
               </div>
             )}
           </div>
@@ -1150,9 +1147,6 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
             {/* User avatar + name */}
             {user && (
               <div className="flex items-center gap-1.5 px-2.5">
-                <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
-                  {user.user_metadata?.full_name || user.email?.split("@")[0] || ""}
-                </span>
                 <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
                   <span className="text-[10px] font-semibold text-[var(--cc-accent-400)]">
                     {(user.email?.[0] || "?").toUpperCase()}

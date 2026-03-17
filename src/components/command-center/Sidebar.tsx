@@ -71,14 +71,16 @@ import {
   FileStack,
   Phone,
   MessageSquareCode,
+  Plug,
+  Cable,
   Image,
   Video,
   AudioLines,
   UserCircle,
 } from "lucide-react";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { SortableContext, verticalListSortingStrategy, rectSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -323,6 +325,17 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       {
         type: "folder",
+        href: "/dashboard/integrations",
+        key: "integrations",
+        icon: Plug,
+        status: "active",
+        children: [
+          { href: "/dashboard/integrations", key: "myConnections", icon: Cable, status: "active" },
+          { href: "/dashboard/integrations/store", key: "appStore", icon: Store, status: "active" },
+        ],
+      },
+      {
+        type: "folder",
         href: "/dashboard/vault",
         key: "vault",
         icon: Lock,
@@ -499,7 +512,10 @@ export function Sidebar({
   } | null>(null);
 
   // DnD
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+  );
 
   const toggleFolder = useCallback((key: string) => {
     setOpenFolders((prev) => {
@@ -1069,7 +1085,12 @@ export function Sidebar({
             />
           )}
 
-         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+         <DndContext
+           sensors={sensors}
+           collisionDetection={closestCenter}
+           onDragEnd={handleDragEnd}
+           autoScroll={{ threshold: { x: 0, y: 0.15 }, interval: 5 }}
+         >
           <SortableContext items={filteredGroups.map((g) => `section:${g.id}`)} strategy={verticalListSortingStrategy}>
           {filteredGroups.map((group, gi) => {
             // Collect all sortable IDs for this group (section header + items)
@@ -1083,7 +1104,7 @@ export function Sidebar({
             const canDelete = (group.isCustomSection || group.isCustomFolder) && isSectionEmpty(group.id);
 
             return (
-            <SortableContext key={group.id} items={sortableIds} strategy={verticalListSortingStrategy}>
+            <SortableContext key={group.id} items={sortableIds} strategy={viewMode === "grid" ? rectSortingStrategy : verticalListSortingStrategy}>
             <SortableSectionDiv id={`section:${group.id}`} editMode={editMode}>
               {/* Group label / divider — now interactive toggle */}
               {gi > 0 && isCollapsed && (
