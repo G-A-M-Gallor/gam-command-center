@@ -53,6 +53,8 @@ import {
   GripVertical,
   RotateCcw,
   BarChart3,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -66,7 +68,9 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import { useSidebarCustomization } from "@/lib/sidebar/useSidebarCustomization";
 import { buildDisplayGroups } from "@/lib/sidebar/sidebarCustomization";
+import type { ItemCustomization } from "@/lib/sidebar/sidebarCustomization";
 import { SidebarContextMenu } from "./SidebarContextMenu";
+import { ItemEditPopover, getIconByName } from "./ItemEditPopover";
 import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
 
 const FULL_WIDTH = 240;
@@ -114,6 +118,7 @@ function SortableNavItem({
   isHidden,
   onToggleHide,
   onRight,
+  onEditClick,
   children,
 }: {
   id: string;
@@ -121,6 +126,7 @@ function SortableNavItem({
   isHidden: boolean;
   onToggleHide: () => void;
   onRight: boolean;
+  onEditClick?: () => void;
   children: React.ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -145,7 +151,17 @@ function SortableNavItem({
       >
         <GripVertical className="h-3 w-3" />
       </div>
-      <div className={onRight ? "pr-5" : "pl-5"}>
+      <div
+        className={onRight ? "pr-5" : "pl-5"}
+        onClick={(e) => {
+          if (onEditClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            onEditClick();
+          }
+        }}
+        style={{ cursor: onEditClick ? "pointer" : undefined }}
+      >
         {children}
       </div>
       <button
@@ -167,7 +183,7 @@ function SortableNavItem({
 
 export interface NavGroup {
   id: string;
-  labelKey: "groupCore" | "groupTools" | "groupSystem";
+  labelKey: string;
   items: NavEntry[];
 }
 
@@ -305,7 +321,49 @@ export function Sidebar({
     customization, editMode, reorder, createFolder: createCustomFolder, deleteFolder,
     moveToFolder: moveItemToFolder, removeFromFolder, toggleHide, trackUsage,
     toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, setEditMode,
+    updateItem, clearItem,
+    toggleSection, renameSection, createSection: createCustomSection, deleteSection,
+    moveItemToSection, removeItemFromSection,
   } = useSidebarCustomization();
+
+  // Per-item edit popover state
+  const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
+  // Section inline rename state
+  const [renamingSectionId, setRenamingSectionId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const renameInputRef = useRef<HTMLInputElement>(null);
+  // New section creation
+  const [creatingSection, setCreatingSection] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+  const newSectionInputRef = useRef<HTMLInputElement>(null);
+
+  // Collapsed sections set for quick lookup
+  const collapsedSet = new Set(customization.collapsedSections);
+
+  // Helper: resolve label for an item based on customization
+  const resolveLabel = useCallback((itemKey: string, defaultLabel: string): string => {
+    const ic = customization.itemCustomizations[itemKey];
+    if (!ic?.labelLanguage) return defaultLabel;
+    if (ic.labelLanguage === "custom" && ic.customLabel) return ic.customLabel;
+    if (ic.labelLanguage === "custom") return defaultLabel;
+    // For he/en/ru — get translations from that language
+    const langTranslations = getTranslations(ic.labelLanguage);
+    return ((langTranslations.tabs as Record<string, string>)?.[itemKey]) || defaultLabel;
+  }, [customization.itemCustomizations]);
+
+  // Helper: resolve icon for an item
+  const resolveIcon = useCallback((itemKey: string, DefaultIcon: React.ElementType): React.ElementType => {
+    const ic = customization.itemCustomizations[itemKey];
+    if (!ic?.customIcon) return DefaultIcon;
+    const custom = getIconByName(ic.customIcon);
+    return custom || DefaultIcon;
+  }, [customization.itemCustomizations]);
+
+  // Helper: get icon position for an item
+  const getIconPosition = useCallback((itemKey: string): "start" | "end" | "above" => {
+    return customization.itemCustomizations[itemKey]?.iconPosition || "start";
+  }, [customization.itemCustomizations]);
+
 
   // Context menu state
   const [ctxMenu, setCtxMenu] = useState<{
@@ -446,9 +504,12 @@ export function Sidebar({
     NAV_GROUPS, customization, filter, favHrefs, permissions, editMode,
   ).map((dg) => ({
     id: dg.id,
-    labelKey: dg.labelKey as NavGroup["labelKey"],
+    labelKey: dg.labelKey,
     isCustomFolder: dg.isCustomFolder,
     customFolderName: dg.customFolderName,
+    isCustomSection: dg.isCustomSection,
+    displayName: dg.displayName,
+    emoji: dg.emoji,
     items: dg.items,
   }));
 
@@ -513,6 +574,23 @@ export function Sidebar({
 
   // ── Filter tab definitions ────────────────────────────
   const sidebarT = t.sidebar as Record<string, string>;
+
+  // Edit popover labels
+  const editLabels = {
+    customLabel: sidebarT.customLabel || "Custom Label",
+    language: sidebarT.language || "Display Language",
+    iconPosition: sidebarT.iconPosition || "Icon Position",
+    changeIcon: sidebarT.changeIcon || "Change Icon",
+    reset: sidebarT.resetItem || "Reset",
+    langHe: sidebarT.langHe || "עברית",
+    langEn: sidebarT.langEn || "English",
+    langRu: sidebarT.langRu || "Русский",
+    langCustom: sidebarT.langCustom || "Custom",
+    posStart: sidebarT.posStart || "Start",
+    posEnd: sidebarT.posEnd || "End",
+    posAbove: sidebarT.posAbove || "Above",
+  };
+
   const filterTabs: { id: SidebarFilter; label: string }[] = [
     { id: "all", label: sidebarT.filterAll },
     { id: "active", label: sidebarT.filterActive },
@@ -842,30 +920,140 @@ export function Sidebar({
             const sortableIds = group.items.flatMap((e) =>
               isFolder(e) ? [e.key, ...e.children.map((c) => c.key)] : [e.key]
             );
+            const isSectionCollapsed = collapsedSet.has(group.id);
+            const sectionLabel = group.displayName || group.customFolderName || sidebarT[group.labelKey] || group.id;
+            const sectionEmoji = group.emoji;
+            const isRenamingThis = renamingSectionId === group.id;
+            const canDelete = group.isCustomSection || group.isCustomFolder;
+
             return (
             <SortableContext key={group.id} items={sortableIds} strategy={verticalListSortingStrategy}>
             <div>
-              {/* Group label / divider */}
+              {/* Group label / divider — now interactive toggle */}
               {gi > 0 && isCollapsed && (
                 <div className="mx-2 my-2 border-t border-slate-700/30" />
               )}
-              {!isCollapsed && viewMode === "list" && (
-                <div className={gi === 0 ? "pt-1 pb-1 px-3" : "pt-4 pb-1 px-3"}>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
-                    {sidebarT[group.labelKey]}
-                  </span>
+              {!isCollapsed && (viewMode === "list" || viewMode === "grid") && (
+                <div className={`${gi === 0 ? "pt-1 pb-1" : "pt-3 pb-1"} ${viewMode === "grid" ? "px-1" : "px-2"}`}>
+                  <div className={`group/section flex items-center gap-1 rounded-md px-1 py-0.5 -mx-1 transition-colors ${
+                    editMode ? "hover:bg-slate-800/50" : "hover:bg-slate-800/30 cursor-pointer"
+                  }`}>
+                    {/* Collapse chevron */}
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(group.id)}
+                      className="shrink-0 rounded p-0.5 text-slate-600 hover:text-slate-400 transition-colors"
+                    >
+                      <ChevronRight className={`h-2.5 w-2.5 transition-transform duration-200 ${isSectionCollapsed ? "" : "rotate-90"}`} />
+                    </button>
+
+                    {/* Section name — clickable toggle or inline edit */}
+                    {isRenamingThis ? (
+                      <input
+                        ref={renameInputRef}
+                        type="text"
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onBlur={() => {
+                          if (renameValue.trim()) renameSection(group.id, renameValue.trim());
+                          setRenamingSectionId(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            if (renameValue.trim()) renameSection(group.id, renameValue.trim());
+                            setRenamingSectionId(null);
+                          }
+                          if (e.key === "Escape") setRenamingSectionId(null);
+                        }}
+                        className="flex-1 bg-transparent border-b border-[var(--cc-accent-500)] text-[10px] uppercase tracking-wider text-slate-300 font-medium outline-none px-0.5"
+                        autoFocus
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (editMode) {
+                            setRenamingSectionId(group.id);
+                            setRenameValue(sectionLabel);
+                          } else {
+                            toggleSection(group.id);
+                          }
+                        }}
+                        className="flex-1 text-start"
+                      >
+                        <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
+                          {sectionEmoji ? `${sectionEmoji} ` : ""}{sectionLabel}
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Item count badge */}
+                    {isSectionCollapsed && (
+                      <span className="text-[9px] text-slate-700 tabular-nums">{group.items.length}</span>
+                    )}
+
+                    {/* Edit mode: delete custom section */}
+                    {editMode && canDelete && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (group.isCustomSection) deleteSection(group.id);
+                          else if (group.isCustomFolder) deleteFolder(group.id);
+                        }}
+                        className="shrink-0 rounded p-0.5 text-slate-700 hover:text-red-400 transition-colors opacity-0 group-hover/section:opacity-100"
+                        title={sidebarT.deleteSection || "Delete section"}
+                      >
+                        <Trash2 className="h-2.5 w-2.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
               {!isCollapsed && viewMode === "compact" && gi > 0 && (
-                <div className="mx-2 my-1.5 border-t border-slate-700/30" />
-              )}
-              {!isCollapsed && viewMode === "grid" && (
-                <div className={gi === 0 ? "pt-1 pb-1 px-1" : "pt-3 pb-1 px-1"}>
-                  <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
-                    {sidebarT[group.labelKey]}
-                  </span>
+                <div className="mx-1 my-1">
+                  <div className={`group/section flex items-center gap-1 rounded-md px-1 py-0.5 transition-colors ${
+                    editMode ? "hover:bg-slate-800/50" : "hover:bg-slate-800/30 cursor-pointer"
+                  }`}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(group.id)}
+                      className="shrink-0 rounded p-0.5 text-slate-600 hover:text-slate-400 transition-colors"
+                    >
+                      <ChevronRight className={`h-2.5 w-2.5 transition-transform duration-200 ${isSectionCollapsed ? "" : "rotate-90"}`} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (editMode) { setRenamingSectionId(group.id); setRenameValue(sectionLabel); }
+                        else toggleSection(group.id);
+                      }}
+                      className="flex-1 text-start"
+                    >
+                      <span className="text-[9px] uppercase tracking-wider text-slate-600 font-medium">
+                        {sectionEmoji ? `${sectionEmoji} ` : ""}{sectionLabel}
+                      </span>
+                    </button>
+                    {isSectionCollapsed && (
+                      <span className="text-[9px] text-slate-700 tabular-nums">{group.items.length}</span>
+                    )}
+                    {editMode && canDelete && (
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); if (group.isCustomSection) deleteSection(group.id); else if (group.isCustomFolder) deleteFolder(group.id); }}
+                        className="shrink-0 rounded p-0.5 text-slate-700 hover:text-red-400 transition-colors opacity-0 group-hover/section:opacity-100"
+                      >
+                        <Trash2 className="h-2.5 w-2.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
+
+              {/* Items — collapse wrapper */}
+              <div className={`overflow-hidden transition-all duration-200 ease-out ${
+                isSectionCollapsed && !isCollapsed ? "max-h-0 opacity-0" : "max-h-[2000px] opacity-100"
+              }`}>
 
               {/* Items — Grid view */}
               {!isCollapsed && viewMode === "grid" ? (
@@ -877,32 +1065,38 @@ export function Sidebar({
                       : [entry];
                     return flatItems
                       .filter(({ key: k }) => !customization.hiddenItems.includes(k) || editMode)
-                      .map(({ href, key: itemKey, icon: Icon }) => {
+                      .map(({ href, key: itemKey, icon: DefaultIcon }) => {
                       const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
-                      const label = (t.tabs as Record<string, string>)[itemKey];
+                      const rawLabel = (t.tabs as Record<string, string>)[itemKey];
+                      const gridLabel = resolveLabel(itemKey, rawLabel);
+                      const GridIcon = resolveIcon(itemKey, DefaultIcon);
                       const isFav = favHrefs.has(href);
                       const isItemHidden = customization.hiddenItems.includes(itemKey);
                       return (
                         <div key={href} className={`group/grid relative ${isItemHidden && editMode ? "opacity-30" : ""}`}
-                          onContextMenu={(e) => { if (editMode) return; e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey, href, label }); }}
+                          onContextMenu={(e) => { if (editMode) return; e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey, href, label: gridLabel }); }}
+                          onClick={editMode ? (e) => { e.preventDefault(); e.stopPropagation(); setEditingItemKey(editingItemKey === itemKey ? null : itemKey); } : undefined}
                         >
                           <Link
-                            href={href}
-                            onClick={() => { trackUsage(itemKey); if (shouldCloseOnNav) onClose?.(); }}
+                            href={editMode ? "#" : href}
+                            onClick={(e) => {
+                              if (editMode) { e.preventDefault(); return; }
+                              trackUsage(itemKey); if (shouldCloseOnNav) onClose?.();
+                            }}
                             data-active={isActive || undefined}
                             className={`flex flex-col items-center gap-1 rounded-lg p-2 text-center transition-colors ${
                               isActive
                                 ? "nav-item-active bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
                                 : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-                            }`}
+                            } ${editMode ? "ring-1 ring-slate-700/50 ring-dashed" : ""}`}
                           >
-                            <Icon className="h-4 w-4 shrink-0" />
-                            <span className="text-[9px] leading-tight truncate w-full">{label}</span>
+                            <GridIcon className="h-4 w-4 shrink-0" />
+                            <span className="text-[9px] leading-tight truncate w-full">{gridLabel}</span>
                           </Link>
                           {!editMode && (
                           <button
                             type="button"
-                            onClick={(e) => { e.stopPropagation(); handleToggleFav(href, label); }}
+                            onClick={(e) => { e.stopPropagation(); handleToggleFav(href, gridLabel); }}
                             className={`absolute top-0.5 right-0.5 rounded p-0.5 transition-all ${
                               isFav
                                 ? "text-amber-400 opacity-100"
@@ -912,6 +1106,18 @@ export function Sidebar({
                           >
                             <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
                           </button>
+                          )}
+                          {editMode && editingItemKey === itemKey && (
+                            <ItemEditPopover
+                              itemKey={itemKey}
+                              currentLabel={rawLabel}
+                              customization={customization.itemCustomizations[itemKey]}
+                              onUpdate={(patch) => updateItem(itemKey, patch)}
+                              onClear={() => clearItem(itemKey)}
+                              onClose={() => setEditingItemKey(null)}
+                              isRtl={language === "he"}
+                              labels={editLabels}
+                            />
                           )}
                         </div>
                       );
@@ -1055,14 +1261,16 @@ export function Sidebar({
                     // ── Collapsed item ──
                     if (isCollapsed) {
                       if (customization.hiddenItems.includes(key) && !editMode) return null;
+                      const collapsedLabel = resolveLabel(key, label);
+                      const CollapsedIcon = resolveIcon(key, Icon);
                       return (
                         <Link
                           key={href}
                           href={href}
                           onClick={() => { trackUsage(key); if (shouldCloseOnNav) onClose?.(); }}
-                          onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label }); }}
+                          onContextMenu={(e) => { e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label: collapsedLabel }); }}
                           data-active={isActive || undefined}
-                          aria-label={label}
+                          aria-label={collapsedLabel}
                           className={`group relative flex items-center justify-center rounded-lg p-2.5 transition-colors ${
                             isActive
                               ? "nav-item-active text-[var(--cc-accent-300)]"
@@ -1077,7 +1285,7 @@ export function Sidebar({
                               aria-hidden
                             />
                           )}
-                          <Icon className={`h-4 w-4 shrink-0 transition-transform duration-150 ${
+                          <CollapsedIcon className={`h-4 w-4 shrink-0 transition-transform duration-150 ${
                             !isActive ? "group-hover:scale-110" : ""
                           }`} />
                           {/* Tooltip */}
@@ -1086,7 +1294,7 @@ export function Sidebar({
                               onRight ? "right-full mr-2" : "left-full ml-2"
                             } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
                           >
-                            {label}
+                            {collapsedLabel}
                           </span>
                         </Link>
                       );
@@ -1096,14 +1304,27 @@ export function Sidebar({
                     if (viewMode === "compact") {
                       const isFav = favHrefs.has(href);
                       const isItemHidden = customization.hiddenItems.includes(key);
+                      const compactLabel = resolveLabel(key, label);
+                      const CompactIcon = resolveIcon(key, Icon);
                       return (
-                        <SortableNavItem key={href} id={key} editMode={editMode} isHidden={isItemHidden} onToggleHide={() => toggleHide(key)} onRight={onRight}>
+                        <SortableNavItem
+                          key={href}
+                          id={key}
+                          editMode={editMode}
+                          isHidden={isItemHidden}
+                          onToggleHide={() => toggleHide(key)}
+                          onRight={onRight}
+                          onEditClick={editMode ? () => setEditingItemKey(editingItemKey === key ? null : key) : undefined}
+                        >
                         <div className="group/item relative"
-                          onContextMenu={(e) => { if (editMode) return; e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label }); }}
+                          onContextMenu={(e) => { if (editMode) return; e.preventDefault(); setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label: compactLabel }); }}
                         >
                           <Link
-                            href={href}
-                            onClick={() => { trackUsage(key); if (shouldCloseOnNav) onClose?.(); }}
+                            href={editMode ? "#" : href}
+                            onClick={(e) => {
+                              if (editMode) { e.preventDefault(); return; }
+                              trackUsage(key); if (shouldCloseOnNav) onClose?.();
+                            }}
                             data-active={isActive || undefined}
                             className={`relative z-10 flex items-center gap-2 rounded px-2.5 py-1 text-xs transition-colors ${
                               onRight ? "flex-row-reverse" : ""
@@ -1111,15 +1332,15 @@ export function Sidebar({
                               isActive
                                 ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
-                            } ${isItemHidden && editMode ? "line-through" : ""}`}
+                            } ${isItemHidden && editMode ? "line-through" : ""} ${editMode ? "ring-1 ring-slate-700/50 ring-dashed" : ""}`}
                           >
-                            <Icon className="h-3.5 w-3.5 shrink-0" />
-                            <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{label}</span>
+                            <CompactIcon className="h-3.5 w-3.5 shrink-0" />
+                            <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{compactLabel}</span>
                           </Link>
                           {!editMode && (
                           <button
                             type="button"
-                            onClick={() => handleToggleFav(href, label)}
+                            onClick={() => handleToggleFav(href, compactLabel)}
                             className={`absolute ${onRight ? "left-1" : "right-1"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all ${
                               isFav
                                 ? "text-amber-400 opacity-100"
@@ -1130,6 +1351,18 @@ export function Sidebar({
                             <Star className="h-2.5 w-2.5" fill={isFav ? "currentColor" : "none"} />
                           </button>
                           )}
+                          {editMode && editingItemKey === key && (
+                            <ItemEditPopover
+                              itemKey={key}
+                              currentLabel={label}
+                              customization={customization.itemCustomizations[key]}
+                              onUpdate={(patch) => updateItem(key, patch)}
+                              onClear={() => clearItem(key)}
+                              onClose={() => setEditingItemKey(null)}
+                              isRtl={language === "he"}
+                              labels={editLabels}
+                            />
+                          )}
                         </div>
                         </SortableNavItem>
                       );
@@ -1138,46 +1371,73 @@ export function Sidebar({
                     // ── Expanded list item ──
                     const isFav = favHrefs.has(href);
                     const isItemHidden = customization.hiddenItems.includes(key);
+                    const displayLabel = resolveLabel(key, label);
+                    const ResolvedIcon = resolveIcon(key, Icon);
+                    const iconPos = getIconPosition(key);
+                    const isIconAbove = iconPos === "above";
+                    const isIconEnd = iconPos === "end";
+                    // For RTL: "start" means right side, "end" means left side
+                    // For LTR: "start" means left side, "end" means right side
+                    const showIconFirst = onRight ? isIconEnd : !isIconEnd;
+
                     return (
-                      <SortableNavItem key={href} id={key} editMode={editMode} isHidden={isItemHidden} onToggleHide={() => toggleHide(key)} onRight={onRight}>
+                      <SortableNavItem
+                        key={href}
+                        id={key}
+                        editMode={editMode}
+                        isHidden={isItemHidden}
+                        onToggleHide={() => toggleHide(key)}
+                        onRight={onRight}
+                        onEditClick={editMode ? () => setEditingItemKey(editingItemKey === key ? null : key) : undefined}
+                      >
                       <div className="group/item relative"
                         onContextMenu={(e) => {
                           if (editMode) return;
                           e.preventDefault();
-                          setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label });
+                          setCtxMenu({ x: e.clientX, y: e.clientY, itemKey: key, href, label: displayLabel });
                         }}
                       >
                         <Link
-                          href={href}
-                          onClick={() => { trackUsage(key); if (shouldCloseOnNav) onClose?.(); }}
+                          href={editMode ? "#" : href}
+                          onClick={(e) => {
+                            if (editMode) { e.preventDefault(); return; }
+                            trackUsage(key); if (shouldCloseOnNav) onClose?.();
+                          }}
                           data-cc-id="sidebar.nav.link"
                           data-active={isActive || undefined}
-                          className={`group relative z-10 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
+                          className={`group relative z-10 flex ${isIconAbove ? "flex-col items-center gap-1" : "items-center gap-3"} rounded-lg px-3 py-2 text-sm transition-all duration-150 ${
                             isActive
                               ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                               : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
-                          } ${isItemHidden && editMode ? "line-through" : ""}`}
+                          } ${isItemHidden && editMode ? "line-through" : ""} ${editMode ? "ring-1 ring-slate-700/50 ring-dashed" : ""}`}
                         >
-                          {onRight ? (
+                          {isIconAbove ? (
                             <>
-                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-right truncate">{label}</span>
-                              <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                              <ResolvedIcon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
                                 !isActive ? "group-hover:scale-105" : ""
                               }`} />
+                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="text-center truncate w-full text-xs">{displayLabel}</span>
+                            </>
+                          ) : showIconFirst ? (
+                            <>
+                              <ResolvedIcon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                                !isActive ? "group-hover:scale-105" : ""
+                              }`} />
+                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{displayLabel}</span>
                             </>
                           ) : (
                             <>
-                              <Icon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
+                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{displayLabel}</span>
+                              <ResolvedIcon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
                                 !isActive ? "group-hover:scale-105" : ""
                               }`} />
-                              <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className="flex-1 text-left truncate">{label}</span>
                             </>
                           )}
                         </Link>
                         {!editMode && (
                         <button
                           type="button"
-                          onClick={() => handleToggleFav(href, label)}
+                          onClick={() => handleToggleFav(href, displayLabel)}
                           className={`absolute ${onRight ? "left-2" : "right-2"} top-1/2 -translate-y-1/2 z-20 rounded p-0.5 transition-all ${
                             isFav
                               ? "text-amber-400 opacity-100"
@@ -1188,16 +1448,73 @@ export function Sidebar({
                           <Star className="h-3 w-3" fill={isFav ? "currentColor" : "none"} />
                         </button>
                         )}
+                        {/* Edit popover */}
+                        {editMode && editingItemKey === key && (
+                          <ItemEditPopover
+                            itemKey={key}
+                            currentLabel={label}
+                            customization={customization.itemCustomizations[key]}
+                            onUpdate={(patch) => updateItem(key, patch)}
+                            onClear={() => clearItem(key)}
+                            onClose={() => setEditingItemKey(null)}
+                            isRtl={language === "he"}
+                            labels={editLabels}
+                          />
+                        )}
                       </div>
                       </SortableNavItem>
                     );
                   })}
                 </div>
               )}
+
+              </div>{/* end collapse wrapper */}
             </div>
             </SortableContext>
           );
           })}
+
+          {/* Add Section button (edit mode only) */}
+          {editMode && !isCollapsed && (
+            <div className="px-2 pt-2">
+              {creatingSection ? (
+                <div className="flex items-center gap-1 px-1">
+                  <input
+                    ref={newSectionInputRef}
+                    type="text"
+                    value={newSectionName}
+                    onChange={(e) => setNewSectionName(e.target.value)}
+                    onBlur={() => {
+                      if (newSectionName.trim()) createCustomSection(newSectionName.trim());
+                      setCreatingSection(false);
+                      setNewSectionName("");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        if (newSectionName.trim()) createCustomSection(newSectionName.trim());
+                        setCreatingSection(false);
+                        setNewSectionName("");
+                      }
+                      if (e.key === "Escape") { setCreatingSection(false); setNewSectionName(""); }
+                    }}
+                    placeholder={sidebarT.newSectionName || "Section name..."}
+                    className="flex-1 bg-transparent border-b border-[var(--cc-accent-500)] text-[10px] text-slate-300 font-medium outline-none px-0.5 py-0.5"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setCreatingSection(true)}
+                  className="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-[10px] text-slate-600 hover:text-[var(--cc-accent-300)] hover:bg-[var(--cc-accent-600-20)] transition-colors"
+                >
+                  <Plus className="h-3 w-3" />
+                  {sidebarT.addSection || "Add Section"}
+                </button>
+              )}
+            </div>
+          )}
+
          </DndContext>
         </nav>
 
@@ -1229,6 +1546,8 @@ export function Sidebar({
               newFolder: sidebarT.newFolder || "New folder...",
               removeFromFolder: sidebarT.removeFromFolder || "Remove from folder",
               folderName: sidebarT.folderName || "Folder name",
+              addNote: sidebarT.addNote || "Add note",
+              editNote: sidebarT.editNote || "Edit note",
             }}
           />
         )}

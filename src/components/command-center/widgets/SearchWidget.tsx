@@ -19,6 +19,11 @@ import {
   BookOpen,
   FolderKanban,
   Command,
+  Grid3X3,
+  Monitor,
+  AppWindow,
+  Power,
+  ChevronRight,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
@@ -29,9 +34,10 @@ import { fetchEntityTypes } from "@/lib/supabase/entityQueries";
 import { SYSTEM_SHORTCUTS } from "@/lib/shortcuts/shortcutRegistry";
 import { formatComboForDisplay } from "@/lib/shortcuts/shortcutEngine";
 import { SHORTCUT_EVENT_MAP, SHORTCUT_NAV_MAP } from "@/contexts/ShortcutsContext";
-import { widgetRegistry } from "./WidgetRegistry";
+import { widgetRegistry, getEffectivePlacement } from "./WidgetRegistry";
 import type { EntityType, NoteRecord } from "@/lib/entities/types";
-import type { WidgetSize } from "./WidgetRegistry";
+import type { WidgetSize, WidgetCategory, WidgetPlacement } from "./WidgetRegistry";
+import { useWidgets } from "@/contexts/WidgetContext";
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
 const RECENT_SEARCHES_KEY = "cc-recent-searches";
@@ -140,6 +146,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
   const lang = language;
   const wt = t.widgets as Record<string, string>;
 
+  const [activeTab, setActiveTab] = useState<"search" | "apps">("search");
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dbDocuments, setDbDocuments] = useState<DbDocument[]>([]);
@@ -665,112 +672,367 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         className={`relative flex flex-col overflow-hidden border-slate-700 bg-slate-800 shadow-2xl ${
           isMobile
             ? "h-full w-full"
-            : "w-[600px] max-h-[70vh] rounded-xl border"
+            : "w-[640px] max-h-[75vh] rounded-xl border"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search input */}
-        <div className="flex items-center gap-3 border-b border-slate-700 px-4 py-3">
-          {isCommandMode ? (
-            <Zap className="h-5 w-5 shrink-0 text-amber-400" />
-          ) : isPageMode ? (
-            <Command className="h-5 w-5 shrink-0 text-blue-400" />
-          ) : (
-            <Search className="h-5 w-5 shrink-0 text-slate-400" />
-          )}
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={t.widgets.searchPlaceholder}
-            className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none"
-          />
-          <kbd className="hidden sm:inline-flex h-5 items-center rounded border border-slate-600 bg-slate-700 px-1.5 text-[10px] font-medium text-slate-400">
+        {/* Tabs */}
+        <div className="flex items-center border-b border-slate-700">
+          <button
+            type="button"
+            onClick={() => { setActiveTab("search"); inputRef.current?.focus(); }}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors border-b-2 ${
+              activeTab === "search"
+                ? "border-[var(--cc-accent-400)] text-[var(--cc-accent-300)]"
+                : "border-transparent text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            <Search className="h-3.5 w-3.5" />
+            {wt.searchTab}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("apps")}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-colors border-b-2 ${
+              activeTab === "apps"
+                ? "border-[var(--cc-accent-400)] text-[var(--cc-accent-300)]"
+                : "border-transparent text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            <Grid3X3 className="h-3.5 w-3.5" />
+            {wt.appsTab}
+          </button>
+          <div className="flex-1" />
+          <kbd className="hidden sm:inline-flex me-3 h-5 items-center rounded border border-slate-600 bg-slate-700 px-1.5 text-[10px] font-medium text-slate-400">
             ESC
           </kbd>
         </div>
 
-        {/* Results */}
-        <div ref={listRef} className="overflow-y-auto px-2 py-2">
-          {groupedSections.length === 0 && query.trim() ? (
-            <div className="px-3 py-8 text-center text-sm text-slate-500">
-              {t.widgets.noResults}
+        {activeTab === "search" ? (
+          <>
+            {/* Search input */}
+            <div className="flex items-center gap-3 border-b border-slate-700 px-4 py-3">
+              {isCommandMode ? (
+                <Zap className="h-5 w-5 shrink-0 text-amber-400" />
+              ) : isPageMode ? (
+                <Command className="h-5 w-5 shrink-0 text-blue-400" />
+              ) : (
+                <Search className="h-5 w-5 shrink-0 text-slate-400" />
+              )}
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={t.widgets.searchPlaceholder}
+                className="flex-1 bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none"
+              />
             </div>
-          ) : (
-            groupedSections.map((section) => (
-              <div key={section.title} className="mb-2">
-                <div className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
-                  {section.title}
-                </div>
-                {section.items.map((item) => {
-                  const idx = globalIndex++;
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      data-index={idx}
-                      onClick={() => handleSelect(item)}
-                      onMouseEnter={() => setSelectedIndex(idx)}
-                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
-                        idx === selectedIndex
-                          ? "bg-[var(--cc-accent-600-20)] text-slate-100"
-                          : "text-slate-300 hover:bg-slate-700/50"
-                      }`}
-                    >
-                      {item.entityIcon ? (
-                        <span className="shrink-0 text-sm">{item.entityIcon}</span>
-                      ) : (
-                        <Icon className={`h-4 w-4 shrink-0 ${
-                          item.type === 'semantic' ? 'text-purple-400' :
-                          item.type === 'command' ? 'text-amber-400' :
-                          item.type === 'widget' ? 'text-blue-400' :
-                          'text-slate-400'
-                        }`} />
-                      )}
-                      <span className="flex-1 truncate text-start">{item.label}</span>
-                      {item.shortcutHint && (
-                        <kbd className="shrink-0 flex items-center gap-0.5 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
-                          {formatComboForDisplay(item.shortcutHint).join("")}
-                        </kbd>
-                      )}
-                      {item.similarity != null && (
-                        <span className="shrink-0 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
-                          {Math.round(item.similarity * 100)}%
-                        </span>
-                      )}
-                      {idx === selectedIndex && !item.shortcutHint && (
-                        <CornerDownLeft className="h-3 w-3 shrink-0 text-slate-500" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            ))
-          )}
-        </div>
 
-        {/* Footer with keyboard hints */}
-        <div className="flex items-center gap-4 border-t border-slate-700 px-4 py-2 text-[11px] text-slate-500">
-          <span className="flex items-center gap-1">
-            <ArrowUp className="h-3 w-3" />
-            <ArrowDown className="h-3 w-3" />
-            {wt.searchNavigate}
-          </span>
-          <span className="flex items-center gap-1">
-            <CornerDownLeft className="h-3 w-3" />
-            {wt.searchSelect}
-          </span>
-          <span className="flex items-center gap-1">
-            <kbd className="rounded border border-slate-600 px-1 text-[10px]">ESC</kbd>
-            {wt.searchClose}
-          </span>
-          <span className="ms-auto text-slate-600">
-            {t.widgets.typeCommandHint}
-          </span>
+            {/* Results */}
+            <div ref={listRef} className="overflow-y-auto px-2 py-2">
+              {groupedSections.length === 0 && query.trim() ? (
+                <div className="px-3 py-8 text-center text-sm text-slate-500">
+                  {t.widgets.noResults}
+                </div>
+              ) : (
+                groupedSections.map((section) => (
+                  <div key={section.title} className="mb-2">
+                    <div className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+                      {section.title}
+                    </div>
+                    {section.items.map((item) => {
+                      const idx = globalIndex++;
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          data-index={idx}
+                          onClick={() => handleSelect(item)}
+                          onMouseEnter={() => setSelectedIndex(idx)}
+                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                            idx === selectedIndex
+                              ? "bg-[var(--cc-accent-600-20)] text-slate-100"
+                              : "text-slate-300 hover:bg-slate-700/50"
+                          }`}
+                        >
+                          {item.entityIcon ? (
+                            <span className="shrink-0 text-sm">{item.entityIcon}</span>
+                          ) : (
+                            <Icon className={`h-4 w-4 shrink-0 ${
+                              item.type === 'semantic' ? 'text-purple-400' :
+                              item.type === 'command' ? 'text-amber-400' :
+                              item.type === 'widget' ? 'text-blue-400' :
+                              'text-slate-400'
+                            }`} />
+                          )}
+                          <span className="flex-1 truncate text-start">{item.label}</span>
+                          {item.shortcutHint && (
+                            <kbd className="shrink-0 flex items-center gap-0.5 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                              {formatComboForDisplay(item.shortcutHint).join("")}
+                            </kbd>
+                          )}
+                          {item.similarity != null && (
+                            <span className="shrink-0 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] text-purple-300">
+                              {Math.round(item.similarity * 100)}%
+                            </span>
+                          )}
+                          {idx === selectedIndex && !item.shortcutHint && (
+                            <CornerDownLeft className="h-3 w-3 shrink-0 text-slate-500" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer with keyboard hints */}
+            <div className="flex items-center gap-4 border-t border-slate-700 px-4 py-2 text-[11px] text-slate-500">
+              <span className="flex items-center gap-1">
+                <ArrowUp className="h-3 w-3" />
+                <ArrowDown className="h-3 w-3" />
+                {wt.searchNavigate}
+              </span>
+              <span className="flex items-center gap-1">
+                <CornerDownLeft className="h-3 w-3" />
+                {wt.searchSelect}
+              </span>
+              <span className="flex items-center gap-1">
+                <kbd className="rounded border border-slate-600 px-1 text-[10px]">ESC</kbd>
+                {wt.searchClose}
+              </span>
+              <span className="ms-auto text-slate-600">
+                {t.widgets.typeCommandHint}
+              </span>
+            </div>
+          </>
+        ) : (
+          <AppsManagerPanel lang={lang} wt={wt} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Apps Manager Panel ──────────────────────────────────────
+
+const CATEGORY_ORDER: WidgetCategory[] = ["basics", "productivity", "ai_comms", "team", "analytics", "integrations"];
+const CATEGORY_LABEL_MAP: Record<WidgetCategory, string> = {
+  basics: "categoryBasics",
+  productivity: "categoryProductivity",
+  ai_comms: "categoryAiComms",
+  team: "categoryTeam",
+  analytics: "categoryAnalytics",
+  integrations: "categoryIntegrations",
+};
+
+function AppsManagerPanel({ lang, wt }: { lang: "he" | "en" | "ru"; wt: Record<string, string> }) {
+  const { widgetPlacements, setWidgetPlacement } = useWidgets();
+  const [filterCategory, setFilterCategory] = useState<WidgetCategory | "all">("all");
+  const [filterPlacement, setFilterPlacement] = useState<WidgetPlacement | "all">("all");
+
+  const grouped = useMemo(() => {
+    const map = new Map<WidgetCategory, typeof widgetRegistry>();
+    for (const cat of CATEGORY_ORDER) map.set(cat, []);
+    for (const w of widgetRegistry) {
+      const list = map.get(w.category);
+      if (list) list.push(w);
+    }
+    return map;
+  }, []);
+
+  const filteredWidgets = useMemo(() => {
+    let widgets = [...widgetRegistry];
+    if (filterCategory !== "all") {
+      widgets = widgets.filter(w => w.category === filterCategory);
+    }
+    if (filterPlacement !== "all") {
+      widgets = widgets.filter(w => {
+        const eff = getEffectivePlacement(w.id, widgetPlacements, w.isRemovable);
+        return eff === filterPlacement;
+      });
+    }
+    return widgets;
+  }, [filterCategory, filterPlacement, widgetPlacements]);
+
+  const stats = useMemo(() => {
+    let toolbar = 0, apps = 0, disabled = 0;
+    for (const w of widgetRegistry) {
+      const p = getEffectivePlacement(w.id, widgetPlacements, w.isRemovable);
+      if (p === "toolbar") toolbar++;
+      else if (p === "apps") apps++;
+      else disabled++;
+    }
+    return { toolbar, apps, disabled, total: widgetRegistry.length };
+  }, [widgetPlacements]);
+
+  const cyclePlacement = useCallback((id: string, isRemovable: boolean) => {
+    if (!isRemovable) return;
+    const current = getEffectivePlacement(id, widgetPlacements, isRemovable);
+    const next: WidgetPlacement = current === "toolbar" ? "apps" : current === "apps" ? "disabled" : "toolbar";
+    setWidgetPlacement(id, next);
+  }, [widgetPlacements, setWidgetPlacement]);
+
+  const placementBadge = (placement: WidgetPlacement) => {
+    if (placement === "toolbar") return { color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", label: wt.appsOnToolbar, icon: Monitor };
+    if (placement === "apps") return { color: "bg-blue-500/20 text-blue-300 border-blue-500/30", label: wt.appsInDrawer, icon: AppWindow };
+    return { color: "bg-slate-500/20 text-slate-400 border-slate-500/30", label: wt.appsDisabled, icon: Power };
+  };
+
+  // Group filtered widgets by category for display
+  const displayGroups = useMemo(() => {
+    const groups: { category: WidgetCategory; label: string; widgets: typeof widgetRegistry }[] = [];
+    for (const cat of CATEGORY_ORDER) {
+      const catWidgets = filteredWidgets.filter(w => w.category === cat);
+      if (catWidgets.length > 0) {
+        groups.push({
+          category: cat,
+          label: wt[CATEGORY_LABEL_MAP[cat]] || cat,
+          widgets: catWidgets,
+        });
+      }
+    }
+    return groups;
+  }, [filteredWidgets, wt]);
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Stats bar */}
+      <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-700/50">
+        <div className="flex items-center gap-1.5">
+          <Monitor className="h-3.5 w-3.5 text-emerald-400" />
+          <span className="text-xs text-emerald-300 font-medium">{stats.toolbar}</span>
         </div>
+        <div className="flex items-center gap-1.5">
+          <AppWindow className="h-3.5 w-3.5 text-blue-400" />
+          <span className="text-xs text-blue-300 font-medium">{stats.apps}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Power className="h-3.5 w-3.5 text-slate-500" />
+          <span className="text-xs text-slate-400 font-medium">{stats.disabled}</span>
+        </div>
+        <span className="text-[10px] text-slate-600 ms-auto">{stats.total} {wt.appsAllWidgets?.toLowerCase()}</span>
+      </div>
+
+      {/* Filter pills */}
+      <div className="flex items-center gap-1.5 px-4 py-2 border-b border-slate-700/50 overflow-x-auto">
+        {/* Placement filter */}
+        {(["all", "toolbar", "apps", "disabled"] as const).map((p) => {
+          const label = p === "all" ? (wt.appsAllWidgets || "All") : p === "toolbar" ? (wt.appsOnToolbar) : p === "apps" ? (wt.appsInDrawer) : (wt.appsDisabled);
+          return (
+            <button
+              key={`p-${p}`}
+              type="button"
+              onClick={() => setFilterPlacement(p)}
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                filterPlacement === p
+                  ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)] border border-[var(--cc-accent-500-30)]"
+                  : "text-slate-500 hover:text-slate-300 border border-transparent hover:border-slate-700"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+        <div className="w-px h-4 bg-slate-700 mx-1 shrink-0" />
+        {/* Category filter */}
+        {(["all", ...CATEGORY_ORDER] as const).map((c) => {
+          const label = c === "all" ? (wt.appsAllWidgets || "All") : (wt[CATEGORY_LABEL_MAP[c]] || c);
+          return (
+            <button
+              key={`c-${c}`}
+              type="button"
+              onClick={() => setFilterCategory(c)}
+              className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium transition-colors ${
+                filterCategory === c
+                  ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)] border border-[var(--cc-accent-500-30)]"
+                  : "text-slate-500 hover:text-slate-300 border border-transparent hover:border-slate-700"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Widget grid */}
+      <div className="overflow-y-auto flex-1 px-3 py-2">
+        {displayGroups.map((group) => (
+          <div key={group.category} className="mb-3">
+            <div className="px-1 py-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+              {group.label}
+              <span className="ms-1.5 text-slate-600">({group.widgets.length})</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {group.widgets.map((w) => {
+                const eff = getEffectivePlacement(w.id, widgetPlacements, w.isRemovable);
+                const badge = placementBadge(eff);
+                const BadgeIcon = badge.icon;
+                const Icon = w.icon;
+                const isComingSoon = w.status === "coming-soon";
+
+                return (
+                  <div
+                    key={w.id}
+                    className={`group relative flex flex-col gap-1.5 rounded-lg border p-2.5 transition-all cursor-pointer ${
+                      eff === "toolbar"
+                        ? "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40"
+                        : eff === "apps"
+                        ? "border-blue-500/20 bg-blue-500/5 hover:border-blue-500/40"
+                        : "border-slate-700/50 bg-slate-800/30 hover:border-slate-600"
+                    } ${isComingSoon ? "opacity-50 pointer-events-none" : ""}`}
+                    onClick={() => cyclePlacement(w.id, w.isRemovable)}
+                  >
+                    {/* Header row */}
+                    <div className="flex items-center gap-2">
+                      <div className={`flex items-center justify-center rounded-md p-1.5 ${
+                        eff === "toolbar" ? "bg-emerald-500/15" : eff === "apps" ? "bg-blue-500/15" : "bg-slate-700/50"
+                      }`}>
+                        <Icon className={`h-3.5 w-3.5 ${
+                          eff === "toolbar" ? "text-emerald-400" : eff === "apps" ? "text-blue-400" : "text-slate-500"
+                        }`} />
+                      </div>
+                      <span className="flex-1 text-xs font-medium text-slate-200 truncate">
+                        {w.label[lang]}
+                      </span>
+                      {!w.isRemovable && (
+                        <span className="text-[9px] text-slate-600 shrink-0">SYSTEM</span>
+                      )}
+                    </div>
+                    {/* Description */}
+                    <p className="text-[10px] text-slate-500 leading-tight line-clamp-2">
+                      {w.description[lang]}
+                    </p>
+                    {/* Placement badge */}
+                    <div className="flex items-center justify-between">
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-medium ${badge.color}`}>
+                        <BadgeIcon className="h-2.5 w-2.5" />
+                        {badge.label}
+                      </span>
+                      {w.isRemovable && (
+                        <ChevronRight className="h-3 w-3 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </div>
+                    {isComingSoon && (
+                      <span className="absolute top-1 end-1 rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[8px] font-medium text-amber-300">
+                        {wt.appsComingSoon}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+        {displayGroups.length === 0 && (
+          <div className="px-3 py-8 text-center text-sm text-slate-500">
+            {wt.noResults}
+          </div>
+        )}
       </div>
     </div>
   );

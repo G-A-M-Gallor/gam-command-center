@@ -32,7 +32,7 @@ import { SearchPanel } from "./widgets/SearchWidget";
 import { ShortcutsPanel } from "./widgets/ShortcutsWidget";
 import { WeeklyPlannerPanel } from "./widgets/WeeklyPlannerWidget";
 import { AIPanel, type AIViewMode } from "./widgets/AIWidget";
-import { UniversalSidePanel } from "./widgets/UniversalSidePanel";
+import { UniversalSidePanel, TabbedSidePanel, SIDE_PANEL_OPEN_EVENT } from "./widgets/UniversalSidePanel";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
@@ -259,6 +259,11 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
         return !p;
       });
     };
+    // Side panel open from widget click
+    const handleSidePanelOpen = (e: Event) => {
+      const widgetId = (e as CustomEvent<string>).detail;
+      if (widgetId) setSidePanelWidgetId(widgetId);
+    };
 
     window.addEventListener("cc-open-search", handleOpenSearch);
     window.addEventListener("cc-open-ai", handleOpenAI);
@@ -275,6 +280,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     window.addEventListener("cc-ai-mode-write", handleAiModeWrite);
     window.addEventListener("cc-ai-clear", handleAiClear);
     window.addEventListener("cc-widget-panel-toggle", handleWidgetPanelToggle);
+    window.addEventListener(SIDE_PANEL_OPEN_EVENT, handleSidePanelOpen);
     return () => {
       window.removeEventListener("cc-open-search", handleOpenSearch);
       window.removeEventListener("cc-open-ai", handleOpenAI);
@@ -291,6 +297,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
       window.removeEventListener("cc-ai-mode-write", handleAiModeWrite);
       window.removeEventListener("cc-ai-clear", handleAiClear);
       window.removeEventListener("cc-widget-panel-toggle", handleWidgetPanelToggle);
+      window.removeEventListener(SIDE_PANEL_OPEN_EVENT, handleSidePanelOpen);
     };
   }, [setEditMode, setSidebarVisibility, router]);
 
@@ -1224,8 +1231,8 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
       {/* Weekly Planner modal */}
       {plannerOpen && <WeeklyPlannerPanel onClose={() => setPlannerOpen(false)} />}
 
-      {/* AI panel */}
-      {aiPanelOpen && (
+      {/* AI panel — standalone modes (dropdown, floating) */}
+      {aiPanelOpen && aiViewMode !== "side-panel" && (
         <AIPanel
           onClose={() => setAiPanelOpen(false)}
           viewMode={aiViewMode}
@@ -1236,18 +1243,17 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
         />
       )}
 
-      {/* Universal Side Panel — for any widget with side-panel mode */}
-      {sidePanelWidgetId && (() => {
-        const w = widgetRegistry.find((wr) => wr.id === sidePanelWidgetId);
-        if (!w) return null;
-        return (
-          <UniversalSidePanel
-            widget={w}
-            onClose={() => setSidePanelWidgetId(null)}
-            onSwitchToDropdown={() => setSidePanelWidgetId(null)}
-          />
-        );
-      })()}
+      {/* Tabbed Side Panel — AI (side-panel mode) + any widget */}
+      {(sidePanelWidgetId || (aiPanelOpen && aiViewMode === "side-panel")) && (
+        <TabbedSidePanel
+          initialWidgetId={sidePanelWidgetId || "ai-assistant"}
+          showAiTab
+          onClose={() => {
+            setSidePanelWidgetId(null);
+            if (aiViewMode === "side-panel") setAiPanelOpen(false);
+          }}
+        />
+      )}
     </>
   );
 }

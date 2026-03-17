@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   type SidebarCustomization,
+  type ItemCustomization,
+  type SectionOverride,
   loadCustomization,
   saveCustomization,
   CUSTOMIZATION_EVENT,
@@ -15,6 +17,15 @@ import {
   recordUsage,
   toggleAutoSort,
   resetCustomization,
+  updateItemCustomization,
+  clearItemCustomization,
+  toggleSectionCollapse,
+  updateSectionOverride,
+  createSection,
+  deleteSection,
+  renameSection,
+  moveItemToSection,
+  removeItemFromSection,
 } from "./sidebarCustomization";
 
 export function useSidebarCustomization() {
@@ -89,6 +100,73 @@ export function useSidebarCustomization() {
     toggleAutoSort: () => {
       setData((prev) => {
         const next = toggleAutoSort(prev);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    updateItem: (key: string, patch: Partial<ItemCustomization>) => {
+      setData((prev) => {
+        const next = updateItemCustomization(prev, key, patch);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    clearItem: (key: string) => {
+      setData((prev) => {
+        const next = clearItemCustomization(prev, key);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    // Section actions
+    toggleSection: (sectionId: string) => {
+      setData((prev) => {
+        const next = toggleSectionCollapse(prev, sectionId);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    updateSection: (sectionId: string, patch: Partial<SectionOverride>) => {
+      setData((prev) => {
+        const next = updateSectionOverride(prev, sectionId, patch);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    createSection: (name: string, emoji?: string) => {
+      let sectionId = "";
+      setData((prev) => {
+        const result = createSection(prev, name, emoji);
+        sectionId = result.sectionId;
+        saveCustomization(result.customization);
+        return result.customization;
+      });
+      return sectionId;
+    },
+    deleteSection: (sectionId: string) => {
+      setData((prev) => {
+        const next = deleteSection(prev, sectionId);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    renameSection: (sectionId: string, name: string) => {
+      setData((prev) => {
+        const next = renameSection(prev, sectionId, name);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    moveItemToSection: (itemKey: string, sectionId: string) => {
+      setData((prev) => {
+        const next = moveItemToSection(prev, itemKey, sectionId);
+        saveCustomization(next);
+        return next;
+      });
+    },
+    removeItemFromSection: (itemKey: string) => {
+      setData((prev) => {
+        const next = removeItemFromSection(prev, itemKey);
         saveCustomization(next);
         return next;
       });

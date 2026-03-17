@@ -10,6 +10,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { IconDisplay } from "@/components/ui/IconPicker";
+import { SIDE_PANEL_OPEN_EVENT } from "./UniversalSidePanel";
 
 const UNIT = 48;
 const MARGIN = 8;
@@ -306,8 +307,14 @@ export function WidgetWrapper({
       onCustomClick();
       return;
     }
+    // Click → open in tabbed side panel (not dropdown)
+    // Modal widgets (search, shortcuts, planner) still use their own modal
+    if (!isCustomPanel) {
+      window.dispatchEvent(new CustomEvent(SIDE_PANEL_OPEN_EVENT, { detail: widget.id }));
+      return;
+    }
     setPanelOpen((prev) => !prev);
-  }, [clearTimer, onCustomClick]);
+  }, [clearTimer, onCustomClick, isCustomPanel, widget.id]);
 
   const handlePresetChange = useCallback((preset: PanelPreset) => {
     setPanelPreset(preset);

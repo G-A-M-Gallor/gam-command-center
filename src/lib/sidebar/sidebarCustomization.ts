@@ -14,6 +14,44 @@ export interface CustomFolder {
   itemKeys: string[];
 }
 
+export type IconPosition = "start" | "end" | "above";
+export type LabelLanguage = "he" | "en" | "ru" | "custom";
+
+export interface ItemCustomization {
+  /** Custom nickname/label (used when labelLanguage is "custom") */
+  customLabel?: string;
+  /** Which language to show for the label, or "custom" for customLabel */
+  labelLanguage?: LabelLanguage;
+  /** Where to show the icon relative to the label */
+  iconPosition?: IconPosition;
+  /** Lucide icon name override */
+  customIcon?: string;
+}
+
+/** User-created section (group) */
+export interface CustomSection {
+  id: string;
+  name: string;
+  /** Item keys assigned to this section */
+  itemKeys: string[];
+  /** Sort order relative to other sections (lower = higher) */
+  sortOrder: number;
+  /** Collapsed by default */
+  defaultCollapsed: boolean;
+  /** Custom emoji/icon prefix for section header */
+  emoji?: string;
+}
+
+/** Override for a built-in section (rename, reorder, collapse state) */
+export interface SectionOverride {
+  /** Custom display name (overrides i18n) */
+  customName?: string;
+  /** Custom emoji prefix */
+  emoji?: string;
+  /** Sort order override (lower = higher) */
+  sortOrder?: number;
+}
+
 export interface SidebarCustomization {
   /** Ordered list of item keys per group */
   itemOrder: Record<string, string[]>;
@@ -25,6 +63,14 @@ export interface SidebarCustomization {
   usageCounts: Record<string, number>;
   /** Auto-sort by usage enabled */
   autoSortByUsage: boolean;
+  /** Per-item customizations (label, icon, position) */
+  itemCustomizations: Record<string, ItemCustomization>;
+  /** Collapsed section IDs */
+  collapsedSections: string[];
+  /** Overrides for built-in sections (rename, emoji, reorder) */
+  sectionOverrides: Record<string, SectionOverride>;
+  /** User-created custom sections */
+  customSections: CustomSection[];
 }
 
 export interface DisplayGroup {
@@ -32,6 +78,12 @@ export interface DisplayGroup {
   labelKey: string;
   isCustomFolder?: boolean;
   customFolderName?: string;
+  /** Whether this is a user-created section */
+  isCustomSection?: boolean;
+  /** Display name (resolved from overrides/custom) */
+  displayName?: string;
+  /** Emoji prefix */
+  emoji?: string;
   items: NavEntry[];
 }
 
@@ -47,6 +99,10 @@ function defaultCustomization(): SidebarCustomization {
     hiddenItems: [],
     usageCounts: {},
     autoSortByUsage: false,
+    itemCustomizations: {},
+    collapsedSections: [],
+    sectionOverrides: {},
+    customSections: [],
   };
 }
 
@@ -115,29 +171,77 @@ export function buildDisplayGroups(
   permissions: { visiblePages?: string[] | null },
   editMode: boolean,
 ): DisplayGroup[] {
-  const { itemOrder, customFolders, hiddenItems, usageCounts, autoSortByUsage } = customization;
+  const { itemOrder, customFolders, hiddenItems, usageCounts, autoSortByUsage, sectionOverrides, customSections } = customization;
   const hiddenSet = new Set(hiddenItems);
+
+  // Build a set of item keys that belong to custom sections (to exclude from built-in groups)
+  const customSectionItemKeys = new Set<string>();
+  for (const cs of customSections) {
+    for (const k of cs.itemKeys) customSectionItemKeys.add(k);
+  }
+
+  // Build global entry map for lookups
+  const globalEntryMap = new Map<string, NavEntry>();
+  for (const group of navGroups) {
+    for (const entry of group.items) {
+      globalEntryMap.set(entry.key, entry);
+      if (isFolder(entry)) {
+        for (const child of entry.children) globalEntryMap.set(child.key, child);
+      }
+    }
+  }
 
   const result: DisplayGroup[] = [];
 
+  // Helper: filter + sort entries for a group
+  function processEntries(allEntries: NavEntry[]): NavEntry[] {
+    let sorted = [...allEntries];
+    if (autoSortByUsage) {
+      sorted.sort((a, b) => (usageCounts[b.key] ?? 0) - (usageCounts[a.key] ?? 0));
+    }
+
+    const filtered = sorted.filter((entry) => {
+      if (permissions.visiblePages && !permissions.visiblePages.includes(entry.key)) return false;
+      if (hiddenSet.has(entry.key) && !editMode) return false;
+      if (filter === "active" && entry.status !== "active") return false;
+      if (filter === "coming-soon" && entry.status !== "coming-soon") return false;
+      if (filter === "favorites") {
+        if (isFolder(entry)) return entry.children.some((c) => favHrefs.has(c.href)) || favHrefs.has(entry.href);
+        return favHrefs.has((entry as NavItem).href);
+      }
+      return true;
+    });
+
+    return filtered.map((entry) => {
+      if (isFolder(entry)) {
+        const filteredChildren = entry.children.filter((child) => {
+          if (permissions.visiblePages && !permissions.visiblePages.includes(child.key)) return false;
+          if (hiddenSet.has(child.key) && !editMode) return false;
+          if (filter === "active" && child.status !== "active") return false;
+          if (filter === "coming-soon" && child.status !== "coming-soon") return false;
+          if (filter === "favorites") return favHrefs.has(child.href);
+          return true;
+        });
+        return { ...entry, children: filteredChildren } as NavFolder;
+      }
+      return entry;
+    });
+  }
+
+  // ── Built-in groups ──
   for (const group of navGroups) {
-    // Get all flat items for this group (respecting built-in folders)
     const allEntries: NavEntry[] = [];
     const entryMap = new Map<string, NavEntry>();
 
     for (const entry of group.items) {
       entryMap.set(entry.key, entry);
       if (isFolder(entry)) {
-        for (const child of entry.children) {
-          entryMap.set(child.key, child);
-        }
+        for (const child of entry.children) entryMap.set(child.key, child);
       }
     }
 
-    // Determine item order for this group
     const savedOrder = itemOrder[group.id];
     if (savedOrder && savedOrder.length > 0) {
-      // Use saved order, append any new items not in saved order
       const seen = new Set<string>();
       for (const key of savedOrder) {
         if (entryMap.has(key) && !seen.has(key)) {
@@ -145,7 +249,6 @@ export function buildDisplayGroups(
           seen.add(key);
         }
       }
-      // Append new items not in saved order
       for (const entry of group.items) {
         if (!seen.has(entry.key)) {
           allEntries.push(entry);
@@ -161,59 +264,27 @@ export function buildDisplayGroups(
         }
       }
     } else {
-      // Default order — flatten folders into items for reordering
       for (const entry of group.items) {
         allEntries.push(entry);
       }
     }
 
-    // Auto-sort by usage if enabled
-    let sorted = [...allEntries];
-    if (autoSortByUsage) {
-      sorted.sort((a, b) => (usageCounts[b.key] ?? 0) - (usageCounts[a.key] ?? 0));
-    }
+    // Exclude items that moved to custom sections
+    const withoutMoved = allEntries.filter((e) => !customSectionItemKeys.has(e.key));
+    const finalItems = processEntries(withoutMoved);
 
-    // Filter entries
-    const filtered = sorted.filter((entry) => {
-      // Permissions check
-      if (permissions.visiblePages && !permissions.visiblePages.includes(entry.key)) return false;
-      // Hidden check — show in edit mode (faded), hide otherwise
-      if (hiddenSet.has(entry.key) && !editMode) return false;
-      // Filter tabs
-      if (filter === "active" && entry.status !== "active") return false;
-      if (filter === "coming-soon" && entry.status !== "coming-soon") return false;
-      if (filter === "favorites") {
-        if (isFolder(entry)) return entry.children.some((c) => favHrefs.has(c.href)) || favHrefs.has(entry.href);
-        return favHrefs.has((entry as NavItem).href);
-      }
-      return true;
-    });
-
-    // Filter folder children too
-    const finalItems = filtered.map((entry) => {
-      if (isFolder(entry)) {
-        const filteredChildren = entry.children.filter((child) => {
-          if (permissions.visiblePages && !permissions.visiblePages.includes(child.key)) return false;
-          if (hiddenSet.has(child.key) && !editMode) return false;
-          if (filter === "active" && child.status !== "active") return false;
-          if (filter === "coming-soon" && child.status !== "coming-soon") return false;
-          if (filter === "favorites") return favHrefs.has(child.href);
-          return true;
-        });
-        return { ...entry, children: filteredChildren } as NavFolder;
-      }
-      return entry;
-    });
-
+    const so = sectionOverrides[group.id];
     if (finalItems.length > 0) {
       result.push({
         id: group.id,
         labelKey: group.labelKey,
+        displayName: so?.customName || undefined,
+        emoji: so?.emoji || undefined,
         items: finalItems,
       });
     }
 
-    // Add custom folders that belong to this group
+    // Custom folders that belong to this group
     for (const cf of customFolders) {
       if (cf.groupId !== group.id) continue;
       const folderItems: NavItem[] = [];
@@ -236,7 +307,43 @@ export function buildDisplayGroups(
     }
   }
 
+  // ── Custom sections ──
+  const sortedCustomSections = [...customSections].sort((a, b) => a.sortOrder - b.sortOrder);
+  for (const cs of sortedCustomSections) {
+    const entries: NavEntry[] = [];
+    for (const key of cs.itemKeys) {
+      const entry = globalEntryMap.get(key);
+      if (entry) entries.push(entry);
+    }
+    const finalItems = processEntries(entries);
+    if (finalItems.length > 0 || editMode) {
+      result.push({
+        id: cs.id,
+        labelKey: cs.id,
+        isCustomSection: true,
+        displayName: cs.name,
+        emoji: cs.emoji,
+        items: finalItems,
+      });
+    }
+  }
+
+  // ── Sort all groups by section overrides ──
+  result.sort((a, b) => {
+    const aOrder = sectionOverrides[a.id]?.sortOrder ?? (a.isCustomSection ? 50 : getBuiltinOrder(a.id));
+    const bOrder = sectionOverrides[b.id]?.sortOrder ?? (b.isCustomSection ? 50 : getBuiltinOrder(b.id));
+    return aOrder - bOrder;
+  });
+
   return result;
+}
+
+/** Default sort order for built-in groups */
+function getBuiltinOrder(id: string): number {
+  if (id === "core") return 10;
+  if (id === "tools") return 20;
+  if (id === "system") return 30;
+  return 25; // custom folders
 }
 
 // ─── Actions (pure functions) ──────────────────────────────
@@ -329,6 +436,139 @@ export function toggleAutoSort(
   customization: SidebarCustomization,
 ): SidebarCustomization {
   return { ...customization, autoSortByUsage: !customization.autoSortByUsage };
+}
+
+// ─── Section Actions ─────────────────────────────────────
+
+export function toggleSectionCollapse(
+  customization: SidebarCustomization,
+  sectionId: string,
+): SidebarCustomization {
+  const set = new Set(customization.collapsedSections);
+  if (set.has(sectionId)) set.delete(sectionId); else set.add(sectionId);
+  return { ...customization, collapsedSections: [...set] };
+}
+
+export function updateSectionOverride(
+  customization: SidebarCustomization,
+  sectionId: string,
+  patch: Partial<SectionOverride>,
+): SidebarCustomization {
+  const existing = customization.sectionOverrides[sectionId] || {};
+  return {
+    ...customization,
+    sectionOverrides: {
+      ...customization.sectionOverrides,
+      [sectionId]: { ...existing, ...patch },
+    },
+  };
+}
+
+export function createSection(
+  customization: SidebarCustomization,
+  name: string,
+  emoji?: string,
+): { customization: SidebarCustomization; sectionId: string } {
+  const id = `section-${Date.now()}`;
+  const maxOrder = customization.customSections.reduce((m, s) => Math.max(m, s.sortOrder), 50);
+  return {
+    customization: {
+      ...customization,
+      customSections: [
+        ...customization.customSections,
+        { id, name, itemKeys: [], sortOrder: maxOrder + 10, defaultCollapsed: false, emoji },
+      ],
+    },
+    sectionId: id,
+  };
+}
+
+export function deleteSection(
+  customization: SidebarCustomization,
+  sectionId: string,
+): SidebarCustomization {
+  return {
+    ...customization,
+    customSections: customization.customSections.filter((s) => s.id !== sectionId),
+    collapsedSections: customization.collapsedSections.filter((id) => id !== sectionId),
+  };
+}
+
+export function renameSection(
+  customization: SidebarCustomization,
+  sectionId: string,
+  name: string,
+): SidebarCustomization {
+  // For custom sections, update the name directly
+  const isCustom = customization.customSections.some((s) => s.id === sectionId);
+  if (isCustom) {
+    return {
+      ...customization,
+      customSections: customization.customSections.map((s) =>
+        s.id === sectionId ? { ...s, name } : s
+      ),
+    };
+  }
+  // For built-in sections, use sectionOverrides
+  return updateSectionOverride(customization, sectionId, { customName: name });
+}
+
+export function moveItemToSection(
+  customization: SidebarCustomization,
+  itemKey: string,
+  sectionId: string,
+): SidebarCustomization {
+  // Remove from all custom sections first
+  const updatedSections = customization.customSections.map((s) => ({
+    ...s,
+    itemKeys: s.itemKeys.filter((k) => k !== itemKey),
+  }));
+  // Add to target section
+  return {
+    ...customization,
+    customSections: updatedSections.map((s) =>
+      s.id === sectionId ? { ...s, itemKeys: [...s.itemKeys, itemKey] } : s
+    ),
+  };
+}
+
+export function removeItemFromSection(
+  customization: SidebarCustomization,
+  itemKey: string,
+): SidebarCustomization {
+  return {
+    ...customization,
+    customSections: customization.customSections.map((s) => ({
+      ...s,
+      itemKeys: s.itemKeys.filter((k) => k !== itemKey),
+    })),
+  };
+}
+
+// ─── Item Actions ────────────────────────────────────────
+
+export function updateItemCustomization(
+  customization: SidebarCustomization,
+  key: string,
+  patch: Partial<ItemCustomization>,
+): SidebarCustomization {
+  const existing = customization.itemCustomizations[key] || {};
+  return {
+    ...customization,
+    itemCustomizations: {
+      ...customization.itemCustomizations,
+      [key]: { ...existing, ...patch },
+    },
+  };
+}
+
+export function clearItemCustomization(
+  customization: SidebarCustomization,
+  key: string,
+): SidebarCustomization {
+  const next = { ...customization.itemCustomizations };
+  delete next[key];
+  return { ...customization, itemCustomizations: next };
 }
 
 export function resetCustomization(): SidebarCustomization {

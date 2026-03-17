@@ -4,10 +4,13 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { TabTray } from "./TabTray";
+import { SplitScreenContainer } from "./SplitScreenContainer";
 import { MobileBottomBar } from "./MobileBottomBar";
 // EditToolbar moved into CanvasEditor — FieldLibrary opens from canvas toolbar
 import { ContextMenuProvider } from "./ContextMenu";
 import { GuideOverlay } from "./GuideOverlay";
+import { StickyNotesManager } from "./StickyNote";
 import { useSettings } from "@/contexts/SettingsContext";
 import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
@@ -141,14 +144,37 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   // TabBar visibility (desktop only)
   const showTabBar = !isMobile && shellPrefs.tabbarVisible;
 
-  // Extra top padding for tabbar (32px)
-  const tabBarOffset = showTabBar ? 32 : 0;
+  // Tray visibility (desktop only)
+  const showTray = !isMobile && shellPrefs.trayVisible;
+
+  // Extra top padding for tabbar + tray (32px each)
+  const tabBarOffset = (showTabBar ? 32 : 0) + (showTray ? 32 : 0);
+
+  // Detect split-screen secondary (chromeless iframe mode)
+  const [isSplitSecondary, setIsSplitSecondary] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setIsSplitSecondary(params.get("split") === "secondary");
+  }, [pathname]);
 
   // Sidebar width change handler
   const handleSidebarWidthChange = useCallback(
     (width: number) => updatePref("sidebarWidth", width),
     [updatePref],
   );
+
+  // Chromeless mode for split-screen iframe
+  if (isSplitSecondary) {
+    return (
+      <DashboardModeProvider>
+      <StyleOverrideProvider>
+      <div data-cc-id="shell.split-secondary" className="min-h-screen bg-slate-900 text-slate-100 p-[var(--cc-density-content)]">
+        {children}
+      </div>
+      </StyleOverrideProvider>
+      </DashboardModeProvider>
+    );
+  }
 
   return (
     <DashboardModeProvider>
@@ -193,6 +219,17 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         />
       )}
 
+      {/* Work Tray — pinnable pages + split screen controls */}
+      {showTray && (
+        <TabTray
+          contentMarginLeft={contentMargin?.marginLeft}
+          contentMarginRight={contentMargin?.marginRight}
+          topbarHover={topbarInHoverMode}
+          topbarVisible={!topbarInHoverMode || topbarHovered}
+          tabBarVisible={showTabBar}
+        />
+      )}
+
       <main
         data-cc-id="content.main"
         className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] transition-[padding-top] duration-200 ${
@@ -204,7 +241,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         }`}
         style={{
           ...contentMargin,
-          ...(!isMobile && showTabBar ? {
+          ...(!isMobile && (showTabBar || showTray) ? {
             paddingTop: `calc(${
               topbarEffectivelyHidden ? "0px"
                 : displayMode === "compact" ? "3.5rem"
@@ -221,7 +258,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           } : undefined),
         }}
       >
-        {children}
+        <SplitScreenContainer>
+          {children}
+        </SplitScreenContainer>
       </main>
 
       {/* Mobile bottom navigation bar */}
@@ -247,6 +286,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Guide mode overlay */}
       <GuideOverlay />
+
+      {/* Sticky notes layer */}
+      <StickyNotesManager />
     </div>
     </ContextMenuProvider>
     </StyleOverrideProvider>

@@ -8,8 +8,11 @@ import {
   FolderInput,
   FolderPlus,
   Trash2,
+  StickyNote,
 } from "lucide-react";
 import type { CustomFolder } from "@/lib/sidebar/sidebarCustomization";
+import { STICKY_NOTE_OPEN_EVENT, type StickyNoteOpenDetail } from "./StickyNote";
+import { getNote } from "@/lib/stickyNotes";
 
 interface SidebarContextMenuProps {
   x: number;
@@ -38,6 +41,8 @@ interface SidebarContextMenuProps {
     newFolder: string;
     removeFromFolder: string;
     folderName: string;
+    addNote: string;
+    editNote: string;
   };
 }
 
@@ -142,6 +147,13 @@ export function SidebarContextMenu({
 
       {/* Add/Remove favorite */}
       {menuItem(Star, isFavorite ? labels.removeFav : labels.addFav, onToggleFav)}
+
+      {/* Sticky note */}
+      {menuItem(StickyNote, getNote(`sidebar:${itemKey}`) ? labels.editNote : labels.addNote, () => {
+        window.dispatchEvent(new CustomEvent<StickyNoteOpenDetail>(STICKY_NOTE_OPEN_EVENT, {
+          detail: { elementKey: `sidebar:${itemKey}`, elementLabel: label, x, y },
+        }));
+      })}
 
       {/* Separator */}
       <div className="my-1 border-t border-slate-700/50" />

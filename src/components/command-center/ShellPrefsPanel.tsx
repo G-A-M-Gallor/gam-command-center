@@ -16,6 +16,7 @@ const DEFAULTS = {
   sidebarWidth: 240,
   topbarVisible: true,
   tabbarVisible: false,
+  trayVisible: false,
   speedDialVisible: true,
 };
 
@@ -53,6 +54,7 @@ export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
   const toggleItems: { key: keyof typeof DEFAULTS; label: string; hint?: string }[] = [
     { key: "topbarVisible", label: sp.topbarVisible },
     { key: "tabbarVisible", label: sp.tabbarVisible },
+    { key: "trayVisible", label: sp.trayVisible },
     { key: "speedDialVisible", label: sp.speedDialVisible },
   ];
 
