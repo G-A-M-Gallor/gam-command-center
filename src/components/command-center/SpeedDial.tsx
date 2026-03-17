@@ -8,11 +8,12 @@ import { getTranslations } from '@/lib/i18n';
 import { widgetRegistry } from './widgets/WidgetRegistry';
 import { BUILTIN_ENTITY_TYPES } from '@/lib/entities/builtinEntityTypes';
 import { ShortcutPicker } from './ShortcutPicker';
+import { NAV_GROUPS } from './Sidebar';
 
 // ─── Types ─────────────────────────────────────────
 
 export type SpeedDialSlot = {
-  type: 'widget' | 'entity' | 'action';
+  type: 'widget' | 'entity' | 'action' | 'page';
   id: string;
 };
 
@@ -55,6 +56,21 @@ function resolveSlot(slot: SpeedDialSlot, language: 'he' | 'en' | 'ru', sd: Reco
     const e = BUILTIN_ENTITY_TYPES.find(r => r.slug === slot.id);
     if (e) {
       return { emoji: e.icon, label: e.label[language] };
+    }
+  }
+
+  if (slot.type === 'page') {
+    for (const group of NAV_GROUPS) {
+      for (const entry of group.items) {
+        if ('type' in entry && entry.type === 'folder') {
+          if (entry.key === slot.id) return { Icon: entry.icon, label: sd[slot.id as keyof typeof sd] ?? slot.id };
+          for (const child of entry.children) {
+            if (child.key === slot.id) return { Icon: child.icon, label: sd[slot.id as keyof typeof sd] ?? slot.id };
+          }
+        } else if (entry.key === slot.id) {
+          return { Icon: entry.icon, label: sd[slot.id as keyof typeof sd] ?? slot.id };
+        }
+      }
     }
   }
 
@@ -104,6 +120,22 @@ function handleSlotClick(slot: SpeedDialSlot, router: ReturnType<typeof useRoute
   if (slot.type === 'entity') {
     router.push(`/dashboard/entities/${slot.id}`);
     return;
+  }
+
+  if (slot.type === 'page') {
+    // Find the nav item href
+    for (const group of NAV_GROUPS) {
+      for (const entry of group.items) {
+        if ('type' in entry && entry.type === 'folder') {
+          if (entry.key === slot.id) { router.push(entry.href); return; }
+          for (const child of entry.children) {
+            if (child.key === slot.id) { router.push(child.href); return; }
+          }
+        } else if (entry.key === slot.id) {
+          router.push(entry.href); return;
+        }
+      }
+    }
   }
 }
 
@@ -499,6 +531,7 @@ export function SpeedDial() {
           translations={{
             pickShortcut: sd.pickShortcut,
             searchShortcuts: sd.searchShortcuts,
+            pages: sd.pages,
             widgets: sd.widgets,
             entities: sd.entities,
           }}

@@ -4,7 +4,9 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { widgetRegistry } from './widgets/WidgetRegistry';
 import { BUILTIN_ENTITY_TYPES } from '@/lib/entities/builtinEntityTypes';
+import { NAV_GROUPS } from './Sidebar';
 import type { SpeedDialSlot } from './SpeedDial';
+import { getTranslations } from '@/lib/i18n';
 
 interface ShortcutPickerProps {
   onSelect: (slot: SpeedDialSlot) => void;
@@ -15,15 +17,17 @@ interface ShortcutPickerProps {
     searchShortcuts: string;
     widgets: string;
     entities: string;
+    pages?: string;
   };
 }
 
-type Tab = 'widgets' | 'entities';
+type Tab = 'pages' | 'widgets' | 'entities';
 
 export function ShortcutPicker({ onSelect, onClose, language, translations }: ShortcutPickerProps) {
-  const [tab, setTab] = useState<Tab>('widgets');
+  const [tab, setTab] = useState<Tab>('pages');
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = getTranslations(language);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -39,6 +43,29 @@ export function ShortcutPicker({ onSelect, onClose, language, translations }: Sh
   }, [onClose]);
 
   const lowerQuery = query.toLowerCase();
+
+  // Flatten all nav items (including folder children) into a flat list
+  const pageItems = useMemo(() => {
+    const items: { key: string; href: string; icon: React.ElementType; label: string }[] = [];
+    const tabsT = t.tabs as Record<string, string>;
+    for (const group of NAV_GROUPS) {
+      for (const entry of group.items) {
+        if ('type' in entry && entry.type === 'folder') {
+          items.push({ key: entry.key, href: entry.href, icon: entry.icon, label: tabsT[entry.key] ?? entry.key });
+          for (const child of entry.children) {
+            items.push({ key: child.key, href: child.href, icon: child.icon, label: tabsT[child.key] ?? child.key });
+          }
+        } else {
+          items.push({ key: entry.key, href: entry.href, icon: entry.icon, label: tabsT[entry.key] ?? entry.key });
+        }
+      }
+    }
+    if (!lowerQuery) return items;
+    return items.filter(p =>
+      p.label.toLowerCase().includes(lowerQuery) ||
+      p.key.toLowerCase().includes(lowerQuery)
+    );
+  }, [lowerQuery, t.tabs]);
 
   const widgetItems = useMemo(() => {
     return widgetRegistry
@@ -106,34 +133,47 @@ export function ShortcutPicker({ onSelect, onClose, language, translations }: Sh
 
         {/* Tabs */}
         <div className="flex border-b border-slate-700 px-3">
-          <button
-            type="button"
-            onClick={() => setTab('widgets')}
-            className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
-              tab === 'widgets'
-                ? 'border-b-2 text-[var(--cc-accent-400)]'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            style={tab === 'widgets' ? { borderColor: 'var(--cc-accent-400)' } : undefined}
-          >
-            {translations.widgets}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('entities')}
-            className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
-              tab === 'entities'
-                ? 'border-b-2 text-[var(--cc-accent-400)]'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            style={tab === 'entities' ? { borderColor: 'var(--cc-accent-400)' } : undefined}
-          >
-            {translations.entities}
-          </button>
+          {([
+            { id: 'pages' as Tab, label: translations.pages || 'Pages' },
+            { id: 'widgets' as Tab, label: translations.widgets },
+            { id: 'entities' as Tab, label: translations.entities },
+          ]).map(t => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
+                tab === t.id
+                  ? 'border-b-2 text-[var(--cc-accent-400)]'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              style={tab === t.id ? { borderColor: 'var(--cc-accent-400)' } : undefined}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {/* Items list */}
         <div className="max-h-52 overflow-y-auto p-1">
+          {tab === 'pages' && pageItems.map(p => {
+            const Icon = p.icon;
+            return (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => {
+                  onSelect({ type: 'page', id: p.key });
+                  onClose();
+                }}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm text-slate-300 hover:bg-slate-700/70 hover:text-white transition-colors"
+              >
+                <Icon size={16} className="shrink-0 text-slate-400" />
+                <span>{p.label}</span>
+              </button>
+            );
+          })}
+
           {tab === 'widgets' && widgetItems.map(w => {
             const Icon = w.icon;
             return (
@@ -167,7 +207,8 @@ export function ShortcutPicker({ onSelect, onClose, language, translations }: Sh
             </button>
           ))}
 
-          {((tab === 'widgets' && widgetItems.length === 0) ||
+          {((tab === 'pages' && pageItems.length === 0) ||
+            (tab === 'widgets' && widgetItems.length === 0) ||
             (tab === 'entities' && entityItems.length === 0)) && (
             <div className="px-3 py-4 text-center text-xs text-slate-500">—</div>
           )}
