@@ -16,6 +16,7 @@ import {
   RefreshCw,
   Film,
   Circle,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -114,6 +115,13 @@ export default function VClipPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/vclip/download"
+            className="flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-800"
+          >
+            <Download className="h-3.5 w-3.5" />
+            {isRtl ? "התקנה" : "Install"}
+          </Link>
           <Link
             href="/dashboard/vclip/record"
             className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black transition-colors hover:bg-slate-200"
