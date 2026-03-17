@@ -297,6 +297,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { href: "/dashboard/entities/fields", key: "entityFields", icon: ListTree, status: "active" },
           { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
           { href: "/dashboard/entities/field-templates", key: "fieldTemplates", icon: Layers, status: "coming-soon" },
+          { href: "/dashboard/icon-library", key: "iconLibrary", icon: Sparkles, status: "active" },
         ],
       },
       {
@@ -862,32 +863,33 @@ export function Sidebar({
         {/* User account section — below header, above filters */}
         {user && !isCollapsed && (
           <div ref={userMenuRef} className="shrink-0 border-b border-slate-700/50 px-2 py-2 relative">
-            <button
-              type="button"
-              onClick={() => setUserMenuOpen((v) => !v)}
-              className={`flex w-full items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-slate-800/50 ${
-                onRight ? "flex-row-reverse" : ""
-              }`}
-            >
+            <div className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${onRight ? "flex-row-reverse" : ""}`}>
+              {/* Avatar — 20% */}
               <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
                 <span className="text-xs font-semibold text-[var(--cc-accent-400)]">
                   {(user.email?.[0] || "?").toUpperCase()}
                 </span>
-                {/* Online dot */}
                 <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-emerald-500" />
               </div>
-              <div className={`flex-1 min-w-0 ${onRight ? "text-right" : "text-left"}`}>
-                <div className="truncate text-xs font-medium text-slate-200">
-                  {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+              {/* Workspace switcher — 80% */}
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen((v) => !v)}
+                className={`flex flex-1 items-center gap-1.5 min-w-0 transition-colors hover:opacity-80 ${onRight ? "flex-row-reverse" : ""}`}
+              >
+                <div className={`flex-1 min-w-0 ${onRight ? "text-right" : "text-left"}`}>
+                  <div className="truncate text-xs font-medium text-slate-200">
+                    {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+                  </div>
+                  <div className="truncate text-[10px] text-slate-500">
+                    {user.email}
+                  </div>
                 </div>
-                <div className="truncate text-[10px] text-slate-500">
-                  {user.email}
-                </div>
-              </div>
-              <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${
-                userMenuOpen ? "rotate-180" : ""
-              }`} />
-            </button>
+                <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${
+                  userMenuOpen ? "rotate-180" : ""
+                }`} />
+              </button>
+            </div>
 
             {/* Dropdown menu — opens to the SIDE of the sidebar, never overlapping */}
             {userMenuOpen && (() => {
@@ -911,6 +913,33 @@ export function Sidebar({
                     <span className="ms-auto rounded-full bg-[var(--cc-accent-600-20)] px-2 py-0.5 text-[9px] font-medium text-[var(--cc-accent-300)]">
                       {roleName}
                     </span>
+                  </div>
+
+                  {/* Workspace switcher */}
+                  <div className="px-2 py-1.5 border-b border-slate-700/50">
+                    <span className="block px-1 pb-1 text-[9px] uppercase tracking-wider text-slate-600 font-medium">Workspace</span>
+                    <div className="grid grid-cols-2 gap-1">
+                      {[
+                        { id: "business", icon: "🏗️", label: "Business" },
+                        { id: "private", icon: "👤", label: "Private" },
+                        { id: "tools", icon: "🛠️", label: "Tools" },
+                        { id: "admin", icon: "⚙️", label: "Admin" },
+                        { id: "cc", icon: "🎯", label: "CC" },
+                      ].map((ws) => (
+                        <button
+                          key={ws.id}
+                          type="button"
+                          className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] transition-colors ${
+                            ws.id === "business"
+                              ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)] font-medium"
+                              : "text-slate-500 hover:bg-slate-800/50 hover:text-slate-300"
+                          }`}
+                        >
+                          <span>{ws.icon}</span>
+                          <span>{ws.label}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Menu items */}
@@ -1112,9 +1141,13 @@ export function Sidebar({
               )}
               {!isCollapsed && (viewMode === "list" || viewMode === "grid") && (
                 <div className={`${gi === 0 ? "pt-1 pb-1" : "pt-3 pb-1"} ${viewMode === "grid" ? "px-1" : "px-2"}`}>
-                  <div className={`group/section flex items-center gap-1 rounded-md px-1 py-0.5 -mx-1 transition-colors ${
+                  <div className={`group/section relative flex items-center gap-1 rounded-md px-1 py-0.5 -mx-1 transition-colors ${
                     editMode ? "hover:bg-slate-800/50" : "hover:bg-slate-800/30 cursor-pointer"
                   }`}>
+                    {/* Decorative accent shape */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-md" aria-hidden>
+                      <div className="absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-12 rounded-full bg-gradient-to-l from-[var(--cc-accent-500)]/[0.04] to-transparent blur-sm" />
+                    </div>
                     {/* Collapse chevron */}
                     <button
                       type="button"
@@ -1189,9 +1222,12 @@ export function Sidebar({
               )}
               {!isCollapsed && viewMode === "compact" && gi > 0 && (
                 <div className="mx-1 my-1">
-                  <div className={`group/section flex items-center gap-1 rounded-md px-1 py-0.5 transition-colors ${
+                  <div className={`group/section relative flex items-center gap-1 rounded-md px-1 py-0.5 transition-colors ${
                     editMode ? "hover:bg-slate-800/50" : "hover:bg-slate-800/30 cursor-pointer"
                   }`}>
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-md" aria-hidden>
+                      <div className="absolute -right-3 top-1/2 -translate-y-1/2 h-5 w-10 rounded-full bg-gradient-to-l from-[var(--cc-accent-500)]/[0.04] to-transparent blur-sm" />
+                    </div>
                     <button
                       type="button"
                       onClick={() => toggleSection(group.id)}
@@ -1315,14 +1351,18 @@ export function Sidebar({
                   ).map((entry) => {
                     // ── Folder rendering (only when folderMode is on) ──
                     if (isFolder(entry)) {
-                      const { href, key, icon: FolderIcon, children } = entry;
-                      const folderLabel = (t.tabs as Record<string, string>)[key];
+                      const { href, key, icon: DefaultFolderIcon, children } = entry;
+                      const rawFolderLabel = (t.tabs as Record<string, string>)[key];
+                      const folderLabel = resolveLabel(key, rawFolderLabel);
+                      const FolderIcon = resolveIcon(key, DefaultFolderIcon);
                       const isOpen = openFolders.has(key);
                       const isFolderActive = pathname === href || pathname.startsWith(href + "/");
                       const hasActiveChild = children.some((c) => pathname === c.href || pathname.startsWith(c.href + "/"));
                       const isHighlighted = isFolderActive || hasActiveChild;
+                      const isFolderHidden = customization.hiddenItems.includes(key);
 
                       if (isCollapsed) {
+                        if (isFolderHidden && !editMode) return null;
                         return (
                           <Link
                             key={key}
@@ -1333,7 +1373,7 @@ export function Sidebar({
                               isHighlighted
                                 ? "nav-item-active text-[var(--cc-accent-300)]"
                                 : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
-                            }`}
+                            } ${isFolderHidden ? "opacity-30" : ""}`}
                           >
                             {isHighlighted && (
                               <span className={`absolute top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-full bg-[var(--cc-accent-500)] ${onRight ? "right-0" : "left-0"}`} aria-hidden />
@@ -1347,14 +1387,23 @@ export function Sidebar({
                       }
 
                       return (
-                        <div key={key}>
+                        <SortableNavItem
+                          key={key}
+                          id={key}
+                          editMode={editMode}
+                          isHidden={isFolderHidden}
+                          onToggleHide={() => toggleHide(key)}
+                          onRight={onRight}
+                          onEditClick={editMode ? () => setEditingItemKey(editingItemKey === key ? null : key) : undefined}
+                        >
+                        <div className={`group/item relative ${isFolderHidden && editMode ? "opacity-30" : ""}`}>
                           {/* Folder header — name navigates + opens, chevron toggles */}
-                          <div className="group/item relative flex items-center">
+                          <div className="flex items-center">
                             <Link
-                              href={href}
-                              onClick={() => {
+                              href={editMode ? "#" : href}
+                              onClick={(e) => {
+                                if (editMode) { e.preventDefault(); return; }
                                 trackUsage(key);
-                                // Toggle folder open/close when navigating
                                 setOpenFolders((prev) => {
                                   const next = new Set(prev);
                                   if (next.has(key)) next.delete(key); else next.add(key);
@@ -1369,7 +1418,7 @@ export function Sidebar({
                                 isHighlighted
                                   ? "nav-item-active text-[var(--cc-accent-300)] font-medium"
                                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/30"
-                              }`}
+                              } ${editMode ? "ring-1 ring-slate-700/50 ring-dashed" : ""}`}
                             >
                               <FolderIcon className={`${viewMode === "compact" ? "h-3.5 w-3.5" : "h-[18px] w-[18px]"} shrink-0`} />
                               <span className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{folderLabel}</span>
@@ -1383,6 +1432,19 @@ export function Sidebar({
                               <ChevronRight className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
                             </button>
                           </div>
+                          {/* Edit popover for folder */}
+                          {editMode && editingItemKey === key && (
+                            <ItemEditPopover
+                              itemKey={key}
+                              currentLabel={rawFolderLabel}
+                              customization={customization.itemCustomizations[key]}
+                              onUpdate={(patch) => updateItem(key, patch)}
+                              onClear={() => clearItem(key)}
+                              onClose={() => setEditingItemKey(null)}
+                              isRtl={language === "he"}
+                              labels={editLabels}
+                            />
+                          )}
                           {/* Folder children */}
                           <div
                             className={`overflow-hidden transition-all duration-200 ease-out ${isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
@@ -1427,6 +1489,7 @@ export function Sidebar({
                             </div>
                           </div>
                         </div>
+                        </SortableNavItem>
                       );
                     }
 
