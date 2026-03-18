@@ -35,6 +35,7 @@ type PageKey =
   | "roadmap"
   | "comms"
   | "documents"
+  | "weeklyPlanner"
   | "audit"
   | "emailTemplates"
   | "control";
@@ -63,6 +64,7 @@ const pageRoutes: Record<PageKey, string> = {
   roadmap: "/dashboard/roadmap",
   comms: "/dashboard/comms",
   documents: "/dashboard/documents",
+  weeklyPlanner: "/dashboard/weekly-planner",
   audit: "/dashboard/audit",
   emailTemplates: "/dashboard/email-templates",
   control: "/dashboard/control",

@@ -3,7 +3,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Pencil, X, Lock, Unlock } from "lucide-react";
+import { Pencil, X, Lock, Unlock, PanelLeft, PanelTop, EyeOff, Star } from "lucide-react";
+import { createPortal } from "react-dom";
 import type { WidgetDefinition, WidgetSize } from "./WidgetRegistry";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -182,6 +183,20 @@ export function WidgetWrapper({
   const mouseInPanel = useRef(false);
   const mouseInWrapper = useRef(false);
 
+  const [wCtxMenu, setWCtxMenu] = useState<{ x: number; y: number } | null>(null);
+  const wCtxRef = useRef<HTMLDivElement>(null);
+  const { setWidgetPlacement } = useWidgets();
+
+  // Close widget context menu on outside click
+  useEffect(() => {
+    if (!wCtxMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (wCtxRef.current && !wCtxRef.current.contains(e.target as Node)) setWCtxMenu(null);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [wCtxMenu]);
+
   const savedPresetKey = `cc-widget-panel-preset-${widget.id}`;
 
   const {
@@ -351,6 +366,10 @@ export function WidgetWrapper({
       <button
         type="button"
         onClick={handleClick}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setWCtxMenu({ x: e.clientX, y: e.clientY });
+        }}
         className={`flex h-full w-full items-center gap-2 px-3 text-slate-400 transition-colors hover:bg-slate-700/50 hover:text-slate-200 ${
           panelOpen ? "bg-slate-700/50 text-slate-200" : ""
         } ${locked ? "ring-1 ring-inset ring-amber-500/20" : ""}`}
@@ -484,6 +503,64 @@ export function WidgetWrapper({
             </WidgetErrorBoundary>
           </div>
         </div>
+      )}
+      {/* Widget context menu */}
+      {wCtxMenu && createPortal(
+        <div
+          ref={wCtxRef}
+          className="fixed z-[65] rounded-xl border border-slate-700/80 overflow-hidden py-1"
+          style={{
+            backgroundColor: "var(--nav-bg)",
+            left: wCtxMenu.x,
+            top: wCtxMenu.y,
+            minWidth: 190,
+            boxShadow: "0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)",
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700/30">
+            <widget.icon className="h-3.5 w-3.5 text-slate-400" />
+            <span className="text-[12px] font-medium text-slate-200 truncate">{label}</span>
+          </div>
+
+          {/* Move to dock */}
+          <div className="py-1 border-b border-slate-700/20">
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("cc-move-to-dock", { detail: widget.id }));
+                setWCtxMenu(null);
+              }}
+              className="flex w-full items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-white/[0.05] transition-colors cursor-pointer"
+            >
+              <PanelLeft className="h-3.5 w-3.5 text-slate-500" />
+              {language === "he" ? "העבר לסרגל צדדי" : "Move to side dock"}
+            </button>
+          </div>
+
+          {/* Settings / disable */}
+          <div className="py-1">
+            <button
+              type="button"
+              onClick={() => { onEditOpen(widget.id); setWCtxMenu(null); }}
+              className="flex w-full items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-white/[0.05] transition-colors cursor-pointer"
+            >
+              <Pencil className="h-3.5 w-3.5 text-slate-500" />
+              {language === "he" ? "הגדרות ווידג׳ט" : "Widget settings"}
+            </button>
+            {widget.isRemovable !== false && (
+              <button
+                type="button"
+                onClick={() => { setWidgetPlacement(widget.id, "disabled"); setWCtxMenu(null); }}
+                className="flex w-full items-center gap-2.5 px-3 py-1.5 text-[11px] text-red-400/80 hover:bg-red-500/[0.06] transition-colors cursor-pointer"
+              >
+                <EyeOff className="h-3.5 w-3.5" />
+                {language === "he" ? "הסתר ווידג׳ט" : "Hide widget"}
+              </button>
+            )}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );

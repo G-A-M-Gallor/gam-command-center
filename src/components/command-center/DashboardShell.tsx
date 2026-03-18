@@ -20,6 +20,7 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 import { GibberishDetector } from "./GibberishDetector";
 import { SpeedDial } from "./SpeedDial";
+import { AppDock } from "./AppDock";
 import { TabBar } from "./TabBar";
 import { DownloadReminderPopup } from "./DownloadReminder";
 import dynamic from "next/dynamic";
@@ -120,22 +121,34 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   // For hover-reveal mode in visible: sidebar collapses to strip, so use strip width for margins
   const sidebarHoverActive = isVisible && shellPrefs.sidebarHover && !isMobile;
 
+  // Dock is 48px, always on the left side, adjacent to sidebar
+  const DOCK_WIDTH = 48;
+  const showDock = !isMobile;
+
   const contentMargin = isVisible
     ? sidebarHoverActive
       ? {
-          marginLeft: sidebarPosition === "left" ? STRIP_WIDTH : 0,
+          marginLeft: sidebarPosition === "left"
+            ? `calc(${STRIP_WIDTH} + ${showDock ? DOCK_WIDTH : 0}px)`
+            : `${showDock ? DOCK_WIDTH : 0}px`,
           marginRight: sidebarPosition === "right" ? STRIP_WIDTH : 0,
         }
       : {
-          marginLeft: sidebarPosition === "left" ? sidebarPx : 0,
+          marginLeft: sidebarPosition === "left"
+            ? `calc(${sidebarPx} + ${showDock ? DOCK_WIDTH : 0}px)`
+            : `${showDock ? DOCK_WIDTH : 0}px`,
           marginRight: sidebarPosition === "right" ? sidebarPx : 0,
         }
     : isFloat
       ? {
-          marginLeft: sidebarPosition === "left" ? STRIP_WIDTH : 0,
+          marginLeft: sidebarPosition === "left"
+            ? `calc(${STRIP_WIDTH} + ${showDock ? DOCK_WIDTH : 0}px)`
+            : `${showDock ? DOCK_WIDTH : 0}px`,
           marginRight: sidebarPosition === "right" ? STRIP_WIDTH : 0,
         }
-      : undefined;
+      : showDock
+        ? { marginLeft: `${DOCK_WIDTH}px` }
+        : undefined;
 
   // topbarVisible ON → always visible (permanent). topbarVisible OFF → hover mode (safety).
   const topbarInHoverMode = !isMobile && !shellPrefs.topbarVisible;
@@ -203,6 +216,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         onWidthChange={handleSidebarWidthChange}
       />
 
+      {/* App Dock — icon strip on the left */}
+      {showDock && <AppDock />}
+
       {/* Top Bar — always rendered; uses hover mode when topbarVisible=false */}
       <TopBar
         onSidebarOpen={isHidden ? () => setFloatOpen(true) : undefined}
@@ -232,7 +248,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <main
         data-cc-id="content.main"
-        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] transition-[padding-top] duration-200 ${
+        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] transition-[padding-top,margin-left,margin-right] duration-300 ease-out ${
           isMobile ? "pt-12"
             : topbarEffectivelyHidden ? ""
             : displayMode === "compact" ? "pt-14"

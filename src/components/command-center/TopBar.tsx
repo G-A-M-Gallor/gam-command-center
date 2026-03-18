@@ -103,6 +103,11 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
 
+  // Ref to read widgetPositions inside effects without adding it as a dependency
+  // (prevents infinite update loops when effects also call setWidgetPositions)
+  const widgetPositionsRef = useRef(widgetPositions);
+  widgetPositionsRef.current = widgetPositions;
+
   const [mounted, setMounted] = useState(false);
   const [topbarHovered, setTopbarHoveredRaw] = useState(false);
   const setTopbarHovered = useCallback((v: boolean) => {
@@ -469,17 +474,18 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
   useEffect(() => {
     if (!mounted || allTopBarDefs.length === 0 || totalColumns === 0) return;
 
+    const positions = widgetPositionsRef.current;
     const needsInit = allTopBarDefs.some(
-      (item) => widgetPositions[item.id] === undefined
+      (item) => positions[item.id] === undefined
     );
     if (!needsInit) return;
 
     // Build occupied ranges from already-positioned items
     const occupied: { start: number; end: number }[] = [];
     for (const item of allTopBarDefs) {
-      if (widgetPositions[item.id] !== undefined) {
+      if (positions[item.id] !== undefined) {
         const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
-        occupied.push({ start: widgetPositions[item.id], end: widgetPositions[item.id] + size });
+        occupied.push({ start: positions[item.id], end: positions[item.id] + size });
       }
     }
     occupied.sort((a, b) => a.start - b.start);
@@ -494,7 +500,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
       return candidate + size <= totalColumns ? candidate : null;
     };
 
-    const newPositions = { ...widgetPositions };
+    const newPositions = { ...positions };
     let changed = false;
     for (const item of allTopBarDefs) {
       if (newPositions[item.id] !== undefined) continue;
@@ -511,22 +517,18 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     if (changed) {
       setWidgetPositions(newPositions);
     }
-  }, [
-    mounted,
-    allTopBarDefs,
-    totalColumns,
-    widgetPositions,
-    widgetSizes,
-    setWidgetPositions,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, allTopBarDefs, totalColumns, widgetSizes, setWidgetPositions]);
 
   // Clamp items that overflow after window resize — re-layout to avoid overlaps
   useEffect(() => {
     if (!mounted || totalColumns === 0) return;
 
+    const positions = widgetPositionsRef.current;
+
     // Check if any item overflows
     const hasOverflow = allTopBarDefs.some((item) => {
-      const pos = widgetPositions[item.id];
+      const pos = positions[item.id];
       if (pos === undefined) return false;
       const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
       return pos + size > totalColumns;
@@ -536,16 +538,16 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
 
     // Sort items by their current position to preserve relative order
     const positioned = allTopBarDefs
-      .filter((item) => widgetPositions[item.id] !== undefined)
-      .sort((a, b) => (widgetPositions[a.id] ?? 0) - (widgetPositions[b.id] ?? 0));
+      .filter((item) => positions[item.id] !== undefined)
+      .sort((a, b) => (positions[a.id] ?? 0) - (positions[b.id] ?? 0));
 
-    const updated: Record<string, number> = { ...widgetPositions };
+    const updated: Record<string, number> = { ...positions };
     let nextCol = 0;
 
     for (const item of positioned) {
       const size: WidgetSize = widgetSizes[item.id] ?? item.defaultSize;
       // Place at the max of its current position or the next available slot
-      const idealCol = Math.max(widgetPositions[item.id] ?? 0, nextCol);
+      const idealCol = Math.max(positions[item.id] ?? 0, nextCol);
       if (idealCol + size <= totalColumns) {
         updated[item.id] = idealCol;
         nextCol = idealCol + size;
@@ -558,7 +560,8 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     }
 
     setWidgetPositions(updated);
-  }, [totalColumns, mounted, allTopBarDefs, widgetPositions, widgetSizes, setWidgetPositions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalColumns, mounted, allTopBarDefs, widgetSizes, setWidgetPositions]);
 
   // DnD sensors
   const sensors = useSensors(
@@ -886,42 +889,12 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
           </button>
         )}
 
-        {/* Brand + User — left side (when sidebar is on left) */}
-        {sidebarPosition === "left" && (
-          <div className="flex h-full shrink-0 items-center border-r border-slate-700/50">
-            {/* G.A.M logo */}
-            <div className="flex items-center gap-1.5 px-2.5 border-r border-slate-700/30">
-              {brandProfile?.logoDataUrl ? (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
-                  <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
-                </div>
-              ) : (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
-                  <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
-                </div>
-              )}
-              <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
-            </div>
-            {/* User avatar + name */}
-            {user && (
-              <div className="flex items-center gap-1.5 px-2.5">
-                <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
-                  <span className="text-[10px] font-semibold text-[var(--cc-accent-400)]">
-                    {(user.email?.[0] || "?").toUpperCase()}
-                  </span>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-slate-900 bg-emerald-500" />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
         <div ref={containerRef} className="relative h-full flex-1">
           {!mounted ? (
             <span className="px-3 text-xs text-slate-500">&nbsp;</span>
           ) : allTopBarDefs.length > 0 ? (
             <DndContext
+              id="topbar-dnd"
               sensors={sensors}
               onDragStart={handleDragStart}
               onDragMove={handleDragMove}
@@ -1140,37 +1113,6 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
         >
           <Store className="h-4 w-4" />
         </button>
-
-        {/* User + Brand — right side (when sidebar is on right) */}
-        {sidebarPosition === "right" && (
-          <div className="flex h-full shrink-0 items-center border-l border-slate-700/50">
-            {/* User avatar + name */}
-            {user && (
-              <div className="flex items-center gap-1.5 px-2.5">
-                <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
-                  <span className="text-[10px] font-semibold text-[var(--cc-accent-400)]">
-                    {(user.email?.[0] || "?").toUpperCase()}
-                  </span>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full border border-slate-900 bg-emerald-500" />
-                </div>
-              </div>
-            )}
-            {/* G.A.M logo */}
-            <div className="flex items-center gap-1.5 border-l border-slate-700/30 px-2.5">
-              <span className="text-xs font-bold tracking-wider text-slate-300">G.A.M</span>
-              {brandProfile?.logoDataUrl ? (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-[var(--cc-accent-600-20)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
-                  <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
-                </div>
-              ) : (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[var(--cc-accent-600-20)]">
-                  <Layers className="h-4 w-4 text-[var(--cc-accent-400)]" />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Hamburger — right side */}
         {sidebarPosition === "right" && sidebarVisibility === "hidden" && onSidebarOpen && (

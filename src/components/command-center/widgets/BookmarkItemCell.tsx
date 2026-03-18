@@ -95,12 +95,13 @@ export function BookmarkItemCell({
         <span className="shrink-0 text-sm">{item.icon}</span>
         <span className="flex-1 truncate text-xs text-start">{label}</span>
         {/* Note indicator */}
-        <button
-          type="button"
-          onClick={handleOpenNote}
-          disabled={creatingNote}
-          className={`relative shrink-0 rounded p-0.5 transition-colors hover:bg-slate-600 ${
-            creatingNote ? "opacity-50" : ""
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={(e) => { e.stopPropagation(); handleOpenNote(e as unknown as React.MouseEvent); }}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); handleOpenNote(e as unknown as React.MouseEvent); } }}
+          className={`relative shrink-0 rounded p-0.5 transition-colors hover:bg-slate-600 cursor-pointer ${
+            creatingNote ? "opacity-50 pointer-events-none" : ""
           }`}
           title={item.noteId ? "Open note" : "Create note"}
         >
@@ -108,7 +109,7 @@ export function BookmarkItemCell({
           {item.noteId && (
             <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-blue-400" />
           )}
-        </button>
+        </div>
         <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />
       </button>
     </div>
