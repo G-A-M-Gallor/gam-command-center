@@ -10,6 +10,7 @@ import {
   FileEdit,
   Map,
   Grid3X3,
+  CalendarDays,
   Bot,
   Palette,
   Network,
@@ -77,6 +78,8 @@ import {
   Video,
   AudioLines,
   UserCircle,
+  Film,
+  Search,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -94,6 +97,7 @@ import type { ItemCustomization } from "@/lib/sidebar/sidebarCustomization";
 import { SidebarContextMenu } from "./SidebarContextMenu";
 import { ItemEditPopover, getIconByName } from "./ItemEditPopover";
 import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 const FULL_WIDTH = 240;
 const MOBILE_WIDTH = 280;
@@ -254,6 +258,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/entities", key: "entities", icon: Database, status: "active" },
       { href: "/dashboard/comms", key: "comms", icon: MessagesSquare, status: "active" },
       { href: "/dashboard/documents", key: "documents", icon: FileSignature, status: "active" },
+      { href: "/dashboard/vclip", key: "vclip", icon: Film, status: "active" },
+      { href: "/dashboard/weekly-planner", key: "weeklyPlanner", icon: CalendarDays, status: "active" },
       {
         type: "folder",
         href: "/dashboard/wiki",
@@ -435,9 +441,11 @@ export function Sidebar({
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
   const [hovered, setHovered] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  // userMenuOpen removed — handled by WorkspaceSwitcher
   const [socialMenuOpen, setSocialMenuOpen] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  // userMenuRef removed — handled by WorkspaceSwitcher
   const socialMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const [navTop, setNavTop] = useState(120);
@@ -445,18 +453,26 @@ export function Sidebar({
 
   const [filter, setFilter] = useState<SidebarFilter>("me");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [searchQuery, setSearchQuery] = useState("");
   const [favHrefs, setFavHrefs] = useState<Set<string>>(new Set());
-  const [openFolders, setOpenFolders] = useState<Set<string>>(() => {
+  const [openFolders, setOpenFolders] = useState<Set<string>>(new Set<string>());
+
+  // Hydrate openFolders from localStorage after mount to avoid SSR mismatch
+  useEffect(() => {
     try {
       const v = localStorage.getItem("cc-sidebar-folders");
-      return v ? new Set(JSON.parse(v)) : new Set<string>();
-    } catch { return new Set<string>(); }
-  });
-  const [folderMode, setFolderMode] = useState<boolean>(() => {
+      if (v) setOpenFolders(new Set(JSON.parse(v)));
+    } catch {}
+  }, []);
+  const [folderMode, setFolderMode] = useState<boolean>(true);
+
+  // Hydrate folderMode from localStorage after mount to avoid SSR mismatch
+  useEffect(() => {
     try {
-      return localStorage.getItem(FOLDER_MODE_KEY) !== "flat";
-    } catch { return true; }
-  });
+      const v = localStorage.getItem(FOLDER_MODE_KEY);
+      if (v === "flat") setFolderMode(false);
+    } catch {}
+  }, []);
 
   // ── Sidebar customization (reorder, hide, folders, usage tracking) ──
   const {
@@ -501,10 +517,11 @@ export function Sidebar({
     return custom || DefaultIcon;
   }, [customization.itemCustomizations]);
 
-  // Helper: get icon position for an item
+  // Helper: get icon position for an item (default to "start" before hydration to avoid mismatch)
   const getIconPosition = useCallback((itemKey: string): "start" | "end" | "above" => {
+    if (!mounted) return "start";
     return customization.itemCustomizations[itemKey]?.iconPosition || "start";
-  }, [customization.itemCustomizations]);
+  }, [customization.itemCustomizations, mounted]);
 
 
   // Context menu state
@@ -535,23 +552,12 @@ export function Sidebar({
     });
   }, []);
 
-  // Close user menu on outside click
+  // navTop: compute position for workspace switcher dropdown
   useEffect(() => {
-    if (!userMenuOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [userMenuOpen]);
-
-  useEffect(() => {
-    if (userMenuOpen && navRef.current) {
+    if (navRef.current) {
       setNavTop(navRef.current.getBoundingClientRect().top - 8);
     }
-  }, [userMenuOpen]);
+  }, []);
 
   // Close social menu on outside click
   useEffect(() => {
@@ -645,18 +651,46 @@ export function Sidebar({
   };
 
   // ── Compute filtered groups (uses customization engine) ─
+  const tabsT = t.tabs as Record<string, string>;
+
   const filteredGroups = buildDisplayGroups(
     NAV_GROUPS, customization, filter, favHrefs, permissions, editMode,
-  ).map((dg) => ({
-    id: dg.id,
-    labelKey: dg.labelKey,
-    isCustomFolder: dg.isCustomFolder,
-    customFolderName: dg.customFolderName,
-    isCustomSection: dg.isCustomSection,
-    displayName: dg.displayName,
-    emoji: dg.emoji,
-    items: dg.items,
-  }));
+  ).map((dg) => {
+    let items = dg.items;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      items = items.flatMap((entry) => {
+        if (isFolder(entry)) {
+          // Check folder label
+          const folderLabel = (resolveLabel(entry.key, tabsT[entry.key] || entry.key)).toLowerCase();
+          // Filter children
+          const matchingChildren = entry.children.filter((child) => {
+            const childLabel = (resolveLabel(child.key, tabsT[child.key] || child.key)).toLowerCase();
+            return childLabel.includes(q) || child.key.toLowerCase().includes(q);
+          });
+          // If folder itself matches, keep all children; otherwise keep only matching children
+          if (folderLabel.includes(q)) return [entry];
+          if (matchingChildren.length > 0) return [{ ...entry, children: matchingChildren }];
+          return [];
+        }
+        const label = (resolveLabel(entry.key, tabsT[entry.key] || entry.key)).toLowerCase();
+        return (label.includes(q) || entry.key.toLowerCase().includes(q)) ? [entry] : [];
+      });
+    }
+
+    return {
+      id: dg.id,
+      labelKey: dg.labelKey,
+      isCustomFolder: dg.isCustomFolder,
+      customFolderName: dg.customFolderName,
+      isCustomSection: dg.isCustomSection,
+      displayName: dg.displayName,
+      emoji: dg.emoji,
+      items,
+    };
+  }).filter((g) => g.items.length > 0 || !searchQuery.trim());
 
   // DnD handler — reorder items within a group
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -782,7 +816,7 @@ export function Sidebar({
     <aside
       data-cc-id="sidebar.root"
       className={`sidebar fixed top-12 z-[35] shrink-0 overflow-hidden ${
-        onRight ? "right-0 border-l" : "left-0 border-r"
+        onRight ? "right-0 border-l" : "border-r"
       } border-slate-700/50 ${
         isFloat ? "shadow-lg" : ""
       } ${
@@ -792,7 +826,8 @@ export function Sidebar({
         width: isCollapsed ? STRIP_WIDTH : expandedWidth,
         maxWidth: isMobile ? "100vw" : undefined,
         height: "calc(100vh - 48px)",
-        transition: (isFloat || isHoverReveal) ? "width 300ms ease" : undefined,
+        ...(!onRight ? { left: 48 } : {}),
+        transition: "width 300ms ease-out",
         backgroundColor: isCollapsed
           ? "color-mix(in srgb, var(--nav-bg) 80%, transparent)"
           : "var(--nav-bg)",
@@ -801,204 +836,24 @@ export function Sidebar({
       onMouseLeave={(isFloat || isHoverReveal) ? () => setHovered(false) : undefined}
     >
       <div className="flex h-full flex-col">
-        {/* Header */}
-        <header
-          data-cc-id="sidebar.header"
-          className="relative flex h-16 shrink-0 items-center border-b border-slate-700/50 overflow-hidden"
-          style={{
-            padding: isCollapsed ? "0" : "0 16px",
-            justifyContent: isCollapsed ? "center" : "flex-start",
-            gap: isCollapsed ? 0 : 8,
-          }}
-        >
-          {/* Subtle gradient overlay */}
-          <div
-            className="absolute inset-0 bg-gradient-to-b from-[var(--cc-accent-500)]/[0.03] to-transparent pointer-events-none"
-            aria-hidden
-          />
-
-          {(() => {
-            const logoEl = brandProfile.logoDataUrl ? (
-              <div data-cc-id="sidebar.header.logo" className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[var(--cc-accent-600-20)]">
-                {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
-                <img src={brandProfile.logoDataUrl} alt="" className="h-full w-full object-cover" />
-              </div>
-            ) : (
-              <div data-cc-id="sidebar.header.logo" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--cc-accent-600-20)]">
-                <Layers className="h-5 w-5 text-[var(--cc-accent-400)]" />
-              </div>
-            );
-            const nameText = brandProfile.companyName || t.appName;
-
-            if (isCollapsed) return <Link href="/" title="Workspace Hub" aria-label="Workspace Hub">{logoEl}</Link>;
-
-            if (onRight) return (
-              <>
-                {isFloating && !isFloat && onClose && (
-                  <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-                <Link href="/" className="flex flex-1 items-center justify-end gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
-                  {logoEl}
-                </Link>
-              </>
-            );
-
-            return (
-              <>
-                <Link href="/" className="flex flex-1 items-center gap-2 transition-opacity hover:opacity-80" title="Workspace Hub">
-                  {logoEl}
-                </Link>
-                {isFloating && !isFloat && onClose && (
-                  <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </>
-            );
-          })()}
-        </header>
-
-        {/* User account section — below header, above filters */}
-        {user && !isCollapsed && (
-          <div ref={userMenuRef} className="shrink-0 border-b border-slate-700/50 px-2 py-2 relative">
-            <div className={`flex items-center gap-2 rounded-lg px-2 py-1.5 ${onRight ? "flex-row-reverse" : ""}`}>
-              {/* Avatar — 20% */}
-              <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
-                <span className="text-xs font-semibold text-[var(--cc-accent-400)]">
-                  {(user.email?.[0] || "?").toUpperCase()}
-                </span>
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-emerald-500" />
-              </div>
-              {/* Workspace switcher — 80% */}
-              <button
-                type="button"
-                onClick={() => setUserMenuOpen((v) => !v)}
-                className={`flex flex-1 items-center gap-1.5 min-w-0 transition-colors hover:opacity-80 ${onRight ? "flex-row-reverse" : ""}`}
-              >
-                <div className={`flex-1 min-w-0 ${onRight ? "text-right" : "text-left"}`}>
-                  <div className="truncate text-xs font-medium text-slate-200">
-                    {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
-                  </div>
-                  <div className="truncate text-[10px] text-slate-500">
-                    {user.email}
-                  </div>
-                </div>
-                <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform duration-200 ${
-                  userMenuOpen ? "rotate-180" : ""
-                }`} />
-              </button>
-            </div>
-
-            {/* Dropdown menu — opens to the SIDE of the sidebar, never overlapping */}
-            {userMenuOpen && (() => {
-              const um = t.userMenu as Record<string, string>;
-              const roleName = permissions.role === "admin" ? um.admin : permissions.role === "viewer" ? um.viewer : um.member;
-              return (
-                <div
-                  className="fixed z-50 w-56 rounded-xl border border-slate-700 shadow-2xl overflow-hidden"
-                  style={{
-                    backgroundColor: "var(--nav-bg)",
-                    top: navTop,
-                    ...(onRight
-                      ? { right: expandedWidth + 8 }
-                      : { left: expandedWidth + 8 }),
-                  }}
-                >
-                  {/* Role badge */}
-                  <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700/50">
-                    <CircleDot className="h-3 w-3 text-emerald-500" />
-                    <span className="text-[10px] text-slate-500">{um.online}</span>
-                    <span className="ms-auto rounded-full bg-[var(--cc-accent-600-20)] px-2 py-0.5 text-[9px] font-medium text-[var(--cc-accent-300)]">
-                      {roleName}
-                    </span>
-                  </div>
-
-                  {/* Workspace switcher */}
-                  <div className="px-2 py-1.5 border-b border-slate-700/50">
-                    <span className="block px-1 pb-1 text-[9px] uppercase tracking-wider text-slate-600 font-medium">Workspace</span>
-                    <div className="grid grid-cols-2 gap-1">
-                      {[
-                        { id: "business", icon: "🏗️", label: "Business" },
-                        { id: "private", icon: "👤", label: "Private" },
-                        { id: "tools", icon: "🛠️", label: "Tools" },
-                        { id: "admin", icon: "⚙️", label: "Admin" },
-                        { id: "cc", icon: "🎯", label: "CC" },
-                      ].map((ws) => (
-                        <button
-                          key={ws.id}
-                          type="button"
-                          className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] transition-colors ${
-                            ws.id === "business"
-                              ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)] font-medium"
-                              : "text-slate-500 hover:bg-slate-800/50 hover:text-slate-300"
-                          }`}
-                        >
-                          <span>{ws.icon}</span>
-                          <span>{ws.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Menu items */}
-                  <div className="py-1">
-                    <button
-                      type="button"
-                      onClick={() => { setUserMenuOpen(false); router.push("/dashboard/settings"); }}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-xs text-slate-300 transition-colors hover:bg-slate-800/50 ${onRight ? "flex-row-reverse" : ""}`}
-                    >
-                      <UserIcon className="h-3.5 w-3.5 text-slate-500" />
-                      {um.profile}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setUserMenuOpen(false); router.push("/dashboard/settings"); }}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-xs text-slate-300 transition-colors hover:bg-slate-800/50 ${onRight ? "flex-row-reverse" : ""}`}
-                    >
-                      <SettingsIcon className="h-3.5 w-3.5 text-slate-500" />
-                      {um.settings}
-                    </button>
-                  </div>
-
-                  {/* Sign out */}
-                  <div className="border-t border-slate-700/50 py-1">
-                    <button
-                      type="button"
-                      onClick={() => { setUserMenuOpen(false); signOut(); }}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-xs text-red-400 transition-colors hover:bg-red-500/10 ${onRight ? "flex-row-reverse" : ""}`}
-                    >
-                      <LogOut className="h-3.5 w-3.5" />
-                      {um.signOut}
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
+        {/* Close button for floating sidebar (no header logo) */}
+        {isFloating && !isFloat && onClose && (
+          <div className="flex justify-end px-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
-        {/* Collapsed: user avatar only (tooltip on hover, no menu) */}
-        {user && isCollapsed && (
-          <div className="shrink-0 border-b border-slate-700/50 py-2 flex justify-center">
-            <div
-              className="group relative"
-            >
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-[var(--cc-accent-600-20)]">
-                <span className="text-xs font-semibold text-[var(--cc-accent-400)]">
-                  {(user.email?.[0] || "?").toUpperCase()}
-                </span>
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-emerald-500" />
-              </div>
-              <span
-                className={`absolute ${
-                  onRight ? "right-full mr-2" : "left-full ml-2"
-                } top-1/2 -translate-y-1/2 rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
-              >
-                {user.email}
-              </span>
-            </div>
-          </div>
+
+        {/* Workspace Switcher — replaces old user menu */}
+        {user && (
+          <WorkspaceSwitcher
+            user={user}
+            isCollapsed={isCollapsed}
+            onRight={onRight}
+            expandedWidth={expandedWidth}
+            navTop={navTop}
+          />
         )}
 
         {/* Filter tabs + View mode (hidden when collapsed) */}
@@ -1020,6 +875,27 @@ export function Sidebar({
                   {tab.label}
                 </button>
               ))}
+            </div>
+
+            {/* Search bar */}
+            <div className="relative">
+              <Search className="absolute start-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-500 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={language === "he" ? "חיפוש בתפריט..." : "Search menu..."}
+                className="w-full rounded-md border border-slate-700/50 bg-slate-800/50 py-1 ps-7 pe-7 text-[11px] text-slate-200 placeholder:text-slate-600 focus:border-[var(--cc-accent-500)] focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute end-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-500 hover:text-slate-300"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
             </div>
 
             {/* View mode toggle + folder mode */}
@@ -1115,6 +991,7 @@ export function Sidebar({
           )}
 
          <DndContext
+           id="sidebar-dnd"
            sensors={sensors}
            collisionDetection={closestCenter}
            onDragEnd={handleDragEnd}
@@ -1548,7 +1425,7 @@ export function Sidebar({
                       const CompactIcon = resolveIcon(key, Icon);
                       return (
                         <SortableNavItem
-                          key={href}
+                          key={key}
                           id={key}
                           editMode={editMode}
                           isHidden={isItemHidden}
@@ -1622,7 +1499,7 @@ export function Sidebar({
 
                     return (
                       <SortableNavItem
-                        key={href}
+                        key={key}
                         id={key}
                         editMode={editMode}
                         isHidden={isItemHidden}

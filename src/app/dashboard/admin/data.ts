@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2, Mail, Gauge,
+  Loader2, Mail, Gauge, Film, CalendarDays,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -225,6 +225,31 @@ export const routes: RouteEntry[] = [
     connectedTo: ['entity-view', 'document-sign'],
   },
   {
+    id: 'vclip', path: '/dashboard/vclip', name: 'vClip', nameHe: 'vClip', icon: Film,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-17',
+    descriptionHe: 'הקלטת מסך + בועת פנים, כיווץ ffmpeg.wasm, העלאה ל-Vercel Blob, לינק שיתוף, מעקב צפיות',
+    descriptionEn: 'Screen recording + face bubble, ffmpeg.wasm compression, Vercel Blob upload, share link, view tracking',
+    components: [
+      { id: 'vclip-library', name: 'VClipPage', file: 'app/dashboard/vclip/page.tsx', status: 'active' },
+      { id: 'vclip-record', name: 'VClipRecordPage', file: 'app/dashboard/vclip/record/page.tsx', status: 'active' },
+      { id: 'vclip-download', name: 'VClipDownloadPage', file: 'app/dashboard/vclip/download/page.tsx', status: 'active' },
+      { id: 'vclip-watch', name: 'WatchPage', file: 'app/watch/[id]/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['vclips', 'vclip_views'], visible: true, sidebarTab: true,
+    connectedTo: ['vcloud'],
+  },
+  {
+    id: 'weekly-planner-page', path: '/dashboard/weekly-planner', name: 'Weekly Planner', nameHe: 'סדר שבועי', icon: CalendarDays,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-18',
+    descriptionHe: 'דף ייעודי לתכנון שבועי — משימות יומיות, תצוגת צוות, תבניות חוזרות',
+    descriptionEn: 'Dedicated weekly planner page — daily tasks, team view, recurring templates',
+    components: [
+      { id: 'weekly-planner-panel', name: 'WeeklyPlannerPanel', file: 'components/command-center/widgets/WeeklyPlannerWidget.tsx', status: 'active' },
+    ],
+    contexts: ['WeeklyPlannerContext', 'SettingsContext'], supabaseTables: ['weekly_planner_items', 'weekly_planner_templates'], visible: true, sidebarTab: true,
+    connectedTo: ['entities'],
+  },
+  {
     id: 'settings', path: '/dashboard/settings', name: 'Settings', nameHe: 'הגדרות', icon: Settings,
     phase: 1, status: 'active', version: '0.7.0', addedDate: '2026-02-15',
     descriptionHe: 'צבעי מבטא, גופנים, סקינים (3 שכבות), צפיפות, פרופיל מותג, עקיפות סגנון, חיבורים ואינטגרציות',
@@ -441,6 +466,30 @@ export const routes: RouteEntry[] = [
     descriptionEn: 'POST — deposit credits (purchase, grant, promotion, refund)',
     components: [],
     contexts: [], supabaseTables: ['vb_wallets', 'vb_wallet_transactions'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-vclip-upload', path: '/api/vclip/upload', name: 'vClip Upload', nameHe: 'העלאת vClip', icon: Film,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-17',
+    descriptionHe: 'POST — העלאת סרטון ל-Vercel Blob + יצירת רשומה ב-Supabase',
+    descriptionEn: 'POST — upload video to Vercel Blob + create Supabase record',
+    components: [],
+    contexts: [], supabaseTables: ['vclips'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-vclip-list', path: '/api/vclip/list', name: 'vClip List', nameHe: 'רשימת vClip', icon: Film,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-17',
+    descriptionHe: 'GET — רשימת כל הסרטונים',
+    descriptionEn: 'GET — list all clips',
+    components: [],
+    contexts: [], supabaseTables: ['vclips'], visible: false, sidebarTab: false,
+  },
+  {
+    id: 'api-vclip-download', path: '/api/vclip/download', name: 'vClip Extension Download', nameHe: 'הורדת תוסף vClip', icon: Film,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-17',
+    descriptionHe: 'GET — הורדת ZIP של תוסף Chrome',
+    descriptionEn: 'GET — download Chrome extension ZIP',
+    components: [],
+    contexts: [], visible: false, sidebarTab: false,
   },
 ];
 

@@ -56,6 +56,8 @@ export const translations = {
       matching: "התאמות",
       comms: "תקשורת",
       documents: "מסמכים",
+      vclip: "vClip",
+      weeklyPlanner: "סדר שבועי",
       audit: "יומן ביקורת",
       templates: "תבניות",
       emailTemplates: "תבניות מייל",
@@ -166,6 +168,10 @@ export const translations = {
       documents: {
         title: "מסמכים",
         description: "הסכמים, חתימות דיגיטליות וארכיון מסמכים",
+      },
+      weeklyPlanner: {
+        title: "סדר שבועי",
+        description: "תכנון שבועי, משימות יומיות ותבניות חוזרות",
       },
       audit: {
         title: "יומן ביקורת",
@@ -3132,6 +3138,8 @@ export const translations = {
       matching: "Matching",
       comms: "Communication",
       documents: "Documents",
+      vclip: "vClip",
+      weeklyPlanner: "Weekly Planner",
       audit: "Audit Log",
       templates: "Templates",
       emailTemplates: "Email Templates",
@@ -3242,6 +3250,10 @@ export const translations = {
       documents: {
         title: "Documents",
         description: "Agreements, digital signatures and document archive",
+      },
+      weeklyPlanner: {
+        title: "Weekly Planner",
+        description: "Weekly planning, daily tasks & recurring templates",
       },
       audit: {
         title: "Audit Log",
@@ -6194,6 +6206,8 @@ export const translations = {
       matching: "Совпадения",
       comms: "Коммуникация",
       documents: "Документы",
+      vclip: "vClip",
+      weeklyPlanner: "Недельный планировщик",
       audit: "Журнал аудита",
       templates: "Шаблоны",
       emailTemplates: "Шаблоны email",
@@ -6304,6 +6318,10 @@ export const translations = {
       documents: {
         title: "Документы",
         description: "Договоры, цифровые подписи и архив документов",
+      },
+      weeklyPlanner: {
+        title: "Недельный планировщик",
+        description: "Недельное планирование, ежедневные задачи и повторяющиеся шаблоны",
       },
       audit: {
         title: "Журнал аудита",
