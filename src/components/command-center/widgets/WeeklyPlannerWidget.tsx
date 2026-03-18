@@ -57,7 +57,7 @@ function getWidgetT(language: "he" | "en" | "ru") {
 
 // ─── Full-Screen Panel ──────────────────────────────────────
 
-export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
+export function WeeklyPlannerPanel({ onClose }: { onClose?: () => void } = {}) {
   return (
     <WeeklyPlannerProvider>
       <WeeklyPlannerPanelInner onClose={onClose} />
@@ -65,7 +65,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
+function WeeklyPlannerPanelInner({ onClose }: { onClose?: () => void }) {
   const { language } = useSettings();
   const t = getTranslations(language);
   const wt = t.widgets as Record<string, string>;
@@ -126,8 +126,9 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
 
   const draggedItem = dragActiveId ? items.find((it) => it.id === dragActiveId) : null;
 
-  // Close on Escape
+  // Close on Escape (only when used as modal)
   useEffect(() => {
+    if (!onClose) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") { e.stopPropagation(); onClose(); }
     };
@@ -135,21 +136,13 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
     return () => window.removeEventListener("keydown", handler, true);
   }, [onClose]);
 
-  return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-label={wt.weeklyPlanner || "Weekly Planner"}>
-      {/* Backdrop */}
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/50"
-        aria-label="Close"
-      />
+  const isModal = !!onClose;
 
-      {/* Full-screen panel */}
-      <div
-        className="relative z-10 flex h-full w-full max-w-[1400px] flex-col overflow-hidden border border-slate-700 bg-slate-900 shadow-2xl"
-        style={{ borderRadius: "var(--cc-radius-lg)" }}
-      >
+  const panelContent = (
+    <div
+      className={`flex flex-col overflow-hidden border border-slate-700 bg-slate-900 shadow-2xl ${isModal ? "relative z-10 h-full w-full max-w-[1400px]" : "h-full w-full"}`}
+      style={{ borderRadius: "var(--cc-radius-lg)" }}
+    >
         {/* ─── Header ─────────────────────────────────────── */}
         <div className="flex items-center justify-between border-b border-slate-700 bg-slate-800 px-5 py-3">
           <div className="flex items-center gap-4">
@@ -228,15 +221,17 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
               <Settings className="h-4 w-4" />
             </button>
 
-            {/* Close */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            {/* Close (only in modal mode) */}
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -279,12 +274,27 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose: () => void }) {
             <span className="text-slate-700">·</span>
             <span className="text-emerald-400">✓ {stats.done} {wt.plannerDone || "done"}</span>
             <span className="flex-1" />
-            <kbd className="rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-500">
-              Esc
-            </kbd>
+            {onClose && (
+              <kbd className="rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-500">
+                Esc
+              </kbd>
+            )}
           </div>
         )}
       </div>
+  );
+
+  if (!isModal) return panelContent;
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-6" role="dialog" aria-modal="true" aria-label={wt.weeklyPlanner || "Weekly Planner"}>
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute inset-0 bg-black/50"
+        aria-label="Close"
+      />
+      {panelContent}
     </div>
   );
 }
