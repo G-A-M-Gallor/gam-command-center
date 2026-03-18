@@ -82,7 +82,7 @@ export const SYSTEM_SHORTCUTS: ShortcutDefinition[] = [
   { id: "nav_home", keyCombo: "Ctrl+H", actionSlug: "nav_home", category: "navigation", displayName: { he: "חזור לדשבורד", en: "Go Home", ru: "На главную" }, isSystem: true, scope: "global", sortOrder: 10 },
 
   // ── Quick Actions ───────────────────────────────────────
-  { id: "search_open", keyCombo: "Ctrl+K", actionSlug: "search_open", category: "actions", displayName: { he: "פתח חיפוש", en: "Open Search", ru: "Открыть поиск" }, isSystem: true, scope: "global", sortOrder: 1 },
+  { id: "search_open", keyCombo: "Cmd+K", actionSlug: "search_open", category: "actions", displayName: { he: "פתח חיפוש", en: "Open Search", ru: "Открыть поиск" }, isSystem: true, scope: "global", sortOrder: 1 },
   { id: "shortcuts_open", keyCombo: "Ctrl+/", actionSlug: "shortcuts_open", category: "actions", displayName: { he: "פתח קיצורים", en: "Open Shortcuts", ru: "Открыть горячие клавиши" }, isSystem: true, scope: "global", sortOrder: 2 },
   { id: "ai_toggle", keyCombo: "Ctrl+J", actionSlug: "ai_toggle", category: "actions", displayName: { he: "פתח/סגור AI", en: "Toggle AI Panel", ru: "Переключить панель AI" }, isSystem: true, scope: "global", sortOrder: 3 },
   { id: "quick_create", keyCombo: "Ctrl+Shift+N", actionSlug: "quick_create", category: "actions", displayName: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" }, isSystem: true, scope: "global", sortOrder: 4 },

@@ -48,3 +48,4 @@ public/swe-worker-*.js
 
 # MCP config (contains secrets)
 .mcp.json
+.env*.local

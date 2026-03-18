@@ -120,6 +120,53 @@ import {
   Minimize2,
   Move,
   Grip,
+  // Dev & Programming
+  GitBranch,
+  GitCommit,
+  GitMerge,
+  GitPullRequest,
+  Bug,
+  Braces,
+  FileCode,
+  FileJson,
+  Regex,
+  Binary,
+  CircuitBoard,
+  Cpu,
+  HardDrive,
+  Usb,
+  Cable,
+  Router,
+  Container,
+  Blocks,
+  Component,
+  Workflow,
+  // Office & Work
+  Printer,
+  ScanLine,
+  Receipt,
+  FileSpreadsheet,
+  FilePlus,
+  FileCheck,
+  FileX,
+  FolderPlus,
+  FolderCheck,
+  Archive,
+  Inbox,
+  MailOpen,
+  Stamp,
+  BadgeCheck,
+  CalendarDays,
+  ClipboardList,
+  ClipboardCheck,
+  ListChecks,
+  ListOrdered,
+  Table,
+  Kanban,
+  GanttChart,
+  Presentation,
+  PieChart as PieChartIcon2,
+  LineChart,
   type LucideIcon,
 } from "lucide-react";
 
@@ -237,7 +284,9 @@ type IconCategory =
   | "weather"
   | "business"
   | "tools"
-  | "layout";
+  | "layout"
+  | "dev"
+  | "office";
 
 interface IconEntry {
   name: string;
@@ -370,6 +419,52 @@ const ICONS: IconEntry[] = [
   { name: "Box", icon: Box, category: "tools" },
   // Layout
   { name: "Layout", icon: Layout, category: "layout" },
+  // Dev & Programming
+  { name: "GitBranch", icon: GitBranch, category: "dev" },
+  { name: "GitCommit", icon: GitCommit, category: "dev" },
+  { name: "GitMerge", icon: GitMerge, category: "dev" },
+  { name: "GitPullRequest", icon: GitPullRequest, category: "dev" },
+  { name: "Bug", icon: Bug, category: "dev" },
+  { name: "Braces", icon: Braces, category: "dev" },
+  { name: "FileCode", icon: FileCode, category: "dev" },
+  { name: "FileJson", icon: FileJson, category: "dev" },
+  { name: "Regex", icon: Regex, category: "dev" },
+  { name: "Binary", icon: Binary, category: "dev" },
+  { name: "CircuitBoard", icon: CircuitBoard, category: "dev" },
+  { name: "Cpu", icon: Cpu, category: "dev" },
+  { name: "HardDrive", icon: HardDrive, category: "dev" },
+  { name: "Usb", icon: Usb, category: "dev" },
+  { name: "Cable", icon: Cable, category: "dev" },
+  { name: "Router", icon: Router, category: "dev" },
+  { name: "Container", icon: Container, category: "dev" },
+  { name: "Blocks", icon: Blocks, category: "dev" },
+  { name: "Component", icon: Component, category: "dev" },
+  { name: "Workflow", icon: Workflow, category: "dev" },
+  // Office & Work
+  { name: "Printer", icon: Printer, category: "office" },
+  { name: "ScanLine", icon: ScanLine, category: "office" },
+  { name: "Receipt", icon: Receipt, category: "office" },
+  { name: "FileSpreadsheet", icon: FileSpreadsheet, category: "office" },
+  { name: "FilePlus", icon: FilePlus, category: "office" },
+  { name: "FileCheck", icon: FileCheck, category: "office" },
+  { name: "FileX", icon: FileX, category: "office" },
+  { name: "FolderPlus", icon: FolderPlus, category: "office" },
+  { name: "FolderCheck", icon: FolderCheck, category: "office" },
+  { name: "Archive", icon: Archive, category: "office" },
+  { name: "Inbox", icon: Inbox, category: "office" },
+  { name: "MailOpen", icon: MailOpen, category: "office" },
+  { name: "Stamp", icon: Stamp, category: "office" },
+  { name: "BadgeCheck", icon: BadgeCheck, category: "office" },
+  { name: "CalendarDays", icon: CalendarDays, category: "office" },
+  { name: "ClipboardList", icon: ClipboardList, category: "office" },
+  { name: "ClipboardCheck", icon: ClipboardCheck, category: "office" },
+  { name: "ListChecks", icon: ListChecks, category: "office" },
+  { name: "ListOrdered", icon: ListOrdered, category: "office" },
+  { name: "Table", icon: Table, category: "office" },
+  { name: "Kanban", icon: Kanban, category: "office" },
+  { name: "GanttChart", icon: GanttChart, category: "office" },
+  { name: "Presentation", icon: Presentation, category: "office" },
+  { name: "LineChart", icon: LineChart, category: "office" },
 ];
 
 // ─── Symbol Data ─────────────────────────────────────────────────
