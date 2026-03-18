@@ -489,6 +489,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
               saveStatus={saveState}
               lastSavedAt={lastSavedAt}
               visibleColumns={visibleColumns}
+              direction={layout.direction}
             />
           )}
 

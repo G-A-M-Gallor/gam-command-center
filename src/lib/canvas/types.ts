@@ -12,10 +12,10 @@ export const MAX_CELL_SIZE = 160;
 export const MIN_ROWS = 8;
 
 export const DEFAULT_EDITOR_ZONE = {
-  col: 2,
+  col: 0,
   row: 0,
-  col_span: 8,
-  row_span: 20,
+  col_span: 12,
+  row_span: 50,
 };
 
 // ─── Grid Position ───────────────────────────────────
@@ -30,6 +30,8 @@ export interface GridRect extends GridPosition {
 }
 
 // ─── Canvas Layout (per document) ────────────────────
+export type EditorDirection = 'rtl' | 'ltr';
+
 export interface CanvasLayout {
   document_id: string;
   grid_columns: number;
@@ -39,6 +41,7 @@ export interface CanvasLayout {
   show_grid: boolean;
   snap_to_grid: boolean;
   zoom: number;
+  direction: EditorDirection;
   updated_at?: string;
 }
 
@@ -97,5 +100,6 @@ export function createDefaultLayout(documentId: string): CanvasLayout {
     show_grid: true,
     snap_to_grid: true,
     zoom: 1.0,
+    direction: 'rtl' as EditorDirection,
   };
 }

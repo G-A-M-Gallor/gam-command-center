@@ -2,7 +2,7 @@
 
 import type { JSONContent } from '@tiptap/react';
 import { TiptapEditor } from '@/components/editor';
-import type { GridRect } from '@/lib/canvas/types';
+import type { GridRect, EditorDirection } from '@/lib/canvas/types';
 import type { SaveState } from '@/lib/editor/useAutoSave';
 
 interface EditorZoneProps {
@@ -14,46 +14,32 @@ interface EditorZoneProps {
   recordId: string;
   saveStatus: SaveState;
   lastSavedAt?: Date;
-  /** Total visible columns — used to detect "full width" mode */
   visibleColumns?: number;
+  direction?: EditorDirection;
 }
 
 export function EditorZone({
-  editorZone,
-  cellSize,
   content,
   onChange,
   onSave,
   recordId,
   saveStatus,
   lastSavedAt,
-  visibleColumns,
+  direction = 'rtl',
 }: EditorZoneProps) {
-  // Full-width mode: when col_span exceeds visible columns or is >= 12
-  const isFullWidth = visibleColumns ? editorZone.col_span >= visibleColumns : editorZone.col_span >= 12;
-
-  const style: React.CSSProperties = isFullWidth
-    ? {
-        position: 'absolute',
-        left: 0,
-        top: editorZone.row * cellSize,
-        width: '100%',
-        minHeight: editorZone.row_span * cellSize,
-        zIndex: 2,
-      }
-    : {
-        position: 'absolute',
-        left: editorZone.col * cellSize,
-        top: editorZone.row * cellSize,
-        width: editorZone.col_span * cellSize,
-        minHeight: editorZone.row_span * cellSize,
-        zIndex: 2,
-      };
+  const style: React.CSSProperties = {
+    position: 'absolute',
+    left: '1.5%',
+    top: 0,
+    width: '97%',
+    minHeight: '100%',
+    zIndex: 2,
+  };
 
   return (
     <div
       style={style}
-      className="rounded-lg border border-slate-700/30 bg-slate-900/50"
+      className="gam-canvas-editor-zone flex flex-col rounded-lg border border-slate-700/30 bg-slate-900/50 overflow-visible"
     >
       <TiptapEditor
         content={content}
@@ -63,6 +49,8 @@ export function EditorZone({
         recordId={recordId}
         saveStatus={saveStatus}
         lastSavedAt={lastSavedAt}
+        className="flex-1"
+        direction={direction}
       />
     </div>
   );

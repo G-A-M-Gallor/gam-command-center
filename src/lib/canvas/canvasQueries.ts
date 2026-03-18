@@ -34,6 +34,7 @@ export async function fetchCanvasLayout(
       show_grid: data.show_grid,
       snap_to_grid: data.snap_to_grid,
       zoom: data.zoom,
+      direction: data.direction || 'rtl',
       updated_at: data.updated_at,
     };
   } catch {
@@ -57,6 +58,7 @@ export async function saveCanvasLayout(
           show_grid: layout.show_grid,
           snap_to_grid: layout.snap_to_grid,
           zoom: layout.zoom,
+          direction: layout.direction || 'rtl',
         },
         { onConflict: 'document_id' }
       );

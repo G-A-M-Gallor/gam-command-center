@@ -36,7 +36,8 @@ export const CanvasGrid = forwardRef<HTMLDivElement, CanvasGridProps>(
         <div
           className="relative"
           style={{
-            width: gridWidth,
+            minWidth: gridWidth,
+            width: '100%',
             minHeight: gridHeight,
             // Dot grid pattern
             backgroundImage: showGrid
