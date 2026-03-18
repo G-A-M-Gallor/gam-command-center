@@ -135,11 +135,57 @@ function applyTypeSpecificExtraction(
       break;
     case "worker":
     case "talent":
+    case "employee":
       extractWorkerFields(meta, fields);
+      break;
+    case "client":
+      extractClientFields(meta, fields);
       break;
     case "project":
       extractProjectFields(meta, fields);
       break;
+  }
+}
+
+function extractClientFields(
+  meta: Record<string, unknown>,
+  fields: Record<string, MatchFieldValue>
+): void {
+  // Required skills
+  const skills = collectMultiSelect(meta, [
+    "required_skills",
+    "skills",
+    "services_needed",
+  ]);
+  if (skills.length > 0) {
+    fields.required_skills = { type: "strings", value: skills };
+  }
+
+  // Service area
+  const areas = collectMultiSelect(meta, ["service_area", "area", "location", "region"]);
+  if (areas.length > 0) {
+    fields.service_area = { type: "strings", value: areas };
+  }
+
+  // Budget as range
+  if (meta.budget_min !== undefined && meta.budget_max !== undefined) {
+    fields.budget = {
+      type: "range",
+      min: Number(meta.budget_min) || 0,
+      max: Number(meta.budget_max) || Number(meta.budget_min) || 0,
+    };
+  } else if (meta.budget !== undefined) {
+    const b = Number(meta.budget) || 0;
+    fields.budget = { type: "number", value: b };
+  }
+
+  // Timeline as date range
+  if (meta.start_date && meta.end_date) {
+    fields.timeline = {
+      type: "dateRange",
+      start: String(meta.start_date),
+      end: String(meta.end_date),
+    };
   }
 }
 

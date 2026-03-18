@@ -149,4 +149,10 @@ export const ENTITY_PAIR_CONFIGS: Record<string, FieldMapping[]> = {
     { sourceKey: "capacity", targetKey: "project_size", matchType: "proximity", weight: 0.2, maxDistance: 100 },
     { sourceKey: "license_expiry", targetKey: "timeline", matchType: "dateRange", weight: 0.25 },
   ],
+  "client-employee": [
+    { sourceKey: "required_skills", targetKey: "skills", matchType: "overlap", weight: 0.35 },
+    { sourceKey: "service_area", targetKey: "location", matchType: "overlap", weight: 0.25 },
+    { sourceKey: "budget", targetKey: "hourly_rate", matchType: "proximity", weight: 0.15, maxDistance: 200 },
+    { sourceKey: "timeline", targetKey: "availability", matchType: "dateRange", weight: 0.25 },
+  ],
 };

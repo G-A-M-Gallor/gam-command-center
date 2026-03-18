@@ -22,6 +22,7 @@ import { EntityContentEditor } from '@/components/entities/EntityContentEditor';
 import { TemplatePicker } from '@/components/entities/TemplatePicker';
 import { RelationPanel } from '@/components/entities/RelationPanel';
 import { StoryCardBackRefPanel } from '@/components/entities/StoryCardBackRefPanel';
+import { MatchingShortlistPanel } from '@/components/entities/MatchingShortlistPanel';
 import dynamic from 'next/dynamic';
 import { IconPicker, IconDisplay } from '@/components/ui/IconPicker';
 
@@ -299,6 +300,7 @@ export default function EntityDetailPage() {
         <TemplatePicker noteId={noteId} />
         <StakeholderPanel noteId={noteId} />
         <RelationPanel noteId={noteId} entityType={entityTypeSlug} language={language} />
+        <MatchingShortlistPanel noteId={noteId} entityType={entityTypeSlug} language={language} />
         <StoryCardBackRefPanel noteId={noteId} />
         {trackActivity && (
           <>

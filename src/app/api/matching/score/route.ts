@@ -170,7 +170,22 @@ export async function POST(request: NextRequest) {
         .upsert(rows, { onConflict: "source_id,target_id" });
     }
 
-    return NextResponse.json({ scores, cached: false });
+    // Return snake_case format matching MatchScoreRow type
+    const responseScores = scores.map((s: MatchScore) => ({
+      id: `${s.sourceId}-${s.targetId}`,
+      source_id: s.sourceId,
+      target_id: s.targetId,
+      source_type: s.sourceType,
+      target_type: s.targetType,
+      semantic_score: s.semanticScore,
+      field_score: s.fieldScore,
+      recency_score: s.recencyScore,
+      total_score: s.totalScore,
+      field_breakdown: s.fieldBreakdown,
+      computed_at: s.computedAt,
+    }));
+
+    return NextResponse.json({ scores: responseScores, cached: false });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ error: message }, { status: 500 });
