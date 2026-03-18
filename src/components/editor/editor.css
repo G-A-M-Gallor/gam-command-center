@@ -1369,14 +1369,24 @@
   border-radius: 10px;
   border: 1px solid rgba(100, 116, 139, 0.2);
   background: rgba(15, 23, 42, 0.4);
-  overflow: hidden;
+  overflow: visible;
+}
+
+.gam-canvas-editor-zone .gam-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+  overflow: visible;
 }
 
 .gam-canvas-editor-zone .gam-editor {
   background: transparent;
   border: none;
   border-radius: 0;
+  flex: 1;
   min-height: 100%;
+  overflow: visible;
 }
 
 .gam-canvas-editor-zone .gam-editor:focus-within {

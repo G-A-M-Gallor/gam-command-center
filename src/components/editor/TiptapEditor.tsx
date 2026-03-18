@@ -79,6 +79,7 @@ export function TiptapEditor({
   saveStatus = 'idle',
   lastSavedAt,
   onConflictReload,
+  direction = 'rtl',
 }: TiptapEditorProps) {
   const { language } = useSettings();
   const t = getTranslations(language);
@@ -222,7 +223,7 @@ export function TiptapEditor({
   if (!editor) return null;
 
   return (
-    <div className="gam-editor-wrapper" dir="rtl" onKeyDown={handleKeyDown}>
+    <div className="gam-editor-wrapper" dir={direction} onKeyDown={handleKeyDown}>
       {editable && <BlockHandle editor={editor} />}
       {editable && <FloatingToolbar editor={editor} />}
       <EditorContent editor={editor} />

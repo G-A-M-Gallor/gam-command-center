@@ -48,6 +48,8 @@ export interface TiptapEditorProps {
   lastSavedAt?: Date;
   /** Callback when user wants to reload after a conflict */
   onConflictReload?: () => void;
+  /** Text direction — rtl or ltr */
+  direction?: 'rtl' | 'ltr';
 }
 
 export interface FloatingToolbarProps {
