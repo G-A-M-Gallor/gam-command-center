@@ -239,6 +239,17 @@ export const routes: RouteEntry[] = [
     connectedTo: ['vcloud'],
   },
   {
+    id: 'app-launcher', path: '/dashboard/app-launcher', name: 'App Launcher', nameHe: 'כל האפליקציות', icon: CalendarDays,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-18',
+    descriptionHe: 'מסך בית — כל האפליקציות, הווידג׳טים והכלים במקום אחד עם גריד, תיקיות, גרירה וחיפוש',
+    descriptionEn: 'Home screen — all apps, widgets and tools in one place with grid, folders, drag & search',
+    components: [
+      { id: 'app-launcher-grid', name: 'AppLauncherGrid', file: 'components/app-launcher/AppLauncherGrid.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+    connectedTo: [],
+  },
+  {
     id: 'weekly-planner-page', path: '/dashboard/weekly-planner', name: 'Weekly Planner', nameHe: 'סדר שבועי', icon: CalendarDays,
     phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-18',
     descriptionHe: 'דף ייעודי לתכנון שבועי — משימות יומיות, תצוגת צוות, תבניות חוזרות',

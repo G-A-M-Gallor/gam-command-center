@@ -13,6 +13,7 @@ import {
 
 type PageKey =
   | "dashboard"
+  | "appLauncher"
   | "layers"
   | "editor"
   | "storyMap"
@@ -42,6 +43,7 @@ type PageKey =
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
+  appLauncher: "/dashboard/app-launcher",
   layers: "/dashboard/layers",
   editor: "/dashboard/editor",
   storyMap: "/dashboard/story-map",

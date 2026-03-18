@@ -307,8 +307,10 @@ export default function RecordPage() {
     // Try ffmpeg compression
     let compressed = raw;
     try {
-      const { FFmpeg } = await import("https://esm.sh/@ffmpeg/ffmpeg@0.12.10" as string);
-      const { fetchFile } = await import("https://esm.sh/@ffmpeg/util@0.12.1" as string);
+      // @ts-expect-error — runtime ESM import from CDN, not a local module
+      const { FFmpeg } = await import(/* webpackIgnore: true */ "https://esm.sh/@ffmpeg/ffmpeg@0.12.10");
+      // @ts-expect-error — runtime ESM import from CDN, not a local module
+      const { fetchFile } = await import(/* webpackIgnore: true */ "https://esm.sh/@ffmpeg/util@0.12.1");
       const ffmpeg = new FFmpeg();
       ffmpeg.on("progress", ({ progress: p }: { progress: number }) => {
         setProgress(10 + Math.min(p, 1) * 60);

@@ -99,6 +99,71 @@ import { ItemEditPopover, getIconByName } from "./ItemEditPopover";
 import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
+// ── Gradient map: sidebar nav key → [from, to] ──
+// Matches app-catalog gradients for the apps-only view
+const APP_GRADIENTS: Record<string, [string, string]> = {
+  dashboard:       ["#6366f1", "#818cf8"],
+  appLauncher:     ["#8b5cf6", "#a78bfa"],
+  layers:          ["#3b82f6", "#60a5fa"],
+  editor:          ["#6366f1", "#a78bfa"],
+  storyMap:        ["#ec4899", "#f472b6"],
+  aiHub:           ["#8b5cf6", "#c084fc"],
+  cliAi:           ["#8b5cf6", "#c084fc"],
+  aiAdvisors:      ["#7c3aed", "#a78bfa"],
+  agents:          ["#6d28d9", "#8b5cf6"],
+  aiKnowledge:     ["#7c3aed", "#a78bfa"],
+  semanticBrain:   ["#6d28d9", "#a855f7"],
+  entities:        ["#f97316", "#fb923c"],
+  comms:           ["#06b6d4", "#22d3ee"],
+  documents:       ["#a855f7", "#c084fc"],
+  vclip:           ["#ef4444", "#f87171"],
+  weeklyPlanner:   ["#10b981", "#34d399"],
+  wiki:            ["#3b82f6", "#60a5fa"],
+  wikiPages:       ["#3b82f6", "#60a5fa"],
+  skills:          ["#8b5cf6", "#a78bfa"],
+  skillsStore:     ["#7c3aed", "#a78bfa"],
+  vcloud:          ["#0ea5e9", "#38bdf8"],
+  vcloudFiles:     ["#0ea5e9", "#38bdf8"],
+  vcloudImages:    ["#14b8a6", "#2dd4bf"],
+  vcloudVideo:     ["#ef4444", "#f87171"],
+  vcloudSound:     ["#f59e0b", "#fbbf24"],
+  vcloudPersonal:  ["#8b5cf6", "#a78bfa"],
+  functionalMap:   ["#10b981", "#34d399"],
+  designSystem:    ["#ec4899", "#f472b6"],
+  libraries:       ["#6366f1", "#818cf8"],
+  entityFields:    ["#f97316", "#fb923c"],
+  fieldTemplates:  ["#f97316", "#fb923c"],
+  iconLibrary:     ["#eab308", "#facc15"],
+  databases:       ["#f97316", "#fb923c"],
+  grid:            ["#f97316", "#fb923c"],
+  matching:        ["#8b5cf6", "#c084fc"],
+  slides:          ["#ec4899", "#f472b6"],
+  templates:       ["#06b6d4", "#22d3ee"],
+  emailTemplates:  ["#06b6d4", "#22d3ee"],
+  phoneTemplates:  ["#10b981", "#34d399"],
+  prompts:         ["#8b5cf6", "#c084fc"],
+  integrations:    ["#6366f1", "#818cf8"],
+  myConnections:   ["#6366f1", "#818cf8"],
+  appStore:        ["#3b82f6", "#60a5fa"],
+  vault:           ["#64748b", "#94a3b8"],
+  vaultPasswords:  ["#64748b", "#94a3b8"],
+  vaultSecrets:    ["#475569", "#64748b"],
+  control:         ["#64748b", "#94a3b8"],
+  roadmap:         ["#10b981", "#34d399"],
+  plan:            ["#3b82f6", "#60a5fa"],
+  architecture:    ["#64748b", "#94a3b8"],
+  admin:           ["#64748b", "#94a3b8"],
+  audit:           ["#f59e0b", "#fbbf24"],
+  import:          ["#10b981", "#34d399"],
+  bookmarks:       ["#f59e0b", "#fbbf24"],
+  feeds:           ["#f97316", "#fb923c"],
+  readList:        ["#f59e0b", "#fbbf24"],
+  automations:     ["#eab308", "#facc15"],
+  settings:        ["#64748b", "#94a3b8"],
+};
+
+const APPS_VIEW_WIDTH = 64;
+
 const FULL_WIDTH = 240;
 const MOBILE_WIDTH = 280;
 const STRIP_WIDTH = 48;
@@ -110,7 +175,7 @@ const FOLDER_MODE_KEY = "cc-sidebar-folder-mode";
 // ─── Types ──────────────────────────────────────────────
 
 type SidebarFilter = "me" | "team" | "hidden" | "favorites";
-type ViewMode = "list" | "grid" | "compact";
+type ViewMode = "list" | "grid" | "compact" | "apps";
 
 // ─── Grouped Navigation ─────────────────────────────────
 
@@ -238,6 +303,7 @@ export const NAV_GROUPS: NavGroup[] = [
     labelKey: "groupCore",
     items: [
       { href: "/dashboard", key: "dashboard", icon: LayoutDashboard, status: "active" },
+      { href: "/dashboard/app-launcher", key: "appLauncher", icon: LayoutGrid, status: "active" },
       { href: "/dashboard/layers", key: "layers", icon: Activity, status: "active" },
       { href: "/dashboard/editor", key: "editor", icon: FileEdit, status: "active" },
       { href: "/dashboard/story-map", key: "storyMap", icon: Map, status: "active" },
@@ -403,7 +469,7 @@ function loadFilter(): SidebarFilter {
 function loadViewMode(): ViewMode {
   try {
     const v = localStorage.getItem(VIEW_MODE_KEY);
-    if (v === "grid" || v === "compact") return v;
+    if (v === "grid" || v === "compact" || v === "apps") return v;
   } catch {}
   return "list";
 }
@@ -602,9 +668,10 @@ export function Sidebar({
   const isFloat = mode === "float";
   // Hover-reveal: in visible mode with sidebarHoverMode, collapse to strip and expand on hover
   const isHoverReveal = mode === "visible" && sidebarHoverMode && !isMobile;
-  const isCollapsed = isFloat ? !hovered : isHoverReveal ? !hovered : false;
+  const isAppsView = viewMode === "apps";
+  const isCollapsed = isAppsView ? false : isFloat ? !hovered : isHoverReveal ? !hovered : false;
   const onRight = sidebarPosition === "right";
-  const expandedWidth = isMobile ? MOBILE_WIDTH : (customWidth ?? FULL_WIDTH);
+  const expandedWidth = isAppsView ? APPS_VIEW_WIDTH : isMobile ? MOBILE_WIDTH : (customWidth ?? FULL_WIDTH);
 
   // Resize drag state
   const [resizing, setResizing] = useState(false);
@@ -810,6 +877,7 @@ export function Sidebar({
     { id: "list", icon: List, label: sidebarT.viewList },
     { id: "grid", icon: LayoutGrid, label: sidebarT.viewGrid },
     { id: "compact", icon: AlignJustify, label: sidebarT.viewCompact },
+    { id: "apps", icon: CircleDot, label: sidebarT.viewApps || "Apps" },
   ];
 
   return (
@@ -846,7 +914,7 @@ export function Sidebar({
         )}
 
         {/* Workspace Switcher — replaces old user menu */}
-        {user && (
+        {user && !isAppsView && (
           <WorkspaceSwitcher
             user={user}
             isCollapsed={isCollapsed}
@@ -856,8 +924,8 @@ export function Sidebar({
           />
         )}
 
-        {/* Filter tabs + View mode (hidden when collapsed) */}
-        {!isCollapsed && (
+        {/* Filter tabs + View mode (hidden when collapsed or apps view) */}
+        {!isCollapsed && !isAppsView && (
           <div className="shrink-0 border-b border-slate-700/50 px-2 pt-2 pb-1.5 space-y-1.5">
             {/* Filter tabs */}
             <div data-cc-id="sidebar.filter-tabs" className="flex gap-0.5 rounded-lg bg-slate-800/50 p-0.5">
@@ -973,8 +1041,182 @@ export function Sidebar({
           </div>
         )}
 
+        {/* Apps-only view — gradient icon strip */}
+        {isAppsView && (() => {
+          // Build filtered items using the same filter logic as main nav
+          const appsFilteredItems = NAV_GROUPS.flatMap((group) =>
+            group.items.flatMap((entry): NavItem[] => {
+              if (isFolder(entry)) {
+                return [
+                  { href: entry.href, key: entry.key, icon: entry.icon, status: entry.status },
+                  ...entry.children,
+                ];
+              }
+              return [entry];
+            })
+          )
+            // Apply filter
+            .filter((item) => {
+              if (filter === "hidden") return customization.hiddenItems.includes(item.key);
+              if (filter === "favorites") return favHrefs.has(item.href);
+              // "me" and "team" show non-hidden
+              return !customization.hiddenItems.includes(item.key);
+            })
+            // Deduplicate by href
+            .filter((item, idx, arr) => arr.findIndex((a) => a.href === item.href) === idx);
+
+          return (
+          <nav className="flex flex-1 flex-col overflow-hidden">
+            {/* Top controls — compact filter + view toggle */}
+            <div className="shrink-0 px-1.5 pt-2 pb-1 space-y-1.5">
+              {/* Filter icons row */}
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-0.5 rounded-lg bg-slate-800/50 p-0.5">
+                  {filterTabs.map((tab) => {
+                    const filterIcons: Record<SidebarFilter, React.ElementType> = {
+                      me: UserIcon,
+                      team: Users,
+                      hidden: EyeOff,
+                      favorites: Star,
+                    };
+                    const FilterIcon = filterIcons[tab.id];
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => handleFilterChange(tab.id)}
+                        title={tab.label}
+                        className={`rounded-md p-1.5 transition-colors ${
+                          filter === tab.id
+                            ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
+                            : "text-slate-600 hover:text-slate-400"
+                        }`}
+                      >
+                        <FilterIcon className="h-3 w-3" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* View mode toggle */}
+              <div className="flex items-center justify-center gap-0.5">
+                {viewModes.map(({ id, icon: ModeIcon, label }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => handleViewModeChange(id)}
+                    title={label}
+                    className={`rounded p-1 transition-colors ${
+                      viewMode === id
+                        ? "text-[var(--cc-accent-300)] bg-[var(--cc-accent-600-20)]"
+                        : "text-slate-600 hover:text-slate-400"
+                    }`}
+                  >
+                    <ModeIcon className="h-3 w-3" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Accent divider */}
+            <div className="mx-2 divider-accent" />
+
+            {/* App icons grid */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-1.5 py-2 scrollbar-none">
+              <div className="flex flex-col items-center gap-2">
+                {appsFilteredItems.length === 0 ? (
+                  <div className="py-6 text-center">
+                    <EyeOff className="h-4 w-4 mx-auto text-slate-700 mb-1" />
+                    <span className="text-[9px] text-slate-700">{filter === "favorites" ? "★" : "—"}</span>
+                  </div>
+                ) : (
+                  appsFilteredItems.map((item) => {
+                    const isActive = item.href === "/dashboard"
+                      ? pathname === "/dashboard"
+                      : pathname === item.href || pathname.startsWith(item.href + "/");
+                    const gradient = APP_GRADIENTS[item.key] || ["#475569", "#64748b"];
+                    const [from, to] = gradient;
+                    const itemLabel = resolveLabel(item.key, tabsT[item.key] || item.key);
+                    const ItemIcon = resolveIcon(item.key, item.icon);
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => { trackUsage(item.key); if (shouldCloseOnNav) onClose?.(); }}
+                        className={`group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] transition-all duration-200 ${
+                          isActive
+                            ? "scale-110"
+                            : "hover:scale-108 opacity-75 hover:opacity-100"
+                        } ${item.status === "coming-soon" ? "opacity-30 grayscale" : ""}`}
+                        style={{
+                          background: `linear-gradient(135deg, ${from}, ${to})`,
+                          boxShadow: isActive
+                            ? `0 6px 16px ${from}50, 0 0 0 2px rgba(255,255,255,0.15), inset 0 1px 0 rgba(255,255,255,0.2)`
+                            : `0 2px 8px ${from}20`,
+                        }}
+                      >
+                        {/* Gloss overlay */}
+                        <div
+                          className="pointer-events-none absolute inset-0 rounded-[14px]"
+                          style={{ background: "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 45%)" }}
+                        />
+                        <ItemIcon className="relative z-10 h-5 w-5 text-white drop-shadow-sm" />
+                        {/* Active indicator — bottom dot */}
+                        {isActive && (
+                          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-1 w-4 rounded-full"
+                            style={{ background: `linear-gradient(90deg, ${from}, ${to})`, boxShadow: `0 0 6px ${from}60` }}
+                          />
+                        )}
+                        {/* Tooltip */}
+                        <span
+                          className={`absolute ${
+                            onRight ? "right-full mr-3" : "left-full ml-3"
+                          } rounded-lg px-2.5 py-1.5 text-xs font-medium text-white opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none whitespace-nowrap z-50 shadow-xl`}
+                          style={{
+                            background: `linear-gradient(135deg, ${from}ee, ${to}ee)`,
+                            backdropFilter: "blur(8px)",
+                          }}
+                        >
+                          {itemLabel}
+                        </span>
+                      </Link>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Settings shortcut at bottom */}
+            <div className="shrink-0 px-1.5 pb-2 pt-1">
+              <div className="mx-1 mb-1.5 divider-accent" />
+              <div className="flex items-center justify-center">
+                <Link
+                  href="/dashboard/settings"
+                  className={`group relative rounded-lg p-2 transition-colors ${
+                    pathname === "/dashboard/settings"
+                      ? "text-[var(--cc-accent-300)] bg-[var(--cc-accent-600-20)]"
+                      : "text-slate-600 hover:text-slate-400 hover:bg-slate-800/50"
+                  }`}
+                >
+                  <SettingsIcon className="h-4 w-4" />
+                  <span
+                    className={`absolute ${
+                      onRight ? "right-full mr-2" : "left-full ml-2"
+                    } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
+                  >
+                    {tabsT.settings || "Settings"}
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </nav>
+          );
+        })()}
+
         {/* Nav with grouped items */}
-        <nav
+        {!isAppsView && <nav
           ref={navRef}
           data-cc-id="sidebar.nav"
           className="relative min-h-0 flex-1 overflow-y-auto p-2"
@@ -1153,8 +1395,14 @@ export function Sidebar({
                     const flatItems: NavItem[] = isFolder(entry)
                       ? [{ href: entry.href, key: entry.key, icon: entry.icon, status: entry.status }, ...entry.children]
                       : [entry];
+                    // Deduplicate by href (folder parent can share href with first child)
+                    const seen = new Set<string>();
                     return flatItems
-                      .filter(({ key: k }) => !customization.hiddenItems.includes(k) || editMode)
+                      .filter(({ href: h, key: k }) => {
+                        if (seen.has(h)) return false;
+                        seen.add(h);
+                        return !customization.hiddenItems.includes(k) || editMode;
+                      })
                       .map(({ href, key: itemKey, icon: DefaultIcon }) => {
                       const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
                       const rawLabel = (t.tabs as Record<string, string>)[itemKey];
@@ -1634,7 +1882,7 @@ export function Sidebar({
 
          </SortableContext>
          </DndContext>
-        </nav>
+        </nav>}
 
         {/* Context menu */}
         {ctxMenu && (
@@ -1671,7 +1919,7 @@ export function Sidebar({
         )}
 
         {/* Footer — Downloads + Social */}
-        {!isCollapsed && (
+        {!isCollapsed && !isAppsView && (
           <footer ref={socialMenuRef} data-cc-id="sidebar.footer" className="relative shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
             <button
               type="button"
@@ -1753,7 +2001,7 @@ export function Sidebar({
       </div>
 
       {/* Resize handle */}
-      {!isMobile && !isCollapsed && (
+      {!isMobile && !isCollapsed && !isAppsView && (
         <div
           className={`absolute top-0 bottom-0 w-1 cursor-col-resize transition-colors hover:bg-[var(--cc-accent-500)]/30 active:bg-[var(--cc-accent-500)]/50 ${
             onRight ? "left-0" : "right-0"

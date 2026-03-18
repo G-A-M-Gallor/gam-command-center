@@ -83,7 +83,10 @@ export function useShellPrefs(): [
       setPrefsState((prev) => {
         const next = { ...prev, [key]: value };
         save(next);
-        window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
+        // Dispatch outside the updater to avoid setState-during-render
+        queueMicrotask(() => {
+          window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: next }));
+        });
         return next;
       });
     },

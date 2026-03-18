@@ -497,7 +497,7 @@ export async function createSubmissionFromTemplate(
 
 export async function createBlankSubmission(
   name: string,
-  workspaceId = 'default',
+  workspaceId = '00000000-0000-0000-0000-000000000000',
 ): Promise<DocumentSubmission | null> {
   const token = crypto.randomUUID();
   const submission: Omit<DocumentSubmission, 'id' | 'created_at' | 'updated_at'> = {

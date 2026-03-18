@@ -5,6 +5,7 @@ export const translations = {
     appName: "מרכז הפיקוד GAM",
     tabs: {
       dashboard: "דשבורד",
+      appLauncher: "כל האפליקציות",
       layers: "האב",
       editor: "עורך",
       storyMap: "Story Map",
@@ -68,6 +69,10 @@ export const translations = {
       dashboard: {
         title: "דשבורד",
         description: "מבט כללי על פרויקטים, מסמכים ופעילות אחרונה",
+      },
+      appLauncher: {
+        title: "כל האפליקציות",
+        description: "מסך בית — כל האפליקציות, הווידג׳טים והכלים במקום אחד",
       },
       layers: {
         title: "האב",
@@ -3087,6 +3092,7 @@ export const translations = {
     appName: "GAM Command Center",
     tabs: {
       dashboard: "Dashboard",
+      appLauncher: "All Apps",
       layers: "Hub",
       editor: "Editor",
       storyMap: "Story Map",
@@ -3150,6 +3156,10 @@ export const translations = {
       dashboard: {
         title: "Dashboard",
         description: "Overview of projects, documents and recent activity",
+      },
+      appLauncher: {
+        title: "All Apps",
+        description: "Home screen — all apps, widgets and tools in one place",
       },
       layers: {
         title: "Hub",
@@ -6155,6 +6165,7 @@ export const translations = {
     appName: "Командный центр GAM",
     tabs: {
       dashboard: "Дашборд",
+      appLauncher: "Все приложения",
       layers: "Хаб",
       editor: "Редактор",
       storyMap: "Карта историй",
@@ -6218,6 +6229,10 @@ export const translations = {
       dashboard: {
         title: "Дашборд",
         description: "Обзор проектов, документов и последней активности",
+      },
+      appLauncher: {
+        title: "Все приложения",
+        description: "Главный экран — все приложения, виджеты и инструменты в одном месте",
       },
       layers: {
         title: "Хаб",

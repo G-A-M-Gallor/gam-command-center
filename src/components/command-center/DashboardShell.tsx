@@ -21,6 +21,7 @@ import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 import { GibberishDetector } from "./GibberishDetector";
 import { SpeedDial } from "./SpeedDial";
 import { AppDock } from "./AppDock";
+import { BottomDock } from "./BottomDock";
 import { TabBar } from "./TabBar";
 import { DownloadReminderPopup } from "./DownloadReminder";
 import dynamic from "next/dynamic";
@@ -291,8 +292,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Gibberish auto-detection */}
       <GibberishDetector />
 
-      {/* FAB Speed Dial — desktop only */}
-      {!isMobile && shellPrefs.speedDialVisible && <SpeedDial />}
+      {/* macOS-style Bottom Dock — desktop only (replaces SpeedDial when active) */}
+      {!isMobile && <BottomDock />}
+
+      {/* Legacy FAB Speed Dial — only shown if dock is explicitly disabled */}
+      {/* {!isMobile && shellPrefs.speedDialVisible && <SpeedDial />} */}
 
       {/* Communication timeline panel — lazy loaded */}
       <CommunicationPanel />

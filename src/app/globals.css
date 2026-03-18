@@ -273,6 +273,51 @@ body {
   --theme-shadow-sm:     0 1px 3px rgba(0,0,0,0.35);
   --theme-shadow-md:     0 2px 8px rgba(0,0,0,0.45);
 
+  /* ── Elevation System — 5 depth layers ──────────────────
+     Each level gets progressively brighter, more shadow,
+     and optional blur. Used by Card component & shell. */
+
+  /* Level 0 — Canvas: the deepest background */
+  --elevation-0-bg:      var(--theme-bg);
+  --elevation-0-border:  transparent;
+  --elevation-0-shadow:  none;
+
+  /* Level 1 — Surface: content cards, panels */
+  --elevation-1-bg:      rgba(30, 41, 59, 0.40);
+  --elevation-1-border:  rgba(255, 255, 255, 0.06);
+  --elevation-1-shadow:  0 1px 3px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.18);
+
+  /* Level 2 — Raised: sidebar, top bar, active panels */
+  --elevation-2-bg:      rgba(30, 41, 59, 0.65);
+  --elevation-2-border:  rgba(255, 255, 255, 0.08);
+  --elevation-2-shadow:  0 4px 12px rgba(0, 0, 0, 0.30), 0 1px 4px rgba(0, 0, 0, 0.20);
+  --elevation-2-blur:    12px;
+
+  /* Level 3 — Floating: dock, popovers, drawers */
+  --elevation-3-bg:      rgba(15, 23, 42, 0.80);
+  --elevation-3-border:  rgba(255, 255, 255, 0.10);
+  --elevation-3-shadow:  0 8px 32px rgba(0, 0, 0, 0.40), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --elevation-3-blur:    40px;
+
+  /* Level 4 — Overlay: modals, command palette, dropdowns */
+  --elevation-4-bg:      rgba(15, 23, 42, 0.92);
+  --elevation-4-border:  rgba(255, 255, 255, 0.12);
+  --elevation-4-shadow:  0 16px 48px rgba(0, 0, 0, 0.50), 0 4px 16px rgba(0, 0, 0, 0.30);
+  --elevation-4-blur:    48px;
+
+  /* ── Artistic accent glow tokens ──
+     Subtle colored light bleed from accent color */
+  --glow-accent-sm:  0 0 8px var(--cc-accent-500-15);
+  --glow-accent-md:  0 0 20px var(--cc-accent-500-15), 0 0 6px var(--cc-accent-500-30);
+  --glow-accent-lg:  0 0 40px var(--cc-accent-500-15), 0 0 12px var(--cc-accent-500-30);
+
+  /* ── Inset light — top edge highlight for depth illusion ── */
+  --inset-highlight:     inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --inset-highlight-strong: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* ── Noise texture overlay (opt-in via .surface-grain) ── */
+  --grain-opacity: 0.018;
+
   /* ── Navigation defaults (follow theme unless overridden) ── */
   --nav-bg: var(--theme-surface);
   --nav-border: var(--theme-border-high);
@@ -649,4 +694,188 @@ body {
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.1),
     0 12px 36px rgba(0, 0, 0, 0.18);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ELEVATION UTILITY CLASSES
+   Apply depth via .elevation-{0-4}
+   ═══════════════════════════════════════════════════════════════ */
+
+.elevation-0 {
+  background: var(--elevation-0-bg);
+  border-color: var(--elevation-0-border);
+  box-shadow: var(--elevation-0-shadow);
+}
+
+.elevation-1 {
+  background: var(--elevation-1-bg);
+  border: 1px solid var(--elevation-1-border);
+  box-shadow: var(--elevation-1-shadow), var(--inset-highlight);
+}
+
+.elevation-2 {
+  background: var(--elevation-2-bg);
+  border: 1px solid var(--elevation-2-border);
+  box-shadow: var(--elevation-2-shadow), var(--inset-highlight);
+  backdrop-filter: blur(var(--elevation-2-blur));
+  -webkit-backdrop-filter: blur(var(--elevation-2-blur));
+}
+
+.elevation-3 {
+  background: var(--elevation-3-bg);
+  border: 1px solid var(--elevation-3-border);
+  box-shadow: var(--elevation-3-shadow), var(--inset-highlight-strong);
+  backdrop-filter: blur(var(--elevation-3-blur)) saturate(1.6);
+  -webkit-backdrop-filter: blur(var(--elevation-3-blur)) saturate(1.6);
+}
+
+.elevation-4 {
+  background: var(--elevation-4-bg);
+  border: 1px solid var(--elevation-4-border);
+  box-shadow: var(--elevation-4-shadow), var(--inset-highlight-strong);
+  backdrop-filter: blur(var(--elevation-4-blur)) saturate(1.8);
+  -webkit-backdrop-filter: blur(var(--elevation-4-blur)) saturate(1.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ARTISTIC EFFECTS — opt-in classes for visual polish
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Accent glow — subtle colored light bleed ── */
+
+.glow-accent-sm { box-shadow: var(--glow-accent-sm); }
+.glow-accent-md { box-shadow: var(--glow-accent-md); }
+.glow-accent-lg { box-shadow: var(--glow-accent-lg); }
+
+/* Combine glow with elevation */
+.elevation-1.glow-accent-sm { box-shadow: var(--elevation-1-shadow), var(--inset-highlight), var(--glow-accent-sm); }
+.elevation-2.glow-accent-md { box-shadow: var(--elevation-2-shadow), var(--inset-highlight), var(--glow-accent-md); }
+
+/* ── Surface grain — subtle noise texture for depth ── */
+
+.surface-grain {
+  position: relative;
+}
+
+.surface-grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+/* ── Top-edge accent line — signature light strip ── */
+
+.accent-edge {
+  position: relative;
+  overflow: hidden;
+}
+
+.accent-edge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--cc-accent-500-30) 30%,
+    var(--cc-accent-400, var(--cc-accent-500)) 50%,
+    var(--cc-accent-500-30) 70%,
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.accent-edge:hover::before {
+  opacity: 0.7;
+}
+
+/* Always-visible accent edge (for nav elements) */
+.accent-edge-visible::before {
+  opacity: 0.35;
+}
+
+.accent-edge-visible:hover::before {
+  opacity: 0.6;
+}
+
+/* ── Bottom edge glow — for floating elements ── */
+
+.glow-bottom {
+  position: relative;
+}
+
+.glow-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--cc-accent-500-30),
+    transparent
+  );
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── Inner light — soft radial glow inside cards ── */
+
+.inner-glow {
+  position: relative;
+}
+
+.inner-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Interactive lift — hover rises element ── */
+
+.hover-lift {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/* ── Subtle divider with accent gradient ── */
+
+.divider-accent {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--cc-accent-500-15) 20%,
+    var(--cc-accent-500-30) 50%,
+    var(--cc-accent-500-15) 80%,
+    transparent
+  );
 }
