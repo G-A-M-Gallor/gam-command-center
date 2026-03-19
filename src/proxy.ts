@@ -20,6 +20,19 @@ export async function proxy(request: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // Skip auth check for public-only routes
+  if (
+    pathname.startsWith("/landing") ||
+    pathname.startsWith("/designs") ||
+    pathname.startsWith("/sign/") ||
+    pathname.startsWith("/verify/") ||
+    pathname.startsWith("/watch/") ||
+    pathname.startsWith("/shared/") ||
+    pathname.startsWith("/api/")
+  ) {
+    return NextResponse.next();
+  }
+
   return await updateSession(request);
 }
 

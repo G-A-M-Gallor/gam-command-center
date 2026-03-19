@@ -100,16 +100,19 @@ export default function DashboardPage() {
         ? Math.round(active.reduce((s, p) => s + (p.health_score || 0), 0) / active.length)
         : 0;
 
-      // Get entity type counts
-      const entityTypesWithCounts: EntityTypeWithCount[] = await Promise.all(
-        entityTypesData.map(async (et) => {
-          const { count } = await supabase.from("vb_records")
-            .select("id", { count: "exact", head: true })
-            .eq("entity_type", et.slug)
-            .eq("is_deleted", false);
-          return { ...et, noteCount: count ?? 0 };
-        }),
-      );
+      // Get entity type counts — single query instead of N+1
+      const { data: countRows } = await supabase.from("vb_records")
+        .select("entity_type")
+        .eq("is_deleted", false)
+        .not("entity_type", "is", null);
+      const countMap: Record<string, number> = {};
+      for (const row of countRows ?? []) {
+        countMap[row.entity_type] = (countMap[row.entity_type] || 0) + 1;
+      }
+      const entityTypesWithCounts: EntityTypeWithCount[] = entityTypesData.map((et) => ({
+        ...et,
+        noteCount: countMap[et.slug] ?? 0,
+      }));
 
       const docPipeline = (docPipelineRes.data ?? []) as DocPipelineItem[];
       const sevenDaysFromNow = Date.now() + 7 * 24 * 60 * 60 * 1000;

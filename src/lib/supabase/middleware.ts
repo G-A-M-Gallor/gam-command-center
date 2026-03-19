@@ -25,10 +25,18 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Use getUser() — server-verified, not just JWT parse
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Use getUser() with timeout — if Supabase is slow, pass through and let client handle auth
+  let user: import("@supabase/supabase-js").User | null = null;
+  try {
+    const result = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000)),
+    ]);
+    user = result.data.user;
+  } catch {
+    // Supabase unreachable or slow — don't block navigation, let the page handle auth client-side
+    return NextResponse.next();
+  }
 
   const { pathname } = request.nextUrl;
 
