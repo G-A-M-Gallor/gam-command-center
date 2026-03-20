@@ -2847,6 +2847,7 @@ export const translations = {
         comingSoon: "בקרוב",
         linkedEntities: "ישויות מקושרות",
         noLinked: "אין ישויות מקושרות",
+        whiteboard: "vCanvas",
       },
       csvImport: {
         importCsv: "ייבוא CSV",
@@ -5927,6 +5928,7 @@ export const translations = {
         comingSoon: "Coming soon",
         linkedEntities: "Linked entities",
         noLinked: "No linked entities",
+        whiteboard: "vCanvas",
       },
       csvImport: {
         importCsv: "Import CSV",
@@ -8993,6 +8995,7 @@ export const translations = {
         comingSoon: "Скоро",
         linkedEntities: "Связанные сущности",
         noLinked: "Нет связанных сущностей",
+        whiteboard: "vCanvas",
       },
       csvImport: {
         importCsv: "Импорт CSV",

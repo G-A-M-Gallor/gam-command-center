@@ -5,8 +5,9 @@ import {
   Maximize2, Minimize2, Network, Frame, History,
   Star, ExternalLink, Loader2, GripVertical,
   Plus, X, ChevronDown, FolderOpen, FileText,
-  Layers, Puzzle, StickyNote,
+  Layers, Puzzle, StickyNote, PenTool,
 } from 'lucide-react';
+import { ExcalidrawCanvas } from './ExcalidrawCanvas';
 import { useRouter } from 'next/navigation';
 import {
   DndContext,
@@ -51,7 +52,7 @@ interface HistoryEntry {
   bookmarked: boolean;
 }
 
-type ViewMode = 'frame' | 'graph' | 'history';
+type ViewMode = 'frame' | 'graph' | 'history' | 'whiteboard';
 
 interface Props {
   noteId: string;
@@ -412,6 +413,7 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
 
   const modeButtons: { key: ViewMode; icon: React.ElementType; label: string }[] = [
     { key: 'frame', icon: Frame, label: l.frame },
+    { key: 'whiteboard', icon: PenTool, label: l.whiteboard },
     { key: 'graph', icon: Network, label: l.linkGraph },
     { key: 'history', icon: History, label: l.navLog },
   ];
@@ -578,6 +580,15 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
             </div>
           )}
         </div>
+      )}
+
+      {/* ─── Whiteboard View (Excalidraw) ─── */}
+      {mode === 'whiteboard' && (
+        <ExcalidrawCanvas
+          noteId={noteId}
+          language={lang}
+          height={expanded ? 'h-[600px]' : 'h-[320px]'}
+        />
       )}
 
       {/* ─── History View ─── */}
