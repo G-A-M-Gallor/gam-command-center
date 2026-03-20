@@ -7,7 +7,11 @@ import {
   Plus, X, ChevronDown, FolderOpen, FileText,
   Layers, Puzzle, StickyNote, PenTool,
 } from 'lucide-react';
-import { TldrawCanvas } from '@/components/vcanvas/TldrawCanvas';
+import dynamic from 'next/dynamic';
+const VCanvas = dynamic(
+  () => import('@/components/vcanvas/VCanvas').then(m => ({ default: m.VCanvas })),
+  { ssr: false, loading: () => <div className="h-[320px] animate-pulse rounded-lg bg-white/[0.03]" /> }
+);
 import { useRouter } from 'next/navigation';
 import {
   DndContext,
@@ -582,11 +586,12 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
         </div>
       )}
 
-      {/* ─── Whiteboard View (tldraw) ─── */}
+      {/* ─── Whiteboard View (Excalidraw) ─── */}
       {mode === 'whiteboard' && (
-        <TldrawCanvas
+        <VCanvas
           persistenceKey={`entity_${noteId}`}
           context="entity"
+          language={lang as 'he' | 'en' | 'ru'}
           className={expanded ? 'h-[600px]' : 'h-[320px]'}
         />
       )}

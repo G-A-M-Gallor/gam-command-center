@@ -1,6 +1,6 @@
 // ===================================================
 // vCanvas — Shared Feature Configuration
-// Controls which tldraw features are enabled per context
+// Controls which canvas features are enabled per context
 // ===================================================
 
 export type CanvasContext = "standalone" | "entity";

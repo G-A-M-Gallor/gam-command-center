@@ -241,11 +241,11 @@ export const routes: RouteEntry[] = [
   {
     id: 'vcanvas', path: '/dashboard/vcanvas', name: 'vCanvas', nameHe: 'vCanvas', icon: Pencil,
     phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-20',
-    descriptionHe: 'לוח ציור חופשי מבוסס tldraw — סקיצות, דיאגרמות ורעיונות ויזואליים. מנהל לוחות עצמאי + שיתוף הגדרות עם Canvas ישויות',
-    descriptionEn: 'Freehand whiteboard powered by tldraw — sketches, diagrams and visual ideas. Standalone canvas manager + shared settings with Entity Canvas',
+    descriptionHe: 'לוח ציור חופשי מבוסס Excalidraw — סקיצות, דיאגרמות ורעיונות ויזואליים. מנהל לוחות עצמאי + שיתוף הגדרות עם Canvas ישויות',
+    descriptionEn: 'Freehand whiteboard powered by Excalidraw — sketches, diagrams and visual ideas. Standalone canvas manager + shared settings with Entity Canvas',
     components: [
       { id: 'vcanvas-page', name: 'VCanvasPage', file: 'app/dashboard/vcanvas/page.tsx', status: 'active' },
-      { id: 'tldraw-canvas', name: 'TldrawCanvas', file: 'components/vcanvas/TldrawCanvas.tsx', status: 'active' },
+      { id: 'vcanvas-component', name: 'VCanvas', file: 'components/vcanvas/VCanvas.tsx', status: 'active' },
       { id: 'canvas-config', name: 'canvasConfig', file: 'lib/vcanvas/canvasConfig.ts', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,

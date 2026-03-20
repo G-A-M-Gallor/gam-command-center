@@ -5,7 +5,7 @@ import { Plus, Trash2, Pencil, Check, X, Clock, Settings2, RotateCcw } from "luc
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
-import { TldrawCanvas } from "@/components/vcanvas/TldrawCanvas";
+import { VCanvas } from "@/components/vcanvas/VCanvas";
 import {
   loadFeatures,
   saveFeatures,
@@ -41,7 +41,7 @@ function saveCanvasList(list: CanvasEntry[]) {
 }
 
 function deleteCanvasStorage(id: string) {
-  // tldraw uses its own persistence key format — clear via prefix
+  // Clear all localStorage entries for this canvas
   try {
     const keys = Object.keys(localStorage);
     for (const key of keys) {
@@ -305,7 +305,7 @@ export default function VCanvasPage() {
 
         {/* Canvas */}
         <div className="flex-1 min-h-0">
-          <TldrawCanvas persistenceKey={activeId} context="standalone" className="h-full" />
+          <VCanvas persistenceKey={activeId} context="standalone" language={language} className="h-full" />
         </div>
 
         {showSettings && (
