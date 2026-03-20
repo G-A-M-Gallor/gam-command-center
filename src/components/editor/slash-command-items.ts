@@ -280,11 +280,11 @@ export const slashCommandCategories: SlashCommandCategory[] = [
         },
       },
       {
-        title: 'Checkbox Field',
-        titleHe: "צ'קבוקס",
-        description: 'תיבת סימון כן/לא',
-        icon: '☑️',
-        aliases: ['checkbox', 'check', "צ'קבוקס", 'סימון'],
+        title: 'Checkbox Form Field',
+        titleHe: "שדה צ'קבוקס",
+        description: 'שדה טופס — תיבת סימון כן/לא',
+        icon: '✓',
+        aliases: ['checkbox field', 'form checkbox', "שדה צ'קבוקס", 'סימון שדה'],
         command: ({ editor, range }) => {
           editor.chain().focus().deleteRange(range).run();
           window.dispatchEvent(new CustomEvent('cc-insert-field', { detail: { fieldType: 'checkbox' } }));
