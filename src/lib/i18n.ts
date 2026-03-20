@@ -58,6 +58,7 @@ export const translations = {
       comms: "תקשורת",
       documents: "מסמכים",
       vclip: "vClip",
+      vcanvas: "vCanvas",
       weeklyPlanner: "סדר שבועי",
       audit: "יומן ביקורת",
       templates: "תבניות",
@@ -185,6 +186,10 @@ export const translations = {
       emailTemplates: {
         title: "עיצוב תבניות מייל",
         description: "עורך תבניות מייל — עריכה, משתנים דינמיים ותצוגה מקדימה",
+      },
+      vcanvas: {
+        title: "vCanvas",
+        description: "לוח ציור חופשי — סקיצות, דיאגרמות ורעיונות ויזואליים",
       },
     },
     auditLog: {
@@ -3153,6 +3158,7 @@ export const translations = {
       comms: "Communication",
       documents: "Documents",
       vclip: "vClip",
+      vcanvas: "vCanvas",
       weeklyPlanner: "Weekly Planner",
       audit: "Audit Log",
       templates: "Templates",
@@ -3280,6 +3286,10 @@ export const translations = {
       emailTemplates: {
         title: "Email Template Designer",
         description: "Email template editor — edit, dynamic variables, and preview",
+      },
+      vcanvas: {
+        title: "vCanvas",
+        description: "Freehand whiteboard — sketches, diagrams and visual ideas",
       },
     },
     auditLog: {
@@ -6234,6 +6244,7 @@ export const translations = {
       comms: "Коммуникация",
       documents: "Документы",
       vclip: "vClip",
+      vcanvas: "vCanvas",
       weeklyPlanner: "Недельный планировщик",
       audit: "Журнал аудита",
       templates: "Шаблоны",
@@ -6361,6 +6372,10 @@ export const translations = {
       emailTemplates: {
         title: "Дизайнер email шаблонов",
         description: "Редактор шаблонов email — редактирование, динамические переменные и предпросмотр",
+      },
+      vcanvas: {
+        title: "vCanvas",
+        description: "Свободная доска — скетчи, диаграммы и визуальные идеи",
       },
     },
     auditLog: {

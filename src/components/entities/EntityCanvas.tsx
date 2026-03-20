@@ -7,7 +7,7 @@ import {
   Plus, X, ChevronDown, FolderOpen, FileText,
   Layers, Puzzle, StickyNote, PenTool,
 } from 'lucide-react';
-import { ExcalidrawCanvas } from './ExcalidrawCanvas';
+import { TldrawCanvas } from '@/components/vcanvas/TldrawCanvas';
 import { useRouter } from 'next/navigation';
 import {
   DndContext,
@@ -582,12 +582,12 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
         </div>
       )}
 
-      {/* ─── Whiteboard View (Excalidraw) ─── */}
+      {/* ─── Whiteboard View (tldraw) ─── */}
       {mode === 'whiteboard' && (
-        <ExcalidrawCanvas
-          noteId={noteId}
-          language={lang}
-          height={expanded ? 'h-[600px]' : 'h-[320px]'}
+        <TldrawCanvas
+          persistenceKey={`entity_${noteId}`}
+          context="entity"
+          className={expanded ? 'h-[600px]' : 'h-[320px]'}
         />
       )}
 

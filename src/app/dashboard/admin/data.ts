@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2, Mail, Gauge, Film, CalendarDays,
+  Loader2, Mail, Gauge, Film, CalendarDays, Pencil,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -237,6 +237,19 @@ export const routes: RouteEntry[] = [
     ],
     contexts: ['SettingsContext'], supabaseTables: ['vclips', 'vclip_views'], visible: true, sidebarTab: true,
     connectedTo: ['vcloud'],
+  },
+  {
+    id: 'vcanvas', path: '/dashboard/vcanvas', name: 'vCanvas', nameHe: 'vCanvas', icon: Pencil,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-20',
+    descriptionHe: 'לוח ציור חופשי מבוסס tldraw — סקיצות, דיאגרמות ורעיונות ויזואליים. מנהל לוחות עצמאי + שיתוף הגדרות עם Canvas ישויות',
+    descriptionEn: 'Freehand whiteboard powered by tldraw — sketches, diagrams and visual ideas. Standalone canvas manager + shared settings with Entity Canvas',
+    components: [
+      { id: 'vcanvas-page', name: 'VCanvasPage', file: 'app/dashboard/vcanvas/page.tsx', status: 'active' },
+      { id: 'tldraw-canvas', name: 'TldrawCanvas', file: 'components/vcanvas/TldrawCanvas.tsx', status: 'active' },
+      { id: 'canvas-config', name: 'canvasConfig', file: 'lib/vcanvas/canvasConfig.ts', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+    connectedTo: ['entities'],
   },
   {
     id: 'app-launcher', path: '/dashboard/app-launcher', name: 'App Launcher', nameHe: 'כל האפליקציות', icon: CalendarDays,

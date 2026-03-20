@@ -14,11 +14,13 @@ const GROUP_TO_CATEGORY: Record<string, LauncherCategory> = {
   system: "system",
 };
 
-// Map icon component displayName/name to string for serialization
+import { Circle } from "lucide-react";
+
+// Resolve icon component — pass through if valid, fallback to Circle
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getIconName(icon: any): string {
-  if (!icon) return "Circle";
-  return icon.displayName || icon.name || icon?.render?.displayName || icon?.render?.name || "Circle";
+function getIcon(icon: any): React.ComponentType<{ className?: string }> {
+  if (!icon) return Circle;
+  return icon;
 }
 
 export function buildCatalog(): LauncherItem[] {
@@ -40,7 +42,7 @@ export function buildCatalog(): LauncherItem[] {
               id: `page:${child.key}`,
               type: "page",
               href: child.href,
-              iconName: getIconName(child.icon),
+              icon: getIcon(child.icon),
               label: { he: child.key, en: child.key, ru: child.key }, // resolved at render via i18n
               description: undefined,
               status: child.status || "active",
@@ -56,7 +58,7 @@ export function buildCatalog(): LauncherItem[] {
             id: `page:${item.key}`,
             type: "page",
             href: item.href,
-            iconName: getIconName(item.icon),
+            icon: getIcon(item.icon),
             label: { he: item.key, en: item.key, ru: item.key },
             description: undefined,
             status: item.status || "active",
@@ -71,7 +73,7 @@ export function buildCatalog(): LauncherItem[] {
           id: `page:${item.key}`,
           type: "page",
           href: item.href,
-          iconName: getIconName(item.icon),
+          icon: getIcon(item.icon),
           label: { he: item.key, en: item.key, ru: item.key },
           description: undefined,
           status: item.status || "active",
@@ -91,7 +93,7 @@ export function buildCatalog(): LauncherItem[] {
     items.push({
       id: `widget:${widget.id}`,
       type: "widget",
-      iconName: getIconName(widget.icon),
+      icon: getIcon(widget.icon),
       label: widget.label,
       description: widget.description,
       status: widget.status,

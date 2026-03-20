@@ -1,14 +1,7 @@
 "use client";
 
 import { useDroppable } from "@dnd-kit/core";
-import * as LucideIcons from "lucide-react";
 import type { LauncherFolder, LauncherItem } from "@/lib/app-launcher/types";
-import type { LucideIcon } from "lucide-react";
-
-function resolveIcon(name: string): LucideIcon {
-  const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-  return icons[name] || LucideIcons.Circle;
-}
 
 interface Props {
   folder: LauncherFolder;
@@ -43,7 +36,7 @@ export function AppLauncherFolder({ folder, items, isSelected, isExpanded, onCli
         style={{ borderColor: isExpanded ? folder.color + "40" : undefined }}
       >
         {previewItems.map((item) => {
-          const Icon = resolveIcon(item.iconName);
+          const Icon = item.icon;
           return (
             <div key={item.id} className="flex h-5 w-5 items-center justify-center">
               <Icon className="h-3.5 w-3.5 text-slate-400" />
@@ -87,7 +80,7 @@ export function FolderOverlay({
         <h3 className="mb-4 text-sm font-semibold text-slate-200">{folder.label[language]}</h3>
         <div className="grid grid-cols-3 gap-3">
           {items.map((item) => {
-            const Icon = resolveIcon(item.iconName);
+            const Icon = item.icon;
             return (
               <button
                 key={item.id}

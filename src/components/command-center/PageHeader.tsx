@@ -39,7 +39,8 @@ type PageKey =
   | "weeklyPlanner"
   | "audit"
   | "emailTemplates"
-  | "control";
+  | "control"
+  | "vcanvas";
 
 const pageRoutes: Record<PageKey, string> = {
   dashboard: "/dashboard",
@@ -70,6 +71,7 @@ const pageRoutes: Record<PageKey, string> = {
   audit: "/dashboard/audit",
   emailTemplates: "/dashboard/email-templates",
   control: "/dashboard/control",
+  vcanvas: "/dashboard/vcanvas",
 };
 
 interface PageHeaderProps {

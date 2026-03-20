@@ -11,7 +11,7 @@ export interface LauncherItem {
   id: string;
   type: LauncherItemType;
   href?: string;
-  iconName: string;
+  icon: React.ComponentType<{ className?: string }>;
   label: { he: string; en: string; ru: string };
   description?: { he: string; en: string; ru: string };
   status: "active" | "coming-soon";

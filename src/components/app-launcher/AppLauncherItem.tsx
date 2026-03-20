@@ -2,14 +2,7 @@
 
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import * as LucideIcons from "lucide-react";
 import type { LauncherItem } from "@/lib/app-launcher/types";
-import type { LucideIcon } from "lucide-react";
-
-function resolveIcon(name: string): LucideIcon {
-  const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-  return icons[name] || LucideIcons.Circle;
-}
 
 interface Props {
   item: LauncherItem;
@@ -26,7 +19,7 @@ export function AppLauncherItem({ item, isSelected, onClick, onDoubleClick, lang
     data: { item },
   });
 
-  const Icon = resolveIcon(item.iconName);
+  const Icon = item.icon;
   const label = labelOverride || item.label[language] || item.label.en;
   const isComingSoon = item.status === "coming-soon";
 

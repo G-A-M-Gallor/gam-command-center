@@ -1,15 +1,9 @@
 "use client";
 
-import * as LucideIcons from "lucide-react";
 import { X, ExternalLink, Maximize2, PanelLeft, Layers, CreditCard } from "lucide-react";
 import type { LauncherItem, LaunchMode } from "@/lib/app-launcher/types";
 import { LAUNCH_MODE_LABELS } from "@/lib/app-launcher/constants";
 import type { LucideIcon } from "lucide-react";
-
-function resolveIcon(name: string): LucideIcon {
-  const icons = LucideIcons as unknown as Record<string, LucideIcon>;
-  return icons[name] || LucideIcons.Circle;
-}
 
 const LAUNCH_MODE_ICONS: Record<LaunchMode, LucideIcon> = {
   "full-page": Maximize2,
@@ -39,7 +33,7 @@ export function AppLauncherPreview({
   labelOverride,
   descriptionOverride,
 }: Props) {
-  const Icon = resolveIcon(item.iconName);
+  const Icon = item.icon;
   const label = labelOverride || item.label[language] || item.label.en;
   const description = descriptionOverride || item.description?.[language] || item.description?.en;
   const isComingSoon = item.status === "coming-soon";

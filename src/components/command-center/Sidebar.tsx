@@ -325,6 +325,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/dashboard/comms", key: "comms", icon: MessagesSquare, status: "active" },
       { href: "/dashboard/documents", key: "documents", icon: FileSignature, status: "active" },
       { href: "/dashboard/vclip", key: "vclip", icon: Film, status: "active" },
+      { href: "/dashboard/vcanvas", key: "vcanvas", icon: Pencil, status: "active" },
       { href: "/dashboard/weekly-planner", key: "weeklyPlanner", icon: CalendarDays, status: "active" },
       {
         type: "folder",
