@@ -296,13 +296,31 @@ export default function RoadmapPage() {
   const byPortfolio = useMemo(() => {
     if (!allLayers.loaded) return [];
     const portfolios = allLayers.data.portfolios;
-    return portfolios.map(p => ({
-      portfolio: p,
-      projects: allLayers.data.projects.filter(proj =>
+    return portfolios.map(p => {
+      const projects = allLayers.data.projects.filter(proj =>
         proj.properties["portfolio_url"] === p.url,
-      ),
-      tasks: allLayers.data.tasks,
-    }));
+      );
+      const projectUrls = new Set(projects.map(proj => proj.url));
+      const sprints = allLayers.data.sprints.filter(s =>
+        projectUrls.has(s.properties["project_url"]),
+      );
+      const sprintUrls = new Set(sprints.map(s => s.url));
+      const tasks = allLayers.data.tasks.filter(t =>
+        sprintUrls.has(t.properties["sprint_url"]),
+      );
+      const doneTasks = tasks.filter(t => {
+        const s = t.status.toLowerCase();
+        return s.includes("done") || s.includes("complete") || s.includes("הושלם");
+      });
+      return {
+        portfolio: p,
+        projects,
+        sprints,
+        tasks,
+        doneTasks,
+        progress: tasks.length > 0 ? Math.round((doneTasks.length / tasks.length) * 100) : 0,
+      };
+    });
   }, [allLayers]);
 
   const byStatus = useMemo(() => {
@@ -320,16 +338,40 @@ export default function RoadmapPage() {
     return Object.entries(groups).sort(([a], [b]) => statusPriority(a) - statusPriority(b));
   }, [allLayers, rp.noStatus]);
 
-  const bySprint = useMemo(() => {
-    if (!allLayers.loaded) return [];
+  interface SprintGroup {
+    sprint: RoadmapRecord;
+    tasks: RoadmapRecord[];
+    doneTasks: RoadmapRecord[];
+    progress: number;
+  }
+  interface BySprintData {
+    sprints: SprintGroup[];
+    unassignedTasks: RoadmapRecord[];
+  }
+
+  const bySprint = useMemo((): BySprintData => {
+    if (!allLayers.loaded) return { sprints: [], unassignedTasks: [] };
     const sprints = allLayers.data.sprints;
-    return sprints.map(s => ({
-      sprint: s,
-      tasks: allLayers.data.tasks.filter(task =>
+    const sprintUrls = new Set(sprints.map(s => s.url));
+    const unassignedTasks = allLayers.data.tasks.filter(t =>
+      !t.properties["sprint_url"] || !sprintUrls.has(t.properties["sprint_url"]),
+    );
+    const sprintData = sprints.map(s => {
+      const tasks = allLayers.data.tasks.filter(task =>
         task.properties["sprint_url"] === s.url,
-      ),
-      subtasks: allLayers.data.subtasks,
-    }));
+      );
+      const doneTasks = tasks.filter(t => {
+        const st = t.status.toLowerCase();
+        return st.includes("done") || st.includes("complete") || st.includes("הושלם");
+      });
+      return {
+        sprint: s,
+        tasks,
+        doneTasks,
+        progress: tasks.length > 0 ? Math.round((doneTasks.length / tasks.length) * 100) : 0,
+      };
+    });
+    return { sprints: sprintData, unassignedTasks };
   }, [allLayers]);
 
   // ── Render ────────────────────────────────────────
@@ -502,10 +544,18 @@ export default function RoadmapPage() {
 
           {!isGroupedLoading && !allLayers.error && viewMode === "portfolio" && (
             <div className="space-y-6" data-cc-id="roadmap.byPortfolio">
+              {/* Stats bar */}
+              <div className="flex items-center gap-4 text-xs text-slate-500">
+                <span>{byPortfolio.length} {rp.portfolioCount || "portfolios"}</span>
+                <span className="text-slate-700">|</span>
+                <span>{byPortfolio.reduce((a, b) => a + b.projects.length, 0)} {rp.projectCount || "projects"}</span>
+                <span className="text-slate-700">|</span>
+                <span>{byPortfolio.reduce((a, b) => a + b.tasks.length, 0)} {rp.taskCount || "tasks"}</span>
+              </div>
               {byPortfolio.length === 0 ? (
                 <EmptyState rp={rp} />
               ) : (
-                byPortfolio.map(({ portfolio, projects }) => (
+                byPortfolio.map(({ portfolio, projects, tasks, doneTasks, progress }) => (
                   <GroupSection
                     key={portfolio.id}
                     title={portfolio.title}
@@ -514,6 +564,8 @@ export default function RoadmapPage() {
                     url={portfolio.url}
                     count={projects.length}
                     rp={rp}
+                    meta={`${tasks.length} ${rp.taskCount || "tasks"} · ${doneTasks.length} ${rp.doneLabel || "done"}`}
+                    progress={progress}
                   >
                     <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {projects.map((proj) => (
@@ -528,6 +580,15 @@ export default function RoadmapPage() {
 
           {!isGroupedLoading && !allLayers.error && viewMode === "status" && (
             <div className="space-y-6" data-cc-id="roadmap.byStatus">
+              {/* Stats bar */}
+              <div className="flex items-center gap-4 text-xs text-slate-500">
+                {byStatus.map(([status, items]) => (
+                  <span key={status} className="flex items-center gap-1">
+                    <span className={`inline-block h-2 w-2 rounded-full ${statusColor(status).split(" ")[0]}`} />
+                    {items.length}
+                  </span>
+                ))}
+              </div>
               {byStatus.length === 0 ? (
                 <EmptyState rp={rp} />
               ) : (
@@ -542,7 +603,7 @@ export default function RoadmapPage() {
                   >
                     <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {items.map((item) => (
-                        <MiniCard key={item.id} record={item} color={LAYER_CONFIG[item.layer].color} />
+                        <MiniCard key={item.id} record={item} color={LAYER_CONFIG[item.layer].color} layerLabel={getLayerLabel(item.layer)} />
                       ))}
                     </div>
                   </GroupSection>
@@ -553,26 +614,57 @@ export default function RoadmapPage() {
 
           {!isGroupedLoading && !allLayers.error && viewMode === "sprint" && (
             <div className="space-y-6" data-cc-id="roadmap.bySprint">
-              {bySprint.length === 0 ? (
+              {/* Stats bar */}
+              <div className="flex items-center gap-4 text-xs text-slate-500">
+                <span>{bySprint.sprints.length} {rp.sprintCount || "sprints"}</span>
+                <span className="text-slate-700">|</span>
+                <span>{bySprint.sprints.reduce((a, b) => a + b.tasks.length, 0)} {rp.assignedTasks || "assigned"}</span>
+                {bySprint.unassignedTasks.length > 0 && (
+                  <>
+                    <span className="text-slate-700">|</span>
+                    <span className="text-amber-500">{bySprint.unassignedTasks.length} {rp.unassignedTasks || "unassigned"}</span>
+                  </>
+                )}
+              </div>
+              {bySprint.sprints.length === 0 && bySprint.unassignedTasks.length === 0 ? (
                 <EmptyState rp={rp} />
               ) : (
-                bySprint.map(({ sprint, tasks }) => (
-                  <GroupSection
-                    key={sprint.id}
-                    title={sprint.title}
-                    status={sprint.status}
-                    color={LAYER_CONFIG.sprints.color}
-                    url={sprint.url}
-                    count={tasks.length}
-                    rp={rp}
-                  >
-                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                      {tasks.map((task) => (
-                        <MiniCard key={task.id} record={task} color={LAYER_CONFIG.tasks.color} />
-                      ))}
-                    </div>
-                  </GroupSection>
-                ))
+                <>
+                  {bySprint.sprints.map(({ sprint, tasks, doneTasks, progress }) => (
+                    <GroupSection
+                      key={sprint.id}
+                      title={sprint.title}
+                      status={sprint.status}
+                      color={LAYER_CONFIG.sprints.color}
+                      url={sprint.url}
+                      count={tasks.length}
+                      rp={rp}
+                      meta={`${doneTasks.length}/${tasks.length} ${rp.doneLabel || "done"}`}
+                      progress={progress}
+                    >
+                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {tasks.sort((a, b) => statusPriority(a.status) - statusPriority(b.status)).map((task) => (
+                          <MiniCard key={task.id} record={task} color={LAYER_CONFIG.tasks.color} />
+                        ))}
+                      </div>
+                    </GroupSection>
+                  ))}
+                  {bySprint.unassignedTasks.length > 0 && (
+                    <GroupSection
+                      title={rp.unassignedTasksTitle || "Unassigned Tasks"}
+                      status=""
+                      color="#ef4444"
+                      count={bySprint.unassignedTasks.length}
+                      rp={rp}
+                    >
+                      <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                        {bySprint.unassignedTasks.map((task) => (
+                          <MiniCard key={task.id} record={task} color={LAYER_CONFIG.tasks.color} />
+                        ))}
+                      </div>
+                    </GroupSection>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -664,6 +756,8 @@ function GroupSection({
   url,
   count,
   rp,
+  meta,
+  progress,
   children,
 }: {
   title: string;
@@ -672,6 +766,8 @@ function GroupSection({
   url?: string;
   count: number;
   rp: Record<string, string>;
+  meta?: string;
+  progress?: number;
   children: React.ReactNode;
 }) {
   return (
@@ -688,6 +784,9 @@ function GroupSection({
         <h3 className="text-sm font-medium text-slate-200 flex-1">
           {color ? title : ""}
         </h3>
+        {meta && (
+          <span className="text-[10px] text-slate-500">{meta}</span>
+        )}
         <span className="text-[10px] text-slate-500">
           {count} {rp.taskCount || "items"}
         </span>
@@ -703,6 +802,14 @@ function GroupSection({
           </a>
         )}
       </div>
+      {progress != null && progress > 0 && (
+        <div className="h-1 bg-slate-800">
+          <div
+            className="h-full bg-emerald-500/60 transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
       <div className="p-3">
         {count === 0 ? (
           <p className="text-xs text-slate-600 py-2 text-center">{rp.noItems || "No items"}</p>
@@ -714,7 +821,7 @@ function GroupSection({
   );
 }
 
-function MiniCard({ record, color }: { record: RoadmapRecord; color: string }) {
+function MiniCard({ record, color, layerLabel }: { record: RoadmapRecord; color: string; layerLabel?: string }) {
   return (
     <div
       className="rounded-md border border-white/[0.06] bg-white/[0.02] p-3 hover:bg-white/[0.04] transition-colors"
@@ -733,11 +840,21 @@ function MiniCard({ record, color }: { record: RoadmapRecord; color: string }) {
           </a>
         )}
       </div>
-      {record.status && (
-        <span className={`mt-1.5 inline-block rounded-full px-1.5 py-0.5 text-[9px] font-medium ${statusColor(record.status)}`}>
-          {record.status}
-        </span>
-      )}
+      <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+        {record.status && (
+          <span className={`inline-block rounded-full px-1.5 py-0.5 text-[9px] font-medium ${statusColor(record.status)}`}>
+            {record.status}
+          </span>
+        )}
+        {layerLabel && (
+          <span
+            className="inline-block rounded-full px-1.5 py-0.5 text-[9px] font-medium text-white/50"
+            style={{ backgroundColor: `${color}30` }}
+          >
+            {layerLabel}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
