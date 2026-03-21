@@ -21,6 +21,7 @@ interface Props {
   language: "he" | "en" | "ru";
   labelOverride?: string;
   descriptionOverride?: string;
+  compact?: boolean;
 }
 
 export function AppLauncherPreview({
@@ -32,6 +33,7 @@ export function AppLauncherPreview({
   language,
   labelOverride,
   descriptionOverride,
+  compact = false,
 }: Props) {
   const Icon = item.icon;
   const label = labelOverride || item.label[language] || item.label.en;
@@ -39,7 +41,7 @@ export function AppLauncherPreview({
   const isComingSoon = item.status === "coming-soon";
 
   return (
-    <div className="flex h-full w-80 shrink-0 flex-col border-s border-white/[0.06] bg-slate-900/80 backdrop-blur-lg">
+    <div className={`flex h-full shrink-0 flex-col border-s border-white/[0.06] bg-slate-900/80 backdrop-blur-lg transition-all duration-200 ${compact ? "w-64" : "w-80"}`}>
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
         <h3 className="text-sm font-semibold text-slate-200">
@@ -59,13 +61,13 @@ export function AppLauncherPreview({
         {/* Icon + Title */}
         <div className="flex flex-col items-center text-center">
           <div
-            className={`mb-4 flex h-20 w-20 items-center justify-center rounded-3xl border transition-colors
+            className={`${compact ? "mb-3 h-14 w-14 rounded-2xl" : "mb-4 h-20 w-20 rounded-3xl"} flex items-center justify-center border transition-all
               ${item.type === "widget"
                 ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border-purple-500/20"
                 : "bg-white/[0.06] border-white/[0.08]"
               }`}
           >
-            <Icon className="h-9 w-9 text-slate-200" />
+            <Icon className={`${compact ? "h-6 w-6" : "h-9 w-9"} text-slate-200`} />
           </div>
 
           <h2 className="text-base font-bold text-slate-100">{label}</h2>
@@ -98,8 +100,8 @@ export function AppLauncherPreview({
           </div>
         </div>
 
-        {/* Launch Mode Selector */}
-        <div className="mt-6">
+        {/* Launch Mode Selector — hidden in compact mode */}
+        <div className={`mt-6 ${compact ? "hidden" : ""}`}>
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
             {language === "he" ? "מצב פתיחה" : "Launch Mode"}
           </p>
@@ -126,8 +128,8 @@ export function AppLauncherPreview({
           </div>
         </div>
 
-        {/* Path */}
-        {item.href && (
+        {/* Path — hidden in compact mode */}
+        {item.href && !compact && (
           <div className="mt-5">
             <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
               {language === "he" ? "נתיב" : "Path"}

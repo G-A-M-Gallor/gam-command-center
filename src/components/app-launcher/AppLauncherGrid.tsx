@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useEffect, useMemo } from "react";
+import { useCallback, useRef, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors, useDroppable } from "@dnd-kit/core";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
@@ -14,6 +14,7 @@ import { AppLauncherItem } from "./AppLauncherItem";
 import { AppLauncherFolder, FolderOverlay } from "./AppLauncherFolder";
 import { AppLauncherSearch } from "./AppLauncherSearch";
 import { AppLauncherPreview } from "./AppLauncherPreview";
+import { AppLauncherHistory } from "./AppLauncherHistory";
 
 /** Droppable cell wrapper */
 function GridCell({ row, col, page, children }: { row: number; col: number; page: number; children?: React.ReactNode }) {
@@ -63,6 +64,8 @@ export function AppLauncherGrid() {
     setCurrentPage,
     layout,
   } = launcher;
+
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -262,6 +265,15 @@ export function AppLauncherGrid() {
 
   return (
     <div className="flex h-full flex-1 overflow-hidden">
+      {/* History panel (left side) */}
+      {historyOpen && (
+        <AppLauncherHistory
+          selectedItem={selectedItem ?? null}
+          onClose={() => setHistoryOpen(false)}
+          language={language}
+        />
+      )}
+
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Search */}
@@ -271,6 +283,8 @@ export function AppLauncherGrid() {
             onChange={setSearchQuery}
             language={language}
             resultCount={filteredCatalog.length}
+            historyOpen={historyOpen}
+            onHistoryToggle={() => setHistoryOpen((prev) => !prev)}
           />
         </div>
 
@@ -338,7 +352,7 @@ export function AppLauncherGrid() {
 
         {/* Page dots */}
         {!isSearching && totalPages > 1 && (
-          <div className="flex shrink-0 items-center justify-center gap-2 pb-10">
+          <div className="flex shrink-0 items-center justify-center gap-2 pb-4">
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i}
@@ -356,7 +370,7 @@ export function AppLauncherGrid() {
         )}
       </div>
 
-      {/* Preview panel (left side) */}
+      {/* Preview panel (right side) */}
       {selectedItem && (
         <AppLauncherPreview
           item={selectedItem}
@@ -367,6 +381,7 @@ export function AppLauncherGrid() {
           language={language}
           labelOverride={getLabel(selectedItem)}
           descriptionOverride={getDescription(selectedItem)}
+          compact={historyOpen}
         />
       )}
 
