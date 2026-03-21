@@ -16,6 +16,7 @@ export { VNoteEntityView } from "./VNoteEntityView";
 export { VNoteBlocksContainer } from "./VNoteBlocksContainer";
 export { VNoteCanvasZone } from "./VNoteCanvasZone";
 export { VNoteSidebar } from "./VNoteSidebar";
+export { VNoteMobileNav } from "./VNoteMobileNav";
 export { useVNote } from "./useVNote";
 export type {
   VNotePageProps,

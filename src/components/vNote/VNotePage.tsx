@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { VBlockErrorBoundary } from "@/components/vBlock";
+import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { useVNote } from "./useVNote";
 import { VNoteUniversalFields } from "./VNoteUniversalFields";
 import { VNoteEntityView } from "./VNoteEntityView";
@@ -10,14 +11,17 @@ import { StoryMap } from "./StoryMap";
 import { VNoteBlocksContainer } from "./VNoteBlocksContainer";
 import { VNoteCanvasZone } from "./VNoteCanvasZone";
 import { VNoteSidebar } from "./VNoteSidebar";
+import { VNoteMobileNav } from "./VNoteMobileNav";
 import type { VNotePageProps } from "./vNote.types";
 
 export function VNotePage({ entityId }: VNotePageProps) {
   const { entity, blocks, isLoading, error } = useVNote(entityId);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const breakpoint = useBreakpoint();
+  const isMobile = breakpoint === "mobile";
 
   const handleEntityUpdate = useCallback(() => {
-    // React Query will auto-refetch; this is a placeholder for optimistic updates
+    // React Query will auto-refetch; placeholder for optimistic updates
   }, []);
 
   // Loading
@@ -52,23 +56,30 @@ export function VNotePage({ entityId }: VNotePageProps) {
 
   return (
     <div dir="rtl" className="relative min-h-screen">
-      {/* Sidebar */}
+      {/* Sidebar (desktop: side panel, mobile: bottom sheet) */}
       <VNoteSidebar
         entity={entity}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((prev) => !prev)}
+        isMobile={isMobile}
       />
 
-      {/* Main content — shifts when sidebar opens */}
+      {/* Main content — shifts on desktop when sidebar opens, no shift on mobile */}
       <div
         className="transition-all duration-300 ease-in-out"
-        style={{ marginInlineEnd: sidebarOpen ? 280 : 0 }}
+        style={{ marginInlineEnd: !isMobile && sidebarOpen ? 280 : 0 }}
       >
-        <div className="max-w-5xl mx-auto px-4 py-6 space-y-5">
+        <div
+          className={`mx-auto space-y-5 ${
+            isMobile ? "px-3 py-4 pb-20" : "max-w-5xl px-4 py-6"
+          }`}
+        >
           {/* Zone 1: Universal Fields */}
-          <VBlockErrorBoundary blockId="zone-universal-fields">
-            <VNoteUniversalFields entity={entity} onUpdate={handleEntityUpdate} />
-          </VBlockErrorBoundary>
+          <div id="zone-fields">
+            <VBlockErrorBoundary blockId="zone-universal-fields">
+              <VNoteUniversalFields entity={entity} onUpdate={handleEntityUpdate} />
+            </VBlockErrorBoundary>
+          </div>
 
           {/* Zone 2: Entity View */}
           <VBlockErrorBoundary blockId="zone-entity-view">
@@ -76,21 +87,32 @@ export function VNotePage({ entityId }: VNotePageProps) {
           </VBlockErrorBoundary>
 
           {/* Zone 3: Story Map */}
-          <VBlockErrorBoundary blockId="zone-story-map">
-            <StoryMap contextId={entityId} blocks={blocks} />
-          </VBlockErrorBoundary>
+          <div id="zone-story">
+            <VBlockErrorBoundary blockId="zone-story-map">
+              <StoryMap contextId={entityId} blocks={blocks} />
+            </VBlockErrorBoundary>
+          </div>
 
           {/* Zone 4: Blocks Container */}
-          <VBlockErrorBoundary blockId="zone-blocks-container">
-            <VNoteBlocksContainer blocks={blocks} />
-          </VBlockErrorBoundary>
+          <div id="zone-blocks">
+            <VBlockErrorBoundary blockId="zone-blocks-container">
+              <VNoteBlocksContainer blocks={blocks} />
+            </VBlockErrorBoundary>
+          </div>
 
           {/* Zone 5: Canvas Zone */}
-          <VBlockErrorBoundary blockId="zone-canvas">
-            <VNoteCanvasZone />
-          </VBlockErrorBoundary>
+          <div id="zone-canvas">
+            <VBlockErrorBoundary blockId="zone-canvas">
+              <VNoteCanvasZone />
+            </VBlockErrorBoundary>
+          </div>
         </div>
       </div>
+
+      {/* Mobile bottom nav */}
+      {isMobile && (
+        <VNoteMobileNav onSidebarOpen={() => setSidebarOpen(true)} />
+      )}
     </div>
   );
 }

@@ -57,7 +57,7 @@ export function VNoteBlocksContainer({ blocks, onEvent }: Props) {
         {viewMode === "vnote" && (
           <>
             {blocks.length > 0 ? (
-              <div className="flex flex-wrap gap-4 items-start">
+              <div className="flex flex-col md:flex-row md:flex-wrap gap-4 items-stretch md:items-start">
                 {blocks.map((block) => (
                   <VBlockShell
                     key={block.blockId}

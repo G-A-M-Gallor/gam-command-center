@@ -117,8 +117,8 @@ export function EntityCard({ entityType, entityId, config, page, mode }: EntityC
     return (
       <div className="flex h-full flex-col">
         {header}
-        <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-auto border-l border-slate-700/30">
+        <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+          <div className="flex-1 overflow-auto md:border-l border-b md:border-b-0 border-slate-700/30">
             <EntityCardFront
               fields={cardConfig.frontFields}
               meta={meta}
