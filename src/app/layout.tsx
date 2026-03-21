@@ -6,6 +6,7 @@ import { WidgetProvider } from "@/contexts/WidgetContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeInit } from "@/components/ThemeInit";
+import { QueryProvider } from "@/components/QueryProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -94,13 +95,15 @@ try{var vm=localStorage.getItem('cc-style-view-mode');if(vm!=='system'){var so=J
           }}
         />
         <ThemeInit />
-        <SettingsProvider>
-          <ToastProvider>
-            <AuthProvider>
-              <WidgetProvider>{children}</WidgetProvider>
-            </AuthProvider>
-          </ToastProvider>
-        </SettingsProvider>
+        <QueryProvider>
+          <SettingsProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <WidgetProvider>{children}</WidgetProvider>
+              </AuthProvider>
+            </ToastProvider>
+          </SettingsProvider>
+        </QueryProvider>
         <SpeedInsights />
         <Analytics />
       </body>
