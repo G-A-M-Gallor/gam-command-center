@@ -1,3 +1,4 @@
+// Story Map
 export { StoryMap } from "./StoryMap";
 export { StoryMapItem } from "./StoryMapItem";
 export { useStoryMap } from "./useStoryMap";
@@ -7,3 +8,18 @@ export type {
   StoryMapProps,
   LayoutBlock,
 } from "./storyMap.types";
+
+// vNote Page
+export { VNotePage } from "./VNotePage";
+export { VNoteUniversalFields } from "./VNoteUniversalFields";
+export { VNoteEntityView } from "./VNoteEntityView";
+export { VNoteBlocksContainer } from "./VNoteBlocksContainer";
+export { VNoteCanvasZone } from "./VNoteCanvasZone";
+export { VNoteSidebar } from "./VNoteSidebar";
+export { useVNote } from "./useVNote";
+export type {
+  VNotePageProps,
+  VNoteLayout,
+  VNoteData,
+  VNoteSidebarTab,
+} from "./vNote.types";
