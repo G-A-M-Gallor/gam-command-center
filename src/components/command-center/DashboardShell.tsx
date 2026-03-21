@@ -44,7 +44,14 @@ const CommunicationPanel = dynamic(
   { ssr: false, loading: () => null },
 );
 
-const STRIP_WIDTH = "48px";
+const STRIP_WIDTH = "60px";
+
+// Routes that get zero padding on main content (full-bleed mode)
+const FULL_BLEED_PREFIXES = [
+  "/dashboard/vnote/",
+  "/dashboard/editor",
+  "/dashboard/vcanvas",
+];
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
 const MAX_RECENT_PAGES = 10;
@@ -133,7 +140,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const sidebarPx = `${shellPrefs.sidebarWidth}px`;
 
   // For hover-reveal mode in visible: sidebar collapses to strip, so use strip width for margins
-  const sidebarHoverActive = isVisible && shellPrefs.sidebarHover && !isMobile;
+  // When pinned, sidebar pushes content (use full width). When unpinned, overlay mode (use strip width).
+  const sidebarHoverActive = isVisible && shellPrefs.sidebarHover && !shellPrefs.sidebarPinned && !isMobile;
+
+  // Full-bleed detection for canvas/editor/vnote routes
+  const isFullBleed = FULL_BLEED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   // Dock is 48px, always on the left side, adjacent to sidebar
   const DOCK_WIDTH = 48;
@@ -227,6 +238,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         onClose={() => setFloatOpen(false)}
         customWidth={shellPrefs.sidebarWidth}
         sidebarHoverMode={shellPrefs.sidebarHover}
+        sidebarPinned={shellPrefs.sidebarPinned}
+        onPinToggle={() => updatePref("sidebarPinned", !shellPrefs.sidebarPinned)}
         onWidthChange={handleSidebarWidthChange}
       />
 
@@ -262,7 +275,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       <main
         data-cc-id="content.main"
-        className={`min-h-screen overflow-x-hidden p-[var(--cc-density-content)] transition-[padding-top,margin-left,margin-right] duration-300 ease-out ${
+        className={`min-h-screen overflow-x-hidden transition-[padding-top,margin-left,margin-right,padding] duration-300 ease-out ${
+          isFullBleed ? "p-0" : "p-[var(--cc-density-content)]"
+        } ${
           isMobile ? "pt-12"
             : topbarEffectivelyHidden ? ""
             : displayMode === "compact" ? "pt-14"
@@ -305,8 +320,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Gibberish auto-detection */}
       <GibberishDetector />
 
-      {/* macOS-style Bottom Dock — desktop only (replaces SpeedDial when active) */}
-      {!isMobile && <BottomDock />}
+      {/* macOS-style Bottom Dock — desktop only, auto-hide support */}
+      {!isMobile && <BottomDock autoHide={shellPrefs.bottomDockAutoHide} />}
 
       {/* Legacy FAB Speed Dial — only shown if dock is explicitly disabled */}
       {/* {!isMobile && shellPrefs.speedDialVisible && <SpeedDial />} */}

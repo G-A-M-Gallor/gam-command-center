@@ -166,7 +166,7 @@ const APPS_VIEW_WIDTH = 64;
 
 const FULL_WIDTH = 240;
 const MOBILE_WIDTH = 280;
-const STRIP_WIDTH = 48;
+const STRIP_WIDTH = 60;
 
 const FILTER_KEY = "cc-sidebar-filter";
 const VIEW_MODE_KEY = "cc-sidebar-view-mode";
@@ -487,6 +487,10 @@ interface SidebarProps {
   customWidth?: number;
   /** When true, sidebar collapses to strip and expands on hover (for "visible" mode) */
   sidebarHoverMode?: boolean;
+  /** When true, sidebar stays expanded and pushes content */
+  sidebarPinned?: boolean;
+  /** Toggle pin state */
+  onPinToggle?: () => void;
   /** Callback when sidebar width changes via drag resize */
   onWidthChange?: (width: number) => void;
 }
@@ -498,6 +502,8 @@ export function Sidebar({
   onClose,
   customWidth,
   sidebarHoverMode = false,
+  sidebarPinned = false,
+  onPinToggle,
   onWidthChange,
 }: SidebarProps = {}) {
   const pathname = usePathname();
@@ -668,7 +674,8 @@ export function Sidebar({
   const mode = effectiveMode ?? sidebarVisibility;
   const isFloat = mode === "float";
   // Hover-reveal: in visible mode with sidebarHoverMode, collapse to strip and expand on hover
-  const isHoverReveal = mode === "visible" && sidebarHoverMode && !isMobile;
+  // When pinned, sidebar stays expanded and pushes content (not overlay)
+  const isHoverReveal = mode === "visible" && sidebarHoverMode && !sidebarPinned && !isMobile;
   const isAppsView = viewMode === "apps";
   const isCollapsed = isAppsView ? false : isFloat ? !hovered : isHoverReveal ? !hovered : false;
   const onRight = sidebarPosition === "right";
@@ -884,7 +891,9 @@ export function Sidebar({
   return (
     <aside
       data-cc-id="sidebar.root"
-      className={`sidebar fixed top-12 z-[35] shrink-0 overflow-hidden ${
+      className={`sidebar fixed top-12 shrink-0 overflow-hidden ${
+        isHoverReveal && hovered ? "z-[45] shadow-2xl" : "z-[35]"
+      } ${
         onRight ? "right-0 border-l" : "border-r"
       } border-slate-700/50 ${
         isFloat ? "shadow-lg" : ""
@@ -910,6 +919,39 @@ export function Sidebar({
           <div className="flex justify-end px-2 pt-2">
             <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
               <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Pin button — shown in hover-reveal mode when expanded */}
+        {isHoverReveal && hovered && onPinToggle && (
+          <div className="flex justify-end px-2 pt-1">
+            <button
+              type="button"
+              onClick={onPinToggle}
+              className="rounded p-1.5 text-slate-500 hover:bg-slate-800 hover:text-purple-300 transition-colors"
+              title={sidebarPinned ? "בטל נעיצה" : "נעץ sidebar"}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="17" x2="12" y2="22" />
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {/* Unpin button — shown when pinned */}
+        {sidebarPinned && sidebarHoverMode && onPinToggle && !isCollapsed && (
+          <div className="flex justify-end px-2 pt-1">
+            <button
+              type="button"
+              onClick={onPinToggle}
+              className="rounded p-1.5 text-purple-400 hover:bg-slate-800 hover:text-purple-300 transition-colors"
+              title="בטל נעיצה"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="17" x2="12" y2="22" />
+                <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+              </svg>
             </button>
           </div>
         )}

@@ -6,23 +6,27 @@ import { useState, useEffect, useCallback } from "react";
 
 export interface ShellPrefs {
   sidebarHover: boolean;
+  sidebarPinned: boolean;
   sidebarWidth: number;
   topbarVisible: boolean;
   tabbarVisible: boolean;
   trayVisible: boolean;
   speedDialVisible: boolean;
+  bottomDockAutoHide: boolean;
 }
 
 const STORAGE_KEY = "cc-shell-prefs";
 const EVENT_NAME = "cc-shell-prefs-change";
 
 const DEFAULTS: ShellPrefs = {
-  sidebarHover: false,
+  sidebarHover: true,
+  sidebarPinned: false,
   sidebarWidth: 240,
   topbarVisible: true,
   tabbarVisible: false,
   trayVisible: false,
   speedDialVisible: true,
+  bottomDockAutoHide: true,
 };
 
 export const SIDEBAR_MIN_WIDTH = 180;

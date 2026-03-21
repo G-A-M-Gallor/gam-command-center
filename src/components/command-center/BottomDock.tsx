@@ -407,7 +407,7 @@ function DockAddPicker({
 
 // ─── Main Bottom Dock ───────────────────────────────────
 
-export function BottomDock() {
+export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const { language } = useSettings();
@@ -417,6 +417,18 @@ export function BottomDock() {
   const dockRef = useRef<HTMLDivElement>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [triggerVisible, setTriggerVisible] = useState(!autoHide);
+
+  // Auto-hide: show trigger on hover near bottom edge (50px zone)
+  useEffect(() => {
+    if (!autoHide) { setTriggerVisible(true); return; }
+    const handleMouseMove = (e: MouseEvent) => {
+      const nearBottom = e.clientY > window.innerHeight - 50;
+      setTriggerVisible(nearBottom || dock.isOpen);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [autoHide, dock.isOpen]);
 
   // Close on Escape
   useEffect(() => {
@@ -493,7 +505,10 @@ export function BottomDock() {
   return (
     <>
       {/* ── Trigger button — half ellipse at bottom center ── */}
-      <div className="fixed bottom-0 left-1/2 z-[51] -translate-x-1/2">
+      <div
+        className="fixed bottom-0 left-1/2 z-[51] -translate-x-1/2 transition-opacity duration-200"
+        style={{ opacity: triggerVisible ? 1 : 0, pointerEvents: triggerVisible ? "auto" : "none" }}
+      >
         <button
           type="button"
           onClick={dock.toggle}

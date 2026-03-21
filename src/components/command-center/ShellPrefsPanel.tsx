@@ -12,12 +12,14 @@ interface ShellPrefsPanelProps {
 }
 
 const DEFAULTS = {
-  sidebarHover: false,
+  sidebarHover: true,
+  sidebarPinned: false,
   sidebarWidth: 240,
   topbarVisible: true,
   tabbarVisible: false,
   trayVisible: false,
   speedDialVisible: true,
+  bottomDockAutoHide: true,
 };
 
 export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
