@@ -1,11 +1,26 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { VBlockShell } from "@/components/vBlock";
 import type { VBlockEvent } from "@/components/vBlock";
+import { EntityCard } from "@/components/vBlock/blocks/EntityCard";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function VBlockTestPage() {
   const [events, setEvents] = useState<string[]>([]);
+  const [entityId, setEntityId] = useState<string | null>(null);
+
+  // Try to find a real entity, fall back to mock
+  useEffect(() => {
+    supabase
+      .from("vb_records")
+      .select("id")
+      .eq("is_deleted", false)
+      .limit(1)
+      .then(({ data }) => {
+        if (data?.[0]) setEntityId(data[0].id);
+      });
+  }, []);
 
   const handleEvent = useCallback((e: VBlockEvent) => {
     setEvents((prev) => [
@@ -69,7 +84,42 @@ export default function VBlockTestPage() {
           )}
         </VBlockShell>
 
-        {/* Block 3: Large (700x500) with custom context actions */}
+        {/* Block 3: Entity Card with flip */}
+        <VBlockShell
+          blockId="test-entity-card"
+          title="כרטיס ישות"
+          icon="👤"
+          initialSize={{ width: 380, height: 340 }}
+          flip={{ enabled: true, frontLabel: "פרטים", backLabel: "מידע נוסף" }}
+          onEvent={handleEvent}
+          onFullscreen="expand"
+          showSettings
+          onSettings={() => handleEvent({ type: "block.settings.opened", blockId: "test-entity-card" })}
+        >
+          {({ mode, page }) =>
+            entityId ? (
+              <EntityCard
+                entityType="contact"
+                entityId={entityId}
+                page={page ?? "front"}
+                mode={mode}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2 p-4">
+                <span className="text-2xl">👤</span>
+                <p className="text-xs text-slate-400">
+                  אין ישויות ב-DB — צור רשומה ב-vb_records לבדיקה
+                </p>
+                <span className="text-xs text-slate-500">
+                  mode: <strong className="text-slate-200">{mode}</strong> | page:{" "}
+                  <strong className="text-slate-200">{page}</strong>
+                </span>
+              </div>
+            )
+          }
+        </VBlockShell>
+
+        {/* Block 4: Large (700x500) with custom context actions */}
         <VBlockShell
           blockId="test-large"
           title="בלוק גדול"
