@@ -1,0 +1,22 @@
+const layers = {
+  product: "מוצר",
+  infrastructure: "תשתית",
+  client: "לקוח",
+  active: "פעיל",
+  claude: "claude",
+  manual: "ידני",
+  trigger: "טריגר",
+  summaryTotal: "סך הכל",
+  summaryProjects: "פרויקטים",
+  searchPlaceholder: "חפש פרויקט...",
+  filterAll: "הכל",
+  filterActive: "פעיל",
+  filterCompleted: "הושלם",
+  filterOnHold: "בהמתנה",
+  sortName: "שם",
+  sortHealth: "בריאות",
+  sortUpdated: "עדכון אחרון",
+  sortBy: "מיון",
+  noResults: "לא נמצאו פרויקטים",
+} as const;
+export default layers;

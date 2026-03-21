@@ -1,0 +1,22 @@
+const layers = {
+  product: "продукт",
+  infrastructure: "инфраструктура",
+  client: "клиент",
+  active: "активный",
+  claude: "claude",
+  manual: "ручной",
+  trigger: "триггер",
+  summaryTotal: "Всего",
+  summaryProjects: "проектов",
+  searchPlaceholder: "Поиск проектов...",
+  filterAll: "Все",
+  filterActive: "Активный",
+  filterCompleted: "Завершён",
+  filterOnHold: "На паузе",
+  sortName: "Имя",
+  sortHealth: "Здоровье",
+  sortUpdated: "Обновление",
+  sortBy: "Сортировка",
+  noResults: "Проекты не найдены",
+} as const;
+export default layers;

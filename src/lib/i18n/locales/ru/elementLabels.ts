@@ -1,0 +1,22 @@
+const elementLabels = {
+  shellRoot: "Оболочка",
+  sidebarRoot: "Боковая панель",
+  sidebarHeader: "Заголовок панели",
+  sidebarLogo: "Логотип",
+  sidebarName: "Название компании",
+  sidebarNav: "Навигация",
+  sidebarNavLink: "Ссылка навигации",
+  sidebarNavLabel: "Метка навигации",
+  sidebarFooter: "Подвал панели",
+  sidebarTagline: "Подпись",
+  topbarRoot: "Верхняя панель",
+  contentMain: "Область контента",
+  pageHeader: "Заголовок страницы",
+  pageHeaderTitle: "Заголовок",
+  pageHeaderDescription: "Описание",
+  cardProject: "Карточка проекта",
+  cardProjectName: "Название проекта",
+  cardProjectMeta: "Детали проекта",
+  badgeHealth: "Индикатор здоровья",
+} as const;
+export default elementLabels;

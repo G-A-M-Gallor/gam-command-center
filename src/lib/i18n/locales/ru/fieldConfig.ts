@@ -1,0 +1,21 @@
+const fieldConfig = {
+  cancel: "Отмена",
+  save: "Сохранить",
+  options: "Варианты",
+  addOption: "Добавить вариант",
+  label: "Метка",
+  fieldName: "Имя поля",
+  placeholder: "Подсказка",
+  exampleText: "Пример текста...",
+  defaultValue: "Значение по умолчанию",
+  required: "Обязательное",
+  maxLength: "Макс. длина",
+  defaultChecked: "По умолчанию отмечено",
+  format: "Формат",
+  maxSelections: "Макс. выбор",
+  unlimited: "0 = без ограничений",
+  allowCustomTags: "Разрешить свои теги",
+  maxTags: "Макс. тегов",
+  addTag: "Добавить тег",
+} as const;
+export default fieldConfig;

@@ -1,0 +1,21 @@
+const fieldConfig = {
+  cancel: "ביטול",
+  save: "שמור",
+  options: "אפשרויות",
+  addOption: "הוסף אפשרות",
+  label: "תווית",
+  fieldName: "שם השדה",
+  placeholder: "טקסט ברירת מחדל",
+  exampleText: "טקסט לדוגמה...",
+  defaultValue: "ערך ברירת מחדל",
+  required: "חובה",
+  maxLength: "אורך מקסימלי",
+  defaultChecked: "מסומן כברירת מחדל",
+  format: "פורמט",
+  maxSelections: "מקסימום בחירות",
+  unlimited: "0 = ללא הגבלה",
+  allowCustomTags: "אפשר תגיות חופשיות",
+  maxTags: "מקסימום תגיות",
+  addTag: "הוסף תגית",
+} as const;
+export default fieldConfig;

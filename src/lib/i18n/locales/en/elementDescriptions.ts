@@ -1,0 +1,22 @@
+const elementDescriptions = {
+  shellRoot: "Main dashboard shell. Controls the overall background and outer borders.",
+  sidebarRoot: "Sidebar navigation panel. Contains links to all pages and brand info.",
+  sidebarHeader: "Sidebar header area. Contains the logo and company name.",
+  sidebarLogo: "Company logo icon in the sidebar header.",
+  sidebarName: "Company/brand display name in the sidebar header. Text editable.",
+  sidebarNav: "Main navigation area with links to all tabs.",
+  sidebarNavLink: "Individual navigation link in the sidebar. Controls background, color and font.",
+  sidebarNavLabel: "Text label of a navigation link. Name and style editable.",
+  sidebarFooter: "Bottom area of the sidebar.",
+  sidebarTagline: "Digital signature at the bottom of the sidebar. Text editable.",
+  topbarRoot: "Top toolbar with widgets, search and quick actions.",
+  contentMain: "Main content area of the dashboard.",
+  pageHeader: "Page header with title and description.",
+  pageHeaderTitle: "Main page title. Text and font editable.",
+  pageHeaderDescription: "Page description below the title. Text editable.",
+  cardProject: "Project card in the layers list. Controls background and borders.",
+  cardProjectName: "Project name in the card. Text and font editable.",
+  cardProjectMeta: "Project metadata: layer, status, source.",
+  badgeHealth: "Project health score badge. Controls background and text colors.",
+} as const;
+export default elementDescriptions;

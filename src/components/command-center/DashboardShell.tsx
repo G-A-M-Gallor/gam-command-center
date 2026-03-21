@@ -9,8 +9,6 @@ import { SplitScreenContainer } from "./SplitScreenContainer";
 import { MobileBottomBar } from "./MobileBottomBar";
 // EditToolbar moved into CanvasEditor — FieldLibrary opens from canvas toolbar
 import { ContextMenuProvider } from "./ContextMenu";
-import { GuideOverlay } from "./GuideOverlay";
-import { StickyNotesManager } from "./StickyNote";
 import { useSettings } from "@/contexts/SettingsContext";
 import { StyleOverrideProvider } from "@/contexts/StyleOverrideContext";
 import { DashboardModeProvider } from "@/contexts/DashboardModeContext";
@@ -20,15 +18,30 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 import { GibberishDetector } from "./GibberishDetector";
 import { SpeedDial } from "./SpeedDial";
-import { AppDock } from "./AppDock";
 import { BottomDock } from "./BottomDock";
 import { TabBar } from "./TabBar";
-import { DownloadReminderPopup } from "./DownloadReminder";
 import dynamic from "next/dynamic";
 
+// ─── Lazy-loaded panels (opened on click, not critical path) ───
+const GuideOverlay = dynamic(
+  () => import("./GuideOverlay").then((m) => ({ default: m.GuideOverlay })),
+  { ssr: false, loading: () => null },
+);
+const StickyNotesManager = dynamic(
+  () => import("./StickyNote").then((m) => ({ default: m.StickyNotesManager })),
+  { ssr: false, loading: () => null },
+);
+const AppDock = dynamic(
+  () => import("./AppDock").then((m) => ({ default: m.AppDock })),
+  { ssr: false, loading: () => null },
+);
+const DownloadReminderPopup = dynamic(
+  () => import("./DownloadReminder").then((m) => ({ default: m.DownloadReminderPopup })),
+  { ssr: false, loading: () => null },
+);
 const CommunicationPanel = dynamic(
   () => import("./CommunicationPanel").then((m) => ({ default: m.CommunicationPanel })),
-  { ssr: false },
+  { ssr: false, loading: () => null },
 );
 
 const STRIP_WIDTH = "48px";

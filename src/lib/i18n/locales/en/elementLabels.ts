@@ -1,0 +1,22 @@
+const elementLabels = {
+  shellRoot: "Shell",
+  sidebarRoot: "Sidebar",
+  sidebarHeader: "Sidebar Header",
+  sidebarLogo: "Logo",
+  sidebarName: "Company Name",
+  sidebarNav: "Navigation",
+  sidebarNavLink: "Nav Link",
+  sidebarNavLabel: "Nav Label",
+  sidebarFooter: "Sidebar Footer",
+  sidebarTagline: "Tagline",
+  topbarRoot: "Top Bar",
+  contentMain: "Content Area",
+  pageHeader: "Page Header",
+  pageHeaderTitle: "Page Title",
+  pageHeaderDescription: "Description",
+  cardProject: "Project Card",
+  cardProjectName: "Project Name",
+  cardProjectMeta: "Project Meta",
+  badgeHealth: "Health Badge",
+} as const;
+export default elementLabels;

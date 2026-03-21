@@ -20,18 +20,12 @@ import {
 } from "./widgets/WidgetRegistry";
 import { WidgetWrapper } from "./widgets/WidgetWrapper";
 import { WidgetSettings } from "./widgets/WidgetSettings";
-import { WidgetStore } from "./widgets/WidgetStore";
 import { AppStorePanel } from "./AppStorePanel";
 import { SettingsFolderPanel } from "./SettingsFolderPanel";
 import { OverflowMenu } from "./OverflowMenu";
 import { AppsDrawer } from "./widgets/AppsDrawer";
-import { ProfileSwitcher } from "./widgets/ProfileSwitcher";
 import { FolderWrapper } from "./widgets/FolderWrapper";
 import { FolderSettings } from "./widgets/FolderSettings";
-import { SearchPanel } from "./widgets/SearchWidget";
-import { ShortcutsPanel } from "./widgets/ShortcutsWidget";
-import { WeeklyPlannerPanel } from "./widgets/WeeklyPlannerWidget";
-import { AIPanel, type AIViewMode } from "./widgets/AIWidget";
 import { UniversalSidePanel, TabbedSidePanel, SIDE_PANEL_OPEN_EVENT } from "./widgets/UniversalSidePanel";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -39,6 +33,36 @@ import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTranslations } from "@/lib/i18n";
 import { ShellPrefsPanel } from "./ShellPrefsPanel";
+import dynamic from "next/dynamic";
+
+// Type-only import for AIViewMode
+import type { AIViewMode } from "./widgets/AIWidget";
+
+// ─── Lazy-loaded panels (opened on click, not critical path) ───
+const WidgetStore = dynamic(
+  () => import("./widgets/WidgetStore").then((m) => ({ default: m.WidgetStore })),
+  { ssr: false, loading: () => null },
+);
+const ProfileSwitcher = dynamic(
+  () => import("./widgets/ProfileSwitcher").then((m) => ({ default: m.ProfileSwitcher })),
+  { ssr: false, loading: () => null },
+);
+const SearchPanel = dynamic(
+  () => import("./widgets/SearchWidget").then((m) => ({ default: m.SearchPanel })),
+  { ssr: false, loading: () => null },
+);
+const ShortcutsPanel = dynamic(
+  () => import("./widgets/ShortcutsWidget").then((m) => ({ default: m.ShortcutsPanel })),
+  { ssr: false, loading: () => null },
+);
+const WeeklyPlannerPanel = dynamic(
+  () => import("./widgets/WeeklyPlannerWidget").then((m) => ({ default: m.WeeklyPlannerPanel })),
+  { ssr: false, loading: () => null },
+);
+const AIPanel = dynamic(
+  () => import("./widgets/AIWidget").then((m) => ({ default: m.AIPanel })),
+  { ssr: false, loading: () => null },
+);
 
 const UNIT = 48;
 

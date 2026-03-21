@@ -1,0 +1,21 @@
+const fieldConfig = {
+  cancel: "Cancel",
+  save: "Save",
+  options: "Options",
+  addOption: "Add option",
+  label: "Label",
+  fieldName: "Field name",
+  placeholder: "Placeholder",
+  exampleText: "Example text...",
+  defaultValue: "Default value",
+  required: "Required",
+  maxLength: "Max length",
+  defaultChecked: "Default checked",
+  format: "Format",
+  maxSelections: "Max selections",
+  unlimited: "0 = unlimited",
+  allowCustomTags: "Allow custom tags",
+  maxTags: "Max tags",
+  addTag: "Add tag",
+} as const;
+export default fieldConfig;

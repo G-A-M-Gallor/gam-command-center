@@ -1,0 +1,22 @@
+const elementLabels = {
+  shellRoot: "מעטפת",
+  sidebarRoot: "סרגל צד",
+  sidebarHeader: "כותרת סרגל צד",
+  sidebarLogo: "לוגו",
+  sidebarName: "שם חברה",
+  sidebarNav: "ניווט",
+  sidebarNavLink: "קישור ניווט",
+  sidebarNavLabel: "תווית ניווט",
+  sidebarFooter: "תחתית סרגל צד",
+  sidebarTagline: "חתימה",
+  topbarRoot: "סרגל עליון",
+  contentMain: "אזור תוכן",
+  pageHeader: "כותרת עמוד",
+  pageHeaderTitle: "כותרת",
+  pageHeaderDescription: "תיאור",
+  cardProject: "כרטיס פרויקט",
+  cardProjectName: "שם פרויקט",
+  cardProjectMeta: "פרטי פרויקט",
+  badgeHealth: "תג בריאות",
+} as const;
+export default elementLabels;
