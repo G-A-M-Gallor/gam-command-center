@@ -4,7 +4,49 @@ import { useState, useCallback, useEffect } from "react";
 import { VBlockShell } from "@/components/vBlock";
 import type { VBlockEvent } from "@/components/vBlock";
 import { EntityCard } from "@/components/vBlock/blocks/EntityCard";
+import { StoryMap } from "@/components/vNote";
+import type { LayoutBlock } from "@/components/vNote";
 import { supabase } from "@/lib/supabaseClient";
+
+// Mock blocks with storyMapConfig — 2 done, 2 not done (using staticValue)
+const MOCK_STORY_BLOCKS: LayoutBlock[] = [
+  {
+    blockId: "step-meeting",
+    storyMapConfig: {
+      trackField: "status",
+      doneValue: "completed",
+      label: "פגישה ראשונה",
+      staticValue: "completed",
+    },
+  },
+  {
+    blockId: "step-proposal",
+    storyMapConfig: {
+      trackField: "status",
+      doneValue: "completed",
+      label: "הצעת מחיר",
+      staticValue: "completed",
+    },
+  },
+  {
+    blockId: "step-contract",
+    storyMapConfig: {
+      trackField: "status",
+      doneValue: "completed",
+      label: "חוזה",
+      staticValue: "pending",
+    },
+  },
+  {
+    blockId: "step-kickoff",
+    storyMapConfig: {
+      trackField: "status",
+      doneValue: "completed",
+      label: "קיקאוף",
+      staticValue: "not_started",
+    },
+  },
+];
 
 export default function VBlockTestPage() {
   const [events, setEvents] = useState<string[]>([]);
@@ -37,6 +79,14 @@ export default function VBlockTestPage() {
           בדיקת resize, context menu, fullscreen, flip card, RTL
         </p>
       </div>
+
+      {/* Story Map — live checklist */}
+      <StoryMap
+        blocks={MOCK_STORY_BLOCKS}
+        onStepClick={(blockId) =>
+          handleEvent({ type: "block.context.action", blockId, actionId: "story-map-click" })
+        }
+      />
 
       <div className="flex flex-wrap gap-6 items-start">
         {/* Block 1: Compact (180x120) */}
