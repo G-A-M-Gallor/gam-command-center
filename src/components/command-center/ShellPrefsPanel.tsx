@@ -20,6 +20,7 @@ const DEFAULTS = {
   trayVisible: false,
   speedDialVisible: true,
   bottomDockAutoHide: true,
+  dockPinned: false,
 };
 
 export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { VBlockErrorBoundary } from "@/components/vBlock";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
@@ -12,10 +12,11 @@ import { VNoteBlocksContainer } from "./VNoteBlocksContainer";
 import { VNoteCanvasZone } from "./VNoteCanvasZone";
 import { VNoteSidebar } from "./VNoteSidebar";
 import { VNoteMobileNav } from "./VNoteMobileNav";
+import { trackRecentItem } from "@/lib/hooks/useRecentItems";
 import type { VNotePageProps } from "./vNote.types";
 
 export function VNotePage({ entityId }: VNotePageProps) {
-  const { entity, blocks, isLoading, error } = useVNote(entityId);
+  const { entity, blocks, isLoading, error, selectedBlockId, setSelectedBlockId } = useVNote(entityId);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
@@ -23,6 +24,18 @@ export function VNotePage({ entityId }: VNotePageProps) {
   const handleEntityUpdate = useCallback(() => {
     // React Query will auto-refetch; placeholder for optimistic updates
   }, []);
+
+  // Track recent visit
+  useEffect(() => {
+    if (!entity) return;
+    trackRecentItem({
+      record_id: entityId,
+      entity_type: entity.entity_type ?? "unknown",
+      title: entity.title,
+      route: `/dashboard/vnote/${entityId}`,
+      icon: (entity.meta as Record<string, unknown>)?.icon as string ?? "",
+    });
+  }, [entityId, entity?.title, entity?.entity_type]);
 
   // Loading
   if (isLoading) {
@@ -59,6 +72,9 @@ export function VNotePage({ entityId }: VNotePageProps) {
       {/* Sidebar (desktop: side panel, mobile: bottom sheet) */}
       <VNoteSidebar
         entity={entity}
+        blocks={blocks}
+        selectedBlockId={selectedBlockId}
+        onClearBlock={() => setSelectedBlockId(null)}
         isOpen={sidebarOpen}
         onToggle={() => setSidebarOpen((prev) => !prev)}
         isMobile={isMobile}
@@ -71,7 +87,7 @@ export function VNotePage({ entityId }: VNotePageProps) {
       >
         <div
           className={`mx-auto space-y-5 ${
-            isMobile ? "px-3 py-4 pb-20" : "max-w-5xl px-4 py-6"
+            isMobile ? "px-3 pt-12 pb-20" : "max-w-5xl px-4 py-6"
           }`}
         >
           {/* Zone 1: Universal Fields */}
@@ -96,7 +112,12 @@ export function VNotePage({ entityId }: VNotePageProps) {
           {/* Zone 4: Blocks Container */}
           <div id="zone-blocks">
             <VBlockErrorBoundary blockId="zone-blocks-container">
-              <VNoteBlocksContainer blocks={blocks} />
+              <VNoteBlocksContainer
+                blocks={blocks}
+                entityId={entityId}
+                selectedBlockId={selectedBlockId}
+                onSelectBlock={setSelectedBlockId}
+              />
             </VBlockErrorBoundary>
           </div>
 
@@ -111,7 +132,11 @@ export function VNotePage({ entityId }: VNotePageProps) {
 
       {/* Mobile bottom nav */}
       {isMobile && (
-        <VNoteMobileNav onSidebarOpen={() => setSidebarOpen(true)} />
+        <VNoteMobileNav
+          onSidebarOpen={() => setSidebarOpen(true)}
+          entityTitle={entity.title}
+          entityType={entity.entity_type ?? undefined}
+        />
       )}
     </div>
   );

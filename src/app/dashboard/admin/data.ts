@@ -260,7 +260,18 @@ export const routes: RouteEntry[] = [
       { id: 'app-launcher-grid', name: 'AppLauncherGrid', file: 'components/app-launcher/AppLauncherGrid.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
-    connectedTo: [],
+    connectedTo: ['apps-page'],
+  },
+  {
+    id: 'apps-page', path: '/dashboard/apps', name: 'All Apps (Registry)', nameHe: 'כל האפליקציות (רישום)', icon: CalendarDays,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-22',
+    descriptionHe: 'תצוגת כל האפליקציות מטבלת vb_apps — סינון לפי סטטוס, חיפוש, קטגוריות מתקפלות',
+    descriptionEn: 'All apps from vb_apps registry — filter by status, search, collapsible sections',
+    components: [
+      { id: 'apps-page-main', name: 'AppsPage', file: 'app/dashboard/apps/page.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['vb_apps', 'vb_app_sections'], visible: true, sidebarTab: false,
+    connectedTo: ['app-launcher'],
   },
   {
     id: 'weekly-planner-page', path: '/dashboard/weekly-planner', name: 'Weekly Planner', nameHe: 'סדר שבועי', icon: CalendarDays,
@@ -284,6 +295,15 @@ export const routes: RouteEntry[] = [
       { id: 'skins-tab', name: 'SkinsTab', file: 'components/settings/SkinsTab.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext', 'StyleOverrideContext'], visible: true, sidebarTab: false,
+  },
+  {
+    id: 'feature-flags', path: '/dashboard/settings/features', name: 'Feature Flags', nameHe: 'דגלי פיצ׳רים', icon: Settings,
+    phase: 1, status: 'active', version: '0.1.0', addedDate: '2026-03-20',
+    descriptionHe: 'ניהול feature flags לפי אפליקציה — vCanvas, vNote. טוגלים לכל פיצ׳ר עם Supabase persistence',
+    descriptionEn: 'Per-app feature flag management — vCanvas, vNote. Toggle features with Supabase persistence',
+    components: [],
+    contexts: ['SettingsContext'], visible: true, sidebarTab: false,
+    connectedTo: ['settings', 'vcanvas'],
   },
   {
     id: 'admin', path: '/dashboard/admin', name: 'Admin', nameHe: 'לוג פיתוח', icon: Code2,

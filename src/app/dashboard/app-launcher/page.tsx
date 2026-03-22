@@ -9,7 +9,7 @@ const AppLauncherGrid = dynamic(
 
 export default function AppLauncherPage() {
   return (
-    <div className="flex h-[calc(100vh-48px)] flex-col bg-slate-950">
+    <div className="flex h-[calc(100vh-48px-76px)] flex-col bg-slate-950">
       <AppLauncherGrid />
     </div>
   );

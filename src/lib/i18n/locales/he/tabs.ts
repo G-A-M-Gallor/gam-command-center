@@ -1,6 +1,7 @@
 const tabs = {
   dashboard: "דשבורד",
   appLauncher: "כל האפליקציות",
+  apps: "כל האפליקציות",
   layers: "האב",
   editor: "עורך",
   storyMap: "Story Map",

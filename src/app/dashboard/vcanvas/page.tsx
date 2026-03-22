@@ -305,7 +305,7 @@ export default function VCanvasPage() {
 
         {/* Canvas */}
         <div className="flex-1 min-h-0">
-          <VCanvas persistenceKey={activeId} context="standalone" language={language} className="h-full" />
+          <VCanvas persistenceKey={activeId} context="standalone" mode="vCanvas" language={language} className="h-full" />
         </div>
 
         {showSettings && (
@@ -318,39 +318,39 @@ export default function VCanvasPage() {
   // ─── List View ───────────────────────────────────
   return (
     <div dir={isRtl ? "rtl" : "ltr"} className="flex h-[calc(100vh-48px)] flex-col">
-      <div className="shrink-0 p-6 pb-2 flex items-start justify-between">
+      <div className="shrink-0 px-5 pt-4 pb-2 flex items-center justify-between">
         <PageHeader pageKey="vcanvas" />
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => setShowSettings(true)}
-            className="rounded-xl border border-white/[0.08] px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-white/[0.06] hover:text-slate-200 transition-colors"
+            className="rounded-lg border border-white/[0.08] p-2 text-slate-400 hover:bg-white/[0.06] hover:text-slate-200 transition-colors"
             title={l.settings}
           >
-            <Settings2 className="h-4 w-4" />
+            <Settings2 className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={handleCreate}
-            className="flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-purple-500 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-2 text-xs font-semibold text-white hover:bg-purple-500 transition-colors"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
             {l.newCanvas}
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-5 pb-4">
         {canvases.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-4">
-            <Pencil className="h-12 w-12 text-slate-700" />
-            <p className="text-sm">{l.empty}</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-3">
+            <Pencil className="h-7 w-7 text-slate-700" />
+            <p className="text-xs">{l.empty}</p>
             <button
               type="button"
               onClick={handleCreate}
-              className="flex items-center gap-2 rounded-xl bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/[0.08] transition-colors"
+              className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/[0.08] transition-colors"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               {l.newCanvas}
             </button>
           </div>
@@ -366,12 +366,12 @@ export default function VCanvasPage() {
                 className="group flex flex-col rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.1] transition-all text-start overflow-hidden cursor-pointer"
               >
                 {/* Preview area */}
-                <div className="h-36 bg-slate-900/50 flex items-center justify-center border-b border-white/[0.04]">
-                  <Pencil className="h-8 w-8 text-slate-700 group-hover:text-slate-600 transition-colors" />
+                <div className="h-24 bg-slate-900/50 flex items-center justify-center border-b border-white/[0.04]">
+                  <Pencil className="h-5 w-5 text-slate-700 group-hover:text-slate-600 transition-colors" />
                 </div>
 
                 {/* Info */}
-                <div className="p-3 flex flex-col gap-1">
+                <div className="p-2.5 flex flex-col gap-0.5">
                   {editingNameId === canvas.id ? (
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       <input

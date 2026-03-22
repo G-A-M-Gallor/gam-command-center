@@ -300,7 +300,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               : skinConfig.mobileNav === "bottom-sheet"
                 ? "calc(2rem + var(--safe-area-bottom, 0px) + 0.5rem)"
                 : "calc(var(--safe-area-bottom, 0px) + 0.5rem)",
-          } : undefined),
+          } : { paddingBottom: "76px" }),
         }}
       >
         <SplitScreenContainer>
@@ -321,7 +321,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <GibberishDetector />
 
       {/* macOS-style Bottom Dock — desktop only, auto-hide support */}
-      {!isMobile && <BottomDock autoHide={shellPrefs.bottomDockAutoHide} />}
+      {!isMobile && (
+        <BottomDock
+          autoHide={shellPrefs.bottomDockAutoHide}
+          contentLeft={contentMargin?.marginLeft as string | undefined}
+          contentRight={contentMargin?.marginRight as string | undefined}
+        />
+      )}
 
       {/* Legacy FAB Speed Dial — only shown if dock is explicitly disabled */}
       {/* {!isMobile && shellPrefs.speedDialVisible && <SpeedDial />} */}

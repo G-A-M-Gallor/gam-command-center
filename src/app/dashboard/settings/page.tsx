@@ -37,6 +37,9 @@ import { useWakeLock } from "@/lib/pwa/useWakeLock";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { EmailTemplatesTab } from "@/components/settings/EmailTemplatesTab";
 import { SkinsTab } from "@/components/settings/SkinsTab";
+import { ProfileTab } from "@/components/settings/ProfileTab";
+import { SystemTab } from "@/components/settings/SystemTab";
+import { KeyboardShortcutsTab } from "@/components/settings/KeyboardShortcutsTab";
 
 const ACCENT_OPTIONS: { value: AccentColor; swatch: string }[] = [
   { value: "purple", swatch: "#9333ea" },
@@ -65,9 +68,10 @@ const DENSITY_OPTIONS: { value: Density; key: "compact" | "default" | "spacious"
   { value: "spacious", key: "spacious" },
 ];
 
-type SettingsTab = "general" | "theme" | "skins" | "brand" | "widgetBar" | "pwa" | "accounts" | "emailTemplates";
+type SettingsTab = "profile" | "general" | "theme" | "skins" | "brand" | "widgetBar" | "pwa" | "accounts" | "emailTemplates" | "system" | "shortcuts";
 
-const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabSkins" | "tabBrand" | "tabWidgetBar" | "tabPwa" | "tabAccounts" | "tabEmailTemplates" }[] = [
+const TAB_KEYS: { tab: SettingsTab; tKey: string; emoji?: string }[] = [
+  { tab: "profile", tKey: "tabProfile", emoji: "🙋" },
   { tab: "general", tKey: "tabGeneral" },
   { tab: "theme", tKey: "tabTheme" },
   { tab: "skins", tKey: "tabSkins" },
@@ -76,6 +80,8 @@ const TAB_KEYS: { tab: SettingsTab; tKey: "tabGeneral" | "tabTheme" | "tabSkins"
   { tab: "pwa", tKey: "tabPwa" },
   { tab: "accounts", tKey: "tabAccounts" },
   { tab: "emailTemplates", tKey: "tabEmailTemplates" },
+  { tab: "system", tKey: "tabSystem", emoji: "🔧" },
+  { tab: "shortcuts", tKey: "tabShortcuts", emoji: "⌨️" },
 ];
 
 // --- Shared button classes ---
@@ -1706,16 +1712,16 @@ function QRScannerModal({ onClose, onResult }: { onClose: () => void; onResult: 
 // ─── Settings Page ────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("general");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const { language } = useSettings();
   const t = getTranslations(language);
   const searchParams = useSearchParams();
 
-  // Auto-switch to accounts tab when redirected from Google OAuth
+  // Auto-switch tab from URL query param
   useEffect(() => {
-    if (searchParams.get("tab") === "accounts") {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
-      setActiveTab("accounts");
+    const tab = searchParams.get("tab");
+    if (tab && TAB_KEYS.some((t) => t.tab === tab)) {
+      setActiveTab(tab as SettingsTab);
     }
   }, [searchParams]);
 
@@ -1725,24 +1731,26 @@ export default function SettingsPage() {
 
       {/* Internal tab bar */}
       <div className="mt-6 flex gap-1 border-b border-slate-700/50 pb-0 overflow-x-auto" data-cc-id="settings.tabs">
-        {TAB_KEYS.map(({ tab, tKey }) => (
+        {TAB_KEYS.map(({ tab, tKey, emoji }) => (
           <button
             key={tab}
             type="button"
             onClick={() => setActiveTab(tab)}
-            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+            className={`-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === tab
                 ? "border-[var(--cc-accent-500)] text-[var(--cc-accent-300)]"
                 : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
-            {t.settings[tKey]}
+            {emoji && <span className="me-1">{emoji}</span>}
+            {(t.settings as Record<string, string>)[tKey] ?? tab}
           </button>
         ))}
       </div>
 
       {/* Tab content */}
       <div className="flex-1 pt-6">
+        {activeTab === "profile" && <ProfileTab />}
         {activeTab === "general" && <GeneralTab />}
         {activeTab === "theme" && <ThemeTab />}
         {activeTab === "skins" && <SkinsTab />}
@@ -1751,6 +1759,8 @@ export default function SettingsPage() {
         {activeTab === "pwa" && <PWATab />}
         {activeTab === "accounts" && <IntegrationsTab />}
         {activeTab === "emailTemplates" && <EmailTemplatesTab />}
+        {activeTab === "system" && <SystemTab />}
+        {activeTab === "shortcuts" && <KeyboardShortcutsTab />}
       </div>
     </div>
   );

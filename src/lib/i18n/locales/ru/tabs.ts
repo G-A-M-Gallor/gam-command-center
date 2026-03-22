@@ -1,6 +1,7 @@
 const tabs = {
   dashboard: "Дашборд",
   appLauncher: "Все приложения",
+  apps: "Все приложения",
   layers: "Хаб",
   editor: "Редактор",
   storyMap: "Карта историй",

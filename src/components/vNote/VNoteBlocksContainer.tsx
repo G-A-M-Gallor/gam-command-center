@@ -1,19 +1,29 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { VBlockShell } from "@/components/vBlock";
 import type { VBlockEvent } from "@/components/vBlock";
 import { EntityCard } from "@/components/vBlock/blocks/EntityCard";
 import type { LayoutBlock } from "./storyMap.types";
 
+const VNoteGraphView = lazy(() =>
+  import("./VNoteGraphView").then((m) => ({ default: m.VNoteGraphView }))
+);
+const VNoteWhiteboard = lazy(() =>
+  import("./VNoteWhiteboard").then((m) => ({ default: m.VNoteWhiteboard }))
+);
+
 interface Props {
   blocks: LayoutBlock[];
+  entityId?: string;
   onEvent?: (event: VBlockEvent) => void;
+  selectedBlockId?: string | null;
+  onSelectBlock?: (id: string | null) => void;
 }
 
 type ViewMode = "vnote" | "whiteboard" | "graph";
 
-export function VNoteBlocksContainer({ blocks, onEvent }: Props) {
+export function VNoteBlocksContainer({ blocks, entityId, onEvent, selectedBlockId, onSelectBlock }: Props) {
   const [viewMode, setViewMode] = useState<ViewMode>("vnote");
 
   const handleEvent = useCallback(
@@ -30,8 +40,8 @@ export function VNoteBlocksContainer({ blocks, onEvent }: Props) {
         {(
           [
             { id: "vnote", label: "vNote", enabled: true },
-            { id: "whiteboard", label: "Whiteboard", enabled: false },
-            { id: "graph", label: "Graph", enabled: false },
+            { id: "whiteboard", label: "Whiteboard", enabled: true },
+            { id: "graph", label: "Graph", enabled: true },
           ] as const
         ).map((tab) => (
           <button
@@ -57,39 +67,55 @@ export function VNoteBlocksContainer({ blocks, onEvent }: Props) {
         {viewMode === "vnote" && (
           <>
             {blocks.length > 0 ? (
-              <div className="flex flex-col md:flex-row md:flex-wrap gap-4 items-stretch md:items-start">
+              <div
+                className="flex flex-col md:flex-row md:flex-wrap gap-4 items-stretch md:items-start"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) onSelectBlock?.(null);
+                }}
+                role="presentation"
+              >
                 {blocks.map((block) => (
-                  <VBlockShell
+                  <div
                     key={block.blockId}
-                    blockId={block.blockId}
-                    title={block.storyMapConfig?.label ?? block.blockId}
-                    icon={block.entityType ? "👤" : "📦"}
-                    initialSize={{ width: 350, height: 280 }}
-                    flip={
-                      block.entityId
-                        ? { enabled: true, frontLabel: "פרטים", backLabel: "מידע נוסף" }
-                        : undefined
-                    }
-                    onEvent={handleEvent}
-                    onFullscreen="expand"
+                    onClick={() => onSelectBlock?.(block.blockId)}
+                    role="presentation"
+                    className={`rounded-xl transition-all duration-150 cursor-pointer ${
+                      selectedBlockId === block.blockId
+                        ? "ring-2 ring-blue-500 ring-offset-1 ring-offset-slate-900"
+                        : ""
+                    }`}
                   >
-                    {({ mode, page }) =>
-                      block.entityId ? (
-                        <EntityCard
-                          entityType={block.entityType ?? "contact"}
-                          entityId={block.entityId}
-                          page={page ?? "front"}
-                          mode={mode}
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full p-4">
-                          <span className="text-xs text-slate-500">
-                            block: {block.blockId}
-                          </span>
-                        </div>
-                      )
-                    }
-                  </VBlockShell>
+                    <VBlockShell
+                      blockId={block.blockId}
+                      title={block.storyMapConfig?.label ?? block.blockId}
+                      icon={block.entityType ? "👤" : "📦"}
+                      initialSize={{ width: 350, height: 280 }}
+                      flip={
+                        block.entityId
+                          ? { enabled: true, frontLabel: "פרטים", backLabel: "מידע נוסף" }
+                          : undefined
+                      }
+                      onEvent={handleEvent}
+                      onFullscreen="expand"
+                    >
+                      {({ mode, page }) =>
+                        block.entityId ? (
+                          <EntityCard
+                            entityType={block.entityType ?? "contact"}
+                            entityId={block.entityId}
+                            page={page ?? "front"}
+                            mode={mode}
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full p-4">
+                            <span className="text-xs text-slate-500">
+                              block: {block.blockId}
+                            </span>
+                          </div>
+                        )
+                      }
+                    </VBlockShell>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -116,10 +142,21 @@ export function VNoteBlocksContainer({ blocks, onEvent }: Props) {
           </>
         )}
 
-        {viewMode !== "vnote" && (
-          <div className="flex items-center justify-center py-12 text-xs text-slate-500">
-            {viewMode === "whiteboard" ? "Whiteboard" : "Graph"} — יגיע בגרסה הבאה
-          </div>
+        {viewMode === "graph" && (
+          <Suspense fallback={<div className="flex items-center justify-center py-12 text-xs text-slate-500">טוען גרף...</div>}>
+            <VNoteGraphView
+              blocks={blocks}
+              mainEntityId={entityId}
+              selectedBlockId={selectedBlockId}
+              onSelectBlock={onSelectBlock}
+            />
+          </Suspense>
+        )}
+
+        {viewMode === "whiteboard" && (
+          <Suspense fallback={<div className="flex items-center justify-center py-12 text-xs text-slate-500">טוען לוח...</div>}>
+            <VNoteWhiteboard entityId={entityId || ""} />
+          </Suspense>
         )}
       </div>
     </div>

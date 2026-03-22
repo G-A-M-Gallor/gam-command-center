@@ -22,10 +22,15 @@ export interface VNoteData {
   layout: VNoteLayout | null;
   isLoading: boolean;
   error: Error | null;
+  selectedBlockId: string | null;
+  setSelectedBlockId: (id: string | null) => void;
 }
 
 /** Sidebar tab identifiers */
 export type VNoteSidebarTab = "comm-log" | "progress-log" | "instance-link";
+
+/** Block-specific sidebar tabs */
+export type VNoteBlockTab = "details" | "history" | "relations";
 
 /** Status options for the universal fields dropdown */
 export const VNOTE_STATUS_OPTIONS = [

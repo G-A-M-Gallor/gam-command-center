@@ -3,18 +3,19 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "next/navigation";
-import { Plus, X, Minus, Search } from "lucide-react";
+import { Plus, X, Minus, Search, Pin, PinOff, Settings } from "lucide-react";
 import { NAV_GROUPS, type NavItem } from "./Sidebar";
 import { widgetRegistry } from "./widgets/WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { useBottomDock, type DockItem } from "@/lib/hooks/useBottomDock";
+import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 
 // ─── Constants ──────────────────────────────────────────
 
-const ICON_SIZE = 56;
-const ICON_RADIUS = 14;
-const ICON_INNER = 26;
+const ICON_SIZE = 44;
+const ICON_RADIUS = 12;
+const ICON_INNER = 21;
 
 // Distinct color gradients for dock icons (macOS-like vibrant app colors)
 const ICON_COLORS: Record<string, [string, string]> = {
@@ -143,13 +144,15 @@ function DockIcon({
   const iconSize = ICON_INNER * scale;
   const radius = ICON_RADIUS * scale;
 
+  // Fixed-size outer container — hover zone stays constant regardless of magnification
   return (
     <div
-      className={`relative flex flex-col items-center ${editMode ? "cursor-grab active:cursor-grabbing" : ""} ${isDragging ? "opacity-30 scale-75" : ""}`}
+      className={`relative flex items-end justify-center ${editMode ? "cursor-grab active:cursor-grabbing" : ""} ${isDragging ? "opacity-30 scale-75" : ""}`}
       data-dock-index={index}
       style={{
-        transition: isDragging ? "opacity 0.15s, transform 0.15s" : "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        marginBottom: `${(scale - 1) * ICON_SIZE * 0.5}px`,
+        width: ICON_SIZE + 2,
+        height: ICON_SIZE + 16,
+        transition: isDragging ? "opacity 0.15s, transform 0.15s" : undefined,
       }}
       draggable={editMode}
       onDragStart={editMode ? () => onDragStart?.(index) : undefined}
@@ -158,73 +161,84 @@ function DockIcon({
       onMouseEnter={() => onHover(index)}
       onMouseLeave={onLeave}
     >
-      {/* Remove badge in edit mode */}
-      {editMode && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(index);
-          }}
-          className="absolute -top-1 -left-1 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-400 transition-colors border border-red-400/50"
-          style={{ animation: "wiggle 0.4s ease-in-out infinite" }}
-        >
-          <Minus size={11} strokeWidth={3} />
-        </button>
-      )}
-
-      {/* Tooltip — only on hover, not in edit mode */}
-      {!editMode && scale > 1.2 && (
-        <span
-          className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg px-3 py-1.5 text-[13px] font-medium text-white shadow-xl"
-          style={{
-            background: "rgba(30, 41, 59, 0.95)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            zIndex: 60,
-            animation: "dock-tooltip-in 0.15s ease-out",
-          }}
-        >
-          {label}
-        </span>
-      )}
-
-      {/* Icon button */}
-      <button
-        type="button"
-        onClick={onClick}
-        className="relative flex items-center justify-center transition-all duration-150 cursor-pointer"
+      {/* Inner — icon grows physically (original macOS effect) but container stays fixed */}
+      <div
+        className="relative flex flex-col items-center"
         style={{
-          width: size,
-          height: size,
-          borderRadius: radius,
-          background: `linear-gradient(145deg, ${from}, ${to})`,
-          boxShadow: isActive
-            ? `0 6px 20px ${from}60, 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.25)`
-            : `0 4px 14px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.2)`,
+          marginBottom: 2,
+          transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
       >
-        {/* Gloss/shine overlay */}
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            borderRadius: radius,
-            background: "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%)",
-          }}
-        />
-        <Icon
-          style={{ width: iconSize, height: iconSize }}
-          className="relative z-10 text-white drop-shadow-md"
-        />
-      </button>
+        {/* Remove badge in edit mode */}
+        {editMode && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(index);
+            }}
+            className="absolute -top-1 -left-1 z-20 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-400 transition-colors border border-red-400/50"
+            style={{ animation: "wiggle 0.4s ease-in-out infinite" }}
+          >
+            <Minus size={9} strokeWidth={3} />
+          </button>
+        )}
 
-      {/* Active indicator dot */}
-      {isActive && (
-        <div
-          className="mt-1 h-[5px] w-[5px] rounded-full"
-          style={{ background: from, boxShadow: `0 0 6px ${from}80` }}
-        />
-      )}
+        {/* Tooltip — refined style */}
+        {!editMode && scale > 1.15 && (
+          <span
+            className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md px-2.5 py-1 text-[11px] font-medium text-slate-200 shadow-lg"
+            style={{
+              background: "rgba(15, 23, 42, 0.9)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              zIndex: 60,
+              animation: "dock-tooltip-in 0.15s ease-out",
+              letterSpacing: "0.01em",
+            }}
+          >
+            {label}
+          </span>
+        )}
+
+        {/* Icon button — physical size changes per icon (original effect) */}
+        <button
+          type="button"
+          onClick={onClick}
+          className="relative flex items-center justify-center cursor-pointer"
+          style={{
+            width: size,
+            height: size,
+            borderRadius: radius,
+            background: `linear-gradient(145deg, ${from}, ${to})`,
+            transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            boxShadow: isActive
+              ? `0 4px 14px ${from}50, 0 1px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25)`
+              : `0 3px 10px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)`,
+          }}
+        >
+          {/* Gloss/shine overlay */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              borderRadius: radius,
+              background: "linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 50%)",
+            }}
+          />
+          <Icon
+            style={{ width: iconSize, height: iconSize, transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)" }}
+            className="relative z-10 text-white drop-shadow-md"
+          />
+        </button>
+
+        {/* Active indicator dot */}
+        {isActive && (
+          <div
+            className="mt-0.5 h-[4px] w-[4px] rounded-full"
+            style={{ background: from, boxShadow: `0 0 5px ${from}80` }}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -407,28 +421,73 @@ function DockAddPicker({
 
 // ─── Main Bottom Dock ───────────────────────────────────
 
-export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
+interface BottomDockProps {
+  autoHide?: boolean;
+  /** Left offset of the content area (sidebar + dock strip) */
+  contentLeft?: string;
+  /** Right offset of the content area (right sidebar strip) */
+  contentRight?: string;
+}
+
+export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight = "0px" }: BottomDockProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { language } = useSettings();
   const dock = useBottomDock();
+  const [, , updatePref] = useShellPrefs();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [showPicker, setShowPicker] = useState(false);
   const dockRef = useRef<HTMLDivElement>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [triggerVisible, setTriggerVisible] = useState(!autoHide);
+  const [closing, setClosing] = useState(false);
+  const [pinned, setPinned] = useState(false);
 
-  // Auto-hide: show trigger on hover near bottom edge (50px zone)
+  // Hydrate pinned from localStorage
   useEffect(() => {
-    if (!autoHide) { setTriggerVisible(true); return; }
+    try {
+      const raw = localStorage.getItem("cc-shell-prefs");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.dockPinned) setPinned(true);
+      }
+    } catch {}
+  }, []);
+
+  // Auto-hide: debounced trigger with hysteresis to prevent flickering
+  useEffect(() => {
+    if (!autoHide || pinned) { setTriggerVisible(true); return; }
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    let isInZone = false;
+
     const handleMouseMove = (e: MouseEvent) => {
       const nearBottom = e.clientY > window.innerHeight - 50;
-      setTriggerVisible(nearBottom || dock.isOpen);
+
+      if (nearBottom && !isInZone) {
+        isInZone = true;
+        if (timeout) clearTimeout(timeout);
+        setTriggerVisible(true);
+      } else if (!nearBottom && isInZone) {
+        isInZone = false;
+        if (!dock.isOpen) {
+          if (timeout) clearTimeout(timeout);
+          timeout = setTimeout(() => setTriggerVisible(false), 300);
+        }
+      }
     };
+
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [autoHide, dock.isOpen]);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [autoHide, dock.isOpen, pinned]);
+
+  // Keep trigger visible while dock is open
+  useEffect(() => {
+    if (dock.isOpen || pinned) setTriggerVisible(true);
+  }, [dock.isOpen, pinned]);
 
   // Close on Escape
   useEffect(() => {
@@ -436,21 +495,39 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (showPicker) setShowPicker(false);
-        else dock.close();
+        else if (!pinned) handleClose();
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [dock, showPicker]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dock.isOpen, showPicker, pinned]);
+
+  // Close with genie-out animation
+  const handleClose = useCallback(() => {
+    if (pinned) return;
+    setClosing(true);
+    setTimeout(() => {
+      setClosing(false);
+      dock.close();
+    }, 350);
+  }, [dock, pinned]);
+
+  // Toggle pin
+  const togglePin = useCallback(() => {
+    const next = !pinned;
+    setPinned(next);
+    updatePref("dockPinned", next);
+  }, [pinned, updatePref]);
 
   // Magnification scale (macOS-like smooth parabolic)
   const getScale = useCallback(
     (index: number) => {
       if (hoveredIndex === null) return 1;
       const distance = Math.abs(index - hoveredIndex);
-      if (distance === 0) return 1.4;
-      if (distance === 1) return 1.2;
-      if (distance === 2) return 1.08;
+      if (distance === 0) return 1.3;
+      if (distance === 1) return 1.12;
+      if (distance === 2) return 1.04;
       return 1;
     },
     [hoveredIndex],
@@ -464,7 +541,7 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
       if (item.type === "page") {
         const nav = findNavItem(item.id);
         if (nav) router.push(nav.href);
-        dock.close();
+        if (!pinned) handleClose();
       } else if (item.type === "widget") {
         const eventMap: Record<string, string> = {
           search: "cc-open-search",
@@ -475,10 +552,10 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
         };
         const eventName = eventMap[item.id] || `cc-open-widget-${item.id}`;
         window.dispatchEvent(new CustomEvent(eventName));
-        dock.close();
+        if (!pinned) handleClose();
       }
     },
-    [dock, router],
+    [dock, router, pinned, handleClose],
   );
 
   // Check if a page is active
@@ -502,12 +579,22 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
     return () => window.removeEventListener("cc-dock-add", handler);
   }, [dock]);
 
+  // Show trigger rising from below (not visible when dock is open)
+  const showTrigger = triggerVisible && !dock.isOpen;
+
   return (
     <>
-      {/* ── Trigger button — half ellipse at bottom center ── */}
+      {/* ── Trigger button — centered in content area ── */}
       <div
-        className="fixed bottom-0 left-1/2 z-[51] -translate-x-1/2 transition-opacity duration-200"
-        style={{ opacity: triggerVisible ? 1 : 0, pointerEvents: triggerVisible ? "auto" : "none" }}
+        className="fixed bottom-0 z-[51] flex justify-center"
+        style={{
+          left: contentLeft,
+          right: contentRight,
+          opacity: showTrigger ? 1 : 0,
+          pointerEvents: showTrigger ? "auto" : "none",
+          transform: `translateY(${showTrigger ? "0" : "100%"})`,
+          transition: "opacity 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        }}
       >
         <button
           type="button"
@@ -517,73 +604,101 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
             width: 80,
             height: 28,
             borderRadius: "40px 40px 0 0",
-            backgroundColor: dock.isOpen ? "var(--cc-accent-500)" : "rgb(30 41 59)",
+            backgroundColor: "rgb(30 41 59)",
             border: "1px solid",
             borderBottom: "none",
-            borderColor: dock.isOpen ? "var(--cc-accent-400)" : "rgba(51 65 85 / 0.6)",
-            boxShadow: dock.isOpen
-              ? "0 0 16px var(--cc-accent-500-50), 0 -4px 20px var(--cc-accent-600-30)"
-              : "0 0 8px var(--cc-accent-500-15), 0 -2px 6px rgba(0,0,0,0.3)",
+            borderColor: "rgba(51 65 85 / 0.6)",
+            boxShadow: "0 0 8px var(--cc-accent-500-15), 0 -2px 6px rgba(0,0,0,0.3)",
           }}
           onMouseEnter={(e) => {
-            if (!dock.isOpen) {
-              e.currentTarget.style.transform = "scale(1.05)";
-              e.currentTarget.style.boxShadow = "0 0 14px var(--cc-accent-500-30), 0 -3px 10px rgba(0,0,0,0.3)";
-            }
+            e.currentTarget.style.transform = "scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 0 14px var(--cc-accent-500-30), 0 -3px 10px rgba(0,0,0,0.3)";
           }}
           onMouseLeave={(e) => {
-            if (!dock.isOpen) {
-              e.currentTarget.style.transform = "";
-              e.currentTarget.style.boxShadow = "0 0 8px var(--cc-accent-500-15), 0 -2px 6px rgba(0,0,0,0.3)";
-            }
+            e.currentTarget.style.transform = "";
+            e.currentTarget.style.boxShadow = "0 0 8px var(--cc-accent-500-15), 0 -2px 6px rgba(0,0,0,0.3)";
           }}
           aria-label="Toggle dock"
         >
           <Plus
             size={18}
-            className={`transition-transform duration-300 ${dock.isOpen ? "rotate-45" : ""}`}
-            style={{ color: dock.isOpen ? "white" : "rgb(148 163 184)" }}
+            style={{ color: "rgb(148 163 184)" }}
           />
         </button>
       </div>
 
       {/* ── The Dock bar ── */}
-      {dock.isOpen && (
+      {(dock.isOpen || closing) && (
         <>
-          {/* Click-away backdrop */}
-          <button
-            type="button"
-            onClick={dock.close}
-            className="fixed inset-0 z-[49]"
-            aria-label="Close dock"
-          />
+          {/* Click-away backdrop — only closes when unpinned */}
+          {!pinned && (
+            <button
+              type="button"
+              onClick={handleClose}
+              className="fixed inset-0 z-[49]"
+              aria-label="Close dock"
+            />
+          )}
 
           <div
             ref={dockRef}
-            className="fixed bottom-[28px] left-1/2 z-[50]"
+            className="fixed bottom-[10px] z-[50] flex justify-center pointer-events-none"
             style={{
-              transform: "translateX(-50%)",
-              animation: "dock-genie-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both",
+              left: contentLeft,
+              right: contentRight,
+            }}
+          >
+          <div
+            className="flex items-end gap-2"
+            style={{
+              pointerEvents: "auto",
+              animation: closing
+                ? "dock-genie-out 0.35s cubic-bezier(0.55, 0.085, 0.68, 0.53) both"
+                : "dock-genie-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both",
               transformOrigin: "bottom center",
             }}
           >
+            {/* Pin button — outside dock bar, to the left */}
+            <div className="flex items-center pb-1">
+              <button
+                type="button"
+                onClick={togglePin}
+                className={`flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer ${
+                  pinned
+                    ? "bg-[var(--cc-accent-500)] text-white shadow-lg"
+                    : "text-slate-500 hover:text-slate-300 hover:bg-white/10"
+                }`}
+                style={{
+                  width: 28,
+                  height: 28,
+                  background: pinned ? undefined : "rgba(15, 23, 42, 0.78)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+                title={pinned ? "Unpin dock" : "Pin dock"}
+              >
+                {pinned ? <Pin size={12} /> : <PinOff size={12} />}
+              </button>
+            </div>
+
             <div
-              className="flex items-end rounded-[22px] border border-white/[0.12]"
+              className="flex items-end rounded-[18px] border border-white/[0.12]"
               onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
               style={{
-                padding: "10px 14px 12px",
-                gap: "6px",
+                padding: "6px 10px 8px",
+                gap: "4px",
                 background: "rgba(15, 23, 42, 0.78)",
                 backdropFilter: "blur(40px) saturate(2)",
                 WebkitBackdropFilter: "blur(40px) saturate(2)",
                 boxShadow: [
-                  "0 12px 48px rgba(0,0,0,0.55)",
-                  "0 4px 16px rgba(0,0,0,0.35)",
+                  "0 8px 32px rgba(0,0,0,0.5)",
+                  "0 2px 10px rgba(0,0,0,0.3)",
                   "inset 0 1px 0 rgba(255,255,255,0.08)",
                   "inset 0 -1px 0 rgba(0,0,0,0.2)",
                 ].join(", "),
               }}
             >
+
               {/* Dock items */}
               {dock.items.map((item, i) => {
                 const dockKey = `${item.type}-${item.id}`;
@@ -642,11 +757,11 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
                     width: ICON_SIZE,
                     height: ICON_SIZE,
                     borderRadius: ICON_RADIUS,
-                    border: "2px dashed rgba(255,255,255,0.15)",
+                    border: "1.5px dashed rgba(255,255,255,0.15)",
                     background: "rgba(255,255,255,0.04)",
                   }}
                 >
-                  <Plus size={24} className="text-slate-400" />
+                  <Plus size={18} className="text-slate-400" />
                 </button>
               </div>
 
@@ -659,17 +774,40 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
                     className={`flex items-center justify-center rounded-xl transition-all duration-200 cursor-pointer ${
                       dock.editMode ? "bg-[var(--cc-accent-500)] text-white shadow-lg" : "text-slate-500 hover:text-slate-300 hover:bg-white/8"
                     }`}
-                    style={{ width: 32, height: 32, borderRadius: 10 }}
+                    style={{ width: 28, height: 28, borderRadius: 8 }}
                   >
                     {dock.editMode ? (
-                      <span className="text-sm font-bold">✓</span>
+                      <span className="text-xs font-bold">✓</span>
                     ) : (
-                      <span className="text-base leading-none tracking-wider">···</span>
+                      <span className="text-sm leading-none tracking-wider">···</span>
                     )}
                   </button>
                 </div>
               )}
             </div>
+
+            {/* Settings area — outside dock bar, to the right */}
+            <div className="flex items-center pb-1">
+              <button
+                type="button"
+                onClick={() => {
+                  router.push("/dashboard/settings");
+                  if (!pinned) handleClose();
+                }}
+                className="flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer text-slate-500 hover:text-slate-300 hover:bg-white/10"
+                style={{
+                  width: 28,
+                  height: 28,
+                  background: "rgba(15, 23, 42, 0.78)",
+                  backdropFilter: "blur(20px)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+                title={language === "he" ? "הגדרות" : "Settings"}
+              >
+                <Settings size={12} />
+              </button>
+            </div>
+          </div>
           </div>
         </>
       )}
@@ -689,18 +827,33 @@ export function BottomDock({ autoHide = false }: { autoHide?: boolean }) {
         @keyframes dock-genie-in {
           0% {
             opacity: 0;
-            transform: translateX(-50%) scaleX(0.2) scaleY(0.05) translateY(30px);
+            transform: scaleX(0.2) scaleY(0.05) translateY(30px);
           }
           40% {
             opacity: 1;
-            transform: translateX(-50%) scaleX(1.02) scaleY(0.85) translateY(-4px);
+            transform: scaleX(1.02) scaleY(0.85) translateY(-4px);
           }
           70% {
-            transform: translateX(-50%) scaleX(0.98) scaleY(1.02) translateY(1px);
+            transform: scaleX(0.98) scaleY(1.02) translateY(1px);
           }
           100% {
             opacity: 1;
-            transform: translateX(-50%) scaleX(1) scaleY(1) translateY(0);
+            transform: scaleX(1) scaleY(1) translateY(0);
+          }
+        }
+
+        @keyframes dock-genie-out {
+          0% {
+            opacity: 1;
+            transform: scaleX(1) scaleY(1) translateY(0);
+          }
+          30% {
+            opacity: 1;
+            transform: scaleX(0.95) scaleY(1.05) translateY(-2px);
+          }
+          100% {
+            opacity: 0;
+            transform: scaleX(0.15) scaleY(0.05) translateY(40px);
           }
         }
 

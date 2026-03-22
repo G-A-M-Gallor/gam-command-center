@@ -13,6 +13,7 @@ export interface ShellPrefs {
   trayVisible: boolean;
   speedDialVisible: boolean;
   bottomDockAutoHide: boolean;
+  dockPinned: boolean;
 }
 
 const STORAGE_KEY = "cc-shell-prefs";
@@ -27,6 +28,7 @@ const DEFAULTS: ShellPrefs = {
   trayVisible: false,
   speedDialVisible: true,
   bottomDockAutoHide: true,
+  dockPinned: false,
 };
 
 export const SIDEBAR_MIN_WIDTH = 180;

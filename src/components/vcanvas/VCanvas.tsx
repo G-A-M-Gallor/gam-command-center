@@ -5,8 +5,10 @@ import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { CanvasContext } from "@/lib/vcanvas/canvasConfig";
 
-// Dynamic import — Excalidraw doesn't support SSR
-const Excalidraw = dynamic(
+// Excalidraw v0.18 requires explicit CSS import for toolbar icons
+import "@excalidraw/excalidraw/index.css";
+
+const ExcalidrawWrapper = dynamic(
   () => import("@excalidraw/excalidraw").then((mod) => ({ default: mod.Excalidraw })),
   {
     ssr: false,
@@ -53,18 +55,22 @@ const LANG_MAP: Record<string, string> = {
 
 // ─── Component ───────────────────────────────────────
 
+export type VCanvasMode = "vCanvas" | "vNote";
+
 interface Props {
   /** Unique persistence key — each canvas gets its own storage */
   persistenceKey: string;
   /** Which context controls feature toggles */
   context: CanvasContext;
+  /** Display mode — "vCanvas" for standalone, "vNote" for entity whiteboard */
+  mode: VCanvasMode;
   /** Language */
   language: "he" | "en" | "ru";
   /** Height class */
   className?: string;
 }
 
-export function VCanvas({ persistenceKey, context, language, className = "h-full" }: Props) {
+export function VCanvas({ persistenceKey, context, mode, language, className = "h-full" }: Props) {
   const [initialData, setInitialData] = useState<ExcalidrawData | null>(null);
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -109,8 +115,12 @@ export function VCanvas({ persistenceKey, context, language, className = "h-full
         .excalidraw { --color-primary: #8b5cf6; }
         .excalidraw .Island { background: rgba(30, 41, 59, 0.95) !important; border: 1px solid rgba(255,255,255,0.08) !important; }
         .excalidraw .App-toolbar .ToolIcon__icon { background: rgba(30, 41, 59, 0.8); }
+        /* Hide Excalidraw branding */
+        .excalidraw .excalidraw-logo-icon,
+        .excalidraw a[href*="excalidraw"],
+        .excalidraw .welcome-screen-center__logo { display: none !important; }
       `}</style>
-      <Excalidraw
+      <ExcalidrawWrapper
         initialData={
           initialData
             ? {
@@ -132,10 +142,19 @@ export function VCanvas({ persistenceKey, context, language, className = "h-full
         onChange={handleChange as never}
         langCode={LANG_MAP[language] || "en"}
         theme="dark"
+        renderTopRightUI={() => (
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-800/80 border border-white/[0.06]">
+            <div className="h-4 w-4 rounded bg-purple-500 flex items-center justify-center">
+              <span className="text-[8px] font-black text-white leading-none">G</span>
+            </div>
+            <span className="text-[10px] font-semibold text-slate-400 tracking-wide">{mode}</span>
+          </div>
+        )}
         UIOptions={{
+          welcomeScreen: false,
           canvasActions: {
             loadScene: false,
-            export: { saveFileToDisk: true },
+            export: false,
           },
         }}
       />

@@ -17,7 +17,7 @@ export function EntityCardFront({ fields, meta, language, compact, onAction }: P
   const visible = compact ? sorted.filter((f) => f.priority <= 2) : sorted;
 
   return (
-    <div className="flex flex-col gap-0.5 px-3 py-2">
+    <div className={`grid gap-0.5 px-3 py-2 ${compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
       {visible.map((slot) => (
         <EntityCardField
           key={slot.metaKey}
@@ -29,7 +29,7 @@ export function EntityCardFront({ fields, meta, language, compact, onAction }: P
         />
       ))}
       {visible.length === 0 && (
-        <p className="text-xs text-slate-500 py-2 text-center">אין שדות להצגה</p>
+        <p className="text-xs text-slate-500 py-2 text-center col-span-full">אין שדות להצגה</p>
       )}
     </div>
   );

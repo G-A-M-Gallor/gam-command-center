@@ -80,11 +80,13 @@ import {
   UserCircle,
   Film,
   Search,
+  Clock,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, rectSortingStrategy, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useQueryClient } from "@tanstack/react-query";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -94,6 +96,8 @@ import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import { useSidebarCustomization } from "@/lib/sidebar/useSidebarCustomization";
 import { buildDisplayGroups } from "@/lib/sidebar/sidebarCustomization";
 import type { ItemCustomization } from "@/lib/sidebar/sidebarCustomization";
+import { useAppsRegistry, getAppStatusByRoute, getStatusBadge, type AppRecord } from "@/lib/hooks/useAppsRegistry";
+import { useRecentItems, deleteRecentItem } from "@/lib/hooks/useRecentItems";
 import { SidebarContextMenu } from "./SidebarContextMenu";
 import { ItemEditPopover, getIconByName } from "./ItemEditPopover";
 import { SOCIAL_LINKS, SocialIcon } from "./DownloadReminder";
@@ -199,6 +203,24 @@ export type NavEntry = NavItem | NavFolder;
 
 function isFolder(entry: NavEntry): entry is NavFolder {
   return "type" in entry && entry.type === "folder";
+}
+
+/** Tiny status badge from vb_apps DB — shows "בפיתוח" / "מתוכנן" / "רעיון" */
+function AppStatusBadge({ href, allApps }: { href: string; allApps: AppRecord[] }) {
+  const status = getAppStatusByRoute(allApps, href);
+  if (!status) return null;
+  const label = getStatusBadge(status);
+  if (!label) return null;
+  const colors = status === "in-progress"
+    ? "text-blue-400 bg-blue-400/10"
+    : status === "idea"
+      ? "text-slate-500 bg-slate-500/10"
+      : "text-amber-400 bg-amber-400/10";
+  return (
+    <span className={`shrink-0 rounded px-1 py-0 text-[8px] font-medium leading-tight ${colors}`}>
+      {label}
+    </span>
+  );
 }
 
 // ─── Sortable Section Wrapper ─────────────────────────────
@@ -513,6 +535,9 @@ export function Sidebar({
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
+  const { allApps } = useAppsRegistry();
+  const { recentItems } = useRecentItems();
+  const queryClient = useQueryClient();
   const [hovered, setHovered] = useState(false);
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -1161,6 +1186,41 @@ export function Sidebar({
                 ))}
               </div>
             </div>
+
+            {/* Recent items */}
+            {recentItems.length > 0 && (
+              <div className="px-1.5 pt-1.5 pb-0.5">
+                <div className="flex items-center gap-1 px-1 mb-1">
+                  <Clock className="h-2.5 w-2.5 text-slate-600" />
+                  <span className="text-[9px] text-slate-600 font-medium">אחרונים</span>
+                </div>
+                <div className="space-y-0.5 max-h-36 overflow-y-auto scrollbar-none">
+                  {recentItems.slice(0, 5).map((item) => (
+                    <Link
+                      key={item.id}
+                      href={item.route}
+                      onClick={() => { if (shouldCloseOnNav) onClose?.(); }}
+                      className="group/recent flex items-center gap-1.5 rounded-md px-1.5 py-1 hover:bg-slate-800/60 transition-colors"
+                    >
+                      <span className="text-[10px] shrink-0">{item.icon || "📄"}</span>
+                      <span className="text-[10px] text-slate-400 truncate flex-1">{item.title}</span>
+                      <button
+                        type="button"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          await deleteRecentItem(item.id);
+                          await queryClient.invalidateQueries({ queryKey: ["recent-items"] });
+                        }}
+                        className="opacity-0 group-hover/recent:opacity-100 shrink-0 rounded p-0.5 text-slate-700 hover:text-red-400 transition-all"
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Accent divider */}
             <div className="mx-2 divider-accent" />
@@ -1832,9 +1892,11 @@ export function Sidebar({
                                 !isActive ? "group-hover:scale-105" : ""
                               }`} />
                               <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{displayLabel}</span>
+                              <AppStatusBadge href={href} allApps={allApps} />
                             </>
                           ) : (
                             <>
+                              <AppStatusBadge href={href} allApps={allApps} />
                               <span data-cc-id="sidebar.nav.link.label" data-cc-text="true" className={`flex-1 truncate ${onRight ? "text-right" : "text-left"}`}>{displayLabel}</span>
                               <ResolvedIcon className={`h-[18px] w-[18px] shrink-0 transition-transform duration-150 ${
                                 !isActive ? "group-hover:scale-105" : ""

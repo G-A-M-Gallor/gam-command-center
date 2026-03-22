@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
 import type { NoteRecord } from "@/lib/entities/types";
@@ -42,6 +43,12 @@ async function fetchVNoteLayout(entityId: string): Promise<VNoteLayout | null> {
 // ── Hook ────────────────────────────────────────────────────────
 
 export function useVNote(entityId: string): VNoteData {
+  const [selectedBlockId, setSelectedBlockIdRaw] = useState<string | null>(null);
+
+  const setSelectedBlockId = useCallback((id: string | null) => {
+    setSelectedBlockIdRaw(id);
+  }, []);
+
   const {
     data: entity,
     isLoading: isLoadingEntity,
@@ -70,5 +77,7 @@ export function useVNote(entityId: string): VNoteData {
     layout: layout ?? null,
     isLoading: isLoadingEntity || isLoadingLayout,
     error: (entityError ?? layoutError) as Error | null,
+    selectedBlockId,
+    setSelectedBlockId,
   };
 }

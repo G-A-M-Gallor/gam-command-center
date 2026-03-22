@@ -591,6 +591,7 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
         <VCanvas
           persistenceKey={`entity_${noteId}`}
           context="entity"
+          mode="vNote"
           language={lang as 'he' | 'en' | 'ru'}
           className={expanded ? 'h-[600px]' : 'h-[320px]'}
         />
