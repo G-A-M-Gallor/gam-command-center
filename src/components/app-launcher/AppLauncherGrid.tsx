@@ -66,6 +66,7 @@ export function AppLauncherGrid() {
   } = launcher;
 
   const [historyOpen, setHistoryOpen] = useState(false);
+  const isRtl = language === "he";
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -144,8 +145,13 @@ export function AppLauncherGrid() {
     const container = scrollRef.current;
     if (!container) return;
     isScrollingProgrammatically.current = true;
-    const targetX = pageIndex * container.clientWidth;
-    container.scrollTo({ left: targetX, behavior: "smooth" });
+    const pageEl = pageRefs.current[pageIndex];
+    if (pageEl) {
+      pageEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    } else {
+      const targetX = pageIndex * container.clientWidth;
+      container.scrollTo({ left: targetX, behavior: "smooth" });
+    }
     // Reset flag after animation
     setTimeout(() => { isScrollingProgrammatically.current = false; }, 500);
   }, []);
@@ -188,16 +194,16 @@ export function AppLauncherGrid() {
     scrollToPage(prev);
   }, [currentPage, setCurrentPage, scrollToPage]);
 
-  // Keyboard nav
+  // Keyboard nav (swap arrows for RTL)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") goPrev();
-      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") isRtl ? goNext() : goPrev();
+      if (e.key === "ArrowRight") isRtl ? goPrev() : goNext();
       if (e.key === "Escape") setSelectedItemId(null);
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [goNext, goPrev, setSelectedItemId]);
+  }, [goNext, goPrev, setSelectedItemId, isRtl]);
 
   // Dot click
   const goToPage = useCallback((idx: number) => {
@@ -264,7 +270,7 @@ export function AppLauncherGrid() {
   }, [selectedItemId, expandedFolderId, language, getFolderItems, getLabel, handleLaunch, setSelectedItemId, setExpandedFolderId]);
 
   return (
-    <div className="flex h-full flex-1 overflow-hidden">
+    <div dir={isRtl ? "rtl" : "ltr"} className="flex h-full flex-1 overflow-hidden">
       {/* History panel (left side) */}
       {historyOpen && (
         <AppLauncherHistory
@@ -325,25 +331,25 @@ export function AppLauncherGrid() {
             )}
           </DndContext>
 
-          {/* Page arrows */}
+          {/* Page arrows — swap sides for RTL */}
           {!isSearching && totalPages > 1 && (
             <>
               {currentPage > 0 && (
                 <button
                   type="button"
                   onClick={goPrev}
-                  className="absolute left-1 top-1/2 z-10 -translate-y-1/2 rounded-full bg-slate-800/80 p-2.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-all backdrop-blur-sm shadow-lg border border-white/[0.06]"
+                  className={`absolute ${isRtl ? "right-1" : "left-1"} top-1/2 z-10 -translate-y-1/2 rounded-full bg-slate-800/80 p-2.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-all backdrop-blur-sm shadow-lg border border-white/[0.06]`}
                 >
-                  <ChevronLeft className="h-5 w-5" />
+                  {isRtl ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                 </button>
               )}
               {currentPage < totalPages - 1 && (
                 <button
                   type="button"
                   onClick={goNext}
-                  className="absolute right-1 top-1/2 z-10 -translate-y-1/2 rounded-full bg-slate-800/80 p-2.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-all backdrop-blur-sm shadow-lg border border-white/[0.06]"
+                  className={`absolute ${isRtl ? "left-1" : "right-1"} top-1/2 z-10 -translate-y-1/2 rounded-full bg-slate-800/80 p-2.5 text-slate-400 hover:bg-slate-700 hover:text-white transition-all backdrop-blur-sm shadow-lg border border-white/[0.06]`}
                 >
-                  <ChevronRight className="h-5 w-5" />
+                  {isRtl ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                 </button>
               )}
             </>
