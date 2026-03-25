@@ -62,5 +62,6 @@ const tabs = {
   phoneTemplates: "Phone Templates (Coming Soon)",
   prompts: "Prompts (Coming Soon)",
   toolkit: "Toolkit",
+  courses: "Course Library",
 } as const;
 export default tabs;

@@ -139,6 +139,7 @@ const APP_GRADIENTS: Record<string, [string, string]> = {
   entityFields:    ["#f97316", "#fb923c"],
   fieldTemplates:  ["#f97316", "#fb923c"],
   iconLibrary:     ["#eab308", "#facc15"],
+  courses:         ["#8b5cf6", "#a78bfa"],
   databases:       ["#f97316", "#fb923c"],
   grid:            ["#f97316", "#fb923c"],
   matching:        ["#8b5cf6", "#c084fc"],
@@ -394,6 +395,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
           { href: "/dashboard/entities/field-templates", key: "fieldTemplates", icon: Layers, status: "coming-soon" },
           { href: "/dashboard/icon-library", key: "iconLibrary", icon: Sparkles, status: "active" },
+          { href: "/dashboard/courses", key: "courses", icon: GraduationCap, status: "active" },
         ],
       },
       {

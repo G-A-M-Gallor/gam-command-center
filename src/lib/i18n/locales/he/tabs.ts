@@ -62,5 +62,6 @@ const tabs = {
   phoneTemplates: "תבניות הודעות טלפון (בקרוב)",
   prompts: "פרומפטים (בקרוב)",
   toolkit: "ארגז כלים",
+  courses: "ספריית קורסים",
 } as const;
 export default tabs;

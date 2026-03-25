@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2, Mail, Gauge, Film, CalendarDays, Pencil, Wrench,
+  Loader2, Mail, Gauge, Film, CalendarDays, Pencil, Wrench, GraduationCap,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -426,6 +426,16 @@ export const routes: RouteEntry[] = [
       { id: 'toolkit-screen', name: 'ToolkitScreen', file: 'components/pm/ToolkitScreen.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: ['cc_toolkit'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'courses', path: '/dashboard/courses', name: 'Course Library', nameHe: 'ספריית קורסים', icon: GraduationCap,
+    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-25',
+    descriptionHe: 'ספריית קורסים אישית — קורסים עם תמלולים, סיכומים וכרטיסיות למידה. וידאו ב-Google Drive, תמלולים ב-Supabase',
+    descriptionEn: 'Personal course library — courses with transcriptions, summaries and learning flashcards. Video in Google Drive, transcriptions in Supabase',
+    components: [
+      { id: 'courses-screen', name: 'CoursesScreen', file: 'components/pm/CoursesScreen.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['cc_courses', 'cc_lessons', 'cc_transcriptions'], visible: true, sidebarTab: true,
   },
   {
     id: 'boardroom', path: '/dashboard/boardroom', name: 'Board Room', nameHe: 'חדר דיונים', icon: Users,

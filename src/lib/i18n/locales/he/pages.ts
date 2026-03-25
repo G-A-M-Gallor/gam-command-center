@@ -127,5 +127,9 @@ const pages = {
     title: "ארגז כלים",
     description: "כלים לפיתוח, AI ותוכניות",
   },
+  courses: {
+    title: "ספריית קורסים",
+    description: "ספריית קורסים אישית עם תמלולים, סיכומים וכרטיסיות למידה",
+  },
 } as const;
 export default pages;

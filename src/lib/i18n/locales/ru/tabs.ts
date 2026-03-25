@@ -62,5 +62,6 @@ const tabs = {
   phoneTemplates: "Шаблоны сообщений (Скоро)",
   prompts: "Промпты (Скоро)",
   toolkit: "Инструменты",
+  courses: "Библиотека курсов",
 } as const;
 export default tabs;

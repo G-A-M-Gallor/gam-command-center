@@ -124,8 +124,12 @@ const pages = {
     description: "Freehand whiteboard — sketches, diagrams and visual ideas",
   },
   toolkit: {
-    title: "ארגז כלים",
-    description: "כלים לפיתוח, AI ותוכניות",
+    title: "Toolkit",
+    description: "Development, AI and software tools",
+  },
+  courses: {
+    title: "Course Library",
+    description: "Personal courses with transcriptions, summaries and learning flashcards",
   },
 } as const;
 export default pages;
