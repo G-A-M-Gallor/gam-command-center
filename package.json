@@ -54,6 +54,7 @@
     "clsx": "^2.1.1",
     "docx": "^9.6.0",
     "framer-motion": "^12.38.0",
+    "googleapis": "^171.4.0",
     "html2canvas": "^1.4.1",
     "html5-qrcode": "^2.3.8",
     "jose": "^6.2.1",
