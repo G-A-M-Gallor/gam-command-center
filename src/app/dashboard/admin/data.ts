@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2, Mail, Gauge, Film, CalendarDays, Pencil,
+  Loader2, Mail, Gauge, Film, CalendarDays, Pencil, Wrench,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -416,6 +416,16 @@ export const routes: RouteEntry[] = [
       { id: 'slide-presenter', name: 'SlidePresenter', file: 'components/slides/SlidePresenter.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'toolkit', path: '/dashboard/toolkit', name: 'Toolkit', nameHe: 'ארגז כלים', icon: Wrench,
+    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-25',
+    descriptionHe: 'ארגז כלים אישי — טבלת כלים עם AI Chat לניהול. מציג כלי פיתוח, MCPs, AI וכלי מדיה',
+    descriptionEn: 'Personal toolkit — tools table with AI Chat manager. Shows dev tools, MCPs, AI tools and media utilities',
+    components: [
+      { id: 'toolkit-screen', name: 'ToolkitScreen', file: 'components/pm/ToolkitScreen.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['cc_toolkit'], visible: true, sidebarTab: true,
   },
   {
     id: 'boardroom', path: '/dashboard/boardroom', name: 'Board Room', nameHe: 'חדר דיונים', icon: Users,

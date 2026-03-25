@@ -123,5 +123,9 @@ const pages = {
     title: "vCanvas",
     description: "Свободная доска — скетчи, диаграммы и визуальные идеи",
   },
+  toolkit: {
+    title: "Инструменты",
+    description: "Инструменты для разработки, ИИ и программы",
+  },
 } as const;
 export default pages;

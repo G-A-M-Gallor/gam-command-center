@@ -123,5 +123,9 @@ const pages = {
     title: "vCanvas",
     description: "לוח ציור חופשי — סקיצות, דיאגרמות ורעיונות ויזואליים",
   },
+  toolkit: {
+    title: "ארגז כלים",
+    description: "כלים לפיתוח, AI ותוכניות",
+  },
 } as const;
 export default pages;

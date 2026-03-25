@@ -81,6 +81,7 @@ import {
   Film,
   Search,
   Clock,
+  Wrench,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -407,6 +408,7 @@ export const NAV_GROUPS: NavGroup[] = [
         ],
       },
       { href: "/dashboard/slides", key: "slides", icon: Presentation, status: "active" },
+      { href: "/dashboard/toolkit", key: "toolkit", icon: Wrench, status: "active" },
       {
         type: "folder",
         href: "/dashboard/email-templates",

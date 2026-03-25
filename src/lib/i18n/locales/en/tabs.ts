@@ -61,5 +61,6 @@ const tabs = {
   emailTemplates: "Email Templates",
   phoneTemplates: "Phone Templates (Coming Soon)",
   prompts: "Prompts (Coming Soon)",
+  toolkit: "Toolkit",
 } as const;
 export default tabs;

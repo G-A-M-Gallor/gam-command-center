@@ -61,5 +61,6 @@ const tabs = {
   emailTemplates: "תבניות מייל",
   phoneTemplates: "תבניות הודעות טלפון (בקרוב)",
   prompts: "פרומפטים (בקרוב)",
+  toolkit: "ארגז כלים",
 } as const;
 export default tabs;

@@ -56,6 +56,7 @@ import email from "./he/email";
 import pwa from "./he/pwa";
 import entities from "./he/entities";
 import wiki from "./he/wiki";
+import toolkit from "./he/toolkit";
 import iconPicker from "./he/iconPicker";
 import grid from "./he/grid";
 import slides from "./he/slides";
@@ -65,4 +66,4 @@ import importEngine from "./he/importEngine";
 import gmail from "./he/gmail";
 import googleCalendar from "./he/googleCalendar";
 
-export const he = { tabs, pages, auditLog, roadmapPage, ceoQueue, common, speedDial, smartBar, auth, settings, sidebar, tray, shellPrefs, userMenu, downloads, brand, contextMenu, elementLabels, elementDescriptions, guide, folders, fieldLibrary, canvas, storyMap, health, dashboardHome, hub, boardroom, documentsPage, export: exportNs, docControl, docTemplates, docFields, fieldConfig, emailTemplates, emailDesigner, relativeTime, layers, home, admin, audit, widgets, gallery, designSystem, projectDetail, functionalMap, architecturePage, planPage, automations, rss, editor, aiHub, bottomBar, comms, email, pwa, entities, wiki, iconPicker, grid, slides, matching, contractor, importEngine, gmail, googleCalendar } as const;
+export const he = { tabs, pages, auditLog, roadmapPage, ceoQueue, common, speedDial, smartBar, auth, settings, sidebar, tray, shellPrefs, userMenu, downloads, brand, contextMenu, elementLabels, elementDescriptions, guide, folders, fieldLibrary, canvas, storyMap, health, dashboardHome, hub, boardroom, documentsPage, export: exportNs, docControl, docTemplates, docFields, fieldConfig, emailTemplates, emailDesigner, relativeTime, layers, home, admin, audit, widgets, gallery, designSystem, projectDetail, functionalMap, architecturePage, planPage, automations, rss, editor, aiHub, bottomBar, comms, email, pwa, entities, wiki, toolkit, iconPicker, grid, slides, matching, contractor, importEngine, gmail, googleCalendar } as const;
