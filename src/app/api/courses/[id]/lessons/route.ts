@@ -25,7 +25,7 @@ export async function GET(
 
     // Verify course exists
     const { data: course, error: courseError } = await supabase
-      .from("cc_courses")
+      .from("courses")
       .select("id")
       .eq("id", courseId)
       .single();
@@ -35,7 +35,7 @@ export async function GET(
     }
 
     const { data: lessons, error } = await supabase
-      .from("cc_lessons")
+      .from("lessons")
       .select("*")
       .eq("course_id", courseId)
       .order("lesson_number", { ascending: true });

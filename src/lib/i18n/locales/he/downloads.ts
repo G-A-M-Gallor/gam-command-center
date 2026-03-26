@@ -1,6 +1,6 @@
 const downloads = {
   title: "הורדות",
-  gamOnline: "גלור ברשת",
+  gamOnline: "גלאור ברשת",
   reminderTitle: "הורד את GAM Command Center",
   reminderSubtitle: "גש מהר יותר מכל מכשיר",
   website: "אתר סלולרי",

@@ -77,8 +77,8 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
     }
 
     // Method 2: Check for function-based MCPs (tools that start with mcp__)
-    const toolFunctions = global.availableTools || [];
-    const mcpTools = toolFunctions.filter(tool => tool.startsWith('mcp__'));
+    const toolFunctions = (global as any).availableTools || [];
+    const mcpTools = toolFunctions.filter((tool: string) => tool.startsWith('mcp__'));
 
     for (const toolName of mcpTools) {
       const parts = toolName.split('__');

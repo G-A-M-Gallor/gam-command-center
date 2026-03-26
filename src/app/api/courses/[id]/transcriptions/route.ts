@@ -25,7 +25,7 @@ export async function GET(
 
     // Verify course exists
     const { data: course, error: courseError } = await supabase
-      .from("cc_courses")
+      .from("courses")
       .select("id")
       .eq("id", courseId)
       .single();
@@ -35,17 +35,17 @@ export async function GET(
     }
 
     const { data: transcriptions, error } = await supabase
-      .from("cc_transcriptions")
+      .from("transcriptions")
       .select(`
         *,
-        cc_lessons!inner (
+        lessons!inner (
           title,
           lesson_number,
           duration_minutes
         )
       `)
       .eq("course_id", courseId)
-      .order("cc_lessons(lesson_number)", { ascending: true });
+      .order("lessons(lesson_number)", { ascending: true });
 
     if (error) {
       console.error("Error fetching transcriptions:", error);

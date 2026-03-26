@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useSettings } from "@/contexts/SettingsContext";
+import CoursesScreen from "@/components/pm/CoursesScreen";
 import {
   Cloud,
   FolderArchive,
@@ -25,6 +26,7 @@ import {
   Eye,
   X,
   Film,
+  BookOpen,
 } from "lucide-react";
 
 interface VCloudFile {
@@ -45,7 +47,7 @@ interface VCloudFile {
   updated_at: string;
 }
 
-type TabKey = "all" | "files" | "images" | "video" | "sound" | "personal";
+type TabKey = "all" | "files" | "images" | "video" | "sound" | "personal" | "courses";
 
 const TABS: { key: TabKey; icon: typeof Cloud; he: string; en: string; type?: string; personal?: boolean }[] = [
   { key: "all", icon: Cloud, he: "הכל", en: "All" },
@@ -53,6 +55,7 @@ const TABS: { key: TabKey; icon: typeof Cloud; he: string; en: string; type?: st
   { key: "images", icon: ImageIcon, he: "תמונות", en: "Images", type: "image" },
   { key: "video", icon: Video, he: "וידאו", en: "Video", type: "video" },
   { key: "sound", icon: AudioLines, he: "סאונד", en: "Sound", type: "sound" },
+  { key: "courses", icon: BookOpen, he: "קורסים", en: "Courses" },
   { key: "personal", icon: UserCircle, he: "אישי", en: "Personal", personal: true },
 ];
 
@@ -292,8 +295,13 @@ export default function VCloudPage() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        {/* Loading */}
-        {loading && files.length === 0 && (
+        {/* Courses Tab */}
+        {activeTab === "courses" ? (
+          <CoursesScreen />
+        ) : (
+          <>
+            {/* Loading */}
+            {loading && files.length === 0 && (
           <div className="grid grid-cols-4 gap-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-32 animate-pulse rounded-xl bg-slate-900" />
@@ -450,6 +458,8 @@ export default function VCloudPage() {
               );
             })}
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

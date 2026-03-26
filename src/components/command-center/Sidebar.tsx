@@ -395,7 +395,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
           { href: "/dashboard/entities/field-templates", key: "fieldTemplates", icon: Layers, status: "coming-soon" },
           { href: "/dashboard/icon-library", key: "iconLibrary", icon: Sparkles, status: "active" },
-          { href: "/dashboard/courses", key: "courses", icon: GraduationCap, status: "active" },
+          { href: "/dashboard/vcloud?tab=courses", key: "courses", icon: GraduationCap, status: "active" },
         ],
       },
       {

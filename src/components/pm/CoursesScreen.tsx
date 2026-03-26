@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Badge } from "@/components/ui/Badge";
 import {
   BookOpen,
   Play,
@@ -19,7 +19,11 @@ import {
   CheckCircle,
   Pause,
   Calendar,
-  Tag
+  Tag,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  AlertTriangle
 } from "lucide-react";
 
 // Progress component inline
@@ -67,10 +71,10 @@ interface Lesson {
 }
 
 const CoursesScreen = () => {
-  const { theme, language, direction } = useSettings();
+  const { language } = useSettings();
   const t = getTranslations(language);
   const courseTranslations = t.courses;
-  const isRtl = direction === 'rtl';
+  const isRtl = language === 'he'; // Hebrew is RTL
 
   // State
   const [courses, setCourses] = useState<Course[]>([]);
@@ -80,6 +84,30 @@ const CoursesScreen = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [platformFilter, setPlatformFilter] = useState<string>("all");
+
+  // Add Course Form State
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    emoji: '📚',
+    platform: 'udemy',
+    language: 'he',
+    status: 'planned',
+    description: '',
+    source_url: '',
+    tags: ''
+  });
+
+  // Edit Course State
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete Course State
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingCourse, setDeletingCourse] = useState<Course | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Fetch courses
   useEffect(() => {
@@ -117,6 +145,176 @@ const CoursesScreen = () => {
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
     fetchLessons(course.id);
+  };
+
+  // Handle form submission
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+
+    try {
+      const tagsArray = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+
+      const response = await fetch('/api/courses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          tags: tagsArray
+        }),
+      });
+
+      if (response.ok) {
+        const newCourse = await response.json();
+        setCourses(prev => [newCourse, ...prev]);
+        setShowAddForm(false);
+        setFormData({
+          name: '',
+          emoji: '📚',
+          platform: 'udemy',
+          language: 'he',
+          status: 'planned',
+          description: '',
+          source_url: '',
+          tags: ''
+        });
+        console.log('Course created successfully!');
+      } else {
+        const error = await response.json();
+        console.error('Error creating course:', error);
+        alert(`Error creating course: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error creating course:', error);
+      alert('Error creating course');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Handle form field changes
+  const handleFormChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle edit course
+  const handleEditCourse = (course: Course) => {
+    setEditingCourse(course);
+    setFormData({
+      name: course.name,
+      emoji: course.emoji,
+      platform: course.platform,
+      language: course.language,
+      status: course.status,
+      description: course.description || '',
+      source_url: course.source_url || '',
+      tags: course.tags.join(', ')
+    });
+    setShowEditForm(true);
+  };
+
+  // Handle update course
+  const handleUpdateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCourse) return;
+    setIsUpdating(true);
+
+    try {
+      const tagsArray = formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+
+      const response = await fetch(`/api/courses/${editingCourse.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          tags: tagsArray
+        }),
+      });
+
+      if (response.ok) {
+        const updatedCourse = await response.json();
+        setCourses(prev => prev.map(c => c.id === editingCourse.id ? updatedCourse : c));
+        setShowEditForm(false);
+        setEditingCourse(null);
+        console.log('Course updated successfully!');
+      } else {
+        const error = await response.json();
+        console.error('Error updating course:', error);
+        alert(`Error updating course: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating course:', error);
+      alert('Error updating course');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle delete course
+  const handleDeleteCourse = async () => {
+    if (!deletingCourse) return;
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/courses/${deletingCourse.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setCourses(prev => prev.filter(c => c.id !== deletingCourse.id));
+        setShowDeleteConfirm(false);
+        setDeletingCourse(null);
+        console.log('Course deleted successfully!');
+      } else {
+        const error = await response.json();
+        console.error('Error deleting course:', error);
+        alert(`Error deleting course: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('Error deleting course');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Handle quick status change
+  const handleQuickStatusChange = async (course: Course, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/courses/${course.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: course.name,
+          emoji: course.emoji,
+          platform: course.platform,
+          language: course.language,
+          status: newStatus,
+          description: course.description,
+          source_url: course.source_url,
+          tags: course.tags
+        }),
+      });
+
+      if (response.ok) {
+        const updatedCourse = await response.json();
+        setCourses(prev => prev.map(c => c.id === course.id ? updatedCourse : c));
+        console.log('Status updated successfully!');
+      } else {
+        console.error('Error updating status');
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
   };
 
   // Filter courses
@@ -190,7 +388,10 @@ const CoursesScreen = () => {
           </h1>
           <p className="text-slate-400 mt-1">{courseTranslations.subtitle}</p>
         </div>
-        <Button className="bg-purple-600 hover:bg-purple-700">
+        <Button
+          className="bg-purple-600 hover:bg-purple-700"
+          onClick={() => setShowAddForm(true)}
+        >
           <Plus className="h-4 w-4 me-2" />
           {courseTranslations.actions.addCourse}
         </Button>
@@ -238,7 +439,7 @@ const CoursesScreen = () => {
           {/* Back Button & Course Info */}
           <div className="flex items-center gap-4">
             <Button
-              intent="outline"
+              variant="secondary"
               onClick={() => setSelectedCourse(null)}
               className="border-slate-700"
             >
@@ -333,17 +534,21 @@ const CoursesScreen = () => {
             return (
               <Card
                 key={course.id}
-                className="bg-slate-800 border-slate-700 hover:border-purple-500 transition-colors cursor-pointer"
-                onClick={() => handleCourseSelect(course)}
+                className="bg-slate-800 border-slate-700 hover:border-purple-500 transition-colors"
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{course.emoji}</span>
-                      <div className="flex-1">
-                        <CardTitle className="text-slate-100 text-lg line-clamp-2">
-                          {course.name}
-                        </CardTitle>
+                {/* Clickable area (excludes action buttons) */}
+                <div
+                  onClick={() => handleCourseSelect(course)}
+                  className="cursor-pointer"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="text-2xl">{course.emoji}</span>
+                        <div className="flex-1">
+                          <CardTitle className="text-slate-100 text-lg line-clamp-2">
+                            {course.name}
+                          </CardTitle>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge
                             className={`${getPlatformColor(course.platform)} text-white text-xs`}
@@ -355,6 +560,56 @@ const CoursesScreen = () => {
                             <span className="text-xs text-slate-400">{statusInfo.label}</span>
                           </div>
                         </div>
+                      </div>
+
+                      {/* Course Menu */}
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex gap-1 items-start"
+                      >
+                        {/* Quick Status Toggle */}
+                        <select
+                          value={course.status}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleQuickStatusChange(course, e.target.value);
+                          }}
+                          className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-xs text-slate-100 cursor-pointer"
+                        >
+                          <option value="planned">מתוכנן</option>
+                          <option value="active">פעיל</option>
+                          <option value="paused">מושהה</option>
+                          <option value="completed">הושלם</option>
+                        </select>
+
+                        {/* Edit Button */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditCourse(course);
+                          }}
+                          className="text-slate-400 hover:text-slate-100 h-8 w-8 p-0"
+                          title="ערוך קורס"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+
+                        {/* Delete Button */}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingCourse(course);
+                            setShowDeleteConfirm(true);
+                          }}
+                          className="text-red-400 hover:text-red-300 h-8 w-8 p-0"
+                          title="מחק קורס"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -406,6 +661,7 @@ const CoursesScreen = () => {
                       )}
                     </div>
                   )}
+                </div>
 
                   {/* Actions */}
                   <div className="flex justify-between items-center">
@@ -423,7 +679,7 @@ const CoursesScreen = () => {
                     {course.drive_folder_url && (
                       <Button
                         size="sm"
-                        intent="outline"
+                        variant="secondary"
                         onClick={(e) => {
                           e.stopPropagation();
                           window.open(course.drive_folder_url, '_blank');
@@ -450,10 +706,394 @@ const CoursesScreen = () => {
           <p className="text-slate-500 mb-4">
             {searchQuery ? courseTranslations.messages.noResults : courseTranslations.messages.addFirstCourse}
           </p>
-          <Button className="bg-purple-600 hover:bg-purple-700">
+          <Button
+            className="bg-purple-600 hover:bg-purple-700"
+            onClick={() => setShowAddForm(true)}
+          >
             <Plus className="h-4 w-4 me-2" />
             {courseTranslations.actions.addCourse}
           </Button>
+        </div>
+      )}
+
+      {/* Add Course Form Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg border border-slate-700 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-slate-100">הוסף קורס חדש</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAddForm(false)}
+                  className="text-slate-400 hover:text-slate-100"
+                >
+                  ✕
+                </Button>
+              </div>
+
+              <form onSubmit={handleCreateCourse} className="space-y-4">
+                {/* Course Name */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    שם הקורס *
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => handleFormChange('name', e.target.value)}
+                    required
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="למשל: React מתקדם"
+                  />
+                </div>
+
+                {/* Emoji */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    אייקון
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.emoji}
+                    onChange={(e) => handleFormChange('emoji', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="📚"
+                    maxLength={2}
+                  />
+                </div>
+
+                {/* Platform */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    פלטפורמה *
+                  </label>
+                  <select
+                    value={formData.platform}
+                    onChange={(e) => handleFormChange('platform', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100"
+                    required
+                  >
+                    <option value="udemy">Udemy</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="coursera">Coursera</option>
+                    <option value="vimeo">Vimeo</option>
+                    <option value="local">Local</option>
+                  </select>
+                </div>
+
+                {/* Language */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    שפה
+                  </label>
+                  <select
+                    value={formData.language}
+                    onChange={(e) => handleFormChange('language', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100"
+                  >
+                    <option value="he">עברית</option>
+                    <option value="en">English</option>
+                    <option value="ru">Русский</option>
+                  </select>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    סטטוס
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => handleFormChange('status', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100"
+                  >
+                    <option value="planned">מתוכנן</option>
+                    <option value="active">פעיל</option>
+                    <option value="paused">מושהה</option>
+                    <option value="completed">הושלם</option>
+                  </select>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    תיאור
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleFormChange('description', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 min-h-[80px]"
+                    placeholder="תיאור קצר של הקורס..."
+                    rows={3}
+                  />
+                </div>
+
+                {/* Source URL */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    קישור לקורס
+                  </label>
+                  <Input
+                    type="url"
+                    value={formData.source_url}
+                    onChange={(e) => handleFormChange('source_url', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    תגיות (מופרדות בפסיקים)
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.tags}
+                    onChange={(e) => handleFormChange('tags', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="react, javascript, frontend"
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowAddForm(false)}
+                    className="flex-1"
+                    disabled={isCreating}
+                  >
+                    ביטול
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    disabled={isCreating || !formData.name}
+                  >
+                    {isCreating ? 'יוצר...' : 'צור קורס'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Course Form Modal */}
+      {showEditForm && editingCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg border border-slate-700 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-slate-100">ערוך קורס</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowEditForm(false)}
+                  className="text-slate-400 hover:text-slate-100"
+                >
+                  ✕
+                </Button>
+              </div>
+
+              <form onSubmit={handleUpdateCourse} className="space-y-4">
+                {/* Course Name */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    שם הקורס *
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => handleFormChange('name', e.target.value)}
+                    required
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="למשל: React מתקדם"
+                  />
+                </div>
+
+                {/* Emoji */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    אייקון
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.emoji}
+                    onChange={(e) => handleFormChange('emoji', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="📚"
+                    maxLength={2}
+                  />
+                </div>
+
+                {/* Platform */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    פלטפורמה *
+                  </label>
+                  <select
+                    value={formData.platform}
+                    onChange={(e) => handleFormChange('platform', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100"
+                    required
+                  >
+                    <option value="udemy">Udemy</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="coursera">Coursera</option>
+                    <option value="vimeo">Vimeo</option>
+                    <option value="local">Local</option>
+                  </select>
+                </div>
+
+                {/* Language */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    שפה
+                  </label>
+                  <select
+                    value={formData.language}
+                    onChange={(e) => handleFormChange('language', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100"
+                  >
+                    <option value="he">עברית</option>
+                    <option value="en">English</option>
+                    <option value="ru">Русский</option>
+                  </select>
+                </div>
+
+                {/* Status */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    סטטוס
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => handleFormChange('status', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100"
+                  >
+                    <option value="planned">מתוכנן</option>
+                    <option value="active">פעיל</option>
+                    <option value="paused">מושהה</option>
+                    <option value="completed">הושלם</option>
+                  </select>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    תיאור
+                  </label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => handleFormChange('description', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-md px-3 py-2 text-slate-100 min-h-[80px]"
+                    placeholder="תיאור קצר של הקורס..."
+                    rows={3}
+                  />
+                </div>
+
+                {/* Source URL */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    קישור לקורס
+                  </label>
+                  <Input
+                    type="url"
+                    value={formData.source_url}
+                    onChange={(e) => handleFormChange('source_url', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    תגיות (מופרדות בפסיקים)
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.tags}
+                    onChange={(e) => handleFormChange('tags', e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-slate-100"
+                    placeholder="react, javascript, frontend"
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => setShowEditForm(false)}
+                    className="flex-1"
+                    disabled={isUpdating}
+                  >
+                    ביטול
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    disabled={isUpdating || !formData.name}
+                  >
+                    {isUpdating ? 'מעדכן...' : 'עדכן קורס'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && deletingCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-lg border border-slate-700 w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-100">מחיקת קורס</h2>
+                  <p className="text-sm text-slate-400">פעולה זו לא ניתנת לביטול</p>
+                </div>
+              </div>
+
+              <p className="text-slate-300 mb-6">
+                האם אתה בטוח שברצונך למחוק את הקורס{' '}
+                <span className="font-semibold text-slate-100">"{deletingCourse.name}"</span>?
+                <br />
+                <span className="text-sm text-slate-400">כל השיעורים וההתקדמות יימחקו.</span>
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeletingCourse(null);
+                  }}
+                  className="flex-1"
+                  disabled={isDeleting}
+                >
+                  ביטול
+                </Button>
+                <Button
+                  onClick={handleDeleteCourse}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'מוחק...' : 'מחק קורס'}
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

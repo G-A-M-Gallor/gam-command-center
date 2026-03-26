@@ -72,7 +72,7 @@ export async function listDriveFiles(
     mimeType: file.mimeType!,
     size: file.size ? parseInt(file.size) : undefined,
     webViewLink: file.webViewLink!,
-    parents: file.parents,
+    parents: file.parents || undefined,
     createdTime: file.createdTime!,
     modifiedTime: file.modifiedTime!,
   }));
@@ -232,7 +232,7 @@ export async function uploadToDrive(
     mimeType: file.mimeType!,
     size: file.size ? parseInt(file.size) : undefined,
     webViewLink: file.webViewLink!,
-    parents: file.parents,
+    parents: file.parents || undefined,
   };
 }
 
