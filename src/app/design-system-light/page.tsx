@@ -38,6 +38,7 @@ import {
   StepForm,
   KpiRow,
   RecentActivity,
+  ActivityFeed,
   QuickActions,
   TablePreview,
   StatusOverview,
@@ -1087,6 +1088,22 @@ function DashboardSectionDemo() {
           columns={4}
         />
       </DashboardGrid>
+
+      {/* Activity Feed - Compact Status-Based Activity */}
+      <Card>
+        <CardHeader title="Activity Feed (קומפקטי)" />
+        <div className="mt-4">
+          <ActivityFeed
+            activities={[
+              { id: "1", title: "הוזמנה חבילה #12345", description: "נשלח אימייל אישור ללקוח", time: "לפני 2 דק׳", status: "success" },
+              { id: "2", title: "ממתין לאישור תשלום", description: "עסקה בסך ₪1,500", time: "לפני 10 דק׳", status: "pending" },
+              { id: "3", title: "שגיאה בסנכרון נתונים", description: "נכשל חיבור ל-API", time: "לפני 25 דק׳", status: "error" },
+              { id: "4", title: "עודכן פרופיל משתמש", description: "שרה כהן עדכנה פרטים", time: "לפני 1 שעה", status: "info" },
+              { id: "5", title: "נוספה משימה חדשה", description: "התקשרות ללקוח חדש", time: "לפני 2 שעות", status: "success" },
+            ]}
+          />
+        </div>
+      </Card>
     </div>
   );
 }

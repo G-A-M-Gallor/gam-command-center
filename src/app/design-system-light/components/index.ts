@@ -50,6 +50,7 @@ export {
 export {
   KpiRow,
   RecentActivity,
+  ActivityFeed,
   QuickActions,
   TablePreview,
   StatusOverview,

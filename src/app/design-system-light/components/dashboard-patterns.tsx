@@ -184,6 +184,98 @@ export function RecentActivity({
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ACTIVITY FEED
+   Compact status-based activity list
+   ═══════════════════════════════════════════════════════════════ */
+
+type ActivityStatus = "success" | "pending" | "error" | "info";
+
+interface ActivityFeedItem {
+  id: string;
+  title: string;
+  description?: string;
+  time: string;
+  status: ActivityStatus;
+}
+
+interface ActivityFeedProps {
+  activities: ActivityFeedItem[];
+  className?: string;
+}
+
+const activityStatusConfig: Record<
+  ActivityStatus,
+  { icon: typeof CheckCircle2; color: string; bg: string }
+> = {
+  success: {
+    icon: CheckCircle2,
+    color: "text-[var(--color-success)]",
+    bg: "bg-[var(--color-success-light)]",
+  },
+  pending: {
+    icon: Clock,
+    color: "text-[var(--color-warning)]",
+    bg: "bg-[var(--color-warning-light)]",
+  },
+  error: {
+    icon: AlertCircle,
+    color: "text-[var(--color-error)]",
+    bg: "bg-[var(--color-error-light)]",
+  },
+  info: {
+    icon: Clock,
+    color: "text-[var(--color-info)]",
+    bg: "bg-[var(--color-info-light)]",
+  },
+};
+
+export function ActivityFeed({ activities, className }: ActivityFeedProps) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      {activities.map((activity) => {
+        const config = activityStatusConfig[activity.status];
+        const Icon = config.icon;
+
+        return (
+          <div
+            key={activity.id}
+            className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-[var(--surface-hover)]"
+          >
+            {/* Icon */}
+            <div className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", config.bg)}>
+              <Icon className={cn("h-4 w-4", config.color)} />
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-[var(--text-primary)]">
+                {activity.title}
+              </p>
+              {activity.description && (
+                <p className="mt-0.5 text-xs text-[var(--text-muted)]">
+                  {activity.description}
+                </p>
+              )}
+            </div>
+
+            {/* Time */}
+            <span className="shrink-0 text-xs text-[var(--text-placeholder)] whitespace-nowrap">
+              {activity.time}
+            </span>
+          </div>
+        );
+      })}
+
+      {activities.length === 0 && (
+        <div className="py-8 text-center text-sm text-[var(--text-muted)]">
+          אין פעילות להצגה
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    QUICK ACTIONS GRID
    ═══════════════════════════════════════════════════════════════ */
 
