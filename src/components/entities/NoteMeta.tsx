@@ -39,11 +39,70 @@ function evaluateFormula(formula: string, meta: Record<string, unknown>): string
   // Evaluate simple math: only digits, +, -, *, /, ., (, ), spaces
   if (!/^[\d\s+\-*/().]+$/.test(expr)) return '—';
   try {
-    const result = new Function(`"use strict"; return (${expr});`)();
+    // Safe math evaluation using recursive descent parser
+    const result = safeMathEval(expr);
     return typeof result === 'number' && isFinite(result) ? String(Math.round(result * 100) / 100) : '—';
   } catch {
     return '—';
   }
+}
+
+// Safe math evaluator that only allows basic arithmetic operations
+function safeMathEval(expr: string): number {
+  // Remove spaces and validate expression contains only safe characters
+  const clean = expr.replace(/\s+/g, '');
+  if (!/^[\d+\-*/().]+$/.test(clean)) {
+    throw new Error('Invalid expression');
+  }
+
+  // Simple recursive descent parser for basic math
+  let pos = 0;
+
+  function parseNumber(): number {
+    let num = '';
+    while (pos < clean.length && /[\d.]/.test(clean[pos])) {
+      num += clean[pos++];
+    }
+    return parseFloat(num);
+  }
+
+  function parseFactor(): number {
+    if (clean[pos] === '(') {
+      pos++; // skip '('
+      const result = parseExpression();
+      pos++; // skip ')'
+      return result;
+    }
+    return parseNumber();
+  }
+
+  function parseTerm(): number {
+    let result = parseFactor();
+    while (pos < clean.length && /[*/]/.test(clean[pos])) {
+      const op = clean[pos++];
+      if (op === '*') {
+        result *= parseFactor();
+      } else {
+        result /= parseFactor();
+      }
+    }
+    return result;
+  }
+
+  function parseExpression(): number {
+    let result = parseTerm();
+    while (pos < clean.length && /[+-]/.test(clean[pos])) {
+      const op = clean[pos++];
+      if (op === '+') {
+        result += parseTerm();
+      } else {
+        result -= parseTerm();
+      }
+    }
+    return result;
+  }
+
+  return parseExpression();
 }
 
 // ─── Field Value Editor ──────────────────────────────

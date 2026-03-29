@@ -74,6 +74,64 @@ const FUNCTIONS: Record<string, (vals: number[]) => number> = {
 /** Track cells being evaluated to detect circular references */
 const evaluationStack = new Set<string>();
 
+// Safe math evaluator that only allows basic arithmetic operations
+function safeMathEval(expr: string): number {
+  // Remove spaces and validate expression contains only safe characters
+  const clean = expr.replace(/\s+/g, '');
+  if (!/^[\d+\-*/().]+$/.test(clean)) {
+    throw new Error('Invalid expression');
+  }
+
+  // Simple recursive descent parser for basic math
+  let pos = 0;
+
+  function parseNumber(): number {
+    let num = '';
+    while (pos < clean.length && /[\d.]/.test(clean[pos])) {
+      num += clean[pos++];
+    }
+    return parseFloat(num);
+  }
+
+  function parseFactor(): number {
+    if (clean[pos] === '(') {
+      pos++; // skip '('
+      const result = parseExpression();
+      pos++; // skip ')'
+      return result;
+    }
+    return parseNumber();
+  }
+
+  function parseTerm(): number {
+    let result = parseFactor();
+    while (pos < clean.length && /[*/]/.test(clean[pos])) {
+      const op = clean[pos++];
+      if (op === '*') {
+        result *= parseFactor();
+      } else {
+        result /= parseFactor();
+      }
+    }
+    return result;
+  }
+
+  function parseExpression(): number {
+    let result = parseTerm();
+    while (pos < clean.length && /[+-]/.test(clean[pos])) {
+      const op = clean[pos++];
+      if (op === '+') {
+        result += parseTerm();
+      } else {
+        result -= parseTerm();
+      }
+    }
+    return result;
+  }
+
+  return parseExpression();
+}
+
 /**
  * Evaluate a formula string (starts with "=").
  * Supports: =SUM(A1:A5), =A1+B2, =42, cell refs, basic arithmetic.
@@ -122,7 +180,7 @@ export function evaluateFormula(
 
     // Safe eval for basic arithmetic only (+-*/)
     if (/^[\d\s+\-*/().]+$/.test(resolved)) {
-      const result = new Function(`return (${resolved})`)();
+      const result = safeMathEval(resolved);
       return typeof result === "number" && isFinite(result) ? result : "#ERROR";
     }
 

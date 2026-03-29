@@ -359,11 +359,12 @@ export default function DocumentDetailPage() {
   };
 
   // ── Live viewing check ────────────────────────────────
+  const [currentTime] = useState(() => Date.now());
   const isLiveViewing = useMemo(() => {
     if (views.length === 0) return false;
-    const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+    const fiveMinAgo = currentTime - 5 * 60 * 1000;
     return views.some((v) => new Date(v.created_at).getTime() > fiveMinAgo);
-  }, [views]);
+  }, [views, currentTime]);
 
   if (loading) {
     return (
@@ -1060,7 +1061,7 @@ function ViewsTab({ views, dc }: { views: DocumentView[]; dc: Record<string, str
     <div className="space-y-2">
       <h3 className="mb-3 text-sm font-medium text-slate-300">{dc.viewHistory} ({views.length})</h3>
       {views.map((v) => {
-        const isRecent = Date.now() - new Date(v.created_at).getTime() < 5 * 60 * 1000;
+        const isRecent = currentTime - new Date(v.created_at).getTime() < 5 * 60 * 1000;
         return (
           <div key={v.id} className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/50 p-3">
             {isRecent ? (
