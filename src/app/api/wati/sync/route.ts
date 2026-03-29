@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
               const { error } = await supabase
                 .from('comm_messages')
                 .upsert(msg, {
-                  onConflict: 'external_id',
+                  onConflict: 'channel,external_id',
                   ignoreDuplicates: false
                 });
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       const { error } = await supabase
         .from('comm_messages')
         .upsert(msg, {
-          onConflict: 'external_id',
+          onConflict: 'channel,external_id',
           ignoreDuplicates: false
         });
 
