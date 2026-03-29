@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { getCourseById, updateCourse, deleteCourse } from "@/lib/courses/courseQueries";
 import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
@@ -68,7 +67,7 @@ export async function PUT(
 
     const updatedCourse = await updateCourse(resolvedParams.id, userId, updateData);
     return NextResponse.json(updatedCourse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating course:", error);
 
     if (error instanceof z.ZodError) {

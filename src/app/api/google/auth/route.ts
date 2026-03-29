@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createGoogleAuth } from "@/lib/google/driveAuth";
 
 /**
@@ -10,10 +10,10 @@ export async function GET() {
     const authUrl = googleAuth.getAuthUrl();
     
     return NextResponse.json({ authUrl });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating Google auth URL:", error);
     return NextResponse.json(
-      { error: "Failed to generate auth URL", details: error.message },
+      { error: "Failed to generate auth URL", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

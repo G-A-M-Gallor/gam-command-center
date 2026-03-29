@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { createCourse, listCourses } from "@/lib/courses/courseQueries";
+import { createCourse } from "@/lib/courses/courseQueries";
 import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 
@@ -82,10 +81,10 @@ export async function GET() {
 
     console.log('📚 Returning demo courses:', demoCourses);
     return NextResponse.json(demoCourses);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ Error fetching courses:", error);
     return NextResponse.json(
-      { error: "Failed to fetch courses", details: error?.message || String(error) },
+      { error: "Failed to fetch courses", details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }
@@ -103,7 +102,7 @@ export async function POST(request: NextRequest) {
     const course = await createCourse(userId, validatedData);
 
     return NextResponse.json(course, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating course:", error);
 
     if (error instanceof z.ZodError) {
