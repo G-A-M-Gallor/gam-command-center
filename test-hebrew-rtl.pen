@@ -1,0 +1,71 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "TE8n3",
+      "x": 0,
+      "y": 0,
+      "name": "screen",
+      "width": 1440,
+      "height": 900,
+      "fill": "#0f172a",
+      "layout": "vertical",
+      "gap": 32,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "text",
+          "id": "rTVYv",
+          "name": "title",
+          "fill": "#f1f5f9",
+          "textGrowth": "fixed-width",
+          "width": 800,
+          "content": "ברוכים הבאים ל-vBrain.io",
+          "textAlign": "center",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "pedQf",
+          "name": "subtitle",
+          "fill": "#94a3b8",
+          "textGrowth": "fixed-width",
+          "width": 600,
+          "content": "מערכת ניהול פרויקטים לענף הבנייה",
+          "textAlign": "center",
+          "fontFamily": "Inter",
+          "fontSize": 20
+        },
+        {
+          "type": "frame",
+          "id": "7m8x1",
+          "name": "btn",
+          "fill": "#3b82f6",
+          "cornerRadius": 10,
+          "padding": [
+            14,
+            48
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "o8rqS",
+              "name": "btnText",
+              "fill": "#ffffff",
+              "content": "התחבר",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "600"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

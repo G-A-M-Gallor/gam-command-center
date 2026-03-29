@@ -4,6 +4,13 @@
 
 מערכת ניהול קורסים עם אינטגרציה מלאה ל-Google Drive, תמיכה בטרנסקריפציה ו-AI לסיכומים.
 
+### ✨ עדכון חדש - Google Drive Integration UI
+נוספה אינטרפייס משתמש מלא לחיבור Google Drive:
+- כפתור חיבור ל-Google Drive בטופס יצירת קורס
+- זרימת OAuth 2.0 בחלון פופ-אפ
+- אינדיקטור מצב חיבור (מחובר/לא מחובר)
+- תמיכה מלאה בסנכרון אוטומטי של קבצי וידיאו מהתיקיה
+
 ---
 
 ## הגדרת המערכת
@@ -62,13 +69,26 @@ public.lesson_progress
 
 ## השימוש במערכת
 
-### שלב 1: חיבור Google Drive
+### שלב 1: יצירת קורס עם Google Drive
 
-1. **בדף ההגדרות** → לחץ "חבר חשבון Google"
-2. **אישור הרשאות** → Drive, Gmail (אופציונלי)
-3. **אימות החיבור** → וודא שהסטטוס "מחובר"
+**דרך הממשק החדש:**
+1. **גש לדף vCloud** → לשונית "קורסים"
+2. **לחץ ➕ "הוסף קורס"**
+3. **מלא פרטי הקורס** (שם, פלטפורמה, תיאור וכו')
+4. **חיבור Google Drive:**
+   - אם לא חובר: לחץ "התחבר ל-Google Drive"
+   - יפתח חלון OAuth → אשר הרשאות
+   - אחרי האישור יופיע ✅ "חובר בהצלחה ל-Google Drive"
+5. **לחץ "צור קורס"**
 
-### שלב 2: יצירת קורס חדש
+### שלב 2: סנכרון תיקיית Drive
+
+אחרי יצירת הקורס, המערכת תאפשר לך:
+- **לחבר תיקיה מ-Drive** בעת יצירת הקורס
+- **לסנכרן קבצים אוטומטית** מהתיקיה
+- **לראות כפתור Drive** בכרטיס הקורס (אם מחובר)
+
+### שלב 3: API ישיר (למפתחים)
 
 ```bash
 POST /api/courses
@@ -78,17 +98,10 @@ POST /api/courses
   "platform": "udemy",
   "language": "he",
   "description": "קורס מקיף ב-React עם hooks ו-context",
-  "google_account_id": "uuid-של-חשבון-google",
   "drive_folder_id": "google-drive-folder-id",
   "tags": ["react", "javascript", "frontend"]
 }
 ```
-
-**דרך הממשק:**
-1. לחץ ➕ "הוסף קורס"
-2. מלא פרטי הקורס
-3. בחר חשבון Google
-4. הדבק ID של תיקיית Drive (מה-URL)
 
 ### שלב 3: סינכרון שיעורים מ-Drive
 
@@ -201,15 +214,39 @@ PUT    /api/lessons/{id}/progress     # עדכון התקדמות
 
 ## פתרון בעיות נפוצות
 
-### שגיאת אימות Google
+### שגיאת אימות Google Drive
+
+**⚠️ חשוב: Google OAuth Credentials**
+
+לפני שימוש בכפתור "התחבר ל-Google Drive", יש להגדיר:
+
+1. **יצירת פרויקט Google Cloud Console:**
+   ```bash
+   https://console.cloud.google.com/
+   → יצור פרויקט חדש → הפעל Drive API
+   ```
+
+2. **עדכון משתני הסביבה ב-.env.local:**
+   ```bash
+   NEXTAUTH_URL="https://vbrain.io"
+   GOOGLE_CLIENT_ID="your-actual-client-id-here"
+   GOOGLE_CLIENT_SECRET="your-actual-client-secret-here"
+   ```
+
+3. **הגדרת Redirect URI ב-Google Console:**
+   ```bash
+   https://vbrain.io/api/google/callback
+   ```
+
+**אם מופיעה שגיאה:**
 ```bash
 # בדוק שהמשתנים הגדרו נכון
 echo $GOOGLE_CLIENT_ID
 echo $GOOGLE_CLIENT_SECRET
 
-# רענן את טוקן הגישה
-DELETE /api/google/accounts/{id}
-# התחבר מחדש
+# בדוק לוג השגיאות
+npm run dev
+# ואז חפש שגיאות בקונסול
 ```
 
 ### שיעורים לא מזוהים

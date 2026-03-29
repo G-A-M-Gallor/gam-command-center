@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
+import { GoogleDriveConnection } from "./GoogleDriveConnection";
 import {
   BookOpen,
   Play,
@@ -108,6 +109,13 @@ const CoursesScreen = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deletingCourse, setDeletingCourse] = useState<Course | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Google Drive State
+  const [isConnectingDrive, setIsConnectingDrive] = useState(false);
+  const [driveConnected, setDriveConnected] = useState(false);
+
+  // Constants
+  const POPUP_FEATURES = 'width=500,height=600,scrollbars=yes,resizable=yes';
 
   // Fetch courses
   useEffect(() => {
@@ -314,6 +322,43 @@ const CoursesScreen = () => {
       }
     } catch (error) {
       console.error('Error updating status:', error);
+    }
+  };
+
+  // Handle Google Drive connection
+  const handleConnectDrive = async () => {
+    setIsConnectingDrive(true);
+    try {
+      const response = await fetch('/api/google/auth');
+      const data = await response.json();
+
+      if (data.authUrl) {
+        // Open Google OAuth in popup
+        const popup = window.open(
+          data.authUrl,
+          'google-auth',
+          POPUP_FEATURES
+        );
+
+        // More efficient popup monitoring - check every 100ms initially, then slow down
+        let pollCount = 0;
+        const checkClosed = () => {
+          if (popup?.closed) {
+            setIsConnectingDrive(false);
+            setDriveConnected(true);
+            console.log('Google Drive connected!');
+          } else {
+            pollCount++;
+            // Start with 100ms, then increase to 500ms after 50 checks (5 seconds)
+            const interval = pollCount > 50 ? 500 : 100;
+            setTimeout(checkClosed, interval);
+          }
+        };
+        checkClosed();
+      }
+    } catch (error) {
+      console.error('Error connecting to Google Drive:', error);
+      setIsConnectingDrive(false);
     }
   };
 
@@ -844,6 +889,13 @@ const CoursesScreen = () => {
                   />
                 </div>
 
+                <GoogleDriveConnection
+                  isConnecting={isConnectingDrive}
+                  isConnected={driveConnected}
+                  onConnect={handleConnectDrive}
+                  onDisconnect={() => setDriveConnected(false)}
+                />
+
                 {/* Tags */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
@@ -1010,6 +1062,13 @@ const CoursesScreen = () => {
                     placeholder="https://..."
                   />
                 </div>
+
+                <GoogleDriveConnection
+                  isConnecting={isConnectingDrive}
+                  isConnected={driveConnected}
+                  onConnect={handleConnectDrive}
+                  onDisconnect={() => setDriveConnected(false)}
+                />
 
                 {/* Tags */}
                 <div>

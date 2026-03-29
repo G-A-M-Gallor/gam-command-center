@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import type { User } from "@supabase/supabase-js";
 
 interface AuthSuccess {
@@ -108,4 +109,26 @@ export async function requireRole(
   }
 
   return result;
+}
+
+/**
+ * Get authenticated user using server-side Supabase client (cookies).
+ * Falls back to demo user for development.
+ *
+ * Usage in API routes:
+ *   const userId = await getUserId();
+ */
+export async function getUserId(): Promise<string> {
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    console.log('Auth warning:', authError?.message || 'No user');
+    return 'demo-user-123'; // Demo user for development
+  }
+
+  return user.id;
 }

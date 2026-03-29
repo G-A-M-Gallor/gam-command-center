@@ -1,0 +1,12 @@
+{
+  "name": "wati-mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Local WATI MCP Server for GAM Command Center",
+  "main": "wati-mcp-server.js",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.28.0",
+    "dotenv": "^16.0.0",
+    "zod": "^3.0.0"
+  }
+}

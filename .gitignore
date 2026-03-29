@@ -50,3 +50,6 @@ public/swe-worker-*.js
 .mcp.json
 .env*.local
 firebase-debug.log
+
+# VS Code settings (may contain access tokens)
+.vscode/settings.json

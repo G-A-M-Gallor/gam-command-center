@@ -6,7 +6,7 @@
 
 import type { WATIContact, WATIMessage, WATITemplate, WATISendResponse } from './types';
 
-function getConfig() {
+export function getConfig() {
   const baseUrl = process.env.WATI_API_URL;
   const token = process.env.WATI_API_TOKEN;
   if (!baseUrl || !token) {

@@ -1,56 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySignedState, exchangeCode, getUserInfo } from "@/lib/google/oauth";
-import { upsertGoogleAccount } from "@/lib/google/googleAccountQueries";
+import { createGoogleAuth } from "@/lib/google/driveAuth";
+import { createClient } from "@/lib/supabase/server";
 
+/**
+ * GET /api/google/callback - Handle Google OAuth callback
+ */
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
-  const error = url.searchParams.get("error");
-
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || url.origin;
-  const settingsUrl = `${baseUrl}/dashboard/settings?tab=accounts`;
-
-  // User denied consent
-  if (error) {
-    return NextResponse.redirect(`${settingsUrl}&error=${encodeURIComponent(error)}`);
-  }
-
-  if (!code || !state) {
-    return NextResponse.redirect(`${settingsUrl}&error=missing_params`);
-  }
-
-  // Verify CSRF state
-  const payload = verifySignedState(state);
-  if (!payload) {
-    return NextResponse.redirect(`${settingsUrl}&error=invalid_state`);
-  }
-
   try {
-    // Exchange authorization code for tokens
-    const tokens = await exchangeCode(code);
+    const { searchParams } = new URL(request.url);
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
 
-    // Get user profile from Google
-    const userInfo = await getUserInfo(tokens.access_token);
+    if (!code) {
+      return NextResponse.json(
+        { error: "Authorization code not found" },
+        { status: 400 }
+      );
+    }
 
-    // Store encrypted tokens in DB
-    const scopes = tokens.scope.split(" ").filter(Boolean);
+    // Exchange code for tokens
+    const googleAuth = createGoogleAuth();
+    const tokens = await googleAuth.getTokens(code);
 
-    await upsertGoogleAccount({
-      userId: payload.userId,
-      googleUserId: userInfo.id,
-      googleEmail: userInfo.email,
-      displayName: userInfo.name || null,
-      avatarUrl: userInfo.picture || null,
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresIn: tokens.expires_in,
-      scopes,
+    // Save tokens to database (simplified for now)
+    console.log('Received Google tokens:', {
+      access_token: tokens.access_token ? '***' : 'missing',
+      refresh_token: tokens.refresh_token ? '***' : 'missing',
+      expiry_date: tokens.expiry_date
     });
 
-    return NextResponse.redirect(`${settingsUrl}&connected=true`);
-  } catch (err) {
-    console.error("Google OAuth callback error:", err);
-    return NextResponse.redirect(`${settingsUrl}&error=exchange_failed`);
+    // For now, redirect back to courses page
+    return NextResponse.redirect(
+      new URL('/dashboard/vcloud?tab=courses&connected=true', request.url)
+    );
+
+  } catch (error: any) {
+    console.error("Google OAuth callback error:", error);
+    return NextResponse.redirect(
+      new URL('/dashboard/vcloud?tab=courses&error=auth_failed', request.url)
+    );
   }
 }

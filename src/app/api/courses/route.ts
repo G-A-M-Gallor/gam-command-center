@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createCourse, listCourses } from "@/lib/courses/courseQueries";
+import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 
 const createCourseSchema = z.object({
@@ -22,18 +23,7 @@ const createCourseSchema = z.object({
  */
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    let userId = user?.id;
-    if (authError || !user) {
-      // Temporary: Allow for development - use demo user
-      console.log('Auth warning:', authError?.message || 'No user');
-      userId = 'demo-user-123';
-    }
+    const userId = await getUserId();
 
     console.log('📚 Fetching courses for userId:', userId);
 
@@ -106,18 +96,7 @@ export async function GET() {
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    let userId = user?.id;
-    if (authError || !user) {
-      // Temporary: Allow for development - use demo user
-      console.log('Auth warning:', authError?.message || 'No user');
-      userId = 'demo-user-123';
-    }
+    const userId = await getUserId();
 
     const body = await request.json();
     const validatedData = createCourseSchema.parse(body);

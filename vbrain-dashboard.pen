@@ -1,0 +1,586 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "NK1ru",
+      "x": 0,
+      "y": 0,
+      "name": "vBrain Dashboard RTL",
+      "width": 1440,
+      "height": 900,
+      "fill": "#0B0B0E",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "MFfFC",
+          "name": "header",
+          "width": "fill_container",
+          "height": 72,
+          "fill": "#16161A",
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#00000040",
+            "offset": {
+              "x": 0,
+              "y": 2
+            },
+            "blur": 12
+          },
+          "padding": [
+            0,
+            40
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "6Wgwn",
+              "name": "leftSection",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "1secS",
+                  "name": "bellIcon",
+                  "width": 22,
+                  "height": 22,
+                  "iconFontName": "bell",
+                  "iconFontFamily": "lucide",
+                  "fill": "#6B6B70"
+                },
+                {
+                  "type": "frame",
+                  "id": "4nKGG",
+                  "name": "avatar",
+                  "width": 36,
+                  "height": 36,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 0,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#6366F1",
+                        "position": 0
+                      },
+                      {
+                        "color": "#4F46E5",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 18,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KIRj8",
+                      "name": "avatarText",
+                      "fill": "#FFFFFF",
+                      "content": "ג",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gsAt2",
+              "name": "rightSection",
+              "gap": 40,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Z5ulA",
+                  "name": "logo",
+                  "fill": "#FAFAF9",
+                  "content": "vBrain.io",
+                  "fontFamily": "Fraunces",
+                  "fontSize": 24,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "type": "frame",
+                  "id": "ZRCqZ",
+                  "name": "logoDot",
+                  "width": 8,
+                  "height": 8,
+                  "fill": "#6366F1",
+                  "cornerRadius": 4
+                },
+                {
+                  "type": "frame",
+                  "id": "HbA3H",
+                  "name": "nav",
+                  "gap": 32,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "HQ5za",
+                      "name": "nav4",
+                      "fill": "#6B6B70",
+                      "content": "דוחות",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "M1r8B",
+                      "name": "nav3",
+                      "fill": "#6B6B70",
+                      "content": "צוות",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OfSpE",
+                      "name": "nav2",
+                      "fill": "#6B6B70",
+                      "content": "פרויקטים",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SRjtJ",
+                      "name": "nav1",
+                      "fill": "#6366F1",
+                      "content": "דשבורד",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "7OTYx",
+          "name": "main",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 40,
+          "padding": [
+            48,
+            60
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "FBCIG",
+              "name": "welcomeRow",
+              "width": "fill_container",
+              "justifyContent": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "2sql7",
+                  "name": "welcomeText",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "lof95",
+                      "name": "greeting",
+                      "fill": "#FAFAF9",
+                      "content": "שלום, גל 👋",
+                      "fontFamily": "Fraunces",
+                      "fontSize": 28,
+                      "fontWeight": "600",
+                      "letterSpacing": -0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "qYvp9",
+                      "name": "subtitle",
+                      "fill": "#6B6B70",
+                      "content": "ניהול פרויקטי בנייה — סקירה כללית",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 16
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "W5o5X",
+              "name": "cardsRow",
+              "width": "fill_container",
+              "gap": 24,
+              "justifyContent": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "YI6TU",
+                  "name": "card3",
+                  "width": "fill_container",
+                  "fill": "#16161A",
+                  "cornerRadius": 20,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#00000040",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 16
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "3pvTD",
+                      "name": "card3Top",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hDc07",
+                          "name": "card3Label",
+                          "fill": "#6B6B70",
+                          "content": "התראות",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 15,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "W24Ch",
+                          "name": "card3Icon",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#E85A4F20",
+                          "cornerRadius": 12,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "16MLk",
+                              "name": "card3IconInner",
+                              "width": 22,
+                              "height": 22,
+                              "iconFontName": "bell-ring",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E85A4F"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "j2RXj",
+                      "name": "card3Num",
+                      "fill": "#FAFAF9",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "3",
+                      "textAlign": "right",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 42,
+                      "fontWeight": "700",
+                      "letterSpacing": -1.2
+                    },
+                    {
+                      "type": "frame",
+                      "id": "tn9qI",
+                      "name": "card3Footer",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EWhHf",
+                          "name": "card3Status",
+                          "fill": "#E85A4F",
+                          "content": "1 קריטית",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Al2HO",
+                          "name": "card3Dot",
+                          "width": 8,
+                          "height": 8,
+                          "fill": "#E85A4F",
+                          "cornerRadius": 4
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "XsvCb",
+                  "name": "card2",
+                  "width": "fill_container",
+                  "fill": "#16161A",
+                  "cornerRadius": 20,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#00000040",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 16
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "2aMcG",
+                      "name": "card2Top",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "2hrQw",
+                          "name": "card2Label",
+                          "fill": "#6B6B70",
+                          "content": "משימות היום",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 15,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "q8oWT",
+                          "name": "card2Icon",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#32D58320",
+                          "cornerRadius": 12,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "j23gW",
+                              "name": "card2IconInner",
+                              "width": 22,
+                              "height": 22,
+                              "iconFontName": "square-check-big",
+                              "iconFontFamily": "lucide",
+                              "fill": "#32D583"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LAlPT",
+                      "name": "card2Num",
+                      "fill": "#FAFAF9",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "8",
+                      "textAlign": "right",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 42,
+                      "fontWeight": "700",
+                      "letterSpacing": -1.2
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oLwPS",
+                      "name": "card2Footer",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "5G2iZ",
+                          "name": "card2Badge",
+                          "fill": "#FFB54720",
+                          "cornerRadius": 8,
+                          "gap": 4,
+                          "padding": [
+                            4,
+                            10
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "psKQJ",
+                              "name": "card2BadgeText",
+                              "fill": "#FFB547",
+                              "content": "3 דחופות",
+                              "fontFamily": "DM Sans",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Glg3k",
+                  "name": "card1",
+                  "width": "fill_container",
+                  "fill": "#16161A",
+                  "cornerRadius": 20,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#00000040",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 16
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 24,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Xl9Yw",
+                      "name": "card1Top",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "2nuE5",
+                          "name": "card1Label",
+                          "fill": "#6B6B70",
+                          "content": "פרויקטים פעילים",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 15,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vf9wS",
+                          "name": "card1Icon",
+                          "width": 44,
+                          "height": 44,
+                          "fill": "#6366F120",
+                          "cornerRadius": 12,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "lgNep",
+                              "name": "card1IconInner",
+                              "width": 22,
+                              "height": 22,
+                              "iconFontName": "building-2",
+                              "iconFontFamily": "lucide",
+                              "fill": "#6366F1"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LNssz",
+                      "name": "card1Num",
+                      "fill": "#FAFAF9",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "12",
+                      "textAlign": "right",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 42,
+                      "fontWeight": "700",
+                      "letterSpacing": -1.2
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wHLb3",
+                      "name": "card1Footer",
+                      "width": "fill_container",
+                      "gap": 6,
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "9KOEW",
+                          "name": "card1Change",
+                          "fill": "#32D583",
+                          "content": "+3 החודש",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "8bG5L",
+                          "name": "card1Trend",
+                          "width": 14,
+                          "height": 14,
+                          "iconFontName": "trending-up",
+                          "iconFontFamily": "lucide",
+                          "fill": "#32D583"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

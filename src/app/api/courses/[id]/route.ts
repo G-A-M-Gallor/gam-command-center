@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCourseById, updateCourse, deleteCourse } from "@/lib/courses/courseQueries";
+import { getUserId } from "@/lib/api/auth";
 import { z } from "zod";
 
 const updateCourseSchema = z.object({
@@ -22,23 +23,12 @@ const updateCourseSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    let userId = user?.id;
-    if (authError || !user) {
-      // Temporary: Allow for development - use demo user
-      console.log('Auth warning:', authError?.message || 'No user');
-      userId = 'demo-user-123';
-    }
-
-    const course = await getCourseById(params.id, userId);
+    const userId = await getUserId();
+    const resolvedParams = await params;
+    const course = await getCourseById(resolvedParams.id, userId);
 
     if (!course) {
       return NextResponse.json(
@@ -62,30 +52,11 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    let userId = user?.id;
-    if (authError || !user) {
-      // Temporary: Allow for development - use demo user
-      console.log('Auth warning:', authError?.message || 'No user');
-      userId = 'demo-user-123';
-    }
-
-    // Check if course exists and belongs to user
-    const existingCourse = await getCourseById(params.id, userId);
-    if (!existingCourse) {
-      return NextResponse.json(
-        { error: "Course not found" },
-        { status: 404 }
-      );
-    }
+    const userId = await getUserId();
+    const resolvedParams = await params;
 
     const body = await request.json();
     const validatedData = updateCourseSchema.parse(body);
@@ -95,7 +66,7 @@ export async function PUT(
       Object.entries(validatedData).filter(([_, value]) => value !== undefined)
     );
 
-    const updatedCourse = await updateCourse(params.id, userId, updateData);
+    const updatedCourse = await updateCourse(resolvedParams.id, userId, updateData);
     return NextResponse.json(updatedCourse);
   } catch (error: any) {
     console.error("Error updating course:", error);
@@ -119,32 +90,13 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const userId = await getUserId();
+    const resolvedParams = await params;
 
-    let userId = user?.id;
-    if (authError || !user) {
-      // Temporary: Allow for development - use demo user
-      console.log('Auth warning:', authError?.message || 'No user');
-      userId = 'demo-user-123';
-    }
-
-    // Check if course exists and belongs to user
-    const existingCourse = await getCourseById(params.id, userId);
-    if (!existingCourse) {
-      return NextResponse.json(
-        { error: "Course not found" },
-        { status: 404 }
-      );
-    }
-
-    await deleteCourse(params.id, userId);
+    await deleteCourse(resolvedParams.id, userId);
 
     return NextResponse.json(
       { message: "Course deleted successfully" },

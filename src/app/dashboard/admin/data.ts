@@ -429,13 +429,23 @@ export const routes: RouteEntry[] = [
   },
   {
     id: 'courses', path: '/dashboard/courses', name: 'Course Library', nameHe: 'ספריית קורסים', icon: GraduationCap,
-    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-25',
-    descriptionHe: 'ספריית קורסים אישית — קורסים עם תמלולים, סיכומים וכרטיסיות למידה. וידאו ב-Google Drive, תמלולים ב-Supabase',
-    descriptionEn: 'Personal course library — courses with transcriptions, summaries and learning flashcards. Video in Google Drive, transcriptions in Supabase',
+    phase: 2, status: 'active', version: '1.1.0', addedDate: '2026-03-25',
+    descriptionHe: 'ספריית קורסים אישית — קורסים עם תמלולים, סיכומים וכרטיסיות למידה. וידאו ב-Google Drive, תמלולים ב-Supabase, אינטגרציה עם Semantic Brain',
+    descriptionEn: 'Personal course library — courses with transcriptions, summaries and learning flashcards. Video in Google Drive, transcriptions in Supabase, integrated with Semantic Brain',
     components: [
       { id: 'courses-screen', name: 'CoursesScreen', file: 'components/pm/CoursesScreen.tsx', status: 'active' },
+      { id: 'google-drive-connection', name: 'GoogleDriveConnection', file: 'components/pm/GoogleDriveConnection.tsx', status: 'active' },
     ],
-    contexts: ['SettingsContext'], supabaseTables: ['cc_courses', 'cc_lessons', 'cc_transcriptions'], visible: true, sidebarTab: true,
+    apiRoutes: [
+      { id: 'courses-crud', path: '/api/courses', method: 'GET,POST,PUT,DELETE', status: 'active' },
+      { id: 'google-drive-sync', path: '/api/courses/[id]/sync-drive', method: 'POST', status: 'active' },
+      { id: 'semantic-embedding', path: '/api/semantic/embed-courses', method: 'POST', status: 'active' },
+      { id: 'google-oauth', path: '/api/google/auth', method: 'GET,POST', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['cc_courses', 'cc_lessons', 'cc_transcriptions', 'google_accounts'],
+    healthChecks: ['courses-health', 'google-oauth-health', 'courses-sync-health'],
+    integrations: ['semantic_memory', 'google_drive', 'pm_system'],
+    visible: true, sidebarTab: true,
   },
   {
     id: 'boardroom', path: '/dashboard/boardroom', name: 'Board Room', nameHe: 'חדר דיונים', icon: Users,

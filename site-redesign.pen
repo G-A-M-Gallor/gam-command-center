@@ -1,0 +1,1695 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "j81wA",
+      "x": 0,
+      "y": 0,
+      "name": "vBrain.io Landing Page",
+      "width": 1440,
+      "fill": "#0B0B0E",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "6HQmu",
+          "name": "Header",
+          "width": "fill_container",
+          "padding": [
+            20,
+            80
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "FL42l",
+              "name": "logoGroup",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WHjOV",
+                  "name": "logoIcon",
+                  "width": 40,
+                  "height": 40,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#6366F1",
+                        "position": 0
+                      },
+                      {
+                        "color": "#32D583",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 12
+                },
+                {
+                  "type": "text",
+                  "id": "FM6z8",
+                  "name": "logoText",
+                  "fill": "#FAFAF9",
+                  "content": "vBrain",
+                  "fontFamily": "Fraunces",
+                  "fontSize": 24,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "type": "text",
+                  "id": "ov9wX",
+                  "name": "logoDot",
+                  "fill": "#6366F1",
+                  "content": ".io",
+                  "fontFamily": "Fraunces",
+                  "fontSize": 24,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.5
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Po6L8",
+              "name": "nav",
+              "gap": 32,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "aaN7d",
+                  "name": "navItem1",
+                  "fill": "#6B6B70",
+                  "content": "תכונות",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "PmPEy",
+                  "name": "navItem2",
+                  "fill": "#6B6B70",
+                  "content": "איך זה עובד",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "j19vq",
+                  "name": "navItem3",
+                  "fill": "#6B6B70",
+                  "content": "אודות",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "VcOZJ",
+                  "name": "ctaBtn",
+                  "fill": "#6366F1",
+                  "cornerRadius": 10,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#6366F133",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 24
+                  },
+                  "padding": [
+                    10,
+                    24
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Wl5D8",
+                      "name": "ctaBtnText",
+                      "fill": "#FFFFFF",
+                      "content": "כניסה למערכת",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kJ08q",
+          "name": "Hero Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            100,
+            120,
+            80,
+            120
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "d0nZM",
+              "name": "badge",
+              "fill": "#16161A",
+              "cornerRadius": 100,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#2A2A2E"
+              },
+              "gap": 8,
+              "padding": [
+                8,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "aOwd3",
+                  "name": "badgeDot",
+                  "fill": "#32D583",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "iLF86",
+                  "name": "badgeText",
+                  "fill": "#6B6B70",
+                  "content": "מערכת ניהול פרויקטים חכמה",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "PElba",
+              "name": "headline",
+              "fill": "#FAFAF9",
+              "textGrowth": "fixed-width",
+              "width": 900,
+              "content": "מרכז הפיקוד\nשל העסק שלך",
+              "lineHeight": 1.15,
+              "textAlign": "center",
+              "fontFamily": "Fraunces",
+              "fontSize": 64,
+              "fontWeight": "600",
+              "letterSpacing": -1.2
+            },
+            {
+              "type": "text",
+              "id": "kZZM9",
+              "name": "subline",
+              "fill": "#6B6B70",
+              "textGrowth": "fixed-width",
+              "width": 720,
+              "content": "vBrain.io מרכז את כל המידע העסקי, הפרויקטים והתקשורת במקום אחד.\nמנוע AI מובנה, סנכרון בזמן אמת, ושליטה מלאה — מכל מכשיר.",
+              "lineHeight": 1.6,
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 20
+            },
+            {
+              "type": "frame",
+              "id": "F1cEW",
+              "name": "ctaRow",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "F3mKZ",
+                  "name": "ctaPrimary",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 180,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "#6366F1",
+                        "position": 0
+                      },
+                      {
+                        "color": "#4F46E5",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 12,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#6366F133",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 24
+                  },
+                  "padding": [
+                    16,
+                    36
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uHRZI",
+                      "name": "ctaPrimaryText",
+                      "fill": "#FFFFFF",
+                      "content": "התחל עכשיו",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CKDiU",
+                  "name": "ctaSecondary",
+                  "cornerRadius": 12,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#2A2A2E"
+                  },
+                  "padding": [
+                    16,
+                    36
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DBDv6",
+                      "name": "ctaSecondaryText",
+                      "fill": "#FAFAF9",
+                      "content": "צפה בהדגמה",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 17,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "lMFNu",
+              "name": "screenshotWrap",
+              "width": 1000,
+              "height": 560,
+              "fill": "#16161A",
+              "cornerRadius": 16,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#2A2A2E"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#00000060",
+                "offset": {
+                  "x": 0,
+                  "y": 24
+                },
+                "blur": 64
+              },
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "E5wLW",
+                  "name": "screenshotLabel",
+                  "fill": "#4A4A50",
+                  "content": "Dashboard Screenshot",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "1sfR2",
+          "name": "Features Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 48,
+          "padding": [
+            80,
+            120
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "bf5f5",
+              "name": "featHeader",
+              "layout": "vertical",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "MMfun",
+                  "name": "featLabel",
+                  "fill": "#6366F1",
+                  "content": "תכונות",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "text",
+                  "id": "kPUpq",
+                  "name": "featTitle",
+                  "fill": "#FAFAF9",
+                  "content": "הכל במקום אחד",
+                  "textAlign": "center",
+                  "fontFamily": "Fraunces",
+                  "fontSize": 44,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.8
+                },
+                {
+                  "type": "text",
+                  "id": "N2zr3",
+                  "name": "featSub",
+                  "fill": "#6B6B70",
+                  "content": "כלים חכמים שמחליפים עשרות אפליקציות נפרדות",
+                  "textAlign": "center",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zOcW2",
+              "name": "featGrid",
+              "width": "fill_container",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "M3IIX",
+                  "name": "col1",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "IL6lE",
+                      "name": "card1",
+                      "width": "fill_container",
+                      "fill": "#16161A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "vBiuT",
+                          "name": "card1icon",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#6366F120",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "GgxnO",
+                              "name": "card1iconInner",
+                              "width": 24,
+                              "height": 24,
+                              "iconFontName": "brain",
+                              "iconFontFamily": "lucide",
+                              "fill": "#6366F1"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "O45RR",
+                          "name": "card1title",
+                          "fill": "#FAFAF9",
+                          "content": "מנוע AI מובנה",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "pqj50",
+                          "name": "card1desc",
+                          "fill": "#6B6B70",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "5 מצבי צ׳אט חכמים ו-6 סוכנים אוטומטיים שעוזרים לנהל, לנתח ולכתוב",
+                          "lineHeight": 1.6,
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YEt56",
+                      "name": "card2",
+                      "width": "fill_container",
+                      "fill": "#16161A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "t7nq1",
+                          "name": "card2icon",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#32D58320",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "MFf9K",
+                              "name": "card2iconInner",
+                              "width": 24,
+                              "height": 24,
+                              "iconFontName": "layout-dashboard",
+                              "iconFontFamily": "lucide",
+                              "fill": "#32D583"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "tlMy1",
+                          "name": "card2title",
+                          "fill": "#FAFAF9",
+                          "content": "דשבורד מלא",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "lbKmS",
+                          "name": "card2desc",
+                          "fill": "#6B6B70",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "17 עמודים, 16 ווידג׳טים עם גרירה ושינוי גודל, תיקיות ופרופילים",
+                          "lineHeight": 1.6,
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "57FKk",
+                  "name": "col2",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "4fWEW",
+                      "name": "card3",
+                      "width": "fill_container",
+                      "fill": "#16161A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Rza4H",
+                          "name": "card3icon",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#E85A4F20",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "cbUxp",
+                              "name": "card3iconInner",
+                              "width": 24,
+                              "height": 24,
+                              "iconFontName": "map",
+                              "iconFontFamily": "lucide",
+                              "fill": "#E85A4F"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "VSPBI",
+                          "name": "card3title",
+                          "fill": "#FAFAF9",
+                          "content": "Story Map",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "k4OKf",
+                          "name": "card3desc",
+                          "fill": "#6B6B70",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "מפת סיפורים תלת-שכבתית עם גרירה, פילטרים ויצוא — בזמן אמת",
+                          "lineHeight": 1.6,
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "4MvL2",
+                      "name": "card4",
+                      "width": "fill_container",
+                      "fill": "#16161A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "kSG05",
+                          "name": "card4icon",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#FFB54720",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "kRzF5",
+                              "name": "card4iconInner",
+                              "width": 24,
+                              "height": 24,
+                              "iconFontName": "database",
+                              "iconFontFamily": "lucide",
+                              "fill": "#FFB547"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "zuwrJ",
+                          "name": "card4title",
+                          "fill": "#FAFAF9",
+                          "content": "ישויות ותבניות",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "cxe4Q",
+                          "name": "card4desc",
+                          "fill": "#6B6B70",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "פלטפורמת ישויות עם 6 תצוגות, תבניות מותאמות ופעולות בכמות",
+                          "lineHeight": 1.6,
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UsIwY",
+                  "name": "col3",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "2FE2C",
+                      "name": "card5",
+                      "width": "fill_container",
+                      "fill": "#16161A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "WzCiU",
+                          "name": "card5icon",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#32D58320",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "msTiM",
+                              "name": "card5iconInner",
+                              "width": 24,
+                              "height": 24,
+                              "iconFontName": "shield-check",
+                              "iconFontFamily": "lucide",
+                              "fill": "#32D583"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "VWYca",
+                          "name": "card5title",
+                          "fill": "#FAFAF9",
+                          "content": "אבטחה מתקדמת",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "FVBrj",
+                          "name": "card5desc",
+                          "fill": "#6B6B70",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "4 שכבות הגנה, RLS, Zod validation, rate limiting ו-Sentry monitoring",
+                          "lineHeight": 1.6,
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "iWygO",
+                      "name": "card6",
+                      "width": "fill_container",
+                      "fill": "#16161A",
+                      "cornerRadius": 16,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "layout": "vertical",
+                      "gap": 16,
+                      "padding": 28,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "CBQm0",
+                          "name": "card6icon",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#6366F120",
+                          "cornerRadius": 12,
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon_font",
+                              "id": "H331e",
+                              "name": "card6iconInner",
+                              "width": 24,
+                              "height": 24,
+                              "iconFontName": "globe",
+                              "iconFontFamily": "lucide",
+                              "fill": "#6366F1"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "4vg3M",
+                          "name": "card6title",
+                          "fill": "#FAFAF9",
+                          "content": "רב-שפתי + RTL",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 20,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dFYUh",
+                          "name": "card6desc",
+                          "fill": "#6B6B70",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "תמיכה מלאה בעברית, אנגלית ורוסית — עם כיוון RTL מותאם אוטומטית",
+                          "lineHeight": 1.6,
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "95e23",
+          "name": "Stats Section",
+          "width": "fill_container",
+          "fill": "#16161A",
+          "stroke": {
+            "align": "inside",
+            "thickness": {
+              "top": 1,
+              "bottom": 1
+            },
+            "fill": "#2A2A2E"
+          },
+          "padding": [
+            60,
+            120
+          ],
+          "justifyContent": "space_around",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "NsIQw",
+              "name": "stat1",
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Ab5PW",
+                  "name": "stat1num",
+                  "fill": "#6366F1",
+                  "content": "17",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 48,
+                  "fontWeight": "700",
+                  "letterSpacing": -1.2
+                },
+                {
+                  "type": "text",
+                  "id": "qZkWE",
+                  "name": "stat1label",
+                  "fill": "#6B6B70",
+                  "content": "עמודי דשבורד",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Tcb3z",
+              "name": "stat2",
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ldnc7",
+                  "name": "stat2num",
+                  "fill": "#32D583",
+                  "content": "26",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 48,
+                  "fontWeight": "700",
+                  "letterSpacing": -1.2
+                },
+                {
+                  "type": "text",
+                  "id": "ZFBZY",
+                  "name": "stat2label",
+                  "fill": "#6B6B70",
+                  "content": "API Routes",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "7dixq",
+              "name": "stat3",
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "I0V1P",
+                  "name": "stat3num",
+                  "fill": "#E85A4F",
+                  "content": "301",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 48,
+                  "fontWeight": "700",
+                  "letterSpacing": -1.2
+                },
+                {
+                  "type": "text",
+                  "id": "t05jP",
+                  "name": "stat3label",
+                  "fill": "#6B6B70",
+                  "content": "קבצי קוד",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Abu0B",
+              "name": "stat4",
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jHM8x",
+                  "name": "stat4num",
+                  "fill": "#FFB547",
+                  "content": "12",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 48,
+                  "fontWeight": "700",
+                  "letterSpacing": -1.2
+                },
+                {
+                  "type": "text",
+                  "id": "6AzY7",
+                  "name": "stat4label",
+                  "fill": "#6B6B70",
+                  "content": "ימי פיתוח",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 15,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ggczo",
+          "name": "How It Works",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 48,
+          "padding": [
+            80,
+            120
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Y2bfy",
+              "name": "howHeader",
+              "layout": "vertical",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "2GDN9",
+                  "name": "howLabel",
+                  "fill": "#32D583",
+                  "content": "איך זה עובד",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "text",
+                  "id": "Seb7D",
+                  "name": "howTitle",
+                  "fill": "#FAFAF9",
+                  "content": "שלושה צעדים לשליטה מלאה",
+                  "textAlign": "center",
+                  "fontFamily": "Fraunces",
+                  "fontSize": 44,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.8
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "yFfEJ",
+              "name": "stepsRow",
+              "width": "fill_container",
+              "gap": 32,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "lQnva",
+                  "name": "step1",
+                  "width": "fill_container",
+                  "fill": "#16161A",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#2A2A2E"
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 32,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "4j20h",
+                      "name": "step1num",
+                      "width": 56,
+                      "height": 56,
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 180,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#6366F1",
+                            "position": 0
+                          },
+                          {
+                            "color": "#4F46E5",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "cornerRadius": 100,
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "z9Yoo",
+                          "name": "step1numText",
+                          "fill": "#FFFFFF",
+                          "content": "1",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 24,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "vZd8T",
+                      "name": "step1title",
+                      "fill": "#FAFAF9",
+                      "content": "חבר את המקורות",
+                      "textAlign": "center",
+                      "fontFamily": "Fraunces",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "7gdeH",
+                      "name": "step1desc",
+                      "fill": "#6B6B70",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "סנכרן את Origami CRM, Notion, Google Calendar ועוד — הכל מתחבר אוטומטית",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FekHf",
+                  "name": "step2",
+                  "width": "fill_container",
+                  "fill": "#16161A",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#2A2A2E"
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 32,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "89NiF",
+                      "name": "step2num",
+                      "width": 56,
+                      "height": 56,
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 180,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#32D583",
+                            "position": 0
+                          },
+                          {
+                            "color": "#059669",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "cornerRadius": 100,
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "zOoh5",
+                          "name": "step2numText",
+                          "fill": "#FFFFFF",
+                          "content": "2",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 24,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "UjW78",
+                      "name": "step2title",
+                      "fill": "#FAFAF9",
+                      "content": "נהל בחכמה",
+                      "textAlign": "center",
+                      "fontFamily": "Fraunces",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ev0GI",
+                      "name": "step2desc",
+                      "fill": "#6B6B70",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "השתמש ב-AI לניתוח, כתיבה, פירוק משימות ותכנון ספרינטים — הכל בעברית",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Rtegs",
+                  "name": "step3",
+                  "width": "fill_container",
+                  "fill": "#16161A",
+                  "cornerRadius": 16,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "#2A2A2E"
+                  },
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 32,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "CSgrs",
+                      "name": "step3num",
+                      "width": 56,
+                      "height": 56,
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 180,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#E85A4F",
+                            "position": 0
+                          },
+                          {
+                            "color": "#DC2626",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "cornerRadius": 100,
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "L4iBp",
+                          "name": "step3numText",
+                          "fill": "#FFFFFF",
+                          "content": "3",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 24,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "rhqQ1",
+                      "name": "step3title",
+                      "fill": "#FAFAF9",
+                      "content": "קבל שליטה",
+                      "textAlign": "center",
+                      "fontFamily": "Fraunces",
+                      "fontSize": 22,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "jkSGK",
+                      "name": "step3desc",
+                      "fill": "#6B6B70",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "דשבורד מרכזי עם Realtime, PWA מותקנת, ומבט-על על כל הפעילות העסקית",
+                      "lineHeight": 1.6,
+                      "textAlign": "center",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "mDSuK",
+          "name": "CTA Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            100,
+            120
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "5dAFZ",
+              "name": "ctaBg",
+              "width": "fill_container",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 180,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#6366F115",
+                    "position": 0
+                  },
+                  {
+                    "color": "#32D58310",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 20,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "#2A2A2E"
+              },
+              "layout": "vertical",
+              "gap": 28,
+              "padding": [
+                64,
+                80
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "XmJZq",
+                  "name": "ctaTitle",
+                  "fill": "#FAFAF9",
+                  "content": "מוכן לשדרג את ניהול העסק?",
+                  "textAlign": "center",
+                  "fontFamily": "Fraunces",
+                  "fontSize": 40,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.8
+                },
+                {
+                  "type": "text",
+                  "id": "rCKVX",
+                  "name": "ctaDesc",
+                  "fill": "#6B6B70",
+                  "textGrowth": "fixed-width",
+                  "width": 600,
+                  "content": "הצטרף למערכת שנבנתה ב-12 ימים ומנהלת עסק שלם.\nvBrain.io — מרכז הפיקוד שלך.",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "DM Sans",
+                  "fontSize": 18,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "g20Au",
+                  "name": "ctaBtnRow",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "f4sbB",
+                      "name": "ctaMainBtn",
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 180,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#6366F1",
+                            "position": 0
+                          },
+                          {
+                            "color": "#4F46E5",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "cornerRadius": 12,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#6366F133",
+                        "offset": {
+                          "x": 0,
+                          "y": 8
+                        },
+                        "blur": 24
+                      },
+                      "padding": [
+                        18,
+                        40
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "yOPVH",
+                          "name": "ctaMainBtnText",
+                          "fill": "#FFFFFF",
+                          "content": "התחל בחינם",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 18,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uzzTb",
+                      "name": "ctaSecBtn",
+                      "cornerRadius": 12,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "#2A2A2E"
+                      },
+                      "padding": [
+                        18,
+                        40
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "azfVX",
+                          "name": "ctaSecBtnText",
+                          "fill": "#FAFAF9",
+                          "content": "דבר איתנו",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 18,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "X3LDQ",
+          "name": "Footer",
+          "width": "fill_container",
+          "fill": "#16161A",
+          "stroke": {
+            "align": "inside",
+            "thickness": {
+              "top": 1
+            },
+            "fill": "#2A2A2E"
+          },
+          "layout": "vertical",
+          "gap": 32,
+          "padding": [
+            48,
+            120,
+            32,
+            120
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Rp2QJ",
+              "name": "footerTop",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Kv0dC",
+                  "name": "footerBrand",
+                  "layout": "vertical",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "jVGbv",
+                      "name": "footerLogo",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "1dEN4",
+                          "name": "footerLogoText",
+                          "fill": "#FAFAF9",
+                          "content": "vBrain",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 22,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.5
+                        },
+                        {
+                          "type": "text",
+                          "id": "6tsbp",
+                          "name": "footerLogoDot",
+                          "fill": "#6366F1",
+                          "content": ".io",
+                          "fontFamily": "Fraunces",
+                          "fontSize": 22,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "JoLPe",
+                      "name": "footerTagline",
+                      "fill": "#4A4A50",
+                      "content": "מרכז הפיקוד של העסק שלך",
+                      "fontFamily": "DM Sans",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "MxMcC",
+                  "name": "footerLinks",
+                  "gap": 64,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "IdESQ",
+                      "name": "linkCol1",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "meWbN",
+                          "name": "linkCol1Title",
+                          "fill": "#FAFAF9",
+                          "content": "מוצר",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Gv7Pu",
+                          "name": "linkCol1a",
+                          "fill": "#6B6B70",
+                          "content": "תכונות",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "haIxM",
+                          "name": "linkCol1b",
+                          "fill": "#6B6B70",
+                          "content": "תמחור",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "k2b47",
+                          "name": "linkCol1c",
+                          "fill": "#6B6B70",
+                          "content": "אבטחה",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Jc6Tg",
+                      "name": "linkCol2",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Fmt9w",
+                          "name": "linkCol2Title",
+                          "fill": "#FAFAF9",
+                          "content": "חברה",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "YN5zW",
+                          "name": "linkCol2a",
+                          "fill": "#6B6B70",
+                          "content": "אודות",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "cmkxa",
+                          "name": "linkCol2b",
+                          "fill": "#6B6B70",
+                          "content": "צור קשר",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "oPqZV",
+                          "name": "linkCol2c",
+                          "fill": "#6B6B70",
+                          "content": "תנאי שימוש",
+                          "fontFamily": "DM Sans",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "9tQsn",
+              "name": "divider",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "#2A2A2E"
+            },
+            {
+              "type": "text",
+              "id": "x4AOA",
+              "name": "copyright",
+              "fill": "#4A4A50",
+              "content": "© 2026 vBrain.io — G.A.M Business Services. All rights reserved.",
+              "textAlign": "center",
+              "fontFamily": "DM Sans",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
