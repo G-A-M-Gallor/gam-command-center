@@ -32,7 +32,7 @@ export function WATIChatInterface({ entityId, phone, className }: WATIChatInterf
 
   const loadMessages = async () => {
     try {
-      let query = new URLSearchParams();
+      const query = new URLSearchParams();
       if (phone) query.set('phone', phone);
       if (entityId) query.set('entity_id', entityId);
 
