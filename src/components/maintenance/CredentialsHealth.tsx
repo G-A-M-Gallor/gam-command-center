@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Shield,
   Key,
@@ -11,13 +11,11 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
-  Copy,
   Github,
   Database,
   Bot,
   Mail,
   MessageSquare,
-  Calendar,
   Cloud
 } from "lucide-react";
 
@@ -161,7 +159,7 @@ function ServiceCard({ service, onTest, showCredential, onToggleCredential }: {
   );
 }
 
-export default function CredentialsHealth({ isRtl }: CredentialsHealthProps) {
+export default function CredentialsHealth({}: CredentialsHealthProps) {
   const [services, setServices] = useState<ApiService[]>(initialServices);
   const [checking, setChecking] = useState(false);
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});

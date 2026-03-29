@@ -20,6 +20,7 @@ import {
   FileText
 } from "lucide-react";
 import CredentialsHealth from "@/components/maintenance/CredentialsHealth";
+import PerformanceMonitor from "@/components/maintenance/PerformanceMonitor";
 
 interface CleanupReport {
   audit_timestamp: string;
@@ -242,7 +243,7 @@ export default function MaintenancePage() {
   const { language } = useSettings();
   const isRtl = language === 'he';
 
-  const [activeTab, setActiveTab] = useState<'system' | 'credentials'>('system');
+  const [activeTab, setActiveTab] = useState<'system' | 'credentials' | 'performance'>('system');
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState<CleanupReport[]>([]);
   const [cronStatus, setCronStatus] = useState<CronStatus | null>(null);
@@ -376,6 +377,17 @@ export default function MaintenancePage() {
             <Key className="h-4 w-4" />
             Credentials & Keys
           </button>
+          <button
+            onClick={() => setActiveTab('performance')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'performance'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <Gauge className="h-4 w-4" />
+            ניטור ביצועים
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -508,6 +520,11 @@ export default function MaintenancePage() {
         {/* Credentials & Keys Tab */}
         {activeTab === 'credentials' && (
           <CredentialsHealth isRtl={isRtl} />
+        )}
+
+        {/* Performance Monitor Tab */}
+        {activeTab === 'performance' && (
+          <PerformanceMonitor isRtl={isRtl} />
         )}
       </div>
     </div>

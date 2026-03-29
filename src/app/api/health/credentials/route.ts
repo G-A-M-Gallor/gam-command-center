@@ -218,7 +218,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error(`Health check error for ${(request as any).service}:`, error);
+    console.error('Health check error:', error);
 
     return NextResponse.json({
       success: false,
