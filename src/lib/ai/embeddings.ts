@@ -1,67 +1,87 @@
-const VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings";
-const VOYAGE_MODEL = "voyage-3-lite";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent";
 
-interface VoyageResponse {
-  data: { embedding: number[] }[];
-  usage: { total_tokens: number };
+interface GeminiResponse {
+  embedding: { values: number[] };
 }
 
-/** Embed a single text string via Voyage AI */
+/** Reduce dimensionality from 3072 to 768 using simple slicing */
+function reduceDimensions(embedding: number[]): number[] {
+  // Take every 4th element to reduce from 3072 to 768
+  // This maintains good coverage across the embedding space
+  const reduced: number[] = [];
+  for (let i = 0; i < embedding.length; i += 4) {
+    reduced.push(embedding[i]);
+  }
+  return reduced.slice(0, 768); // Ensure exactly 768 dimensions
+}
+
+/** Embed a single text string via Gemini */
 export async function embedText(text: string): Promise<number[]> {
-  const [result] = await embedTexts([text]);
-  return result;
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) throw new Error("GOOGLE_AI_API_KEY is not set");
+
+  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      content: {
+        parts: [{ text }]
+      },
+      taskType: "RETRIEVAL_DOCUMENT"
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Gemini AI error ${res.status}: ${body}`);
+  }
+
+  const json = (await res.json()) as GeminiResponse;
+  return reduceDimensions(json.embedding.values);
 }
 
-/** Embed multiple texts in a single Voyage AI call (max 128 per batch) */
+/** Embed multiple texts by calling Gemini for each (no batch API) */
 export async function embedTexts(texts: string[]): Promise<number[][]> {
-  const apiKey = process.env.VOYAGE_API_KEY;
-  if (!apiKey) throw new Error("VOYAGE_API_KEY is not set");
+  const embeddings: number[][] = [];
 
-  const res = await fetch(VOYAGE_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: VOYAGE_MODEL,
-      input: texts,
-      input_type: "document",
-    }),
-  });
+  for (const text of texts) {
+    const embedding = await embedText(text);
+    embeddings.push(embedding);
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Voyage AI error ${res.status}: ${body}`);
+    // Add small delay to avoid rate limiting
+    if (texts.length > 1) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }
 
-  const json = (await res.json()) as VoyageResponse;
-  return json.data.map((d) => d.embedding);
+  return embeddings;
 }
 
-/** Embed a query (uses input_type: "query" for better retrieval) */
+/** Embed a query (uses taskType: "RETRIEVAL_QUERY" for better retrieval) */
 export async function embedQuery(text: string): Promise<number[]> {
-  const apiKey = process.env.VOYAGE_API_KEY;
-  if (!apiKey) throw new Error("VOYAGE_API_KEY is not set");
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
+  if (!apiKey) throw new Error("GOOGLE_AI_API_KEY is not set");
 
-  const res = await fetch(VOYAGE_API_URL, {
+  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: VOYAGE_MODEL,
-      input: [text],
-      input_type: "query",
+      content: {
+        parts: [{ text }]
+      },
+      taskType: "RETRIEVAL_QUERY"
     }),
   });
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Voyage AI error ${res.status}: ${body}`);
+    throw new Error(`Gemini AI error ${res.status}: ${body}`);
   }
 
-  const json = (await res.json()) as VoyageResponse;
-  return json.data[0].embedding;
+  const json = (await res.json()) as GeminiResponse;
+  return reduceDimensions(json.embedding.values);
 }

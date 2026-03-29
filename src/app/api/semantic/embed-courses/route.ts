@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { embedText } from "@/lib/ai/embeddings";
 import { createHash } from "crypto";
 
@@ -8,7 +8,7 @@ function createContentHash(content: string): string {
 }
 
 async function embedCourseContent(courseId: string) {
-  const supabase = await createClient();
+  const supabase = createServiceClient();
 
   // Get course with lessons
   const { data: course } = await supabase
@@ -50,23 +50,27 @@ async function embedCourseContent(courseId: string) {
     try {
       const courseEmbedding = await embedText(courseContent);
 
+      // Delete existing entry if it exists, then insert new one
       await supabase
         .from('semantic_memory')
-        .upsert({
+        .delete()
+        .eq('source_id', courseId)
+        .eq('source_type', 'course');
+
+      const { error: insertError } = await supabase
+        .from('semantic_memory')
+        .insert({
           source_type: 'course',
           source_id: courseId,
           content: courseContent,
           content_hash: courseHash,
-          embedding: courseEmbedding,
+          embedding: `[${courseEmbedding.join(',')}]`, // Convert to pgvector format
           memory_type: 'knowledge',
           domain: 'education',
-          metadata: {
-            course_name: course.name,
-            platform: course.platform,
-            language: course.language,
-            total_lessons: course.cc_lessons?.length || 0
-          }
-        }, { onConflict: 'source_id,source_type' });
+          embedded_at: new Date().toISOString()
+        });
+
+      if (insertError) throw insertError;
 
       results.push({ id: courseId, type: 'course', status: 'embedded' });
     } catch (error: any) {
@@ -103,23 +107,27 @@ async function embedCourseContent(courseId: string) {
       try {
         const lessonEmbedding = await embedText(lessonContent);
 
+        // Delete existing entry if it exists, then insert new one
         await supabase
           .from('semantic_memory')
-          .upsert({
+          .delete()
+          .eq('source_id', lesson.id)
+          .eq('source_type', 'lesson');
+
+        const { error: lessonInsertError } = await supabase
+          .from('semantic_memory')
+          .insert({
             source_type: 'lesson',
             source_id: lesson.id,
             content: lessonContent,
             content_hash: lessonHash,
-            embedding: lessonEmbedding,
+            embedding: `[${lessonEmbedding.join(',')}]`, // Convert to pgvector format
             memory_type: 'knowledge',
             domain: 'education',
-            metadata: {
-              course_id: courseId,
-              course_name: course.name,
-              lesson_number: lesson.lesson_number,
-              duration_minutes: lesson.duration_minutes
-            }
-          }, { onConflict: 'source_id,source_type' });
+            embedded_at: new Date().toISOString()
+          });
+
+        if (lessonInsertError) throw lessonInsertError;
 
         results.push({ id: lesson.id, type: 'lesson', status: 'embedded' });
       } catch (error: any) {
@@ -145,7 +153,7 @@ export async function POST(request: NextRequest) {
 
     if (batch_all) {
       // All courses
-      const supabase = await createClient();
+      const supabase = createServiceClient();
       const { data: courses } = await supabase
         .from('cc_courses')
         .select('id');
@@ -161,15 +169,15 @@ export async function POST(request: NextRequest) {
       }
 
       const totalEmbedded = allResults
-        .flatMap(r => r.results)
+        .flatMap(r => r.results || [])
         .filter(r => r.status === 'embedded').length;
 
       const totalUnchanged = allResults
-        .flatMap(r => r.results)
+        .flatMap(r => r.results || [])
         .filter(r => r.status === 'unchanged').length;
 
       const totalErrors = allResults
-        .flatMap(r => r.results)
+        .flatMap(r => r.results || [])
         .filter(r => r.status === 'error').length;
 
       return NextResponse.json({

@@ -20,6 +20,13 @@ export interface ComponentEntry {
   fields?: FieldEntry[];
 }
 
+export interface ApiRouteEntry {
+  id: string;
+  path: string;
+  method: string;
+  status: Status;
+}
+
 export interface RouteEntry {
   id: string;
   path: string;
@@ -38,6 +45,9 @@ export interface RouteEntry {
   connectedTo?: string[];
   visible: boolean;
   sidebarTab: boolean;
+  apiRoutes?: ApiRouteEntry[];
+  healthChecks?: string[];
+  integrations?: string[];
 }
 
 export interface WidgetEntry {
