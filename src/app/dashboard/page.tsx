@@ -220,10 +220,8 @@ export default function DashboardPage() {
           {statCards.map((card) => (
             <Card
               key={card.label}
-              variant="default"
-              interactive={!!card.href}
               onClick={card.href ? () => router.push(card.href!) : undefined}
-              className="group"
+              className="group cursor-pointer"
             >
               <div className="flex items-center justify-between mb-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${card.bg}`}>
@@ -263,11 +261,8 @@ export default function DashboardPage() {
               {data!.entityTypes.map((et) => (
                 <Card
                   key={et.slug}
-                  variant="default"
-                  padding="sm"
-                  interactive
                   onClick={() => router.push(`/dashboard/entities/${et.slug}`)}
-                  className="group flex items-center gap-3"
+                  className="group flex items-center gap-3 p-3 cursor-pointer"
                 >
                   <span className="text-lg">{et.icon}</span>
                   <div className="min-w-0 flex-1">
@@ -287,43 +282,41 @@ export default function DashboardPage() {
 
         {/* Document Pipeline */}
         {!loading && (data?.docPipeline.length ?? 0) > 0 && (
-          <Card variant="default" padding="lg">
-            <CardHeader
-              actions={
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard/documents")}
-                  className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
-                >
-                  {d.viewAll}
-                  <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
-                </button>
-              }
-              className="mb-4"
-            >
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <CardHeader className="p-0">
               <CardTitle>
                 <FileSignature size={14} className="inline me-1.5 text-purple-400" />
                 {d.docPipeline}
               </CardTitle>
             </CardHeader>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/documents")}
+                className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
+              >
+                {d.viewAll}
+                <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
+              </button>
+            </div>
 
             {/* Pipeline mini stats */}
             <div className="grid grid-cols-2 gap-2 mb-4 sm:grid-cols-4">
-              <Card variant="ghost" padding="sm" className="flex items-center gap-2 border border-white/[0.04]">
+              <Card className="p-3 flex items-center gap-2 border border-white/[0.04]">
                 <FileText size={14} className="text-slate-400" />
                 <div>
                   <div className="text-lg font-bold text-slate-200">{data!.docStats.draft}</div>
                   <div className="text-[10px] text-slate-500">{d.docDrafts}</div>
                 </div>
               </Card>
-              <Card variant="ghost" padding="sm" className="flex items-center gap-2 border border-blue-800/30 bg-blue-900/10">
+              <Card className="p-3 flex items-center gap-2 border border-blue-800/30 bg-blue-900/10">
                 <Send size={14} className="text-blue-400" />
                 <div>
                   <div className="text-lg font-bold text-blue-300">{data!.docStats.sent}</div>
                   <div className="text-[10px] text-slate-500">{d.docPending}</div>
                 </div>
               </Card>
-              <Card variant="ghost" padding="sm" className="flex items-center gap-2 border border-emerald-800/30 bg-emerald-900/10">
+              <Card className="p-3 flex items-center gap-2 border border-emerald-800/30 bg-emerald-900/10">
                 <CheckCircle2 size={14} className="text-emerald-400" />
                 <div>
                   <div className="text-lg font-bold text-emerald-300">{data!.docStats.signed}</div>
@@ -331,7 +324,7 @@ export default function DashboardPage() {
                 </div>
               </Card>
               {data!.docStats.expiringSoon > 0 && (
-                <Card variant="ghost" padding="sm" className="flex items-center gap-2 border border-amber-800/30 bg-amber-900/10">
+                <Card className="p-3 flex items-center gap-2 border border-amber-800/30 bg-amber-900/10">
                   <AlertTriangleIcon size={14} className="text-amber-400" />
                   <div>
                     <div className="text-lg font-bold text-amber-300">{data!.docStats.expiringSoon}</div>
@@ -380,22 +373,20 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Recent Projects */}
-          <Card variant="default" padding="lg" className="lg:col-span-2">
-            <CardHeader
-              actions={
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard/layers")}
-                  className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
-                >
-                  {d.viewAll}
-                  <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
-                </button>
-              }
-              className="mb-4"
-            >
+          <Card className="p-6 lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <CardHeader className="p-0">
               <CardTitle>{d.recentProjects}</CardTitle>
             </CardHeader>
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/layers")}
+                className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
+              >
+                {d.viewAll}
+                <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
+              </button>
+            </div>
             {loading ? (
               <div className="space-y-3">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -436,7 +427,7 @@ export default function DashboardPage() {
           {/* Right Column */}
           <div className="space-y-6">
             {/* Today's Events */}
-            <Card variant="default" padding="lg">
+            <Card className="p-6">
               <CardTitle className="mb-4">{d.todayEvents}</CardTitle>
               {loading ? (
                 <div className="space-y-2">
@@ -467,22 +458,20 @@ export default function DashboardPage() {
 
             {/* Recent Entities */}
             {!loading && (data?.recentEntities.length ?? 0) > 0 && (
-              <Card variant="default" padding="lg">
-                <CardHeader
-                  actions={
-                    <button
-                      type="button"
-                      onClick={() => router.push("/dashboard/entities")}
-                      className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
-                    >
-                      {d.viewAll}
-                      <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
-                    </button>
-                  }
-                  className="mb-3"
-                >
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <CardHeader className="p-0">
                   <CardTitle>{d.recentEntities}</CardTitle>
                 </CardHeader>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard/entities")}
+                    className="flex items-center gap-1 text-xs text-[var(--cc-accent-400)] hover:text-[var(--cc-accent-300)] transition-colors"
+                  >
+                    {d.viewAll}
+                    <ArrowRight size={12} className={isRtl ? "rotate-180" : ""} />
+                  </button>
+                </div>
                 <div className="space-y-1">
                   {data!.recentEntities.map((e) => {
                     const etInfo = data!.entityTypes.find(et => et.slug === e.entity_type);
@@ -506,17 +495,14 @@ export default function DashboardPage() {
             )}
 
             {/* Quick Actions */}
-            <Card variant="default" padding="lg">
+            <Card className="p-6">
               <CardTitle className="mb-3">{d.quickActions}</CardTitle>
               <div className="space-y-2">
                 {quickActions.map((action) => (
                   <Card
                     key={action.label}
-                    variant="ghost"
-                    padding="sm"
-                    interactive
                     onClick={() => router.push(action.href)}
-                    className="flex items-center gap-3 border border-white/[0.04] text-sm text-slate-300"
+                    className="flex items-center gap-3 border border-white/[0.04] text-sm text-slate-300 p-3 cursor-pointer"
                   >
                     <action.icon size={14} className="text-[var(--cc-accent-400)]" />
                     {action.label}

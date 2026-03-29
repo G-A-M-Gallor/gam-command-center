@@ -1316,7 +1316,7 @@ export default function ToolkitScreen() {
 
         {/* Chat Panel */}
         {chatOpen && (
-          <Card variant="elevated" className="w-1/3 min-w-[300px] max-w-[400px] h-fit max-h-[600px] flex flex-col">
+          <Card className="w-1/3 min-w-[300px] max-w-[400px] h-fit max-h-[600px] flex flex-col shadow-lg">
             <div className="p-4 border-b border-slate-700">
               <h3 className="font-medium text-slate-200">AI Assistant</h3>
               <p className="text-xs text-slate-400">עזרה עם {

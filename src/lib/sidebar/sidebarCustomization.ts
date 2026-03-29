@@ -208,7 +208,7 @@ export function buildDisplayGroups(
 
   // Helper: filter + sort entries for a group
   function processEntries(allEntries: NavEntry[]): NavEntry[] {
-    let sorted = [...allEntries];
+    const sorted = [...allEntries];
     if (autoSortByUsage) {
       sorted.sort((a, b) => (usageCounts[b.key] ?? 0) - (usageCounts[a.key] ?? 0));
     }

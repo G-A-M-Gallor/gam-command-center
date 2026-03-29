@@ -168,6 +168,26 @@ export async function GET() {
         how_to_fix: "Check Notion API connection and webhook configuration",
         app_name: null,
         edge_function_slug: "notion-sync"
+      },
+      {
+        id: "9",
+        name: "WATI WhatsApp Sync",
+        emoji: "💬",
+        type: "cron_job" as const,
+        trigger_type: "scheduled" as const,
+        schedule: "0 */2 * * *",
+        schedule_human: "Every 2 hours",
+        status: "active" as const,
+        health: "healthy" as const,
+        last_run: new Date(Date.now() - 45 * 60 * 1000).toISOString(), // 45 minutes ago
+        source: "WATI API",
+        target: "Supabase",
+        tables_involved: ["comm_messages"],
+        description: "Sync WhatsApp messages and contacts from WATI to communication timeline",
+        what_happens_if_fails: "WhatsApp messages not synced, manual sync required",
+        how_to_fix: "Check WATI API credentials and network connectivity at /api/wati/health",
+        app_name: null,
+        edge_function_slug: "wati-sync"
       }
     ];
 

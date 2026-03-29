@@ -1,16 +1,19 @@
 import { NextRequest } from 'next/server';
 import { syncWatiMessages, findEntityByPhone } from '@/lib/wati/sync';
 import { getConfig, getContacts, getMessages } from '@/lib/wati/client';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 
 export async function GET(request: NextRequest) {
   try {
     // Verify WATI is configured
     getConfig();
 
-    const supabase = await createClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     let synced = 0;
-    let errors: string[] = [];
+    const errors: string[] = [];
 
     // Get WATI contacts
     const contacts = await getContacts();
@@ -26,10 +29,7 @@ export async function GET(request: NextRequest) {
             for (const msg of commMessages) {
               const { error } = await supabase
                 .from('comm_messages')
-                .upsert(msg, {
-                  onConflict: 'channel,external_id',
-                  ignoreDuplicates: false
-                });
+                .insert(msg);
 
               if (error) {
                 errors.push(`Failed to insert message ${msg.external_id}: ${error.message}`);
@@ -71,7 +71,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
     const messages = await getMessages(phone, limit);
 
     if (messages.length === 0) {
@@ -84,15 +87,12 @@ export async function POST(request: NextRequest) {
 
     const commMessages = await syncWatiMessages(supabase, messages, phone);
     let synced = 0;
-    let errors: string[] = [];
+    const errors: string[] = [];
 
     for (const msg of commMessages) {
       const { error } = await supabase
         .from('comm_messages')
-        .upsert(msg, {
-          onConflict: 'channel,external_id',
-          ignoreDuplicates: false
-        });
+        .insert(msg);
 
       if (error) {
         errors.push(`Failed to insert message ${msg.external_id}: ${error.message}`);

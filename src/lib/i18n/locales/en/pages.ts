@@ -131,5 +131,9 @@ const pages = {
     title: "Course Library",
     description: "Personal courses with transcriptions, summaries and learning flashcards",
   },
+  maintenance: {
+    title: "Code Maintenance",
+    description: "Professional code quality monitoring and maintenance system",
+  },
 } as const;
 export default pages;

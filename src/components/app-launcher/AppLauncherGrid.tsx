@@ -266,7 +266,7 @@ export function AppLauncherGrid() {
         )}
       </div>
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [selectedItemId, expandedFolderId, language, getFolderItems, getLabel, handleLaunch, setSelectedItemId, setExpandedFolderId]);
 
   return (

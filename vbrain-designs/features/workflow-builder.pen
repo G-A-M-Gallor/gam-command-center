@@ -1,0 +1,2785 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "TZ2zh",
+      "x": 0,
+      "y": 0,
+      "name": "vBrain.io — Base Template",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$bg-page",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "H1pBM",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$bg-header",
+          "stroke": {
+            "thickness": {
+              "bottom": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "P1EcG",
+              "name": "User Menu",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UD1XD",
+                  "name": "Avatar",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "$accent-purple",
+                  "cornerRadius": 100,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FPcFG",
+                      "name": "avatarLetter",
+                      "fill": "#FFFFFF",
+                      "content": "ג",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "7NuCf",
+                  "name": "userName",
+                  "fill": "$text-secondary",
+                  "content": "גל מילר",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LWPPJ",
+              "name": "Header Nav",
+              "gap": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "J9OzM",
+                  "name": "nav1",
+                  "fill": "$text-primary",
+                  "content": "דשבורד",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "hq5Xs",
+                  "name": "nav2",
+                  "fill": "$text-secondary",
+                  "content": "פרויקטים",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "T1tCm",
+                  "name": "nav3",
+                  "fill": "$text-secondary",
+                  "content": "ישויות",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "PMyAl",
+                  "name": "nav4",
+                  "fill": "$text-secondary",
+                  "content": "מסמכים",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "LavYo",
+                  "name": "nav5",
+                  "fill": "$text-secondary",
+                  "content": "הגדרות",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "78HKk",
+              "name": "Logo",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Z1H61",
+                  "name": "logoIcon",
+                  "width": 28,
+                  "height": 28,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "$accent-purple",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-blue",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 6
+                },
+                {
+                  "type": "text",
+                  "id": "Optpw",
+                  "name": "logoText",
+                  "fill": "$text-primary",
+                  "content": "vBrain.io",
+                  "fontFamily": "$font-heading",
+                  "fontSize": 18,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "V2GgK",
+          "name": "Body Row",
+          "width": "fill_container",
+          "height": "fill_container",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Kw4Lk",
+              "name": "Sidebar",
+              "width": 240,
+              "height": "fill_container",
+              "fill": "$bg-sidebar",
+              "layout": "vertical",
+              "gap": 4,
+              "padding": [
+                16,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Sha2e",
+                  "name": "Sidebar Header",
+                  "width": "fill_container",
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "guBiP",
+                      "name": "sidebarTitle",
+                      "fill": "$text-muted",
+                      "content": "ניווט ראשי",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "yS4vF",
+                  "name": "Nav — דשבורד",
+                  "width": "fill_container",
+                  "fill": "$bg-hover",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "70UJq",
+                      "name": "icon1",
+                      "fill": "$text-primary",
+                      "content": "דשבורד",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "o9ZJI",
+                      "name": "dot1",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "layout-dashboard",
+                      "iconFontFamily": "lucide",
+                      "fill": "$accent-purple"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QmJ7v",
+                  "name": "Nav — פרויקטים",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZsvJN",
+                      "name": "icon2",
+                      "fill": "$text-secondary",
+                      "content": "פרויקטים",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "bxMRK",
+                      "name": "dot2",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "folder",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hGiyF",
+                  "name": "Nav — ישויות",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "U4pV0",
+                      "name": "icon3",
+                      "fill": "$text-secondary",
+                      "content": "ישויות",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "GBr6A",
+                      "name": "dot3",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "database",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I62RE",
+                  "name": "Nav — מסמכים",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "j4fZy",
+                      "name": "icon4",
+                      "fill": "$text-secondary",
+                      "content": "מסמכים",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "IZGa0",
+                      "name": "dot4",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "file-text",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CSlpm",
+                  "name": "Nav — AI Hub",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Equd2",
+                      "name": "icon5",
+                      "fill": "$text-secondary",
+                      "content": "AI Hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "erhnI",
+                      "name": "dot5",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "bot",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YrG09",
+                  "name": "Nav — וויקי",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JP35t",
+                      "name": "icon6",
+                      "fill": "$text-secondary",
+                      "content": "וויקי",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "ai3fn",
+                      "name": "dot6",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "book-open",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fy6v0",
+                  "name": "Nav — הגדרות",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kNE5y",
+                      "name": "icon7",
+                      "fill": "$text-secondary",
+                      "content": "הגדרות",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "cbG8h",
+                      "name": "dot7",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "settings",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M3pfD",
+                  "name": "Spacer",
+                  "width": "fill_container",
+                  "height": "fill_container"
+                },
+                {
+                  "type": "frame",
+                  "id": "L6xKr",
+                  "name": "Sidebar Footer",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n2dw8",
+                      "name": "verLabel",
+                      "fill": "$text-muted",
+                      "content": "v2.1.0",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "F8N3s",
+              "name": "sidebarDivider",
+              "width": 1,
+              "height": "fill_container",
+              "fill": "$border-subtle"
+            },
+            {
+              "type": "frame",
+              "id": "Wrycg",
+              "name": "Main Content Area",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "$bg-page",
+              "layout": "vertical",
+              "gap": 24,
+              "padding": 24,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ZvZdk",
+                  "name": "mainTitle",
+                  "fill": "$text-primary",
+                  "content": "תוכן ראשי",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "type": "text",
+                  "id": "FWEar",
+                  "name": "mainSubtitle",
+                  "fill": "$text-secondary",
+                  "content": "האזור הזה ישמש כתבנית בסיס לכל המסכים החדשים של vBrain.io",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "SWADw",
+                  "name": "Content Placeholder",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$bg-card",
+                  "cornerRadius": 12,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-subtle"
+                  },
+                  "layout": "vertical",
+                  "padding": 24,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "YHSun",
+                      "name": "placeholderIcon",
+                      "width": 48,
+                      "height": 48,
+                      "iconFontName": "layout-template",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xbl5H",
+                      "name": "placeholderText",
+                      "fill": "$text-muted",
+                      "content": "הוסף תוכן כאן",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NDw6V",
+          "name": "Footer",
+          "width": "fill_container",
+          "height": 48,
+          "fill": "$bg-footer",
+          "stroke": {
+            "thickness": {
+              "top": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "YzYQi",
+              "name": "footerLeft",
+              "fill": "$text-muted",
+              "content": "© 2026 G.A.M — כל הזכויות שמורות",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "okp6O",
+              "name": "footerRight",
+              "fill": "$text-muted",
+              "content": "vBrain.io — מרכז פיקוד",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "XNC6O",
+      "x": 1540,
+      "y": 0,
+      "name": "Workflow Builder — בונה תהליכים",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$bg-page",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "4tCfw",
+          "name": "Body Row",
+          "width": "fill_container",
+          "height": "fill_container",
+          "children": [
+            {
+              "type": "frame",
+              "id": "wfCanvas",
+              "name": "Workflow Canvas",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "#080E1B",
+              "layout": "none",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "6zhgS",
+                  "x": 40,
+                  "y": 40,
+                  "name": "gridDot1",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "etlOA",
+                  "x": 80,
+                  "y": 40,
+                  "name": "gridDot2",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "SgJg1",
+                  "x": 120,
+                  "y": 40,
+                  "name": "gridDot3",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "iYg8k",
+                  "x": 160,
+                  "y": 40,
+                  "name": "gridDot4",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "Ti2tt",
+                  "x": 200,
+                  "y": 40,
+                  "name": "gridDot5",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "fsIl0",
+                  "x": 240,
+                  "y": 40,
+                  "name": "gridDot6",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "5LfOn",
+                  "x": 280,
+                  "y": 40,
+                  "name": "gridDot7",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "qkhah",
+                  "x": 320,
+                  "y": 40,
+                  "name": "gridDot8",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "lUVIU",
+                  "x": 360,
+                  "y": 40,
+                  "name": "gridDot9",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "dCGlf",
+                  "x": 400,
+                  "y": 40,
+                  "name": "gridDot10",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "poH5i",
+                  "x": 440,
+                  "y": 40,
+                  "name": "gridDot11",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "ejtvF",
+                  "x": 480,
+                  "y": 40,
+                  "name": "gridDot12",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "agUIQ",
+                  "x": 520,
+                  "y": 40,
+                  "name": "gridDot13",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "hKhrQ",
+                  "x": 560,
+                  "y": 40,
+                  "name": "gridDot14",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "iJCLn",
+                  "x": 600,
+                  "y": 40,
+                  "name": "gridDot15",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "XGf0t",
+                  "x": 640,
+                  "y": 40,
+                  "name": "gridDot16",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "TPLsh",
+                  "x": 680,
+                  "y": 40,
+                  "name": "gridDot17",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "ellipse",
+                  "id": "bHd8E",
+                  "x": 720,
+                  "y": 40,
+                  "name": "gridDot18",
+                  "fill": "#1E293B44",
+                  "width": 2,
+                  "height": 2
+                },
+                {
+                  "type": "frame",
+                  "id": "YQlEk",
+                  "x": 380,
+                  "y": 40,
+                  "name": "Trigger Node",
+                  "clip": true,
+                  "width": 220,
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#10B98166"
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "hlnlo",
+                      "name": "n1top",
+                      "width": "fill_container",
+                      "height": 6,
+                      "fill": "$accent-emerald"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "zWnSr",
+                      "name": "n1body",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "h0GIh",
+                          "name": "n1header",
+                          "gap": 8,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rP23V",
+                              "fill": "$accent-emerald",
+                              "content": "טריגר",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                              "letterSpacing": 1
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "awE80",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "zap",
+                              "iconFontFamily": "lucide",
+                              "fill": "$accent-emerald"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "5jA5G",
+                          "fill": "$text-primary",
+                          "content": "לקוח חדש נוצר",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iKgPr",
+                          "fill": "$text-muted",
+                          "content": "כאשר לקוח חדש נרשם במערכת Origami",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ellipse",
+                  "id": "5KQYl",
+                  "x": 484,
+                  "y": 122,
+                  "name": "n1out",
+                  "fill": "$accent-emerald",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "TaQp2",
+                  "x": 489,
+                  "y": 134,
+                  "name": "conn1",
+                  "width": 2,
+                  "height": 50,
+                  "fill": "#334155"
+                },
+                {
+                  "type": "frame",
+                  "id": "VpXzm",
+                  "x": 380,
+                  "y": 185,
+                  "name": "Condition Node",
+                  "clip": true,
+                  "width": 220,
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#F59E0B66"
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yPdPH",
+                      "name": "n2top",
+                      "width": "fill_container",
+                      "height": 6,
+                      "fill": "$accent-amber"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jzfXG",
+                      "name": "n2body",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "b9Rjw",
+                          "name": "n2hdr",
+                          "gap": 8,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "uYcZL",
+                              "fill": "$accent-amber",
+                              "content": "תנאי",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                              "letterSpacing": 1
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "8iVus",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "git-branch",
+                              "iconFontFamily": "lucide",
+                              "fill": "$accent-amber"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "UbJ9P",
+                          "fill": "$text-primary",
+                          "content": "האם יש אימייל?",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "S8vqQ",
+                          "fill": "$text-muted",
+                          "content": "בדיקה אם ללקוח יש כתובת אימייל תקינה",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ellipse",
+                  "id": "W65vh",
+                  "x": 484,
+                  "y": 182,
+                  "name": "n2in",
+                  "fill": "$accent-amber",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "ellipse",
+                  "id": "UJHhY",
+                  "x": 590,
+                  "y": 270,
+                  "name": "n2outL",
+                  "fill": "$accent-amber",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "ellipse",
+                  "id": "YlrDB",
+                  "x": 378,
+                  "y": 270,
+                  "name": "n2outR",
+                  "fill": "$accent-amber",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "text",
+                  "id": "TotLR",
+                  "x": 598,
+                  "y": 256,
+                  "name": "yesLabel",
+                  "fill": "$accent-emerald",
+                  "content": "כן ✓",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "I3pqp",
+                  "x": 355,
+                  "y": 256,
+                  "name": "noLabel",
+                  "fill": "$accent-red",
+                  "content": "לא ✗",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "path",
+                  "id": "LNGg8",
+                  "x": 596,
+                  "y": 284,
+                  "name": "connYes",
+                  "geometry": "M1 0l0 50",
+                  "fill": "#334155",
+                  "width": 2,
+                  "height": 50
+                },
+                {
+                  "type": "frame",
+                  "id": "2Zma1",
+                  "x": 500,
+                  "y": 340,
+                  "name": "Action Node — Email",
+                  "clip": true,
+                  "width": 220,
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "$accent-blue"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#3B82F633",
+                    "blur": 20
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "3PQkI",
+                      "name": "n3top",
+                      "width": "fill_container",
+                      "height": 6,
+                      "fill": "$accent-blue"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "rlfPW",
+                      "name": "n3body",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Oiwm7",
+                          "name": "n3hdr",
+                          "gap": 8,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "DSfcu",
+                              "fill": "$accent-blue",
+                              "content": "פעולה",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                              "letterSpacing": 1
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "rqnQb",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "mail",
+                              "iconFontFamily": "lucide",
+                              "fill": "$accent-blue"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Fpk55",
+                          "fill": "$text-primary",
+                          "content": "שלח אימייל ברוכים הבאים",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "VGIs5",
+                          "fill": "$text-muted",
+                          "content": "שליחת תבנית אימייל ברכה ללקוח החדש",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ellipse",
+                  "id": "wb2x1",
+                  "x": 604,
+                  "y": 334,
+                  "name": "n3in",
+                  "fill": "$accent-blue",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "ellipse",
+                  "id": "J2m8P",
+                  "x": 604,
+                  "y": 433,
+                  "name": "n3out",
+                  "fill": "$accent-blue",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "EQNPd",
+                  "x": 383,
+                  "y": 284,
+                  "name": "connNo",
+                  "width": 2,
+                  "height": 50,
+                  "fill": "#334155"
+                },
+                {
+                  "type": "frame",
+                  "id": "DDqBx",
+                  "x": 260,
+                  "y": 340,
+                  "name": "Action Node — Status",
+                  "clip": true,
+                  "width": 220,
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#3B82F666"
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "i1li5",
+                      "name": "n6top",
+                      "width": "fill_container",
+                      "height": 6,
+                      "fill": "$accent-blue"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "4Ix6n",
+                      "name": "n6body",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "aa7Q1",
+                          "name": "n6hdr",
+                          "gap": 8,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "82ufr",
+                              "fill": "$accent-blue",
+                              "content": "פעולה",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                              "letterSpacing": 1
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "uEaLz",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "refresh-cw",
+                              "iconFontFamily": "lucide",
+                              "fill": "$accent-blue"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Irsi6",
+                          "fill": "$text-primary",
+                          "content": "עדכן סטטוס ב-CRM",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Obkar",
+                          "fill": "$text-muted",
+                          "content": "סימון הלקוח כ״ללא אימייל״ ב-Origami",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ellipse",
+                  "id": "JzDPl",
+                  "x": 364,
+                  "y": 334,
+                  "name": "n6in",
+                  "fill": "$accent-blue",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "DGOEN",
+                  "x": 609,
+                  "y": 447,
+                  "name": "conn3",
+                  "width": 2,
+                  "height": 45,
+                  "fill": "#334155"
+                },
+                {
+                  "type": "frame",
+                  "id": "r7NYT",
+                  "x": 500,
+                  "y": 495,
+                  "name": "Delay Node",
+                  "clip": true,
+                  "width": 220,
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#64748B66"
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "gMBMy",
+                      "name": "n4top",
+                      "width": "fill_container",
+                      "height": 6,
+                      "fill": "$text-muted"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bJmFZ",
+                      "name": "n4body",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "UgP5B",
+                          "name": "n4hdr",
+                          "gap": 8,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "mmU7Y",
+                              "fill": "$text-muted",
+                              "content": "השהיה",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                              "letterSpacing": 1
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "U60H2",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "timer",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "ZdWp3",
+                          "fill": "$text-primary",
+                          "content": "המתן 24 שעות",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "dAkJm",
+                          "fill": "$text-muted",
+                          "content": "השהיית התהליך למשך 24 שעות לפני המשך",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ellipse",
+                  "id": "OolHH",
+                  "x": 604,
+                  "y": 489,
+                  "name": "n4in",
+                  "fill": "#64748B",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "ellipse",
+                  "id": "Q8jUD",
+                  "x": 604,
+                  "y": 583,
+                  "name": "n4out",
+                  "fill": "#64748B",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "F64Ja",
+                  "x": 609,
+                  "y": 597,
+                  "name": "conn4",
+                  "width": 2,
+                  "height": 45,
+                  "fill": "#334155"
+                },
+                {
+                  "type": "frame",
+                  "id": "6EA8Y",
+                  "x": 500,
+                  "y": 645,
+                  "name": "Action Node — CRM",
+                  "clip": true,
+                  "width": 220,
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "#3B82F666"
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "kS4sQ",
+                      "name": "n5top",
+                      "width": "fill_container",
+                      "height": 6,
+                      "fill": "$accent-blue"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "SAPpb",
+                      "name": "n5body",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sruOA",
+                          "name": "n5hdr",
+                          "gap": 8,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Up4S5",
+                              "fill": "$accent-blue",
+                              "content": "פעולה",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "600",
+                              "letterSpacing": 1
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "9CbYt",
+                              "width": 16,
+                              "height": 16,
+                              "iconFontName": "database",
+                              "iconFontFamily": "lucide",
+                              "fill": "$accent-blue"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "QDtDx",
+                          "fill": "$text-primary",
+                          "content": "הוסף ל-CRM",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "QgvR3",
+                          "fill": "$text-muted",
+                          "content": "יצירת רשומת לקוח מלאה ב-Origami CRM",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "ellipse",
+                  "id": "NFBnX",
+                  "x": 604,
+                  "y": 639,
+                  "name": "n5in",
+                  "fill": "$accent-blue",
+                  "width": 12,
+                  "height": 12,
+                  "stroke": {
+                    "thickness": 2,
+                    "fill": "#080E1B"
+                  }
+                },
+                {
+                  "type": "frame",
+                  "id": "9uG9Q",
+                  "x": 16,
+                  "y": 16,
+                  "name": "Canvas Toolbar",
+                  "fill": "$bg-card",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-subtle"
+                  },
+                  "gap": 4,
+                  "padding": 4,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "8oBjj",
+                      "name": "tbZI",
+                      "width": 32,
+                      "height": 32,
+                      "fill": "$bg-hover",
+                      "cornerRadius": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "k4ko1",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "plus",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oe20A",
+                      "name": "tbZL",
+                      "width": 48,
+                      "height": 32,
+                      "cornerRadius": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "4WM9G",
+                          "fill": "$text-muted",
+                          "content": "75%",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uMTxR",
+                      "name": "tbZO",
+                      "width": 32,
+                      "height": 32,
+                      "fill": "$bg-hover",
+                      "cornerRadius": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "tqgAC",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "minus",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "5Wee4",
+                      "width": 1,
+                      "height": 20,
+                      "fill": "$border-subtle"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "AdTGu",
+                      "name": "tbFit",
+                      "width": 32,
+                      "height": 32,
+                      "fill": "$bg-hover",
+                      "cornerRadius": 6,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "FUXvf",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "maximize-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gkG6N",
+                  "x": 16,
+                  "y": 720,
+                  "name": "Node Legend",
+                  "fill": "$bg-card",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-subtle"
+                  },
+                  "gap": 16,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "EIbOx",
+                      "name": "lg1",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "QQX62",
+                          "width": 10,
+                          "height": 10,
+                          "fill": "$accent-emerald",
+                          "cornerRadius": 3
+                        },
+                        {
+                          "type": "text",
+                          "id": "mfKRV",
+                          "fill": "$text-muted",
+                          "content": "טריגר",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "bU2gd",
+                      "name": "lg2",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "hULiz",
+                          "width": 10,
+                          "height": 10,
+                          "fill": "$accent-amber",
+                          "cornerRadius": 3
+                        },
+                        {
+                          "type": "text",
+                          "id": "4X0Qa",
+                          "fill": "$text-muted",
+                          "content": "תנאי",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nIbVW",
+                      "name": "lg3",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "p8kLL",
+                          "width": 10,
+                          "height": 10,
+                          "fill": "$accent-blue",
+                          "cornerRadius": 3
+                        },
+                        {
+                          "type": "text",
+                          "id": "seO89",
+                          "fill": "$text-muted",
+                          "content": "פעולה",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "2CeEr",
+                      "name": "lg4",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "HQR5Y",
+                          "width": 10,
+                          "height": 10,
+                          "fill": "$text-muted",
+                          "cornerRadius": 3
+                        },
+                        {
+                          "type": "text",
+                          "id": "zyEh9",
+                          "fill": "$text-muted",
+                          "content": "השהיה",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Nj03a",
+                  "x": 16,
+                  "y": 60,
+                  "name": "Add Node Button",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "$accent-purple",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-blue",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 8,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#8B5CF633",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 12
+                  },
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "unxJN",
+                      "fill": "#FFFFFF",
+                      "content": "הוסף צעד",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "oga2a",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "plus",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HIChO",
+              "name": "panelDiv",
+              "width": 1,
+              "height": "fill_container",
+              "fill": "$border-subtle"
+            },
+            {
+              "type": "frame",
+              "id": "V0EX4",
+              "name": "Settings Panel",
+              "clip": true,
+              "width": 320,
+              "height": "fill_container",
+              "fill": "$bg-sidebar",
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vRz6A",
+                  "name": "panelHeader",
+                  "width": "fill_container",
+                  "stroke": {
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "$border-subtle"
+                  },
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "mrXNt",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "x",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dqK3T",
+                      "name": "panelTitle",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h4haI",
+                          "fill": "$text-primary",
+                          "content": "הגדרות צעד",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "Voyfa",
+                          "width": 18,
+                          "height": 18,
+                          "iconFontName": "settings",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "zQdtU",
+                  "name": "panelBody",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 20,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "u85sd",
+                      "name": "selNode",
+                      "width": "fill_container",
+                      "fill": "$bg-card",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$accent-blue"
+                      },
+                      "gap": 10,
+                      "padding": [
+                        12,
+                        14
+                      ],
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "WPv2N",
+                          "name": "selInfo",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "DhM0B",
+                              "fill": "$text-primary",
+                              "content": "שלח אימייל ברוכים הבאים",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "YAG5t",
+                              "fill": "$accent-blue",
+                              "content": "פעולה — אימייל",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "EszFd",
+                          "width": 20,
+                          "height": 20,
+                          "iconFontName": "mail",
+                          "iconFontFamily": "lucide",
+                          "fill": "$accent-blue"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "QbXPJ",
+                      "name": "sec1",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "EVTrT",
+                          "fill": "$text-secondary",
+                          "content": "כללי",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "KUjPS",
+                          "name": "f1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 5,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Aaqww",
+                              "fill": "$text-secondary",
+                              "content": "שם הצעד",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ooIf6",
+                              "name": "f1i",
+                              "width": "fill_container",
+                              "height": 36,
+                              "fill": "$bg-page",
+                              "cornerRadius": 6,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "$border-strong"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "justifyContent": "end",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CtEJW",
+                                  "fill": "$text-primary",
+                                  "content": "שלח אימייל ברוכים הבאים",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "SknS3",
+                          "name": "f2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 5,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "g0yFx",
+                              "fill": "$text-secondary",
+                              "content": "תיאור",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ioxPQ",
+                              "name": "f2i",
+                              "width": "fill_container",
+                              "height": 36,
+                              "fill": "$bg-page",
+                              "cornerRadius": 6,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "$border-strong"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "justifyContent": "end",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "X95OP",
+                                  "fill": "$text-muted",
+                                  "content": "שליחת תבנית אימייל ברכה",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Eh7q6",
+                      "name": "divider",
+                      "width": "fill_container",
+                      "height": 1,
+                      "fill": "$border-subtle"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Rg3cS",
+                      "name": "sec2",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "J0AZV",
+                          "fill": "$text-secondary",
+                          "content": "הגדרות אימייל",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vDm7e",
+                          "name": "f3",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 5,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "gbmUF",
+                              "fill": "$text-secondary",
+                              "content": "תבנית אימייל",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "NOluA",
+                              "name": "f3sel",
+                              "width": "fill_container",
+                              "height": 36,
+                              "fill": "$bg-page",
+                              "cornerRadius": 6,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "$border-strong"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon_font",
+                                  "id": "bqbZE",
+                                  "width": 14,
+                                  "height": 14,
+                                  "iconFontName": "chevron-down",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "$text-muted"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "S53pO",
+                                  "fill": "$text-primary",
+                                  "content": "ברוכים הבאים — עברית",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OG6xO",
+                          "name": "f4",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 5,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "oVkEB",
+                              "fill": "$text-secondary",
+                              "content": "כתובת נמען",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "tBHU8",
+                              "name": "f4i",
+                              "width": "fill_container",
+                              "height": 36,
+                              "fill": "$bg-page",
+                              "cornerRadius": 6,
+                              "stroke": {
+                                "thickness": 1,
+                                "fill": "$border-strong"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "justifyContent": "end",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "0lnAu",
+                                  "fill": "$accent-purple",
+                                  "content": "{{customer.email}}",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "yqElW",
+                          "name": "toggleRow",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "N2DRo",
+                              "name": "toggleBg",
+                              "width": 36,
+                              "height": 20,
+                              "fill": "$accent-emerald",
+                              "cornerRadius": 100,
+                              "padding": [
+                                0,
+                                3
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "kRR00",
+                                  "width": 14,
+                                  "height": 14,
+                                  "fill": "#FFFFFF",
+                                  "cornerRadius": 100
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "WYSXl",
+                              "fill": "$text-secondary",
+                              "content": "שלח עותק למנהל",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "FOYvE",
+                      "name": "div2",
+                      "width": "fill_container",
+                      "height": 1,
+                      "fill": "$border-subtle"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VNsYJ",
+                      "name": "sec3",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 10,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "e8xfk",
+                          "fill": "$text-secondary",
+                          "content": "חיבורים",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "600",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "JrC7R",
+                          "name": "connInfo",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "Ncn7h",
+                              "name": "ci1",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "vbOIX",
+                                  "fill": "$text-muted",
+                                  "content": "תנאי: האם יש אימייל?",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "US0pA",
+                                  "fill": "$text-secondary",
+                                  "content": "מקור",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "zFPds",
+                              "name": "ci2",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "iEK6L",
+                                  "fill": "$text-muted",
+                                  "content": "המתן 24 שעות",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "dSfZy",
+                                  "fill": "$text-secondary",
+                                  "content": "יעד",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zmQHc",
+          "name": "Footer",
+          "width": "fill_container",
+          "height": 48,
+          "fill": "$bg-footer",
+          "stroke": {
+            "thickness": {
+              "top": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "i3Qex",
+              "name": "footerLeft",
+              "fill": "$text-muted",
+              "content": "© 2026 G.A.M — כל הזכויות שמורות",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "QDZpQ",
+              "name": "footerRight",
+              "fill": "$text-muted",
+              "content": "vBrain.io — מרכז פיקוד",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "wfTopBar",
+          "name": "Workflow TopBar",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$bg-header",
+          "stroke": {
+            "thickness": {
+              "bottom": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "c4RHx",
+              "name": "Left Actions",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "5u79n",
+                  "name": "Save Button",
+                  "fill": "$bg-card",
+                  "cornerRadius": 6,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-strong"
+                  },
+                  "gap": 6,
+                  "padding": [
+                    7,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "TY7Z6",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "save",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ewziG",
+                      "fill": "$text-secondary",
+                      "content": "שמור",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "LHWlC",
+                  "name": "Publish Button",
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "$accent-purple",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-blue",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 6,
+                  "gap": 6,
+                  "padding": [
+                    7,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "3MJyZ",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "rocket",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nYYiz",
+                      "fill": "#FFFFFF",
+                      "content": "פרסם",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "26Bac",
+                  "name": "Run Button",
+                  "fill": "$accent-emerald",
+                  "cornerRadius": 6,
+                  "gap": 6,
+                  "padding": [
+                    7,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "gTwgk",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "play",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "UROzz",
+                      "fill": "#FFFFFF",
+                      "content": "הרץ",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "I9zfR",
+              "name": "Workflow Info",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "T5q8a",
+                  "name": "statusDot",
+                  "width": 8,
+                  "height": 8,
+                  "fill": "$accent-emerald",
+                  "cornerRadius": 100
+                },
+                {
+                  "type": "text",
+                  "id": "4VZG0",
+                  "fill": "$text-muted",
+                  "content": "טיוטה",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 12,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "RaarC",
+                  "fill": "$text-primary",
+                  "content": "סנכרון לקוחות חדשים",
+                  "fontFamily": "$font-heading",
+                  "fontSize": 16,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.3
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iwspq",
+              "name": "Logo",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "sakBR",
+                  "name": "logoIcon",
+                  "width": 28,
+                  "height": 28,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "$accent-purple",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-blue",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 6
+                },
+                {
+                  "type": "text",
+                  "id": "KQRDn",
+                  "fill": "$text-primary",
+                  "content": "vBrain.io",
+                  "fontFamily": "$font-heading",
+                  "fontSize": 18,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "accent-amber": {
+      "type": "color",
+      "value": "#F59E0B"
+    },
+    "accent-blue": {
+      "type": "color",
+      "value": "#3B82F6"
+    },
+    "accent-emerald": {
+      "type": "color",
+      "value": "#10B981"
+    },
+    "accent-purple": {
+      "type": "color",
+      "value": "#8B5CF6"
+    },
+    "accent-red": {
+      "type": "color",
+      "value": "#EF4444"
+    },
+    "bg-card": {
+      "type": "color",
+      "value": "#1E293B"
+    },
+    "bg-footer": {
+      "type": "color",
+      "value": "#0B1120"
+    },
+    "bg-header": {
+      "type": "color",
+      "value": "#0B1120"
+    },
+    "bg-hover": {
+      "type": "color",
+      "value": "#1E293B"
+    },
+    "bg-page": {
+      "type": "color",
+      "value": "#0F172A"
+    },
+    "bg-sidebar": {
+      "type": "color",
+      "value": "#0B1120"
+    },
+    "border-strong": {
+      "type": "color",
+      "value": "#334155"
+    },
+    "border-subtle": {
+      "type": "color",
+      "value": "#1E293B"
+    },
+    "font-heading": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-primary": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "footer-height": {
+      "type": "number",
+      "value": 48
+    },
+    "header-height": {
+      "type": "number",
+      "value": 56
+    },
+    "sidebar-width": {
+      "type": "number",
+      "value": 240
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#64748B"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#F8FAFC"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#94A3B8"
+    }
+  }
+}

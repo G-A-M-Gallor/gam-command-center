@@ -1,0 +1,146 @@
+/* Automations (אוטומציות) Design System */
+:root {
+  /* Automations Brand Colors */
+  --automations-primary: #FF6B1A;
+  --automations-primary-hover: #FF8A3D;
+  --automations-primary-active: #E55A0F;
+
+  /* Background System */
+  --automations-dark: #1A1A1A;
+  --automations-surface: #2A2A2A;
+  --automations-surface-hover: #333333;
+  --automations-border: #404040;
+
+  /* Text System */
+  --automations-text-primary: #FFFFFF;
+  --automations-text-secondary: #E5E5E5;
+  --automations-text-muted: #A1A1AA;
+
+  /* Status Colors */
+  --automations-success: #10B981;
+  --automations-warning: #F59E0B;
+  --automations-error: #EF4444;
+  --automations-info: #3B82F6;
+
+  /* Node Colors for Builder */
+  --automations-trigger: var(--automations-primary);
+  --automations-action: var(--automations-info);
+  --automations-condition: var(--automations-warning);
+  --automations-delay: #6B7280;
+}
+
+/* Automations App Base Styles */
+.automations-app {
+  background-color: var(--automations-dark);
+  color: var(--automations-text-primary);
+  font-family: 'Inter', sans-serif;
+  direction: rtl;
+}
+
+/* Override RTL for canvas and code elements */
+.automations-canvas,
+.automations-code {
+  direction: ltr;
+}
+
+/* Custom scrollbar for automations */
+.automations-app ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.automations-app ::-webkit-scrollbar-track {
+  background: var(--automations-dark);
+}
+
+.automations-app ::-webkit-scrollbar-thumb {
+  background: var(--automations-border);
+  border-radius: 4px;
+}
+
+.automations-app ::-webkit-scrollbar-thumb:hover {
+  background: var(--automations-surface-hover);
+}
+
+/* Animations for automations */
+.automations-fade-in {
+  animation: automations-fade-in 0.3s ease-out;
+}
+
+@keyframes automations-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.automations-slide-in {
+  animation: automations-slide-in 0.4s ease-out;
+}
+
+@keyframes automations-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Focus states for automations */
+.automations-focus {
+  outline: 2px solid var(--automations-primary);
+  outline-offset: 2px;
+}
+
+/* Button variants for automations */
+.automations-btn-primary {
+  background-color: var(--automations-primary);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.automations-btn-primary:hover {
+  background-color: var(--automations-primary-hover);
+}
+
+.automations-btn-primary:active {
+  background-color: var(--automations-primary-active);
+}
+
+.automations-btn-secondary {
+  background-color: var(--automations-surface);
+  color: var(--automations-text-primary);
+  border: 1px solid var(--automations-border);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.automations-btn-secondary:hover {
+  background-color: var(--automations-surface-hover);
+}
+
+/* Status indicators */
+.automations-status-active {
+  background-color: var(--automations-success);
+}
+
+.automations-status-draft {
+  background-color: var(--automations-warning);
+}
+
+.automations-status-disabled {
+  background-color: var(--automations-error);
+}
+
+.automations-status-running {
+  background-color: var(--automations-info);
+}

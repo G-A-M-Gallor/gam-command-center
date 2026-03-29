@@ -1057,6 +1057,8 @@ function ViewsTab({ views, dc }: { views: DocumentView[]; dc: Record<string, str
     return <EmptyState icon={Eye} message={dc.noViews} />;
   }
 
+  const currentTime = Date.now();
+
   return (
     <div className="space-y-2">
       <h3 className="mb-3 text-sm font-medium text-slate-300">{dc.viewHistory} ({views.length})</h3>

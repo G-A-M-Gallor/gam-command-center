@@ -1,7 +1,7 @@
 import {
   Circle, CheckCircle2, Activity, Layers, FileEdit, Map, Grid3X3,
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
-  Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, FileSignature,
+  Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, MessageCircle, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
   Loader2, Mail, Gauge, Film, CalendarDays, Pencil, Wrench, GraduationCap,
 } from 'lucide-react';
@@ -314,6 +314,20 @@ export const routes: RouteEntry[] = [
     contexts: ['SettingsContext'], visible: true, sidebarTab: true,
   },
   {
+    id: 'maintenance', path: '/dashboard/maintenance', name: 'Code Maintenance', nameHe: 'תחזוקת קוד', icon: Wrench,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-29',
+    descriptionHe: 'מערכת תחזוקת קוד מקצועית — ביקורת אוטומטית, ניקוי קוד מת, דוחות איכות, תזמון cron',
+    descriptionEn: 'Professional code maintenance system — automated audits, dead code cleanup, quality reports, cron scheduling',
+    components: [
+      { id: 'maintenance-page', name: 'MaintenancePage', file: 'app/dashboard/maintenance/page.tsx', status: 'coming-soon' },
+      { id: 'cleanup-audit', name: 'CleanupAuditScript', file: '.maintenance/cleanup-audit.sh', status: 'active' },
+      { id: 'cleanup-scheduler', name: 'CleanupScheduler', file: '.maintenance/cleanup-scheduler.sh', status: 'active' },
+      { id: 'git-hooks', name: 'GitHooksInstaller', file: '.maintenance/install-hooks.sh', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], visible: true, sidebarTab: true,
+    connectedTo: ['admin', 'control'],
+  },
+  {
     id: 'control', path: '/dashboard/control', name: 'Control Center', nameHe: 'מרכז בקרה', icon: Gauge,
     phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-16',
     descriptionHe: 'מרכז בקרה — סקירה כללית של מפת דרכים, לוג פיתוח, ארכיטקטורה ועדכונים אחרונים',
@@ -479,6 +493,18 @@ export const routes: RouteEntry[] = [
       { id: 'email-stats-widget', name: 'EmailStatsWidget', file: 'components/email/EmailStatsWidget.tsx', status: 'active' },
     ],
     contexts: ['SettingsContext'], supabaseTables: ['comm_messages', 'comm_templates', 'notification_log', 'email_sends', 'email_events', 'email_tenants', 'email_templates', 'email_unsubscribes'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'whatsapp', path: '/dashboard/whatsapp', name: 'WhatsApp Command Center', nameHe: 'מרכז פיקוד WhatsApp', icon: MessageCircle,
+    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-03-29',
+    descriptionHe: 'מרכז פיקוד WhatsApp מלא — WATI dashboard, צ\'אט מהיר, סטטיסטיקות, פעולות מהירות ואוטומציה',
+    descriptionEn: 'Complete WhatsApp Command Center — WATI dashboard embed, quick chat interface, statistics, quick actions and automation',
+    components: [
+      { id: 'whatsapp-page', name: 'WhatsAppPage', file: 'app/dashboard/whatsapp/page.tsx', status: 'active' },
+      { id: 'wati-embed-widget', name: 'WATIEmbedWidget', file: 'components/integrations/WATIEmbedWidget.tsx', status: 'active' },
+      { id: 'wati-chat-interface', name: 'WATIChatInterface', file: 'components/integrations/WATIChatInterface.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['comm_messages'], visible: true, sidebarTab: true,
   },
   {
     id: 'audit', path: '/dashboard/audit', name: 'Audit Log', nameHe: 'יומן ביקורת', icon: Shield,

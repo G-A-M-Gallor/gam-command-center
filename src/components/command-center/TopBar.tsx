@@ -541,7 +541,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     if (changed) {
       setWidgetPositions(newPositions);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [mounted, allTopBarDefs, totalColumns, widgetSizes, setWidgetPositions]);
 
   // Clamp items that overflow after window resize — re-layout to avoid overlaps
@@ -584,7 +584,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     }
 
     setWidgetPositions(updated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [totalColumns, mounted, allTopBarDefs, widgetSizes, setWidgetPositions]);
 
   // DnD sensors

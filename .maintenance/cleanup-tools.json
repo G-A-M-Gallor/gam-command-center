@@ -1,0 +1,67 @@
+{
+  "cleanup_framework": {
+    "version": "1.0.0",
+    "last_updated": "2026-03-29",
+    "tools": {
+      "static_analysis": {
+        "eslint": {
+          "config": "eslint.config.mjs",
+          "rules": ["no-unused-vars", "no-unreachable", "no-duplicate-imports"],
+          "frequency": "every_commit"
+        },
+        "typescript": {
+          "config": "tsconfig.json",
+          "checks": ["noUnusedLocals", "noUnusedParameters", "noImplicitReturns"],
+          "frequency": "every_build"
+        },
+        "dependency_check": {
+          "tool": "depcheck",
+          "command": "npx depcheck --ignores='@types/*,eslint-*'",
+          "frequency": "weekly"
+        }
+      },
+      "automated_detection": {
+        "dead_code": {
+          "tool": "ts-prune",
+          "command": "npx ts-prune --error --ignore 'src/types|.d.ts'",
+          "frequency": "monthly"
+        },
+        "unused_files": {
+          "tool": "unimported",
+          "command": "npx unimported --show-unresolved",
+          "frequency": "weekly"
+        },
+        "large_files": {
+          "command": "find . -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' | xargs wc -l | sort -nr | head -20",
+          "threshold": 500,
+          "frequency": "monthly"
+        }
+      },
+      "bundle_analysis": {
+        "webpack_analyzer": {
+          "tool": "@next/bundle-analyzer",
+          "command": "npm run analyze",
+          "frequency": "before_release"
+        },
+        "duplicate_packages": {
+          "tool": "npm-check-duplicates",
+          "command": "npx npm-check-duplicates",
+          "frequency": "monthly"
+        }
+      }
+    },
+    "metrics": {
+      "code_quality": {
+        "loc_threshold": 50000,
+        "file_count_threshold": 1000,
+        "avg_file_size_threshold": 200,
+        "cyclomatic_complexity_threshold": 10
+      },
+      "technical_debt": {
+        "todo_count": "grep -r 'TODO\\|FIXME\\|XXX\\|HACK' src/ --include='*.ts' --include='*.tsx' | wc -l",
+        "eslint_warnings": "npx eslint src/ --format=json | jq '.[] | .warningCount' | awk '{sum+=$1} END {print sum}'",
+        "typescript_errors": "npx tsc --noEmit --pretty false 2>&1 | grep 'error TS' | wc -l"
+      }
+    }
+  }
+}

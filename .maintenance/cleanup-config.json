@@ -1,0 +1,79 @@
+{
+  "project_config": {
+    "name": "vBrain.io",
+    "type": "Next.js",
+    "framework": "React",
+    "language": "TypeScript"
+  },
+  "cleanup_schedule": {
+    "daily": {
+      "enabled": true,
+      "time": "06:00",
+      "checks": ["tech_debt_markers", "typescript_errors", "eslint_issues"]
+    },
+    "weekly": {
+      "enabled": true,
+      "day": "sunday",
+      "time": "08:00",
+      "checks": ["unused_dependencies", "unused_imports", "large_files"]
+    },
+    "monthly": {
+      "enabled": true,
+      "day": 1,
+      "time": "09:00",
+      "checks": ["unused_exports", "duplicate_files", "deep_nesting", "git_large_files"]
+    }
+  },
+  "thresholds": {
+    "unused_exports": 10,
+    "unused_imports": 5,
+    "large_files": 5,
+    "empty_files": 0,
+    "duplicate_files": 0,
+    "unused_dependencies": 3,
+    "outdated_dependencies": 10,
+    "tech_debt_markers": 20,
+    "eslint_issues": 5,
+    "typescript_errors": 0,
+    "deep_nesting": 3,
+    "naming_violations": 5,
+    "git_large_files": 3,
+    "frequently_changed_files": 3
+  },
+  "auto_fix": {
+    "enabled": true,
+    "safe_fixes_only": true,
+    "fixes": {
+      "eslint": true,
+      "empty_files": true,
+      "package_lock_clean": false,
+      "prettier": true,
+      "unused_imports": false
+    }
+  },
+  "exclusions": {
+    "files": [
+      "node_modules/**",
+      ".next/**",
+      "build/**",
+      "dist/**",
+      "*.d.ts",
+      "migrations/**"
+    ],
+    "checks": {
+      "unused_exports": ["src/types/**", "*.d.ts"],
+      "large_files": ["src/lib/i18n/**"]
+    }
+  },
+  "notifications": {
+    "slack_webhook": null,
+    "email": null,
+    "discord_webhook": null,
+    "failure_only": false
+  },
+  "reporting": {
+    "format": "json",
+    "retention_days": 30,
+    "compress_old": true
+  }
+}

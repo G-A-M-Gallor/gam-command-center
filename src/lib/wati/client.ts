@@ -5,6 +5,7 @@
 // Requires: WATI_API_URL + WATI_API_TOKEN env vars.
 
 import type { WATIContact, WATIMessage, WATITemplate, WATISendResponse } from './types';
+import { resilientWatiRequest } from './resilience';
 
 export function getConfig() {
   const baseUrl = process.env.WATI_API_URL;
@@ -36,19 +37,29 @@ async function watiRequest<T>(path: string, options?: RequestInit): Promise<T> {
 
 /** Fetch contacts list */
 export async function getContacts(pageSize = 50, pageNumber = 1): Promise<WATIContact[]> {
-  const data = await watiRequest<{ result?: string; contact_list?: WATIContact[] }>(
-    `/api/v1/getContacts?pageSize=${pageSize}&pageNumber=${pageNumber}`
+  return resilientWatiRequest(
+    async () => {
+      const data = await watiRequest<{ result?: string; contact_list?: WATIContact[] }>(
+        `/api/v1/getContacts?pageSize=${pageSize}&pageNumber=${pageNumber}`
+      );
+      return data.contact_list ?? [];
+    },
+    'getContacts'
   );
-  return data.contact_list ?? [];
 }
 
 /** Fetch messages for a phone number */
 export async function getMessages(phone: string, pageSize = 50, pageNumber = 1): Promise<WATIMessage[]> {
   const normalized = normalizePhone(phone);
-  const data = await watiRequest<{ result?: string; messages?: { items?: WATIMessage[] } }>(
-    `/api/v1/getMessages/${normalized}?pageSize=${pageSize}&pageNumber=${pageNumber}`
+  return resilientWatiRequest(
+    async () => {
+      const data = await watiRequest<{ result?: string; messages?: { items?: WATIMessage[] } }>(
+        `/api/v1/getMessages/${normalized}?pageSize=${pageSize}&pageNumber=${pageNumber}`
+      );
+      return data.messages?.items ?? [];
+    },
+    'getMessages'
   );
-  return data.messages?.items ?? [];
 }
 
 /** Send a free-text WhatsApp message */

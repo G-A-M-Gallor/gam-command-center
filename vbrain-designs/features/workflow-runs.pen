@@ -1,0 +1,2795 @@
+{
+  "version": "2.9",
+  "children": [
+    {
+      "type": "frame",
+      "id": "TZ2zh",
+      "x": 0,
+      "y": 0,
+      "name": "vBrain.io — Base Template",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$bg-page",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "H1pBM",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$bg-header",
+          "stroke": {
+            "thickness": {
+              "bottom": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "P1EcG",
+              "name": "User Menu",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UD1XD",
+                  "name": "Avatar",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "$accent-purple",
+                  "cornerRadius": 100,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FPcFG",
+                      "name": "avatarLetter",
+                      "fill": "#FFFFFF",
+                      "content": "ג",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "7NuCf",
+                  "name": "userName",
+                  "fill": "$text-secondary",
+                  "content": "גל מילר",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LWPPJ",
+              "name": "Header Nav",
+              "gap": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "J9OzM",
+                  "name": "nav1",
+                  "fill": "$text-primary",
+                  "content": "דשבורד",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "hq5Xs",
+                  "name": "nav2",
+                  "fill": "$text-secondary",
+                  "content": "פרויקטים",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "T1tCm",
+                  "name": "nav3",
+                  "fill": "$text-secondary",
+                  "content": "ישויות",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "PMyAl",
+                  "name": "nav4",
+                  "fill": "$text-secondary",
+                  "content": "מסמכים",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "LavYo",
+                  "name": "nav5",
+                  "fill": "$text-secondary",
+                  "content": "הגדרות",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "78HKk",
+              "name": "Logo",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Z1H61",
+                  "name": "logoIcon",
+                  "width": 28,
+                  "height": 28,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "$accent-purple",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-blue",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 6
+                },
+                {
+                  "type": "text",
+                  "id": "Optpw",
+                  "name": "logoText",
+                  "fill": "$text-primary",
+                  "content": "vBrain.io",
+                  "fontFamily": "$font-heading",
+                  "fontSize": 18,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "V2GgK",
+          "name": "Body Row",
+          "width": "fill_container",
+          "height": "fill_container",
+          "children": [
+            {
+              "type": "frame",
+              "id": "Kw4Lk",
+              "name": "Sidebar",
+              "width": 240,
+              "height": "fill_container",
+              "fill": "$bg-sidebar",
+              "layout": "vertical",
+              "gap": 4,
+              "padding": [
+                16,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Sha2e",
+                  "name": "Sidebar Header",
+                  "width": "fill_container",
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "guBiP",
+                      "name": "sidebarTitle",
+                      "fill": "$text-muted",
+                      "content": "ניווט ראשי",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "yS4vF",
+                  "name": "Nav — דשבורד",
+                  "width": "fill_container",
+                  "fill": "$bg-hover",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "70UJq",
+                      "name": "icon1",
+                      "fill": "$text-primary",
+                      "content": "דשבורד",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "o9ZJI",
+                      "name": "dot1",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "layout-dashboard",
+                      "iconFontFamily": "lucide",
+                      "fill": "$accent-purple"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QmJ7v",
+                  "name": "Nav — פרויקטים",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ZsvJN",
+                      "name": "icon2",
+                      "fill": "$text-secondary",
+                      "content": "פרויקטים",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "bxMRK",
+                      "name": "dot2",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "folder",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hGiyF",
+                  "name": "Nav — ישויות",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "U4pV0",
+                      "name": "icon3",
+                      "fill": "$text-secondary",
+                      "content": "ישויות",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "GBr6A",
+                      "name": "dot3",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "database",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I62RE",
+                  "name": "Nav — מסמכים",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "j4fZy",
+                      "name": "icon4",
+                      "fill": "$text-secondary",
+                      "content": "מסמכים",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "IZGa0",
+                      "name": "dot4",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "file-text",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CSlpm",
+                  "name": "Nav — AI Hub",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Equd2",
+                      "name": "icon5",
+                      "fill": "$text-secondary",
+                      "content": "AI Hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "erhnI",
+                      "name": "dot5",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "bot",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "YrG09",
+                  "name": "Nav — וויקי",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JP35t",
+                      "name": "icon6",
+                      "fill": "$text-secondary",
+                      "content": "וויקי",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "ai3fn",
+                      "name": "dot6",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "book-open",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fy6v0",
+                  "name": "Nav — הגדרות",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kNE5y",
+                      "name": "icon7",
+                      "fill": "$text-secondary",
+                      "content": "הגדרות",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "cbG8h",
+                      "name": "dot7",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "settings",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M3pfD",
+                  "name": "Spacer",
+                  "width": "fill_container",
+                  "height": "fill_container"
+                },
+                {
+                  "type": "frame",
+                  "id": "L6xKr",
+                  "name": "Sidebar Footer",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n2dw8",
+                      "name": "verLabel",
+                      "fill": "$text-muted",
+                      "content": "v2.1.0",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "F8N3s",
+              "name": "sidebarDivider",
+              "width": 1,
+              "height": "fill_container",
+              "fill": "$border-subtle"
+            },
+            {
+              "type": "frame",
+              "id": "Wrycg",
+              "name": "Main Content Area",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "$bg-page",
+              "layout": "vertical",
+              "gap": 24,
+              "padding": 24,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ZvZdk",
+                  "name": "mainTitle",
+                  "fill": "$text-primary",
+                  "content": "תוכן ראשי",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "type": "text",
+                  "id": "FWEar",
+                  "name": "mainSubtitle",
+                  "fill": "$text-secondary",
+                  "content": "האזור הזה ישמש כתבנית בסיס לכל המסכים החדשים של vBrain.io",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "SWADw",
+                  "name": "Content Placeholder",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$bg-card",
+                  "cornerRadius": 12,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-subtle"
+                  },
+                  "layout": "vertical",
+                  "padding": 24,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "YHSun",
+                      "name": "placeholderIcon",
+                      "width": 48,
+                      "height": 48,
+                      "iconFontName": "layout-template",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xbl5H",
+                      "name": "placeholderText",
+                      "fill": "$text-muted",
+                      "content": "הוסף תוכן כאן",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "NDw6V",
+          "name": "Footer",
+          "width": "fill_container",
+          "height": 48,
+          "fill": "$bg-footer",
+          "stroke": {
+            "thickness": {
+              "top": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "YzYQi",
+              "name": "footerLeft",
+              "fill": "$text-muted",
+              "content": "© 2026 G.A.M — כל הזכויות שמורות",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "okp6O",
+              "name": "footerRight",
+              "fill": "$text-muted",
+              "content": "vBrain.io — מרכז פיקוד",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "BTRnb",
+      "x": 1540,
+      "y": 0,
+      "name": "Workflow Runs Screen",
+      "clip": true,
+      "width": 1440,
+      "height": 900,
+      "fill": "$bg-page",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "e5kHe",
+          "name": "Header",
+          "width": "fill_container",
+          "height": 56,
+          "fill": "$bg-header",
+          "stroke": {
+            "thickness": {
+              "bottom": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "IMeC3",
+              "name": "User Menu",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wH5AU",
+                  "name": "Avatar",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "$accent-purple",
+                  "cornerRadius": 100,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "VE7gg",
+                      "name": "avatarLetter",
+                      "fill": "#FFFFFF",
+                      "content": "ג",
+                      "fontFamily": "$font-primary",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "dRZ3u",
+                  "name": "userName",
+                  "fill": "$text-secondary",
+                  "content": "גל מילר",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "xqCQm",
+              "name": "Header Nav",
+              "gap": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "8pEjB",
+                  "name": "nav1",
+                  "fill": "$text-primary",
+                  "content": "דשבורד",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "h5qQJ",
+                  "name": "nav2",
+                  "fill": "$text-secondary",
+                  "content": "פרויקטים",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "nEl9b",
+                  "name": "nav3",
+                  "fill": "$text-secondary",
+                  "content": "ישויות",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "yglrN",
+                  "name": "nav4",
+                  "fill": "$text-secondary",
+                  "content": "מסמכים",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "CSXe3",
+                  "name": "nav5",
+                  "fill": "$text-secondary",
+                  "content": "הגדרות",
+                  "fontFamily": "$font-primary",
+                  "fontSize": 14,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ahoxt",
+              "name": "Logo",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LHhdm",
+                  "name": "logoIcon",
+                  "width": 28,
+                  "height": 28,
+                  "fill": {
+                    "type": "gradient",
+                    "gradientType": "linear",
+                    "enabled": true,
+                    "rotation": 135,
+                    "size": {
+                      "height": 1
+                    },
+                    "colors": [
+                      {
+                        "color": "$accent-purple",
+                        "position": 0
+                      },
+                      {
+                        "color": "$accent-blue",
+                        "position": 1
+                      }
+                    ]
+                  },
+                  "cornerRadius": 6
+                },
+                {
+                  "type": "text",
+                  "id": "jxdIt",
+                  "name": "logoText",
+                  "fill": "$text-primary",
+                  "content": "vBrain.io",
+                  "fontFamily": "$font-heading",
+                  "fontSize": 18,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.5
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "nEvx8",
+          "name": "Body Row",
+          "width": "fill_container",
+          "height": "fill_container",
+          "children": [
+            {
+              "type": "frame",
+              "id": "s7r2G",
+              "name": "Sidebar",
+              "width": 240,
+              "height": "fill_container",
+              "fill": "$bg-sidebar",
+              "layout": "vertical",
+              "gap": 4,
+              "padding": [
+                16,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UCvvu",
+                  "name": "Sidebar Header",
+                  "width": "fill_container",
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NtCWn",
+                      "name": "sidebarTitle",
+                      "fill": "$text-muted",
+                      "content": "ניווט ראשי",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.5
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "654BS",
+                  "name": "Nav — דשבורד",
+                  "width": "fill_container",
+                  "fill": "#00000000",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "i8lHz",
+                      "name": "icon1",
+                      "fill": "$text-secondary",
+                      "content": "דשבורד",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "u5KV0",
+                      "name": "dot1",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "layout-dashboard",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rZDlg",
+                  "name": "Nav — פרויקטים",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "t37Og",
+                      "name": "icon2",
+                      "fill": "$text-secondary",
+                      "content": "פרויקטים",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "azda4",
+                      "name": "dot2",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "folder",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "3FRqL",
+                  "name": "Nav — ישויות",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vlexn",
+                      "name": "icon3",
+                      "fill": "$text-secondary",
+                      "content": "ישויות",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "GBLLP",
+                      "name": "dot3",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "database",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KjIz6",
+                  "name": "Nav — מסמכים",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "YTRiV",
+                      "name": "icon4",
+                      "fill": "$text-secondary",
+                      "content": "מסמכים",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "sLR9G",
+                      "name": "dot4",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "file-text",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Kb0Z8",
+                  "name": "Nav — AI Hub",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "xAfEx",
+                      "name": "icon5",
+                      "fill": "$text-secondary",
+                      "content": "AI Hub",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "ho0NJ",
+                      "name": "dot5",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "bot",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gjpHk",
+                  "name": "Nav — וויקי",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wK6MX",
+                      "name": "icon6",
+                      "fill": "$text-secondary",
+                      "content": "וויקי",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "bb4by",
+                      "name": "dot6",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "book-open",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ziYFR",
+                  "name": "Nav — הגדרות",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    10,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "AuSLz",
+                      "name": "icon7",
+                      "fill": "$text-secondary",
+                      "content": "הגדרות",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "8MFWn",
+                      "name": "dot7",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "settings",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "SlbU0",
+                  "name": "Spacer",
+                  "width": "fill_container",
+                  "height": "fill_container"
+                },
+                {
+                  "type": "frame",
+                  "id": "Mgopf",
+                  "name": "Sidebar Footer",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "padding": [
+                    12,
+                    16
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ffI9X",
+                      "name": "verLabel",
+                      "fill": "$text-muted",
+                      "content": "v2.1.0",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ZXSjQ",
+              "name": "sidebarDivider",
+              "width": 1,
+              "height": "fill_container",
+              "fill": "$border-subtle"
+            },
+            {
+              "type": "frame",
+              "id": "2sE4G",
+              "name": "Main Content Area",
+              "width": "fill_container",
+              "height": "fill_container",
+              "fill": "$bg-page",
+              "layout": "vertical",
+              "gap": 20,
+              "padding": [
+                24,
+                28
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "tNWr1",
+                  "name": "Page Header",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "KLxEF",
+                      "name": "Title Column",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "F3Owo",
+                          "fill": "$text-primary",
+                          "content": "הרצות Workflow",
+                          "fontFamily": "$font-heading",
+                          "fontSize": 22,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        },
+                        {
+                          "type": "text",
+                          "id": "SC41E",
+                          "fill": "$text-secondary",
+                          "content": "מעקב אחרי כל הרצות האוטומציה במערכת",
+                          "fontFamily": "$font-primary",
+                          "fontSize": 13
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WruCM",
+                      "name": "Filters",
+                      "gap": 10,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "mPhSr",
+                          "name": "Date Range Filter",
+                          "fill": "$bg-card",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "$border-subtle"
+                          },
+                          "gap": 8,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "0gpym",
+                              "fill": "$text-secondary",
+                              "content": "7 ימים אחרונים",
+                              "fontFamily": "$font-primary",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "n5cit",
+                              "width": 14,
+                              "height": 14,
+                              "iconFontName": "calendar",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-secondary"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wfpFC",
+                          "name": "Status Filter",
+                          "fill": "$bg-card",
+                          "cornerRadius": 6,
+                          "stroke": {
+                            "thickness": 1,
+                            "fill": "$border-subtle"
+                          },
+                          "gap": 8,
+                          "padding": [
+                            8,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eUZGr",
+                              "fill": "$text-secondary",
+                              "content": "כל הסטטוסים",
+                              "fontFamily": "$font-primary",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "7N7Oc",
+                              "width": 14,
+                              "height": 14,
+                              "iconFontName": "chevron-down",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-secondary"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WShHc",
+                  "name": "Summary Stats",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "SeZwT",
+                      "name": "stat1",
+                      "width": "fill_container",
+                      "fill": "$bg-card",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$border-subtle"
+                      },
+                      "layout": "vertical",
+                      "gap": 2,
+                      "padding": [
+                        12,
+                        18
+                      ],
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ikpG2",
+                          "fill": "$text-muted",
+                          "content": "סה״כ הרצות",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "OrX8r",
+                          "fill": "$text-primary",
+                          "content": "147",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Uqrq7",
+                      "name": "stat2",
+                      "width": "fill_container",
+                      "fill": "$bg-card",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$border-subtle"
+                      },
+                      "layout": "vertical",
+                      "gap": 2,
+                      "padding": [
+                        12,
+                        18
+                      ],
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ivtJ0",
+                          "fill": "$text-muted",
+                          "content": "הצלחות",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "bQ177",
+                          "fill": "$accent-emerald",
+                          "content": "138",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "R0bwj",
+                      "name": "stat3",
+                      "width": "fill_container",
+                      "fill": "$bg-card",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$border-subtle"
+                      },
+                      "layout": "vertical",
+                      "gap": 2,
+                      "padding": [
+                        12,
+                        18
+                      ],
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "NfDOe",
+                          "fill": "$text-muted",
+                          "content": "כשלונות",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "BDifX",
+                          "fill": "$accent-red",
+                          "content": "7",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "kfyPa",
+                      "name": "stat4",
+                      "width": "fill_container",
+                      "fill": "$bg-card",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "thickness": 1,
+                        "fill": "$border-subtle"
+                      },
+                      "layout": "vertical",
+                      "gap": 2,
+                      "padding": [
+                        12,
+                        18
+                      ],
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CZaAD",
+                          "fill": "$text-muted",
+                          "content": "רצות כעת",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "38LhZ",
+                          "fill": "$accent-blue",
+                          "content": "2",
+                          "fontFamily": "Inter",
+                          "fontSize": 22,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.5
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "jYG8F",
+                  "name": "Workflow Table",
+                  "clip": true,
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "$bg-card",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-subtle"
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "JwW9R",
+                      "name": "Table Header",
+                      "width": "fill_container",
+                      "height": 44,
+                      "fill": "#141C2E",
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "padding": [
+                        0,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "DaUop",
+                          "name": "Col Status",
+                          "width": 120,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "QLabF",
+                              "fill": "$text-muted",
+                              "content": "סטטוס",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IWWmf",
+                          "name": "Col Name",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "aIngU",
+                              "fill": "$text-muted",
+                              "content": "שם הרצה",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wmbf2",
+                          "name": "Col Date",
+                          "width": 160,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "bzjxw",
+                              "fill": "$text-muted",
+                              "content": "תאריך",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "fco8p",
+                          "name": "Col Duration",
+                          "width": 100,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZQHVp",
+                              "fill": "$text-muted",
+                              "content": "משך",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.5
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "PUApH",
+                          "name": "Col Trigger",
+                          "width": 140,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "eeoLa",
+                              "fill": "$text-muted",
+                              "content": "מקור הפעלה",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "600",
+                              "letterSpacing": 0.5
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "9mB6x",
+                      "name": "Row 1 — Success",
+                      "width": "fill_container",
+                      "height": 48,
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "padding": [
+                        0,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BsVvm",
+                          "name": "Status Badge",
+                          "width": 120,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "LUfAX",
+                              "name": "badgeInner1",
+                              "fill": "#10B98118",
+                              "cornerRadius": 100,
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                10
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "aiGfV",
+                                  "fill": "$accent-emerald",
+                                  "content": "הצלחה",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "vvR59",
+                                  "fill": "$accent-emerald",
+                                  "width": 6,
+                                  "height": 6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Mzvgr",
+                          "name": "nameCell1",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GSqlA",
+                              "fill": "$text-primary",
+                              "content": "סנכרון ישויות — Origami → Supabase",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bldSw",
+                          "name": "dateCell1",
+                          "width": 160,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "X4fkt",
+                              "fill": "$text-secondary",
+                              "content": "29/03/2026, 14:32",
+                              "fontFamily": "Inter",
+                              "fontSize": 12
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "OJxPs",
+                          "name": "durCell1",
+                          "width": 100,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "V22TX",
+                              "fill": "$text-secondary",
+                              "content": "2 דק׳ 14 שנ׳",
+                              "fontFamily": "Inter",
+                              "fontSize": 12
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "M267X",
+                          "name": "trigCell1",
+                          "width": 140,
+                          "height": "fill_container",
+                          "gap": 6,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "kuqQO",
+                              "fill": "$text-secondary",
+                              "content": "Cron — כל שעה",
+                              "fontFamily": "Inter",
+                              "fontSize": 12
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "ElK3s",
+                              "width": 13,
+                              "height": 13,
+                              "iconFontName": "clock",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jy7Ti",
+                      "name": "Row 2 — Failed",
+                      "width": "fill_container",
+                      "height": 48,
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "padding": [
+                        0,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "wr9k1",
+                          "name": "badge2",
+                          "width": 120,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "tpYJq",
+                              "name": "badgeIn2",
+                              "fill": "#EF444418",
+                              "cornerRadius": 100,
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                10
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "crqni",
+                                  "fill": "$accent-red",
+                                  "content": "נכשל",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "PuuTx",
+                                  "fill": "$accent-red",
+                                  "width": 6,
+                                  "height": 6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "68zTB",
+                          "name": "nc2",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "cEKNT",
+                              "fill": "$text-primary",
+                              "content": "גיבוי יומי — Supabase Snapshots",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mJTDN",
+                          "name": "dc2",
+                          "width": 160,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "8j0Mu",
+                              "fill": "$text-secondary",
+                              "content": "29/03/2026, 12:00",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "1zSc7",
+                          "name": "du2",
+                          "width": 100,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "XsGcB",
+                              "fill": "$text-secondary",
+                              "content": "0 דק׳ 47 שנ׳",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "co3KZ",
+                          "name": "tr2",
+                          "width": 140,
+                          "height": "fill_container",
+                          "gap": 6,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "oyD6l",
+                              "fill": "$text-secondary",
+                              "content": "תזמון יומי",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "vYeQx",
+                              "width": 13,
+                              "height": 13,
+                              "iconFontName": "timer",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "q3iDe",
+                      "name": "Row 3 — Running (Expanded)",
+                      "width": "fill_container",
+                      "height": 48,
+                      "fill": "#1E293B",
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "padding": [
+                        0,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "vysgn",
+                          "name": "b3",
+                          "width": 120,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "kyv9t",
+                              "name": "bi3",
+                              "fill": "#3B82F618",
+                              "cornerRadius": 100,
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                10
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "5Hiuj",
+                                  "fill": "$accent-blue",
+                                  "content": "רץ כעת",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "hVGnQ",
+                                  "fill": "$accent-blue",
+                                  "width": 6,
+                                  "height": 6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "cceB1",
+                          "name": "nc3",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "uobKq",
+                              "fill": "$text-primary",
+                              "content": "עדכון RSS Feeds — 5 מקורות",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "l0nQE",
+                          "name": "dc3",
+                          "width": 160,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "dHWZk",
+                              "fill": "$text-secondary",
+                              "content": "29/03/2026, 15:01",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "rryyK",
+                          "name": "du3",
+                          "width": 100,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GJF7L",
+                              "fill": "$accent-blue",
+                              "content": "0 דק׳ 32 שנ׳…",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "7z5tX",
+                          "name": "tr3",
+                          "width": 140,
+                          "height": "fill_container",
+                          "gap": 6,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "GHBhf",
+                              "fill": "$text-secondary",
+                              "content": "ידני — גל",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "Klif3",
+                              "width": 13,
+                              "height": 13,
+                              "iconFontName": "user",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jsO6n",
+                      "name": "Expanded Timeline — Row 3",
+                      "width": "fill_container",
+                      "fill": "#151D2E",
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": [
+                        16,
+                        20,
+                        20,
+                        20
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "on0lM",
+                          "name": "tlLabel",
+                          "fill": "$text-muted",
+                          "content": "שלבי הרצה",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "600",
+                          "letterSpacing": 0.5
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZgUkb",
+                          "name": "Timeline Steps",
+                          "width": "fill_container",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "MJhd3",
+                              "name": "Step 1",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "2n9Tx",
+                                  "name": "s1dot",
+                                  "width": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "LAPzx",
+                                      "fill": "$accent-emerald",
+                                      "width": 12,
+                                      "height": 12
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "N8BTR",
+                                      "width": "fill_container",
+                                      "height": 3,
+                                      "fill": "$accent-emerald",
+                                      "cornerRadius": 2
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "sxFrR",
+                                  "fill": "$text-secondary",
+                                  "content": "אתחול",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "aUIva",
+                                  "fill": "$text-muted",
+                                  "content": "4 שנ׳",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Skjlp",
+                              "name": "Step 2",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "lXv0h",
+                                  "name": "s2dot",
+                                  "width": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "NEDly",
+                                      "fill": "$accent-emerald",
+                                      "width": 12,
+                                      "height": 12
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "pCFct",
+                                      "width": "fill_container",
+                                      "height": 3,
+                                      "fill": "$accent-emerald",
+                                      "cornerRadius": 2
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "H0yZA",
+                                  "fill": "$text-secondary",
+                                  "content": "שליפת מקורות",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "n0PPa",
+                                  "fill": "$text-muted",
+                                  "content": "8 שנ׳",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "wlwa1",
+                              "name": "Step 3 — Running",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "PHMDt",
+                                  "name": "s3dot",
+                                  "width": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "x6UlQ",
+                                      "fill": "$accent-blue",
+                                      "width": 12,
+                                      "height": 12
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "jU9U2",
+                                      "width": "fill_container",
+                                      "height": 3,
+                                      "fill": "$accent-blue",
+                                      "cornerRadius": 2
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "U2yoP",
+                                  "fill": "$accent-blue",
+                                  "content": "עיבוד פידים",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "WA1N9",
+                                  "fill": "$accent-blue",
+                                  "content": "20 שנ׳…",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "scSZr",
+                              "name": "Step 4 — Pending",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "nEdNY",
+                                  "name": "s4dot",
+                                  "width": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "EcO7j",
+                                      "fill": "$border-strong",
+                                      "width": 12,
+                                      "height": 12
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "YJuTi",
+                                      "width": "fill_container",
+                                      "height": 3,
+                                      "fill": "$border-strong",
+                                      "cornerRadius": 2
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "AfuYG",
+                                  "fill": "$text-muted",
+                                  "content": "שמירה ב-DB",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "gmyQ5",
+                                  "fill": "$text-muted",
+                                  "content": "—",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "as8sp",
+                              "name": "Step 5 — Pending",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "ni0ZT",
+                                  "name": "s5dot",
+                                  "width": "fill_container",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "ellipse",
+                                      "id": "81E4O",
+                                      "fill": "$border-strong",
+                                      "width": 12,
+                                      "height": 12
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "qvPil",
+                                  "fill": "$text-muted",
+                                  "content": "סיום ודיווח",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "BKd5u",
+                                  "fill": "$text-muted",
+                                  "content": "—",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Yx9fz",
+                      "name": "Row 4 — Success",
+                      "width": "fill_container",
+                      "height": 48,
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "padding": [
+                        0,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "FIb3A",
+                          "name": "b4",
+                          "width": 120,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "bSLkr",
+                              "name": "bi4",
+                              "fill": "#10B98118",
+                              "cornerRadius": 100,
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                10
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "b15Rl",
+                                  "fill": "$accent-emerald",
+                                  "content": "הצלחה",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "p4xK2",
+                                  "fill": "$accent-emerald",
+                                  "width": 6,
+                                  "height": 6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "kH3nh",
+                          "name": "nc4",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "k5lst",
+                              "fill": "$text-primary",
+                              "content": "סנכרון WATI — הודעות נכנסות",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "4i1yV",
+                          "name": "dc4",
+                          "width": 160,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "LlA4x",
+                              "fill": "$text-secondary",
+                              "content": "29/03/2026, 11:15",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "YXC8m",
+                          "name": "du4",
+                          "width": 100,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "NyFkp",
+                              "fill": "$text-secondary",
+                              "content": "1 דק׳ 03 שנ׳",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "O6Gcb",
+                          "name": "tr4",
+                          "width": 140,
+                          "height": "fill_container",
+                          "gap": 6,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "iZywZ",
+                              "fill": "$text-secondary",
+                              "content": "Webhook",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "p52nm",
+                              "width": 13,
+                              "height": 13,
+                              "iconFontName": "webhook",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "0HHez",
+                      "name": "Row 5 — Failed",
+                      "width": "fill_container",
+                      "height": 48,
+                      "stroke": {
+                        "thickness": {
+                          "bottom": 1
+                        },
+                        "fill": "$border-subtle"
+                      },
+                      "padding": [
+                        0,
+                        20
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "GyDii",
+                          "name": "b5",
+                          "width": 120,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "XMsyQ",
+                              "name": "bi5",
+                              "fill": "#EF444418",
+                              "cornerRadius": 100,
+                              "gap": 6,
+                              "padding": [
+                                4,
+                                10
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "fNDDh",
+                                  "fill": "$accent-red",
+                                  "content": "נכשל",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 11,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "ellipse",
+                                  "id": "e2hba",
+                                  "fill": "$accent-red",
+                                  "width": 6,
+                                  "height": 6
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "iQNCM",
+                          "name": "nc5",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "UFa6i",
+                              "fill": "$text-primary",
+                              "content": "דוח שבועי — סיכום פעילות AI Hub",
+                              "fontFamily": "Inter",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vpM1o",
+                          "name": "dc5",
+                          "width": 160,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "MXisN",
+                              "fill": "$text-secondary",
+                              "content": "28/03/2026, 23:00",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "7LfBN",
+                          "name": "du5",
+                          "width": 100,
+                          "height": "fill_container",
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "XeFJK",
+                              "fill": "$text-secondary",
+                              "content": "0 דק׳ 12 שנ׳",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "JOc9m",
+                          "name": "tr5",
+                          "width": 140,
+                          "height": "fill_container",
+                          "gap": 6,
+                          "justifyContent": "end",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "rXii9",
+                              "fill": "$text-secondary",
+                              "content": "Cron — שבועי",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "SzH2H",
+                              "width": 13,
+                              "height": 13,
+                              "iconFontName": "repeat",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-muted"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "g0H1K",
+          "name": "Footer",
+          "width": "fill_container",
+          "height": 48,
+          "fill": "$bg-footer",
+          "stroke": {
+            "thickness": {
+              "top": 1
+            },
+            "fill": "$border-subtle"
+          },
+          "padding": [
+            0,
+            24
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "ru6Nv",
+              "name": "footerLeft",
+              "fill": "$text-muted",
+              "content": "© 2026 G.A.M — כל הזכויות שמורות",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "oBc41",
+              "name": "footerRight",
+              "fill": "$text-muted",
+              "content": "vBrain.io — מרכז פיקוד",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "accent-amber": {
+      "type": "color",
+      "value": "#F59E0B"
+    },
+    "accent-blue": {
+      "type": "color",
+      "value": "#3B82F6"
+    },
+    "accent-emerald": {
+      "type": "color",
+      "value": "#10B981"
+    },
+    "accent-purple": {
+      "type": "color",
+      "value": "#8B5CF6"
+    },
+    "accent-red": {
+      "type": "color",
+      "value": "#EF4444"
+    },
+    "bg-card": {
+      "type": "color",
+      "value": "#1E293B"
+    },
+    "bg-footer": {
+      "type": "color",
+      "value": "#0B1120"
+    },
+    "bg-header": {
+      "type": "color",
+      "value": "#0B1120"
+    },
+    "bg-hover": {
+      "type": "color",
+      "value": "#1E293B"
+    },
+    "bg-page": {
+      "type": "color",
+      "value": "#0F172A"
+    },
+    "bg-sidebar": {
+      "type": "color",
+      "value": "#0B1120"
+    },
+    "border-strong": {
+      "type": "color",
+      "value": "#334155"
+    },
+    "border-subtle": {
+      "type": "color",
+      "value": "#1E293B"
+    },
+    "font-heading": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-primary": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "footer-height": {
+      "type": "number",
+      "value": 48
+    },
+    "header-height": {
+      "type": "number",
+      "value": 56
+    },
+    "sidebar-width": {
+      "type": "number",
+      "value": 240
+    },
+    "text-muted": {
+      "type": "color",
+      "value": "#64748B"
+    },
+    "text-primary": {
+      "type": "color",
+      "value": "#F8FAFC"
+    },
+    "text-secondary": {
+      "type": "color",
+      "value": "#94A3B8"
+    }
+  }
+}

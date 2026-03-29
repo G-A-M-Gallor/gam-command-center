@@ -131,5 +131,9 @@ const pages = {
     title: "ספריית קורסים",
     description: "ספריית קורסים אישית עם תמלולים, סיכומים וכרטיסיות למידה",
   },
+  maintenance: {
+    title: "תחזוקת קוד",
+    description: "מערכת ניטור ותחזוקה מקצועית לאיכות קוד",
+  },
 } as const;
 export default pages;
