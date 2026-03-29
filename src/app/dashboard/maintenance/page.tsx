@@ -21,8 +21,10 @@ import {
   TrendingUp,
   Wrench,
   FileText,
-  Zap
+  Zap,
+  Key
 } from "lucide-react";
+import CredentialsHealth from "@/components/maintenance/CredentialsHealth";
 
 interface CleanupReport {
   audit_timestamp: string;
@@ -246,6 +248,7 @@ export default function MaintenancePage() {
   const t = getTranslations(language);
   const isRtl = language === 'he';
 
+  const [activeTab, setActiveTab] = useState<'system' | 'credentials'>('system');
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState<CleanupReport[]>([]);
   const [cronStatus, setCronStatus] = useState<CronStatus | null>(null);
@@ -350,8 +353,37 @@ export default function MaintenancePage() {
       <PageHeader pageKey="maintenance" />
 
       <div className="p-6">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Tabs Navigation */}
+        <div className="flex gap-1 mb-8 p-1 bg-slate-900/50 rounded-lg border border-white/[0.06] w-fit">
+          <button
+            onClick={() => setActiveTab('system')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'system'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <Wrench className="h-4 w-4" />
+            ביקורת מערכת
+          </button>
+          <button
+            onClick={() => setActiveTab('credentials')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'credentials'
+                ? 'bg-blue-500 text-white shadow-lg'
+                : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800'
+            }`}
+          >
+            <Key className="h-4 w-4" />
+            Credentials & Keys
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'system' && (
+          <div>
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatsCard
             title="בריאות כללית"
             value={stats.health.value}
@@ -471,6 +503,13 @@ export default function MaintenancePage() {
             </div>
           </div>
         </div>
+          </div>
+        )}
+
+        {/* Credentials & Keys Tab */}
+        {activeTab === 'credentials' && (
+          <CredentialsHealth isRtl={isRtl} />
+        )}
       </div>
     </div>
   );
