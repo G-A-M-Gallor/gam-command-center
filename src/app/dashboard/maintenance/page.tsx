@@ -9,20 +9,15 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Code2,
-  Database,
-  Download,
   Gauge,
-  GitBranch,
   Play,
   RefreshCw,
   Settings,
   Shield,
   TrendingUp,
   Wrench,
-  FileText,
-  Zap,
-  Key
+  Key,
+  FileText
 } from "lucide-react";
 import CredentialsHealth from "@/components/maintenance/CredentialsHealth";
 
@@ -245,14 +240,18 @@ function ReportsTable({ reports }: { reports: CleanupReport[] }) {
 
 export default function MaintenancePage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
   const isRtl = language === 'he';
 
   const [activeTab, setActiveTab] = useState<'system' | 'credentials'>('system');
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState<CleanupReport[]>([]);
   const [cronStatus, setCronStatus] = useState<CronStatus | null>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+
+  // Set initial refresh time after hydration to avoid SSR mismatch
+  useEffect(() => {
+    setLastRefresh(new Date());
+  }, []);
 
   // Load reports from .maintenance/reports/ directory
   const loadReports = async () => {
@@ -295,7 +294,7 @@ export default function MaintenancePage() {
   };
 
   // Run manual audit
-  const runAudit = async (withFix = false) => {
+  const runAudit = async () => {
     setLoading(true);
     try {
       // In a real implementation, this would trigger the audit script
@@ -417,14 +416,14 @@ export default function MaintenancePage() {
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 mb-8">
           <ActionButton
-            onClick={() => runAudit(false)}
+            onClick={() => runAudit()}
             loading={loading}
             icon={Play}
           >
             הרץ ביקורת
           </ActionButton>
           <ActionButton
-            onClick={() => runAudit(true)}
+            onClick={() => runAudit()}
             loading={loading}
             icon={Wrench}
             variant="secondary"
@@ -489,7 +488,7 @@ export default function MaintenancePage() {
               מידע נוסף
             </h3>
             <div className="space-y-3 text-sm text-slate-400">
-              <p>עדכון אחרון: {lastRefresh.toLocaleString('he-IL')}</p>
+              <p>עדכון אחרון: {lastRefresh ? lastRefresh.toLocaleString('he-IL') : 'טוען...'}</p>
               <p>תיקיית דוחות: <code className="bg-slate-800 px-1 rounded">.maintenance/reports/</code></p>
               <p>תיקיית לוגים: <code className="bg-slate-800 px-1 rounded">.maintenance/logs/</code></p>
               <div className="flex gap-2 mt-4">
