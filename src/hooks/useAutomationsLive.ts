@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/client'
 
 export interface LiveAutomation {
   id: string
@@ -44,7 +44,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
 
-  const supabase = createBrowserClient()
+  const supabase = createClient()
 
   const fetchAutomations = async () => {
     try {
@@ -147,7 +147,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
           schema: 'public',
           table: 'automations'
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Automation changed:', payload)
           fetchAutomations() // Refresh on any change
         }
@@ -163,7 +163,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
           schema: 'public',
           table: 'automation_runs'
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Run changed:', payload)
           // Update stats in real-time
           fetchAutomations()
@@ -257,7 +257,7 @@ export function useAutomationRuns(automationId: string) {
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
 
-  const supabase = createBrowserClient()
+  const supabase = createClient()
 
   const fetchRuns = async () => {
     try {
@@ -322,7 +322,7 @@ export function useAutomationRuns(automationId: string) {
           table: 'automation_runs',
           filter: `automation_id=eq.${automationId}`
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Run updated:', payload)
           fetchRuns()
         }
@@ -333,7 +333,7 @@ export function useAutomationRuns(automationId: string) {
           schema: 'public',
           table: 'automation_run_steps'
         },
-        (payload) => {
+        (payload: any) => {
           console.log('Step updated:', payload)
           fetchRuns()
         }

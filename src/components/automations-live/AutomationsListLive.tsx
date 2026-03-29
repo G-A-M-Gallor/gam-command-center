@@ -122,10 +122,15 @@ export function AutomationsListLive() {
       <div className="flex h-[calc(100vh-3.5rem)]">
         {/* Sidebar Filters */}
         <AutomationFilters
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          categoryFilter={categoryFilter}
-          setCategoryFilter={setCategoryFilter}
+          selectedFilters={{
+            status: statusFilter,
+            triggerType: categoryFilter,
+            tags: []
+          }}
+          onFiltersChange={(filters) => {
+            setStatusFilter(filters.status)
+            setCategoryFilter(filters.triggerType)
+          }}
         />
 
         {/* Main Content */}

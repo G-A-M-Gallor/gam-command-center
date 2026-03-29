@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/api/auth'
 
 // GET /api/automations-live - List all automations with stats
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -71,8 +75,12 @@ export async function GET(request: NextRequest) {
 // POST /api/automations-live - Create new automation
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     const body = await request.json()
     const {

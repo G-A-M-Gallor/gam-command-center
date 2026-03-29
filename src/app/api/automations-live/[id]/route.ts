@@ -1,20 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/api/auth'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET /api/automations-live/[id] - Get single automation with workflow
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     // Get automation with stats
     const { data: automation, error: automationError } = await supabase
-      .rpc('get_automation_with_stats', { automation_uuid: params.id })
+      .rpc('get_automation_with_stats', { automation_uuid: id })
       .single()
 
     if (automationError) throw automationError
@@ -29,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { data: nodes, error: nodesError } = await supabase
       .from('workflow_nodes')
       .select('*')
-      .eq('automation_id', params.id)
+      .eq('automation_id', id)
       .order('created_at')
 
     if (nodesError) throw nodesError
@@ -38,7 +43,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { data: connections, error: connectionsError } = await supabase
       .from('workflow_connections')
       .select('*')
-      .eq('automation_id', params.id)
+      .eq('automation_id', id)
       .order('created_at')
 
     if (connectionsError) throw connectionsError
@@ -62,9 +67,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PUT /api/automations-live/[id] - Update automation
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     const body = await request.json()
     const {
@@ -91,7 +101,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         folder_id,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('created_by', user.id)
       .select()
       .single()
@@ -104,12 +114,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       await supabase
         .from('workflow_connections')
         .delete()
-        .eq('automation_id', params.id)
+        .eq('automation_id', id)
 
       await supabase
         .from('workflow_nodes')
         .delete()
-        .eq('automation_id', params.id)
+        .eq('automation_id', id)
 
       // Insert new nodes
       if (workflow.nodes && workflow.nodes.length > 0) {
@@ -117,7 +127,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           .from('workflow_nodes')
           .insert(
             workflow.nodes.map((node: any) => ({
-              automation_id: params.id,
+              automation_id: id,
               node_id: node.id,
               node_type: node.type,
               title: node.title,
@@ -140,7 +150,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           .from('workflow_connections')
           .insert(
             workflow.connections.map((conn: any) => ({
-              automation_id: params.id,
+              automation_id: id,
               connection_id: conn.id,
               from_node_id: conn.from,
               to_node_id: conn.to,
@@ -166,14 +176,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/automations-live/[id] - Delete automation
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     const { error } = await supabase
       .from('automations')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('created_by', user.id)
 
     if (error) throw error

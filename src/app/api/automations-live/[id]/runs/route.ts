@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/api/auth'
 
 interface RouteParams {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // GET /api/automations-live/[id]/runs - Get automation runs
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
+
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: getAuthError } = await requireAuth(request)
+    if (getAuthError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -21,7 +27,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { data: automation, error: authError } = await supabase
       .from('automations')
       .select('id, name')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('created_by', user.id)
       .single()
 
@@ -57,7 +63,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           output_data
         )
       `)
-      .eq('automation_id', params.id)
+      .eq('automation_id', id)
       .order('started_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -70,7 +76,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if (error) throw error
 
     // Transform data to match frontend interface
-    const transformedRuns = runs?.map(run => ({
+    const transformedRuns = runs?.map((run: any) => ({
       id: run.id,
       automationName: automation.name,
       status: run.status,
@@ -79,7 +85,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       duration: run.duration_ms,
       triggerSource: run.trigger_source || 'Unknown',
       triggeredBy: run.triggered_by,
-      steps: run.automation_run_steps?.map(step => ({
+      steps: run.automation_run_steps?.map((step: any) => ({
         id: step.id,
         name: step.step_name,
         status: step.status,
@@ -95,7 +101,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { count, error: countError } = await supabase
       .from('automation_runs')
       .select('*', { count: 'exact', head: true })
-      .eq('automation_id', params.id)
+      .eq('automation_id', id)
 
     if (countError) throw countError
 
@@ -117,9 +123,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // POST /api/automations-live/[id]/runs - Trigger automation run
 export async function POST(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
+
   try {
-    const user = await requireAuth(request)
-    const supabase = createServerClient()
+    const { user, error: postAuthError } = await requireAuth(request)
+    if (postAuthError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabase = createServiceClient()
 
     const body = await request.json()
     const { trigger_source = 'Manual', trigger_data = {} } = body
@@ -128,7 +140,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { data: automation, error: authError } = await supabase
       .from('automations')
       .select('id, name, status, trigger_type, trigger_config')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('created_by', user.id)
       .single()
 
@@ -150,7 +162,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { data: run, error: runError } = await supabase
       .from('automation_runs')
       .insert({
-        automation_id: params.id,
+        automation_id: id,
         status: 'pending',
         trigger_source,
         triggered_by: user.id,
@@ -166,14 +178,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const { data: nodes, error: nodesError } = await supabase
       .from('workflow_nodes')
       .select('*')
-      .eq('automation_id', params.id)
+      .eq('automation_id', id)
       .order('created_at')
 
     if (nodesError) throw nodesError
 
     // Create run steps for each node
     if (nodes && nodes.length > 0) {
-      const steps = nodes.map(node => ({
+      const steps = nodes.map((node: any) => ({
         run_id: run.id,
         node_id: node.node_id,
         step_name: node.title,
