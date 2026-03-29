@@ -9,6 +9,7 @@ import { ThemeInit } from "@/components/ThemeInit";
 import { QueryProvider } from "@/components/QueryProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
+import WebVitalsTracker from "@/components/WebVitalsTracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -106,6 +107,7 @@ try{var vm=localStorage.getItem('cc-style-view-mode');if(vm!=='system'){var so=J
         </QueryProvider>
         <SpeedInsights />
         <Analytics />
+        <WebVitalsTracker />
       </body>
     </html>
   );

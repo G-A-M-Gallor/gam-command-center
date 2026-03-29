@@ -127,8 +127,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [isAdmin, actionPerms]);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
-    router.push("/dashboard");
+    try {
+      // Use our API route for logout to properly handle cookies
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout API error:', error);
+      // Fallback to direct Supabase logout
+      await supabase.auth.signOut();
+    }
+
+    // Redirect to login page
+    router.push("/auth/login");
     router.refresh();
   }, [supabase, router]);
 

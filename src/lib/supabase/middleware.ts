@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest) {
   // No session + dashboard route → redirect to login
   if (!user && pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/auth/login";
     url.searchParams.set("redirect", pathname);
     return NextResponse.redirect(url);
   }
@@ -60,14 +60,14 @@ export async function updateSession(request: NextRequest) {
     if (allowedEmails.length > 0 && !allowedEmails.includes(email)) {
       await supabase.auth.signOut();
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = "/auth/login";
       url.searchParams.set("error", "unauthorized");
       return NextResponse.redirect(url);
     }
   }
 
   // Has session + login page → redirect to dashboard
-  if (user && pathname === "/login") {
+  if (user && (pathname === "/login" || pathname === "/auth/login")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.searchParams.delete("redirect");

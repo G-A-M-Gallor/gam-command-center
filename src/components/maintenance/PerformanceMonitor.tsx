@@ -27,7 +27,7 @@ interface PageLoadMetrics {
   fcp: number;
   lcp: number;
   cls: number;
-  fid: number;
+  inp: number;
   ttfb: number;
 }
 
@@ -509,10 +509,10 @@ export default function PerformanceMonitor({ isRtl }: PerformanceMonitorProps) {
               status={metrics.pageLoad.fcp <= 1800 ? 'good' : metrics.pageLoad.fcp <= 3000 ? 'warning' : 'critical'}
             />
             <MetricCard
-              title="FID (First Input Delay)"
-              value={formatTime(metrics.pageLoad.fid)}
+              title="INP (Interaction to Next Paint)"
+              value={formatTime(metrics.pageLoad.inp)}
               icon={Clock}
-              status={metrics.pageLoad.fid <= 100 ? 'good' : metrics.pageLoad.fid <= 300 ? 'warning' : 'critical'}
+              status={metrics.pageLoad.inp <= 200 ? 'good' : metrics.pageLoad.inp <= 500 ? 'warning' : 'critical'}
             />
             <MetricCard
               title="CLS (Cumulative Layout Shift)"

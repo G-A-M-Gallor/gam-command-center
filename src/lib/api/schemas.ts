@@ -271,6 +271,15 @@ export const profileSetupSchema = z.object({
 
 export type ProfileSetupInput = z.infer<typeof profileSetupSchema>;
 
+// ─── Password Auth ─────────────────────────────────────────
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required").max(200, "Username exceeds 200 characters").transform((s) => s.trim()),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
 // ─── Contractor Submission ─────────────────────────────────
 
 export const contractorSubmitSchema = z.object({

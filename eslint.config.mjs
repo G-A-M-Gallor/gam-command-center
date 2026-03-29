@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": "warn",
       "@typescript-eslint/no-require-imports": "warn",
+      "react-hooks/exhaustive-deps": "warn" // Fix missing deps warnings
     }
   },
   // Override default ignores of eslint-config-next.
