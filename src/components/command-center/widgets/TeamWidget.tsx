@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Circle } from "lucide-react";
+import { Circle, Wifi, WifiOff } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
+import { useTeamPresence } from "@/hooks/useTeamPresence";
 import type { WidgetSize } from "./WidgetRegistry";
 
 type LangKey = "he" | "en" | "ru";
@@ -41,21 +41,25 @@ const STATUS_LABELS: Record<string, Record<LangKey, string>> = {
 export function TeamPanel() {
   const { language } = useSettings();
   const t = getTranslations(language);
-  const [team, setTeam] = useState<TeamMemberStatus[]>([]);
-
-  useEffect(() => {
-    // TODO: Replace with Supabase Realtime presence when available
-    setTeam(DEMO_TEAM);
-  }, []);
+  const { team, isConnected, error } = useTeamPresence();
 
   const onlineCount = team.filter((m) => m.status === "online" || m.status === "busy").length;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          {t.widgets.teamTitle}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+            {t.widgets.teamTitle}
+          </span>
+          {isConnected ? (
+            <Wifi size={10} className="text-emerald-400" />
+          ) : (
+            <div title={error || "Using demo data"}>
+              <WifiOff size={10} className="text-amber-400" />
+            </div>
+          )}
+        </div>
         <span className="text-[10px] text-slate-500">
           {onlineCount}/{team.length} {t.widgets.teamOnline}
         </span>
@@ -103,9 +107,11 @@ export function TeamPanel() {
 export function TeamBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
   const t = getTranslations(language);
+  const { team } = useTeamPresence();
+
   if (size < 2) return null;
 
-  const onlineCount = DEMO_TEAM.filter((m) => m.status === "online" || m.status === "busy").length;
+  const onlineCount = team.filter((m) => m.status === "online" || m.status === "busy").length;
   return (
     <span className="truncate text-xs text-slate-400">
       {onlineCount} {t.widgets.teamBar}

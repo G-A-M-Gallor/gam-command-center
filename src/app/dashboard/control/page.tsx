@@ -55,24 +55,36 @@ function loadOrder(): BlockId[] {
       }
       return parsed.filter((id) => DEFAULT_ORDER.includes(id));
     }
-  } catch {}
+  } catch {
+    // Ignore localStorage parse errors - fallback to default order
+  }
   return [...DEFAULT_ORDER];
 }
 
 function saveOrder(order: BlockId[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(order)); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 function loadHidden(): Set<BlockId> {
   try {
     const raw = localStorage.getItem(HIDDEN_KEY);
     if (raw) return new Set(JSON.parse(raw) as BlockId[]);
-  } catch {}
+  } catch {
+    // Ignore localStorage parse errors - fallback to empty set
+  }
   return new Set();
 }
 
 function saveHidden(hidden: Set<BlockId>) {
-  try { localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden])); } catch {}
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden]));
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 // ─── Section Card ────────────────────────────────────────

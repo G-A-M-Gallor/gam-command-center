@@ -1061,11 +1061,11 @@ function SubmitterCard({
 
 // ── Views Tab ────────────────────────────────────────────
 function ViewsTab({ views, dc }: { views: DocumentView[]; dc: Record<string, string> }) {
+  const currentTime = useMemo(() => Date.now(), []);
+
   if (views.length === 0) {
     return <EmptyState icon={Eye} message={dc.noViews} />;
   }
-
-  const currentTime = useMemo(() => Date.now(), []);
 
   return (
     <div className="space-y-2">
