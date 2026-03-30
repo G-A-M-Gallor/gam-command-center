@@ -879,3 +879,170 @@ body {
     transparent
   );
 }
+
+/* ============================================================
+   ENHANCED DESIGN TOKEN SYSTEM — International Support
+   ============================================================ */
+
+:root {
+  /* ── Typography Scale (following design system) ── */
+  --cc-text-xs: 0.75rem;     /* 12px */
+  --cc-text-sm: 0.875rem;    /* 14px */
+  --cc-text-base: 1rem;      /* 16px */
+  --cc-text-lg: 1.125rem;    /* 18px */
+  --cc-text-xl: 1.25rem;     /* 20px */
+  --cc-text-2xl: 1.5rem;     /* 24px */
+  --cc-text-3xl: 1.875rem;   /* 30px */
+  --cc-text-4xl: 2.25rem;    /* 36px */
+  --cc-text-5xl: 3rem;       /* 48px */
+
+  /* ── Line Heights (optimized for readability) ── */
+  --cc-leading-tight: 1.25;
+  --cc-leading-normal: 1.5;
+  --cc-leading-relaxed: 1.75;
+
+  /* ── Spacing Scale (consistent tokens) ── */
+  --cc-space-xs: 0.25rem;    /* 4px */
+  --cc-space-sm: 0.5rem;     /* 8px */
+  --cc-space-md: 1rem;       /* 16px */
+  --cc-space-lg: 1.5rem;     /* 24px */
+  --cc-space-xl: 2rem;       /* 32px */
+  --cc-space-2xl: 3rem;      /* 48px */
+  --cc-space-3xl: 4rem;      /* 64px */
+
+  /* ── Shadow Depths (performance optimized) ── */
+  --cc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --cc-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --cc-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --cc-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* ── International Typography (multilingual support) ── */
+  --cc-font-hebrew: "Noto Sans Hebrew", "Arial Hebrew", sans-serif;
+  --cc-font-arabic: "Noto Sans Arabic", "Arial", sans-serif;
+  --cc-font-international: "Be Vietnam Pro", "Noto Sans", system-ui, sans-serif;
+}
+
+/* ── RTL/LTR Logical Property Utilities ── */
+
+/* Margin logical properties */
+.ms-auto { margin-inline-start: auto; }
+.me-auto { margin-inline-end: auto; }
+.ms-1 { margin-inline-start: var(--cc-space-xs); }
+.me-1 { margin-inline-end: var(--cc-space-xs); }
+.ms-2 { margin-inline-start: var(--cc-space-sm); }
+.me-2 { margin-inline-end: var(--cc-space-sm); }
+.ms-3 { margin-inline-start: var(--cc-space-md); }
+.me-3 { margin-inline-end: var(--cc-space-md); }
+.ms-4 { margin-inline-start: var(--cc-space-lg); }
+.me-4 { margin-inline-end: var(--cc-space-lg); }
+
+/* Padding logical properties */
+.ps-1 { padding-inline-start: var(--cc-space-xs); }
+.pe-1 { padding-inline-end: var(--cc-space-xs); }
+.ps-2 { padding-inline-start: var(--cc-space-sm); }
+.pe-2 { padding-inline-end: var(--cc-space-sm); }
+.ps-3 { padding-inline-start: var(--cc-space-md); }
+.pe-3 { padding-inline-end: var(--cc-space-md); }
+.ps-4 { padding-inline-start: var(--cc-space-lg); }
+.pe-4 { padding-inline-end: var(--cc-space-lg); }
+
+/* Text alignment logical properties */
+.text-start { text-align: start; }
+.text-end { text-align: end; }
+
+/* Border logical properties */
+.border-s { border-inline-start: 1px solid var(--theme-border); }
+.border-e { border-inline-end: 1px solid var(--theme-border); }
+
+/* RTL/LTR Layout Utilities */
+.flex-rtl {
+  display: flex;
+  flex-direction: row;
+}
+
+[dir="rtl"] .flex-rtl {
+  flex-direction: row-reverse;
+}
+
+/* Language-specific typography */
+[lang="he"], [dir="rtl"] {
+  font-family: var(--cc-font-hebrew);
+  text-align: start;
+}
+
+[lang="ar"] {
+  font-family: var(--cc-font-arabic);
+  text-align: start;
+}
+
+/* Performance: reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Accessibility: High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --theme-border: rgba(255, 255, 255, 0.3);
+    --theme-border-high: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* ── Component Token Integration ── */
+
+/* Button using design tokens */
+.cc-button {
+  font-size: var(--cc-text-base);
+  padding: var(--cc-space-sm) var(--cc-space-md);
+  border-radius: var(--cc-radius);
+  transition: all 200ms ease;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.cc-button:focus-visible {
+  outline: 2px solid var(--cc-accent-500);
+  outline-offset: 2px;
+}
+
+/* Input using design tokens */
+.cc-input {
+  font-size: var(--cc-text-base);
+  padding: var(--cc-space-sm) var(--cc-space-md);
+  border-radius: var(--cc-radius);
+  border: 1px solid var(--theme-border);
+  background: var(--elevation-1-bg);
+  color: var(--theme-text);
+  transition: border-color 200ms ease;
+}
+
+.cc-input:focus {
+  border-color: var(--cc-accent-500);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--cc-accent-500-15);
+}
+
+/* Card using design tokens */
+.cc-card {
+  background: var(--elevation-1-bg);
+  border: 1px solid var(--elevation-1-border);
+  border-radius: var(--cc-radius-lg);
+  padding: var(--cc-space-lg);
+  box-shadow: var(--elevation-1-shadow);
+  transition: all 200ms ease;
+}
+
+.cc-card:hover {
+  background: var(--elevation-2-bg);
+  border-color: var(--elevation-2-border);
+  box-shadow: var(--elevation-2-shadow);
+  transform: translateY(-1px);
+}

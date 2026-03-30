@@ -391,28 +391,26 @@ export default function BrainHealthDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className={`flex mb-4 ${isRtl ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`flex max-w-2xl ${isRtl ? 'flex-row-reverse gap-x-2' : 'gap-2'}`}>
-                    <Input
-                      placeholder="הכנס שאלה או מושג לחיפוש..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && searchBrain()}
-                      className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${isRtl ? 'text-right' : 'text-left'}`}
-                      dir={isRtl ? "rtl" : "ltr"}
-                    />
-                    <Button
-                      onClick={searchBrain}
-                      disabled={searching}
-                      className="bg-purple-600 hover:bg-purple-700 shrink-0"
-                    >
-                      {searching ? (
-                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                      ) : (
-                        <Search className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+                <div className="flex gap-3 mb-4 w-full">
+                  <Input
+                    placeholder="הכנס שאלה או מושג לחיפוש..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && searchBrain()}
+                    className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${isRtl ? 'text-right' : 'text-left'} flex-1`}
+                    dir={isRtl ? "rtl" : "ltr"}
+                  />
+                  <Button
+                    onClick={searchBrain}
+                    disabled={searching}
+                    className="bg-purple-600 hover:bg-purple-700 shrink-0 cursor-pointer"
+                  >
+                    {searching ? (
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
 
                 {searchResults.length > 0 && (
