@@ -7,7 +7,7 @@ type DocxParagraph = DocxElement;
 type DocxTextRun = DocxElement;
 
 interface DocxAPI {
-  Document: new (options: object) => DocxElement;
+  Document?: new (options: object) => DocxElement;
   Paragraph: new (options: object) => DocxParagraph;
   TextRun: new (options: object) => DocxTextRun;
   HeadingLevel: Record<string, unknown>;
@@ -84,7 +84,7 @@ export async function exportToDOCX(content: JSONContent, title: string): Promise
 
   const paragraphs = tiptapJsonToDocxParagraphs(
     content,
-    { Paragraph, TextRun, HeadingLevel, AlignmentType }
+    { Paragraph, TextRun, HeadingLevel, AlignmentType } as DocxAPI
   );
 
   const doc = new Document({
@@ -96,7 +96,7 @@ export async function exportToDOCX(content: JSONContent, title: string): Promise
           heading: HeadingLevel.TITLE,
           alignment: AlignmentType.RIGHT,
         }),
-        ...paragraphs,
+        ...(paragraphs as any),
       ],
     }],
   });

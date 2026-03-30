@@ -66,7 +66,7 @@ export function WorkflowBuilderLive() {
   // Load workflow when automation changes
   useEffect(() => {
     if (automation?.workflow) {
-      const { nodes: loadedNodes, connections: loadedConnections } = automation.workflow
+      const { nodes: loadedNodes, connections: loadedConnections } = automation.workflow as any
 
       // Transform from DB format to component format
       setNodes(loadedNodes.map((node: any) => ({
@@ -168,8 +168,8 @@ export function WorkflowBuilderLive() {
 
       const workflow = {
         nodes: nodes.map(node => ({
-          id: node.id,
-          type: node.type,
+          node_id: node.id,
+          node_type: node.type,
           title: node.title,
           x: node.x,
           y: node.y,
@@ -181,14 +181,14 @@ export function WorkflowBuilderLive() {
         })),
         connections: connections.map(conn => ({
           id: conn.id,
-          from: conn.from,
-          to: conn.to,
-          fromPort: conn.fromPort,
-          toPort: conn.toPort
+          source: conn.from,
+          target: conn.to,
+          sourceHandle: conn.fromPort,
+          targetHandle: conn.toPort
         }))
       }
 
-      await updateWorkflow(workflow)
+      await updateWorkflow({ workflow })
       setLastSaved(new Date())
 
       if (!silent) {

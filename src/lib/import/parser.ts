@@ -97,7 +97,7 @@ function parseCSVText(text: string): string[][] {
  */
 export async function parseXLSX(buffer: Buffer, fileName: string): Promise<ParseResult> {
   const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer);
+  await workbook.xlsx.load(buffer as any);
 
   const firstWorksheet = workbook.worksheets[0];
   if (!firstWorksheet) {

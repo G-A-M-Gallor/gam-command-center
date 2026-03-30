@@ -34,10 +34,6 @@ interface ConnectionCredentials {
 }
 
 interface AuthenticationConfig {
-  token?: string;
-  apiKey?: string;
-  username?: string;
-  password?: string;
   [key: string]: JsonValue;
 }
 
@@ -118,13 +114,15 @@ export interface AutomationRun {
 }
 
 export interface AutomationRunStep {
+  id: string
   stepId: string
+  name: string
   status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped'
   startedAt?: Date
   completedAt?: Date
   duration?: number
   input?: JsonValue
-  output?: JsonValue
+  output?: string
   error?: string
   logs: AutomationLogEntry[]
 }

@@ -33,7 +33,8 @@ const statusConfig = {
   success: { color: 'bg-green-500', textColor: 'text-green-500', label: 'הצליח' },
   failed: { color: 'bg-red-500', textColor: 'text-red-500', label: 'נכשל' },
   running: { color: 'bg-blue-500', textColor: 'text-blue-500', label: 'בביצוע' },
-  cancelled: { color: 'bg-[#6B7280]', textColor: 'text-[#6B7280]', label: 'בוטל' }
+  cancelled: { color: 'bg-[#6B7280]', textColor: 'text-[#6B7280]', label: 'בוטל' },
+  paused: { color: 'bg-yellow-500', textColor: 'text-yellow-500', label: 'מושהה' }
 }
 
 const formatDuration = (ms: number) => {
