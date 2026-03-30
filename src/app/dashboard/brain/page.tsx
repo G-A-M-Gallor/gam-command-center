@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Brain, Activity, AlertTriangle, TrendingUp, Database, Clock } from "lucide-react";
+import { Search, Brain, Activity, AlertTriangle, TrendingUp, Database, Clock, ExternalLink } from "lucide-react";
 
 interface BrainStats {
   total_chunks: number;
@@ -385,25 +385,26 @@ export default function BrainHealthDashboard() {
           <TabsContent value="search">
             <Card className="bg-slate-800 border-slate-700">
               <CardHeader>
-                <CardTitle className="text-white">חיפוש סמנטי</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className={`text-white ${isRtl ? 'text-right' : 'text-left'}`}>חיפוש סמנטי</CardTitle>
+                <CardDescription className={`text-slate-400 ${isRtl ? 'text-right' : 'text-left'}`}>
                   חפש במאגר הידע הסמנטי של הפרויקט
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-center mb-4">
-                  <div className="flex gap-2 w-full max-w-2xl">
+                <div className={`flex mb-4 ${isRtl ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`flex max-w-2xl ${isRtl ? 'flex-row-reverse gap-x-2' : 'gap-2'}`}>
                     <Input
                       placeholder="הכנס שאלה או מושג לחיפוש..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && searchBrain()}
-                      className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                      className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${isRtl ? 'text-right' : 'text-left'}`}
+                      dir={isRtl ? "rtl" : "ltr"}
                     />
                     <Button
                       onClick={searchBrain}
                       disabled={searching}
-                      className="bg-purple-600 hover:bg-purple-700"
+                      className="bg-purple-600 hover:bg-purple-700 shrink-0"
                     >
                       {searching ? (
                         <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
@@ -416,12 +417,12 @@ export default function BrainHealthDashboard() {
 
                 {searchResults.length > 0 && (
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">
+                    <h3 className={`text-lg font-semibold text-white ${isRtl ? 'text-right' : 'text-left'}`}>
                       נמצאו {searchResults.length} תוצאות
                     </h3>
                     <div className="space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto">
                       {searchResults.map((result) => (
-                        <div key={result.id} className="p-4 bg-slate-700 rounded-md" dir="rtl">
+                        <div key={result.id} className="p-4 bg-slate-700 rounded-md" dir={isRtl ? "rtl" : "ltr"}>
                           <div className="flex flex-wrap items-center gap-2 mb-3">
                             <Badge intent="outline" className="text-xs">
                               ציון: {(result.smart_score * 100).toFixed(1)}%
@@ -440,13 +441,16 @@ export default function BrainHealthDashboard() {
                                 href={result.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-400 hover:text-blue-300 ms-auto"
+                                className={`flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 transition-colors cursor-pointer ${isRtl ? 'me-auto' : 'ms-auto'}`}
                               >
-                                🔗 מקור
+                                <ExternalLink className="h-3 w-3" />
+                                מקור
                               </a>
                             )}
                           </div>
-                          <p className="text-sm text-slate-300 leading-relaxed">{result.content}</p>
+                          <p className={`text-sm text-slate-300 leading-relaxed ${isRtl ? 'text-right' : 'text-left'}`}>
+                            {result.content}
+                          </p>
                         </div>
                       ))}
                     </div>
