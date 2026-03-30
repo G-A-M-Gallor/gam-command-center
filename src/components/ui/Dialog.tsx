@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { _X } from "lucide-react";
 
 interface DialogProps {
   open: boolean;
@@ -79,7 +79,7 @@ export function Dialog({
               onClick={onClose}
               className="rounded-md p-1 text-slate-500 transition-colors hover:bg-white/5 hover:text-slate-300"
             >
-              <X size={16} />
+              <_X size={16} />
             </button>
           </div>
         )}

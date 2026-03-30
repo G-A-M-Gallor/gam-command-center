@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { _createClient } from "@supabase/supabase-js";
 import { watiMessageToCommRow } from "@/lib/wati/sync";
-import { findEntityByPhone } from "@/lib/wati/sync";
+import { _findEntityByPhone } from "@/lib/wati/sync";
 import type { WATIMessage } from "@/lib/wati/types";
 import { sendCommPush } from "@/lib/push/sendCommPush";
 
@@ -17,7 +17,7 @@ function getServiceClient() {
  * Receives incoming message webhooks from WATI.
  * No auth — WATI sends webhooks with a shared secret.
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     // Verify webhook secret — always required
     const webhookSecret = process.env.WATI_WEBHOOK_SECRET;

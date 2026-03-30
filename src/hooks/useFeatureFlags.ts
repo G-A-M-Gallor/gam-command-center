@@ -49,7 +49,7 @@ export function useFeatureFlags(appName: string) {
       try {
         await fetch("/api/feature-flags", {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          _headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             app_name: appName,
             feature_name: featureName,

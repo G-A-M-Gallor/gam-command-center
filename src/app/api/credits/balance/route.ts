@@ -7,10 +7,10 @@ import { createServiceClient } from '@/lib/supabase/server';
  * Auth: JWT required
  * Returns wallet balance, usage stats, and pricing for current workspace.
  */
-export async function GET(request: Request) {
-  const auth = await requireAuth(request);
+export async function GET(_request: Request) {
+  const auth = await requireAuth(_request);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
-  const user = auth.user!;
+  const _user = auth.user!;
 
   const supabase = createServiceClient();
 
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const { data: wu } = await supabase
     .from('vb_workspace_users')
     .select('workspace_id')
-    .eq('user_id', user.id)
+    .eq('user_id', _user.id)
     .eq('is_active', true)
     .limit(1)
     .single();

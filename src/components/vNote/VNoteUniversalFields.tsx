@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Clock, Tag, User } from "lucide-react";
+import { _Clock, Tag, User } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import type { NoteRecord, EntityType } from "@/lib/entities/types";
 import { VNOTE_STATUS_OPTIONS } from "./vNote.types";

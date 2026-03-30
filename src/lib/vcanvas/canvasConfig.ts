@@ -81,15 +81,15 @@ export const FEATURE_LABELS: Record<keyof CanvasFeatures, { he: string; en: stri
   debug: { he: "דיבאג", en: "Debug", ru: "Отладка" },
 };
 
-export const DEFAULT_FEATURES: Record<CanvasContext, CanvasFeatures> = {
+export const _DEFAULT_FEATURES: Record<CanvasContext, CanvasFeatures> = {
   standalone: ALL_ON,
   entity: ENTITY_DEFAULTS,
 };
 
 /** Load saved features for a context */
-export function loadFeatures(context: CanvasContext): CanvasFeatures {
+export function loadFeatures(_context: CanvasContext): CanvasFeatures {
   try {
-    const raw = localStorage.getItem(`${STORAGE_KEY}:${context}`);
+    const raw = localStorage.getItem(`${STORAGE_KEY}:${_context}`);
     if (!raw) return DEFAULT_FEATURES[context];
     return { ...DEFAULT_FEATURES[context], ...JSON.parse(raw) };
   } catch {
@@ -98,16 +98,20 @@ export function loadFeatures(context: CanvasContext): CanvasFeatures {
 }
 
 /** Save features for a context */
-export function saveFeatures(context: CanvasContext, features: CanvasFeatures): void {
+export function saveFeatures(_context: CanvasContext, features: CanvasFeatures): void {
   try {
-    localStorage.setItem(`${STORAGE_KEY}:${context}`, JSON.stringify(features));
-  } catch {}
+    localStorage.setItem(`${STORAGE_KEY}:${_context}`, JSON.stringify(features));
+  } catch {
+    // Ignore errors
+  }
 }
 
 /** Reset features for a context to defaults */
-export function resetFeatures(context: CanvasContext): CanvasFeatures {
+export function resetFeatures(_context: CanvasContext): CanvasFeatures {
   try {
-    localStorage.removeItem(`${STORAGE_KEY}:${context}`);
-  } catch {}
+    localStorage.removeItem(`${STORAGE_KEY}:${_context}`);
+  } catch {
+    // Ignore errors
+  }
   return DEFAULT_FEATURES[context];
 }

@@ -4,8 +4,8 @@ import { useCallback, useState } from "react";
 import {
   Bold, Italic, Strikethrough, Code, Link, List, ListOrdered, Languages,
 } from "lucide-react";
-import type { Language } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import type { _Language } from "@/contexts/SettingsContext";
+import { _getTranslations } from "@/lib/i18n";
 import { detectGibberish, toHebrew, toEnglish } from "@/lib/gibberish";
 
 interface ChatToolbarProps {
@@ -30,7 +30,7 @@ const FORMATS: Record<string, FormatAction> = {
 };
 
 export function ChatToolbar({ textareaRef, value, onChange, lang }: ChatToolbarProps) {
-  const t = getTranslations(lang);
+  const _t = getTranslations(lang);
   const isRtl = lang === "he";
   const [flashConvert, setFlashConvert] = useState(false);
 
@@ -171,7 +171,7 @@ export function ChatToolbar({ textareaRef, value, onChange, lang }: ChatToolbarP
   return {
     toolbar: (
       <div
-        className={`flex items-center gap-0.5 rounded-t-lg border border-b-0 border-slate-600 bg-slate-800 px-1.5 h-8 ${
+        className={`flex items-center gap-0.5 rounded-_t-lg border border-b-0 border-slate-600 bg-slate-800 px-1.5 h-8 ${
           isRtl ? "flex-row-reverse" : ""
         }`}
         data-cc-id="aihub.chat-toolbar"

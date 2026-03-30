@@ -5,12 +5,12 @@ import {
   ChevronLeft,
   ChevronRight,
   CalendarDays,
-  Plus,
+  _Plus,
   Check,
   ArrowRight,
   Trash2,
   Lock,
-  X,
+  _X,
   Settings,
   Users,
   User,
@@ -29,7 +29,7 @@ import {
 } from "@dnd-kit/core";
 import { useWeeklyPlanner, WeeklyPlannerProvider } from "@/contexts/WeeklyPlannerContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import type { WeeklyItem, ItemPriority } from "@/lib/weeklyPlanner/types";
 import {
   PRIORITY_COLORS,
@@ -67,7 +67,7 @@ export function WeeklyPlannerPanel({ onClose }: { onClose?: () => void } = {}) {
 
 function WeeklyPlannerPanelInner({ onClose }: { onClose?: () => void }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const wt = t.widgets as Record<string, string>;
   const planner = useWeeklyPlanner();
   const {
@@ -229,7 +229,7 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose?: () => void }) {
                 className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
                 aria-label="Close"
               >
-                <X className="h-4 w-4" />
+                <_X className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -265,7 +265,7 @@ function WeeklyPlannerPanelInner({ onClose }: { onClose?: () => void }) {
 
         {/* ─── Footer ─────────────────────────────────────── */}
         {!showTemplates && (
-          <div className="flex items-center gap-4 border-t border-slate-700 bg-slate-800 px-5 py-2.5 text-xs text-slate-500">
+          <div className="flex items-center gap-4 border-_t border-slate-700 bg-slate-800 px-5 py-2.5 text-xs text-slate-500">
             <span>{stats.total} {wt.plannerTasks || "tasks"}</span>
             <span className="text-slate-700">·</span>
             <span className="text-red-400">{stats.urgent} {wt.plannerUrgent || "urgent"}</span>
@@ -449,7 +449,7 @@ function ItemCard({
 
       {/* Expanded */}
       {expanded && !readOnly && (
-        <div className="mt-2 space-y-2 border-t border-slate-700/40 pt-2">
+        <div className="mt-2 space-y-2 border-_t border-slate-700/40 pt-2">
           {item.description && (
             <p className="text-[11px] text-slate-400">{item.description}</p>
           )}
@@ -632,7 +632,7 @@ function QuickAddInput({ dateStr, language }: { dateStr: string; language: "he" 
   }
 
   return (
-    <div className="border-t border-slate-800 bg-slate-900/50 p-2 space-y-1.5">
+    <div className="border-_t border-slate-800 bg-slate-900/50 p-2 space-y-1.5">
       <input
         ref={inputRef}
         type="text"

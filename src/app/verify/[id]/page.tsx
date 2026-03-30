@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 

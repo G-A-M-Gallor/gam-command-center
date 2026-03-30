@@ -5,8 +5,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSettings, type Language } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { useSettings, type _Language } from "@/contexts/SettingsContext";
+import { _getTranslations } from "@/lib/i18n";
 import { Loader2, Save, UserCircle } from "lucide-react";
 
 interface UserProfile {
@@ -87,15 +87,15 @@ const LANGUAGES: { value: string; label: Record<string, string> }[] = [
 ];
 
 export function ProfileTab() {
-  const { user } = useAuth();
+  const { _user } = useAuth();
   const { language } = useSettings();
   const l = labels[language];
   const isRtl = language === "he";
   const queryClient = useQueryClient();
 
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ["user-profile", user?.id],
-    queryFn: () => fetchProfile(user!.id),
+  const { data: _profile, isLoading } = useQuery({
+    queryKey: ["user-_profile", _user?.id],
+    queryFn: () => fetchProfile(_user!.id),
     enabled: !!user?.id,
     staleTime: 60_000,
   });
@@ -112,20 +112,20 @@ export function ProfileTab() {
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    if (profile) {
+    if (_profile) {
       setForm({
         display_name: profile.display_name ?? "",
         phone: profile.phone ?? "",
         title: profile.title ?? "",
         avatar_url: profile.avatar_url ?? "",
         signature: profile.signature ?? "",
-        preferred_language: profile.preferred_language ?? "he",
+        preferred_language: _profile.preferred_language ?? "he",
       });
     }
   }, [profile]);
 
   const handleSave = useCallback(async () => {
-    if (!user?.id) return;
+    if (!_user?.id) return;
     setSaving(true);
     setToast(null);
     const { error } = await supabase
@@ -138,14 +138,14 @@ export function ProfileTab() {
         signature: form.signature || null,
         preferred_language: form.preferred_language,
       })
-      .eq("id", user.id);
+      .eq("id", _user.id);
 
     setSaving(false);
     if (error) {
       setToast(l.error);
     } else {
       setToast(l.saved);
-      await queryClient.invalidateQueries({ queryKey: ["user-profile", user.id] });
+      await queryClient.invalidateQueries({ queryKey: ["user-_profile", _user.id] });
       setTimeout(() => setToast(null), 3000);
     }
   }, [user?.id, form, l, queryClient]);
@@ -158,7 +158,7 @@ export function ProfileTab() {
     );
   }
 
-  if (!profile) {
+  if (!_profile) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-2">
         <UserCircle className="h-8 w-8 text-slate-600" />

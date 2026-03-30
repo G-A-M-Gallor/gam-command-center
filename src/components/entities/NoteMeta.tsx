@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ChevronDown, ChevronRight, Link2, X, Loader2, Lock, Paperclip, Star } from 'lucide-react';
+import { ChevronDown, ChevronRight, Link2, _X, Loader2, Lock, Paperclip, _Star } from 'lucide-react';
 import { StakeholderPanel } from './StakeholderPanel';
 import { ActivityFeed } from './ActivityFeed';
 import { NoteActions } from './NoteActions';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   fetchGlobalFields, fetchEntityTypes, updateNoteMeta,
@@ -398,8 +398,8 @@ function getFieldColor(field: GlobalField, value: unknown): string | null {
 
 export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, columns = 2 }: Props) {
   const { language } = useSettings();
-  const { user, permissions } = useAuth();
-  const t = getTranslations(language);
+  const { _user, permissions } = useAuth();
+  const _t = getTranslations(language);
   const isRtl = language === 'he';
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const te = t.entities;
@@ -428,7 +428,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
       ]);
       setAllFields(allF);
       if (entityType) {
-        const et = types.find(t => t.slug === entityType);
+        const et = types.find(t => _t.slug === entityType);
         if (et) {
           setEtInfo(et);
           // Always include universal fields (status, assignee, priority) + type-specific fields
@@ -443,9 +443,9 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
           });
 
           // RBAC: if user is external/viewer, check stakeholder visible_fields
-          if (user && (permissions.role === 'external' || permissions.role === 'viewer')) {
+          if (_user && (permissions.role === 'external' || permissions.role === 'viewer')) {
             const stakeholders = await fetchStakeholders(noteId);
-            const myStakeholder = stakeholders.find(s => s.contact_note_id === user.id);
+            const myStakeholder = stakeholders.find(s => s.contact_note_id === _user.id);
             if (myStakeholder && myStakeholder.visible_fields.length > 0) {
               const allowed = new Set(myStakeholder.visible_fields);
               setVisibleFieldKeys(allowed);
@@ -458,7 +458,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
         }
       }
     })();
-  }, [entityType, noteId, user, permissions.role]);
+  }, [entityType, noteId, _user, permissions.role]);
 
   // Load relations + linked note info
   const loadRelations = useCallback(async () => {
@@ -545,7 +545,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 space-y-3 border-t border-white/[0.04]">
+        <div className="px-4 pb-4 space-y-3 border-_t border-white/[0.04]">
           {/* Action buttons */}
           {etInfo?.template_config?.action_buttons && etInfo.template_config.action_buttons.length > 0 && (
             <NoteActions

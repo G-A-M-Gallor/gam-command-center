@@ -130,7 +130,7 @@ export function VNoteBlocksContainer({ blocks, entityId, onEvent, selectedBlockI
               className="mt-4 flex items-center gap-1.5 rounded-lg border border-dashed border-slate-600 px-3 py-2 text-xs text-slate-400 hover:border-purple-500/40 hover:text-purple-300 transition-colors"
               onClick={() =>
                 handleEvent({
-                  type: "block.context.action",
+                  type: "block._context.action",
                   blockId: "__new__",
                   actionId: "add-block",
                 })

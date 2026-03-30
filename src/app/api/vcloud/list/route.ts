@@ -5,9 +5,9 @@ import { createServiceClient } from "@/lib/supabase/server";
  * GET /api/vcloud/list?type=file|image|video|sound&personal=true&folder=/
  * Returns files filtered by type. Video type also includes vclips.
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
     const fileType = searchParams.get("type");
     const personal = searchParams.get("personal") === "true";
     const folder = searchParams.get("folder") || "/";

@@ -14,7 +14,7 @@ const planPage = {
   realtimeConnecting: "Connecting...",
   realtimeDisconnected: "Disconnected",
   phase1Name: "Core Infrastructure",
-  phase1Desc: "Sidebar, Layout, Layers, Settings, Automations",
+  phase1Desc: "Sidebar, Layout, _Layers, Settings, Automations",
   phase2Name: "Document Editor",
   phase2Desc: "Canvas Editor with field system and templates",
   phase3Name: "Story Map",

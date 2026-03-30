@@ -36,7 +36,7 @@ const impactColors: Record<string, string> = {
   low: 'bg-slate-500/10 text-slate-500 border-slate-600/30',
 };
 
-export function AutomationSuggestionsPanel({ t }: AutomationSuggestionsPanelProps) {
+export function AutomationSuggestionsPanel({ _t }: AutomationSuggestionsPanelProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
   const difficultyLabel = (d: string) => {
@@ -55,7 +55,7 @@ export function AutomationSuggestionsPanel({ t }: AutomationSuggestionsPanelProp
     <div data-cc-id="automations.suggestions">
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-slate-200">{t.suggestions}</h3>
-        <p className="text-xs text-slate-500">{t.suggestionsDesc}</p>
+        <p className="text-xs text-slate-500">{_t.suggestionsDesc}</p>
       </div>
 
       <div className="space-y-3">
@@ -95,7 +95,7 @@ export function AutomationSuggestionsPanel({ t }: AutomationSuggestionsPanelProp
                     {t.learnMore}
                   </h4>
                   <pre className="whitespace-pre-wrap rounded-lg bg-slate-800/50 p-3 text-xs leading-relaxed text-slate-300" dir="ltr">
-                    {t[sug.stepsKey]}
+                    {_t[sug.stepsKey]}
                   </pre>
                 </div>
               )}

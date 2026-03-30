@@ -36,7 +36,7 @@ function timeAgo(dateStr: string): string {
   return `${d}d`;
 }
 
-export function ActivityFeedPanel({ t }: ActivityFeedPanelProps) {
+export function ActivityFeedPanel({ _t }: ActivityFeedPanelProps) {
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,7 +90,7 @@ export function ActivityFeedPanel({ t }: ActivityFeedPanelProps) {
         </div>
         <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-medium text-emerald-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          {t.activityLive}
+          {_t.activityLive}
         </span>
       </div>
 
@@ -101,7 +101,7 @@ export function ActivityFeedPanel({ t }: ActivityFeedPanelProps) {
       ) : entries.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-700/50 bg-white/[0.02] py-12">
           <Activity className="h-8 w-8 text-slate-600" />
-          <p className="text-xs text-slate-500">{t.activityNoEntries}</p>
+          <p className="text-xs text-slate-500">{_t.activityNoEntries}</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-700/50">
@@ -111,7 +111,7 @@ export function ActivityFeedPanel({ t }: ActivityFeedPanelProps) {
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.activityTime}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.activityTable}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.activityAction}</th>
-                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.activityRecord}</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{_t.activityRecord}</th>
               </tr>
             </thead>
             <tbody>

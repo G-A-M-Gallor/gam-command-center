@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { SignJWT } from "jose";
 import { documentReminderSchema } from "@/lib/api/schemas";
 
@@ -14,8 +14,8 @@ import { documentReminderSchema } from "@/lib/api/schemas";
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     workspace_id: sub.workspace_id,
     submission_id,
     actor_type: "user",
-    actor_id: user.id,
+    actor_id: _user.id,
     action: "document.reminder_sent",
     details: {
       reminded_count: reminded,

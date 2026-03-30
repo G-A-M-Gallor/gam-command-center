@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Pin, Pencil, X, FolderOpen } from "lucide-react";
+import { Pin, Pencil, _X, FolderOpen } from "lucide-react";
 import type { FolderDefinition } from "./FolderRegistry";
 import type { WidgetSize } from "./WidgetRegistry";
 import { FolderItemCell } from "./FolderItemCell";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 
 const UNIT = 48;
@@ -82,7 +82,7 @@ export function FolderWrapper({
 }: FolderWrapperProps) {
   const { widgetSizes, hoverDelay, updateFolder } = useWidgets();
   const { language, sidebarPosition, sidebarVisibility } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
 
@@ -247,7 +247,7 @@ export function FolderWrapper({
   }, [clearTimer, clearLeaveTimer]);
 
   const label = folder.label[language];
-  const ft = (t as unknown as Record<string, Record<string, string>>).folders;
+  const ft = (_t as unknown as Record<string, Record<string, string>>).folders;
 
   return (
     <div

@@ -17,7 +17,7 @@ import { useWidgets } from "@/contexts/WidgetContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 import { GibberishDetector } from "./GibberishDetector";
-import { SpeedDial } from "./SpeedDial";
+import { _SpeedDial } from "./SpeedDial";
 import { BottomDock } from "./BottomDock";
 import { TabBar } from "./TabBar";
 import dynamic from "next/dynamic";
@@ -288,7 +288,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           ...(!isMobile && (showTabBar || showTray) ? {
             paddingTop: `calc(${
               topbarEffectivelyHidden ? "0px"
-                : displayMode === "compact" ? "3.5rem"
+                : displayMode === "_compact" ? "3.5rem"
                 : displayMode === "icons-only" ? "3rem"
                 : "4rem"
             } + ${tabBarOffset}px)`

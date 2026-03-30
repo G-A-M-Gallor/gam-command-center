@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations, loc } from "@/lib/i18n";
+import { _getTranslations, loc } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { DESIGNS, type DesignEntry } from "@/app/designs/registry";
 import {
@@ -15,10 +15,10 @@ import { libraryRegistry } from "./libraryRegistry";
 import { LibraryTab } from "./LibraryTab";
 import {
   Eye,
-  ExternalLink,
+  _ExternalLink,
   ArrowRight,
   ArrowLeft,
-  X,
+  _X,
   Tag,
   Calendar,
   FolderOpen,
@@ -27,7 +27,7 @@ import {
   ChevronDown,
   ChevronRight,
   FileCode2,
-  Layers,
+  _Layers,
   BookOpen,
   CheckCircle2,
   Circle,
@@ -169,11 +169,11 @@ function DesignPreview({
         </div>
         <div className="flex items-center gap-2">
           <a href={design.route} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="sm" icon={ExternalLink}>
+            <Button variant="ghost" size="sm" icon={_ExternalLink}>
               {td.openNewTab}
             </Button>
           </a>
-          <Button variant="ghost" size="sm" icon={X} onClick={onClose} />
+          <Button variant="ghost" size="sm" icon={_X} onClick={onClose} />
         </div>
       </div>
       <iframe
@@ -328,7 +328,7 @@ function ComponentCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-slate-700/30 px-4 py-3 text-[12px]">
+        <div className="border-_t border-slate-700/30 px-4 py-3 text-[12px]">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {/* File path */}
             <div>
@@ -505,7 +505,7 @@ function HandbookTab({
           </span>
         </button>
         {openSections.has("registries") && (
-          <div className="border-t border-slate-700/30 px-4 pb-3 pt-2">
+          <div className="border-_t border-slate-700/30 px-4 pb-3 pt-2">
             <div className="space-y-2">
               {REGISTRIES.map((r) => (
                 <div
@@ -548,7 +548,7 @@ function HandbookTab({
             </span>
           </button>
           {openSections.has(section.id) && (
-            <div className="border-t border-slate-700/30 px-4 pb-3 pt-2">
+            <div className="border-_t border-slate-700/30 px-4 pb-3 pt-2">
               <ul className="space-y-1.5">
                 {section.content.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-[12px] text-slate-400">
@@ -735,7 +735,7 @@ function AppPreviewTab({ language, td }: { language: "he" | "en" | "ru"; td: Rec
 
 export default function DesignSystemPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === "he";
   const td = t.designSystem;
 
@@ -830,7 +830,7 @@ export default function DesignSystemPage() {
             </div>
             {DESIGNS.length === 0 ? (
               <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-slate-700/60 bg-slate-800/20">
-                <p className="text-sm text-slate-500">{t.gallery.noDesigns}</p>
+                <p className="text-sm text-slate-500">{_t.gallery.noDesigns}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

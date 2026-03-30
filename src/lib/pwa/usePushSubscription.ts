@@ -82,7 +82,7 @@ export function usePushSubscription() {
       const json = sub.toJSON();
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           endpoint: json.endpoint,
           keys: {
@@ -114,7 +114,7 @@ export function usePushSubscription() {
         await sub.unsubscribe();
         await fetch("/api/push/subscribe", {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          _headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ endpoint }),
         });
       }

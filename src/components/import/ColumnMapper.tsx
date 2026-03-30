@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { ArrowRight, Sparkles, X, ChevronDown } from "lucide-react";
+import { ArrowRight, Sparkles, _X, ChevronDown } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import type { GlobalField } from "@/lib/entities/types";
 import type { ParsedColumn, ColumnMapping, DetectedFieldType } from "@/lib/import/types";
 
@@ -43,7 +43,7 @@ export function ColumnMapper({
   onMappingsChange,
 }: ColumnMapperProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const it = t.importEngine;
 
   // Group fields by category

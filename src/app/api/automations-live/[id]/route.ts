@@ -33,11 +33,11 @@ interface WorkflowData {
 }
 
 // GET /api/automations-live/[id] - Get single automation with workflow
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
   try {
-    const { user, error: authError } = await requireAuth(request)
-    if (authError || !user) {
+    const { _user, error: authError } = await requireAuth(_request)
+    if (authError || !_user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -92,11 +92,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PUT /api/automations-live/[id] - Update automation
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
   try {
-    const { user, error: authError } = await requireAuth(request)
-    if (authError || !user) {
+    const { _user, error: authError } = await requireAuth(_request)
+    if (authError || !_user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -137,7 +137,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', _user.id)
       .select()
       .single()
 
@@ -203,18 +203,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   } catch (error) {
     console.error('Error updating automation:', error)
     return NextResponse.json(
-      { error: 'Failed to update automation' },
+      { error: 'Failed to _update automation' },
       { status: 500 }
     )
   }
 }
 
 // DELETE /api/automations-live/[id] - Delete automation
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
   try {
-    const { user, error: authError } = await requireAuth(request)
-    if (authError || !user) {
+    const { _user, error: authError } = await requireAuth(_request)
+    if (authError || !_user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -224,7 +224,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .from('automations')
       .delete()
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', _user.id)
 
     if (error) throw error
 

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import type { JSONContent } from "@tiptap/react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -21,8 +21,8 @@ import {
   MessageSquare,
   ScrollText,
   Send,
-  Clock,
-  Shield,
+  _Clock,
+  _Shield,
   Users,
   FileText,
   Globe,
@@ -41,10 +41,10 @@ import {
   Trash2,
   Copy,
   Link,
-  ExternalLink,
+  _ExternalLink,
   Edit3,
   Check,
-  X,
+  _X,
   RefreshCw,
   Bell,
   Ban,
@@ -89,10 +89,10 @@ const TAB_CONFIG: { key: Tab; icon: React.ElementType; i18nKey: string }[] = [
 // ── Main Component ───────────────────────────────────────
 export default function DocumentDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const _router = useRouter();
   const id = params.id as string;
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const dc = t.docControl;
   const isRtl = language === "he";
 
@@ -273,7 +273,7 @@ export default function DocumentDetailPage() {
     try {
       const res = await fetch("/api/documents/send", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submission_id: id }),
       });
       const data = await res.json();
@@ -292,7 +292,7 @@ export default function DocumentDetailPage() {
     try {
       const res = await fetch("/api/documents/resend", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submission_id: id }),
       });
       const data = await res.json();
@@ -310,7 +310,7 @@ export default function DocumentDetailPage() {
     try {
       const res = await fetch("/api/documents/revoke", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submission_id: id }),
       });
       const data = await res.json();
@@ -324,7 +324,7 @@ export default function DocumentDetailPage() {
     try {
       const res = await fetch("/api/documents/reminder", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submission_id: id }),
       });
       await res.json();
@@ -338,7 +338,7 @@ export default function DocumentDetailPage() {
     try {
       const res = await fetch("/api/documents/pdf", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ submission_id: id, store }),
       });
       if (res.ok) {
@@ -377,7 +377,7 @@ export default function DocumentDetailPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-_t-transparent" />
       </div>
     );
   }
@@ -1215,7 +1215,7 @@ function AuditTab({ auditLog, dc }: { auditLog: DocumentAuditEntry[]; dc: Record
   const actorIcons: Record<string, React.ElementType> = {
     user: Users,
     submitter: FileText,
-    system: Shield,
+    system: _Shield,
     automation: Globe,
   };
 

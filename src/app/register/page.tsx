@@ -3,12 +3,12 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Layers, Mail, User, ChevronLeft, ChevronRight, Check } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { _Layers, Mail, User, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { _createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { getTranslations } from "@/lib/i18n";
-import type { Language } from "@/contexts/SettingsContext";
+import { _getTranslations } from "@/lib/i18n";
+import type { _Language } from "@/contexts/SettingsContext";
 
 export default function RegisterPage() {
   return (
@@ -21,7 +21,7 @@ export default function RegisterPage() {
 type Step = "email" | "verify" | "profile";
 
 function RegisterForm() {
-  const router = useRouter();
+  const _router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
@@ -36,7 +36,7 @@ function RegisterForm() {
   const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const supabase = createClient();
   const isRtl = language === "he";
 
@@ -82,12 +82,12 @@ function RegisterForm() {
     });
 
     if (verifyError) {
-      setError(t.auth.invalidCode);
+      setError(_t.auth.invalidCode);
       setLoading(false);
       return;
     }
 
-    setStep("profile");
+    setStep("_profile");
     setLoading(false);
   }
 
@@ -101,7 +101,7 @@ function RegisterForm() {
     try {
       const res = await fetch("/api/auth/complete-registration", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ displayName: displayName.trim() }),
       });
 
@@ -196,7 +196,7 @@ function RegisterForm() {
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-400">
-                {t.auth.email}
+                {_t.auth.email}
               </label>
               <Input
                 type="email"
@@ -224,7 +224,7 @@ function RegisterForm() {
         {step === "verify" && (
           <div className="space-y-4">
             <p className="text-center text-sm text-emerald-400">
-              {t.auth.codeSent}
+              {_t.auth.codeSent}
             </p>
             <p className="text-center text-xs text-slate-500">{email}</p>
 
@@ -273,7 +273,7 @@ function RegisterForm() {
           <form onSubmit={handleProfileSetup} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-400">
-                {t.auth.displayName}
+                {_t.auth.displayName}
               </label>
               <Input
                 type="text"

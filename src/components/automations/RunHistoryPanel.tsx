@@ -38,7 +38,7 @@ const STATUS_CONFIG = {
   error: { icon: XCircle, color: 'bg-red-500/15 text-red-400', animate: '' },
 } as const;
 
-export function RunHistoryPanel({ t }: RunHistoryPanelProps) {
+export function RunHistoryPanel({ _t }: RunHistoryPanelProps) {
   const [runs, setRuns] = useState<AutomationRun[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -100,7 +100,7 @@ export function RunHistoryPanel({ t }: RunHistoryPanelProps) {
         </div>
         <span className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-[10px] font-medium text-emerald-400">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
-          {t.runLive}
+          {_t.runLive}
         </span>
       </div>
 
@@ -111,7 +111,7 @@ export function RunHistoryPanel({ t }: RunHistoryPanelProps) {
       ) : runs.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-700/50 bg-white/[0.02] py-12">
           <History className="h-8 w-8 text-slate-600" />
-          <p className="text-xs text-slate-500">{t.runNoEntries}</p>
+          <p className="text-xs text-slate-500">{_t.runNoEntries}</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-700/50">
@@ -121,7 +121,7 @@ export function RunHistoryPanel({ t }: RunHistoryPanelProps) {
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.runStarted}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.runJobName}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.runStatus}</th>
-                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.runDuration}</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{_t.runDuration}</th>
               </tr>
             </thead>
             <tbody>

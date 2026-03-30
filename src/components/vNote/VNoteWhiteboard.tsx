@@ -91,7 +91,7 @@ export function VNoteWhiteboard({ entityId }: Props) {
   if (!Excalidraw || !loaded) {
     return (
       <div className="flex items-center justify-center h-[400px] text-xs text-slate-500">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-purple-500/30 border-t-purple-500 mr-2" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-purple-500/30 border-_t-purple-500 mr-2" />
         טוען Whiteboard...
       </div>
     );

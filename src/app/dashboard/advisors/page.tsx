@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Bot, Users, Sparkles, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { AdvisorChat } from "@/components/ai-hub/AdvisorChat";
@@ -11,9 +11,9 @@ import { PERSONAS, PERSONA_DOMAINS } from "@/lib/ai/personas";
 import type { Persona } from "@/lib/ai/personas";
 
 export default function AdvisorsPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null);
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);

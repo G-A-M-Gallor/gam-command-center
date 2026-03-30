@@ -4,7 +4,7 @@ import {
   CheckSquare,
   Search,
   Bot,
-  Layers,
+  _Layers,
   PenTool,
   Settings,
   Bookmark,
@@ -107,7 +107,7 @@ export const ACTION_CONFIG: Record<QuickActionId, ActionConfig> = {
     label: { he: "עוזר AI", en: "AI Assistant", ru: "AI Ассистент" },
   },
   "navigate-layers": {
-    icon: Layers,
+    icon: _Layers,
     color: "text-cyan-400",
     label: { he: "שכבות", en: "Layers", ru: "Слои" },
   },

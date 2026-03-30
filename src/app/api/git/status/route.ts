@@ -10,12 +10,12 @@ function run(cmd: string, args: string[]): string {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Blocked in production' }, { status: 403 });
   }
 
-  const { error: authError } = await requireAuth(request);
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }

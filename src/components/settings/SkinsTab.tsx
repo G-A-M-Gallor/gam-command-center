@@ -1,10 +1,10 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { SHELL_SKINS, CONTENT_SKINS, MOBILE_NAV_SKINS } from "@/lib/skins/registry";
 import type { ShellSkinMeta, ContentSkinMeta, MobileNavSkinMeta } from "@/lib/skins/types";
-import { Check, Monitor, Smartphone, Layout } from "lucide-react";
+import { Check, _Monitor, Smartphone, Layout } from "lucide-react";
 
 export function SkinsTab() {
   const {
@@ -15,7 +15,7 @@ export function SkinsTab() {
     setMobileNavSkin,
   } = useSettings();
 
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const lang = language;
 
   return (
@@ -32,11 +32,11 @@ export function SkinsTab() {
 
       {/* Shell Skins */}
       <SkinSection
-        icon={<Monitor className="h-5 w-5" />}
+        icon={<_Monitor className="h-5 w-5" />}
         title={t.settings.skinShellTitle}
         description={t.settings.skinShellDesc}
         currentLabel={t.settings.skinCurrent}
-        featuresLabel={t.settings.skinFeatures}
+        featuresLabel={_t.settings.skinFeatures}
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {SHELL_SKINS.map((skin) => (
@@ -46,7 +46,7 @@ export function SkinsTab() {
               lang={lang}
               active={skinConfig.shell === skin.id}
               currentLabel={t.settings.skinCurrent}
-              featuresLabel={t.settings.skinFeatures}
+              featuresLabel={_t.settings.skinFeatures}
               onSelect={() => setShellSkin(skin.id)}
             />
           ))}
@@ -69,7 +69,7 @@ export function SkinsTab() {
               lang={lang}
               active={skinConfig.content === skin.id}
               currentLabel={t.settings.skinCurrent}
-              featuresLabel={t.settings.skinFeatures}
+              featuresLabel={_t.settings.skinFeatures}
               onSelect={() => setContentSkin(skin.id)}
             />
           ))}
@@ -92,7 +92,7 @@ export function SkinsTab() {
               lang={lang}
               active={skinConfig.mobileNav === skin.id}
               currentLabel={t.settings.skinCurrent}
-              safetyLabel={t.settings.skinSafetyNote}
+              safetyLabel={_t.settings.skinSafetyNote}
               onSelect={() => setMobileNavSkin(skin.id)}
             />
           ))}

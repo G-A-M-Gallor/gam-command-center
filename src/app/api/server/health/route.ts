@@ -63,11 +63,11 @@ interface ServerHealthResponse {
   }[];
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Authentication
-    const authResult = await requireAuth(request);
-    if (authResult.error || !authResult.user) {
+    const authResult = await requireAuth(_request);
+    if (authResult.error || !authResult._user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = checkRateLimit(
-      request,
+      _request,
       RATE_LIMITS.general
     );
 
@@ -362,7 +362,7 @@ async function getServicesHealth() {
         // Simple check - this is a basic implementation
         // In production, you'd want proper health checks
         if (service.name === 'Next.js App') {
-          service.status = 'running'; // We know this is running since we're serving the request
+          service.status = 'running'; // We know this is running since we're serving the _request
         }
       } catch {
         service.status = 'stopped';

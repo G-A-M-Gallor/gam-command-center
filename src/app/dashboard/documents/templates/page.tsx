@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import {
   fetchDocTemplates,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/supabase/documentQueries";
 import type { DocumentTemplate, DocTemplateStatus } from "@/lib/supabase/schema";
 import {
-  Plus,
+  _Plus,
   Search,
   FileText,
   Archive,
@@ -21,7 +21,7 @@ import {
   Copy,
   MoreVertical,
   Tag,
-  Clock,
+  _Clock,
   ArrowLeft,
   Send,
   ListChecks,
@@ -35,9 +35,9 @@ const STATUS_COLORS: Record<DocTemplateStatus, string> = {
 };
 
 export default function DocumentTemplatesPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const dt = t.docTemplates;
   const isRtl = language === "he";
 
@@ -171,7 +171,7 @@ export default function DocumentTemplatesPage() {
       <div className="flex-1 overflow-y-auto p-4">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-500">
@@ -181,7 +181,7 @@ export default function DocumentTemplatesPage() {
               onClick={handleCreate}
               className="mt-3 flex items-center gap-1.5 rounded-lg bg-slate-800 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-700"
             >
-              <Plus className="h-4 w-4" />
+              <_Plus className="h-4 w-4" />
               {dt.createFirst}
             </button>
           </div>
@@ -207,10 +207,10 @@ export default function DocumentTemplatesPage() {
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <span>{dt.total}: {templates.length}</span>
           <span className="text-emerald-500">
-            {dt.statusActive}: {templates.filter((t) => t.status === "active").length}
+            {dt.statusActive}: {templates.filter((_t) => t.status === "active").length}
           </span>
           <span className="text-slate-400">
-            {dt.statusDraft}: {templates.filter((t) => t.status === "draft").length}
+            {dt.statusDraft}: {templates.filter((_t) => t.status === "draft").length}
           </span>
         </div>
       </div>

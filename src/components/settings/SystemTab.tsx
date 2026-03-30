@@ -103,12 +103,12 @@ export function SystemTab() {
   }
 
   // Group by app_name
-  const grouped = flags.reduce<Record<string, FeatureFlag[]>>((acc, flag) => {
+  const _grouped = flags.reduce<Record<string, FeatureFlag[]>>((acc, flag) => {
     (acc[flag.app_name] ??= []).push(flag);
     return acc;
   }, {});
 
-  const appNames = Object.keys(grouped).sort();
+  const appNames = Object.keys(_grouped).sort();
 
   return (
     <div dir={isRtl ? "rtl" : "ltr"} className="max-w-3xl space-y-4">
@@ -131,7 +131,7 @@ export function SystemTab() {
             <h3 className="text-sm font-semibold text-slate-200">{appName}</h3>
           </div>
           <div className="divide-y divide-slate-700/20">
-            {grouped[appName].map((flag) => (
+            {_grouped[appName].map((flag) => (
               <div
                 key={flag.id}
                 className="flex items-center justify-between px-4 py-2.5 hover:bg-slate-700/10 transition-colors"

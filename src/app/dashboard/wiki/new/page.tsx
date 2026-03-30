@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Plus, X, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, _Plus, _X, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
@@ -16,9 +16,9 @@ interface QAPair {
 const WIKI_CATEGORIES = ["sales", "ops", "tech", "people", "products"] as const;
 
 export default function WikiNewPage() {
-  const router = useRouter();
+  const _router = useRouter();
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === "he";
   const wikiT = t.wiki as any;
   const tw = wikiT as Record<string, string>;

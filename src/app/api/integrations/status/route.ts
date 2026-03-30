@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 
 export interface IntegrationStatus {
   // Auth providers connected via Supabase identities
@@ -20,14 +20,14 @@ export interface IntegrationStatus {
 // GET /api/integrations/status — return status of all integrations
 export async function GET() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { _user } } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!_user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   // Extract identity providers from user object
-  const providers = (user.identities ?? []).map((id) => ({
+  const providers = (_user.identities ?? []).map((id) => ({
     provider: id.provider,
     uid: id.id,
     email: id.identity_data?.email as string | undefined,
@@ -41,7 +41,7 @@ export async function GET() {
     const { count } = await supabase
       .from("google_accounts")
       .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id);
+      .eq("user_id", _user.id);
     googleAccountsCount = count ?? 0;
   } catch {
     // table may not exist yet

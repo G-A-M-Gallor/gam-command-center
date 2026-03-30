@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
-import { createClient } from "@supabase/supabase-js";
+import { _createClient } from "@supabase/supabase-js";
 import { getMessages, getContacts } from "@/lib/wati/client";
 import { syncWatiMessages } from "@/lib/wati/sync";
 import { sendSummaryPush } from "@/lib/push/sendCommPush";
@@ -41,8 +41,8 @@ async function syncPhone(
  * - With phone → sync messages for that specific number
  * - Without phone → bulk sync: fetch all WATI contacts, sync each one
  */
-export async function POST(request: NextRequest) {
-  const { error: authError } = await requireAuth(request);
+export async function POST(_request: NextRequest) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) return NextResponse.json({ error: authError }, { status: 401 });
 
   try {

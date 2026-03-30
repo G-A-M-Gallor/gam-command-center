@@ -32,14 +32,18 @@ function loadSlots(): MiddleSlots {
         return parsed as MiddleSlots;
       }
     }
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
   return [...DEFAULT_SLOTS];
 }
 
 function saveSlots(slots: MiddleSlots) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 // ─── Hook ───────────────────────────────────────────────
@@ -74,5 +78,5 @@ export function useMobileBottomBar() {
     setEditMode((prev) => !prev);
   }, []);
 
-  return { slots, editMode, setEditMode, setSlot, toggleEditMode };
+  return { slots, editMode, _setEditMode, setSlot, toggleEditMode };
 }

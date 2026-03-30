@@ -178,7 +178,7 @@ export function AutomationsListLive() {
           {loading && (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3 text-[#A1A1AA]">
-                <div className="w-6 h-6 border-2 border-[#FF6B1A] border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-[#FF6B1A] border-_t-transparent rounded-full animate-spin" />
                 טוען אוטומציות...
               </div>
             </div>

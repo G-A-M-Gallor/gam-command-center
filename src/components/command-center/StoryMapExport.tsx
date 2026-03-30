@@ -17,7 +17,7 @@ interface StoryMapExportProps {
   };
 }
 
-export function StoryMapExport({ cards, boardRef, t }: StoryMapExportProps) {
+export function StoryMapExport({ cards, boardRef, _t }: StoryMapExportProps) {
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -127,11 +127,11 @@ export function StoryMapExport({ cards, boardRef, t }: StoryMapExportProps) {
         className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:border-slate-600 hover:text-slate-100 transition-colors disabled:opacity-50"
       >
         {exporting ? (
-          <span className="animate-pulse">{t.exporting}</span>
+          <span className="animate-pulse">{_t.exporting}</span>
         ) : (
           <>
             <Download size={13} />
-            {t.export}
+            {_t.export}
             <ChevronDown size={12} />
           </>
         )}
@@ -158,7 +158,7 @@ export function StoryMapExport({ cards, boardRef, t }: StoryMapExportProps) {
             className="flex w-full items-center gap-2 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700/50"
           >
             <ImageIcon size={14} className="text-purple-400" />
-            {t.exportPNG}
+            {_t.exportPNG}
           </button>
         </div>
       )}

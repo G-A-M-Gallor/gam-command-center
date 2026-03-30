@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  X,
+  _X,
   Search,
   Lock,
   Unlock,
@@ -20,7 +20,7 @@ import {
 } from "./widgets/WidgetRegistry";
 import { useWidgets, type TopBarDisplayMode, type HoverDelay } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { IconPicker, IconDisplay } from "@/components/ui/IconPicker";
 
 // ─── Category labels ───────────────────────────────
@@ -80,7 +80,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
     setHoverDelay,
   } = useWidgets();
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const sb = t.smartBar;
 
   const [query, setQuery] = useState("");
@@ -168,7 +168,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
               onClick={onClose}
               className="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
             >
-              <X size={16} />
+              <_X size={16} />
             </button>
           </div>
 
@@ -191,7 +191,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
           <div className="flex gap-1 overflow-x-auto px-4 pb-2">
             {categories.map((cat) => {
               const label = cat === "all"
-                ? (t.widgets as Record<string, string>).categoryAll
+                ? (_t.widgets as Record<string, string>).categoryAll
                 : CATEGORY_LABELS[cat][language];
               return (
                 <button
@@ -273,10 +273,10 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
               <div>
                 <label className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-400">
                   <LayoutList size={13} />
-                  {(t.widgets as Record<string, string>).displayMode}
+                  {(_t.widgets as Record<string, string>).displayMode}
                 </label>
                 <div className="flex gap-2">
-                  {(["normal", "compact", "icons-only"] as TopBarDisplayMode[]).map((mode) => {
+                  {(["normal", "_compact", "icons-only"] as TopBarDisplayMode[]).map((mode) => {
                     const wtl = t.widgets as Record<string, string>;
                     const mLabel = mode === "normal"
                       ? wtl.displayNormal
@@ -305,7 +305,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
               <div>
                 <label className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-400">
                   <Timer size={13} />
-                  {(t.widgets as Record<string, string>).hoverDelay}
+                  {(_t.widgets as Record<string, string>).hoverDelay}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {(["none", 0.1, 0.3, 0.5, 1, 2] as HoverDelay[]).map((d) => (
@@ -360,7 +360,7 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
             />
           ) : (
             <div className="flex flex-1 items-center justify-center text-sm text-slate-500">
-              {(t.widgets as Record<string, string>).selectWidgetToConfigure}
+              {(_t.widgets as Record<string, string>).selectWidgetToConfigure}
             </div>
           )}
         </div>

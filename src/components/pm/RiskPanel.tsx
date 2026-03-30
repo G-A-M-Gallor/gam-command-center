@@ -4,7 +4,7 @@
 // Displays risks with level-based colors
 // ===================================================
 
-import { AlertTriangle, Info, Clock } from "lucide-react";
+import { AlertTriangle, Info, _Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Risk, RiskLevel } from "@/lib/pm-types";
 
@@ -85,7 +85,7 @@ function getRiskConfig(level: RiskLevel) {
       };
     case "medium":
       return {
-        icon: Clock,
+        icon: _Clock,
         bg: "bg-amber-500/10",
         border: "border-amber-500/30",
         iconColor: "text-amber-400",

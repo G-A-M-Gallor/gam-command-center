@@ -238,7 +238,7 @@ export function NodeProperties({ node, onUpdate, onClose }: NodePropertiesProps)
 
             {/* Test Button */}
             {template && (
-              <div className="pt-4 border-t border-[#404040]">
+              <div className="pt-4 border-_t border-[#404040]">
                 <button className="w-full bg-[#404040] text-[#E5E5E5] py-2 px-4 rounded-lg hover:bg-[#505050] transition-colors text-sm">
                   🧪 בדוק הגדרות
                 </button>

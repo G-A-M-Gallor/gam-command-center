@@ -1,4 +1,4 @@
-import { createClient } from './client';
+import { _createClient } from './client';
 import type { Project } from './schema';
 
 export type { Project };

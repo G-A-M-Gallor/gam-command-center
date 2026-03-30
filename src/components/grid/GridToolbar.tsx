@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  Plus, Minus, Bold, Italic, Download, Undo2, Redo2,
+  _Plus, Minus, Bold, Italic, Download, Undo2, Redo2,
   Columns, Rows, Snowflake,
 } from "lucide-react";
 import { useGridStore } from "@/lib/grid/gridStore";
@@ -29,7 +29,7 @@ function ToolbarBtn({ onClick, title, active, children }: { onClick: () => void;
   );
 }
 
-export function GridToolbar({ t }: GridToolbarProps) {
+export function GridToolbar({ _t }: GridToolbarProps) {
   const sheet = useGridStore((s) => s.sheets.find((sh) => sh.id === s.activeSheetId) || s.sheets[0]);
   const activeCell = useGridStore((s) => s.activeCell);
   const editingCell = useGridStore((s) => s.editingCell);

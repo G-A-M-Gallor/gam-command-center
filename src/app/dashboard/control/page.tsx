@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Compass,
   Network,
-  Shield,
+  _Shield,
   ClipboardList,
   ArrowRight,
   GitCommit,
@@ -55,24 +55,36 @@ function loadOrder(): BlockId[] {
       }
       return parsed.filter((id) => DEFAULT_ORDER.includes(id));
     }
-  } catch {}
+  } catch {
+    // Ignore localStorage parsing errors
+  }
   return [...DEFAULT_ORDER];
 }
 
 function saveOrder(order: BlockId[]) {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(order)); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+  } catch {
+    // Ignore localStorage errors
+  }
 }
 
 function loadHidden(): Set<BlockId> {
   try {
     const raw = localStorage.getItem(HIDDEN_KEY);
     if (raw) return new Set(JSON.parse(raw) as BlockId[]);
-  } catch {}
+  } catch {
+    // Ignore localStorage parsing errors
+  }
   return new Set();
 }
 
 function saveHidden(hidden: Set<BlockId>) {
-  try { localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden])); } catch {}
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden]));
+  } catch {
+    // Ignore localStorage errors
+  }
 }
 
 // ─── Section Card ────────────────────────────────────────
@@ -366,7 +378,7 @@ export default function ControlCenterPage() {
                 { label: l.widgetsLabel, value: systemStats.totalWidgets, color: "#f472b6", icon: Layout },
                 { label: l.contextsLabel, value: systemStats.totalContexts, color: "#fb923c", icon: Braces },
                 { label: l.tables, value: systemStats.totalTables, color: "#c084fc", icon: Database },
-                { label: l.audit, value: `${systemStats.auditScore}%`, color: systemStats.auditScore >= 80 ? "#34d399" : "#fbbf24", icon: Shield },
+                { label: l.audit, value: `${systemStats.auditScore}%`, color: systemStats.auditScore >= 80 ? "#34d399" : "#fbbf24", icon: _Shield },
                 { label: l.checklist, value: `${systemStats.checklistPct}%`, color: systemStats.checklistPct >= 80 ? "#34d399" : "#fbbf24", icon: ClipboardList },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 text-center">
@@ -441,7 +453,7 @@ export default function ControlCenterPage() {
       case "devlog":
         return (
           <DraggableBlock key={id} {...blockProps(id)}>
-            <SectionLink href="/dashboard/admin" icon={Shield} title={l.devLogSection} description={l.devLogDesc} color="bg-emerald-500/10 text-emerald-400" isRtl={isRtl}>
+            <SectionLink href="/dashboard/admin" icon={_Shield} title={l.devLogSection} description={l.devLogDesc} color="bg-emerald-500/10 text-emerald-400" isRtl={isRtl}>
               <div className="flex items-center gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">

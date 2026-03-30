@@ -128,7 +128,9 @@ export function loadCustomization(language?: string): SidebarCustomization {
         return { ...defaultCustomization(), ...parsed };
       }
     }
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
   return defaultCustomization();
 }
 
@@ -136,7 +138,9 @@ export function saveCustomization(data: SidebarCustomization, language?: string)
   try {
     localStorage.setItem(storageKey(language), JSON.stringify(data));
     window.dispatchEvent(new Event(EVENT_NAME));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 export { EVENT_NAME as CUSTOMIZATION_EVENT };
@@ -224,7 +228,7 @@ export function buildDisplayGroups(
       // "me" and "team": hide hidden items (unless edit mode)
       if (hiddenSet.has(entry.key) && !editMode) return false;
 
-      // "team": show only active items in default order (ignore user customization)
+      // "team": show only active items in default order (ignore _user customization)
       if (filter === "team" && entry.status !== "active") return false;
 
       // "me": show active items in user's custom order (default behavior)

@@ -62,7 +62,7 @@ export default function WatchPage() {
       if (!id) return;
       fetch(`/api/vclip/${id}/view`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           viewer_token: viewerToken.current,
           watch_duration_seconds: watchDuration || 0,

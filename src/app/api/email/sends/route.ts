@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const url = new URL(request.url);
+  const url = new URL(_request.url);
   const tenant_id = url.searchParams.get("tenant_id");
   const entity_id = url.searchParams.get("entity_id");
   const status = url.searchParams.get("status");

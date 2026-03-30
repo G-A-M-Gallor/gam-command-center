@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, GripVertical, X } from "lucide-react";
+import { _ExternalLink, GripVertical, _X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getWidgetById } from "./WidgetRegistry";
@@ -55,7 +55,7 @@ export function FolderItemCell({
   onDragEnd,
 }: FolderItemCellProps) {
   const { language } = useSettings();
-  const router = useRouter();
+  const _router = useRouter();
 
   const dragProps = {
     draggable: true,

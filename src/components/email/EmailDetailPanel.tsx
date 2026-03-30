@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import {
-  X, Clock, Eye, MousePointerClick, AlertTriangle,
-  CheckCircle2, Send, ExternalLink, ChevronDown, ChevronUp,
+  _X, _Clock, Eye, MousePointerClick, AlertTriangle,
+  CheckCircle2, Send, _ExternalLink, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 
 interface EmailSend {
   id: string;
@@ -41,7 +41,7 @@ interface EmailDetailPanelProps {
 }
 
 const STATUS_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string; label: Record<string, string> }> = {
-  queued: { icon: Clock, color: 'text-slate-400', bg: 'bg-slate-500/10', label: { he: 'בתור', en: 'Queued', ru: 'В очереди' } },
+  queued: { icon: _Clock, color: 'text-slate-400', bg: 'bg-slate-500/10', label: { he: 'בתור', en: 'Queued', ru: 'В очереди' } },
   sent: { icon: Send, color: 'text-blue-400', bg: 'bg-blue-500/10', label: { he: 'נשלח', en: 'Sent', ru: 'Отправлено' } },
   delivered: { icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: { he: 'נמסר', en: 'Delivered', ru: 'Доставлено' } },
   opened: { icon: Eye, color: 'text-amber-400', bg: 'bg-amber-500/10', label: { he: 'נפתח', en: 'Opened', ru: 'Открыто' } },
@@ -64,7 +64,7 @@ function formatDate(dateStr: string | null | undefined, lang: string): string {
 
 export function EmailDetailPanel({ emailSend, onClose }: EmailDetailPanelProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const e = t.email as Record<string, string>;
   const isRtl = language === 'he';
 
@@ -169,7 +169,7 @@ export function EmailDetailPanel({ emailSend, onClose }: EmailDetailPanelProps) 
               <div className="space-y-1.5">
                 {emailSend.clicked_links.map((link, i) => (
                   <div key={i} className="flex items-center gap-2 rounded-lg bg-slate-800/50 px-3 py-2">
-                    <ExternalLink className="h-3 w-3 shrink-0 text-purple-400" />
+                    <_ExternalLink className="h-3 w-3 shrink-0 text-purple-400" />
                     <span className="min-w-0 flex-1 truncate text-xs text-slate-300">{link.url}</span>
                     <span className="shrink-0 rounded-full bg-purple-500/20 px-1.5 text-[10px] font-medium text-purple-400">
                       {link.count}x

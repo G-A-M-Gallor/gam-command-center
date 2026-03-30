@@ -2,12 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import {
-  CheckCircle2, AlertCircle, Clock, Circle,
+  CheckCircle2, AlertCircle, _Clock, Circle,
   ChevronDown, ChevronRight, ChevronLeft,
   Component, Database, Eye, EyeOff, LayoutDashboard, Globe,
 } from 'lucide-react';
-import { getTranslations, loc } from '@/lib/i18n';
-import type { Language } from '@/contexts/SettingsContext';
+import { _getTranslations, loc } from '@/lib/i18n';
+import type { _Language } from '@/contexts/SettingsContext';
 import type { Status, Phase, RouteEntry } from './types';
 import { routes, standalonePages, widgets, contexts } from './data';
 
@@ -19,7 +19,7 @@ function StatusBadge({ status, ta }: { status: Status; ta: AdminTranslations }) 
   const cfg: Record<Status, { label: string; color: string; icon: React.ElementType }> = {
     active: { label: ta.statusActive, color: '#34d399', icon: CheckCircle2 },
     placeholder: { label: ta.statusPlaceholder, color: '#fbbf24', icon: AlertCircle },
-    'coming-soon': { label: ta.statusComingSoon, color: '#818cf8', icon: Clock },
+    'coming-soon': { label: ta.statusComingSoon, color: '#818cf8', icon: _Clock },
     deprecated: { label: ta.statusDeprecated, color: '#ef4444', icon: Circle },
   };
   const c = cfg[status];
@@ -59,7 +59,7 @@ function CollapsibleRow({ title, defaultOpen = false, count, children, isRtl }: 
   );
 }
 
-function RouteCard({ route, language, ta }: { route: RouteEntry; language: Language; ta: AdminTranslations }) {
+function RouteCard({ route, language, ta }: { route: RouteEntry; language: _Language; ta: AdminTranslations }) {
   const isRtl = language === 'he';
   const Icon = route.icon;
   const description = language === 'he' ? route.descriptionHe : route.descriptionEn;
@@ -147,7 +147,7 @@ function RouteCard({ route, language, ta }: { route: RouteEntry; language: Langu
 
 // ─── Routes Tab ──────────────────────────────────────────
 
-export function RoutesSection({ language, ta }: { language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
+export function RoutesSection({ language, ta }: { language: _Language; ta: ReturnType<typeof _getTranslations>['admin'] }) {
   const [filterPhase, setFilterPhase] = useState<Phase | 'all'>('all');
   const [filterStatus, setFilterStatus] = useState<Status | 'all'>('all');
 
@@ -217,7 +217,7 @@ export function RoutesSection({ language, ta }: { language: Language; ta: Return
 
 // ─── Widgets Tab ─────────────────────────────────────────
 
-export function WidgetsSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
+export function WidgetsSection({ language, ta }: { language: _Language; ta: AdminTranslations }) {
   const isRtl = language === 'he';
   return (
     <div className="space-y-2">
@@ -245,7 +245,7 @@ export function WidgetsSection({ language, ta }: { language: Language; ta: Admin
 
 // ─── Contexts Tab ────────────────────────────────────────
 
-export function ContextsSection({ ta }: { language?: Language; ta: AdminTranslations }) {
+export function ContextsSection({ ta }: { language?: _Language; ta: AdminTranslations }) {
   return (
     <div className="space-y-3">
       {contexts.map(ctx => (

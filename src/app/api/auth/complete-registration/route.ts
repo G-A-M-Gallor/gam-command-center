@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { _createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
@@ -8,18 +8,18 @@ const completeRegistrationSchema = z.object({
   displayName: z.string().min(1, 'Display name is required').max(100).trim(),
 });
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   // Rate limit — auth routes get brute-force protection
-  const rl = checkRateLimit(request, RATE_LIMITS.auth);
+  const rl = checkRateLimit(_request, RATE_LIMITS.auth);
   if (rl.limited) return rl.response;
 
   // Verify the user is authenticated via cookie session
   const supabase = await createServerClient();
   const {
-    data: { user },
+    data: { _user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!_user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   const parsed = completeRegistrationSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || 'Invalid request' },
+      { error: parsed.error.issues[0]?.message || 'Invalid _request' },
       { status: 400 },
     );
   }
@@ -48,14 +48,14 @@ export async function POST(request: Request) {
 
   // Set app_metadata.role = 'external' for self-registered users
   // This is the most restrictive role — admin can promote later
-  const { error: updateError } = await adminClient.auth.admin.updateUserById(user.id, {
+  const { error: updateError } = await adminClient.auth.admin.updateUserById(_user.id, {
     app_metadata: { role: 'external' },
     user_metadata: { display_name: displayName },
   });
 
   if (updateError) {
     return NextResponse.json(
-      { error: 'Failed to update user metadata' },
+      { error: 'Failed to _update _user metadata' },
       { status: 500 },
     );
   }
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     .upsert(
       {
         id: user.id,
-        email: user.email,
+        email: _user.email,
         display_name: displayName,
         role: 'client',
       },
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
   if (profileError) {
     return NextResponse.json(
-      { error: 'Failed to update profile' },
+      { error: 'Failed to _update _profile' },
       { status: 500 },
     );
   }

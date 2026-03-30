@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  X,
+  _X,
   Maximize2,
   Minimize2,
   Trash2,
@@ -21,7 +21,7 @@ import {
   upsertNote,
   deleteNote,
   updateNoteSize,
-  type StickyNote as StickyNoteType,
+  type StickyNote as _StickyNoteType,
 } from "@/lib/stickyNotes";
 
 // ─── Open event ──────────────────────────────────────────────

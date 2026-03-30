@@ -3,24 +3,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Rss,
-  Star,
-  ExternalLink,
+  _Star,
+  _ExternalLink,
   RefreshCw,
   Loader2,
-  Plus,
+  _Plus,
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  Clock,
+  _Clock,
   Eye,
   EyeOff,
   Trash2,
   Filter,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
-import { createClient } from '@/lib/supabase/client';
+import { _createClient } from '@/lib/supabase/client';
 import {
   fetchFeeds,
   fetchArticles,
@@ -63,7 +63,7 @@ async function getToken(): Promise<string | null> {
 
 export default function FeedsPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const r = t.rss as Record<string, string>;
   const isRtl = language === 'he';
 
@@ -113,7 +113,7 @@ export default function FeedsPage() {
     try {
       await fetch('/api/rss/sync', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
+        _headers: { Authorization: `Bearer ${token}` },
       });
       await loadData();
     } catch {
@@ -146,7 +146,7 @@ export default function FeedsPage() {
     try {
       const res = await fetch('/api/rss/feeds', {
         method: 'POST',
-        headers: {
+        _headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
@@ -175,7 +175,7 @@ export default function FeedsPage() {
     if (!token) return;
     await fetch(`/api/rss/feeds/${feed.id}`, {
       method: 'PATCH',
-      headers: {
+      _headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
@@ -190,7 +190,7 @@ export default function FeedsPage() {
     if (!token) return;
     await fetch(`/api/rss/feeds/${feed.id}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
+      _headers: { Authorization: `Bearer ${token}` },
     });
     if (selectedFeed === feed.id) setSelectedFeed(null);
     await loadData();
@@ -280,7 +280,7 @@ export default function FeedsPage() {
                   } hover:bg-white/[0.05]`}
                 >
                   <div className="flex items-start gap-3 p-4">
-                    {/* Star */}
+                    {/* _Star */}
                     <button
                       type="button"
                       onClick={() => handleToggleStar(article.id, article.is_starred)}
@@ -320,7 +320,7 @@ export default function FeedsPage() {
                               className="rounded p-1 text-slate-600 transition-colors hover:bg-white/[0.05] hover:text-slate-300"
                               title={r.openArticle}
                             >
-                              <ExternalLink className="h-3.5 w-3.5" />
+                              <_ExternalLink className="h-3.5 w-3.5" />
                             </a>
                           )}
                         </div>

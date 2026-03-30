@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   EyeOff,
-  ExternalLink,
-  Star,
+  _ExternalLink,
+  _Star,
   FolderInput,
   FolderPlus,
   Trash2,
@@ -143,10 +143,10 @@ export function SidebarContextMenu({
       {menuItem(EyeOff, isHidden ? labels.show : labels.hide, onToggleHide)}
 
       {/* Open in new tab */}
-      {menuItem(ExternalLink, labels.openNewTab, () => window.open(href, "_blank"))}
+      {menuItem(_ExternalLink, labels.openNewTab, () => window.open(href, "_blank"))}
 
       {/* Add/Remove favorite */}
-      {menuItem(Star, isFavorite ? labels.removeFav : labels.addFav, onToggleFav)}
+      {menuItem(_Star, isFavorite ? labels.removeFav : labels.addFav, onToggleFav)}
 
       {/* Sticky note */}
       {menuItem(StickyNote, getNote(`sidebar:${itemKey}`) ? labels.editNote : labels.addNote, () => {
@@ -219,7 +219,7 @@ export function SidebarContextMenu({
       {/* Remove from folder */}
       {isInAnyFolder && (
         <>
-          <div className="my-1 border-t border-slate-700/50" />
+          <div className="my-1 border-_t border-slate-700/50" />
           {menuItem(Trash2, labels.removeFromFolder, onRemoveFromFolder, "danger")}
         </>
       )}

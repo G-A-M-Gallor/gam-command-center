@@ -4,13 +4,13 @@ import { useEffect, useRef, useCallback } from "react";
 import { useSlidesStore } from "@/lib/slides/slidesStore";
 import { SLIDE_WIDTH, SLIDE_HEIGHT } from "@/lib/slides/types";
 import { SlideElementComponent } from "./SlideElement";
-import { X } from "lucide-react";
+import { _X } from "lucide-react";
 
 interface SlidePresenterProps {
   t: Record<string, string>;
 }
 
-export function SlidePresenter({ t }: SlidePresenterProps) {
+export function SlidePresenter({ _t }: SlidePresenterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isPresenting = useSlidesStore((s) => s.isPresenting);

@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Edit3, Trash2, Search, ArrowRight, Link2 } from 'lucide-react';
+import { _Plus, Edit3, Trash2, Search, ArrowRight, Link2 } from 'lucide-react';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import {
   fetchEntityTypes, createEntityType, updateEntityType, deleteEntityType,
   fetchGlobalFields, fetchEntityConnections, createEntityConnection, fetchFieldGroups,
@@ -35,7 +35,7 @@ function newTypeDefaults(): EntityTypeInsert {
 
 export default function EntityTypesPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === 'he';
   const te = t.entities;
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
@@ -76,7 +76,7 @@ export default function EntityTypesPage() {
       setGroups(g2);
     } else {
       // Auto-seed missing built-in types, connections, and groups
-      const existingSlugs = new Set(typesData.map(t => t.slug));
+      const existingSlugs = new Set(typesData.map(t => _t.slug));
       const missingTypes = BUILTIN_ENTITY_TYPES.filter(et => !existingSlugs.has(et.slug));
       if (missingTypes.length > 0) {
         for (const et of missingTypes) await createEntityType(et);
@@ -113,7 +113,7 @@ export default function EntityTypesPage() {
   const filtered = useMemo(() => {
     if (!search) return types;
     const q = search.toLowerCase();
-    return types.filter(t => t.slug.includes(q) || (t.label[lang] ?? '').toLowerCase().includes(q));
+    return types.filter(t => _t.slug.includes(q) || (_t.label[lang] ?? '').toLowerCase().includes(q));
   }, [types, search, lang]);
 
   const handleSave = async () => {
@@ -226,14 +226,14 @@ export default function EntityTypesPage() {
           />
 
           {/* Add connection */}
-          <div className="mt-4 flex flex-wrap gap-2 items-center border-t border-white/[0.06] pt-3">
+          <div className="mt-4 flex flex-wrap gap-2 items-center border-_t border-white/[0.06] pt-3">
             <select
               value={connDraft.source}
               onChange={e => setConnDraft(d => ({ ...d, source: e.target.value }))}
               className="rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300"
             >
               <option value="">{te.sourceType}</option>
-              {types.map(t => <option key={t.slug} value={t.slug}>{t.label[lang] || t.slug}</option>)}
+              {types.map(t => <option key={t.slug} value={t.slug}>{t.label[lang] || _t.slug}</option>)}
             </select>
             <ArrowRight size={14} className="text-slate-500" />
             <select
@@ -242,7 +242,7 @@ export default function EntityTypesPage() {
               className="rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300"
             >
               <option value="">{te.targetType}</option>
-              {types.map(t => <option key={t.slug} value={t.slug}>{t.label[lang] || t.slug}</option>)}
+              {types.map(t => <option key={t.slug} value={t.slug}>{t.label[lang] || _t.slug}</option>)}
             </select>
             <input
               type="text"

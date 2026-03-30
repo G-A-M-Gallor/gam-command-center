@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Circle } from "lucide-react";
+import { Circle, Wifi, WifiOff } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
+import { useTeamPresence } from "@/hooks/useTeamPresence";
 import type { WidgetSize } from "./WidgetRegistry";
 
 type LangKey = "he" | "en" | "ru";
@@ -16,13 +16,7 @@ interface TeamMemberStatus {
   activity?: Record<LangKey, string>;
 }
 
-const DEMO_TEAM: TeamMemberStatus[] = [
-  { id: "1", name: "גל", role: { he: "מנהל פרויקטים", en: "Project Manager", ru: "Менеджер проектов" }, status: "online", activity: { he: "עובד על vBrain.io", en: "Working on vBrain.io", ru: "Работает над vBrain.io" } },
-  { id: "2", name: "חני", role: { he: "מנהלת תפעול", en: "Operations Manager", ru: "Операционный менеджер" }, status: "online", activity: { he: "סקירת לקוחות", en: "Client review", ru: "Обзор клиентов" } },
-  { id: "3", name: "יואב", role: { he: "מפתח", en: "Developer", ru: "Разработчик" }, status: "busy", activity: { he: "פגישה", en: "In a meeting", ru: "На встрече" } },
-  { id: "4", name: "נועה", role: { he: "עיצוב", en: "Design", ru: "Дизайн" }, status: "away" },
-  { id: "5", name: "רון", role: { he: "מכירות", en: "Sales", ru: "Продажи" }, status: "offline" },
-];
+// Demo data moved to useTeamPresence hook
 
 const STATUS_COLORS: Record<string, string> = {
   online: "text-emerald-400",
@@ -40,22 +34,26 @@ const STATUS_LABELS: Record<string, Record<LangKey, string>> = {
 
 export function TeamPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const [team, setTeam] = useState<TeamMemberStatus[]>([]);
-
-  useEffect(() => {
-    // TODO: Replace with Supabase Realtime presence when available
-    setTeam(DEMO_TEAM);
-  }, []);
+  const _t = getTranslations(language);
+  const { team, isConnected, error } = useTeamPresence();
 
   const onlineCount = team.filter((m) => m.status === "online" || m.status === "busy").length;
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          {t.widgets.teamTitle}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+            {_t.widgets.teamTitle}
+          </span>
+          {isConnected ? (
+            <Wifi size={10} className="text-emerald-400" />
+          ) : (
+            <div title={error || "Using demo data"}>
+              <WifiOff size={10} className="text-amber-400" />
+            </div>
+          )}
+        </div>
         <span className="text-[10px] text-slate-500">
           {onlineCount}/{team.length} {t.widgets.teamOnline}
         </span>
@@ -102,13 +100,15 @@ export function TeamPanel() {
 
 export function TeamBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
+  const { team } = useTeamPresence();
+
   if (size < 2) return null;
 
-  const onlineCount = DEMO_TEAM.filter((m) => m.status === "online" || m.status === "busy").length;
+  const onlineCount = team.filter((m) => m.status === "online" || m.status === "busy").length;
   return (
     <span className="truncate text-xs text-slate-400">
-      {onlineCount} {t.widgets.teamBar}
+      {onlineCount} {_t.widgets.teamBar}
     </span>
   );
 }

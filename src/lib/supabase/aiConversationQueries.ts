@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client";
+import { _createClient } from "@/lib/supabase/client";
 
 export interface AIConversation {
   id: string;
@@ -16,7 +16,7 @@ export interface AIConversation {
 export async function saveConversation(conversation: {
   id: string;
   mode: string;
-  messages: { role: "user" | "assistant"; content: string; timestamp: number }[];
+  messages: { role: "_user" | "assistant"; content: string; timestamp: number }[];
   title?: string;
   total_tokens_input?: number;
   total_tokens_output?: number;

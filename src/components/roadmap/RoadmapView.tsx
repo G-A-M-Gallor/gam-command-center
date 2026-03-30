@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, X, CheckCircle2, Circle, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { ArrowLeft, _ExternalLink, _X, CheckCircle2, Circle, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations, loc } from "@/lib/i18n";
+import { _getTranslations, loc } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { NotionTask } from "@/lib/notion/client";
 
@@ -138,8 +138,8 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 export function RoadmapView() {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const rt = (t as Record<string, unknown>).roadmapPage as Record<string, string> | undefined;
+  const _t = getTranslations(language);
+  const rt = (_t as Record<string, unknown>).roadmapPage as Record<string, string> | undefined;
 
   const [selectedPhase, setSelectedPhase] = useState<number | null>(null);
   const [allTasks, setAllTasks] = useState<NotionTask[]>([]);
@@ -160,7 +160,7 @@ export function RoadmapView() {
         return;
       }
       const res = await fetch("/api/notion/tasks", {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        _headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
@@ -185,9 +185,9 @@ export function RoadmapView() {
         config,
         tasks: layerTasks,
         total: layerTasks.length,
-        done: layerTasks.filter((t) => t.status === "Done").length,
-        inProgress: layerTasks.filter((t) => t.status === "In Progress" || t.status === "Ready for QA").length,
-        blocked: layerTasks.filter((t) => t.status === "Blocked").length,
+        done: layerTasks.filter((_t) => t.status === "Done").length,
+        inProgress: layerTasks.filter((_t) => t.status === "In Progress" || t.status === "Ready for QA").length,
+        blocked: layerTasks.filter((_t) => t.status === "Blocked").length,
       };
     });
   }, [allTasks]);
@@ -201,7 +201,7 @@ export function RoadmapView() {
   }, [allTasks]);
 
   const totalTasks = allTasks.length;
-  const totalDone = allTasks.filter((t) => t.status === "Done").length;
+  const totalDone = allTasks.filter((_t) => t.status === "Done").length;
   const overallProgress = totalTasks > 0 ? totalDone / totalTasks : 0;
 
   // Current phase = highest phase with any "Done" tasks
@@ -253,7 +253,7 @@ export function RoadmapView() {
   const filteredTasks = useMemo(() => {
     if (!selected) return [];
     if (!statusFilter) return selected.tasks;
-    return selected.tasks.filter((t) => t.status === statusFilter);
+    return selected.tasks.filter((_t) => t.status === statusFilter);
   }, [selected, statusFilter]);
 
   return (
@@ -497,7 +497,7 @@ export function RoadmapView() {
               {[null, "Done", "In Progress", "Backlog", "Blocked"].map((status) => {
                 const count = status === null
                   ? selected.total
-                  : selected.tasks.filter((t) => t.status === status).length;
+                  : selected.tasks.filter((_t) => t.status === status).length;
                 if (count === 0 && status !== null) return null;
                 return (
                   <button key={status ?? "all"} type="button"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 
 export type HealthStatus = "green" | "yellow" | "red";
 
@@ -39,7 +39,7 @@ interface HealthBadgeProps {
 
 export function HealthBadge({ score, showLabel = true }: HealthBadgeProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const status = getHealthStatus(score);
   const config = statusConfig[status];
   const label =

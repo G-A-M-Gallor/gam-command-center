@@ -4,11 +4,11 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search,
-  Clock,
+  _Clock,
   FileText,
   Bot,
-  Layers,
-  Plus,
+  _Layers,
+  _Plus,
   ArrowUp,
   ArrowDown,
   CornerDownLeft,
@@ -20,13 +20,13 @@ import {
   FolderKanban,
   Command,
   Grid3X3,
-  Monitor,
+  _Monitor,
   AppWindow,
   Power,
   ChevronRight,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { supabase } from "@/lib/supabaseClient";
 import { searchNotes } from "@/lib/supabase/entityQueries";
@@ -107,23 +107,23 @@ const DASHBOARD_PAGES: {
   icon: typeof Search;
   label: { he: string; en: string; ru: string };
 }[] = [
-  { path: "/dashboard", icon: Layers, label: { he: "דשבורד", en: "Dashboard", ru: "Панель" } },
-  { path: "/dashboard/layers", icon: Layers, label: { he: "האב", en: "Command Hub", ru: "Командный центр" } },
+  { path: "/dashboard", icon: _Layers, label: { he: "דשבורד", en: "Dashboard", ru: "Панель" } },
+  { path: "/dashboard/layers", icon: _Layers, label: { he: "האב", en: "Command Hub", ru: "Командный центр" } },
   { path: "/dashboard/editor", icon: FileText, label: { he: "עורך", en: "Editor", ru: "Редактор" } },
-  { path: "/dashboard/story-map", icon: Layers, label: { he: "מפת סיפור", en: "Story Map", ru: "Карта историй" } },
-  { path: "/dashboard/functional-map", icon: Layers, label: { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" } },
+  { path: "/dashboard/story-map", icon: _Layers, label: { he: "מפת סיפור", en: "Story Map", ru: "Карта историй" } },
+  { path: "/dashboard/functional-map", icon: _Layers, label: { he: "מפה פונקציונלית", en: "Functional Map", ru: "Функциональная карта" } },
   { path: "/dashboard/ai-hub", icon: Bot, label: { he: "מרכז AI", en: "AI Hub", ru: "AI Центр" } },
-  { path: "/dashboard/design-system", icon: Layers, label: { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" } },
-  { path: "/dashboard/architecture", icon: Layers, label: { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" } },
-  { path: "/dashboard/plan", icon: Layers, label: { he: "תוכנית", en: "Plan", ru: "План" } },
-  { path: "/dashboard/settings", icon: Layers, label: { he: "הגדרות", en: "Settings", ru: "Настройки" } },
-  { path: "/dashboard/admin", icon: Layers, label: { he: "לוג פיתוח", en: "Admin", ru: "Админ" } },
+  { path: "/dashboard/design-system", icon: _Layers, label: { he: "מערכת עיצוב", en: "Design System", ru: "Дизайн-система" } },
+  { path: "/dashboard/architecture", icon: _Layers, label: { he: "ארכיטקטורה", en: "Architecture", ru: "Архитектура" } },
+  { path: "/dashboard/plan", icon: _Layers, label: { he: "תוכנית", en: "Plan", ru: "План" } },
+  { path: "/dashboard/settings", icon: _Layers, label: { he: "הגדרות", en: "Settings", ru: "Настройки" } },
+  { path: "/dashboard/admin", icon: _Layers, label: { he: "לוג פיתוח", en: "Admin", ru: "Админ" } },
   { path: "/dashboard/wiki", icon: BookOpen, label: { he: "ויקי", en: "Wiki", ru: "Вики" } },
   { path: "/dashboard/automations", icon: Zap, label: { he: "אוטומציות", en: "Automations", ru: "Автоматизации" } },
-  { path: "/dashboard/entities/fields", icon: Layers, label: { he: "ספריית שדות", en: "Field Library", ru: "Библиотека полей" } },
+  { path: "/dashboard/entities/fields", icon: _Layers, label: { he: "ספריית שדות", en: "Field Library", ru: "Библиотека полей" } },
   { path: "/dashboard/grid", icon: LayoutGrid, label: { he: "גיליון", en: "Grid", ru: "Таблица" } },
   { path: "/dashboard/boardroom", icon: Bot, label: { he: "חדר דיונים", en: "Board Room", ru: "Зал заседаний" } },
-  { path: "/dashboard/feeds", icon: Layers, label: { he: "פידים", en: "Feeds", ru: "Ленты" } },
+  { path: "/dashboard/feeds", icon: _Layers, label: { he: "פידים", en: "Feeds", ru: "Ленты" } },
 ];
 
 /** Legacy routeIcons lookup — used for recent pages icon mapping */
@@ -139,8 +139,8 @@ interface SearchPanelProps {
 
 export function SearchPanel({ onClose }: SearchPanelProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const router = useRouter();
+  const _t = getTranslations(language);
+  const _router = useRouter();
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
   const lang = language;
@@ -247,7 +247,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
           try {
             const res = await fetch('/api/embeddings/search', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              _headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ query: effectiveQuery, max_results: 10 }),
             });
             if (res.ok) {
@@ -354,14 +354,14 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         label: p.label,
         type: "page" as const,
         href: p.href,
-        icon: routeIcons[p.href] || Layers,
+        icon: routeIcons[p.href] || _Layers,
       }));
 
       const searchItems: SearchItem[] = recentSearches.map((s, i) => ({
         id: `search-${i}`,
         label: s,
         type: "page" as const,
-        icon: Clock,
+        icon: _Clock,
       }));
 
       const docItems: SearchItem[] = dbDocuments.slice(0, 5).map((d) => ({
@@ -450,11 +450,11 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
 
     // Quick create action
     const actions: SearchItem[] = [
-      { id: "action-document", label: t.widgets.newDocument, type: "action" as const, href: "__new-doc__", icon: Plus },
+      { id: "action-document", label: t.widgets.newDocument, type: "action" as const, href: "__new-doc__", icon: _Plus },
     ];
 
     return [...cmds, ...pages, ...widgets, ...documents, ...entities, ...semantic, ...projects, ...wiki, ...actions];
-  }, [query, lang, t, wt.untitled, dbDocuments, searchResults, semanticResults, entityResults, entityTypes, commandItems, pageItems, widgetItems, projectResults, wikiResults, isCommandMode, isPageMode]);
+  }, [query, lang, _t, wt.untitled, dbDocuments, searchResults, semanticResults, entityResults, entityTypes, commandItems, pageItems, widgetItems, projectResults, wikiResults, isCommandMode, isPageMode]);
 
   // Reset selection when items change
   useEffect(() => {
@@ -536,7 +536,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
         setQuery(item.label);
       }
     },
-    [router, onClose, query, isCommandMode, isPageMode, wt.newDocument]
+    [_router, onClose, query, isCommandMode, isPageMode, wt.newDocument]
   );
 
   const handleKeyDown = useCallback(
@@ -575,14 +575,14 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       );
       const sections: { title: string; items: SearchItem[] }[] = [];
       if (recentPages.length > 0) {
-        sections.push({ title: t.widgets.recent, items: recentPages });
+        sections.push({ title: _t.widgets.recent, items: recentPages });
       }
       if (docItems.length > 0) {
-        sections.push({ title: t.widgets.documents, items: docItems });
+        sections.push({ title: _t.widgets.documents, items: docItems });
       }
       if (recentSearches.length > 0) {
         sections.push({
-          title: t.widgets.recentSearches,
+          title: _t.widgets.recentSearches,
           items: recentSearches,
         });
       }
@@ -593,7 +593,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     if (isCommandMode) {
       const sections: { title: string; items: SearchItem[] }[] = [];
       if (items.length > 0) {
-        sections.push({ title: t.widgets.commandsSection, items });
+        sections.push({ title: _t.widgets.commandsSection, items });
       }
       return sections;
     }
@@ -601,7 +601,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     if (isPageMode) {
       const sections: { title: string; items: SearchItem[] }[] = [];
       if (items.length > 0) {
-        sections.push({ title: t.widgets.pagesSection, items });
+        sections.push({ title: _t.widgets.pagesSection, items });
       }
       return sections;
     }
@@ -620,12 +620,12 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
     const sections: { title: string; items: SearchItem[] }[] = [];
 
     // 1. Actions (commands)
-    if (commands.length > 0) sections.push({ title: t.widgets.commandsSection, items: commands });
+    if (commands.length > 0) sections.push({ title: _t.widgets.commandsSection, items: commands });
     // 2. Pages
-    if (pages.length > 0) sections.push({ title: t.widgets.pagesSection, items: pages });
+    if (pages.length > 0) sections.push({ title: _t.widgets.pagesSection, items: pages });
     // 3. Widgets
-    if (widgets.length > 0) sections.push({ title: t.widgets.widgetsSection, items: widgets });
-    // 4. Entities (grouped by type)
+    if (widgets.length > 0) sections.push({ title: _t.widgets.widgetsSection, items: widgets });
+    // 4. Entities (_grouped by type)
     if (entityItems.length > 0) {
       const byType = new Map<string, SearchItem[]>();
       for (const item of entityItems) {
@@ -638,18 +638,18 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
       }
     }
     // 5. Documents
-    if (documents.length > 0) sections.push({ title: t.widgets.documents, items: documents });
+    if (documents.length > 0) sections.push({ title: _t.widgets.documents, items: documents });
     // 6. Projects
-    if (projectItems.length > 0) sections.push({ title: t.widgets.projectsSection, items: projectItems });
+    if (projectItems.length > 0) sections.push({ title: _t.widgets.projectsSection, items: projectItems });
     // 7. Wiki
-    if (wikiItems.length > 0) sections.push({ title: t.widgets.wikiSection, items: wikiItems });
+    if (wikiItems.length > 0) sections.push({ title: _t.widgets.wikiSection, items: wikiItems });
     // Semantic
     if (semanticItems.length > 0) sections.push({ title: wt.semanticResults, items: semanticItems });
     // Quick actions
-    if (actions.length > 0) sections.push({ title: t.widgets.quickActions, items: actions });
+    if (actions.length > 0) sections.push({ title: _t.widgets.quickActions, items: actions });
 
     return sections;
-  }, [items, query, t, wt.semanticResults, isCommandMode, isPageMode]);
+  }, [items, query, _t, wt.semanticResults, isCommandMode, isPageMode]);
 
   // Compute global index for each item across sections
   let globalIndex = 0;
@@ -734,7 +734,7 @@ export function SearchPanel({ onClose }: SearchPanelProps) {
             <div ref={listRef} className="overflow-y-auto px-2 py-2">
               {groupedSections.length === 0 && query.trim() ? (
                 <div className="px-3 py-8 text-center text-sm text-slate-500">
-                  {t.widgets.noResults}
+                  {_t.widgets.noResults}
                 </div>
               ) : (
                 groupedSections.map((section) => (
@@ -835,7 +835,7 @@ function AppsManagerPanel({ lang, wt }: { lang: "he" | "en" | "ru"; wt: Record<s
   const [filterCategory, setFilterCategory] = useState<WidgetCategory | "all">("all");
   const [filterPlacement, setFilterPlacement] = useState<WidgetPlacement | "all">("all");
 
-  const grouped = useMemo(() => {
+  const _grouped = useMemo(() => {
     const map = new Map<WidgetCategory, typeof widgetRegistry>();
     for (const cat of CATEGORY_ORDER) map.set(cat, []);
     for (const w of widgetRegistry) {
@@ -878,7 +878,7 @@ function AppsManagerPanel({ lang, wt }: { lang: "he" | "en" | "ru"; wt: Record<s
   }, [widgetPlacements, setWidgetPlacement]);
 
   const placementBadge = (placement: WidgetPlacement) => {
-    if (placement === "toolbar") return { color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", label: wt.appsOnToolbar, icon: Monitor };
+    if (placement === "toolbar") return { color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", label: wt.appsOnToolbar, icon: _Monitor };
     if (placement === "apps") return { color: "bg-blue-500/20 text-blue-300 border-blue-500/30", label: wt.appsInDrawer, icon: AppWindow };
     return { color: "bg-slate-500/20 text-slate-400 border-slate-500/30", label: wt.appsDisabled, icon: Power };
   };
@@ -904,7 +904,7 @@ function AppsManagerPanel({ lang, wt }: { lang: "he" | "en" | "ru"; wt: Record<s
       {/* Stats bar */}
       <div className="flex items-center gap-3 px-4 py-2.5 border-b border-slate-700/50">
         <div className="flex items-center gap-1.5">
-          <Monitor className="h-3.5 w-3.5 text-emerald-400" />
+          <_Monitor className="h-3.5 w-3.5 text-emerald-400" />
           <span className="text-xs text-emerald-300 font-medium">{stats.toolbar}</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -1042,13 +1042,13 @@ function AppsManagerPanel({ lang, wt }: { lang: "he" | "en" | "ru"; wt: Record<s
 
 export function SearchBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   if (size < 2) return null;
 
   return (
     <span className="flex items-center gap-2 truncate text-xs text-slate-400">
-      <span className="truncate">{t.widgets.searchPlaceholder}</span>
+      <span className="truncate">{_t.widgets.searchPlaceholder}</span>
       <kbd className="hidden sm:inline-flex shrink-0 h-4 items-center rounded border border-slate-600 bg-slate-700/60 px-1 text-[9px] font-medium text-slate-500">
         {"\u2318"}K
       </kbd>

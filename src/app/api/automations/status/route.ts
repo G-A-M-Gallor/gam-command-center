@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { _createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth';
 
@@ -13,8 +13,8 @@ interface StatusResponse {
   timestamp: string;
 }
 
-export async function GET(request: Request) {
-  const auth = await requireAuth(request);
+export async function GET(_request: Request) {
+  const auth = await requireAuth(_request);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
   const result: StatusResponse = {
     supabase: { status: 'offline', checks: {} },
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
   if (notionKey) {
     try {
       const res = await fetch('https://api.notion.com/v1/users/me', {
-        headers: {
+        _headers: {
           Authorization: `Bearer ${notionKey}`,
           'Notion-Version': '2022-06-28',
         },

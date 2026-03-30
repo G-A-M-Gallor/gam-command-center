@@ -4,7 +4,7 @@
 // Stats + Active Sprint + Risks + Urgent Tasks
 // ===================================================
 
-import { Activity, Clock, Target, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Activity, _Clock, Target, AlertTriangle, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProgressBar } from "./ProgressBar";
 import { RiskPanel } from "./RiskPanel";
@@ -23,7 +23,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
   const { data: apps = [] } = useApps();
   const { data: projects = [] } = useProjects();
 
-  const context = buildPMContext(openTasks, activeSprints);
+  const _context = buildPMContext(openTasks, activeSprints);
   const activeSprint = activeSprints[0]; // First active sprint
 
   return (
@@ -65,12 +65,12 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
             <div className="flex gap-2">
               {context.blockedTasks.length > 0 && (
                 <span className="px-2 py-1 text-xs bg-red-500/20 text-red-400 rounded-full">
-                  {context.blockedTasks.length} חסום
+                  {_context.blockedTasks.length} חסום
                 </span>
               )}
               {context.urgentTasks.length > 0 && (
                 <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-full">
-                  {context.urgentTasks.length} דחוף
+                  {_context.urgentTasks.length} דחוף
                 </span>
               )}
             </div>
@@ -124,7 +124,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
               <AlertTriangle className="w-5 h-5 text-amber-400" />
               <h3 className="text-lg font-medium text-white">משימות דחופות</h3>
               <span className="text-sm text-slate-400">
-                ({context.urgentTasks.length})
+                ({_context.urgentTasks.length})
               </span>
             </div>
             <button
@@ -142,7 +142,7 @@ export function HomeScreen({ onNavigate }: HomeScreenProps) {
                 <p className="text-slate-400">✅ אין משימות דחופות</p>
               </div>
             ) : (
-              context.urgentTasks.slice(0, 5).map((task) => (
+              _context.urgentTasks.slice(0, 5).map((task) => (
                 <div
                   key={task.id}
                   className="p-4 bg-slate-800/30 rounded-lg border border-slate-700 hover:bg-slate-800/50 transition-colors"

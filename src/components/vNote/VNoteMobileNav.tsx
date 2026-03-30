@@ -25,7 +25,7 @@ interface Props {
 
 export function VNoteMobileNav({ onSidebarOpen, entityTitle, entityType }: Props) {
   const [activeZone, setActiveZone] = useState(ZONES[0].id);
-  const router = useRouter();
+  const _router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {

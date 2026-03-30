@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { _createClient } from "@supabase/supabase-js";
 import { calculateHealthScore } from "@/lib/utils/health";
 import { requireAuth } from "@/lib/api/auth";
 
@@ -51,9 +51,9 @@ function extractField(instance: OrigamiInstance, fieldName: string): string {
   return "";
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   // Authenticate the request
-  const { error: authError } = await requireAuth(request);
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     return Response.json({ error: authError }, { status: 401 });
   }
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
   try {
     const res = await fetch(ORIGAMI_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      _headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         username,
         api_secret: apiSecret,

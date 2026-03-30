@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Eye, EyeOff, LogIn } from "lucide-react";
+import { _Shield, Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
+  const _router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +19,7 @@ export default function LoginPage() {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
       });
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500/10 rounded-full mb-4">
-            <Shield className="w-8 h-8 text-purple-400" />
+            <_Shield className="w-8 h-8 text-purple-400" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">GAM Staff Portal</h1>
           <p className="text-slate-400">התחבר למערכת הפנימית</p>
@@ -109,7 +109,7 @@ export default function LoginPage() {
               className="w-full flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 disabled:bg-slate-700 disabled:text-slate-500 text-white font-medium py-2 px-4 rounded-lg transition-colors"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/20 border-_t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />

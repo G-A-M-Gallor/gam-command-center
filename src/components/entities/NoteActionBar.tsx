@@ -5,8 +5,8 @@ import { resolveActions } from '@/lib/entities/resolveActions';
 import { executeAction } from '@/lib/entities/actionHandlers';
 import { resolveActionIcon } from '@/lib/entities/actionIconMap';
 import { useAuth } from '@/contexts/AuthContext';
-import { getTranslations } from '@/lib/i18n';
-import type { Language } from '@/contexts/SettingsContext';
+import { _getTranslations } from '@/lib/i18n';
+import type { _Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, TemplateConfig, GlobalField, ActionButton } from '@/lib/entities/types';
 
 const VARIANT_CLASSES: Record<string, string> = {
@@ -28,7 +28,7 @@ interface Props {
 export function NoteActionBar({
   note, entityType, templateConfig, language, fields, onRefresh,
 }: Props) {
-  const t = getTranslations(language as Language);
+  const _t = getTranslations(language as _Language);
   const isRtl = language === 'he';
   const { canPerformAction } = useAuth();
   const [confirming, setConfirming] = useState<string | null>(null);

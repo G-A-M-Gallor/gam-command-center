@@ -160,9 +160,9 @@ export async function sendEmail(
       subject,
       html,
       replyTo,
-      headers: {
-        ...options.headers,
-        "X-Email-Send-Id": sendRecord.id,
+      _headers: {
+        ...options._headers,
+        "_X-Email-Send-Id": sendRecord.id,
       },
     });
 

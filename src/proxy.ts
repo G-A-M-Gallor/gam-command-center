@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
-import { createClient } from "@supabase/supabase-js";
+import { _createClient } from "@supabase/supabase-js";
 
 // Honeypot paths — bots/scanners probe these, real users never hit them
 const BLOCKED_PATHS = [
@@ -81,7 +81,7 @@ function buildCSPHeader(iframeDomains: string[]): string {
     .join("; ");
 }
 
-export async function proxy(request: NextRequest) {
+export async function proxy(_request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Block honeypot/attack paths — return 404 (not 403, to avoid fingerprinting)
@@ -109,7 +109,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Update session and add CSP header
-  const response = await updateSession(request);
+  const response = await updateSession(_request);
   response.headers.set("Content-Security-Policy", cspHeader);
 
   return response;

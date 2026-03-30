@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Brain, Activity, AlertTriangle, TrendingUp, Database, Clock } from "lucide-react";
+import { Search, Brain, Activity, AlertTriangle, TrendingUp, Database, _Clock } from "lucide-react";
 
 interface BrainStats {
   total_chunks: number;
@@ -187,7 +187,7 @@ export default function BrainHealthDashboard() {
       // Use semantic-query v3 via brain search API
       const response = await fetch('/api/brain/search', {
         method: 'POST',
-        headers: {
+        _headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
@@ -405,7 +405,7 @@ export default function BrainHealthDashboard() {
                     className="bg-purple-600 hover:bg-purple-700"
                   >
                     {searching ? (
-                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-_t-transparent rounded-full" />
                     ) : (
                       <Search className="h-4 w-4" />
                     )}

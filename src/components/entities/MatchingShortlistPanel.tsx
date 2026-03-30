@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Users, Briefcase, MapPin, ChevronUp, ExternalLink, Loader2,
-  Eye, Phone, Calendar, CheckCircle2, XCircle, UserX, ThumbsDown, Ban, Clock, UserPlus,
+  Users, Briefcase, MapPin, ChevronUp, _ExternalLink, Loader2,
+  Eye, Phone, Calendar, CheckCircle2, XCircle, UserX, ThumbsDown, Ban, _Clock, UserPlus,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -42,7 +42,7 @@ interface Props {
 }
 
 export function MatchingShortlistPanel({ noteId, entityType, language }: Props) {
-  const router = useRouter();
+  const _router = useRouter();
   const isRtl = language === "he";
   const [expanded, setExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -147,7 +147,7 @@ export function MatchingShortlistPanel({ noteId, entityType, language }: Props) 
       </button>
 
       {expanded && (
-        <div className="border-t border-slate-700/30">
+        <div className="border-_t border-slate-700/30">
           {rows.length === 0 ? (
             <div className="px-4 py-6 text-center">
               <span className="text-xs text-slate-500">{emptyText}</span>

@@ -11,7 +11,7 @@ const workspaceSwitcher = {
   workspaces: {
     personal: {
       name: "vBrain — Personal",
-      desc: "Basic tools, profile, settings"
+      desc: "Basic tools, _profile, settings"
     },
     gamBusiness: {
       name: "G.A.M Construction",

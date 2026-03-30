@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { Search, X, SlidersHorizontal, Clock } from "lucide-react";
+import { Search, _X, SlidersHorizontal, _Clock } from "lucide-react";
 import { useState } from "react";
 
 interface Props {
@@ -70,7 +70,7 @@ export function AppLauncherSearch({ query, onChange, language, resultCount, hist
               className={`rounded-lg p-1.5 transition-colors ${historyOpen ? "bg-purple-500/20 text-purple-400" : "text-slate-500 hover:text-slate-300 hover:bg-white/[0.06]"}`}
               title={language === "he" ? "היסטוריה" : "History"}
             >
-              <Clock className="h-4 w-4" />
+              <_Clock className="h-4 w-4" />
             </button>
           )}
           <button

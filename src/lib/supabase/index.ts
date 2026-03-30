@@ -1,7 +1,7 @@
 // Barrel export for Supabase utilities and queries
 
 // Core clients and configuration
-export { createClient } from './client';
+export { _createClient } from './client';
 export * from './server';
 export * from './schema';
 export * from './middleware';

@@ -1,28 +1,28 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { pushPreferencesSchema } from "@/lib/api/schemas";
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { data } = await supabase
     .from("push_subscriptions")
     .select("preferences")
-    .eq("user_id", user.id)
+    .eq("user_id", _user.id)
     .limit(1)
     .single();
 
   return NextResponse.json({ preferences: data?.preferences ?? {} });
 }
 
-export async function PUT(request: Request) {
+export async function PUT(_request: Request) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -42,7 +42,7 @@ export async function PUT(request: Request) {
   const { data: existing } = await supabase
     .from("push_subscriptions")
     .select("preferences")
-    .eq("user_id", user.id)
+    .eq("user_id", _user.id)
     .limit(1)
     .single();
 
@@ -51,10 +51,10 @@ export async function PUT(request: Request) {
   const { error } = await supabase
     .from("push_subscriptions")
     .update({ preferences: merged })
-    .eq("user_id", user.id);
+    .eq("user_id", _user.id);
 
   if (error) {
-    return NextResponse.json({ error: "Failed to update preferences" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to _update preferences" }, { status: 500 });
   }
 
   return NextResponse.json({ preferences: merged });

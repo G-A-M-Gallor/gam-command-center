@@ -2,15 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import {
   Video,
   Copy,
   Check,
   Trash2,
-  ExternalLink,
+  _ExternalLink,
   Eye,
-  Clock,
+  _Clock,
   HardDrive,
   Search,
   RefreshCw,
@@ -89,14 +89,16 @@ export default function VClipPage() {
       if (res.ok) {
         setClips((prev) => prev.filter((c) => c.id !== clipId));
       }
-    } catch {}
+    } catch {
+    // Ignore errors
+  }
   };
 
   const filtered = clips.filter(
     (c) =>
       !search ||
       c.title?.toLowerCase().includes(search.toLowerCase()) ||
-      c.tags?.some((t) => t.toLowerCase().includes(search.toLowerCase()))
+      c.tags?.some((_t) => t.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
@@ -201,7 +203,7 @@ export default function VClipPage() {
               </h3>
               <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-slate-500">
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                  <_Clock className="h-3 w-3" />
                   {formatDuration(clip.duration_seconds)}
                 </span>
                 <span className="flex items-center gap-1">

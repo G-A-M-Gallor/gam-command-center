@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Loader2, X, Check, Phone } from 'lucide-react';
+import { Loader2, _X, Check, Phone } from 'lucide-react';
 import { resolveActions } from '@/lib/entities/resolveActions';
 import { executeAction } from '@/lib/entities/actionHandlers';
 import { resolveActionIcon } from '@/lib/entities/actionIconMap';
 import { updateNoteMeta, addCallLogEntry } from '@/lib/supabase/entityQueries';
-import { getTranslations } from '@/lib/i18n';
-import type { Language } from '@/contexts/SettingsContext';
+import { _getTranslations } from '@/lib/i18n';
+import type { _Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, TemplateConfig, GlobalField } from '@/lib/entities/types';
 
 const VARIANT_CLASSES: Record<string, string> = {
@@ -30,7 +30,7 @@ interface Props {
 }
 
 export function NoteActions({ note, entityType, templateConfig, language, fields, allNotes, onRefresh }: Props) {
-  const t = getTranslations(language as Language);
+  const _t = getTranslations(language as _Language);
   const ta = t.entities.actions;
   const lang = language as 'he' | 'en' | 'ru';
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -203,7 +203,7 @@ export function NoteActions({ note, entityType, templateConfig, language, fields
       {/* Status Picker fallback when no status field exists */}
       {activeUI === 'status_picker' && !statusField && (
         <p className="text-[10px] text-slate-500 px-2">
-          {t.entities.noStatusFieldFound}
+          {_t.entities.noStatusFieldFound}
         </p>
       )}
 

@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
-  X,
+  _X,
   Search,
   ChevronLeft,
   Lock,
@@ -12,7 +12,7 @@ import {
   Power,
   List,
   LayoutGrid,
-  Plus,
+  _Plus,
   Trash2,
 } from "lucide-react";
 import { Input } from "@/components/ui/Input";
@@ -29,10 +29,10 @@ import {
 import { FolderCreator } from "./FolderCreator";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
-import type { Language } from "@/contexts/SettingsContext";
+import type { _Language } from "@/contexts/SettingsContext";
 
 // ─── State Persistence ──────────────────────────────────
 
@@ -58,7 +58,9 @@ function saveStoreState(patch: Partial<PersistedStoreState>) {
   try {
     const prev = loadStoreState();
     localStorage.setItem(STORE_STATE_KEY, JSON.stringify({ ...prev, ...patch }));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 // ─── Category Config ────────────────────────────────────
@@ -140,7 +142,7 @@ function filterWidgets(
   widgets: WidgetDefinition[],
   query: string,
   category: CategoryFilter,
-  lang: Language
+  lang: _Language
 ) {
   let result = widgets;
   if (category !== "all") {
@@ -180,7 +182,7 @@ function PlacementPill({
   language,
 }: {
   placement: WidgetPlacement;
-  language: Language;
+  language: _Language;
 }) {
   const colorMap: Record<WidgetPlacement, string> = {
     toolbar: "text-emerald-400",
@@ -248,7 +250,7 @@ function CategoryChips({
   language: Language;
   counts: Partial<Record<WidgetCategory, number>>;
 }) {
-  const allLabel = (getTranslations(language).widgets as Record<string, string>).categoryAll;
+  const allLabel = (_getTranslations(language).widgets as Record<string, string>).categoryAll;
   const totalCount = Object.values(counts).reduce((s, n) => s + (n ?? 0), 0);
 
   return (
@@ -300,7 +302,7 @@ function WidgetCard({
 }: {
   widget: WidgetDefinition;
   placement: WidgetPlacement;
-  language: Language;
+  language: _Language;
   isMobile: boolean;
   onSelect: (id: string) => void;
   onToggle: (id: string) => void;
@@ -326,7 +328,7 @@ function WidgetCard({
         />
         {!widget.isRemovable && (
           <span className="text-[9px] text-slate-600">
-            {(getTranslations(language).widgets as Record<string, string>).storeSystem}
+            {(_getTranslations(language).widgets as Record<string, string>).storeSystem}
           </span>
         )}
       </div>
@@ -384,7 +386,7 @@ function WidgetRow({
 }: {
   widget: WidgetDefinition;
   placement: WidgetPlacement;
-  language: Language;
+  language: _Language;
   onSelect: (id: string) => void;
   onToggle: (id: string) => void;
 }) {
@@ -433,7 +435,7 @@ function WidgetRow({
         />
         {!widget.isRemovable && (
           <span className="shrink-0 text-[10px] text-slate-600">
-            {(getTranslations(language).widgets as Record<string, string>).storeSystem}
+            {(_getTranslations(language).widgets as Record<string, string>).storeSystem}
           </span>
         )}
       </div>
@@ -449,10 +451,10 @@ function ComingSoonCard({
   isMobile,
 }: {
   widget: WidgetDefinition;
-  language: Language;
+  language: _Language;
   isMobile: boolean;
 }) {
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   return (
     <div
       className={`flex flex-col gap-2 rounded-xl border border-slate-700/50 bg-slate-900/50 opacity-60 ${
@@ -478,7 +480,7 @@ function ComingSoonCard({
       </p>
       <div className="flex items-center gap-1 text-[10px] text-slate-600">
         <Lock className="h-3 w-3" />
-        {t.widgets.comingSoon}
+        {_t.widgets.comingSoon}
       </div>
     </div>
   );
@@ -489,9 +491,9 @@ function ComingSoonRow({
   language,
 }: {
   widget: WidgetDefinition;
-  language: Language;
+  language: _Language;
 }) {
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   return (
     <div className="flex items-center gap-3 rounded-lg px-3 py-3 opacity-50">
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-800">
@@ -504,7 +506,7 @@ function ComingSoonRow({
           </span>
           <span className="inline-flex shrink-0 items-center gap-1 rounded bg-slate-700 px-1.5 py-0.5 text-[10px] text-slate-400">
             <Lock className="h-2.5 w-2.5" />
-            {t.widgets.comingSoon}
+            {_t.widgets.comingSoon}
           </span>
         </div>
         <p className="truncate text-xs text-slate-600">
@@ -529,7 +531,7 @@ function CategorySection({
 }: {
   category: WidgetCategory;
   widgets: WidgetDefinition[];
-  language: Language;
+  language: _Language;
   placements: Record<string, WidgetPlacement>;
   viewMode: ViewMode;
   isMobile: boolean;
@@ -595,11 +597,11 @@ function WidgetDetailView({
   onBack,
 }: {
   widgetId: string;
-  language: Language;
+  language: _Language;
   isMobile: boolean;
   onBack: () => void;
 }) {
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const { widgetPlacements, widgetSizes, setWidgetPlacement, setWidgetSize } =
     useWidgets();
 
@@ -623,7 +625,7 @@ function WidgetDetailView({
           className="mb-4 flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-slate-200"
         >
           <ChevronLeft className="h-4 w-4" />
-          {t.widgets.storeBack}
+          {_t.widgets.storeBack}
         </button>
       )}
 
@@ -688,7 +690,7 @@ function WidgetDetailView({
         </div>
         {!widget.isRemovable && (
           <p className="mt-2 text-xs text-slate-600">
-            {t.widgets.storeSystemWidget}
+            {_t.widgets.storeSystemWidget}
           </p>
         )}
       </div>
@@ -697,7 +699,7 @@ function WidgetDetailView({
       {placement !== "disabled" && (
         <div className="mb-6">
           <label className="mb-2 block text-sm font-medium text-slate-300">
-            {t.widgets.size}
+            {_t.widgets.size}
           </label>
           <div className="flex gap-1">
             {([1, 2, 3, 4] as WidgetSize[]).map((s) => (
@@ -739,7 +741,7 @@ function InstalledContent({
 }: {
   searchQuery: string;
   categoryFilter: CategoryFilter;
-  language: Language;
+  language: _Language;
   viewMode: ViewMode;
   isMobile: boolean;
   onSelect: (id: string) => void;
@@ -749,7 +751,7 @@ function InstalledContent({
     useWidgets();
   const [showFolderCreator, setShowFolderCreator] = useState(false);
   const ft = (
-    getTranslations(language) as unknown as Record<
+    _getTranslations(language) as unknown as Record<
       string,
       Record<string, string>
     >
@@ -798,7 +800,7 @@ function InstalledContent({
         <div className="mb-6">
           <h3 className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
             📁{" "}
-            {(getTranslations(language).widgets as Record<string, string>).storeFolders}
+            {(_getTranslations(language).widgets as Record<string, string>).storeFolders}
             <span className="text-slate-600">({folders.length})</span>
           </h3>
           {viewMode === "grid" ? (
@@ -906,7 +908,7 @@ function InstalledContent({
         className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-600 py-3 text-sm text-slate-500 transition-colors hover:border-slate-400 hover:text-slate-300"
       >
         <Plus className="h-3.5 w-3.5" />
-        {ft?.createFolder || (getTranslations(language).widgets as Record<string, string>).storeCreateFolder}
+        {ft?.createFolder || (_getTranslations(language).widgets as Record<string, string>).storeCreateFolder}
       </button>
 
       {showFolderCreator && (
@@ -915,7 +917,7 @@ function InstalledContent({
 
       {filtered.length === 0 && folders.length === 0 && (
         <p className="py-12 text-center text-sm text-slate-500">
-          {getTranslations(language).widgets.storeNoResults}
+          {_getTranslations(language).widgets.storeNoResults}
         </p>
       )}
     </div>
@@ -935,7 +937,7 @@ function AvailableContent({
 }: {
   searchQuery: string;
   categoryFilter: CategoryFilter;
-  language: Language;
+  language: _Language;
   viewMode: ViewMode;
   isMobile: boolean;
   onSelect: (id: string) => void;
@@ -967,7 +969,7 @@ function AvailableContent({
       ))}
       {filtered.length === 0 && (
         <p className="py-12 text-center text-sm text-slate-500">
-          {getTranslations(language).widgets.storeNoResults}
+          {_getTranslations(language).widgets.storeNoResults}
         </p>
       )}
     </div>
@@ -985,7 +987,7 @@ function ComingSoonContent({
 }: {
   searchQuery: string;
   categoryFilter: CategoryFilter;
-  language: Language;
+  language: _Language;
   viewMode: ViewMode;
   isMobile: boolean;
 }) {
@@ -1019,7 +1021,7 @@ function ComingSoonContent({
       )}
       {filtered.length === 0 && (
         <p className="py-12 text-center text-sm text-slate-500">
-          {getTranslations(language).widgets.storeNoResults}
+          {_getTranslations(language).widgets.storeNoResults}
         </p>
       )}
     </div>
@@ -1037,7 +1039,7 @@ const TAB_KEYS: StoreTab[] = ["installed", "available", "coming-soon"];
 export function WidgetStore({ onClose }: WidgetStoreProps) {
   const { language } = useSettings();
   const { widgetPlacements, setWidgetPlacement } = useWidgets();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
@@ -1169,7 +1171,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
             </h2>
             <span className="rounded-full bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
               {installedCount}{" "}
-              {t.widgets.storeActiveCount}
+              {_t.widgets.storeActiveCount}
             </span>
           </div>
         )}
@@ -1269,7 +1271,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
 
           {/* Tab bar — mobile only */}
           {isMobile && (
-            <div className="flex border-t border-slate-700/50">
+            <div className="flex border-_t border-slate-700/50">
               {TAB_KEYS.map((tab) => (
                 <button
                   key={tab}
@@ -1343,7 +1345,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
     </div>
   );
 
-  // ─── Mobile: Full-screen (portaled to escape stacking context) ──
+  // ─── Mobile: Full-screen (portaled to escape stacking _context) ──
   if (isMobile) {
     return createPortal(
       <div
@@ -1375,7 +1377,7 @@ export function WidgetStore({ onClose }: WidgetStoreProps) {
         type="button"
         onClick={onClose}
         className="absolute inset-0 bg-black/50"
-        aria-label={t.widgets.close}
+        aria-label={_t.widgets.close}
       />
       <div
         ref={trapRef}

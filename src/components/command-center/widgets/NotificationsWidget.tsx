@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   AtSign,
-  Clock,
+  _Clock,
   Sparkles,
   Check,
   CheckCheck,
@@ -23,7 +23,7 @@ import {
   Settings2,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { usePushSubscription } from "@/lib/pwa/usePushSubscription";
 import { updateAppBadge } from "@/lib/pwa/badge";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -58,7 +58,7 @@ function saveNotifications(items: NotificationItem[]) {
 function persistToServer(detail: { type: string; titleHe: string; titleEn: string; titleRu?: string }) {
   fetch("/api/notifications", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    _headers: { "Content-Type": "application/json" },
     body: JSON.stringify(detail),
   }).catch(() => { /* localStorage fallback is fine */ });
 }
@@ -103,7 +103,7 @@ function timeAgo(timestamp: number, lang: "he" | "en" | "ru"): string {
 const typeIcons = {
   status: AlertTriangle,
   mention: AtSign,
-  deadline: Clock,
+  deadline: _Clock,
   ai: Sparkles,
   entity: FileText,
 };
@@ -130,8 +130,8 @@ const PREF_CHANNELS = [
 
 export function NotificationsPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const router = useRouter();
+  const _t = getTranslations(language);
+  const _router = useRouter();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const { state: pushState, subscribe, unsubscribe } = usePushSubscription();
   const [pushLoading, setPushLoading] = useState(false);
@@ -156,7 +156,7 @@ export function NotificationsPanel() {
     try {
       await fetch("/api/push/preferences", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ [key]: !current }),
       });
     } catch { /* revert on failure */ setPrefs(prefs); }
@@ -258,7 +258,7 @@ export function NotificationsPanel() {
       saveNotifications(updated);
       fetch("/api/notifications", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       }).catch(() => { /* no-op */ });
     },
@@ -271,7 +271,7 @@ export function NotificationsPanel() {
     saveNotifications(updated);
     fetch("/api/notifications", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      _headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ markAllRead: true }),
     }).catch(() => { /* no-op */ });
   }, [items]);
@@ -288,7 +288,7 @@ export function NotificationsPanel() {
               ? t.pwa.pushBlocked
               : pushState === "subscribed"
                 ? t.pwa.pushEnabled
-                : t.pwa.pushEnable}
+                : _t.pwa.pushEnable}
           </span>
           <button
             type="button"
@@ -351,7 +351,7 @@ export function NotificationsPanel() {
       {unreadCount > 0 && (
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500">
-            {unreadCount} {t.widgets.unread}
+            {unreadCount} {_t.widgets.unread}
           </span>
           <button
             type="button"
@@ -366,7 +366,7 @@ export function NotificationsPanel() {
 
       {items.length === 0 ? (
         <p className="py-4 text-center text-sm text-slate-500">
-          {t.widgets.noNotifications}
+          {_t.widgets.noNotifications}
         </p>
       ) : (
         <div className="space-y-0.5">
@@ -466,7 +466,7 @@ export function NotificationsBarContent({ size }: { size: WidgetSize }) {
   if (top2.length === 0) {
     return (
       <span className="truncate text-xs text-slate-500">
-        {getTranslations(language).widgets.allClear}
+        {_getTranslations(language).widgets.allClear}
       </span>
     );
   }

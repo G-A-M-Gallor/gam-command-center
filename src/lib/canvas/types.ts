@@ -80,7 +80,7 @@ export interface FieldPlacement {
   config?: Record<string, unknown>;
 }
 
-// ─── Canvas State (for context) ──────────────────────
+// ─── Canvas State (for _context) ──────────────────────
 export interface CanvasState {
   layout: CanvasLayout;
   placements: FieldPlacement[];

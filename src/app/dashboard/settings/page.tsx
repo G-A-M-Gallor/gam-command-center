@@ -21,9 +21,9 @@ import {
   type WidgetBarProfile,
 } from "@/contexts/WidgetContext";
 import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import {
-  Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload,
+  _Layers, X as XIcon, Lock, LockOpen, Palette, Undo2, Trash2, RotateCcw, Check, Pencil, Download, Upload,
   Smartphone, Bell, Camera, Users, Wifi, WifiOff, Share2, Moon, Vibrate, MapPin, BadgeCheck, RefreshCw, Send, ScanLine, Trash, Image,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -145,7 +145,7 @@ function GeneralTab() {
     setGibberishDetect,
   } = useSettings();
   const { hoverDelay, setHoverDelay } = useWidgets();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   const DELAY_OPTIONS: { value: HoverDelay; display: string }[] = [
     { value: "none", display: t.widgets.none },
@@ -159,7 +159,7 @@ function GeneralTab() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      <Section label={t.settings.language} ccId="settings.language">
+      <Section label={_t.settings.language} ccId="settings.language">
         <div className="flex gap-2">
           <ToggleButton active={language === "he"} onClick={() => setLanguage("he")}>
             {t.settings.hebrew}
@@ -215,16 +215,16 @@ function GeneralTab() {
         </div>
       </Section>
 
-      <Section label={(t.bottomBar as Record<string, string>).editBottomBar} ccId="settings.bottomBar">
+      <Section label={(_t.bottomBar as Record<string, string>).editBottomBar} ccId="settings.bottomBar">
         <button
           type="button"
           onClick={() => window.dispatchEvent(new Event("cc-bottom-bar-edit"))}
           className={`rounded px-4 py-2 text-sm font-medium transition-colors ${inactiveBtn}`}
         >
-          {(t.bottomBar as Record<string, string>).editMode}
+          {(_t.bottomBar as Record<string, string>).editMode}
         </button>
         <p className="mt-2 text-xs text-slate-500">
-          {(t.bottomBar as Record<string, string>).longPressToEdit}
+          {(_t.bottomBar as Record<string, string>).longPressToEdit}
         </p>
       </Section>
 
@@ -250,7 +250,7 @@ function GeneralTab() {
 function OverridesSection() {
   const { language } = useSettings();
   const { viewMode, setViewMode, resetAll, personalOverrides } = useStyleOverrides();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const cm = t.contextMenu;
   const overrideCount = Object.keys(personalOverrides).length;
 
@@ -305,7 +305,7 @@ function ThemeTab() {
     fontFamily,
     borderRadius,
     density,
-    brandProfile,
+    _brandProfile,
     customAccentHex,
     savedColors,
     archivedColors,
@@ -322,7 +322,7 @@ function ThemeTab() {
     setAccentEffect,
     setNavColor,
   } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const [pickerColor, setPickerColor] = useState(customAccentHex || "#9333ea");
 
   const handleApplyColor = useCallback((hex: string) => {
@@ -344,9 +344,9 @@ function ThemeTab() {
   }, [savedColors, setSavedColors]);
 
   const handleUseAsBrand = useCallback((hex: string) => {
-    setBrandProfile({ ...brandProfile, brandPrimary: hex });
+    setBrandProfile({ ..._brandProfile, brandPrimary: hex });
     setAccentColor("brand");
-  }, [brandProfile, setBrandProfile, setAccentColor]);
+  }, [_brandProfile, setBrandProfile, setAccentColor]);
 
   const handleRemoveSaved = useCallback((index: number) => {
     const color = savedColors[index];
@@ -499,7 +499,7 @@ function ThemeTab() {
       {/* 3. My Palette */}
       <Section label={t.settings.myPalette} ccId="settings.myPalette">
         {savedColors.length === 0 ? (
-          <p className="text-xs text-slate-500">{t.settings.noSavedColors}</p>
+          <p className="text-xs text-slate-500">{_t.settings.noSavedColors}</p>
         ) : (
           <div className="flex flex-wrap gap-3">
             {savedColors.map((color, i) => (
@@ -555,7 +555,7 @@ function ThemeTab() {
       {/* 3.5 Color Archive */}
       <Section label={t.settings.colorArchive} ccId="settings.colorArchive">
         {archivedColors.length === 0 ? (
-          <p className="text-xs text-slate-500">{t.settings.noArchivedColors}</p>
+          <p className="text-xs text-slate-500">{_t.settings.noArchivedColors}</p>
         ) : (
           <div className="flex flex-wrap gap-3">
             {archivedColors.map((color, i) => (
@@ -628,7 +628,7 @@ function ThemeTab() {
             {accentEffect.gradient.enabled && (
               <div className="space-y-2 rounded-lg bg-slate-700/30 p-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500">{t.settings.gradientDirection}</span>
+                  <span className="text-[10px] text-slate-500">{_t.settings.gradientDirection}</span>
                   <div className="flex gap-1">
                     {DIRECTION_OPTIONS.map((d) => (
                       <button
@@ -755,15 +755,15 @@ function ThemeTab() {
 // ─── Brand Tab ────────────────────────────────────────────────
 
 function BrandTab() {
-  const { language, brandProfile, setBrandProfile } = useSettings();
-  const t = getTranslations(language);
+  const { language, _brandProfile, setBrandProfile } = useSettings();
+  const _t = getTranslations(language);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const updateBrand = useCallback(
     (partial: Partial<BrandProfile>) => {
-      setBrandProfile({ ...brandProfile, ...partial });
+      setBrandProfile({ ..._brandProfile, ...partial });
     },
-    [brandProfile, setBrandProfile]
+    [_brandProfile, setBrandProfile]
   );
 
   const handleLogoUpload = useCallback(
@@ -783,7 +783,7 @@ function BrandTab() {
   return (
     <div className="max-w-2xl space-y-4">
       {/* Logo + Company Name */}
-      <Section label={t.brand.companyName} ccId="settings.brandLogo">
+      <Section label={_t.brand.companyName} ccId="settings.brandLogo">
         <div className="flex items-center gap-4">
           <button
             type="button"
@@ -793,12 +793,12 @@ function BrandTab() {
           >
             {brandProfile.logoDataUrl ? (
               <img
-                src={brandProfile.logoDataUrl}
+                src={_brandProfile.logoDataUrl}
                 alt="Logo"
                 className="h-full w-full object-cover"
               />
             ) : (
-              <Layers className="h-8 w-8 text-[var(--cc-accent-400)]" />
+              <_Layers className="h-8 w-8 text-[var(--cc-accent-400)]" />
             )}
           </button>
           <input
@@ -838,13 +838,13 @@ function BrandTab() {
           {([
             { key: "brandPrimary" as const, label: t.brand.primary },
             { key: "brandSecondary" as const, label: t.brand.secondary },
-            { key: "brandTertiary" as const, label: t.brand.tertiary },
+            { key: "brandTertiary" as const, label: _t.brand.tertiary },
           ]).map(({ key, label }) => (
             <div key={key} className="flex items-center gap-3">
               <span className="w-16 text-xs text-slate-400">{label}</span>
               <input
                 type="color"
-                value={brandProfile[key] || "#9333ea"}
+                value={_brandProfile[key] || "#9333ea"}
                 onChange={(e) => updateBrand({ [key]: e.target.value })}
                 className="h-8 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
               />
@@ -886,7 +886,7 @@ function WidgetBarTab() {
     hoverDelay,
     folders,
   } = useWidgets();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const s = t.settings as Record<string, string>;
 
   const [newName, setNewName] = useState("");
@@ -938,7 +938,7 @@ function WidgetBarTab() {
 
   return (
     <div className="max-w-2xl space-y-4">
-      {/* Active profile */}
+      {/* Active _profile */}
       <Section label={s.activeProfile} ccId="settings.activeProfile">
         <div className="flex items-center gap-2 rounded-lg bg-slate-700/30 px-3 py-2.5">
           {activeProfile ? (
@@ -978,7 +978,7 @@ function WidgetBarTab() {
         </div>
       </Section>
 
-      {/* Overwrite active (only for user profiles that are modified) */}
+      {/* Overwrite active (only for _user profiles that are modified) */}
       {activeProfile && !activeProfile.builtIn && isModified && (
         <Section label={s.updateProfile} ccId="settings.updateProfile">
           <Button
@@ -1107,8 +1107,8 @@ interface NotificationTemplate {
 type NotificationTemplates = Record<TemplateType, NotificationTemplate>;
 
 const DEFAULT_TEMPLATES: NotificationTemplates = {
-  status: { title: "{{project}} — Status Update", body: "Status changed by {{user}}" },
-  mention: { title: "{{user}} mentioned you", body: "In {{project}}" },
+  status: { title: "{{project}} — Status Update", body: "Status changed by {{_user}}" },
+  mention: { title: "{{_user}} mentioned you", body: "In {{project}}" },
   deadline: { title: "Deadline: {{project}}", body: "Due {{date}}" },
   ai: { title: "AI Response Ready", body: "Your request in {{project}} is complete" },
 };
@@ -1127,7 +1127,7 @@ function loadTemplates(): NotificationTemplates {
 
 function PWATab() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const p = t.pwa as Record<string, string>;
   const install = useInstallPrompt();
   const push = usePushSubscription();
@@ -1181,7 +1181,7 @@ function PWATab() {
   const handleSendTest = useCallback(async () => {
     await fetch("/api/push/send", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      _headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: "GAM CC — Test",
         body: p.testPushSent,
@@ -1194,7 +1194,7 @@ function PWATab() {
   const handleSendToUser = useCallback(async (userId: string) => {
     await fetch("/api/push/send", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      _headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: "GAM CC",
         body: "Notification from admin",
@@ -1206,7 +1206,7 @@ function PWATab() {
   const handleSendToAll = useCallback(async () => {
     await fetch("/api/push/send", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      _headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title: "GAM CC",
         body: "Broadcast notification",
@@ -1219,7 +1219,7 @@ function PWATab() {
     try {
       const res = await fetch("/api/push/subscribers", {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        _headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mode: "expired" }),
       });
       if (res.ok) {
@@ -1709,15 +1709,15 @@ function QRScannerModal({ onClose, onResult }: { onClose: () => void; onResult: 
 // ─── Settings Page ────────────────────────────────────────────
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("_profile");
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const searchParams = useSearchParams();
 
   // Auto-switch tab from URL query param
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && TAB_KEYS.some((t) => t.tab === tab)) {
+    if (tab && TAB_KEYS.some((_t) => t.tab === tab)) {
       // Defer to avoid cascading setState
       const timer = setTimeout(() => {
         setActiveTab(tab as SettingsTab);
@@ -1744,7 +1744,7 @@ export default function SettingsPage() {
             }`}
           >
             {emoji && <span className="me-1">{emoji}</span>}
-            {(t.settings as Record<string, string>)[tKey] ?? tab}
+            {(_t.settings as Record<string, string>)[tKey] ?? tab}
           </button>
         ))}
       </div>

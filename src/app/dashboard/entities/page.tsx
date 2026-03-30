@@ -6,13 +6,13 @@ import { Database, Hash, Link2, ArrowRight, Loader2 } from 'lucide-react';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { IconDisplay } from '@/components/ui/IconPicker';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { fetchGlobalFields, fetchEntityTypes, fetchEntityConnections } from '@/lib/supabase/entityQueries';
 import { EntitySetupGuide } from '@/components/entities/EntitySetupGuide';
 
 export default function EntitiesPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === 'he';
   const te = t.entities;
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';

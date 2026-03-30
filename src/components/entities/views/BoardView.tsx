@@ -9,8 +9,8 @@ import {
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
 import { IconDisplay } from '@/components/ui/IconPicker';
-import { getTranslations } from '@/lib/i18n';
-import type { Language } from '@/contexts/SettingsContext';
+import { _getTranslations } from '@/lib/i18n';
+import type { _Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, GlobalField, I18nLabel } from '@/lib/entities/types';
 
 interface Props {
@@ -93,7 +93,7 @@ function DroppableColumn({
 }
 
 export function BoardView({ notes, fields, onUpdate, language, entityType }: Props) {
-  const t = getTranslations(language as Language);
+  const _t = getTranslations(language as _Language);
   const lang = language === 'he' ? 'he' : 'en';
 
   // Find the first select field to use as board columns

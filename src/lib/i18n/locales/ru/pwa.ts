@@ -35,7 +35,7 @@ const pwa = {
   templateAi: "Ответ AI",
   templateTitle: "Заголовок",
   templateBody: "Содержание",
-  templateVars: "Переменные: {{project}}, {{user}}, {{date}}",
+  templateVars: "Переменные: {{project}}, {{_user}}, {{date}}",
   notifPreferences: "Настройки уведомлений",
   notifWhatsapp: "WhatsApp",
   notifPhone: "Звонки",

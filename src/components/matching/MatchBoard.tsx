@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { RefreshCw, ArrowUpDown, Filter } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { MatchCard } from "./MatchCard";
 import type { MatchScoreRow } from "@/lib/matching/types";
 
@@ -31,7 +31,7 @@ export function MatchBoard({
   onCardClick,
 }: MatchBoardProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const mt = t.matching as Record<string, string>;
 
   const [sortBy, setSortBy] = useState<SortField>("total");

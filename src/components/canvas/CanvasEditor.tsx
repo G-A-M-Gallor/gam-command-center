@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { supabase } from '@/lib/supabaseClient';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { useAutoSave } from '@/lib/editor/useAutoSave';
 import { CanvasProvider, useCanvas } from '@/contexts/CanvasContext';
 import { useCanvasGrid } from '@/lib/canvas/useCanvasGrid';
@@ -35,11 +35,11 @@ interface CanvasEditorProps {
   recordId: string;
 }
 
-// ─── Inner Component (uses context) ──────────────────
+// ─── Inner Component (uses _context) ──────────────────
 function CanvasEditorInner({ recordId }: CanvasEditorProps) {
-  const router = useRouter();
+  const _router = useRouter();
   const { sidebarPosition, language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const {
     layout,
     placements,
@@ -380,7 +380,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
     return (
       <div className="flex h-full items-center justify-center text-slate-500" dir="rtl">
         <div className="flex items-center gap-2">
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
           <span className="text-sm">טוען...</span>
         </div>
       </div>
@@ -411,7 +411,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
             cardText={storyNoteMeta.cardText}
             t={{
               storyMap: t.editor.sourceBannerStoryMap,
-              backToStoryMap: t.editor.sourceBannerBack,
+              backToStoryMap: _t.editor.sourceBannerBack,
             }}
           />
         </div>
@@ -424,7 +424,7 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
             cardText={bookmarkNoteMeta.bookmarkUrl}
             t={{
               storyMap: t.editor.sourceBannerBookmark || 'Bookmark',
-              backToStoryMap: t.editor.sourceBannerOpenUrl || 'Open URL',
+              backToStoryMap: _t.editor.sourceBannerOpenUrl || 'Open URL',
             }}
             linkHref={bookmarkNoteMeta.bookmarkUrl}
           />

@@ -45,7 +45,7 @@ export function useSidebarCustomization(language?: string) {
     return () => window.removeEventListener(CUSTOMIZATION_EVENT, handler);
   }, [language]);
 
-  const update = useCallback((next: SidebarCustomization) => {
+  const _update = useCallback((next: SidebarCustomization) => {
     setData(next);
     saveCustomization(next, language);
   }, [language]);
@@ -179,7 +179,7 @@ export function useSidebarCustomization(language?: string) {
       });
     },
     toggleEditMode: () => setEditMode((v) => !v),
-    setEditMode,
+    _setEditMode,
     reset: () => {
       const next = resetCustomization();
       setData(next);

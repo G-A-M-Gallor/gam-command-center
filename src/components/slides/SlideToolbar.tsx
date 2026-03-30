@@ -30,7 +30,7 @@ function ToolbarBtn({ onClick, title, children, active }: { onClick: () => void;
   );
 }
 
-export function SlideToolbar({ t }: SlideToolbarProps) {
+export function SlideToolbar({ _t }: SlideToolbarProps) {
   const addTextElement = useSlidesStore((s) => s.addTextElement);
   const addShapeElement = useSlidesStore((s) => s.addShapeElement);
   const addImageElement = useSlidesStore((s) => s.addImageElement);
@@ -75,7 +75,7 @@ export function SlideToolbar({ t }: SlideToolbarProps) {
       <ToolbarBtn onClick={addTextElement} title={t.addText || "Add Text"}>
         <Type className="h-4 w-4" />
       </ToolbarBtn>
-      <ToolbarBtn onClick={handleImageUpload} title={t.addImage || "Add Image"}>
+      <ToolbarBtn onClick={handleImageUpload} title={_t.addImage || "Add Image"}>
         <ImagePlus className="h-4 w-4" />
       </ToolbarBtn>
 

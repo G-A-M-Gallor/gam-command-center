@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Search, Plus, BookOpen, Tag } from "lucide-react";
+import { Search, _Plus, BookOpen, Tag } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { supabase } from "@/lib/supabaseClient";
 import { timeAgo } from "@/lib/utils/timeAgo";
@@ -23,7 +23,7 @@ const WIKI_CATEGORIES = ["sales", "ops", "tech", "people", "products"] as const;
 
 export default function WikiPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === "he";
   const wikiT = t.wiki as any;
   const tw = wikiT as Record<string, string>;
@@ -110,7 +110,7 @@ export default function WikiPage() {
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-t-[var(--cc-accent-400)]" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-_t-[var(--cc-accent-400)]" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">

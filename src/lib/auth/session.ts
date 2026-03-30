@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { _createClient } from '@/lib/supabase/server';
 import { createClient as createBrowserClient } from '@/lib/supabase/client';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -24,9 +24,9 @@ export async function getServerSession() {
 
 // Require authentication on server side - redirects if not authenticated
 export async function requireAuth(): Promise<User> {
-  const user = await getServerSession();
+  const _user = await getServerSession();
 
-  if (!user) {
+  if (!_user) {
     redirect('/auth/login');
   }
 
@@ -34,8 +34,8 @@ export async function requireAuth(): Promise<User> {
 }
 
 // Check if user has required role
-export function hasRole(user: User | null, requiredRole: string): boolean {
-  if (!user) return false;
+export function hasRole(_user: User | null, requiredRole: string): boolean {
+  if (!_user) return false;
 
   const userRole = user.app_metadata?.role || 'member';
 
@@ -48,8 +48,8 @@ export function hasRole(user: User | null, requiredRole: string): boolean {
 }
 
 // Check if user is in allowed emails list
-export async function isUserAuthorized(user: User | null): Promise<boolean> {
-  if (!user || !user.email) return false;
+export async function isUserAuthorized(_user: User | null): Promise<boolean> {
+  if (!user || !_user.email) return false;
 
   const allowedEmails = (process.env.ALLOWED_EMAILS || "")
     .split(",")
@@ -59,14 +59,14 @@ export async function isUserAuthorized(user: User | null): Promise<boolean> {
   // If no allowlist configured, allow all authenticated users
   if (allowedEmails.length === 0) return true;
 
-  return allowedEmails.includes(user.email.toLowerCase());
+  return allowedEmails.includes(_user.email.toLowerCase());
 }
 
 // Server-side role check with redirect
 export async function requireRole(requiredRole: string): Promise<User> {
-  const user = await requireAuth();
+  const _user = await requireAuth();
 
-  if (!hasRole(user, requiredRole)) {
+  if (!hasRole(_user, requiredRole)) {
     redirect('/auth/unauthorized');
   }
 
@@ -78,7 +78,7 @@ export async function loginWithCredentials(username: string, password: string) {
   try {
     const response = await fetch('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      _headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({ username, password }),
     });

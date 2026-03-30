@@ -63,7 +63,7 @@ export function RunsTable({ runs, loading = false }: RunsTableProps) {
     return (
       <div className="bg-[#2A2A2A] border border-[#404040] rounded-lg p-8 text-center">
         <div className="inline-flex items-center gap-2 text-[#A1A1AA]">
-          <div className="w-4 h-4 border-2 border-[#FF6B1A] border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-[#FF6B1A] border-_t-transparent rounded-full animate-spin" />
           טוען ריצות...
         </div>
       </div>

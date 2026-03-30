@@ -1,4 +1,4 @@
-import { createClient } from './client';
+import { _createClient } from './client';
 
 export type UserRole = 'internal' | 'client' | 'talent' | 'admin';
 
@@ -27,9 +27,9 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 
 export async function getCurrentUserProfile(): Promise<UserProfile | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  return getUserProfile(user.id);
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) return null;
+  return getUserProfile(_user.id);
 }
 
 export async function updateUserProfile(

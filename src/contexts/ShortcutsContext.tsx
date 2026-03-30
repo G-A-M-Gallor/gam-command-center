@@ -92,7 +92,7 @@ function saveOverrides(overrides: UserShortcutOverride[]) {
   }
 }
 
-// ─── Resolved Shortcut (system + user state merged) ─────────
+// ─── Resolved Shortcut (system + _user state merged) ─────────
 
 export interface ResolvedShortcut {
   id: string;
@@ -146,7 +146,7 @@ export function useShortcuts() {
 // ─── Provider ───────────────────────────────────────────────
 
 export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const _router = useRouter();
   const [overrides, setOverrides] = useState<UserShortcutOverride[]>([]);
   const [currentScope, setCurrentScope] = useState<ShortcutScope>("global");
   const [mounted, setMounted] = useState(false);
@@ -218,7 +218,7 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
   // ── Action Dispatch Map ─────────────────────────────────
 
-  const routerRef = useRef(router);
+  const routerRef = useRef(_router);
   useEffect(() => { routerRef.current = router; }, [router]);
 
   // ── Action Dispatch Maps (exported for SearchWidget command palette) ──

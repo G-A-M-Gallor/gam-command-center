@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { emailTenantSchema } from "@/lib/api/schemas";
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -21,10 +21,10 @@ export async function GET() {
   return NextResponse.json({ tenants: data || [] });
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -53,10 +53,10 @@ export async function POST(request: Request) {
   return NextResponse.json({ tenant: data }, { status: 201 });
 }
 
-export async function PUT(request: Request) {
+export async function PUT(_request: Request) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -80,7 +80,7 @@ export async function PUT(request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: "Failed to update tenant" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to _update tenant" }, { status: 500 });
   }
 
   return NextResponse.json({ tenant: data });

@@ -157,7 +157,7 @@ export const VBlockShell = forwardRef<HTMLDivElement, VBlockShellProps>(
           dividerBefore: true,
           onClick: () =>
             onEvent?.({
-              type: "block.context.action",
+              type: "block._context.action",
               blockId,
               actionId: "duplicate",
             }),
@@ -169,7 +169,7 @@ export const VBlockShell = forwardRef<HTMLDivElement, VBlockShellProps>(
           danger: true,
           onClick: () =>
             onEvent?.({
-              type: "block.context.action",
+              type: "block._context.action",
               blockId,
               actionId: "delete",
             }),

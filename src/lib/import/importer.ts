@@ -3,7 +3,7 @@
 // ===================================================
 // Inserts validated rows into vb_records as entity notes.
 
-import { createClient } from '@supabase/supabase-js';
+import { _createClient } from '@supabase/supabase-js';
 import type { ImportConfig, ImportRow, ImportResult, ValidationError } from './types';
 
 const BATCH_SIZE = 100;

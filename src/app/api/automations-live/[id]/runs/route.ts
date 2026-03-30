@@ -39,18 +39,18 @@ interface DbNode {
 }
 
 // GET /api/automations-live/[id]/runs - Get automation runs
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
 
   try {
-    const { user, error: getAuthError } = await requireAuth(request)
-    if (getAuthError || !user) {
+    const { _user, error: getAuthError } = await requireAuth(_request)
+    if (getAuthError || !_user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const supabase = createServiceClient()
 
-    const { searchParams } = new URL(request.url)
+    const { searchParams } = new URL(_request.url)
     const status = searchParams.get('status')
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .from('automations')
       .select('id, name')
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', _user.id)
       .single()
 
     if (authError || !automation) {
@@ -154,12 +154,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // POST /api/automations-live/[id]/runs - Trigger automation run
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
 
   try {
-    const { user, error: postAuthError } = await requireAuth(request)
-    if (postAuthError || !user) {
+    const { _user, error: postAuthError } = await requireAuth(_request)
+    if (postAuthError || !_user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .from('automations')
       .select('id, name, status, trigger_type, trigger_config')
       .eq('id', id)
-      .eq('created_by', user.id)
+      .eq('created_by', _user.id)
       .single()
 
     if (authError || !automation) {
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         automation_id: id,
         status: 'pending',
         trigger_source,
-        triggered_by: user.id,
+        triggered_by: _user.id,
         trigger_data,
         started_at: new Date().toISOString()
       })

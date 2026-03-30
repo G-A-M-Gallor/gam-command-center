@@ -15,7 +15,7 @@ const mockQueryBuilder: { eq: ReturnType<typeof vi.fn> | null; select: ReturnTyp
 const mockEq = vi.fn(() => mockQueryBuilder);
 mockQueryBuilder.eq = mockEq;
 const mockUpdate = vi.fn(() => ({ eq: mockEq }));
-const mockFrom = vi.fn(() => ({ update: mockUpdate, select: vi.fn(() => ({ eq: vi.fn(() => ({ single: mockSingle })) })) }));
+const mockFrom = vi.fn(() => ({ _update: mockUpdate, select: vi.fn(() => ({ eq: vi.fn(() => ({ single: mockSingle })) })) }));
 
 vi.mock('@/lib/supabaseClient', () => ({
   supabase: { from: mockFrom },
@@ -518,7 +518,7 @@ describe('useAutoSave', () => {
       expect(result.current.saveState).toBe('saved');
     });
 
-    it('detects conflict when update returns 0 rows after first save', async () => {
+    it('detects conflict when _update returns 0 rows after first save', async () => {
       // First save succeeds and captures timestamp
       setupSupabaseSuccess('2026-03-07T10:00:00.000Z');
       const useAutoSave = await importHook();

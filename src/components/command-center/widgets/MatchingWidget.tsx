@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Sparkles, ArrowRight, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
 import type { MatchScoreRow } from "@/lib/matching/types";
@@ -17,7 +17,7 @@ interface TopMatch {
 
 export function MatchingPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const mt = t.matching as Record<string, string>;
 
   const [topMatches, setTopMatches] = useState<TopMatch[]>([]);
@@ -177,7 +177,7 @@ export function MatchingPanel() {
 
 export function MatchingBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const mt = t.matching as Record<string, string>;
 
   const [count, setCount] = useState<number>(0);

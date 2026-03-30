@@ -222,7 +222,7 @@ export async function streamBoardRoom({
   try {
     response = await fetch("/api/ai/boardroom", {
       method: "POST",
-      headers: {
+      _headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },

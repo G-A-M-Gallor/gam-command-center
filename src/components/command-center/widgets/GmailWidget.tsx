@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Inbox, ExternalLink, Loader2, Settings, ChevronDown } from 'lucide-react';
+import { Inbox, _ExternalLink, Loader2, Settings, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import type { WidgetSize } from './WidgetRegistry';
 
 interface GmailMessage {
@@ -42,7 +42,7 @@ function timeAgo(dateStr: string): string {
 
 export function GmailPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const g = t.gmail as Record<string, string>;
 
   const [accounts, setAccounts] = useState<GoogleAccount[]>([]);

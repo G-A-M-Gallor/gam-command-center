@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import {
-  ChevronDown, ChevronRight, ChevronUp, Plus, X, GripVertical,
+  ChevronDown, ChevronRight, ChevronUp, _Plus, _X, GripVertical,
   Eye, EyeOff, Settings2, Zap, Library,
 } from 'lucide-react';
 import type {
@@ -40,7 +40,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const isRtl = language === 'he';
 
-  const t = {
+  const _t = {
     he: {
       templateConfig: 'הגדרות תבנית',
       sections: 'סקציות',
@@ -195,7 +195,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
   const selectFields = availableFields.filter(f => f.field_type === 'select');
   const dateFields = availableFields.filter(f => f.field_type === 'date');
 
-  const update = useCallback((patch: Partial<TemplateConfig>) => {
+  const _update = useCallback((patch: Partial<TemplateConfig>) => {
     onChange({ ...c, ...patch });
   }, [c, onChange]);
 
@@ -314,7 +314,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
   return (
     <div className="space-y-2" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Available Views */}
-      {renderPanelToggle("views", t.availableViews)}
+      {renderPanelToggle("views", _t.availableViews)}
       {openPanel === 'views' && (
         <div className="px-3 pb-3 space-y-3">
           <div className="flex flex-wrap gap-2">
@@ -339,10 +339,10 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
             <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
               <span className="text-[10px] font-semibold text-slate-500 uppercase">{t.boardConfig}</span>
               <div>
-                <label className="text-[10px] text-slate-400">{t.groupField}</label>
+                <label className="text-[10px] text-slate-400">{_t.groupField}</label>
                 <select
                   value={c.board_config?.group_field ?? ''}
-                  onChange={e => update({ board_config: { group_field: e.target.value, card_fields: c.board_config?.card_fields ?? [] } })}
+                  onChange={e => _update({ board_config: { group_field: e.target.value, card_fields: c.board_config?.card_fields ?? [] } })}
                   className="mt-1 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300"
                 >
                   <option value="">—</option>
@@ -384,10 +384,10 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
               <span className="text-[10px] font-semibold text-slate-500 uppercase">{t.ganttConfig}</span>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-slate-400">{t.startField}</label>
+                  <label className="text-[10px] text-slate-400">{_t.startField}</label>
                   <select
                     value={c.gantt_config?.start_field ?? ''}
-                    onChange={e => update({ gantt_config: { start_field: e.target.value, end_field: c.gantt_config?.end_field ?? '' } })}
+                    onChange={e => _update({ gantt_config: { start_field: e.target.value, end_field: c.gantt_config?.end_field ?? '' } })}
                     className="mt-1 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300"
                   >
                     <option value="">—</option>
@@ -418,10 +418,10 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
             <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 space-y-2">
               <span className="text-[10px] font-semibold text-slate-500 uppercase">{t.timelineConfig}</span>
               <div>
-                <label className="text-[10px] text-slate-400">{t.dateField}</label>
+                <label className="text-[10px] text-slate-400">{_t.dateField}</label>
                 <select
                   value={c.timeline_config?.date_field ?? ''}
-                  onChange={e => update({ timeline_config: { date_field: e.target.value, milestone_statuses: c.timeline_config?.milestone_statuses ?? [] } })}
+                  onChange={e => _update({ timeline_config: { date_field: e.target.value, milestone_statuses: c.timeline_config?.milestone_statuses ?? [] } })}
                   className="mt-1 w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300"
                 >
                   <option value="">—</option>
@@ -452,12 +452,12 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
       )}
 
       {/* Layout — columns + sections */}
-      {renderPanelToggle("sections", t.sections)}
+      {renderPanelToggle("sections", _t.sections)}
       {openPanel === 'sections' && (
         <div className="px-3 pb-3 space-y-3">
           {/* Meta columns */}
           <div>
-            <label className="text-[10px] text-slate-400">{t.columns}</label>
+            <label className="text-[10px] text-slate-400">{_t.columns}</label>
             <div className="flex gap-2 mt-1">
               {([1, 2, 3] as const).map(n => (
                 <button
@@ -508,7 +508,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                 <label className="text-[9px] text-slate-500">{t.assignFields}</label>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {availableFields.length === 0 ? (
-                    <span className="text-[10px] text-slate-600">{t.noFields}</span>
+                    <span className="text-[10px] text-slate-600">{_t.noFields}</span>
                   ) : (
                     availableFields.map(f => (
                       <button
@@ -540,14 +540,14 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
       )}
 
       {/* Toggles */}
-      {renderPanelToggle("toggles", `${t.trackActivity} / ${t.trackKpi}`)}
+      {renderPanelToggle("toggles", `${t.trackActivity} / ${_t.trackKpi}`)}
       {openPanel === 'toggles' && (
         <div className="px-3 pb-3 space-y-2">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={c.track_activity}
-              onChange={e => update({ track_activity: e.target.checked })}
+              onChange={e => _update({ track_activity: e.target.checked })}
               className="rounded border-white/20"
             />
             <Settings2 size={12} className="text-slate-400" />
@@ -567,7 +567,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
       )}
 
       {/* Action Buttons */}
-      {renderPanelToggle("actions", t.actionButtons)}
+      {renderPanelToggle("actions", _t.actionButtons)}
       {openPanel === 'actions' && (
         <div className="px-3 pb-3 space-y-3">
           {(c.action_buttons ?? []).map((btn, idx) => {
@@ -601,7 +601,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                   </span>
                   {isBlt && (
                     <span className="rounded-full bg-purple-500/10 px-1.5 py-0.5 text-[9px] text-purple-400 font-medium">
-                      {t.builtin}
+                      {_t.builtin}
                     </span>
                   )}
                   <span className="rounded-full bg-white/[0.04] px-1.5 py-0.5 text-[9px] text-slate-500">
@@ -615,7 +615,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                 {/* Builtin actions only show positions — no other config editable */}
                 {isBlt ? (
                   <div>
-                    <label className="text-[9px] text-slate-500">{t.positions}</label>
+                    <label className="text-[9px] text-slate-500">{_t.positions}</label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {ALL_POSITIONS.map(pos => (
                         <button
@@ -631,7 +631,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                         </button>
                       ))}
                       {(!btn.positions || btn.positions.length === 0) && (
-                        <span className="text-[9px] text-slate-600 italic">{t.autoFromScope}</span>
+                        <span className="text-[9px] text-slate-600 italic">{_t.autoFromScope}</span>
                       )}
                     </div>
                   </div>
@@ -641,7 +641,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                     <div className="grid grid-cols-2 gap-2">
                       {/* Label he/en */}
                       <div>
-                        <label className="text-[9px] text-slate-500">{t.actionLabel} (he)</label>
+                        <label className="text-[9px] text-slate-500">{_t.actionLabel} (he)</label>
                         <input
                           type="text"
                           value={btn.label.he}
@@ -746,7 +746,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                     {btn.handler_type === 'navigate' && (
                       <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 space-y-2">
                         <div>
-                          <label className="text-[9px] text-slate-500">{t.urlTemplate}</label>
+                          <label className="text-[9px] text-slate-500">{_t.urlTemplate}</label>
                           <input
                             type="text"
                             value={(btn.handler_config as NavigateConfig | undefined)?.url_template ?? ''}
@@ -783,7 +783,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                     {btn.handler_type === 'set_field' && (
                       <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 space-y-2">
                         <div>
-                          <label className="text-[9px] text-slate-500">{t.fieldKey}</label>
+                          <label className="text-[9px] text-slate-500">{_t.fieldKey}</label>
                           <select
                             value={(btn.handler_config as SetFieldConfig | undefined)?.field_key ?? ''}
                             onChange={e => updateActionButton(idx, {
@@ -822,7 +822,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                     {btn.handler_type === 'custom_event' && (
                       <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 space-y-2">
                         <div>
-                          <label className="text-[9px] text-slate-500">{t.eventName}</label>
+                          <label className="text-[9px] text-slate-500">{_t.eventName}</label>
                           <input
                             type="text"
                             value={(btn.handler_config as CustomEventConfig | undefined)?.event_name ?? ''}
@@ -858,7 +858,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                     {btn.handler_type === 'webhook' && (
                       <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2 space-y-2">
                         <div>
-                          <label className="text-[9px] text-slate-500">{t.webhookUrl}</label>
+                          <label className="text-[9px] text-slate-500">{_t.webhookUrl}</label>
                           <input
                             type="text"
                             value={(btn.handler_config as WebhookConfig | undefined)?.url ?? ''}
@@ -908,7 +908,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
                           </button>
                         ))}
                         {(!btn.positions || btn.positions.length === 0) && (
-                          <span className="text-[9px] text-slate-600 italic">{t.autoFromScope}</span>
+                          <span className="text-[9px] text-slate-600 italic">{_t.autoFromScope}</span>
                         )}
                       </div>
                     </div>
@@ -953,7 +953,7 @@ export function TemplateEditor({ config, fieldRefs, fields, language, onChange }
           {showBuiltinPicker && availableBuiltins.length > 0 && (
             <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/[0.03] p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold text-emerald-400 uppercase">{t.addFromLibrary}</span>
+                <span className="text-[10px] font-semibold text-emerald-400 uppercase">{_t.addFromLibrary}</span>
                 <button onClick={() => setShowBuiltinPicker(false)} className="text-slate-500 hover:text-slate-300">
                   <X size={12} />
                 </button>

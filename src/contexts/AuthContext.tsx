@@ -10,7 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
+import { _createClient } from "@/lib/supabase/client";
 import {
   fetchActionPermissions,
   roleDefaults,
@@ -36,10 +36,10 @@ const DEFAULT_PERMISSIONS: UserPermissions = {
   canManageUsers: false,
 };
 
-function resolvePermissions(user: User | null): UserPermissions {
-  if (!user) return { ...DEFAULT_PERMISSIONS, role: 'viewer', canEdit: false };
+function resolvePermissions(_user: User | null): UserPermissions {
+  if (!_user) return { ...DEFAULT_PERMISSIONS, role: 'viewer', canEdit: false };
 
-  const role = (user.app_metadata?.role as UserRole) ?? 'member';
+  const role = (_user.app_metadata?.role as UserRole) ?? 'member';
 
   switch (role) {
     case 'admin':
@@ -51,7 +51,7 @@ function resolvePermissions(user: User | null): UserPermissions {
     case 'viewer':
       return { role, visiblePages: null, canEdit: false, canDelete: false, canManageUsers: false };
     case 'external': {
-      const pages = (user.app_metadata?.visible_pages as string[]) ?? null;
+      const pages = (_user.app_metadata?.visible_pages as string[]) ?? null;
       return { role, visiblePages: pages, canEdit: false, canDelete: false, canManageUsers: false };
     }
     default:
@@ -72,7 +72,7 @@ interface AuthContextValue {
 const DEFAULT_ACTION_PERMISSIONS = roleDefaults('member');
 
 const AuthContext = createContext<AuthContextValue>({
-  user: null,
+  _user: null,
   loading: true,
   permissions: DEFAULT_PERMISSIONS,
   actionPermissions: DEFAULT_ACTION_PERMISSIONS,
@@ -82,15 +82,15 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [_user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionPerms, setActionPerms] = useState<ActionPermissions>(DEFAULT_ACTION_PERMISSIONS);
-  const router = useRouter();
+  const _router = useRouter();
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     // Initial user load
-    supabase.auth.getUser().then(({ data: { user: u } }) => {
+    supabase.auth.getUser().then(({ data: { _user: u } }) => {
       setUser(u);
       setLoading(false);
     });
@@ -99,24 +99,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      setUser(session?._user ?? null);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, [supabase]);
 
-  const permissions = useMemo(() => resolvePermissions(user), [user]);
+  const permissions = useMemo(() => resolvePermissions(_user), [user]);
   const isAdmin = permissions.role === 'admin';
 
   // Fetch action permissions when user loads
   useEffect(() => {
-    if (!user) {
+    if (!_user) {
       setActionPerms(roleDefaults('viewer'));
       return;
     }
-    fetchActionPermissions(user.id, permissions.role).then(setActionPerms);
-  }, [user, permissions.role]);
+    fetchActionPermissions(_user.id, permissions.role).then(setActionPerms);
+  }, [_user, permissions.role]);
 
   const canPerformAction = useCallback((actionId: string): boolean => {
     if (isAdmin) return true;
@@ -125,7 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return actionPerms[permKey];
   }, [isAdmin, actionPerms]);
 
-  const signOut = useCallback(async () => {
+  const _signOut = useCallback(async () => {
     try {
       // Use our API route for logout to properly handle cookies
       await fetch('/api/auth/logout', {
@@ -144,8 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, router]);
 
   const value = useMemo(
-    () => ({ user, loading, permissions, actionPermissions: actionPerms, canPerformAction, isAdmin, signOut }),
-    [user, loading, permissions, actionPerms, canPerformAction, isAdmin, signOut]
+    () => ({ _user, loading, permissions, actionPermissions: actionPerms, canPerformAction, isAdmin, _signOut }),
+    [_user, loading, permissions, actionPerms, canPerformAction, isAdmin, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

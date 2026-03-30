@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Send, Phone, User, Clock } from 'lucide-react';
+import { Send, Phone, User, _Clock } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -57,7 +57,7 @@ export function WATIChatInterface({ entityId, phone, className }: WATIChatInterf
     try {
       const response = await fetch('/api/wati/messages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'send_text',
           phone,
@@ -141,7 +141,7 @@ export function WATIChatInterface({ entityId, phone, className }: WATIChatInterf
                 <div className={`flex items-center gap-1 mt-1 text-xs ${
                   message.direction === 'outbound' ? 'text-blue-200' : 'text-slate-400'
                 }`}>
-                  <Clock size={10} />
+                  <_Clock size={10} />
                   <span>
                     {new Date(message.timestamp).toLocaleTimeString('he-IL', {
                       hour: '2-digit',

@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   Search,
-  ExternalLink,
+  _ExternalLink,
   Check,
   Copy,
   Info,
   Sparkles,
   Eye,
-  X,
+  _X,
   RefreshCw,
 } from "lucide-react";
 import { Input } from "@/components/ui";
@@ -100,7 +100,7 @@ export function LibraryTab({ language, td }: LibraryTabProps) {
           c.description.he.includes(q) ||
           c.description.en.toLowerCase().includes(q) ||
           c.slug.includes(q) ||
-          c.tags.some((t) => t.includes(q))
+          c.tags.some((_t) => t.includes(q))
       );
     }
     return items;

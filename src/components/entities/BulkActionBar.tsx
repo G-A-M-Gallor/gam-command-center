@@ -2,13 +2,13 @@
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
-  RefreshCw, Trash2, PowerOff, Edit3, ChevronDown, X, Check,
+  RefreshCw, Trash2, PowerOff, Edit3, ChevronDown, _X, Check,
 } from 'lucide-react';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { bulkUpdateMeta, deactivateNote, deleteNote } from '@/lib/supabase/entityQueries';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
-import type { Language } from '@/contexts/SettingsContext';
+import type { _Language } from '@/contexts/SettingsContext';
 import type { GlobalField, TemplateConfig } from '@/lib/entities/types';
 import { getPriorityOptions } from '@/lib/entities/priorityAliases';
 
@@ -30,11 +30,11 @@ export function BulkActionBar({
   onClearSelection,
   onRefresh,
 }: BulkActionBarProps) {
-  const t = getTranslations(language as Language);
+  const _t = getTranslations(language as _Language);
   const tb = t.entities.bulkBar;
   const isRtl = language === 'he';
   const lang = language as 'he' | 'en' | 'ru';
-  const { user } = useAuth();
+  const { _user } = useAuth();
   const { toast } = useToast();
 
   const [loading, setLoading] = useState(false);
@@ -90,13 +90,13 @@ export function BulkActionBar({
     setShowStatusDropdown(false);
     await bulkUpdateMeta([...selectedIds], { [statusField.meta_key]: statusValue }, {
       trackActivity: true,
-      actorId: user?.id ?? null,
+      actorId: _user?.id ?? null,
     });
     setLoading(false);
     toast({ message: tb.success, type: 'success' });
     onRefresh();
     onClearSelection();
-  }, [selectedIds, statusField, user, onRefresh, onClearSelection, toast, tb]);
+  }, [selectedIds, statusField, _user, onRefresh, onClearSelection, toast, tb]);
 
   const handleFieldUpdate = useCallback(async () => {
     if (!selectedFieldKey || !fieldValue) return;
@@ -104,7 +104,7 @@ export function BulkActionBar({
     setShowFieldPopover(false);
     await bulkUpdateMeta([...selectedIds], { [selectedFieldKey]: fieldValue }, {
       trackActivity: true,
-      actorId: user?.id ?? null,
+      actorId: _user?.id ?? null,
     });
     setLoading(false);
     setSelectedFieldKey('');
@@ -112,7 +112,7 @@ export function BulkActionBar({
     toast({ message: tb.success, type: 'success' });
     onRefresh();
     onClearSelection();
-  }, [selectedIds, selectedFieldKey, fieldValue, user, onRefresh, onClearSelection, toast, tb]);
+  }, [selectedIds, selectedFieldKey, fieldValue, _user, onRefresh, onClearSelection, toast, tb]);
 
   const handleDeactivate = useCallback(async () => {
     if (confirmAction !== 'deactivate') {
@@ -123,13 +123,13 @@ export function BulkActionBar({
     setConfirmAction(null);
     const ids = [...selectedIds];
     for (const id of ids) {
-      await deactivateNote(id, user?.id ?? null);
+      await deactivateNote(id, _user?.id ?? null);
     }
     setLoading(false);
     toast({ message: tb.success, type: 'success' });
     onRefresh();
     onClearSelection();
-  }, [confirmAction, selectedIds, user, onRefresh, onClearSelection, toast, tb]);
+  }, [confirmAction, selectedIds, _user, onRefresh, onClearSelection, toast, tb]);
 
   const handleDelete = useCallback(async () => {
     if (confirmAction !== 'delete') {
@@ -278,7 +278,7 @@ export function BulkActionBar({
               disabled={loading}
               className="rounded px-2 py-0.5 text-[11px] bg-amber-600/30 text-amber-200 hover:bg-amber-600/50 transition-colors disabled:opacity-50"
             >
-              {t.common.confirm}
+              {_t.common.confirm}
             </button>
             <button
               onClick={() => setConfirmAction(null)}
@@ -307,7 +307,7 @@ export function BulkActionBar({
               disabled={loading}
               className="rounded px-2 py-0.5 text-[11px] bg-red-600/30 text-red-200 hover:bg-red-600/50 transition-colors disabled:opacity-50"
             >
-              {t.common.confirm}
+              {_t.common.confirm}
             </button>
             <button
               onClick={() => setConfirmAction(null)}

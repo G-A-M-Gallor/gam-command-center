@@ -11,11 +11,11 @@ import {
   CheckCircle,
   ArrowLeft,
   ArrowRight,
-  Monitor,
+  _Monitor,
   Camera,
   Zap,
   Link as LinkIcon,
-  Shield,
+  _Shield,
   Film,
 } from "lucide-react";
 import Link from "next/link";
@@ -47,19 +47,19 @@ export default function VClipDownloadPage() {
 
   const features = isRtl
     ? [
-        { icon: Monitor, title: "הקלטת מסך", desc: "מסך מלא, חלון, או טאב" },
+        { icon: _Monitor, title: "הקלטת מסך", desc: "מסך מלא, חלון, או טאב" },
         { icon: Camera, title: "בועת פנים", desc: "מצלמה עגולה בפינה — גודל ומיקום לבחירה" },
         { icon: Zap, title: "כיווץ אוטומטי", desc: "ffmpeg.wasm מכווץ בדפדפן לפני העלאה" },
         { icon: LinkIcon, title: "לינק מיידי", desc: "לינק מוכן תוך שניות — שלח לכל אחד" },
-        { icon: Shield, title: "פרטיות", desc: "סיסמה, תפוגה, ווטרמרק — הכל אופציונלי" },
+        { icon: _Shield, title: "פרטיות", desc: "סיסמה, תפוגה, ווטרמרק — הכל אופציונלי" },
         { icon: Film, title: "מעקב צפיות", desc: "מי צפה, מתי, כמה זמן, איזה מכשיר" },
       ]
     : [
-        { icon: Monitor, title: "Screen Recording", desc: "Full screen, window, or tab" },
+        { icon: _Monitor, title: "Screen Recording", desc: "Full screen, window, or tab" },
         { icon: Camera, title: "Face Bubble", desc: "Round camera overlay — adjustable size & position" },
         { icon: Zap, title: "Auto Compress", desc: "ffmpeg.wasm compresses in browser before upload" },
         { icon: LinkIcon, title: "Instant Link", desc: "Link ready in seconds — share with anyone" },
-        { icon: Shield, title: "Privacy", desc: "Password, expiry, watermark — all optional" },
+        { icon: _Shield, title: "Privacy", desc: "Password, expiry, watermark — all optional" },
         { icon: Film, title: "View Tracking", desc: "Who watched, when, how long, which device" },
       ];
 
@@ -131,7 +131,7 @@ export default function VClipDownloadPage() {
         >
           {downloading ? (
             <>
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-400 border-t-black" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-400 border-_t-black" />
               {isRtl ? "מכין הורדה..." : "Preparing..."}
             </>
           ) : (

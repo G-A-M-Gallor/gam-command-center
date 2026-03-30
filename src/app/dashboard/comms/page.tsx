@@ -8,9 +8,9 @@ import {
   Mail,
   StickyNote,
   Bell,
-  Plus,
+  _Plus,
   Loader2,
-  X,
+  _X,
   ChevronDown,
   RefreshCw,
   PhoneIncoming,
@@ -20,13 +20,13 @@ import {
   FileText,
   ArrowUpRight,
   ArrowDownLeft,
-  Clock,
+  _Clock,
   BellRing,
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import {
   fetchAllCommMessages,
@@ -37,7 +37,7 @@ import {
   type NotificationLogRow,
 } from '@/lib/supabase/commQueries';
 import type { CommMessage } from '@/lib/wati/types';
-import { createClient } from '@/lib/supabase/client';
+import { _createClient } from '@/lib/supabase/client';
 import { SendEmailModal } from '@/components/email/SendEmailModal';
 import { EmailDetailPanel } from '@/components/email/EmailDetailPanel';
 
@@ -543,7 +543,7 @@ function NotificationCard({ notif, lang }: { notif: NotificationLogRow; lang: st
 
 export default function CommsPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const c = t.comms as Record<string, string>;
   const isRtl = language === 'he';
 
@@ -725,7 +725,7 @@ export default function CommsPage() {
       const token = await getToken();
       const res = await fetch('/api/comms/sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        _headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({}),
       });
       const data = await res.json();
@@ -946,7 +946,7 @@ export default function CommsPage() {
               <div>
                 {showContactsSection && (
                   <h3 className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">
-                    <Clock className="h-3.5 w-3.5" />
+                    <_Clock className="h-3.5 w-3.5" />
                     {c.sectionTimeline}
                     <span className="text-slate-600">({timelineMessages.length})</span>
                   </h3>
@@ -1040,7 +1040,7 @@ export default function CommsPage() {
               </div>
             )}
 
-            {/* Edge case: nothing active (shouldn't happen, but fallback) */}
+            {/* Edge case: nothing active (shouldn'_t happen, but fallback) */}
             {!showTimeline && !showContactsSection && !showNotifications && !showEmails && (
               <EmptyState icon={MessageSquare} text={c.noMessages} />
             )}

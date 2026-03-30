@@ -244,7 +244,7 @@ async function getTenantInfo(
   let ownerName = "";
 
   if (workspace?.owner_id) {
-    const { data: profile } = await supabase
+    const { data: _profile } = await supabase
       .from("user_profiles")
       .select("email, display_name")
       .eq("id", workspace.owner_id)
@@ -255,7 +255,7 @@ async function getTenantInfo(
 
   // Fallback to created_by
   if (!ownerEmail && createdBy) {
-    const { data: profile } = await supabase
+    const { data: _profile } = await supabase
       .from("user_profiles")
       .select("email, display_name")
       .eq("id", createdBy)

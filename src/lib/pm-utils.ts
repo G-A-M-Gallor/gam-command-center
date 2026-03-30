@@ -46,47 +46,47 @@ export function detectRisks(
   const risks: Risk[] = [];
 
   // HIGH: blocked tasks
-  const blocked = tasks.filter((t) => t.status === "חסום");
+  const blocked = tasks.filter((_t) => t.status === "חסום");
   if (blocked.length) {
     risks.push({
       level: "high",
       title: `${blocked.length} משימות חסומות`,
-      description: blocked.map((t) => t.title).join(", "),
-      relatedIds: blocked.map((t) => t.id),
+      description: blocked.map((_t) => t.title).join(", "),
+      relatedIds: blocked.map((_t) => t.id),
     });
   }
 
   // HIGH: overdue tasks
   const threeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
   const overdue = tasks.filter(
-    (t) =>
+    (_t) =>
       t.due_date &&
-      new Date(t.due_date) < now &&
+      new Date(_t.due_date) < now &&
       t.status !== "הושלם",
   );
   if (overdue.length) {
     risks.push({
       level: "high",
       title: `${overdue.length} משימות באיחור`,
-      description: overdue.map((t) => t.title).join(", "),
-      relatedIds: overdue.map((t) => t.id),
+      description: overdue.map((_t) => t.title).join(", "),
+      relatedIds: overdue.map((_t) => t.id),
     });
   }
 
   // HIGH: due within 3 days
   const dueSoon = tasks.filter(
-    (t) =>
+    (_t) =>
       t.due_date &&
-      new Date(t.due_date) >= now &&
-      new Date(t.due_date) < threeDays &&
+      new Date(_t.due_date) >= now &&
+      new Date(_t.due_date) < threeDays &&
       t.status !== "הושלם",
   );
   if (dueSoon.length) {
     risks.push({
       level: "high",
       title: `${dueSoon.length} משימות מתקרבות לדדליין`,
-      description: dueSoon.map((t) => t.title).join(", "),
-      relatedIds: dueSoon.map((t) => t.id),
+      description: dueSoon.map((_t) => t.title).join(", "),
+      relatedIds: dueSoon.map((_t) => t.id),
     });
   }
 
@@ -115,8 +115,8 @@ export function detectRisks(
 
   // INFO: large tasks without definition of done
   const noDod = tasks.filter(
-    (t) =>
-      (t.estimated_hours || 0) > 8 &&
+    (_t) =>
+      (_t.estimated_hours || 0) > 8 &&
       !t.definition_of_done &&
       t.status !== "הושלם",
   );
@@ -124,8 +124,8 @@ export function detectRisks(
     risks.push({
       level: "info",
       title: `${noDod.length} משימות גדולות ללא הגדרת סיום`,
-      description: noDod.map((t) => t.title).join(", "),
-      relatedIds: noDod.map((t) => t.id),
+      description: noDod.map((_t) => t.title).join(", "),
+      relatedIds: noDod.map((_t) => t.id),
     });
   }
 
@@ -155,11 +155,11 @@ export function getUrgentTasks(tasks: PmTask[]): PmTask[] {
   const threeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
   return sortByPriority(
     tasks.filter(
-      (t) =>
+      (_t) =>
         t.status !== "הושלם" &&
         (t.status === "חסום" ||
           t.priority === "קריטי" ||
-          (t.due_date && new Date(t.due_date) < threeDays)),
+          (t.due_date && new Date(_t.due_date) < threeDays)),
     ),
   );
 }
@@ -170,8 +170,8 @@ export function buildPMContext(
   tasks: PmTask[],
   sprints: PmSprint[],
 ): PMContext {
-  const openTasks = tasks.filter((t) => t.status !== "הושלם");
-  const blockedTasks = tasks.filter((t) => t.status === "חסום");
+  const openTasks = tasks.filter((_t) => t.status !== "הושלם");
+  const blockedTasks = tasks.filter((_t) => t.status === "חסום");
   const activeSprints = sprints.filter((s) => s.status === "פעיל");
   const urgentTasks = getUrgentTasks(tasks);
   const risks = detectRisks(openTasks, activeSprints);

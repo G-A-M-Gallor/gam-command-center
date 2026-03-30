@@ -5,7 +5,7 @@ import { Pin, GitCommit, Rocket, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import {
   isFavorite,
   toggleFavorite,
@@ -86,7 +86,7 @@ interface PageHeaderProps {
 }
 
 function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const ta = t.admin;
   const isRtl = language === 'he';
   const isDev = process.env.NODE_ENV !== 'production';
@@ -122,7 +122,7 @@ function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
     try {
       const res = await fetch('/api/git/commit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: commitMsg.trim() }),
       });
       const data = await res.json();
@@ -146,7 +146,7 @@ function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
     try {
       const res = await fetch('/api/git/deploy', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: commitMsg.trim() || undefined }),
       });
       const data = await res.json();
@@ -228,7 +228,7 @@ function GitButtons({ language }: { language: 'he' | 'en' | 'ru' }) {
 
 export function PageHeader({ pageKey, children }: PageHeaderProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   const href = pageRoutes[pageKey];
   const page = t.pages[pageKey];

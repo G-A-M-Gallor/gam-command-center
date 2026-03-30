@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { _createClient } from '@supabase/supabase-js';
 import { getContacts, getMessages } from '@/lib/wati/client';
 import { syncWatiMessages } from '@/lib/wati/sync';
 import { watiHealthChecker } from '@/lib/wati/resilience';
@@ -13,7 +13,7 @@ import { watiHealthChecker } from '@/lib/wati/resilience';
  * Can be triggered manually or by external cron services
  */
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   const startTime = Date.now();
   let status = 'success';
   const errors: string[] = [];
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     const duration = Date.now() - startTime;
 
-    // Log automation run to Supabase for monitoring (ignore errors if table doesn't exist)
+    // Log automation run to Supabase for monitoring (ignore errors if table doesn'_t exist)
     try {
       await supabase
         .from('automation_logs')

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { PDFDocument, rgb, StandardFonts, PDFPage, PDFFont, Color } from "pdf-lib";
 import { appendCertificatePage } from "@/lib/documents/certificatePage";
 import { documentPdfSchema } from "@/lib/api/schemas";
@@ -14,8 +14,8 @@ import type { DocumentSubmission, DocumentSubmitter } from "@/lib/supabase/schem
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
+  const { data: { _user } } = await supabase.auth.getUser();
+  if (!_user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
   const rawBytes = pdfBytes instanceof Uint8Array ? pdfBytes : new Uint8Array(pdfBytes);
   const responseBuffer = Buffer.from(rawBytes);
   return new NextResponse(responseBuffer, {
-    headers: {
+    _headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${encodeURIComponent(submission.name)}.pdf"`,
       "X-PDF-Hash": pdfHash,

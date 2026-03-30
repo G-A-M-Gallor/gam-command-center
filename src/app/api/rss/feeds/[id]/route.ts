@@ -8,8 +8,8 @@ type RouteContext = { params: Promise<{ id: string }> };
 /**
  * PATCH /api/rss/feeds/[id] — update feed
  */
-export async function PATCH(request: Request, context: RouteContext) {
-  const { error: authError } = await requireAuth(request);
+export async function PATCH(_request: Request, _context: RouteContext) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -30,7 +30,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   const parsed = rssFeedUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || 'Invalid request' },
+      { error: parsed.error.issues[0]?.message || 'Invalid _request' },
       { status: 400 },
     );
   }
@@ -53,8 +53,8 @@ export async function PATCH(request: Request, context: RouteContext) {
 /**
  * DELETE /api/rss/feeds/[id] — remove non-default feed
  */
-export async function DELETE(request: Request, context: RouteContext) {
-  const { error: authError } = await requireAuth(request);
+export async function DELETE(_request: Request, _context: RouteContext) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }

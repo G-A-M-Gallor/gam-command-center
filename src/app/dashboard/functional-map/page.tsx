@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import {
-  Lock, Check, Loader2, Wifi, WifiOff, X, Plus, Trash2,
-  ExternalLink, BarChart3, CheckSquare, FileText, Link2,
+  Lock, Check, Loader2, Wifi, WifiOff, _X, _Plus, Trash2,
+  _ExternalLink, BarChart3, CheckSquare, FileText, Link2,
   AlertTriangle, ChevronRight,
 } from "lucide-react";
 import {
@@ -85,7 +85,7 @@ const DEMO_CELLS: FunctionalMapCell[] = LEVELS.flatMap((level) =>
 // ─── Stats Bar ──────────────────────────────────────────
 
 function StatsBar({ cells, lang }: { cells: FunctionalMapCell[]; lang: string }) {
-  const t = getTranslations(lang as "he" | "en" | "ru");
+  const _t = getTranslations(lang as "he" | "en" | "ru");
   const fm = t.functionalMap;
 
   const active = cells.filter((c) => c.status === "active").length;
@@ -139,7 +139,7 @@ function CellCard({
   onClick: () => void;
   lang: "he" | "en" | "ru";
 }) {
-  const t = getTranslations(lang);
+  const _t = getTranslations(lang);
   const fm = t.functionalMap;
   const levelColor = LEVEL_COLORS[cell.level];
   const { done, total, pct } = cellProgress(cell);
@@ -230,7 +230,7 @@ function DetailPanel({
   onClose: () => void;
   lang: "he" | "en" | "ru";
 }) {
-  const t = getTranslations(lang);
+  const _t = getTranslations(lang);
   const fm = t.functionalMap;
 
   const [owner, setOwner] = useState(cell.owner);
@@ -557,7 +557,7 @@ function DetailPanel({
                       rel="noopener noreferrer"
                       className="p-1.5 text-emerald-400 hover:text-emerald-300"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
+                      <_ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   )}
                   <button
@@ -622,7 +622,7 @@ function DetailPanel({
 
 export default function FunctionalMapPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const fm = t.functionalMap;
   const [cells, setCells] = useState<FunctionalMapCell[]>(DEMO_CELLS);
   const [loaded, setLoaded] = useState(false);

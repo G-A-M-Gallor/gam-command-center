@@ -17,7 +17,7 @@ async function sendVitalsToAPI(metrics: WebVitalsMetric[]) {
   try {
     await fetch('/api/performance/metrics', {
       method: 'POST',
-      headers: {
+      _headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

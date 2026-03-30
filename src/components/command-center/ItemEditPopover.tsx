@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-  X,
+  _X,
   RotateCcw,
   LayoutDashboard,
   Activity,
@@ -23,7 +23,7 @@ import {
   Mail,
   Compass,
   Network,
-  Shield,
+  _Shield,
   ClipboardList,
   Upload,
   Rss,
@@ -31,7 +31,7 @@ import {
   Settings,
   Gauge,
   Home,
-  Star,
+  _Star,
   Heart,
   Folder,
   Search,
@@ -58,7 +58,7 @@ import {
   Award,
   Crown,
   Gem,
-  Layers,
+  _Layers,
   Package,
   Truck,
   HardHat,
@@ -74,11 +74,11 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard, Activity, FileEdit, Map, Bot, Database,
   MessagesSquare, FileSignature, BookOpen, Grid3X3, Palette,
   Calendar, Sheet, Presentation, Users, Sparkles, Mail,
-  Compass, Network, Shield, ClipboardList, Upload, Rss, Zap,
-  Settings, Gauge, Home, Star, Heart, Folder, Search, Bell,
+  Compass, Network, _Shield, ClipboardList, Upload, Rss, Zap,
+  Settings, Gauge, Home, _Star, Heart, Folder, Search, Bell,
   Globe, Lock, Briefcase, Building2, Phone, Camera, Image,
   Music, Video, Code, Terminal, Cpu, Wifi, Cloud, Sun, Moon,
-  Flame, Rocket, Target, Award, Crown, Gem, Layers, Package,
+  Flame, Rocket, Target, Award, Crown, Gem, _Layers, Package,
   Truck, HardHat, Wrench, Hammer,
 };
 

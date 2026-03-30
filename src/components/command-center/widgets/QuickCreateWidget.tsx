@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, FileSignature, X, Loader2 } from "lucide-react";
+import { FileText, FileSignature, _X, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/contexts/ToastContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { fetchEntityTypes, createNote } from "@/lib/supabase/entityQueries";
 import type { EntityType } from "@/lib/entities/types";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -42,8 +42,8 @@ function getCreatedTodayCount(): number {
 
 export function QuickCreatePanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const router = useRouter();
+  const _t = getTranslations(language);
+  const _router = useRouter();
   const { toast } = useToast();
   const lang = language === "he" ? "he" : language === "ru" ? "ru" : "en";
 
@@ -87,14 +87,14 @@ export function QuickCreatePanel() {
     } catch {
       saveItem({ type: creating, title: title.trim(), timestamp: Date.now() });
       toast({
-        message: `${label}: ${title.trim()} (${t.widgets.savedLocally})`,
+        message: `${label}: ${title.trim()} (${_t.widgets.savedLocally})`,
         type: "warning",
       });
     }
     setSaving(false);
     setTitle("");
     setCreating(null);
-  }, [title, creating, saving, entityTypes, lang, toast, router, t.widgets.savedLocally]);
+  }, [title, creating, saving, entityTypes, lang, toast, _router, t.widgets.savedLocally]);
 
   const todayCount = getCreatedTodayCount();
 
@@ -184,7 +184,7 @@ export function QuickCreatePanel() {
       {/* Counter */}
       {todayCount > 0 && (
         <p className="text-center text-[11px] text-slate-500">
-          {t.widgets.createdToday}: {todayCount}
+          {_t.widgets.createdToday}: {todayCount}
         </p>
       )}
     </div>
@@ -193,7 +193,7 @@ export function QuickCreatePanel() {
 
 export function QuickCreateBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   if (size < 2) return null;
 
@@ -202,12 +202,12 @@ export function QuickCreateBarContent({ size }: { size: WidgetSize }) {
   if (size >= 3 && count > 0) {
     return (
       <span className="truncate text-xs text-slate-400">
-        {t.widgets.new} ({count})
+        {_t.widgets.new} ({count})
       </span>
     );
   }
 
   return (
-    <span className="truncate text-xs text-slate-400">{t.widgets.new}</span>
+    <span className="truncate text-xs text-slate-400">{_t.widgets.new}</span>
   );
 }

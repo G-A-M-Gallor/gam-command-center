@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import {
-  ExternalLink,
-  Plus,
-  X,
+  _ExternalLink,
+  _Plus,
+  _X,
   } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 interface QuickLink {
@@ -43,7 +43,7 @@ function saveLinks(links: QuickLink[]) {
 
 export function ExternalLinksPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   const [links, setLinks] = useState<QuickLink[]>(loadLinks);
   const [adding, setAdding] = useState(false);
@@ -96,7 +96,7 @@ export function ExternalLinksPanel() {
             className="flex-1 min-w-0 flex items-center gap-1.5 text-sm text-slate-300 hover:text-slate-100 transition-colors"
           >
             <span className="truncate">{link.label}</span>
-            <ExternalLink size={11} className="shrink-0 opacity-0 group-hover:opacity-50 transition-opacity" />
+            <_ExternalLink size={11} className="shrink-0 opacity-0 group-hover:opacity-50 transition-opacity" />
           </a>
           {link.id.startsWith("custom-") && (
             <button
@@ -169,7 +169,7 @@ export function ExternalLinksPanel() {
               onClick={handleReset}
               className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors"
             >
-              {t.widgets.externalLinksReset}
+              {_t.widgets.externalLinksReset}
             </button>
           )}
         </div>
@@ -180,11 +180,11 @@ export function ExternalLinksPanel() {
 
 export function ExternalLinksBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   if (size < 2) return null;
   return (
     <span className="truncate text-xs text-slate-400">
-      {t.widgets.externalLinksBar}
+      {_t.widgets.externalLinksBar}
     </span>
   );
 }

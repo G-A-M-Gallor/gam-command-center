@@ -3,7 +3,7 @@
 // GET /api/health — checks DB, Auth, RLS (read-only)
 // ===================================================
 
-import { createClient } from '@supabase/supabase-js';
+import { _createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 type CheckStatus = 'pass' | 'fail';

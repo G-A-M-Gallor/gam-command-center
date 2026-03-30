@@ -8,16 +8,16 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import {
-  X,
+  _X,
   Send,
-  Plus,
+  _Plus,
   Sparkles,
   PanelRight,
   Square,
   MessageCircle,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { streamChat } from "@/lib/ai/client";
 import { addUsage, isOverBudget } from "@/lib/ai/tokenTracker";
@@ -58,10 +58,10 @@ const pageKeys: Record<string, string> = {
 
 function getPageLabel(
   pathname: string,
-  t: ReturnType<typeof getTranslations>
+  _t: ReturnType<typeof _getTranslations>
 ): string {
   const key = pageKeys[pathname];
-  if (key && key in t.tabs) {
+  if (key && key in _t.tabs) {
     return t.tabs[key as keyof typeof t.tabs];
   }
   return pathname.split("/").pop() || "Dashboard";
@@ -69,7 +69,7 @@ function getPageLabel(
 
 function getSuggestions(
   pathname: string,
-  t: ReturnType<typeof getTranslations>
+  _t: ReturnType<typeof _getTranslations>
 ): string[] {
   const key = pageKeys[pathname];
   switch (key) {
@@ -105,9 +105,9 @@ interface ChatContentProps {
   compact?: boolean;
 }
 
-function ChatContent({ compact = false }: ChatContentProps) {
+function ChatContent({ _compact = false }: ChatContentProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const pathname = usePathname();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -122,7 +122,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
 
   useEffect(() => {
     setMessages(loadMessages());
-    const label = getPageLabel(pathname, t);
+    const label = getPageLabel(pathname, _t);
     setContexts([label]);
   }, [pathname, t]);
 
@@ -151,8 +151,8 @@ function ChatContent({ compact = false }: ChatContentProps) {
     return () => { abortRef.current?.abort(); };
   }, []);
 
-  const currentPageLabel = getPageLabel(pathname, t);
-  const suggestions = getSuggestions(pathname, t);
+  const currentPageLabel = getPageLabel(pathname, _t);
+  const suggestions = getSuggestions(pathname, _t);
 
   const addContext = useCallback(() => {
     if (!contexts.includes(currentPageLabel)) {
@@ -275,7 +275,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
         className={`flex flex-wrap items-center gap-1.5 border-b border-slate-700/50 ${px} ${py}`}
       >
         <span className="text-[11px] font-medium text-slate-500">
-          {t.widgets.context}:
+          {_t.widgets._context}:
         </span>
         {contexts.map((ctx) => (
           <span
@@ -326,7 +326,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
         {messages.length === 0 && !isStreaming && (
           <div className="flex h-full items-center justify-center">
             <p className="text-center text-sm text-slate-500">
-              {t.widgets.typePlaceholder}
+              {_t.widgets.typePlaceholder}
             </p>
           </div>
         )}
@@ -337,7 +337,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
           >
             <div
               className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
-                msg.role === "user"
+                msg.role === "_user"
                   ? "bg-[var(--cc-accent-600-30)] text-slate-100"
                   : "bg-slate-700/50 text-slate-300"
               }`}
@@ -426,7 +426,7 @@ function PanelHeader({
   onMouseDown,
 }: PanelHeaderProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   const modes: { mode: AIViewMode; icon: typeof PanelRight; title: string }[] =
     [
@@ -812,7 +812,7 @@ function FloatingContainer({
         onClose={onClose}
         onMouseDown={handleDragStart}
       />
-      <ChatContent compact />
+      <ChatContent _compact />
     </div>
   );
 }
@@ -871,20 +871,20 @@ export function AIPanel({ onClose, viewMode, onViewModeChange }: AIPanelProps) {
 
 export function AIBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   if (size < 2) return null;
 
   if (size === 2) {
     return (
-      <span className="truncate text-xs text-slate-400">{t.widgets.ask}</span>
+      <span className="truncate text-xs text-slate-400">{_t.widgets.ask}</span>
     );
   }
 
   const messages = loadMessages();
   if (messages.length === 0) {
     return (
-      <span className="truncate text-xs text-slate-400">{t.widgets.ask}</span>
+      <span className="truncate text-xs text-slate-400">{_t.widgets.ask}</span>
     );
   }
 

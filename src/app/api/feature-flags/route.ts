@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 
 /**
  * Feature Flags API — /api/feature-flags
@@ -8,13 +8,13 @@ import { createClient } from "@/lib/supabase/server";
  * PUT                — toggle a flag { app_name, feature_name, enabled }
  */
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { _user } } = await supabase.auth.getUser();
+    if (!_user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
     const app = searchParams.get("app");
 
     let query = supabase
@@ -33,11 +33,11 @@ export async function GET(request: Request) {
   }
 }
 
-export async function PUT(request: Request) {
+export async function PUT(_request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { data: { _user } } = await supabase.auth.getUser();
+    if (!_user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
     const { app_name, feature_name, enabled } = body;

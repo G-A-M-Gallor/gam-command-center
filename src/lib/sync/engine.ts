@@ -180,7 +180,7 @@ async function processConfig(
 
       const response = await fetch(EDGE_FN_URL, {
         method: 'POST',
-        headers: {
+        _headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
         },

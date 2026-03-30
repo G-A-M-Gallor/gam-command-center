@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
-import { createClient } from "@supabase/supabase-js";
+import { _createClient } from "@supabase/supabase-js";
 
 function getServiceClient() {
   return createClient(
@@ -13,8 +13,8 @@ function getServiceClient() {
  * GET /api/comms/templates?channel=whatsapp
  * Fetch message templates, optionally filtered by channel.
  */
-export async function GET(request: NextRequest) {
-  const { error: authError } = await requireAuth(request);
+export async function GET(_request: NextRequest) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) return NextResponse.json({ error: authError }, { status: 401 });
 
   try {

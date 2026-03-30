@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Upload, FileSpreadsheet, FileText, AlertCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import type { EntityType } from "@/lib/entities/types";
 
 interface UploadZoneProps {
@@ -25,7 +25,7 @@ export function UploadZone({
   isLoading,
 }: UploadZoneProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const it = t.importEngine;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -113,7 +113,7 @@ export function UploadZone({
 
         {isLoading ? (
           <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-400 border-_t-transparent" />
             <p className="text-sm text-slate-400">{it.importing}...</p>
           </div>
         ) : selectedFile ? (

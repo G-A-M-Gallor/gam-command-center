@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { _X } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 
 const RECENT_PAGES_KEY = "cc-recent-pages";
@@ -24,7 +24,7 @@ interface TabBarProps {
 
 export function TabBar({ contentMarginLeft, contentMarginRight, topbarHover = false, topbarVisible = true }: TabBarProps) {
   const pathname = usePathname();
-  const router = useRouter();
+  const _router = useRouter();
   const { language } = useSettings();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<RecentPage[]>([]);

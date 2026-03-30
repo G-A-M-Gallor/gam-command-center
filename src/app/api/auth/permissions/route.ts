@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { _createClient } from '@supabase/supabase-js';
 import { requireAuth } from '@/lib/api/auth';
 
 type UserRole = 'admin' | 'manager' | 'member' | 'viewer' | 'external';
@@ -83,13 +83,13 @@ function roleDefaults(role: UserRole): ActionPermissions {
   }
 }
 
-export async function GET(request: Request) {
-  const { user, error } = await requireAuth(request);
-  if (error || !user) {
+export async function GET(_request: Request) {
+  const { _user, error } = await requireAuth(_request);
+  if (error || !_user) {
     return NextResponse.json({ error: error ?? 'Unauthorized' }, { status: 401 });
   }
 
-  const role = (user.app_metadata?.role as UserRole) ?? 'member';
+  const role = (_user.app_metadata?.role as UserRole) ?? 'member';
   const defaults = roleDefaults(role);
 
   // Admin always gets full permissions, skip DB lookup
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
   const { data } = await supabase
     .from('user_action_permissions')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', _user.id)
     .single();
 
   if (!data) {

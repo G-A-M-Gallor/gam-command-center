@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { X, Plus, Trash2, GripVertical } from 'lucide-react';
+import { _X, _Plus, Trash2, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import {
   getFieldType,
@@ -57,7 +57,7 @@ export function FieldConfigModal({
 
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose, enabled: !!typeDef });
 
-  const update = useCallback((key: string, value: unknown) => {
+  const _update = useCallback((key: string, value: unknown) => {
     setConfig((prev) => ({ ...prev, [key]: value } as FieldConfig));
   }, []);
 
@@ -164,7 +164,7 @@ export function FieldConfigModal({
             onClick={onClose}
             className="rounded p-1.5 text-slate-500 hover:bg-slate-700 hover:text-slate-300"
           >
-            <X className="h-4 w-4" />
+            <_X className="h-4 w-4" />
           </button>
         </div>
 
@@ -173,13 +173,13 @@ export function FieldConfigModal({
           <FieldConfigForm
             fieldType={fieldType}
             config={config}
-            update={update}
+            _update={_update}
             language={language}
           />
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-2 border-t border-slate-700/50 px-4 py-3">
+        <div className="flex items-center justify-end gap-2 border-_t border-slate-700/50 px-4 py-3">
           <Button variant="ghost" size="sm" onClick={onClose}>
             {fc.cancel}
           </Button>
@@ -196,12 +196,12 @@ export function FieldConfigModal({
 function FieldConfigForm({
   fieldType,
   config,
-  update,
+  _update,
   language,
 }: {
   fieldType: FieldTypeId;
   config: FieldConfig;
-  update: (key: string, value: unknown) => void;
+  _update: (key: string, value: unknown) => void;
   language: 'he' | 'en' | 'ru';
 }) {
   const fc = getTranslations(language).fieldConfig;
@@ -461,7 +461,7 @@ function OptionsList({
   return (
     <div className="flex flex-col gap-1.5">
       <label className="text-[11px] font-medium text-slate-400">
-        {getTranslations(language).fieldConfig.options}
+        {_getTranslations(language).fieldConfig.options}
       </label>
       <div className="flex flex-col gap-1 rounded-lg border border-slate-700/50 bg-slate-900/50 p-2">
         {options.map((opt, i) => (

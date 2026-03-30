@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  Server, Cpu, MemoryStick, HardDrive, Clock, Activity,
+  Server, Cpu, MemoryStick, HardDrive, _Clock, Activity,
   Container, Image, Network, Database, RefreshCw,
   AlertTriangle, CheckCircle2, Circle, Play, Square,
-  TrendingUp, TrendingDown, Minus, Monitor
+  TrendingUp, TrendingDown, Minus, _Monitor
 } from "lucide-react";
 
 interface SystemHealth {
@@ -76,7 +76,7 @@ interface ServerHealthDashboardProps {
 
 export function ServerHealthDashboard({
   refreshInterval = 30000, // 30 seconds
-  compact = false,
+  _compact = false,
   className = ""
 }: ServerHealthDashboardProps) {
   const [data, setData] = useState<ServerHealthData | null>(null);
@@ -361,7 +361,7 @@ export function ServerHealthDashboard({
                 )}
 
                 {container.ports.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-700">
+                  <div className="mt-3 pt-3 border-_t border-slate-700">
                     <div className="text-xs text-slate-400">
                       <span className="font-medium">Ports:</span> {container.ports.join(', ')}
                     </div>
@@ -380,12 +380,12 @@ export function ServerHealthDashboard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-slate-200 flex items-center gap-2">
-          <Monitor className="w-6 h-6 text-blue-400" />
+          <_Monitor className="w-6 h-6 text-blue-400" />
           מצב השרת
         </h2>
         <div className="flex items-center gap-4">
           <div className="text-sm text-slate-400">
-            <Clock className="w-4 h-4 inline ml-1" />
+            <_Clock className="w-4 h-4 inline ml-1" />
             Uptime: {formatUptime(data.system.uptime)}
           </div>
           {lastRefresh && (

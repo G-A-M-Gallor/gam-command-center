@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Grid3X3, X } from "lucide-react";
+import { Grid3X3, _X } from "lucide-react";
 import {
   widgetRegistry,
   getWidgetById,
@@ -9,7 +9,7 @@ import {
 } from "./WidgetRegistry";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 
 const PANEL_WIDTH = 288; // w-72 = 18rem = 288px
 
@@ -21,7 +21,7 @@ interface AppsDrawerProps {
 export function AppsDrawer({ onOpenWidget }: AppsDrawerProps) {
   const { widgetPlacements } = useWidgets();
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   const [open, setOpen] = useState(false);
   const [selectedAppId, setSelectedAppId] = useState<string | null>(null);
@@ -152,7 +152,7 @@ export function AppsDrawer({ onOpenWidget }: AppsDrawerProps) {
             <div className="p-3">
               {appsWidgets.length === 0 ? (
                 <p className="py-6 text-center text-xs text-slate-500">
-                  {t.widgets.appsEmpty}
+                  {_t.widgets.appsEmpty}
                 </p>
               ) : (
                 <div className="grid grid-cols-4 gap-2">
@@ -181,7 +181,7 @@ export function AppsDrawer({ onOpenWidget }: AppsDrawerProps) {
 
             {/* Inline panel for selected dropdown widget */}
             {selectedWidget && SelectedContent && (
-              <div className="border-t border-slate-700">
+              <div className="border-_t border-slate-700">
                 <div className="flex items-center gap-2 border-b border-slate-700/50 px-4 py-2.5">
                   <selectedWidget.icon className="h-4 w-4 text-[var(--cc-accent-400)]" />
                   <span className="text-sm font-semibold text-slate-200">

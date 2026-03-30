@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import {
-  X, Lock, Plus, Trash2, Hash, Type, Calendar as CalendarIcon, CheckSquare, List,
+  _X, Lock, _Plus, Trash2, Hash, Type, Calendar as CalendarIcon, CheckSquare, List,
   Link as LinkIcon, Mail, Phone, Users, Tag, Combine,
-  Eye, EyeOff, Palette, Paperclip, FileText, CalendarClock, DollarSign, Star,
+  Eye, EyeOff, Palette, Paperclip, FileText, CalendarClock, DollarSign, _Star,
 } from 'lucide-react';
 import { IconPicker } from '@/components/ui/IconPicker';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import type {
   GlobalFieldInsert, FieldType, FieldCategory, I18nLabel, VisibilityOperator,
   ColorOperator,
@@ -24,7 +24,7 @@ const FIELD_TYPE_ICONS: Record<string, React.ElementType> = {
   phone: Phone, checkbox: CheckSquare, composite: Combine,
   relation: LinkIcon, formula: Hash,
   file: Paperclip, rich_text: FileText, datetime: CalendarClock,
-  currency: DollarSign, rating: Star,
+  currency: DollarSign, rating: _Star,
 };
 
 const FIELD_TYPE_LABELS: Record<string, { he: string; en: string; ru: string }> = {
@@ -115,7 +115,7 @@ interface Props {
 
 export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onClose, allFieldKeys }: Props) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const te = t.entities;
   const isRtl = language === 'he';
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
@@ -142,7 +142,7 @@ export function FieldEditorModal({ draft, editingId, onDraftChange, onSave, onCl
     { key: 'aliases', label: te.tabAliases, icon: LinkIcon, show: !!editingId, tip: tips.aliases },
   ];
 
-  const visibleTabs = tabs.filter(t => t.show);
+  const visibleTabs = tabs.filter(t => _t.show);
 
   const canSave = editingId
     ? !!(draft.meta_key?.trim())

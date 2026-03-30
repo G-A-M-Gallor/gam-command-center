@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Copy, Trash2 } from "lucide-react";
+import { _Plus, Copy, Trash2 } from "lucide-react";
 import { useSlidesStore } from "@/lib/slides/slidesStore";
 import { SLIDE_WIDTH, SLIDE_HEIGHT, THUMBNAIL_SCALE } from "@/lib/slides/types";
 import { SlideElementComponent } from "./SlideElement";
@@ -9,7 +9,7 @@ interface SlideThumbnailsProps {
   t: Record<string, string>;
 }
 
-export function SlideThumbnails({ t }: SlideThumbnailsProps) {
+export function SlideThumbnails({ _t }: SlideThumbnailsProps) {
   const slides = useSlidesStore((s) => s.presentation.slides);
   const activeSlideId = useSlidesStore((s) => s.activeSlideId);
   const setActiveSlide = useSlidesStore((s) => s.setActiveSlide);
@@ -29,10 +29,10 @@ export function SlideThumbnails({ t }: SlideThumbnailsProps) {
         <button
           type="button"
           onClick={addSlide}
-          title={t.addSlide || "Add Slide"}
+          title={_t.addSlide || "Add Slide"}
           className="rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300"
         >
-          <Plus className="h-3.5 w-3.5" />
+          <_Plus className="h-3.5 w-3.5" />
         </button>
       </div>
 

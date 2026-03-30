@@ -6,8 +6,8 @@ import {
   ChevronDown, ChevronRight, ChevronLeft, CheckCircle2, AlertTriangle,
   XCircle, Info, ArrowLeft, ArrowRight, FileCode,
 } from 'lucide-react';
-import { useSettings, type Language } from '@/contexts/SettingsContext';
-import { getTranslations, loc } from '@/lib/i18n';
+import { useSettings, type _Language } from '@/contexts/SettingsContext';
+import { _getTranslations, loc } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import {
   allChecks, getChecksByHat, getHatScore, getOverallScore, hatMeta,
@@ -65,7 +65,7 @@ function ScoreRing({ pct, size = 64 }: { pct: number; size?: number }) {
   );
 }
 
-function CheckCard({ check, isRtl, language, ta }: { check: AuditCheck; isRtl: boolean; language: Language; ta: AuditTranslations }) {
+function CheckCard({ check, isRtl, language, ta }: { check: AuditCheck; isRtl: boolean; language: _Language; ta: AuditTranslations }) {
   const [expanded, setExpanded] = useState(false);
   const Arrow = expanded ? ChevronDown : (isRtl ? ChevronLeft : ChevronRight);
   const resultLabelMap = getResultLabels(ta);
@@ -93,7 +93,7 @@ function CheckCard({ check, isRtl, language, ta }: { check: AuditCheck; isRtl: b
       </button>
 
       {expanded && (
-        <div className="border-t border-white/[0.04] px-4 py-3 space-y-2" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="border-_t border-white/[0.04] px-4 py-3 space-y-2" dir={isRtl ? 'rtl' : 'ltr'}>
           <p className="text-xs text-slate-400">{loc(check, 'detail', language)}</p>
 
           {check.file && (
@@ -120,7 +120,7 @@ function CheckCard({ check, isRtl, language, ta }: { check: AuditCheck; isRtl: b
 }
 
 function HatSummary({ hat, isRtl, language, isActive, onClick, ta }: {
-  hat: AuditHat; isRtl: boolean; language: Language; isActive: boolean; onClick: () => void; ta: AuditTranslations;
+  hat: AuditHat; isRtl: boolean; language: _Language; isActive: boolean; onClick: () => void; ta: AuditTranslations;
 }) {
   const score = getHatScore(hat);
   const meta = hatMeta[hat];
@@ -170,7 +170,7 @@ function HatSummary({ hat, isRtl, language, isActive, onClick, ta }: {
 
 export default function AuditPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === 'he';
 
   const [activeHat, setActiveHat] = useState<AuditHat | 'all'>('all');

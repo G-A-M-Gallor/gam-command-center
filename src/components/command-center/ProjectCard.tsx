@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { HealthBadge } from "./HealthBadge";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 
 export interface Project {
   id: string;
@@ -20,8 +20,8 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const router = useRouter();
+  const _t = getTranslations(language);
+  const _router = useRouter();
   const isRtl = language === "he";
 
   const layerLabel =

@@ -122,12 +122,12 @@ export async function getProjectStatus(): Promise<ProjectStatus> {
   const byStatus: Record<string, number> = {};
   const byPriority: Record<string, number> = {};
 
-  for (const t of all) {
-    byStatus[t.status] = (byStatus[t.status] ?? 0) + 1;
-    if (t.priority) byPriority[t.priority] = (byPriority[t.priority] ?? 0) + 1;
+  for (const _t of all) {
+    byStatus[t.status] = (byStatus[_t.status] ?? 0) + 1;
+    if (_t.priority) byPriority[t.priority] = (byPriority[_t.priority] ?? 0) + 1;
   }
 
-  const inProgress = all.filter((t) => t.status === "In Progress");
+  const inProgress = all.filter((_t) => t.status === "In Progress");
 
   return { total: all.length, byStatus, byPriority, inProgress };
 }
@@ -186,7 +186,7 @@ export async function getTasksSummaryForPrompt(): Promise<string> {
     lines.push(
       `\nIn Progress (${status.inProgress.length}):`,
       ...status.inProgress.map(
-        (t) => `- [${t.priority}] ${t.task} (${t.effort})`
+        (_t) => `- [${t.priority}] ${t.task} (${_t.effort})`
       )
     );
   }

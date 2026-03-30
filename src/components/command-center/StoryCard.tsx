@@ -8,9 +8,9 @@ import {
   Trash2,
   ChevronDown,
   ChevronRight,
-  Plus,
+  _Plus,
   Check,
-  X,
+  _X,
   StickyNote,
   GitBranch,
   FileText,
@@ -100,7 +100,7 @@ function DiagramModal({
   initialDiagram,
   onSave,
   onCancel,
-  t,
+  _t,
 }: {
   initialDiagram: string;
   onSave: (diagram: string) => void;
@@ -246,7 +246,7 @@ function DiagramModal({
 }
 
 // ─── Epic Card (column header, not draggable) ───────
-export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
+export function EpicCard({ card, onUpdate, onDelete, _t }: StoryCardProps) {
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(card.text);
   const [showColor, setShowColor] = useState(false);
@@ -328,7 +328,7 @@ export function EpicCard({ card, onUpdate, onDelete, t }: StoryCardProps) {
 
       {/* Color picker dropdown */}
       {showColor && (
-        <div className="mt-1.5 flex flex-wrap gap-1" role="listbox" aria-label={t.colorPicker}>
+        <div className="mt-1.5 flex flex-wrap gap-1" role="listbox" aria-label={_t.colorPicker}>
           {/* No color option */}
           <button
             type="button"
@@ -381,7 +381,7 @@ interface FeatureCardProps {
   };
 }
 
-export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }: FeatureCardProps) {
+export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, _t }: FeatureCardProps) {
   const {
     attributes,
     listeners,
@@ -525,7 +525,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 
       {/* Estimation picker */}
       {showEstimation && (
-        <div className="mt-1 flex flex-wrap items-center gap-1 ps-6" role="listbox" aria-label={t.estimation}>
+        <div className="mt-1 flex flex-wrap items-center gap-1 ps-6" role="listbox" aria-label={_t.estimation}>
           <button
             type="button"
             role="option"
@@ -561,7 +561,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 
       {/* Color picker */}
       {showColor && (
-        <div className="mt-1 flex flex-wrap gap-1 ps-6" role="listbox" aria-label={t.colorPicker}>
+        <div className="mt-1 flex flex-wrap gap-1 ps-6" role="listbox" aria-label={_t.colorPicker}>
           <button
             type="button"
             role="option"
@@ -597,7 +597,7 @@ export function FeatureCard({ card, onUpdate, onDelete, expanded, onToggle, t }:
 }
 
 // ─── Story Card (sortable/draggable) ────────────────
-export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities, onLinkEntity, onUnlinkEntity, t }: StoryCardProps) {
+export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities, onLinkEntity, onUnlinkEntity, _t }: StoryCardProps) {
   const {
     attributes,
     listeners,
@@ -753,16 +753,16 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities
               {(hasNotes || hasDiagram || hasEditorNote || hasEntityLinks) && (
                 <div className="flex shrink-0 items-center gap-0.5">
                   {hasEditorNote && (
-                    <div className="h-1.5 w-1.5 rounded-full bg-blue-400" title={t.hasNote || 'Note'} />
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-400" title={_t.hasNote || 'Note'} />
                   )}
                   {hasEntityLinks && (
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" title={t.linkedEntities || 'Linked entities'} />
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" title={_t.linkedEntities || 'Linked entities'} />
                   )}
                   {hasNotes && (
-                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400" title={t.notes} />
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400" title={_t.notes} />
                   )}
                   {hasDiagram && (
-                    <div className="h-1.5 w-1.5 rounded-full bg-purple-400" title={t.diagram} />
+                    <div className="h-1.5 w-1.5 rounded-full bg-purple-400" title={_t.diagram} />
                   )}
                 </div>
               )}
@@ -890,7 +890,7 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities
                 linkedEntities={linkedEntities ?? []}
                 onLink={onLinkEntity}
                 onUnlink={onUnlinkEntity}
-                t={t}
+                _t={_t}
               />
             )}
           </div>
@@ -993,7 +993,7 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities
 
         {/* Color picker */}
         {showColor && (
-          <div className="mt-1.5 flex flex-wrap gap-1 px-5" role="listbox" aria-label={t.colorPicker}>
+          <div className="mt-1.5 flex flex-wrap gap-1 px-5" role="listbox" aria-label={_t.colorPicker}>
             <button
               type="button"
               role="option"
@@ -1027,7 +1027,7 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities
 
         {/* Estimation picker */}
         {showEstimation && (
-          <div className="mt-1.5 flex flex-wrap items-center gap-1 px-5" role="listbox" aria-label={t.estimation}>
+          <div className="mt-1.5 flex flex-wrap items-center gap-1 px-5" role="listbox" aria-label={_t.estimation}>
             <button
               type="button"
               role="option"
@@ -1068,7 +1068,7 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities
           initialDiagram={card.diagram || ''}
           onSave={saveDiagram}
           onCancel={() => setShowDiagramModal(false)}
-          t={t}
+          t={_t}
         />
       )}
     </>

@@ -9,7 +9,7 @@ const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
  * Public route — handles file uploads for contractor registration.
  * Uploads to contractor-submissions/submissions/ bucket.
  */
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

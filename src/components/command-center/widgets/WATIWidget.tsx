@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { MessageCircle, ExternalLink, RefreshCw } from "lucide-react";
+import { MessageCircle, _ExternalLink, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { timeAgo } from "@/lib/utils/timeAgo";
 import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -11,7 +11,7 @@ import type { CommMessage } from "@/lib/wati/types";
 
 export function WATIPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const [messages, setMessages] = useState<CommMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const watiUrl = typeof window !== "undefined" ? process.env.NEXT_PUBLIC_WATI_URL : null;
@@ -74,7 +74,7 @@ export function WATIPanel() {
               rel="noopener noreferrer"
               className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
             >
-              <ExternalLink size={12} />
+              <_ExternalLink size={12} />
             </a>
           )}
         </div>
@@ -83,11 +83,11 @@ export function WATIPanel() {
       {loading ? (
         <div className="flex items-center justify-center gap-2 py-4 text-sm text-slate-500">
           <RefreshCw size={12} className="animate-spin" />
-          {t.common.loading}
+          {_t.common.loading}
         </div>
       ) : messages.length === 0 ? (
         <p className="py-4 text-center text-sm text-slate-500">
-          {t.widgets.watiNoMessages}
+          {_t.widgets.watiNoMessages}
         </p>
       ) : (
         <div className="space-y-1">
@@ -124,7 +124,7 @@ export function WATIPanel() {
 
       {!watiUrl && (
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-400">
-          {t.widgets.watiConfigNote}
+          {_t.widgets.watiConfigNote}
         </div>
       )}
     </div>

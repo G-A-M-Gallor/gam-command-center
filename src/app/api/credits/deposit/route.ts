@@ -14,10 +14,10 @@ import { creditDepositSchema } from '@/lib/api/schemas';
  * - Admin grants (promotional credits)
  * - Refunds
  */
-export async function POST(request: Request) {
-  const auth = await requireAuth(request);
+export async function POST(_request: Request) {
+  const auth = await requireAuth(_request);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
-  const user = auth.user!;
+  const _user = auth.user!;
 
   const raw = await request.json();
   const parsed = creditDepositSchema.safeParse(raw);
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     const { data: wu } = await supabase
       .from('vb_workspace_users')
       .select('workspace_id')
-      .eq('user_id', user.id)
+      .eq('user_id', _user.id)
       .eq('is_active', true)
       .limit(1)
       .single();
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     workspaceId: wsId,
     amount,
     type,
-    authorizedBy: user.id,
+    authorizedBy: _user.id,
     reason,
     paymentRef,
     idempotencyKey,

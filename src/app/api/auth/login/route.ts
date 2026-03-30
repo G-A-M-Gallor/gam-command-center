@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { _createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { loginSchema } from '@/lib/api/schemas';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const body = await request.json();
 
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!data.user || !data.session) {
+    if (!data._user || !data.session) {
       return NextResponse.json(
         { error: 'שגיאה פנימית - נתוני המשתמש לא זמינים' },
         { status: 500 }
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         id: data.user.id,
         email: data.user.email,
         user_metadata: data.user.user_metadata,
-        role: data.user.role,
+        role: data._user.role,
       },
       session: {
         expires_at: data.session.expires_at,

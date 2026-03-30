@@ -20,8 +20,8 @@ import TextAlign from '@tiptap/extension-text-align';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { JSONContent } from '@tiptap/react';
 import { useDebouncedCallback } from 'use-debounce';
-import { useSettings, type Language } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { useSettings, type _Language } from '@/contexts/SettingsContext';
+import { _getTranslations } from '@/lib/i18n';
 
 import { SlashCommands } from './extensions/SlashCommands';
 import { ToggleDetails, DetailsSummary, DetailsContent } from './extensions/Toggle';
@@ -82,7 +82,7 @@ export function TiptapEditor({
   direction = 'rtl',
 }: TiptapEditorProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const et = t.editor;
   const placeholderMap = useMemo(() => getPlaceholderMap(et), [et]);
   const defaultPlaceholder = et.placeholderSlashMenu;
@@ -243,7 +243,7 @@ function StatusBar({
   editor: ReturnType<typeof useEditor>;
   saveStatus: string;
   lastSavedAt?: Date;
-  language: Language;
+  language: _Language;
   et: Record<string, string>;
   onConflictReload?: () => void;
 }) {

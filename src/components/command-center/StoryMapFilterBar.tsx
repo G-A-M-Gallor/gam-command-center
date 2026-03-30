@@ -1,7 +1,7 @@
 'use client';
 
 import { type Ref } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, _X } from 'lucide-react';
 
 const COLORS = [
   { id: 'slate', dot: 'bg-slate-400' },
@@ -41,7 +41,7 @@ export function StoryMapFilterBar({
   colorFilter,
   setColorFilter,
   searchInputRef,
-  t,
+  _t,
 }: StoryMapFilterBarProps) {
   const hasFilters = searchQuery || typeFilter.size < 3 || colorFilter.size > 0;
 
@@ -123,8 +123,8 @@ export function StoryMapFilterBar({
           onClick={clearAll}
           className="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-[11px] text-slate-400 hover:text-slate-200 transition-colors"
         >
-          <X size={10} />
-          {t.clearFilters}
+          <_X size={10} />
+          {_t.clearFilters}
         </button>
       )}
     </div>

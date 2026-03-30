@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { getValidAccessToken } from "@/lib/google/tokenManager";
 
 const CALENDAR_API = "https://www.googleapis.com/calendar/v3";
@@ -14,15 +14,15 @@ interface CalendarEvent {
 }
 
 // GET /api/google/calendar?account_id=xxx&days=2
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { _user } } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!_user) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const params = new URL(request.url).searchParams;
+  const params = new URL(_request.url).searchParams;
   const accountId = params.get("account_id");
   if (!accountId) {
     return NextResponse.json({ error: "Missing account_id" }, { status: 400 });
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   const days = Math.min(Math.max(parseInt(params.get("days") || "2", 10) || 2, 1), 7);
 
   try {
-    const accessToken = await getValidAccessToken(accountId, user.id);
+    const accessToken = await getValidAccessToken(accountId, _user.id);
 
     const timeMin = new Date().toISOString();
     const timeMax = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();

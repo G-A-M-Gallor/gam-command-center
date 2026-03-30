@@ -9,11 +9,11 @@ import {
 } from "@/lib/notion/roadmapLayers";
 
 // GET /api/roadmap/layers?layer=goals&parentId=xxx
-export async function GET(request: Request) {
-  const { error } = await requireAuth(request);
+export async function GET(_request: Request) {
+  const { error } = await requireAuth(_request);
   if (error) return NextResponse.json({ error }, { status: 401 });
 
-  const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(_request.url);
   const parsed = roadmapLayersSchema.safeParse({
     layer: searchParams.get("layer") ?? undefined,
     parentId: searchParams.get("parentId") ?? undefined,
@@ -62,7 +62,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       { items, layer, parentId: parentId ?? null },
-      { headers: { "Cache-Control": "private, s-maxage=120" } },
+      { _headers: { "Cache-Control": "private, s-maxage=120" } },
     );
   } catch (err) {
     const msg =

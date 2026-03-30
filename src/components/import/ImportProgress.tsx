@@ -3,7 +3,7 @@
 import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import type { ImportResult } from "@/lib/import/types";
 
 interface ImportProgressProps {
@@ -14,7 +14,7 @@ interface ImportProgressProps {
 
 export function ImportProgress({ result, isRunning, progress }: ImportProgressProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const it = t.importEngine;
 
   const pct = progress.total > 0 ? Math.round((progress.imported / progress.total) * 100) : 0;
@@ -40,7 +40,7 @@ export function ImportProgress({ result, isRunning, progress }: ImportProgressPr
         </div>
 
         {/* Spinner */}
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-400 border-_t-transparent" />
       </div>
     );
   }

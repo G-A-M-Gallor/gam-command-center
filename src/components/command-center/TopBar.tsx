@@ -11,7 +11,7 @@ import {
   type DragStartEvent,
   type DragMoveEvent,
 } from "@dnd-kit/core";
-import { Store, Pencil, Menu, X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings, SlidersHorizontal, Layers } from "lucide-react";
+import { Store, Pencil, Menu, _X, Grid3X3, Bookmark, LayoutList, AlignHorizontalJustifyStart, Settings, SlidersHorizontal, _Layers } from "lucide-react";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import {
   widgetRegistry,
@@ -26,12 +26,12 @@ import { OverflowMenu } from "./OverflowMenu";
 import { AppsDrawer } from "./widgets/AppsDrawer";
 import { FolderWrapper } from "./widgets/FolderWrapper";
 import { FolderSettings } from "./widgets/FolderSettings";
-import { UniversalSidePanel, TabbedSidePanel, SIDE_PANEL_OPEN_EVENT } from "./widgets/UniversalSidePanel";
+import { _UniversalSidePanel, TabbedSidePanel, SIDE_PANEL_OPEN_EVENT } from "./widgets/UniversalSidePanel";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { ShellPrefsPanel } from "./ShellPrefsPanel";
 import dynamic from "next/dynamic";
 
@@ -118,17 +118,17 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     widgetPanelModes,
     widgetIcons,
   } = useWidgets();
-  const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language, brandProfile } = useSettings();
-  const { user } = useAuth();
+  const { sidebarPosition, sidebarVisibility, setSidebarVisibility, language, _brandProfile } = useSettings();
+  const { _user } = useAuth();
   const pathname = usePathname();
-  const { editMode, setEditMode } = useDashboardMode();
-  const router = useRouter();
-  const t = getTranslations(language);
+  const { editMode, _setEditMode } = useDashboardMode();
+  const _router = useRouter();
+  const _t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
 
   // Ref to read widgetPositions inside effects without adding it as a dependency
-  // (prevents infinite update loops when effects also call setWidgetPositions)
+  // (prevents infinite _update loops when effects also call setWidgetPositions)
   const widgetPositionsRef = useRef(widgetPositions);
   widgetPositionsRef.current = widgetPositions;
 
@@ -328,7 +328,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
       window.removeEventListener("cc-widget-panel-toggle", handleWidgetPanelToggle);
       window.removeEventListener(SIDE_PANEL_OPEN_EVENT, handleSidePanelOpen);
     };
-  }, [setEditMode, setSidebarVisibility, router]);
+  }, [_setEditMode, setSidebarVisibility, router]);
 
   const handleSearchOpen = useCallback(() => {
     setSearchOpen(true);
@@ -412,7 +412,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
 
     window.dispatchEvent(
       new CustomEvent("cc-notify", {
-        detail: { type: "success", message: t.widgets.bookmarkAdded || "Bookmark added" },
+        detail: { type: "success", message: _t.widgets.bookmarkAdded || "Bookmark added" },
       })
     );
   }, [folders, pathname, addFolder, updateFolder, t]);
@@ -461,7 +461,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
     return items;
   }, [visibleWidgets, visibleFolders]);
 
-  // Collect overflow widget IDs (widgets that don't fit in the bar)
+  // Collect overflow widget IDs (widgets that don'_t fit in the bar)
   const overflowWidgetIds = useMemo(() => {
     if (totalColumns === 0) return [];
     return visibleWidgets
@@ -852,7 +852,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
 
               {/* Active widget panel content (inline) */}
               {activeWidget && ActiveContent && (
-                <div className="border-t border-slate-700">
+                <div className="border-_t border-slate-700">
                   <div className="flex items-center gap-2 border-b border-slate-700/50 px-4 py-2.5">
                     <activeWidget.icon className="h-4 w-4 text-[var(--cc-accent-400)]" />
                     <span className="text-sm font-semibold text-slate-200">
@@ -1035,7 +1035,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
             </DndContext>
           ) : (
             <span className="absolute inset-0 flex items-center px-3 text-xs text-slate-500">
-              {t.widgets.noWidgets}
+              {_t.widgets.noWidgets}
             </span>
           )}
         </div>
@@ -1080,7 +1080,7 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
             onClick={handleAutoPack}
             aria-label={t.widgets.autoPack || "Auto-pack"}
             className="mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded text-slate-500 transition-colors hover:bg-slate-700 hover:text-slate-300"
-            title={t.widgets.autoPack || "Auto-pack"}
+            title={_t.widgets.autoPack || "Auto-pack"}
           >
             <AlignHorizontalJustifyStart className="h-4 w-4" />
           </button>
@@ -1116,13 +1116,13 @@ export function TopBar({ onSidebarOpen, topbarHover = false, topOffset }: TopBar
           ref={shellPrefsBtnRef}
           type="button"
           onClick={() => setShellPrefsOpen((v) => !v)}
-          aria-label={(t.shellPrefs as Record<string, string>).title}
+          aria-label={(_t.shellPrefs as Record<string, string>).title}
           className={`mx-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded transition-colors ${
             shellPrefsOpen
               ? "bg-[var(--cc-accent-600-20)] text-[var(--cc-accent-300)]"
               : "text-slate-500 hover:bg-slate-700 hover:text-slate-300"
           }`}
-          title={(t.shellPrefs as Record<string, string>).title}
+          title={(_t.shellPrefs as Record<string, string>).title}
         >
           <SlidersHorizontal className="h-4 w-4" />
         </button>

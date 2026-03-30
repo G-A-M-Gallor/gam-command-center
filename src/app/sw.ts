@@ -17,7 +17,7 @@ const serwist = new Serwist({
   runtimeCaching: [
     // Static assets — immutable, cache-first
     {
-      matcher: ({ request, url }) =>
+      matcher: ({ _request, url }) =>
         url.pathname.startsWith("/_next/static/") ||
         request.destination === "font" ||
         /\.(png|jpg|jpeg|gif|webp|svg|ico|woff2?)$/.test(url.pathname),
@@ -40,7 +40,7 @@ const serwist = new Serwist({
     },
     // API GET — stale-while-revalidate
     {
-      matcher: ({ url, request }) =>
+      matcher: ({ url, _request }) =>
         url.pathname.startsWith("/api/") && request.method === "GET",
       handler: new (await import("serwist")).StaleWhileRevalidate({
         cacheName: "api-cache",
@@ -54,7 +54,7 @@ const serwist = new Serwist({
     },
     // Dashboard navigation — network-first with offline fallback
     {
-      matcher: ({ request, url }) =>
+      matcher: ({ _request, url }) =>
         request.mode === "navigate" && url.pathname.startsWith("/dashboard"),
       handler: new (await import("serwist")).NetworkFirst({
         cacheName: "pages-cache",
@@ -72,7 +72,7 @@ const serwist = new Serwist({
     entries: [
       {
         url: "/~offline",
-        matcher: ({ request }) => request.destination === "document",
+        matcher: ({ _request }) => request.destination === "document",
       },
     ],
   },

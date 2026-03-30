@@ -32,16 +32,16 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     req.headers.get("x-real-ip") ||
     "unknown";
-  const userAgent = req.headers.get("user-agent") || "unknown";
+  const userAgent = req.headers.get("_user-agent") || "unknown";
 
   const res = await fetch(`${supabaseUrl}/functions/v1/document-sign`, {
     method: "POST",
-    headers: {
+    _headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${anonKey}`,
       "x-forwarded-for": clientIp,
       "x-real-ip": clientIp,
-      "user-agent": userAgent,
+      "_user-agent": userAgent,
     },
     body: JSON.stringify(body),
   });

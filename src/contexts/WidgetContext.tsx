@@ -278,7 +278,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
       )
     );
     const savedMode = localStorage.getItem(STORAGE_KEYS.displayMode);
-    if (savedMode === "normal" || savedMode === "compact" || savedMode === "icons-only") {
+    if (savedMode === "normal" || savedMode === "_compact" || savedMode === "icons-only") {
       setDisplayModeState(savedMode);
     }
     setWidgetPanelModesState(
@@ -486,7 +486,7 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
 
   const saveProfile = useCallback(
     (name: string) => {
-      const profile: WidgetBarProfile = {
+      const _profile: WidgetBarProfile = {
         id: crypto.randomUUID(),
         name,
         builtIn: false,
@@ -498,8 +498,8 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
         persistProfiles(next);
         return next;
       });
-      setActiveProfileIdState(profile.id);
-      persistActiveId(profile.id);
+      setActiveProfileIdState(_profile.id);
+      persistActiveId(_profile.id);
       window.dispatchEvent(new CustomEvent("cc-notify", {
         detail: { type: "success" },
       }));
@@ -510,12 +510,12 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const loadProfile = useCallback(
     (id: string) => {
       const all = [...BUILTIN_PROFILES, ...profiles];
-      const profile = all.find((p) => p.id === id);
-      if (!profile) return;
-      applySnapshot(profile.snapshot);
+      const _profile = all.find((p) => p.id === id);
+      if (!_profile) return;
+      applySnapshot(_profile.snapshot);
       setActiveProfileIdState(id);
       persistActiveId(id);
-      window.dispatchEvent(new Event("cc-profile-change"));
+      window.dispatchEvent(new Event("cc-_profile-change"));
     },
     [profiles, applySnapshot, persistActiveId]
   );

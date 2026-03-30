@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Search, Upload, Link2, X, Smile, Shapes, ImageIcon, Circle } from 'lucide-react';
+import { Search, Upload, Link2, _X, Smile, Shapes, ImageIcon, Circle } from 'lucide-react';
 import { parseIconValue, serializeIcon } from '@/lib/icons/iconValue';
 import { EMOJI_CATEGORIES } from '@/lib/icons/emojiData';
 import { LUCIDE_CATEGORIES, LUCIDE_MAP } from '@/lib/icons/lucideIconList';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 
 // ─── IconDisplay ────────────────────────────────────────
 // Renders any icon value inline — use this everywhere
@@ -57,7 +57,7 @@ interface IconPickerProps {
 
 export function IconPicker({ value, onChange, size = 28 }: IconPickerProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const ip = t.iconPicker;
   const isRtl = language === 'he';
   const langKey = language === 'ru' ? 'labelRu' : isRtl ? 'labelHe' : 'labelEn';
@@ -120,12 +120,12 @@ export function IconPicker({ value, onChange, size = 28 }: IconPickerProps) {
     setUploading(true);
     try {
       const { uploadFile } = await import('@/lib/supabase/storageQueries');
-      const { createClient } = await import('@/lib/supabase/client');
+      const { _createClient } = await import('@/lib/supabase/client');
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { setUploading(false); return; }
+      const { data: { _user } } = await supabase.auth.getUser();
+      if (!_user) { setUploading(false); return; }
 
-      const result = await uploadFile(user.id, file);
+      const result = await uploadFile(_user.id, file);
       if (result?.url) {
         pick(serializeIcon({ kind: 'image', value: result.url }));
       }

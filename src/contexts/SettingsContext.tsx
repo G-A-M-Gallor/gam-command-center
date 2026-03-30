@@ -83,14 +83,14 @@ interface Settings {
   navColor: string;
   gibberishDetect: boolean;
   skinConfig: SkinConfig;
-  setLanguage: (lang: Language) => void;
+  setLanguage: (lang: _Language) => void;
   setSidebarPosition: (pos: SidebarPosition) => void;
   setSidebarVisibility: (mode: SidebarVisibility) => void;
   setAccentColor: (color: AccentColor) => void;
   setFontFamily: (font: FontFamily) => void;
   setBorderRadius: (radius: BorderRadius) => void;
   setDensity: (density: Density) => void;
-  setBrandProfile: (profile: BrandProfile) => void;
+  setBrandProfile: (_profile: BrandProfile) => void;
   setCustomAccentHex: (hex: string) => void;
   setSavedColors: (colors: SavedColor[]) => void;
   setArchivedColors: (colors: SavedColor[]) => void;
@@ -183,7 +183,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [fontFamily, setFontFamilyState] = useState<FontFamily>("geist");
   const [borderRadius, setBorderRadiusState] = useState<BorderRadius>("default");
   const [density, setDensityState] = useState<Density>("default");
-  const [brandProfile, setBrandProfileState] = useState<BrandProfile>(defaultBrandProfile);
+  const [_brandProfile, setBrandProfileState] = useState<BrandProfile>(defaultBrandProfile);
   const [customAccentHex, setCustomAccentHexState] = useState("");
   const [savedColors, setSavedColorsState] = useState<SavedColor[]>([]);
   const [archivedColors, setArchivedColorsState] = useState<SavedColor[]>([]);
@@ -211,7 +211,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     if (storedDensity && DENSITIES.includes(storedDensity)) setDensityState(storedDensity);
 
     try {
-      const storedBrand = localStorage.getItem(STORAGE_KEYS.brandProfile);
+      const storedBrand = localStorage.getItem(STORAGE_KEYS._brandProfile);
       if (storedBrand) {
         const parsed = JSON.parse(storedBrand) as Partial<BrandProfile>;
         setBrandProfileState({ ...defaultBrandProfile, ...parsed });
@@ -280,8 +280,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     const root = document.documentElement;
-    if (brandProfile.brandPrimary) {
-      const palette = generateAccentPalette(brandProfile.brandPrimary);
+    if (_brandProfile.brandPrimary) {
+      const palette = generateAccentPalette(_brandProfile.brandPrimary);
       root.style.setProperty("--cc-brand-300", palette["300"]);
       root.style.setProperty("--cc-brand-400", palette["400"]);
       root.style.setProperty("--cc-brand-500", palette["500"]);
@@ -359,7 +359,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [navColor, mounted]);
 
-  const setLanguage = useCallback((lang: Language) => {
+  const setLanguage = useCallback((lang: _Language) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEYS.language, lang);
   }, []);
@@ -394,9 +394,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.density, d);
   }, []);
 
-  const setBrandProfile = useCallback((profile: BrandProfile) => {
-    setBrandProfileState(profile);
-    localStorage.setItem(STORAGE_KEYS.brandProfile, JSON.stringify(profile));
+  const setBrandProfile = useCallback((_profile: BrandProfile) => {
+    setBrandProfileState(_profile);
+    localStorage.setItem(STORAGE_KEYS._brandProfile, JSON.stringify(_profile));
   }, []);
 
   const setCustomAccentHex = useCallback((hex: string) => {
@@ -471,7 +471,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       fontFamily,
       borderRadius,
       density,
-      brandProfile,
+      _brandProfile,
       customAccentHex,
       savedColors,
       archivedColors,
@@ -506,7 +506,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       fontFamily,
       borderRadius,
       density,
-      brandProfile,
+      _brandProfile,
       customAccentHex,
       savedColors,
       archivedColors,

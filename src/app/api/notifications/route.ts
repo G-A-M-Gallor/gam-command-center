@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { requireAuth } from "@/lib/api/auth";
 import { z } from "zod";
 
@@ -24,8 +24,8 @@ const patchSchema = z.union([
   z.object({ id: z.string().min(1) }),
 ]);
 
-export async function GET(request: Request) {
-  const { error: authError } = await requireAuth(request);
+export async function GET(_request: Request) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     // Allow unauthenticated reads (widget calls without token) — return empty gracefully
     return NextResponse.json({ notifications: [], persisted: false });
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { _user } } = await supabase.auth.getUser();
 
     let query = supabase
       .from("dashboard_notifications")
@@ -42,8 +42,8 @@ export async function GET(request: Request) {
       .limit(50);
 
     // Filter: show user-specific + global (user_id IS NULL) notifications
-    if (user) {
-      query = query.or(`user_id.eq.${user.id},user_id.is.null`);
+    if (_user) {
+      query = query.or(`user_id.eq.${_user.id},user_id.is.null`);
     }
 
     const { data, error } = await query;
@@ -71,8 +71,8 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
-  const { error: authError } = await requireAuth(request);
+export async function POST(_request: Request) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     return NextResponse.json({ saved: false, error: "Unauthorized" }, { status: 401 });
   }
@@ -112,8 +112,8 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
-  const { error: authError } = await requireAuth(request);
+export async function PATCH(_request: Request) {
+  const { error: authError } = await requireAuth(_request);
   if (authError) {
     return NextResponse.json({ updated: false, error: "Unauthorized" }, { status: 401 });
   }

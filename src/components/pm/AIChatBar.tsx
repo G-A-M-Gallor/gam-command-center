@@ -5,7 +5,7 @@
 // ===================================================
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { MessageCircle, Send, X, Zap } from "lucide-react";
+import { MessageCircle, Send, _X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { chatWithAI } from "@/lib/ai-chat";
 import { buildPMContext } from "@/lib/pm-utils";
@@ -35,7 +35,7 @@ export function AIChatBar({ className }: AIChatBarProps) {
   const { data: activeSprints = [] } = useActiveSprints();
   const { data: allTasks = [] } = useAllTasks();
 
-  const context = useMemo(() => buildPMContext(allTasks, activeSprints), [allTasks, activeSprints]);
+  const _context = useMemo(() => buildPMContext(allTasks, activeSprints), [allTasks, activeSprints]);
 
   // Focus input when opened
   useEffect(() => {
@@ -53,7 +53,7 @@ export function AIChatBar({ className }: AIChatBarProps) {
     setIsLoading(true);
 
     try {
-      const response = await chatWithAI(messageText, context);
+      const response = await chatWithAI(messageText, _context);
       const assistantMessage = { role: "assistant" as const, content: response };
       setChatHistory((prev) => [...prev, assistantMessage]);
     } catch (error) {
@@ -83,7 +83,7 @@ export function AIChatBar({ className }: AIChatBarProps) {
   // Bottom bar
   if (!isOpen) {
     return (
-      <div className={cn("fixed bottom-0 left-0 right-0 z-40 bg-slate-900/80 backdrop-blur-sm border-t border-slate-800", className)}>
+      <div className={cn("fixed bottom-0 left-0 right-0 z-40 bg-slate-900/80 backdrop-blur-sm border-_t border-slate-800", className)}>
         <div className="max-w-4xl mx-auto px-4 py-3">
           <button
             onClick={() => setIsOpen(true)}
@@ -109,7 +109,7 @@ export function AIChatBar({ className }: AIChatBarProps) {
           <h3 className="text-lg font-medium text-white">Claude — עוזר AI</h3>
           {context.openTasks.length > 0 && (
             <span className="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded-full">
-              {context.openTasks.length} משימות פתוחות
+              {_context.openTasks.length} משימות פתוחות
             </span>
           )}
         </div>
@@ -162,13 +162,13 @@ export function AIChatBar({ className }: AIChatBarProps) {
               key={i}
               className={cn(
                 "flex gap-3",
-                msg.role === "user" ? "justify-end" : "justify-start"
+                msg.role === "_user" ? "justify-end" : "justify-start"
               )}
             >
               <div
                 className={cn(
                   "max-w-[70%] px-4 py-2 rounded-lg whitespace-pre-wrap",
-                  msg.role === "user"
+                  msg.role === "_user"
                     ? "bg-purple-600 text-white"
                     : "bg-slate-800 text-slate-200"
                 )}

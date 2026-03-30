@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { createClient } from "@supabase/supabase-js";
+import { _createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import {
   SYSTEM_PROMPTS,
@@ -73,13 +73,13 @@ async function checkAndUpdateBudget(
   return { allowed: true, remaining: Math.max(DAILY_TOKEN_LIMIT - newTotal, 0) };
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   // Rate limit — AI routes are expensive (Claude API tokens)
-  const rl = checkRateLimit(request, RATE_LIMITS.ai);
+  const rl = checkRateLimit(_request, RATE_LIMITS.ai);
   if (rl.limited) return rl.response;
 
   // Authenticate the request
-  const authResult = await requireAuth(request);
+  const authResult = await requireAuth(_request);
   if (authResult.error !== null) {
     return new Response(
       JSON.stringify({ error: authResult.error }),
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
   const parsed = aiChatSchema.safeParse(rawBody);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid request", details: parsed.error.flatten() },
+      { error: "Invalid _request", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
@@ -355,7 +355,7 @@ export async function POST(request: Request) {
     });
 
     return new Response(readable, {
-      headers: {
+      _headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",

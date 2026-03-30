@@ -212,7 +212,7 @@ export function WorkflowBuilderLive() {
       // Then trigger a test run
       const response = await fetch(`/api/automations-live/${selectedAutomation}/runs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           trigger_source: 'Test',
           trigger_data: { test: true }
@@ -323,7 +323,7 @@ export function WorkflowBuilderLive() {
         ) : loading ? (
           <div className="w-full h-full bg-[#0F0F0F] flex items-center justify-center">
             <div className="text-center text-[#6B7280]">
-              <div className="w-8 h-8 border-2 border-[#FF6B1A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <div className="w-8 h-8 border-2 border-[#FF6B1A] border-_t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p>טוען זרימת עבודה...</p>
             </div>
           </div>

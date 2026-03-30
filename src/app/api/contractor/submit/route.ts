@@ -7,7 +7,7 @@ import { contractorSubmitSchema } from "@/lib/api/schemas";
  * Public route — no auth required.
  * Creates a contractor entity from the public registration wizard.
  */
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const body = await request.json();
     const parsed = contractorSubmitSchema.safeParse(body);

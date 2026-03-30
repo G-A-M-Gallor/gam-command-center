@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import {
-  ExternalLink,
+  _ExternalLink,
   PanelRight,
   Copy,
   Trash2,
-  Star,
+  _Star,
   Link,
   Palette,
   Paintbrush,
-  X,
+  _X,
 } from "lucide-react";
 
 // ─── Color Rule Types ───────────────────────────────
@@ -35,7 +35,9 @@ export function loadColorRules(): ColorRule[] {
 export function saveColorRules(rules: ColorRule[]) {
   try {
     localStorage.setItem(COLOR_RULES_KEY, JSON.stringify(rules));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 // ─── Context Menu ───────────────────────────────────
@@ -78,7 +80,7 @@ export function RowContextMenu({
   onCopyLink,
   onEditIcon,
   onColorRule,
-  t,
+  _t,
 }: RowContextMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ x, y });
@@ -119,10 +121,10 @@ export function RowContextMenu({
   }, [onClose]);
 
   const actions: MenuAction[] = [
-    { key: "open", label: t.openItem, icon: ExternalLink, onClick: onOpen, hidden: !onOpen },
+    { key: "open", label: t.openItem, icon: _ExternalLink, onClick: onOpen, hidden: !onOpen },
     { key: "sidePanel", label: t.openInSidePanel, icon: PanelRight, onClick: onOpenSidePanel, hidden: !onOpenSidePanel },
     { key: "duplicate", label: t.duplicate, icon: Copy, onClick: onDuplicate, hidden: !onDuplicate },
-    { key: "favorite", label: isFavorite ? t.removeFromFavorites : t.addToFavorites, icon: Star, onClick: onToggleFavorite, hidden: !onToggleFavorite },
+    { key: "favorite", label: isFavorite ? t.removeFromFavorites : t.addToFavorites, icon: _Star, onClick: onToggleFavorite, hidden: !onToggleFavorite },
     { key: "copyLink", label: t.copyLink, icon: Link, onClick: onCopyLink, hidden: !onCopyLink },
     { key: "editIcon", label: t.editIcon, icon: Palette, onClick: onEditIcon, hidden: !onEditIcon },
     { key: "colorRule", label: t.colorRule, icon: Paintbrush, onClick: onColorRule, hidden: !onColorRule },
@@ -151,7 +153,7 @@ export function RowContextMenu({
         return (
           <div key={action.key}>
             {showDivider && (
-              <div className="mx-2 my-1 border-t border-white/[0.06]" />
+              <div className="mx-2 my-1 border-_t border-white/[0.06]" />
             )}
             <button
               type="button"
@@ -192,7 +194,7 @@ export function ColorRuleDialog({
   onSave,
   onRemove,
   existing,
-  t,
+  _t,
 }: ColorRuleDialogProps) {
   const [field, setField] = useState(existing?.field ?? "status");
   const [value, setValue] = useState(existing?.value ?? "");
@@ -281,7 +283,7 @@ export function ColorRuleDialog({
               onClick={onRemove}
               className="rounded-md border border-red-500/30 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-500/10"
             >
-              {t.colorRuleRemove}
+              {_t.colorRuleRemove}
             </button>
           )}
         </div>

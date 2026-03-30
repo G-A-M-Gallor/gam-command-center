@@ -4,19 +4,19 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ListTodo,
   Zap,
-  ExternalLink,
+  _ExternalLink,
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Clock,
+  _Clock,
   HelpCircle,
   Bell,
   History,
 } from "lucide-react";
 import type { WidgetSize } from "./WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
-import { createClient } from "@/lib/supabase/client";
+import { _getTranslations } from "@/lib/i18n";
+import { _createClient } from "@/lib/supabase/client";
 
 interface QueueCounts {
   total: number;
@@ -76,8 +76,8 @@ function markAllSeen(items: QueueItem[]) {
 
 export function CeoQueuePanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
-  const cq = (t as unknown as Record<string, Record<string, string>>).ceoQueue ?? {};
+  const _t = getTranslations(language);
+  const cq = (_t as unknown as Record<string, Record<string, string>>).ceoQueue ?? {};
   const supabase = createClient();
   const isRtl = language === "he";
 
@@ -96,7 +96,7 @@ export function CeoQueuePanel() {
       if (!token) return;
 
       const res = await fetch("/api/ceo-intake", {
-        headers: { Authorization: `Bearer ${token}` },
+        _headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
 
@@ -334,7 +334,7 @@ export function CeoQueueBarContent({ size }: { size: WidgetSize }) {
         if (!token) return;
 
         const res = await fetch("/api/ceo-intake", {
-          headers: { Authorization: `Bearer ${token}` },
+          _headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;
 

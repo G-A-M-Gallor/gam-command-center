@@ -1,6 +1,6 @@
 "use client";
 
-import type { Language } from "@/contexts/SettingsContext";
+import type { _Language } from "@/contexts/SettingsContext";
 import type { FieldSlot, FieldActionType } from "./entityCard.types";
 
 interface Props {
@@ -23,7 +23,7 @@ function formatCurrency(val: unknown): string {
   return isNaN(n) ? String(val) : `₪${n.toLocaleString("he-IL")}`;
 }
 
-export function EntityCardField({ slot, value, language, compact, onAction }: Props) {
+export function EntityCardField({ slot, value, language, _compact, onAction }: Props) {
   const label = slot.label[language] || slot.label.he;
   const strVal = value != null ? String(value) : "";
 
@@ -88,7 +88,7 @@ export function EntityCardField({ slot, value, language, compact, onAction }: Pr
   };
 
   return (
-    <div className={`flex items-start gap-2 ${compact ? "py-0.5" : "py-1"}`}>
+    <div className={`flex items-start gap-2 ${_compact ? "py-0.5" : "py-1"}`}>
       {slot.icon && <span className="text-xs mt-0.5 shrink-0">{slot.icon}</span>}
       <div className="flex-1 min-w-0">
         <div className="text-[10px] text-slate-500 leading-tight">{label}</div>

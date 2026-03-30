@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { X, Search, FileText } from "lucide-react";
+import { _X, Search, FileText } from "lucide-react";
 import { searchNotes, fetchNote } from "@/lib/supabase/entityQueries";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 
 // ─── Tiptap JSON → plain text ───────────────────────────────────
 
@@ -53,7 +53,7 @@ interface DocPanelProps {
   t: ReturnType<typeof getTranslations>;
 }
 
-export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
+export function AiDocPanel({ isOpen, onClose, onDocChange, _t }: DocPanelProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ id: string; title: string; entity_type: string | null }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -142,7 +142,7 @@ export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
         <div className="flex items-center gap-2">
           <FileText size={15} className="text-slate-400" />
           <span className="text-sm font-medium text-slate-300">
-            {selectedDoc ? selectedDoc.title : t.aiHub.docPanel}
+            {selectedDoc ? selectedDoc.title : _t.aiHub.docPanel}
           </span>
           {selectedDoc?.entityType && (
             <span className="rounded px-1.5 py-0.5 text-[9px] font-medium bg-slate-600/50 text-slate-400">
@@ -193,7 +193,7 @@ export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
         )}
 
         {loading && (
-          <p className="mt-2 text-center text-xs text-slate-600">{t.common.loading}</p>
+          <p className="mt-2 text-center text-xs text-slate-600">{_t.common.loading}</p>
         )}
       </div>
 
@@ -206,7 +206,7 @@ export function AiDocPanel({ isOpen, onClose, onDocChange, t }: DocPanelProps) {
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3">
             <FileText size={32} className="text-slate-700" />
-            <p className="text-sm text-slate-600">{t.aiHub.noDocSelected}</p>
+            <p className="text-sm text-slate-600">{_t.aiHub.noDocSelected}</p>
           </div>
         )}
       </div>

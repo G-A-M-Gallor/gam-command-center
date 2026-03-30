@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import {
-  Shield,
+  _Shield,
   Key,
   CheckCircle2,
   AlertTriangle,
   XCircle,
   RefreshCw,
-  ExternalLink,
+  _ExternalLink,
   Eye,
   EyeOff,
   Github,
@@ -51,8 +51,8 @@ const initialServices: ApiService[] = [
   { name: 'WATI WhatsApp', key: 'WATI_API_TOKEN', status: 'unknown', category: 'external', icon: MessageSquare, required: false },
 
   // Auth & OAuth
-  { name: 'Google OAuth', key: 'GOOGLE_CLIENT_ID', status: 'unknown', category: 'auth', icon: Shield, required: true },
-  { name: 'NextAuth', key: 'NEXTAUTH_SECRET', status: 'unknown', category: 'auth', icon: Shield, required: true },
+  { name: 'Google OAuth', key: 'GOOGLE_CLIENT_ID', status: 'unknown', category: 'auth', icon: _Shield, required: true },
+  { name: 'NextAuth', key: 'NEXTAUTH_SECRET', status: 'unknown', category: 'auth', icon: _Shield, required: true },
 
   // System
   { name: 'Vercel Blob', key: 'BLOB_READ_WRITE_TOKEN', status: 'unknown', category: 'system', icon: Cloud, required: true },
@@ -150,7 +150,7 @@ function ServiceCard({ service, onTest, showCredential, onToggleCredential }: {
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-3 py-1 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 rounded text-xs transition-colors"
           >
-            <ExternalLink className="h-3 w-3" />
+            <_ExternalLink className="h-3 w-3" />
             API
           </a>
         )}
@@ -177,7 +177,7 @@ export default function CredentialsHealth({}: CredentialsHealthProps) {
       // Call our API health check endpoint
       const response = await fetch('/api/health/credentials', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ service: key })
       });
 
@@ -246,7 +246,7 @@ export default function CredentialsHealth({}: CredentialsHealthProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className={`border rounded-lg p-4 ${requiredHealthy ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-red-500/20 bg-red-500/5'}`}>
           <div className="flex items-center gap-2 mb-2">
-            <Shield className="h-5 w-5 text-emerald-400" />
+            <_Shield className="h-5 w-5 text-emerald-400" />
             <h3 className="font-medium text-white">שירותים קריטיים</h3>
           </div>
           <p className={`text-2xl font-bold ${requiredHealthy ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -337,7 +337,7 @@ export default function CredentialsHealth({}: CredentialsHealthProps) {
       </div>
 
       {lastFullCheck && (
-        <div className="text-center text-xs text-slate-500 pt-4 border-t border-white/[0.06]">
+        <div className="text-center text-xs text-slate-500 pt-4 border-_t border-white/[0.06]">
           בדיקה מלאה אחרונה: {new Date(lastFullCheck).toLocaleString('he-IL')}
         </div>
       )}

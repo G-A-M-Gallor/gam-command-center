@@ -43,14 +43,18 @@ function load(): ShellPrefs {
       const parsed = JSON.parse(raw);
       return { ...DEFAULTS, ...parsed };
     }
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
   return { ...DEFAULTS };
 }
 
 function save(prefs: ShellPrefs) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 // ─── Hook ───────────────────────────────────────────────

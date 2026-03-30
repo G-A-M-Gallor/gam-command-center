@@ -4,20 +4,20 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import type { JSONContent } from "@tiptap/react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import {
-  Plus,
+  _Plus,
   Search,
   Mail,
   Copy,
   Trash2,
   MoreVertical,
-  Clock,
+  _Clock,
   CheckCircle2,
   AlertCircle,
   ChevronDown,
-  X,
+  _X,
   Tag,
   Braces,
   PanelLeftClose,
@@ -82,7 +82,7 @@ async function fetchTemplates(category?: string): Promise<EmailTemplate[]> {
 async function createTemplate(payload: Record<string, unknown>): Promise<EmailTemplate | null> {
   const res = await fetch("/api/email/templates", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    _headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
   if (!res.ok) return null;
@@ -93,7 +93,7 @@ async function createTemplate(payload: Record<string, unknown>): Promise<EmailTe
 async function updateTemplate(id: string, payload: Record<string, unknown>): Promise<EmailTemplate | null> {
   const res = await fetch("/api/email/templates", {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    _headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id, ...payload }),
   });
   if (!res.ok) return null;
@@ -176,7 +176,7 @@ function replaceVariables(html: string, preview: boolean): string {
 
 export default function EmailTemplateDesignerPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const ed = t.emailDesigner;
   const isRtl = language === "he";
   const langKey = language as "he" | "en" | "ru";
@@ -207,7 +207,7 @@ export default function EmailTemplateDesignerPage() {
   const subjectInputRef = useRef<HTMLInputElement>(null);
 
   const selected = useMemo(
-    () => templates.find((t) => t.id === selectedId) || null,
+    () => templates.find((_t) => t.id === selectedId) || null,
     [templates, selectedId],
   );
 
@@ -265,7 +265,7 @@ export default function EmailTemplateDesignerPage() {
       setSaveState("saving");
       const result = await updateTemplate(selectedId, { [field]: value });
       if (result) {
-        setTemplates((prev) => prev.map((t) => (t.id === result.id ? result : t)));
+        setTemplates((prev) => prev.map((_t) => (t.id === result.id ? result : _t)));
         markSaved();
       } else {
         setSaveState("error");
@@ -281,7 +281,7 @@ export default function EmailTemplateDesignerPage() {
       setSaveState("saving");
       const result = await updateTemplate(selectedId, { html_compiled: html });
       if (result) {
-        setTemplates((prev) => prev.map((t) => (t.id === result.id ? result : t)));
+        setTemplates((prev) => prev.map((_t) => (t.id === result.id ? result : _t)));
         markSaved();
       } else {
         setSaveState("error");
@@ -355,7 +355,7 @@ export default function EmailTemplateDesignerPage() {
     async (id: string) => {
       const ok = await deleteTemplate(id);
       if (ok) {
-        setTemplates((prev) => prev.filter((t) => t.id !== id));
+        setTemplates((prev) => prev.filter((_t) => t.id !== id));
         if (selectedId === id) {
           setSelectedId(null);
           setEditorContent(null);
@@ -401,7 +401,7 @@ export default function EmailTemplateDesignerPage() {
     if (!search.trim()) return templates;
     const q = search.toLowerCase();
     return templates.filter(
-      (t) =>
+      (_t) =>
         t.name.toLowerCase().includes(q) ||
         t.subject.toLowerCase().includes(q) ||
         t.category.includes(q),
@@ -494,7 +494,7 @@ export default function EmailTemplateDesignerPage() {
 
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-slate-500">
@@ -658,7 +658,7 @@ export default function EmailTemplateDesignerPage() {
 
                 {/* Save indicator */}
                 {saveState === "saving" && (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
                 )}
                 {saveState === "saved" && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
                 {saveState === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}

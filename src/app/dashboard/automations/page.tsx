@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Network, Clock, Webhook, Lightbulb, Activity, History, Rss } from 'lucide-react';
+import { Network, _Clock, Webhook, Lightbulb, Activity, History, Rss } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { ConnectionCards } from '@/components/automations/ConnectionCards';
 import { QuickActionsBar } from '@/components/automations/QuickActionsBar';
@@ -29,7 +29,7 @@ const TAB_LABELS: Record<TabKey, 'tabEndpoints' | 'tabJobs' | 'tabWebhooks' | 't
 
 const TAB_ICONS: Record<TabKey, typeof Network> = {
   endpoints: Network,
-  jobs: Clock,
+  jobs: _Clock,
   webhooks: Webhook,
   suggestions: Lightbulb,
   activity: Activity,
@@ -41,7 +41,7 @@ const TAB_KEYS: TabKey[] = ['endpoints', 'jobs', 'webhooks', 'suggestions', 'act
 
 export default function AutomationsPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const a = t.automations;
   const [activeTab, setActiveTab] = useState<TabKey>('endpoints');
 
@@ -54,7 +54,7 @@ export default function AutomationsPage() {
         <QuickActionsBar t={a} />
 
         {/* ── Connection Status Cards ───────────── */}
-        <ConnectionCards t={a} />
+        <ConnectionCards _t={a} />
 
         {/* ── Tabs ──────────────────────────────── */}
         <div className="border-b border-slate-700/50">

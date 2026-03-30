@@ -32,7 +32,7 @@ interface QuickAccessGridProps {
 }
 
 export function QuickAccessGrid({ tabLabels, onContextMenu }: QuickAccessGridProps) {
-  const router = useRouter();
+  const _router = useRouter();
 
   return (
     <div

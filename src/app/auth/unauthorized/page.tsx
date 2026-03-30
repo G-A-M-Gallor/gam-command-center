@@ -1,4 +1,4 @@
-import { Shield, ArrowLeft, Home } from "lucide-react";
+import { _Shield, ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 
 export default function UnauthorizedPage() {
@@ -7,7 +7,7 @@ export default function UnauthorizedPage() {
       <div className="w-full max-w-md text-center">
         {/* Icon */}
         <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/10 rounded-full mb-6">
-          <Shield className="w-8 h-8 text-red-400" />
+          <_Shield className="w-8 h-8 text-red-400" />
         </div>
 
         {/* Title */}
@@ -43,7 +43,7 @@ export default function UnauthorizedPage() {
         </div>
 
         {/* Help */}
-        <div className="mt-8 pt-6 border-t border-slate-700">
+        <div className="mt-8 pt-6 border-_t border-slate-700">
           <p className="text-xs text-slate-500">
             זקוק לעזרה? פנה לתמיכה הטכנית
           </p>

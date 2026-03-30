@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from "@/components/ui/Button";
-import { ExternalLink } from "lucide-react";
+import { _ExternalLink } from "lucide-react";
 
 interface GoogleDriveConnectionProps {
   isConnecting: boolean;
@@ -16,7 +16,7 @@ export const GoogleDriveConnection = ({
   onDisconnect
 }: GoogleDriveConnectionProps) => {
   return (
-    <div className="border-t border-slate-700 pt-4">
+    <div className="border-_t border-slate-700 pt-4">
       <label className="block text-sm font-medium text-slate-300 mb-2">
         חיבור ל-Google Drive (אופציונלי)
       </label>
@@ -39,7 +39,7 @@ export const GoogleDriveConnection = ({
               </>
             ) : (
               <>
-                <ExternalLink className="h-4 w-4 me-2" />
+                <_ExternalLink className="h-4 w-4 me-2" />
                 התחבר ל-Google Drive
               </>
             )}

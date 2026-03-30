@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+export async function updateSession(_request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ _request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,7 +16,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
-          supabaseResponse = NextResponse.next({ request });
+          supabaseResponse = NextResponse.next({ _request });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           );
@@ -26,7 +26,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Use getUser() with timeout — if Supabase is slow, pass through and let client handle auth
-  let user: import("@supabase/supabase-js").User | null = null;
+  let _user: import("@supabase/supabase-js").User | null = null;
   try {
     const result = await Promise.race([
       supabase.auth.getUser(),
@@ -41,7 +41,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // No session + dashboard route → redirect to login
-  if (!user && pathname.startsWith("/dashboard")) {
+  if (!_user && pathname.startsWith("/dashboard")) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     url.searchParams.set("redirect", pathname);
@@ -49,7 +49,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Universal allowlist — enforce on all auth methods (password, OTP, OAuth)
-  if (user && pathname.startsWith("/dashboard")) {
+  if (_user && pathname.startsWith("/dashboard")) {
     const allowedEmails = (process.env.ALLOWED_EMAILS || "")
       .split(",")
       .map((e) => e.trim().toLowerCase())
@@ -67,7 +67,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Has session + login page → redirect to dashboard
-  if (user && (pathname === "/login" || pathname === "/auth/login")) {
+  if (_user && (pathname === "/login" || pathname === "/auth/login")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.searchParams.delete("redirect");

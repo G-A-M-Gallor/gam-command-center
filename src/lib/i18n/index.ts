@@ -8,18 +8,18 @@
  *   loadNamespaces(lang, ['common', 'entities']) — loads only what's needed
  */
 
-import type { Language } from "@/contexts/SettingsContext";
+import type { _Language } from "@/contexts/SettingsContext";
 import { he } from "./locales/he";
 import { en } from "./locales/en";
 import { ru } from "./locales/ru";
 import type { Translations, TranslationKey } from "./types";
 
-const translations: Record<Language, Translations> = { he, en, ru };
+const translations: Record<_Language, Translations> = { he, en, ru };
 
 // ═══ Backward-compatible API ═══════════════════════════
 // Drop-in replacement for the old getTranslations()
 
-export function getTranslations(lang: Language): Translations {
+export function getTranslations(lang: _Language): Translations {
   return translations[lang];
 }
 
@@ -32,7 +32,7 @@ export type { Translations, TranslationKey };
 export function loc<T = string>(
   obj: Record<string, any>,
   field: string,
-  language: Language,
+  language: _Language,
 ): T {
   if (language === "he") {
     return (obj[`${field}He`] ?? obj[`${field}_he`] ?? obj[field] ?? "") as T;
@@ -49,7 +49,7 @@ export function loc<T = string>(
 const nsCache = new Map<string, Record<string, unknown>>();
 
 export async function loadNamespaces(
-  lang: Language,
+  lang: _Language,
   namespaces: TranslationKey[],
 ): Promise<Partial<Translations>> {
   const result: Record<string, unknown> = {};

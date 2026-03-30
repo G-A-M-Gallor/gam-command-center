@@ -6,7 +6,7 @@ import { getUserId } from "@/lib/api/auth";
  * POST /api/courses/[id]/sync-drive - Sync lessons from Google Drive folder
  */
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

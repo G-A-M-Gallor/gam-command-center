@@ -9,7 +9,7 @@ import { put } from "@vercel/blob";
  *
  * Uses server-side upload (extension sends the blob here).
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

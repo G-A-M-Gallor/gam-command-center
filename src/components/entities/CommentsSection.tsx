@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   MessageSquare, Send, Reply, Pencil, Trash2,
   ThumbsUp, Heart, Flame, Eye, CheckCircle2,
-  Loader2, MoreHorizontal, X,
+  Loader2, MoreHorizontal, _X,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 
 interface Comment {
   id: string;
@@ -48,7 +48,7 @@ const EMOJI_KEYS = Object.keys(EMOJI_MAP) as (keyof typeof EMOJI_MAP)[];
 export function CommentsSection({ noteId, entityType, language }: Props) {
   const { language: settingsLang } = useSettings();
   const lang = (language || settingsLang) as 'he' | 'en' | 'ru';
-  const t = getTranslations(lang);
+  const _t = getTranslations(lang);
   const te = t.entities;
   const tc = (te as unknown as { comments?: Record<string, string> }).comments ?? {};
   const isRtl = lang === 'he';
@@ -104,7 +104,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
     try {
       await fetch(apiBase, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: text,
           parentId: replyTo || undefined,
@@ -124,7 +124,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
     try {
       await fetch(apiBase, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ commentId, content: editContent.trim() }),
       });
       setEditingId(null);
@@ -138,7 +138,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
     try {
       await fetch(apiBase, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ commentId }),
       });
       await load();
@@ -149,7 +149,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
     try {
       await fetch(apiBase, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ commentId, emoji, action }),
       });
       await load();
@@ -276,7 +276,7 @@ export function CommentsSection({ noteId, entityType, language }: Props) {
   );
 
   return (
-    <div className="border-t border-white/[0.04] pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="border-_t border-white/[0.04] pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
       <h4 className="text-[10px] font-medium text-slate-400 mb-2">
         {tc.title || 'Comments'}
       </h4>

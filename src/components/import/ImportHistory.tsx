@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Clock, ChevronDown, ChevronUp, XCircle } from "lucide-react";
+import { _Clock, ChevronDown, ChevronUp, XCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { fetchImportLogs } from "@/lib/supabase/importQueries";
 import type { ImportLog, ImportLogStatus } from "@/lib/import/types";
 
@@ -16,7 +16,7 @@ const STATUS_STYLES: Record<ImportLogStatus, { bg: string; text: string }> = {
 
 export function ImportHistory() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const it = t.importEngine;
   const [logs, setLogs] = useState<ImportLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +41,7 @@ export function ImportHistory() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-400 border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-400 border-_t-transparent" />
       </div>
     );
   }
@@ -49,7 +49,7 @@ export function ImportHistory() {
   if (logs.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-        <Clock className="mb-2 h-8 w-8" />
+        <_Clock className="mb-2 h-8 w-8" />
         <p className="text-sm">{it.noImports}</p>
       </div>
     );

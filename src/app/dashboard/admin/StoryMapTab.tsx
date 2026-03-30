@@ -4,12 +4,12 @@ import { useState, useMemo } from 'react';
 import {
   CheckCircle2, AlertCircle, AlertTriangle, Circle, XCircle,
   ChevronDown, ChevronLeft, ChevronRight,
-  Heart, Zap, Target, Shield, Calendar, TrendingUp,
-  Map, Layers, FileEdit, Bot, Grid3X3, Settings,
+  Heart, Zap, Target, _Shield, Calendar, TrendingUp,
+  Map, _Layers, FileEdit, Bot, Grid3X3, Settings,
   Lock,
 } from 'lucide-react';
-import { getTranslations, loc } from '@/lib/i18n';
-import type { Language } from '@/contexts/SettingsContext';
+import { _getTranslations, loc } from '@/lib/i18n';
+import type { _Language } from '@/contexts/SettingsContext';
 import type { StoryStatus, RiskLevel, Effort, UserJourneyStep, MLPTier } from './types';
 import {
   userJourneySteps, walkingSkeleton, mvp, mlpTiers,
@@ -49,7 +49,7 @@ const EFFORT_CONFIG: Record<Effort, { color: string; bg: string }> = {
 const STEP_ICONS: Record<string, React.ElementType> = {
   authenticate: Lock,
   navigate: Map,
-  monitor: Layers,
+  monitor: _Layers,
   'create-edit': FileEdit,
   'plan-map': Target,
   'ai-assist': Bot,
@@ -100,7 +100,7 @@ function ProgressBar({ done, total, height = 'h-2' }: { done: number; total: num
 
 // ─── Journey Step Card ──────────────────────────────────
 
-function JourneyStepCard({ step, language, ta }: { step: UserJourneyStep; language: Language; ta: AdminTranslations }) {
+function JourneyStepCard({ step, language, ta }: { step: UserJourneyStep; language: _Language; ta: AdminTranslations }) {
   const isRtl = language === 'he';
   const [expanded, setExpanded] = useState(false);
   const Icon = STEP_ICONS[step.id] || Circle;
@@ -142,7 +142,7 @@ function JourneyStepCard({ step, language, ta }: { step: UserJourneyStep; langua
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="border-t border-white/[0.04] px-4 py-3 space-y-3">
+        <div className="border-_t border-white/[0.04] px-4 py-3 space-y-3">
           {/* Emotion / Friction / Aha */}
           <div className="grid grid-cols-3 gap-2 text-[11px]">
             <div className="rounded-lg bg-pink-500/5 border border-pink-500/10 px-2.5 py-2">
@@ -172,7 +172,7 @@ function JourneyStepCard({ step, language, ta }: { step: UserJourneyStep; langua
               </thead>
               <tbody>
                 {step.stories.map((story, i) => (
-                  <tr key={i} className={`border-t border-white/[0.03] ${story.status === 'broken' || story.risk === 'critical' ? 'bg-red-500/[0.03]' : ''}`}>
+                  <tr key={i} className={`border-_t border-white/[0.03] ${story.status === 'broken' || story.risk === 'critical' ? 'bg-red-500/[0.03]' : ''}`}>
                     <td className="px-3 py-1.5">
                       <span className="text-slate-300">{loc(story, 'name', language)}</span>
                       {story.note && (
@@ -222,7 +222,7 @@ function JourneyStepCard({ step, language, ta }: { step: UserJourneyStep; langua
 // ─── Release Tier Section ───────────────────────────────
 
 function ReleaseTierSection({ tier, language, accent, ta }: {
-  tier: typeof walkingSkeleton; language: Language; accent: string; ta: AdminTranslations;
+  tier: typeof walkingSkeleton; language: _Language; accent: string; ta: AdminTranslations;
 }) {
   const isRtl = language === 'he';
   return (
@@ -248,7 +248,7 @@ function ReleaseTierSection({ tier, language, accent, ta }: {
           </thead>
           <tbody>
             {tier.tasks.map((task, i) => (
-              <tr key={i} className="border-t border-white/[0.03]">
+              <tr key={i} className="border-_t border-white/[0.03]">
                 <td className="px-3 py-1.5 text-slate-300">{loc(task, 'name', language)}</td>
                 <td className="px-2 py-1.5 text-center">
                   <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
@@ -280,7 +280,7 @@ function ReleaseTierSection({ tier, language, accent, ta }: {
 
 // ─── MLP Tier Card ──────────────────────────────────────
 
-function MLPTierCard({ tier, language, ta }: { tier: MLPTier; language: Language; ta: AdminTranslations }) {
+function MLPTierCard({ tier, language, ta }: { tier: MLPTier; language: _Language; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <h4 className="text-sm font-semibold text-slate-200 mb-3">{loc(tier, 'name', language)}</h4>
@@ -302,12 +302,12 @@ function MLPTierCard({ tier, language, ta }: { tier: MLPTier; language: Language
 
 // ─── Risk Matrix ────────────────────────────────────────
 
-function RiskMatrixSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
+function RiskMatrixSection({ language, ta }: { language: _Language; ta: AdminTranslations }) {
   const isRtl = language === 'he';
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
-        <Shield size={16} className="text-red-400" />
+        <_Shield size={16} className="text-red-400" />
         <h4 className="text-sm font-semibold text-slate-200">{ta.smRiskMatrix}</h4>
       </div>
       <div className="rounded-lg border border-white/[0.04] overflow-hidden">
@@ -322,7 +322,7 @@ function RiskMatrixSection({ language, ta }: { language: Language; ta: AdminTran
           </thead>
           <tbody>
             {riskMatrix.map((r, i) => (
-              <tr key={i} className={`border-t border-white/[0.03] ${r.level === 'critical' ? 'bg-red-500/[0.03]' : ''}`}>
+              <tr key={i} className={`border-_t border-white/[0.03] ${r.level === 'critical' ? 'bg-red-500/[0.03]' : ''}`}>
                 <td className="px-3 py-1.5 text-slate-300">{loc(r, 'risk', language)}</td>
                 <td className="px-2 py-1.5 text-center">
                   <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-500">{loc(r, 'type', language)}</span>
@@ -340,7 +340,7 @@ function RiskMatrixSection({ language, ta }: { language: Language; ta: AdminTran
 
 // ─── Implementation Timeline ────────────────────────────
 
-function TimelineSection({ language, ta }: { language: Language; ta: AdminTranslations }) {
+function TimelineSection({ language, ta }: { language: _Language; ta: AdminTranslations }) {
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
@@ -357,8 +357,8 @@ function TimelineSection({ language, ta }: { language: Language; ta: AdminTransl
             <div className="pb-3">
               <div className="text-xs font-medium text-slate-200">{loc(week, 'week', language)}</div>
               <ul className="mt-1 space-y-0.5">
-                {loc<string[]>(week, 'tasks', language).map((t, j) => (
-                  <li key={j} className="text-[11px] text-slate-500">• {t}</li>
+                {loc<string[]>(week, 'tasks', language).map((_t, j) => (
+                  <li key={j} className="text-[11px] text-slate-500">• {_t}</li>
                 ))}
               </ul>
             </div>
@@ -372,7 +372,7 @@ function TimelineSection({ language, ta }: { language: Language; ta: AdminTransl
 // ─── Main Export ─────────────────────────────────────────
 
 export default function StoryMapTab({ language, ta }: {
-  language: Language;
+  language: _Language;
   ta: AdminTranslations;
 }) {
   const stats = useMemo(() => getJourneyStats(), []);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -19,14 +19,14 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -115,7 +115,7 @@ ${currentTools.map(tool =>
       system: systemPrompt,
       messages: [
         {
-          role: "user",
+          role: "_user",
           content: message
         }
       ]
@@ -191,7 +191,7 @@ ${currentTools.map(tool =>
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid request data" }, { status: 400 });
+      return NextResponse.json({ error: "Invalid _request data" }, { status: 400 });
     }
 
     console.error("POST /api/toolkit/chat error:", error);

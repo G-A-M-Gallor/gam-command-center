@@ -3,8 +3,8 @@ import { requireAuth } from '@/lib/api/auth';
 import { automationRunJobSchema } from '@/lib/api/schemas';
 import { createServiceClient } from '@/lib/supabase/server';
 
-export async function POST(request: Request) {
-  const { user, error: authError } = await requireAuth(request);
+export async function POST(_request: Request) {
+  const { _user, error: authError } = await requireAuth(_request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const parsed = automationRunJobSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || 'Invalid request' },
+      { error: parsed.error.issues[0]?.message || 'Invalid _request' },
       { status: 400 },
     );
   }
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   // Record run start
   const { data: runRow } = await supabase
     .from('automation_runs')
-    .insert({ job_name: job, status: 'running', triggered_by: user!.id, started_at: startedAt.toISOString() })
+    .insert({ job_name: job, status: 'running', triggered_by: _user!.id, started_at: startedAt.toISOString() })
     .select('id')
     .single();
 
@@ -43,11 +43,11 @@ export async function POST(request: Request) {
 
     switch (job) {
       case 'origami-sync': {
-        const origin = new URL(request.url).origin;
+        const origin = new URL(_request.url).origin;
         const res = await fetch(`${origin}/api/origami/sync`, {
           method: 'POST',
           headers: {
-            Authorization: request.headers.get('authorization') || '',
+            Authorization: _request._headers.get('authorization') || '',
             'Content-Type': 'application/json',
           },
         });
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       }
 
       case 'health-check': {
-        const origin = new URL(request.url).origin;
+        const origin = new URL(_request.url).origin;
         const res = await fetch(`${origin}/api/health`);
         result = await res.json();
         success = res.ok;
@@ -65,11 +65,11 @@ export async function POST(request: Request) {
       }
 
       case 'rss-sync': {
-        const origin = new URL(request.url).origin;
+        const origin = new URL(_request.url).origin;
         const res = await fetch(`${origin}/api/rss/sync`, {
           method: 'POST',
           headers: {
-            Authorization: request.headers.get('authorization') || '',
+            Authorization: _request._headers.get('authorization') || '',
             'Content-Type': 'application/json',
           },
         });
@@ -79,11 +79,11 @@ export async function POST(request: Request) {
       }
 
       case 'test-notification': {
-        const origin = new URL(request.url).origin;
+        const origin = new URL(_request.url).origin;
         const res = await fetch(`${origin}/api/push/send`, {
           method: 'POST',
           headers: {
-            Authorization: request.headers.get('authorization') || '',
+            Authorization: _request._headers.get('authorization') || '',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({

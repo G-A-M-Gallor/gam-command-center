@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 
 interface ExportButtonProps {
   table: string;
@@ -13,7 +13,7 @@ interface ExportButtonProps {
 
 export function ExportButton({ table, filters, filename }: ExportButtonProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const ex = t.export;
   const [loading, setLoading] = useState(false);
 

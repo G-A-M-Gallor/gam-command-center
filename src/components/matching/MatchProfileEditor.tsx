@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Save, Eye, Settings2 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import type { MatchProfile, MatchWeights } from "@/lib/matching/types";
 import { DEFAULT_WEIGHTS } from "@/lib/matching/types";
 
@@ -14,12 +14,12 @@ interface MatchProfileEditorProps {
 }
 
 export function MatchProfileEditor({
-  profile,
+  _profile,
   savedWeights,
   onSave,
 }: MatchProfileEditorProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const mt = t.matching as Record<string, string>;
 
   const [mode, setMode] = useState<"view" | "edit">("view");
@@ -58,7 +58,7 @@ export function MatchProfileEditor({
     });
   };
 
-  if (!profile) {
+  if (!_profile) {
     return (
       <div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4 text-center text-sm text-slate-500">
         {mt.selectSource}
@@ -68,7 +68,7 @@ export function MatchProfileEditor({
 
   return (
     <div
-      data-cc-id="matching.profile-editor"
+      data-cc-id="matching._profile-editor"
       className="rounded-lg border border-slate-700/50 bg-slate-800/30"
     >
       {/* Header */}
@@ -115,7 +115,7 @@ export function MatchProfileEditor({
             {mt.matchedOn || "Extracted Fields"}
           </span>
           <div className="mt-1 space-y-1">
-            {Object.entries(profile.fields).map(([key, val]) => (
+            {Object.entries(_profile.fields).map(([key, val]) => (
               <div
                 key={key}
                 className="flex items-center justify-between rounded bg-slate-800/50 px-2 py-1"
@@ -138,7 +138,7 @@ export function MatchProfileEditor({
                 </span>
               </div>
             ))}
-            {Object.keys(profile.fields).length === 0 && (
+            {Object.keys(_profile.fields).length === 0 && (
               <p className="text-[10px] text-slate-600 italic">
                 No structured fields extracted
               </p>
@@ -148,7 +148,7 @@ export function MatchProfileEditor({
 
         {/* Weight editor */}
         {mode === "edit" && (
-          <div className="mt-3 space-y-2 border-t border-slate-700/50 pt-3">
+          <div className="mt-3 space-y-2 border-_t border-slate-700/50 pt-3">
             <span className="text-[10px] uppercase tracking-wider text-slate-600">
               Weights
             </span>

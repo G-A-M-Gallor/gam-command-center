@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Plus, Trash2, Pencil, Check, X, Clock, Settings2, RotateCcw } from "lucide-react";
+import { _Plus, Trash2, Pencil, Check, _X, _Clock, Settings2, RotateCcw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { VCanvas } from "@/components/vcanvas/VCanvas";
 import {
@@ -11,7 +11,7 @@ import {
   saveFeatures,
   resetFeatures,
   FEATURE_LABELS,
-  DEFAULT_FEATURES,
+  _DEFAULT_FEATURES,
 } from "@/lib/vcanvas/canvasConfig";
 import type { CanvasFeatures, CanvasContext } from "@/lib/vcanvas/canvasConfig";
 
@@ -37,7 +37,9 @@ function loadCanvasList(): CanvasEntry[] {
 function saveCanvasList(list: CanvasEntry[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 function deleteCanvasStorage(id: string) {
@@ -47,7 +49,9 @@ function deleteCanvasStorage(id: string) {
     for (const key of keys) {
       if (key.includes(id)) localStorage.removeItem(key);
     }
-  } catch {}
+  } catch {
+    // Ignore errors
+  }
 }
 
 // ─── i18n labels ─────────────────────────────────────
@@ -134,7 +138,7 @@ function FeatureSettingsPanel({
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
           <h2 className="text-base font-bold text-slate-100">{l.settings}</h2>
           <button type="button" onClick={onClose} className="p-1 rounded-lg text-slate-500 hover:bg-white/[0.06] hover:text-slate-300">
-            <X className="h-4 w-4" />
+            <_X className="h-4 w-4" />
           </button>
         </div>
 
@@ -203,7 +207,7 @@ function FeatureSettingsPanel({
 // ─── Page Component ──────────────────────────────────
 export default function VCanvasPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const isRtl = language === "he";
   const l = labels[language];
 
@@ -350,7 +354,7 @@ export default function VCanvasPage() {
               onClick={handleCreate}
               className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/[0.08] transition-colors"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <_Plus className="h-3.5 w-3.5" />
               {l.newCanvas}
             </button>
           </div>

@@ -5,7 +5,7 @@ const healthChecks = {
   ANTHROPIC_API_KEY: async (key: string) => {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
+      _headers: {
         'Content-Type': 'application/json',
         'x-api-key': key,
         'anthropic-version': '2023-06-01'
@@ -13,7 +13,7 @@ const healthChecks = {
       body: JSON.stringify({
         model: 'claude-3-haiku-20240307',
         max_tokens: 10,
-        messages: [{ role: 'user', content: 'test' }]
+        messages: [{ role: '_user', content: 'test' }]
       })
     });
 
@@ -43,7 +43,7 @@ const healthChecks = {
     }
 
     const response = await fetch(`${supabaseUrl}/rest/v1/`, {
-      headers: {
+      _headers: {
         'apikey': key,
         'Authorization': `Bearer ${key}`
       }
@@ -58,7 +58,7 @@ const healthChecks = {
 
   NOTION_API_KEY: async (key: string) => {
     const response = await fetch('https://api.notion.com/v1/users/me', {
-      headers: {
+      _headers: {
         'Authorization': `Bearer ${key}`,
         'Notion-Version': '2022-06-28'
       }
@@ -74,7 +74,7 @@ const healthChecks = {
 
   RESEND_API_KEY: async (key: string) => {
     const response = await fetch('https://api.resend.com/domains', {
-      headers: {
+      _headers: {
         'Authorization': `Bearer ${key}`
       }
     });
@@ -94,7 +94,7 @@ const healthChecks = {
     }
 
     const response = await fetch(`${wapiUrl}/api/v1/getUsers`, {
-      headers: {
+      _headers: {
         'Authorization': `Bearer ${key}`
       }
     });
@@ -139,7 +139,7 @@ const healthChecks = {
     // Test Vercel blob token by attempting to list (this should work with read permission)
     const response = await fetch('https://blob.vercel-storage.com', {
       method: 'GET',
-      headers: {
+      _headers: {
         'Authorization': `Bearer ${token}`
       }
     });
@@ -171,7 +171,7 @@ const healthChecks = {
   }
 };
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const { service } = await request.json();
 
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: false,
-      service: (await request.json().catch(() => ({}))).service || 'unknown',
+      service: (await _request.json().catch(() => ({}))).service || 'unknown',
       error: error instanceof Error ? error.message : 'Unknown error',
       timestamp: new Date().toISOString()
     });

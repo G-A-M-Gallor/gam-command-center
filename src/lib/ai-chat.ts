@@ -7,7 +7,7 @@ import type { PMContext } from "@/lib/pm-types";
 
 // ─── System Prompt ──────────────────────────────────
 
-export function buildSystemPrompt(context: PMContext): string {
+export function buildSystemPrompt(_context: PMContext): string {
   return `אתה Claude — עוזר AI של GAM Command Center.
 אתה מכיר את כל הנתונים ומדבר עברית תמיד.
 
@@ -21,7 +21,7 @@ ${
   context.urgentTasks
     .slice(0, 5)
     .map(
-      (t) =>
+      (_t) =>
         `- ${t.title} | ${t.status} | ${t.worker || "לא משויך"} | ${t.due_date || "ללא תאריך"}`,
     )
     .join("\n") || "אין משימות דחופות"
@@ -46,15 +46,15 @@ export interface ChatMessage {
 
 export async function chatWithAI(
   userMessage: string,
-  context: PMContext,
+  _context: PMContext,
 ): Promise<string> {
   const res = await fetch("/api/ai-chat", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    _headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1000,
-      system: buildSystemPrompt(context),
+      system: buildSystemPrompt(_context),
       messages: [{ role: "user", content: userMessage }],
     }),
   });

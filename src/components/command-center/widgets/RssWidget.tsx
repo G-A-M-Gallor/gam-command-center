@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Rss, ExternalLink, Eye, Loader2 } from 'lucide-react';
+import { Rss, _ExternalLink, Eye, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSettings } from '@/contexts/SettingsContext';
-import { getTranslations } from '@/lib/i18n';
+import { _getTranslations } from '@/lib/i18n';
 import { fetchArticles, markAllArticlesRead, fetchUnreadCount, type RssArticle } from '@/lib/supabase/rssQueries';
 import type { WidgetSize } from './WidgetRegistry';
 
@@ -20,9 +20,9 @@ function timeAgo(date: string | null): string {
 
 export function RssPanel() {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const r = t.rss as Record<string, string>;
-  const router = useRouter();
+  const _router = useRouter();
 
   const [articles, setArticles] = useState<RssArticle[]>([]);
   const [loading, setLoading] = useState(true);

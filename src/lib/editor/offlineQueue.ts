@@ -16,7 +16,7 @@ interface PendingSave {
 
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const _request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -24,8 +24,8 @@ function openDB(): Promise<IDBDatabase> {
         store.createIndex('documentId', 'documentId', { unique: false });
       }
     };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(_request.result);
+    request.onerror = () => reject(_request.error);
   });
 }
 

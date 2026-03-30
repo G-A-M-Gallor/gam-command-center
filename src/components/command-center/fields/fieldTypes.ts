@@ -10,7 +10,7 @@ import {
   ListChecks,
   Calendar,
   CalendarClock,
-  Clock,
+  _Clock,
   Tags,
   type LucideIcon,
 } from 'lucide-react';
@@ -223,7 +223,7 @@ export const fieldTypes: FieldTypeDefinition[] = [
   },
   {
     id: 'time',
-    icon: Clock,
+    icon: _Clock,
     label: { he: 'שעה', en: 'Time', ru: 'Время' },
     description: { he: 'בורר שעה', en: 'Time picker', ru: 'Выбор времени' },
     category: 'time',

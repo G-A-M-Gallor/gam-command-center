@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { X, Bot } from "lucide-react";
+import { _X, Bot } from "lucide-react";
 import type { WidgetDefinition } from "./WidgetRegistry";
 import { widgetRegistry } from "./WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useWidgets } from "@/contexts/WidgetContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 
 const MIN_WIDTH = 300;
 const MAX_WIDTH = 700;
@@ -81,7 +81,7 @@ export function TabbedSidePanel({
 }: TabbedSidePanelProps) {
   const { language, sidebarPosition } = useSettings();
   const { widgetLabels } = useWidgets();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
 
   // Tabs: AI is always first (if showAiTab), then other opened widgets
   const [tabs, setTabs] = useState<string[]>(() => {
@@ -302,7 +302,7 @@ export function TabbedSidePanel({
             </PanelErrorBoundary>
           ) : (
             <div className="flex items-center justify-center h-full text-sm text-slate-500">
-              {t.widgets.noResults}
+              {_t.widgets.noResults}
             </div>
           )}
         </div>

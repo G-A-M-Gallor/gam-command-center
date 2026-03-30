@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Download, FileText, FileType, FileCode, Copy, ChevronDown } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
+import { _getTranslations } from "@/lib/i18n";
 import {
   exportToHTML,
   exportToMarkdown,
@@ -20,7 +20,7 @@ interface ExportMenuProps {
 
 export function ExportMenu({ content, title }: ExportMenuProps) {
   const { language } = useSettings();
-  const t = getTranslations(language);
+  const _t = getTranslations(language);
   const et = t.editor;
   const [open, setOpen] = useState(false);
   const [exporting, setExporting] = useState<string | null>(null);

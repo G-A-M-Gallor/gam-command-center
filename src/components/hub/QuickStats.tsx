@@ -27,9 +27,9 @@ export function QuickStats({
   openTasks,
   aiConversations,
   loading,
-  t,
+  _t,
 }: QuickStatsProps) {
-  const router = useRouter();
+  const _router = useRouter();
 
   const cards: StatCard[] = [
     {

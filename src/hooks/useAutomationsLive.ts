@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { _createClient } from '@/lib/supabase/client'
 import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
 import type { Automation, AutomationRun } from '@/types/automations'
 
@@ -96,7 +96,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
     try {
       const response = await fetch('/api/automations-live', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(automation)
       })
 
@@ -115,12 +115,12 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
     try {
       const response = await fetch(`/api/automations-live/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(automation)
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update automation')
+        throw new Error('Failed to _update automation')
       }
 
       await fetchAutomations() // Refresh list
@@ -238,12 +238,12 @@ export function useAutomationLive(id: string) {
     try {
       const response = await fetch(`/api/automations-live/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workflow })
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update workflow')
+        throw new Error('Failed to _update workflow')
       }
 
       await fetchAutomation() // Refresh
@@ -303,7 +303,7 @@ export function useAutomationRuns(automationId: string) {
     try {
       const response = await fetch(`/api/automations-live/${automationId}/runs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        _headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           trigger_source: 'Manual',
           trigger_data: triggerData

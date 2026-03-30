@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import {
   entityCreateSchema,
   entityUpdateSchema,
@@ -22,18 +22,18 @@ interface RouteContext {
 
 // ─── GET /api/entities/[type] ────────────────────────────────
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { type } = await context.params;
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(_request.url);
 
     const page = Math.max(0, parseInt(searchParams.get("page") || "0", 10));
     const pageSize = Math.min(
@@ -156,13 +156,13 @@ export async function GET(request: Request, context: RouteContext) {
 
 // ─── POST /api/entities/[type] ───────────────────────────────
 
-export async function POST(request: Request, context: RouteContext) {
+export async function POST(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -189,7 +189,7 @@ export async function POST(request: Request, context: RouteContext) {
         status: "active",
         source: "api",
         is_deleted: false,
-        created_by: user.id,
+        created_by: _user.id,
       })
       .select()
       .single();
@@ -203,7 +203,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     // Fire-and-forget activity log
     if (data?.id) {
-      logActivityServer(data.id, 'created', { actorId: user.id }).catch(() => { /* no-op */ });
+      logActivityServer(data.id, 'created', { actorId: _user.id }).catch(() => { /* no-op */ });
     }
 
     return NextResponse.json({ data }, { status: 201 });
@@ -217,13 +217,13 @@ export async function POST(request: Request, context: RouteContext) {
 
 // ─── PATCH /api/entities/[type] ──────────────────────────────
 
-export async function PATCH(request: Request, context: RouteContext) {
+export async function PATCH(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -300,20 +300,20 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     if (title !== undefined && title !== existing.title) {
       logPromises.push(logActivityServer(id, 'field_change', {
-        actorId: user.id, fieldKey: 'title',
+        actorId: _user.id, fieldKey: 'title',
         oldValue: existing.title, newValue: title,
       }));
     }
     if (status !== undefined && status !== existing.status) {
       logPromises.push(logActivityServer(id, 'status_change', {
-        actorId: user.id, fieldKey: 'status',
+        actorId: _user.id, fieldKey: 'status',
         oldValue: existing.status, newValue: status,
       }));
     }
     if (meta !== undefined) {
       const oldMeta = typeof existing.meta === 'object' && existing.meta !== null
         ? (existing.meta as Record<string, unknown>) : {};
-      logPromises.push(logMetaChanges(id, oldMeta, meta, user.id));
+      logPromises.push(logMetaChanges(id, oldMeta, meta, _user.id));
     }
     Promise.all(logPromises).catch(() => { /* no-op */ });
 
@@ -328,13 +328,13 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 // ─── DELETE /api/entities/[type] ─────────────────────────────
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -375,7 +375,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     if (data && data.length > 0) {
       Promise.all(
         data.map((d: { id: string }) =>
-          logActivityServer(d.id, 'deleted', { actorId: user.id })
+          logActivityServer(d.id, 'deleted', { actorId: _user.id })
         )
       ).catch(() => { /* no-op */ });
     }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 import { entityUpdateSchema } from "@/lib/api/schemas";
 
 /**
@@ -20,13 +20,13 @@ const UUID_RE =
 
 // ─── GET /api/entities/[type]/[id] ──────────────────────────
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -65,13 +65,13 @@ export async function GET(_request: Request, context: RouteContext) {
 
 // ─── PATCH /api/entities/[type]/[id] ────────────────────────
 
-export async function PATCH(request: Request, context: RouteContext) {
+export async function PATCH(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -155,13 +155,13 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 // ─── DELETE /api/entities/[type]/[id] ───────────────────────
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, _context: RouteContext) {
   try {
     const supabase = await createClient();
     const {
-      data: { user },
+      data: { _user },
     } = await supabase.auth.getUser();
-    if (!user) {
+    if (!_user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

@@ -296,7 +296,7 @@ export async function createNote(
     .limit(1)
     .maybeSingle();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { _user } } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
     .from('vb_records')
@@ -309,7 +309,7 @@ export async function createNote(
       source: 'manual',
       workspace_id: existing?.workspace_id ?? null,
       entity_id: existing?.entity_id ?? null,
-      created_by: user?.id ?? null,
+      created_by: _user?.id ?? null,
     }])
     .select()
     .single();
@@ -492,8 +492,8 @@ export async function bulkUpdateMeta(
 export async function getFieldUsage(metaKey: string): Promise<string[]> {
   const types = await fetchEntityTypes();
   return types
-    .filter(t => t.field_refs.includes(metaKey))
-    .map(t => t.slug);
+    .filter(t => _t.field_refs.includes(metaKey))
+    .map(t => _t.slug);
 }
 
 // ─── Stakeholders ───────────────────────────────────

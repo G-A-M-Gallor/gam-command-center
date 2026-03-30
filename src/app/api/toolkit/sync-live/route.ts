@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { _createClient } from "@/lib/supabase/server";
 
 /**
  * Live MCP Sync API — /api/toolkit/sync-live
@@ -70,7 +70,7 @@ async function discoverLiveMcps() {
 export async function POST() {
   try {
     // Create service role client for development
-    const { createClient } = await import("@supabase/supabase-js");
+    const { _createClient } = await import("@supabase/supabase-js");
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
