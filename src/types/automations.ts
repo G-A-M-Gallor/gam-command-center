@@ -38,6 +38,7 @@ interface AuthenticationConfig {
   apiKey?: string;
   username?: string;
   password?: string;
+  [key: string]: JsonValue;
 }
 
 export interface Automation {
@@ -55,6 +56,27 @@ export interface Automation {
   lastRunAt?: Date
   createdBy: string
   version: number
+  workflow?: {
+    nodes: Array<{
+      node_id: string
+      node_type: 'trigger' | 'action' | 'condition' | 'delay'
+      title: string
+      x: number
+      y: number
+      width: number
+      height: number
+      config: Record<string, string | number | boolean>
+      inputs: string[]
+      outputs: string[]
+    }>
+    connections: Array<{
+      id: string
+      source: string
+      target: string
+      sourceHandle: string
+      targetHandle: string
+    }>
+  }
 }
 
 export interface AutomationTrigger {
@@ -83,6 +105,7 @@ export interface AutomationStep {
 export interface AutomationRun {
   id: string
   automationId: string
+  automationName: string
   status: 'success' | 'failed' | 'running' | 'cancelled' | 'paused'
   startedAt: Date
   completedAt?: Date

@@ -6,7 +6,7 @@ import { RunTimeline } from './RunTimeline'
 interface WorkflowRun {
   id: string
   automationName: string
-  status: 'success' | 'failed' | 'running' | 'cancelled'
+  status: 'success' | 'failed' | 'running' | 'cancelled' | 'paused'
   startedAt: Date
   completedAt?: Date
   duration?: number

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAutomationsLive, useAutomationLive } from '@/hooks/useAutomationsLive'
+import type { Automation } from '@/types/automations'
 import { NodePanel } from '../automations/NodePanel'
 import { NodeProperties } from '../automations/NodeProperties'
 

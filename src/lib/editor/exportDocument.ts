@@ -84,7 +84,7 @@ export async function exportToDOCX(content: JSONContent, title: string): Promise
 
   const paragraphs = tiptapJsonToDocxParagraphs(
     content,
-    { Document, Paragraph, TextRun, HeadingLevel, AlignmentType }
+    { Paragraph, TextRun, HeadingLevel, AlignmentType }
   );
 
   const doc = new Document({
