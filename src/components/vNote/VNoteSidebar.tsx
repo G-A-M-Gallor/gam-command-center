@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { _X, _ExternalLink } from "lucide-react";
+import { X, ExternalLink } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import type { NoteRecord } from "@/lib/entities/types";
 import type { VNoteSidebarTab, VNoteBlockTab } from "./vNote.types";
@@ -344,7 +344,7 @@ function findClosestSnap(translateFraction: number, velocity: number): number {
 const SHEET_TRANSITION = "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)";
 
 export function VNoteSidebar({ entity, blocks, selectedBlockId, onClearBlock, isOpen, onToggle, isMobile = false }: Props) {
-  const _router = useRouter();
+  const router = useRouter();
   const [entityTab, setEntityTab] = useState<VNoteSidebarTab>("comm-log");
   const [blockTab, setBlockTab] = useState<VNoteBlockTab>("details");
   const sheetRef = useRef<HTMLDivElement>(null);

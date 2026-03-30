@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { documentRevokeSchema } from "@/lib/api/schemas";
 
 /**
@@ -13,8 +13,8 @@ import { documentRevokeSchema } from "@/lib/api/schemas";
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
 
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     workspace_id: sub.workspace_id,
     submission_id,
     actor_type: "user",
-    actor_id: _user.id,
+    actor_id: user.id,
     action: "document.revoked",
     details: {
       previous_status: sub.status,

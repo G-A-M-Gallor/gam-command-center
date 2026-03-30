@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { _X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { widgetRegistry } from './widgets/WidgetRegistry';
 import { BUILTIN_ENTITY_TYPES } from '@/lib/entities/builtinEntityTypes';
 import { NAV_GROUPS } from './Sidebar';
 import type { SpeedDialSlot } from './SpeedDial';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 
 interface ShortcutPickerProps {
   onSelect: (slot: SpeedDialSlot) => void;
@@ -27,7 +27,7 @@ export function ShortcutPicker({ onSelect, onClose, language, translations }: Sh
   const [tab, setTab] = useState<Tab>('pages');
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -115,7 +115,7 @@ export function ShortcutPicker({ onSelect, onClose, language, translations }: Sh
             onClick={onClose}
             className="rounded p-0.5 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
           >
-            <_X size={14} />
+            <X size={14} />
           </button>
         </div>
 
@@ -139,9 +139,9 @@ export function ShortcutPicker({ onSelect, onClose, language, translations }: Sh
             { id: 'entities' as Tab, label: translations.entities },
           ]).map(t => (
             <button
-              key={_t.id}
+              key={t.id}
               type="button"
-              onClick={() => setTab(_t.id)}
+              onClick={() => setTab(t.id)}
               className={`flex-1 py-1.5 text-xs font-medium transition-colors ${
                 tab === t.id
                   ? 'border-b-2 text-[var(--cc-accent-400)]'

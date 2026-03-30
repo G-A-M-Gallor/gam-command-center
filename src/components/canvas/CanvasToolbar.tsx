@@ -1,9 +1,9 @@
 'use client';
 
-import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, _Plus, Copy, Share2, _Clock, LayoutTemplate, Columns2, Maximize2, Languages } from 'lucide-react';
+import { Grid3X3, Magnet, ZoomIn, ZoomOut, ArrowRight, Plus, Copy, Share2, Clock, LayoutTemplate, Columns2, Maximize2, Languages } from 'lucide-react';
 import { useCanvas } from '@/contexts/CanvasContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { ExportMenu } from '@/components/editor/ExportMenu';
 import type { JSONContent } from '@tiptap/react';
 import type { SaveState } from '@/lib/editor/useAutoSave';
@@ -41,7 +41,7 @@ export function CanvasToolbar({
 }: CanvasToolbarProps) {
   const { layout, toggleGrid, toggleSnap, setZoom, setLayout } = useCanvas();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const ct = t.canvas;
   const et = t.editor;
 
@@ -157,7 +157,7 @@ export function CanvasToolbar({
             className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200"
             title={et.versionHistory}
           >
-            <_Clock className="h-3.5 w-3.5" />
+            <Clock className="h-3.5 w-3.5" />
           </button>
         )}
 

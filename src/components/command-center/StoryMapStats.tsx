@@ -19,7 +19,7 @@ interface StoryMapStatsProps {
   };
 }
 
-export function StoryMapStats({ cards, _t }: StoryMapStatsProps) {
+export function StoryMapStats({ cards, t }: StoryMapStatsProps) {
   const epics = cards.filter((c) => c.type === 'epic').length;
   const features = cards.filter((c) => c.type === 'feature').length;
   const stories = cards.filter((c) => c.type === 'story').length;
@@ -51,7 +51,7 @@ export function StoryMapStats({ cards, _t }: StoryMapStatsProps) {
       </span>
       <span className="text-slate-600">|</span>
       <span className="flex items-center gap-1.5">
-        {_t.statsCompletion}:
+        {t.statsCompletion}:
         <span className="inline-flex h-1.5 w-16 rounded-full bg-slate-700 overflow-hidden">
           <span
             className="h-full rounded-full bg-emerald-500 transition-all"
@@ -67,7 +67,7 @@ export function StoryMapStats({ cards, _t }: StoryMapStatsProps) {
         <>
           <span className="text-slate-600">|</span>
           <span>
-            {_t.totalPoints}: <span className="font-semibold text-amber-400">{totalPoints}</span>
+            {t.totalPoints}: <span className="font-semibold text-amber-400">{totalPoints}</span>
           </span>
         </>
       )}

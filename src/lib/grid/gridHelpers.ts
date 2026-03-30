@@ -103,7 +103,7 @@ export function copyCellsToClipboard(
       const cell = sheet.cells[addr];
       cells.push(cell ? (cell.computed != null ? String(cell.computed) : cell.value) : "");
     }
-    lines.push(cells.join("\_t"));
+    lines.push(cells.join("\t"));
   }
   return lines.join("\n");
 }

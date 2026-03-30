@@ -96,7 +96,7 @@ export interface GoogleTokens {
 export async function exchangeCode(code: string): Promise<GoogleTokens> {
   const res = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
-    _headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
       client_id: getClientId(),
@@ -117,7 +117,7 @@ export async function exchangeCode(code: string): Promise<GoogleTokens> {
 export async function refreshAccessToken(refreshToken: string): Promise<Omit<GoogleTokens, "refresh_token">> {
   const res = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
-    _headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       refresh_token: refreshToken,
       client_id: getClientId(),
@@ -146,11 +146,11 @@ export interface GoogleUserInfo {
 
 export async function getUserInfo(accessToken: string): Promise<GoogleUserInfo> {
   const res = await fetch(GOOGLE_USERINFO_URL, {
-    _headers: { Authorization: `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch Google _user info");
+    throw new Error("Failed to fetch Google user info");
   }
 
   return res.json() as Promise<GoogleUserInfo>;

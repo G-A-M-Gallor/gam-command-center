@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import * as jose from "jose";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || process.env.SUPABASE_JWT_SECRET || "fallback-secret";
 
 // Public route — no auth required (link from email)
-export async function GET(_request: Request) {
-  const url = new URL(_request.url);
+export async function GET(request: Request) {
+  const url = new URL(request.url);
   const token = url.searchParams.get("token");
 
   if (!token) {
@@ -46,10 +46,10 @@ export async function GET(_request: Request) {
 }
 
 // POST — authenticated re-subscribe / manage
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

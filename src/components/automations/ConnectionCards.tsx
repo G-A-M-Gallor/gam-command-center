@@ -44,7 +44,7 @@ const statusDot = (status: string) => {
   return <XCircle className="h-4 w-4 text-red-400" />;
 };
 
-const statusLabel = (status: string, _t: Record<string, string>) => {
+const statusLabel = (status: string, t: Record<string, string>) => {
   if (status === 'online') return t.online;
   if (status === 'configured') return t.configured;
   if (status === 'unconfigured') return t.unconfigured;
@@ -55,7 +55,7 @@ interface ConnectionCardsProps {
   t: Record<string, string>;
 }
 
-export function ConnectionCards({ _t }: ConnectionCardsProps) {
+export function ConnectionCards({ t }: ConnectionCardsProps) {
   const [data, setData] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [testingCard, setTestingCard] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export function ConnectionCards({ _t }: ConnectionCardsProps) {
       <div>
         <div className="mb-3 flex items-center gap-2">
           <h3 className="text-sm font-semibold text-slate-200">{t.connections}</h3>
-          <span className="text-[10px] text-slate-500">{_t.checking}</span>
+          <span className="text-[10px] text-slate-500">{t.checking}</span>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {cards.map((c) => (
@@ -118,7 +118,7 @@ export function ConnectionCards({ _t }: ConnectionCardsProps) {
       <div className="mb-3 flex items-center gap-2">
         <h3 className="text-sm font-semibold text-slate-200">{t.connections}</h3>
         {lastCheckedTime && (
-          <span className="text-[10px] text-slate-500">{_t.lastChecked}: {lastCheckedTime}</span>
+          <span className="text-[10px] text-slate-500">{t.lastChecked}: {lastCheckedTime}</span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -147,7 +147,7 @@ export function ConnectionCards({ _t }: ConnectionCardsProps) {
                 status === 'configured' ? 'text-amber-400' :
                 status === 'unconfigured' ? 'text-slate-500' : 'text-red-400'
               }`}>
-                {statusLabel(status, _t)}
+                {statusLabel(status, t)}
               </span>
               <button
                 onClick={() => handleTest(c.key)}

@@ -144,7 +144,7 @@ export function SigningFlow({
 
       const res = await fetch("/api/documents/sign", {
         method: "POST",
-        _headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           access_token: token,
           submitter_id: selectedSubmitter,
@@ -656,7 +656,7 @@ function StepSign({
         >
           {isSubmitting ? (
             <>
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-_t-white" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               חותם...
             </>
           ) : (

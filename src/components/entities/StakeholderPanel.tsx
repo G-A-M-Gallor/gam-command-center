@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Users, _Plus, _X, Crown, ChevronDown, ChevronRight,
-  Bell, BellOff, Eye, _Shield, Edit3, Trash2,
+  Users, Plus, X, Crown, ChevronDown, ChevronRight,
+  Bell, BellOff, Eye, Shield, Edit3, Trash2,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import {
   fetchStakeholders, addStakeholder, updateStakeholder, removeStakeholder,
   searchNotes,
@@ -24,7 +24,7 @@ interface Props {
 
 export function StakeholderPanel({ noteId }: Props) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === 'he';
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const te = t.entities;
@@ -125,7 +125,7 @@ export function StakeholderPanel({ noteId }: Props) {
       </button>
 
       {expanded && (
-        <div className="px-4 pb-4 border-_t border-white/[0.04] space-y-3 pt-3">
+        <div className="px-4 pb-4 border-t border-white/[0.04] space-y-3 pt-3">
           {/* Primary stakeholders */}
           {primaryStakeholders.length > 0 && (
             <div className="space-y-1.5">
@@ -351,7 +351,7 @@ function StakeholderRow({
 
       {/* Expanded edit row */}
       {isEditing && (
-        <div className="flex flex-wrap gap-2 px-2.5 pb-2.5 border-_t border-white/[0.04] pt-2">
+        <div className="flex flex-wrap gap-2 px-2.5 pb-2.5 border-t border-white/[0.04] pt-2">
           <div>
             <label className="text-[9px] text-slate-500">{te.access as string}</label>
             <select

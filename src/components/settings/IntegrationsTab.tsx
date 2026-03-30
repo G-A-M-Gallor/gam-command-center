@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  _Shield, MessageSquare, Globe, CreditCard, Link2, Power, Loader2,
+  Shield, MessageSquare, Globe, CreditCard, Link2, Power, Loader2,
   Copy, Check, KeyRound,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
-import { _createClient } from "@/lib/supabase/client";
+import { getTranslations } from "@/lib/i18n";
+import { createClient } from "@/lib/supabase/client";
 import type { IntegrationStatus } from "@/app/api/integrations/status/route";
 
 // ─── Google Account Types (moved from settings page) ──────
@@ -25,7 +25,7 @@ interface GoogleAccountSafe {
 
 // ─── Copy Button Helper ────────────────────────────────────
 
-function CopyButton({ text, _t }: { text: string; _t: ReturnType<typeof _getTranslations> }) {
+function CopyButton({ text, t }: { text: string; t: ReturnType<typeof getTranslations> }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -41,7 +41,7 @@ function CopyButton({ text, _t }: { text: string; _t: ReturnType<typeof _getTran
       className="inline-flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-colors"
     >
       {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
-      {copied ? t.settings.copied : _t.settings.copyUrl}
+      {copied ? t.settings.copied : t.settings.copyUrl}
     </button>
   );
 }
@@ -75,13 +75,13 @@ function SectionHeader({ icon: Icon, title }: { icon: React.ElementType; title: 
 // ─── Service Card ──────────────────────────────────────────
 
 function ServiceCard({
-  name, configured, webhookUrl, comingSoon, _t,
+  name, configured, webhookUrl, comingSoon, t,
 }: {
   name: string;
   configured: boolean;
   webhookUrl?: string;
   comingSoon?: boolean;
-  _t: ReturnType<typeof _getTranslations>;
+  t: ReturnType<typeof getTranslations>;
 }) {
   if (comingSoon) {
     return (
@@ -89,7 +89,7 @@ function ServiceCard({
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-400">{name}</span>
           <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-500">
-            {_t.settings.comingSoon}
+            {t.settings.comingSoon}
           </span>
         </div>
       </div>
@@ -110,7 +110,7 @@ function ServiceCard({
           <code className="flex-1 truncate rounded bg-slate-900 px-2 py-1 text-xs text-slate-400">
             {webhookUrl}
           </code>
-          <CopyButton text={webhookUrl} _t={_t} />
+          <CopyButton text={webhookUrl} t={t} />
         </div>
       )}
     </div>
@@ -119,7 +119,7 @@ function ServiceCard({
 
 // ─── Provider Name Helper ──────────────────────────────────
 
-function getProviderLabel(provider: string, _t: ReturnType<typeof _getTranslations>): string {
+function getProviderLabel(provider: string, t: ReturnType<typeof getTranslations>): string {
   const map: Record<string, string> = {
     email: t.settings.providerEmail,
     github: t.settings.providerGithub,
@@ -136,7 +136,7 @@ function getProviderLabel(provider: string, _t: ReturnType<typeof _getTranslatio
 
 export function IntegrationsTab() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const supabase = createClient();
 
   const [status, setStatus] = useState<IntegrationStatus | null>(null);
@@ -200,7 +200,7 @@ export function IntegrationsTab() {
     try {
       const res = await fetch("/api/google/accounts/toggle", {
         method: "PATCH",
-        _headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ accountId: id, isActive }),
       });
       if (res.ok) {
@@ -246,7 +246,7 @@ export function IntegrationsTab() {
     <div className="mx-auto max-w-2xl space-y-8" data-cc-id="settings.integrations">
       {/* ── Section A: Auth & Security ── */}
       <div className="space-y-4">
-        <SectionHeader icon={_Shield} title={t.settings.sectionAuthSecurity} />
+        <SectionHeader icon={Shield} title={t.settings.sectionAuthSecurity} />
 
         {/* Current login method */}
         <div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
@@ -254,7 +254,7 @@ export function IntegrationsTab() {
             <div>
               <p className="text-xs text-slate-500">{t.settings.currentLoginMethod}</p>
               <p className="mt-0.5 text-sm font-medium text-slate-200">
-                {getProviderLabel(status?.currentProvider ?? "email", _t)}
+                {getProviderLabel(status?.currentProvider ?? "email", t)}
               </p>
             </div>
             <KeyRound className="h-5 w-5 text-slate-500" />
@@ -269,7 +269,7 @@ export function IntegrationsTab() {
               {status.providers.map((p) => (
                 <div key={p.uid} className="flex items-center justify-between rounded-lg border border-slate-700/50 bg-slate-800/30 px-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-slate-200">{getProviderLabel(p.provider, _t)}</p>
+                    <p className="text-sm font-medium text-slate-200">{getProviderLabel(p.provider, t)}</p>
                     {p.email && <p className="text-xs text-slate-500">{p.email}</p>}
                   </div>
                   {/* Don't allow unlinking the last provider */}
@@ -287,7 +287,7 @@ export function IntegrationsTab() {
               ))}
             </div>
           ) : (
-            <p className="text-xs text-slate-500">{_t.settings.noProviders}</p>
+            <p className="text-xs text-slate-500">{t.settings.noProviders}</p>
           )}
         </div>
 
@@ -307,7 +307,7 @@ export function IntegrationsTab() {
                 ) : (
                   <Link2 className="h-3 w-3" />
                 )}
-                {t.settings.linkProvider} {getProviderLabel(provider, _t)}
+                {t.settings.linkProvider} {getProviderLabel(provider, t)}
               </button>
             ))}
           </div>
@@ -321,12 +321,12 @@ export function IntegrationsTab() {
           <ServiceCard
             name={t.settings.watiWhatsapp}
             configured={status?.services.wati ?? false}
-            t={_t}
+            t={t}
           />
           <ServiceCard
             name={t.settings.voicenterPbx}
             configured={status?.services.voicenter ?? false}
-            t={_t}
+            t={t}
           />
         </div>
       </div>
@@ -351,7 +351,7 @@ export function IntegrationsTab() {
           {googleAccounts.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-700 py-6 text-center">
               <p className="text-sm text-slate-400">{t.settings.noAccounts}</p>
-              <p className="mt-1 text-xs text-slate-500">{_t.settings.noAccountsHint}</p>
+              <p className="mt-1 text-xs text-slate-500">{t.settings.noAccountsHint}</p>
             </div>
           ) : (
             googleAccounts.map((account) => (
@@ -376,10 +376,10 @@ export function IntegrationsTab() {
                     <p className="truncate text-xs text-slate-400">{account.google_email}</p>
                     <div className="mt-1.5 flex flex-wrap gap-1.5">
                       {hasGmail(account.scopes) && (
-                        <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{_t.settings.scopeGmail}</span>
+                        <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-xs text-blue-400">{t.settings.scopeGmail}</span>
                       )}
                       {hasCalendar(account.scopes) && (
-                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{_t.settings.scopeCalendar}</span>
+                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400">{t.settings.scopeCalendar}</span>
                       )}
                     </div>
                   </div>
@@ -437,27 +437,27 @@ export function IntegrationsTab() {
           <ServiceCard
             name={t.settings.origamiCrm}
             configured={status?.services.origami ?? false}
-            t={_t}
+            t={t}
           />
           <ServiceCard
             name={t.settings.notionIntegration}
             configured={status?.services.notion ?? false}
-            t={_t}
+            t={t}
           />
           <ServiceCard
             name={t.settings.n8nAutomation}
             configured={status?.services.n8n ?? false}
-            t={_t}
+            t={t}
           />
           <ServiceCard
             name={t.settings.zapierIntegration}
             configured={false}
-            t={_t}
+            t={t}
           />
           <ServiceCard
             name={t.settings.makeIntegration}
             configured={false}
-            t={_t}
+            t={t}
           />
         </div>
       </div>
@@ -466,8 +466,8 @@ export function IntegrationsTab() {
       <div className="space-y-4">
         <SectionHeader icon={CreditCard} title={t.settings.sectionMessaging} />
         <div className="space-y-3">
-          <ServiceCard name={t.settings.smsCredits} configured={false} comingSoon t={_t} />
-          <ServiceCard name={t.settings.emailCredits} configured={false} comingSoon t={_t} />
+          <ServiceCard name={t.settings.smsCredits} configured={false} comingSoon t={t} />
+          <ServiceCard name={t.settings.emailCredits} configured={false} comingSoon t={t} />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { CheckCircle2, AlertCircle, MinusCircle } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { GlobalField } from "@/lib/entities/types";
 import type { ColumnMapping, ImportRow } from "@/lib/import/types";
 
@@ -16,7 +16,7 @@ interface PreviewTableProps {
 
 export function PreviewTable({ rows, mappings, fields, totalRows }: PreviewTableProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const it = t.importEngine;
 
   const fieldMap = useMemo(

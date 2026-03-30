@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { _X, Pin, Grid3X3, Power, RotateCcw, PanelRight, Maximize2, ChevronDown } from "lucide-react";
+import { X, Pin, Grid3X3, Power, RotateCcw, PanelRight, Maximize2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useWidgets, type HoverDelay, type WidgetPanelMode } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import {
   getWidgetById,
@@ -59,7 +59,7 @@ export function WidgetSettings({
     setWidgetPanelMode,
   } = useWidgets();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
 
@@ -84,7 +84,7 @@ export function WidgetSettings({
         type="button"
         onClick={onClose}
         className="absolute inset-0 bg-black/30"
-        aria-label={_t.widgets.close}
+        aria-label={t.widgets.close}
       />
       <div
         ref={trapRef}
@@ -112,7 +112,7 @@ export function WidgetSettings({
           {widget.isRemovable ? (
             <div>
               <label className="mb-2 block text-sm text-slate-300">
-                {_t.widgets.storePlacement}
+                {t.widgets.storePlacement}
               </label>
               <div className="flex flex-col gap-1">
                 {PLACEMENT_OPTIONS.map(({ value: p, icon: Icon }) => (
@@ -139,7 +139,7 @@ export function WidgetSettings({
             </div>
           ) : (
             <div className="rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-500">
-              {_t.widgets.storeSystemWidget}
+              {t.widgets.storeSystemWidget}
             </div>
           )}
 
@@ -249,9 +249,9 @@ export function WidgetSettings({
                 const modeIcon = mode === "side-panel" ? PanelRight : mode === "popup" ? Maximize2 : ChevronDown;
                 const ModeIcon = modeIcon;
                 const modeLabel =
-                  mode === "dropdown" ? (_t.widgets.panelModeDropdown || "Dropdown")
-                  : mode === "side-panel" ? (_t.widgets.panelModeSidePanel || "Side Panel")
-                  : (_t.widgets.panelModePopup || "Popup");
+                  mode === "dropdown" ? (t.widgets.panelModeDropdown || "Dropdown")
+                  : mode === "side-panel" ? (t.widgets.panelModeSidePanel || "Side Panel")
+                  : (t.widgets.panelModePopup || "Popup");
                 return (
                   <button
                     key={mode}

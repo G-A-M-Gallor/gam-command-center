@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { _Plus, _X, Copy } from "lucide-react";
+import { Plus, X, Copy } from "lucide-react";
 import { useGridStore } from "@/lib/grid/gridStore";
 
 interface SheetTabsProps {
   t: Record<string, string>;
 }
 
-export function SheetTabs({ _t }: SheetTabsProps) {
+export function SheetTabs({ t }: SheetTabsProps) {
   const sheets = useGridStore((s) => s.sheets);
   const activeSheetId = useGridStore((s) => s.activeSheetId);
   const setActiveSheet = useGridStore((s) => s.setActiveSheet);
@@ -33,13 +33,13 @@ export function SheetTabs({ _t }: SheetTabsProps) {
   };
 
   return (
-    <div className="flex items-center gap-0.5 border-_t border-slate-700/50 bg-slate-800/50 px-1 py-0.5">
+    <div className="flex items-center gap-0.5 border-t border-slate-700/50 bg-slate-800/50 px-1 py-0.5">
       {sheets.map((sh) => (
         <div
           key={sh.id}
           className={`group flex items-center gap-1 rounded-t px-2 py-1 text-xs transition-colors cursor-pointer ${
             sh.id === activeSheetId
-              ? "bg-slate-900 text-slate-200 border-t-2 border-_t-[var(--cc-accent-500)]"
+              ? "bg-slate-900 text-slate-200 border-t-2 border-t-[var(--cc-accent-500)]"
               : "text-slate-500 hover:text-slate-300 hover:bg-slate-800"
           }`}
           onClick={() => setActiveSheet(sh.id)}
@@ -74,7 +74,7 @@ export function SheetTabs({ _t }: SheetTabsProps) {
           {sheets.length > 1 && (
             <button
               type="button"
-              title={_t.deleteSheet || "Delete"}
+              title={t.deleteSheet || "Delete"}
               onClick={(e) => { e.stopPropagation(); removeSheet(sh.id); }}
               className="rounded p-0.5 text-slate-600 opacity-0 group-hover:opacity-100 hover:text-red-400"
             >

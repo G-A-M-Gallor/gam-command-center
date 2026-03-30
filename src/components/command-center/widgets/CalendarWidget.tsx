@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { CalendarDays, MapPin, _ExternalLink, Loader2, Settings, ChevronDown } from 'lucide-react';
+import { CalendarDays, MapPin, ExternalLink, Loader2, Settings, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import type { WidgetSize } from './WidgetRegistry';
 
 interface CalendarEvent {
@@ -52,7 +52,7 @@ function startsIn(dateStr: string, rt: { now: string; inMinutes: string; inHours
 
 export function CalendarPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const c = t.googleCalendar as Record<string, string>;
 
   const [accounts, setAccounts] = useState<GoogleAccount[]>([]);

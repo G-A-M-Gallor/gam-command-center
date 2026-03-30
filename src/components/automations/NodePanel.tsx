@@ -122,7 +122,7 @@ export function NodePanel({ onAddNode }: NodePanelProps) {
 
               {/* Templates */}
               {expandedCategory === nodeType.key && (
-                <div className="border-_t border-[#404040]">
+                <div className="border-t border-[#404040]">
                   {nodeType.templates.map((template) => (
                     <div
                       key={template.id}

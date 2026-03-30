@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { emailSendSchema } from "@/lib/api/schemas";
 import { sendEmail, getTenant, isUnsubscribed, renderTemplate } from "@/lib/email/resend";
 import { getTemplateElement } from "@/lib/email/templates";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

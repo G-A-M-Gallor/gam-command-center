@@ -103,13 +103,13 @@ function WorkersLoadChart() {
   const chartData = useMemo(() => {
     const workerCounts: Array<{name: string, openTasks: number, totalTasks: number}> = WORKERS.map(worker => ({
       name: worker,
-      openTasks: tasks.filter(t => t.worker === worker && _t.status !== "הושלם").length,
-      totalTasks: tasks.filter(t => _t.worker === worker).length,
+      openTasks: tasks.filter(t => t.worker === worker && t.status !== "הושלם").length,
+      totalTasks: tasks.filter(t => t.worker === worker).length,
     }));
 
     // Add unassigned tasks
-    const unassignedOpen = tasks.filter(t => !t.worker && _t.status !== "הושלם").length;
-    const unassignedTotal = tasks.filter(t => !_t.worker).length;
+    const unassignedOpen = tasks.filter(t => !t.worker && t.status !== "הושלם").length;
+    const unassignedTotal = tasks.filter(t => !t.worker).length;
 
     if (unassignedOpen > 0 || unassignedTotal > 0) {
       workerCounts.push({
@@ -172,7 +172,7 @@ function TasksStatusChart() {
   const chartData = useMemo(() => {
     const statusCounts = TASK_STATUSES.map(status => ({
       name: status,
-      value: tasks.filter(t => _t.status === status).length,
+      value: tasks.filter(t => t.status === status).length,
       color: getStatusPieColor(status),
     })).filter(item => item.value > 0);
 

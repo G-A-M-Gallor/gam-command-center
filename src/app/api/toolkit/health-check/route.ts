@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * MCP Health Check API — /api/toolkit/health-check
@@ -38,27 +38,27 @@ async function checkMcpHealth(mcp: MCPConnection): Promise<HealthCheckResult> {
       // For claude.ai MCPs, check via Claude API health endpoint
       const response = await fetch('https://api.anthropic.com/v1/health', {
         method: 'GET',
-        _headers: {
+        headers: {
           'anthropic-version': '2023-06-01',
         },
         signal: AbortSignal.timeout(5000) // 5 second timeout
       });
 
-      const _latency = Date.now() - startTime;
+      const latency = Date.now() - startTime;
 
       if (response.ok) {
         return {
           id: mcp.id,
           name: mcp.name,
           status: latency > 2000 ? 'warning' : 'healthy',
-          latency_ms: _latency
+          latency_ms: latency
         };
       } else {
         return {
           id: mcp.id,
           name: mcp.name,
           status: 'unhealthy',
-          latency_ms: _latency,
+          latency_ms: latency,
           error: `HTTP ${response.status}`
         };
       }
@@ -67,7 +67,7 @@ async function checkMcpHealth(mcp: MCPConnection): Promise<HealthCheckResult> {
     else if (platform === 'Claude Code') {
       // For Claude Code MCPs, they're local and should be healthy if this API can run
       // In a real implementation, this would check the Claude Code CLI status
-      const _latency = Date.now() - startTime;
+      const latency = Date.now() - startTime;
 
       // Simulate quick health check for local MCPs
       await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 40)); // 10-50ms simulation
@@ -91,14 +91,14 @@ async function checkMcpHealth(mcp: MCPConnection): Promise<HealthCheckResult> {
     }
 
   } catch (error) {
-    const _latency = Date.now() - startTime;
+    const latency = Date.now() - startTime;
 
     if (error instanceof Error && error.name === 'TimeoutError') {
       return {
         id: mcp.id,
         name: mcp.name,
         status: 'timeout',
-        latency_ms: _latency,
+        latency_ms: latency,
         error: 'Request timeout'
       };
     }
@@ -107,7 +107,7 @@ async function checkMcpHealth(mcp: MCPConnection): Promise<HealthCheckResult> {
       id: mcp.id,
       name: mcp.name,
       status: 'unhealthy',
-      latency_ms: _latency,
+      latency_ms: latency,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
@@ -117,10 +117,10 @@ export async function POST() {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

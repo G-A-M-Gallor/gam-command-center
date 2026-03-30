@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { _Plus, _X, Check, CircleDashed } from 'lucide-react';
+import { Plus, X, Check, CircleDashed } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { widgetRegistry } from './widgets/WidgetRegistry';
 import { BUILTIN_ENTITY_TYPES } from '@/lib/entities/builtinEntityTypes';
 import { ShortcutPicker } from './ShortcutPicker';
@@ -30,14 +30,14 @@ const DEFAULT_SLOTS: SpeedDialSlot[] = [
 
 // ─── Built-in action definitions ───────────────────
 
-const ACTION_DEFS: Record<string, { labelKey: string; handler: (_router: ReturnType<typeof useRouter>) => void }> = {
+const ACTION_DEFS: Record<string, { labelKey: string; handler: (router: ReturnType<typeof useRouter>) => void }> = {
   'quick-create': {
     labelKey: 'quickCreate',
     handler: () => window.dispatchEvent(new CustomEvent('cc-open-quick-create')),
   },
   'new-note': {
     labelKey: 'newNote',
-    handler: (_router) => router.push('/dashboard/entities/note'),
+    handler: (router) => router.push('/dashboard/entities/note'),
   },
 };
 
@@ -81,13 +81,13 @@ function resolveSlot(slot: SpeedDialSlot, language: 'he' | 'en' | 'ru', sd: Reco
       // Action icons: use widget icon if matches, else Plus
       if (slot.id === 'quick-create') {
         const w = widgetRegistry.find(r => r.id === 'quick-create');
-        return { Icon: w?.icon ?? _Plus, label: sd[labelKey] ?? slot.id };
+        return { Icon: w?.icon ?? Plus, label: sd[labelKey] ?? slot.id };
       }
       if (slot.id === 'new-note') {
         // StickyNote from the note entity
         return { emoji: '📝', label: sd[labelKey] ?? slot.id };
       }
-      return { Icon: _Plus, label: sd[labelKey] ?? slot.id };
+      return { Icon: Plus, label: sd[labelKey] ?? slot.id };
     }
   }
 
@@ -96,10 +96,10 @@ function resolveSlot(slot: SpeedDialSlot, language: 'he' | 'en' | 'ru', sd: Reco
 
 // ─── Slot click handler ────────────────────────────
 
-function handleSlotClick(slot: SpeedDialSlot, _router: ReturnType<typeof useRouter>) {
+function handleSlotClick(slot: SpeedDialSlot, router: ReturnType<typeof useRouter>) {
   if (slot.type === 'action') {
     const def = ACTION_DEFS[slot.id];
-    if (def) def.handler(_router);
+    if (def) def.handler(router);
     return;
   }
 
@@ -176,9 +176,9 @@ export function SpeedDial() {
   const [slots, setSlots] = useState<SpeedDialSlot[]>(DEFAULT_SLOTS);
   const [pickerIndex, setPickerIndex] = useState<number | null>(null);
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const sd = t.speedDial;
-  const _router = useRouter();
+  const router = useRouter();
 
   // Long-press state (main button)
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -392,7 +392,7 @@ export function SpeedDial() {
                     setPickerIndex(i);
                   } else {
                     onSlotPointerUp(); // Cancel any pending long-press
-                    handleSlotClick(slot, _router);
+                    handleSlotClick(slot, router);
                     setOpen(false);
                   }
                 }}

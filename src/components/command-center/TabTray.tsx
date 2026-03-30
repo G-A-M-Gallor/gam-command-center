@@ -2,11 +2,11 @@
 
 import { useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Pin, PinOff, PanelLeftOpen, PanelRightOpen, _X, Trash2 } from "lucide-react";
+import { Pin, PinOff, PanelLeftOpen, PanelRightOpen, X, Trash2 } from "lucide-react";
 import { useTray } from "@/lib/hooks/useTray";
 import { useSplitScreen } from "@/lib/hooks/useSplitScreen";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 interface TabTrayProps {
   contentMarginLeft?: string | number;
@@ -24,10 +24,10 @@ export function TabTray({
   topbarVisible = true,
   tabBarVisible = false,
 }: TabTrayProps) {
-  const _router = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const tray = useTray();
   const split = useSplitScreen();
 
@@ -162,7 +162,7 @@ export function TabTray({
             className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] text-amber-400 hover:bg-amber-500/10 transition-colors"
             title={trayT.closeSplit}
           >
-            <_X className="h-2.5 w-2.5" />
+            <X className="h-2.5 w-2.5" />
             <span>{trayT.closeSplit}</span>
           </button>
         )}

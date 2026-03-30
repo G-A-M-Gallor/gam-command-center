@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
-  _X,
+  X,
   Pin,
   PinOff,
   MessageCircle,
@@ -16,7 +16,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchCommMessages } from "@/lib/supabase/commQueries";
 import {
@@ -86,11 +86,11 @@ interface PanelContext {
 
 export function CommunicationPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
-  const [_context, setContext] = useState<PanelContext | null>(null);
+  const [context, setContext] = useState<PanelContext | null>(null);
   const [messages, setMessages] = useState<CommMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
@@ -141,16 +141,16 @@ export function CommunicationPanel() {
   }, []);
 
   useEffect(() => {
-    if (!isOpen || !_context) return;
-    loadMessages(_context.entityId, channelFilter, null);
-  }, [isOpen, _context, channelFilter, loadMessages]);
+    if (!isOpen || !context) return;
+    loadMessages(context.entityId, channelFilter, null);
+  }, [isOpen, context, channelFilter, loadMessages]);
 
   // ─── Realtime subscription ──────────────────────────
 
   useEffect(() => {
-    if (!isOpen || !_context) return;
+    if (!isOpen || !context) return;
 
-    channelRef.current = subscribeToCommMessagesByEntity(_context.entityId, {
+    channelRef.current = subscribeToCommMessagesByEntity(context.entityId, {
       onInsert: (msg) => {
         setMessages((prev) => [msg, ...prev]);
       },
@@ -181,12 +181,12 @@ export function CommunicationPanel() {
 
       const res = await fetch("/api/comms/send", {
         method: "POST",
-        _headers: {
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${currentSession.access_token}`,
         },
         body: JSON.stringify({
-          phone: _context.phone,
+          phone: context.phone,
           message: composeText.trim(),
           entity_id: context.entityId,
         }),
@@ -205,9 +205,9 @@ export function CommunicationPanel() {
   // ─── Load more ────────────────────────────────────
 
   const handleLoadMore = useCallback(() => {
-    if (!_context || !cursor || loading) return;
-    loadMessages(_context.entityId, channelFilter, cursor);
-  }, [_context, cursor, loading, channelFilter, loadMessages]);
+    if (!context || !cursor || loading) return;
+    loadMessages(context.entityId, channelFilter, cursor);
+  }, [context, cursor, loading, channelFilter, loadMessages]);
 
   // ─── Close ────────────────────────────────────────
 
@@ -275,7 +275,7 @@ export function CommunicationPanel() {
               {context?.entityName ?? t.comms.title}
             </h2>
             {context?.phone && (
-              <p className="text-xs text-slate-500" dir="ltr">{_context.phone}</p>
+              <p className="text-xs text-slate-500" dir="ltr">{context.phone}</p>
             )}
           </div>
           <div className="flex items-center gap-1">
@@ -345,7 +345,7 @@ export function CommunicationPanel() {
           {!loading && messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <MessageCircle size={32} className="mb-3 text-slate-600" />
-              <p className="text-sm text-slate-400">{_t.comms.noMessages}</p>
+              <p className="text-sm text-slate-400">{t.comms.noMessages}</p>
             </div>
           )}
 
@@ -436,7 +436,7 @@ export function CommunicationPanel() {
               <button
                 type="button"
                 className="rounded p-1.5 text-slate-400 transition-colors hover:bg-slate-700/50 hover:text-slate-300"
-                title={_t.comms.templates}
+                title={t.comms.templates}
               >
                 <FileText size={16} />
               </button>

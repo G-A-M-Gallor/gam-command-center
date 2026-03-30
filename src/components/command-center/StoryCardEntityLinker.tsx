@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Search, _X, Loader2 } from 'lucide-react';
+import { Search, X, Loader2 } from 'lucide-react';
 import { searchNotes } from '@/lib/supabase/entityQueries';
 import type { EnrichedEntityLink } from '@/lib/supabase/storyCardQueries';
 
@@ -40,7 +40,7 @@ function getTypeBadgeClass(entityType: string | null) {
   return TYPE_COLORS[entityType] ?? 'bg-slate-500/20 text-slate-400';
 }
 
-export function StoryCardEntityLinker({ storyCardId, linkedEntities, onLink, onUnlink, _t }: Props) {
+export function StoryCardEntityLinker({ storyCardId, linkedEntities, onLink, onUnlink, t }: Props) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);

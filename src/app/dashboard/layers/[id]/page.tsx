@@ -7,11 +7,11 @@ import {
   ArrowRight,
   FileText,
   Map,
-  _ExternalLink,
+  ExternalLink,
 } from "lucide-react";
 import { supabase } from "@/lib/supabaseClient";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { HealthBadge, getHealthStatus } from "@/components/command-center/HealthBadge";
 import { Badge, SkeletonCard } from "@/components/ui";
 import type { Project } from "@/components/command-center/ProjectCard";
@@ -32,9 +32,9 @@ interface StoryCard {
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const _router = useRouter();
+  const router = useRouter();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const pd = t.projectDetail;
   const isRtl = language === "he";
   const localeMap: Record<string, string> = { he: "he-IL", en: "en-US", ru: "ru-RU" };

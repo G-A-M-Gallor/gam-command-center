@@ -8,7 +8,7 @@ import { AGENT_LABELS, AGENT_ICONS, type AgentType } from "@/lib/work-manager/ag
 import { ActionPreview } from "@/components/work-manager/ActionPreview";
 import { Workflow, ClipboardList, Code2, Palette, ShieldCheck, TrendingUp } from "lucide-react";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { ChatMessage } from "./types";
 import type { AIMode } from "@/lib/ai/prompts";
 
@@ -34,7 +34,7 @@ interface AiMessageProps {
 
 export function AiMessage({
   message, index, isWorkMode, language, currentAgent, activeId,
-  isDismissed, onDismiss, onReply, onRegenerate, isLast, _t,
+  isDismissed, onDismiss, onReply, onRegenerate, isLast, t,
 }: AiMessageProps) {
   const [copied, setCopied] = useState(false);
   const [showTimestamp, setShowTimestamp] = useState(false);
@@ -76,7 +76,7 @@ export function AiMessage({
 
   return (
     <div
-      className={`group mb-4 ${message.role === "_user" ? "flex justify-end" : ""}`}
+      className={`group mb-4 ${message.role === "user" ? "flex justify-end" : ""}`}
       onMouseEnter={() => setShowTimestamp(true)}
       onMouseLeave={() => setShowTimestamp(false)}
     >
@@ -143,7 +143,7 @@ export function AiMessage({
               <button
                 onClick={handleCopy}
                 className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300 transition-colors"
-                title={_t.aiHub.copyMessage}
+                title={t.aiHub.copyMessage}
               >
                 {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
               </button>
@@ -159,7 +159,7 @@ export function AiMessage({
               <button
                 onClick={onRegenerate}
                 className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300 transition-colors"
-                title={_t.aiHub.regenerate}
+                title={t.aiHub.regenerate}
               >
                 <RotateCcw size={12} />
               </button>
@@ -179,7 +179,7 @@ export function AiMessage({
                 const token = session?.access_token;
                 const res = await fetch("/api/work-manager/execute", {
                   method: "POST",
-                  _headers: {
+                  headers: {
                     "Content-Type": "application/json",
                     ...(token ? { Authorization: `Bearer ${token}` } : {}),
                   },
@@ -241,14 +241,14 @@ export function StreamingMessage({ content, mode, currentAgent, language }: Stre
 
 // ─── Typing Indicator ───────────────────────────────────────────
 
-export function TypingIndicator({ _t }: { _t: ReturnType<typeof _getTranslations> }) {
+export function TypingIndicator({ t }: { t: ReturnType<typeof getTranslations> }) {
   return (
     <div className="mb-4">
       <div className="inline-flex items-center gap-2 rounded-xl bg-slate-700/50 px-4 py-3">
         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:0ms]" />
         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:150ms]" />
         <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:300ms]" />
-        <span className="text-xs text-slate-500 ms-1">{_t.aiHub.streaming}</span>
+        <span className="text-xs text-slate-500 ms-1">{t.aiHub.streaming}</span>
       </div>
     </div>
   );

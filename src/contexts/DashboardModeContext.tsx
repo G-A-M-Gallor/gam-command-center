@@ -30,7 +30,7 @@ export function DashboardModeProvider({
   const [editMode, setEditModeState] = useState(false);
   const [guideMode, setGuideModeState] = useState(false);
 
-  const _setEditMode = useCallback((v: boolean) => {
+  const setEditMode = useCallback((v: boolean) => {
     setEditModeState(v);
   }, []);
 
@@ -39,8 +39,8 @@ export function DashboardModeProvider({
   }, []);
 
   const value = useMemo(
-    () => ({ editMode, _setEditMode, guideMode, setGuideMode }),
-    [editMode, _setEditMode, guideMode, setGuideMode]
+    () => ({ editMode, setEditMode, guideMode, setGuideMode }),
+    [editMode, setEditMode, guideMode, setGuideMode]
   );
 
   return (

@@ -50,7 +50,7 @@ export function ActivityFeed({
   noActivityLabel,
   onContextMenu,
 }: ActivityFeedProps) {
-  const _router = useRouter();
+  const router = useRouter();
 
   const handleClick = useCallback(
     (noteId: string) => {

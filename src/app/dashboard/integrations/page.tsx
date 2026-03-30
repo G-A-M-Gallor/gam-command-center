@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import {
-  Plug, _Plus, Trash2, _ExternalLink, CheckCircle2, XCircle, RefreshCw,
+  Plug, Plus, Trash2, ExternalLink, CheckCircle2, XCircle, RefreshCw,
   Globe,
 } from "lucide-react";
 
@@ -295,7 +295,7 @@ export default function IntegrationsPage() {
                     rel="noopener noreferrer"
                     className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-700 hover:text-slate-200 transition-colors"
                   >
-                    <_ExternalLink size={14} />
+                    <ExternalLink size={14} />
                   </a>
                 )}
                 <button

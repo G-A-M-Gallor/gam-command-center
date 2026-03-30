@@ -17,7 +17,7 @@ import {
   Check,
   RotateCcw,
   Loader2,
-  _Monitor,
+  Monitor,
   Camera,
 } from "lucide-react";
 
@@ -84,7 +84,7 @@ export default function RecordPage() {
     (async () => {
       try {
         const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        tempStream.getTracks().forEach((_t) => t.stop());
+        tempStream.getTracks().forEach((t) => t.stop());
         const devices = await navigator.mediaDevices.enumerateDevices();
         setCameras(devices.filter((d) => d.kind === "videoinput"));
         setMics(devices.filter((d) => d.kind === "audioinput"));
@@ -107,12 +107,10 @@ export default function RecordPage() {
         if (cameraPreviewRef.current) {
           cameraPreviewRef.current.srcObject = stream;
         }
-      } catch {
-    // Ignore errors
-  }
+      } catch {}
     })();
     return () => {
-      if (stream) stream.getTracks().forEach((_t) => t.stop());
+      if (stream) stream.getTracks().forEach((t) => t.stop());
     };
   }, [prefs.enableCamera, prefs.cameraDeviceId, phase]);
 
@@ -162,9 +160,7 @@ export default function RecordPage() {
           cameraVideo.srcObject = camStream;
           cameraVideo.muted = true;
           await cameraVideo.play();
-        } catch {
-    // Ignore errors
-  }
+        } catch {}
       }
 
       // Bubble position
@@ -269,7 +265,7 @@ export default function RecordPage() {
       setStatusText("");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Unknown error";
-      setStatusText(msg === "Permission denied" || msg === "Permission denied by _user"
+      setStatusText(msg === "Permission denied" || msg === "Permission denied by user"
         ? (isRtl ? "ההקלטה בוטלה" : "Recording cancelled")
         : msg);
     }
@@ -296,8 +292,8 @@ export default function RecordPage() {
       recorderRef.current?.stop();
     }
     if (timerRef.current) clearInterval(timerRef.current);
-    screenStreamRef.current?.getTracks().forEach((_t) => t.stop());
-    cameraStreamRef.current?.getTracks().forEach((_t) => t.stop());
+    screenStreamRef.current?.getTracks().forEach((t) => t.stop());
+    cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
   }, []);
 
   // ── After recording ──

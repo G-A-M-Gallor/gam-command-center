@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import {
-  _X,
+  X,
   Languages,
   PanelLeftClose,
   PanelRightClose,
@@ -11,7 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 
 interface SettingsFolderPanelProps {
@@ -27,8 +27,8 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
     sidebarVisibility,
     setSidebarVisibility,
   } = useSettings();
-  const _router = useRouter();
-  const _t = getTranslations(language);
+  const router = useRouter();
+  const t = getTranslations(language);
 
   // Close on Escape
   useEffect(() => {
@@ -158,7 +158,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
               className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             >
               <Keyboard size={14} />
-              {(_t.widgets as Record<string, string>).keyboardShortcuts}
+              {(t.widgets as Record<string, string>).keyboardShortcuts}
             </button>
             <button
               type="button"
@@ -169,7 +169,7 @@ export function SettingsFolderPanel({ onClose }: SettingsFolderPanelProps) {
               className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200"
             >
               <Settings size={14} />
-              {(_t.widgets as Record<string, string>).allSettings}
+              {(t.widgets as Record<string, string>).allSettings}
             </button>
           </div>
         </div>

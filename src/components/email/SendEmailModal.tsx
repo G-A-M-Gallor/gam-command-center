@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  _X, Loader2, Send, ChevronDown,
+  X, Loader2, Send, ChevronDown,
   Mail, } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 
 interface EmailTemplate {
   id: string;
@@ -35,7 +35,7 @@ interface SendEmailModalProps {
 
 export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityName }: SendEmailModalProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === 'he';
   const e = t.email as Record<string, string>;
 
@@ -77,7 +77,7 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
   // When template changes, update subject + variable fields
   useEffect(() => {
     if (!templateId) return;
-    const tmpl = templates.find((_t) => t.id === templateId);
+    const tmpl = templates.find((t) => t.id === templateId);
     if (tmpl) {
       if (tmpl.subject) setSubject(tmpl.subject);
       // Pre-fill variables with entity data if available
@@ -93,7 +93,7 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
     }
   }, [templateId, templates]);
 
-  const selectedTemplate = templates.find((_t) => t.id === templateId);
+  const selectedTemplate = templates.find((t) => t.id === templateId);
   const templateVars = selectedTemplate?.variables || [];
 
   const handleSend = useCallback(async () => {
@@ -120,7 +120,7 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
 
       const res = await fetch('/api/email/send', {
         method: 'POST',
-        _headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
@@ -182,8 +182,8 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
               <div className="relative">
                 <select value={tenantId} onChange={(ev) => setTenantId(ev.target.value)}
                   className="w-full appearance-none rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 pe-8 text-sm text-slate-100 focus:border-[var(--cc-accent-500)] focus:outline-none">
-                  {tenants.map((_t) => (
-                    <option key={t.id} value={t.id}>{t.from_name} &lt;{_t.from_email}&gt;</option>
+                  {tenants.map((t) => (
+                    <option key={t.id} value={t.id}>{t.from_name} &lt;{t.from_email}&gt;</option>
                   ))}
                 </select>
                 <ChevronDown className="pointer-events-none absolute end-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />

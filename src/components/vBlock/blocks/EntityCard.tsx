@@ -32,7 +32,7 @@ async function fetchEntity(entityId: string) {
 
 export function EntityCard({ entityType, entityId, config, page, mode }: EntityCardProps) {
   const { language } = useSettings();
-  const _router = useRouter();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const cardConfig = config ?? getEntityCardConfig(entityType);
@@ -46,7 +46,7 @@ export function EntityCard({ entityType, entityId, config, page, mode }: EntityC
 
   const handleAction = useCallback(
     (type: FieldActionType, value: string) => {
-      executeFieldAction(type, value, entityId, _router.push, (msg: string) => {
+      executeFieldAction(type, value, entityId, router.push, (msg: string) => {
         window.dispatchEvent(
           new CustomEvent("cc-notify", { detail: { message: msg, type: "success" } }),
         );
@@ -166,7 +166,7 @@ export function EntityCard({ entityType, entityId, config, page, mode }: EntityC
               fields={cardConfig.backFields}
               meta={meta}
               language={language}
-              _compact={isCompact}
+              compact={isCompact}
               onAction={handleAction}
               onFieldChange={handleFieldChange}
             />
@@ -185,7 +185,7 @@ export function EntityCard({ entityType, entityId, config, page, mode }: EntityC
             fields={cardConfig.frontFields}
             meta={meta}
             language={language}
-            _compact={isCompact}
+            compact={isCompact}
             onAction={handleAction}
           />
         ) : (
@@ -193,7 +193,7 @@ export function EntityCard({ entityType, entityId, config, page, mode }: EntityC
             fields={cardConfig.backFields}
             meta={meta}
             language={language}
-            _compact={isCompact}
+            compact={isCompact}
             onAction={handleAction}
             onFieldChange={handleFieldChange}
           />

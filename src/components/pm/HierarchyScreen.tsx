@@ -141,7 +141,7 @@ export function HierarchyScreen({ className }: HierarchyScreenProps) {
       {/* Task Details Drawer */}
       {selectedTask && (
         <TaskDrawer
-          task={tasks.find(t => _t.id === selectedTask)!}
+          task={tasks.find(t => t.id === selectedTask)!}
           onClose={() => setSelectedTask(null)}
         />
       )}
@@ -323,7 +323,7 @@ function ProjectNode({ project, sprints, tasks, isExpanded, toggleExpanded, sele
 }
 
 function SprintNode({ sprint, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: SprintNodeProps) {
-  const sprintTasks = tasks.filter((_t: PmTask) => t.sprint_notion_id === sprint.notion_id);
+  const sprintTasks = tasks.filter((t: PmTask) => t.sprint_notion_id === sprint.notion_id);
   const velocity = calcSprintVelocity(sprint);
   const nodeId = `sprint-${sprint.id}`;
 
@@ -390,14 +390,14 @@ function UnlinkedSection({ apps, portfolios, projects, sprints, tasks, selectedT
   const unlinkedPortfolios = portfolios.filter((p: PmPortfolio) => !p.app_notion_id);
   const unlinkedProjects = projects.filter((p: PmProject) => !p.portfolio_notion_id);
   const unlinkedSprints = sprints.filter((s: PmSprint) => !s.project_notion_id);
-  const unlinkedTasks = tasks.filter((_t: PmTask) => !t.sprint_notion_id);
+  const unlinkedTasks = tasks.filter((t: PmTask) => !t.sprint_notion_id);
 
   const hasUnlinked = unlinkedApps.length || unlinkedPortfolios.length || unlinkedProjects.length || unlinkedSprints.length || unlinkedTasks.length;
 
   if (!hasUnlinked) return null;
 
   return (
-    <div className="space-y-2 pt-4 border-_t border-slate-700">
+    <div className="space-y-2 pt-4 border-t border-slate-700">
       <h3 className="text-slate-400 font-medium">פריטים לא מקושרים</h3>
 
       {unlinkedTasks.length > 0 && (

@@ -63,7 +63,7 @@ export function BiCharts({
   entityData,
   timeRange,
   onTimeRangeChange,
-  _t,
+  t,
 }: BiChartsProps) {
   const [tab, setTab] = useState<ChartTab>("status");
 

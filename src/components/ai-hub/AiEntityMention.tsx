@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search } from "lucide-react";
 import { searchNotes } from "@/lib/supabase/entityQueries";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 const RECENT_KEY = "cc-ai-recent-mentions";
 const MAX_RECENT = 5;
@@ -35,7 +35,7 @@ function saveRecentMention(entity: MentionResult) {
   localStorage.setItem(RECENT_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
 }
 
-export function AiEntityMention({ isOpen, onClose, onSelect, _t }: AiEntityMentionProps) {
+export function AiEntityMention({ isOpen, onClose, onSelect, t }: AiEntityMentionProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MentionResult[]>([]);
   const [recent, setRecent] = useState<MentionResult[]>([]);
@@ -130,13 +130,13 @@ export function AiEntityMention({ isOpen, onClose, onSelect, _t }: AiEntityMenti
       <div className="max-h-48 overflow-y-auto p-1.5">
         {!query.trim() && recent.length > 0 && (
           <div className="mb-1 px-2 text-[10px] font-medium uppercase tracking-wider text-slate-600">
-            {_t.aiHub.recentEntities}
+            {t.aiHub.recentEntities}
           </div>
         )}
 
         {displayList.length === 0 && (
           <p className="px-3 py-3 text-center text-xs text-slate-600">
-            {loading ? _t.common.loading : query.trim() ? t.aiHub.noEntitiesFound : t.aiHub.mentionEntity}
+            {loading ? t.common.loading : query.trim() ? t.aiHub.noEntitiesFound : t.aiHub.mentionEntity}
           </p>
         )}
 

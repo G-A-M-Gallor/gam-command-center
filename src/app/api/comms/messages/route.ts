@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
 function getServiceClient() {
   return createClient(
@@ -13,8 +13,8 @@ function getServiceClient() {
  * GET /api/comms/messages?entity_id=...&channel=...&cursor=...&limit=50
  * Fetch communication messages for an entity, with cursor pagination.
  */
-export async function GET(_request: NextRequest) {
-  const { error: authError } = await requireAuth(_request);
+export async function GET(request: NextRequest) {
+  const { error: authError } = await requireAuth(request);
   if (authError) return NextResponse.json({ error: authError }, { status: 401 });
 
   try {

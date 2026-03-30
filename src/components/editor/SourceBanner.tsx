@@ -13,7 +13,7 @@ interface SourceBannerProps {
   linkHref?: string;
 }
 
-export function SourceBanner({ cardText, _t, linkHref }: SourceBannerProps) {
+export function SourceBanner({ cardText, t, linkHref }: SourceBannerProps) {
   const isExternal = linkHref && !linkHref.startsWith('/');
   const href = linkHref || '/dashboard/story-map';
   const Icon = linkHref ? Bookmark : MapPin;
@@ -35,7 +35,7 @@ export function SourceBanner({ cardText, _t, linkHref }: SourceBannerProps) {
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-purple-400"
           >
-            {_t.backToStoryMap}
+            {t.backToStoryMap}
             <ArrowRight className="h-3 w-3" />
           </a>
         ) : (
@@ -43,7 +43,7 @@ export function SourceBanner({ cardText, _t, linkHref }: SourceBannerProps) {
             href={href}
             className="flex items-center gap-1 text-xs text-slate-500 transition-colors hover:text-purple-400"
           >
-            {_t.backToStoryMap}
+            {t.backToStoryMap}
             <ArrowRight className="h-3 w-3" />
           </Link>
         )}

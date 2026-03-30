@@ -19,7 +19,7 @@ function detectFileType(mimeType: string): string {
  * POST /api/vcloud/upload
  * Upload a file to Vercel Blob + create Supabase record.
  */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

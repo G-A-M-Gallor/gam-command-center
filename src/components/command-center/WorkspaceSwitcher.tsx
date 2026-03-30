@@ -5,11 +5,11 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   ChevronDown, Check, Settings, User, Briefcase, Users, Globe,
-  Building2, Wrench, _Shield, _Plus, LogOut,
+  Building2, Wrench, Shield, Plus, LogOut,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 
 // ─── Workspace definitions ──────────────────────────────
@@ -30,7 +30,7 @@ interface WorkspaceSection {
   items: WorkspaceItem[];
 }
 
-function getWorkspaceSections(lang: "he" | "en" | "ru", _t: any): WorkspaceSection[] {
+function getWorkspaceSections(lang: "he" | "en" | "ru", t: any): WorkspaceSection[] {
   const ws = t.workspaceSwitcher;
   return [
     {
@@ -133,11 +133,11 @@ interface WorkspaceSwitcherProps {
   navTop: number;
 }
 
-export function WorkspaceSwitcher({ _user, isCollapsed, onRight, _expandedWidth, _navTop }: WorkspaceSwitcherProps) {
-  const _router = useRouter();
+export function WorkspaceSwitcher({ user, isCollapsed, onRight, expandedWidth, navTop }: WorkspaceSwitcherProps) {
+  const router = useRouter();
   const { language } = useSettings();
-  const { _signOut } = useAuth();
-  const _t = getTranslations(language);
+  const { signOut } = useAuth();
+  const t = getTranslations(language);
   const isRtl = language === "he";
   const lang = language === "he" ? "he" : language === "ru" ? "ru" : "en";
 
@@ -147,7 +147,7 @@ export function WorkspaceSwitcher({ _user, isCollapsed, onRight, _expandedWidth,
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropPos, setDropPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 280 });
 
-  const sections = getWorkspaceSections(lang as "he" | "en" | "ru", _t);
+  const sections = getWorkspaceSections(lang as "he" | "en" | "ru", t);
   const activeItem = sections.flatMap(s => s.items).find(i => i.id === activeWs);
 
   // Compute dropdown position from trigger rect
@@ -181,7 +181,7 @@ export function WorkspaceSwitcher({ _user, isCollapsed, onRight, _expandedWidth,
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const userInitial = (_user.email?.[0] || "?").toUpperCase();
+  const userInitial = (user.email?.[0] || "?").toUpperCase();
   const userName = user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
 
   // ─── Collapsed: compact avatar trigger ───
@@ -237,7 +237,7 @@ export function WorkspaceSwitcher({ _user, isCollapsed, onRight, _expandedWidth,
 
   // ─── Dropdown panel ───
   function renderDropdown() {
-    const _um = t.userMenu as Record<string, string>;
+    const um = t.userMenu as Record<string, string>;
 
     return createPortal(
       <div
@@ -337,7 +337,7 @@ export function WorkspaceSwitcher({ _user, isCollapsed, onRight, _expandedWidth,
             type="button"
             onClick={() => { setOpen(false); signOut(); }}
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-slate-600 hover:text-red-400 hover:bg-red-500/[0.08] transition-colors cursor-pointer"
-            title={(_t.userMenu as Record<string, string>).signOut || "Log Out"}
+            title={(t.userMenu as Record<string, string>).signOut || "Log Out"}
           >
             <LogOut className="h-3 w-3" />
           </button>

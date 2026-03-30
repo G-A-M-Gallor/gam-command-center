@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { _X, ChevronRight, Check, AlertTriangle } from 'lucide-react';
-import { _getTranslations } from '@/lib/i18n';
+import { X, ChevronRight, Check, AlertTriangle } from 'lucide-react';
+import { getTranslations } from '@/lib/i18n';
 import { bulkUpdateMeta } from '@/lib/supabase/entityQueries';
-import type { _Language } from '@/contexts/SettingsContext';
+import type { Language } from '@/contexts/SettingsContext';
 import type { GlobalField, NoteRecord } from '@/lib/entities/types';
 
 type Step = 'field' | 'value' | 'preview';
@@ -23,7 +23,7 @@ interface Props {
 export function BulkFieldUpdateModal({
   open, onClose, selectedIds, notes, fields, language, actorId, onComplete,
 }: Props) {
-  const _t = getTranslations(language as _Language);
+  const t = getTranslations(language as Language);
   const tb = t.entities.bulk;
   const isRtl = language === 'he';
 
@@ -87,7 +87,7 @@ export function BulkFieldUpdateModal({
             {tb.title}
           </h3>
           <button onClick={handleClose} className="text-slate-500 hover:text-slate-300">
-            <_X size={16} />
+            <X size={16} />
           </button>
         </div>
 
@@ -127,7 +127,7 @@ export function BulkFieldUpdateModal({
                   </button>
                 ))}
                 {filteredFields.length === 0 && (
-                  <p className="py-4 text-center text-xs text-slate-500">{_t.common.noResults}</p>
+                  <p className="py-4 text-center text-xs text-slate-500">{t.common.noResults}</p>
                 )}
               </div>
             </div>
@@ -206,7 +206,7 @@ export function BulkFieldUpdateModal({
 
         {/* Footer */}
         {step === 'preview' && (
-          <div className="flex items-center justify-end gap-2 border-_t border-white/[0.06] px-5 py-3">
+          <div className="flex items-center justify-end gap-2 border-t border-white/[0.06] px-5 py-3">
             <button
               onClick={() => setStep('value')}
               className="rounded-lg border border-white/[0.08] px-3 py-1.5 text-xs text-slate-400 hover:bg-white/[0.04]"

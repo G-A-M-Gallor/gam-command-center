@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { X as XIcon, ChevronDown, ChevronUp, Pipette, RotateCcw, _Clock } from "lucide-react";
+import { X as XIcon, ChevronDown, ChevronUp, Pipette, RotateCcw, Clock } from "lucide-react";
 import { useStyleOverrides } from "@/contexts/StyleOverrideContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { getStylableElement } from "@/lib/styleOverrideRegistry";
 import { ColorPicker } from "./ColorPicker";
 
@@ -110,7 +110,7 @@ function ContextMenu({
   const menuRef = useRef<HTMLDivElement>(null);
   const { language, savedColors } = useSettings();
   const { overrides, setElementStyle, resetElement, resetAll, textHistory, clearTextHistory } = useStyleOverrides();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const element = getStylableElement(ccId);
 
   const [position, setPosition] = useState({ top: y, left: x });
@@ -506,10 +506,10 @@ function TextHistoryLog({
   const reversed = [...history].reverse();
 
   return (
-    <div className="mt-2 border-_t border-slate-700/50 pt-2">
+    <div className="mt-2 border-t border-slate-700/50 pt-2">
       <div className="mb-1.5 flex items-center justify-between">
         <span className="flex items-center gap-1 text-[10px] font-medium text-slate-400">
-          <_Clock className="h-3 w-3" />
+          <Clock className="h-3 w-3" />
           {cm.nameHistory}
         </span>
         <button

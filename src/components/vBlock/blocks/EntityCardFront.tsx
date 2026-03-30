@@ -1,6 +1,6 @@
 "use client";
 
-import type { _Language } from "@/contexts/SettingsContext";
+import type { Language } from "@/contexts/SettingsContext";
 import type { FieldSlot, FieldActionType } from "./entityCard.types";
 import { EntityCardField } from "./EntityCardField";
 
@@ -12,19 +12,19 @@ interface Props {
   onAction?: (type: FieldActionType, value: string) => void;
 }
 
-export function EntityCardFront({ fields, meta, language, _compact, onAction }: Props) {
+export function EntityCardFront({ fields, meta, language, compact, onAction }: Props) {
   const sorted = [...fields].sort((a, b) => a.priority - b.priority);
   const visible = compact ? sorted.filter((f) => f.priority <= 2) : sorted;
 
   return (
-    <div className={`grid gap-0.5 px-3 py-2 ${_compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
+    <div className={`grid gap-0.5 px-3 py-2 ${compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
       {visible.map((slot) => (
         <EntityCardField
           key={slot.metaKey}
           slot={slot}
           value={meta[slot.metaKey]}
           language={language}
-          _compact={_compact}
+          compact={compact}
           onAction={onAction}
         />
       ))}

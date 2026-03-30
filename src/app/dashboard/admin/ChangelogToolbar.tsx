@@ -3,7 +3,7 @@
 import {
   ArrowUpDown, ChevronDown, ChevronUp,
 } from 'lucide-react';
-import type { _getTranslations } from '@/lib/i18n';
+import type { getTranslations } from '@/lib/i18n';
 
 type Phase = 1 | 2 | 3 | 4 | 5;
 type FeatureStatus = 'working' | 'not-verified' | 'broken';
@@ -26,7 +26,7 @@ const WORKFLOW_COLORS: Record<WorkflowStatus, { color: string; bg: string }> = {
   cancelled:  { color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
 };
 
-function getWfLabels(ta: ReturnType<typeof _getTranslations>['admin']): Record<WorkflowStatus, string> {
+function getWfLabels(ta: ReturnType<typeof getTranslations>['admin']): Record<WorkflowStatus, string> {
   return {
     inbox: ta.wfLabelInbox, wishlist: ta.wfLabelWishlist, todo: ta.wfLabelTodo, next: ta.wfLabelNext,
     inProgress: ta.wfLabelInProgress, hold: ta.wfLabelHold, stuck: ta.wfLabelStuck, freeze: ta.wfLabelFreeze,

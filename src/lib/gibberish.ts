@@ -45,12 +45,12 @@ function convertText(text: string, map: Record<string, string>): string {
   return result;
 }
 
-/** Convert English-typed text to Hebrew (_user meant to type Hebrew) */
+/** Convert English-typed text to Hebrew (user meant to type Hebrew) */
 export function toHebrew(text: string): string {
   return convertText(text, EN_TO_HE);
 }
 
-/** Convert Hebrew-typed text to English (_user meant to type English) */
+/** Convert Hebrew-typed text to English (user meant to type English) */
 export function toEnglish(text: string): string {
   return convertText(text, HE_TO_EN);
 }

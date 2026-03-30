@@ -26,8 +26,8 @@ export interface CeoIntakeItem {
 }
 
 // GET /api/ceo-intake — active queue items
-export async function GET(_request: Request) {
-  const { error } = await requireAuth(_request);
+export async function GET(request: Request) {
+  const { error } = await requireAuth(request);
   if (error) return NextResponse.json({ error }, { status: 401 });
 
   const client = getClient();
@@ -38,7 +38,7 @@ export async function GET(_request: Request) {
     );
   }
 
-  const { searchParams } = new URL(_request.url);
+  const { searchParams } = new URL(request.url);
   const showCompleted = searchParams.get("completed") === "true";
 
   try {

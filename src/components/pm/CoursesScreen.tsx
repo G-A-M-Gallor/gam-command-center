@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -12,11 +12,11 @@ import {
   BookOpen,
   Play,
   FileText,
-  _ExternalLink,
+  ExternalLink,
   Search,
-  _Plus,
+  Plus,
   Filter,
-  _Clock,
+  Clock,
   CheckCircle,
   Pause,
   Calendar,
@@ -73,7 +73,7 @@ interface Lesson {
 
 const CoursesScreen = () => {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const courseTranslations = t.courses;
   const isRtl = language === 'he'; // Hebrew is RTL
 
@@ -165,7 +165,7 @@ const CoursesScreen = () => {
 
       const response = await fetch('/api/courses', {
         method: 'POST',
-        _headers: {
+        headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -237,7 +237,7 @@ const CoursesScreen = () => {
 
       const response = await fetch(`/api/courses/${editingCourse.id}`, {
         method: 'PUT',
-        _headers: {
+        headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -298,7 +298,7 @@ const CoursesScreen = () => {
     try {
       const response = await fetch(`/api/courses/${course.id}`, {
         method: 'PUT',
-        _headers: {
+        headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -529,7 +529,7 @@ const CoursesScreen = () => {
                         <div className="flex-1">
                           <h4 className="font-medium text-slate-100">{lesson.title}</h4>
                           <div className="flex items-center gap-2 text-sm text-slate-400">
-                            <_Clock className="h-3 w-3" />
+                            <Clock className="h-3 w-3" />
                             <span>{formatDuration(lesson.duration_minutes)}</span>
                             {lesson.file_format && (
                               <>

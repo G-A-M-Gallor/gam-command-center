@@ -9,7 +9,7 @@ import {
   AlertTriangle,
   TrendingUp,
   TrendingDown,
-  _Clock,
+  Clock,
   HardDrive,
   Cpu,
   Wifi,
@@ -302,7 +302,7 @@ function ApiPerformance({ apis }: { apis: ApiMetrics }) {
               <span className="text-sm font-medium text-white">{endpoint}</span>
               <div className="flex items-center gap-2">
                 {hasErrors && <AlertTriangle className="h-4 w-4 text-amber-400" />}
-                {isSlow && <_Clock className="h-4 w-4 text-red-400" />}
+                {isSlow && <Clock className="h-4 w-4 text-red-400" />}
               </div>
             </div>
 
@@ -511,7 +511,7 @@ export default function PerformanceMonitor({ isRtl }: PerformanceMonitorProps) {
             <MetricCard
               title="INP (Interaction to Next Paint)"
               value={formatTime(metrics.pageLoad.inp)}
-              icon={_Clock}
+              icon={Clock}
               status={metrics.pageLoad.inp <= 200 ? 'good' : metrics.pageLoad.inp <= 500 ? 'warning' : 'critical'}
             />
             <MetricCard

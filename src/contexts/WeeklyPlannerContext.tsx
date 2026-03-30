@@ -58,7 +58,7 @@ function debouncedSyncToServer() {
     const templates = loadJson<unknown[]>(TEMPLATES_KEY, []);
     fetch("/api/weekly-planner", {
       method: "PUT",
-      _headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ items, templates }),
     }).catch(() => { /* localStorage is fine as fallback */ });
   }, 2000);
@@ -322,17 +322,17 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
 
   const deleteTemplate = useCallback(
     (id: string) => {
-      persistTemplates(templates.filter((_t) => t.id !== id));
+      persistTemplates(templates.filter((t) => t.id !== id));
     },
     [templates, persistTemplates]
   );
 
   const addTemplateItem = useCallback(
     (templateId: string, item: Omit<WeeklyTemplateItem, "id" | "templateId">) => {
-      const next = templates.map((_t) => {
-        if (_t.id !== templateId) return t;
+      const next = templates.map((t) => {
+        if (t.id !== templateId) return t;
         return {
-          ..._t,
+          ...t,
           items: [...t.items, { ...item, id: generateId(), templateId }],
         };
       });
@@ -343,9 +343,9 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
 
   const removeTemplateItem = useCallback(
     (templateId: string, itemId: string) => {
-      const next = templates.map((_t) => {
-        if (_t.id !== templateId) return t;
-        return { ..._t, items: t.items.filter((i) => i.id !== itemId) };
+      const next = templates.map((t) => {
+        if (t.id !== templateId) return t;
+        return { ...t, items: t.items.filter((i) => i.id !== itemId) };
       });
       persistTemplates(next);
     },
@@ -354,7 +354,7 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
 
   const applyTemplate = useCallback(
     (templateId: string, weekStartDate: Date) => {
-      const tpl = templates.find((_t) => t.id === templateId);
+      const tpl = templates.find((t) => t.id === templateId);
       if (!tpl) return;
 
       const now = new Date().toISOString();

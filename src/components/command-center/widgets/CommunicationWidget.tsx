@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import { MessageCircle, Phone, Mail } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 import type { CommMessage } from "@/lib/wati/types";
 import { supabase } from "@/lib/supabaseClient";
 
 export function CommunicationWidgetPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [recentMessages, setRecentMessages] = useState<CommMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +44,7 @@ export function CommunicationWidgetPanel() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-slate-500">
-          {_t.comms.title}
+          {t.comms.title}
         </span>
         {unread > 0 && (
           <span className="rounded-full bg-purple-500/20 px-1.5 text-[10px] font-medium text-purple-400">
@@ -55,11 +55,11 @@ export function CommunicationWidgetPanel() {
 
       {loading ? (
         <div className="flex items-center justify-center py-4 text-sm text-slate-500">
-          {_t.common.loading}
+          {t.common.loading}
         </div>
       ) : recentMessages.length === 0 ? (
         <p className="py-4 text-center text-sm text-slate-500">
-          {_t.comms.noMessages}
+          {t.comms.noMessages}
         </p>
       ) : (
         <div className="space-y-1">
@@ -100,11 +100,11 @@ export function CommunicationWidgetPanel() {
 
 export function CommunicationBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   if (size < 2) return null;
   return (
     <span className="truncate text-xs text-slate-400">
-      {_t.comms.title}
+      {t.comms.title}
     </span>
   );
 }

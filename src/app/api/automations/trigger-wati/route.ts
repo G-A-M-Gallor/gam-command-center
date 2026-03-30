@@ -8,15 +8,15 @@ import { requireAuth } from '@/lib/api/auth';
  * Used by the Automation UI for immediate sync
  */
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // Require authentication
-    await requireAuth(_request);
+    await requireAuth(request);
 
     // Trigger the automation endpoint
     const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/automations/wati-sync`, {
       method: 'POST',
-      _headers: {
+      headers: {
         'Authorization': `Bearer ${process.env.CRON_SECRET}`,
         'Content-Type': 'application/json',
       },

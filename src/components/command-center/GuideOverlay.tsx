@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { Info, Bot } from "lucide-react";
 import { useDashboardMode } from "@/contexts/DashboardModeContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { getStylableElement } from "@/lib/styleOverrideRegistry";
 
 interface TooltipState {
@@ -37,10 +37,10 @@ function getSupportChips(
 export function GuideOverlay() {
   const { guideMode, editMode } = useDashboardMode();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const elLabels = t.elementLabels as Record<string, string>;
-  const elDescs = (_t as unknown as Record<string, Record<string, string>>).elementDescriptions;
-  const guide = (_t as unknown as Record<string, Record<string, string>>).guide;
+  const elDescs = (t as unknown as Record<string, Record<string, string>>).elementDescriptions;
+  const guide = (t as unknown as Record<string, Record<string, string>>).guide;
 
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
@@ -190,7 +190,7 @@ export function GuideOverlay() {
 
       {/* Expanded info */}
       {tooltip.expanded && element && (
-        <div className="border-_t border-slate-700/50 px-3 py-2">
+        <div className="border-t border-slate-700/50 px-3 py-2">
           <p className="mb-1 text-[10px] font-medium text-slate-500">{guide.supports}</p>
           <div className="flex flex-wrap gap-1">
             {Object.entries(element.supports).map(
@@ -230,7 +230,7 @@ export function GuideOverlay() {
           onClick={() => {
             // Dispatch custom event to open AI with element context
             const event = new CustomEvent("cc-open-ai", {
-              detail: { _context: `element:${tooltip.ccId}` },
+              detail: { context: `element:${tooltip.ccId}` },
             });
             window.dispatchEvent(event);
           }}

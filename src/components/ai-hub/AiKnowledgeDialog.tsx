@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
-import { _X, _Plus, _ExternalLink, Loader2, Trash2 } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { X, Plus, ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { getTranslations } from "@/lib/i18n";
 import type { AIMode } from "@/lib/ai/prompts";
 import { MODE_ICONS, MODE_COLORS } from "./types";
 
@@ -34,7 +34,7 @@ interface AiKnowledgeDialogProps {
   t: ReturnType<typeof getTranslations>;
 }
 
-export function AiKnowledgeDialog({ isOpen, onClose, mode, _t }: AiKnowledgeDialogProps) {
+export function AiKnowledgeDialog({ isOpen, onClose, mode, t }: AiKnowledgeDialogProps) {
   const [urls, setUrls] = useState<KnowledgeUrls>({} as KnowledgeUrls);
   const [newUrl, setNewUrl] = useState("");
   const [fetching, setFetching] = useState<string | null>(null);
@@ -60,17 +60,17 @@ export function AiKnowledgeDialog({ isOpen, onClose, mode, _t }: AiKnowledgeDial
     try {
       new URL(url);
     } catch {
-      setError(_t.aiHub.invalidUrl);
+      setError(t.aiHub.invalidUrl);
       return;
     }
 
     if (currentUrls.length >= MAX_URLS_PER_MODE) {
-      setError(_t.aiHub.urlLimit);
+      setError(t.aiHub.urlLimit);
       return;
     }
 
     if (currentUrls.includes(url)) {
-      setError(_t.aiHub.urlDuplicate);
+      setError(t.aiHub.urlDuplicate);
       return;
     }
 
@@ -80,16 +80,16 @@ export function AiKnowledgeDialog({ isOpen, onClose, mode, _t }: AiKnowledgeDial
     try {
       const res = await fetch("/api/ai/fetch-url", {
         method: "POST",
-        _headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
       });
       if (!res.ok) {
-        setError(_t.aiHub.urlFetchFailed);
+        setError(t.aiHub.urlFetchFailed);
         setFetching(null);
         return;
       }
     } catch {
-      setError(_t.aiHub.urlFetchFailed);
+      setError(t.aiHub.urlFetchFailed);
       setFetching(null);
       return;
     }
@@ -124,7 +124,7 @@ export function AiKnowledgeDialog({ isOpen, onClose, mode, _t }: AiKnowledgeDial
             <ModeIcon size={16} className={`text-${color}-400`} />
             <h2 className="text-sm font-medium text-slate-200">{t.aiHub.knowledgeBase}</h2>
             <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium bg-${color}-500/20 text-${color}-400`}>
-              {_t.aiHub[`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}` as keyof typeof t.aiHub]}
+              {t.aiHub[`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}` as keyof typeof t.aiHub]}
             </span>
           </div>
           <button onClick={onClose} className="rounded p-1 text-slate-500 hover:bg-slate-700 hover:text-slate-300 transition-colors">
@@ -144,7 +144,7 @@ export function AiKnowledgeDialog({ isOpen, onClose, mode, _t }: AiKnowledgeDial
                   key={url}
                   className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2"
                 >
-                  <_ExternalLink size={13} className="shrink-0 text-slate-500" />
+                  <ExternalLink size={13} className="shrink-0 text-slate-500" />
                   <span className="flex-1 truncate text-[13px] text-slate-300">{url}</span>
                   <button
                     onClick={() => handleRemove(url)}

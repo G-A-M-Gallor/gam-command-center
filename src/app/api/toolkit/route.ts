@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 /**
@@ -43,10 +43,10 @@ export async function GET() {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -70,14 +70,14 @@ export async function GET() {
 
 // ─── POST /api/toolkit ────────────────────────────────
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -108,14 +108,14 @@ export async function POST(_request: Request) {
 
 // ─── PATCH /api/toolkit ────────────────────────────────
 
-export async function PATCH(_request: Request) {
+export async function PATCH(request: Request) {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -134,7 +134,7 @@ export async function PATCH(_request: Request) {
 
     if (error) {
       console.error("Error updating tool:", error);
-      return NextResponse.json({ error: "Failed to _update tool" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to update tool" }, { status: 500 });
     }
 
     return NextResponse.json(updatedTool);
@@ -150,18 +150,18 @@ export async function PATCH(_request: Request) {
 
 // ─── DELETE /api/toolkit ────────────────────────────────
 
-export async function DELETE(_request: Request) {
+export async function DELETE(request: Request) {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(_request.url);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {

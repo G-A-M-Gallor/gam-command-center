@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { RefreshCw, Activity, AlertTriangle, CheckCircle2, _Clock, _ExternalLink, Play, Database, Zap, TrendingUp } from "lucide-react";
+import { RefreshCw, Activity, AlertTriangle, CheckCircle2, Clock, ExternalLink, Play, Database, Zap, TrendingUp } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 
 // ─── Types ──────────────────────────────────────────────
@@ -72,7 +72,7 @@ const getStatusIcon = (status: string | null) => {
 
 export default function SyncPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [data, setData] = useState<SyncData | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);

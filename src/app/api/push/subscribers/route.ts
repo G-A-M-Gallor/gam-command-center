@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { pushSubscribersDeleteSchema } from "@/lib/api/schemas";
 
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -9,8 +9,8 @@ const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:admin@gam.co.il";
 
 export async function GET() {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -26,10 +26,10 @@ export async function GET() {
   return NextResponse.json({ subscribers: data || [] });
 }
 
-export async function DELETE(_request: Request) {
+export async function DELETE(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

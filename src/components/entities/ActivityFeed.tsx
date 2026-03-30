@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  MessageSquare, Phone, ArrowRight, _Plus, Trash2,
+  MessageSquare, Phone, ArrowRight, Plus, Trash2,
   UserPlus, UserMinus, Power, Send,
 } from 'lucide-react';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { fetchActivityLog, addComment, addCallLogEntry } from '@/lib/supabase/entityQueries';
 import type { ActivityLogEntry, ActivityType } from '@/lib/entities/types';
 
@@ -20,11 +20,11 @@ const ACTIVITY_ICONS: Record<ActivityType, React.ElementType> = {
   status_change: ArrowRight,
   comment: MessageSquare,
   call_log: Phone,
-  relation_added: _Plus,
+  relation_added: Plus,
   relation_removed: Trash2,
   stakeholder_added: UserPlus,
   stakeholder_removed: UserMinus,
-  created: _Plus,
+  created: Plus,
   deactivated: Power,
   reactivated: Power,
   deleted: Trash2,
@@ -54,7 +54,7 @@ function formatTimeI18n(
 export function ActivityFeed({ noteId, language, hideCommentInput }: Props) {
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const locale = LOCALE_MAP[lang] ?? 'en-US';
-  const _t = getTranslations(language as 'he' | 'en' | 'ru');
+  const t = getTranslations(language as 'he' | 'en' | 'ru');
   const te = t.entities;
   const isRtl = language === 'he';
 
@@ -89,7 +89,7 @@ export function ActivityFeed({ noteId, language, hideCommentInput }: Props) {
   };
 
   return (
-    <div className="border-_t border-white/[0.04] pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
+    <div className="border-t border-white/[0.04] pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
       <h4 className="text-[10px] font-medium text-slate-400 mb-2">
         {te.activity}
       </h4>

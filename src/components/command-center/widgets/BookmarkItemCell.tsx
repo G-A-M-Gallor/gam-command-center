@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { _ExternalLink, FileText, GripVertical, _X } from "lucide-react";
+import { ExternalLink, FileText, GripVertical, X } from "lucide-react";
 import type { FolderItemBookmark } from "./FolderRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
 import { createBookmarkNote } from "@/lib/supabase/editorQueries";
@@ -29,7 +29,7 @@ export function BookmarkItemCell({
   onDragEnd,
 }: BookmarkItemCellProps) {
   const { language } = useSettings();
-  const _router = useRouter();
+  const router = useRouter();
   const [creatingNote, setCreatingNote] = useState(false);
 
   const dragProps = {

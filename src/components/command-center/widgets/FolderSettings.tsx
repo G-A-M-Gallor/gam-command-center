@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { _X, Trash2, _Plus, Globe } from "lucide-react";
+import { X, Trash2, Plus, Globe } from "lucide-react";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -15,7 +15,7 @@ import {
 } from "./FolderRegistry";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 const SIZE_OPTIONS: WidgetSize[] = [1, 2, 3, 4];
 const GRID_COL_OPTIONS = [1, 2, 3, 4];
@@ -30,8 +30,8 @@ export function FolderSettings({ folderId, onClose }: FolderSettingsProps) {
   const { folders, updateFolder, removeFolder, widgetSizes, setWidgetSize, setWidgetPlacement } =
     useWidgets();
   const { language } = useSettings();
-  const _t = getTranslations(language);
-  const ft = (_t as unknown as Record<string, Record<string, string>>).folders;
+  const t = getTranslations(language);
+  const ft = (t as unknown as Record<string, Record<string, string>>).folders;
 
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
   const pathname = usePathname();
@@ -500,7 +500,7 @@ function ItemRow({
         className="text-slate-600 transition-colors hover:text-red-400"
         aria-label={`Remove ${label}`}
       >
-        <_X className="h-3 w-3" />
+        <X className="h-3 w-3" />
       </button>
     </div>
   );

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { RefreshCw, _ExternalLink, Activity, Bell, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { _createClient } from '@/lib/supabase/client';
+import { RefreshCw, ExternalLink, Activity, Bell, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface QuickActionsBarProps {
   t: Record<string, string>;
@@ -12,7 +12,7 @@ type ActionResult = { type: 'success' | 'error'; msg: string } | null;
 
 const supabase = createClient();
 
-export function QuickActionsBar({ _t }: QuickActionsBarProps) {
+export function QuickActionsBar({ t }: QuickActionsBarProps) {
   const [runningAction, setRunningAction] = useState<string | null>(null);
   const [result, setResult] = useState<ActionResult>(null);
 
@@ -24,7 +24,7 @@ export function QuickActionsBar({ _t }: QuickActionsBarProps) {
       const token = session?.access_token;
       const res = await fetch('/api/automations/run-job', {
         method: 'POST',
-        _headers: {
+        headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
@@ -33,10 +33,10 @@ export function QuickActionsBar({ _t }: QuickActionsBarProps) {
       const data = await res.json();
       setResult({
         type: data.success ? 'success' : 'error',
-        msg: data.success ? t.actionSuccess : (data.error || _t.actionError),
+        msg: data.success ? t.actionSuccess : (data.error || t.actionError),
       });
     } catch {
-      setResult({ type: 'error', msg: _t.actionError });
+      setResult({ type: 'error', msg: t.actionError });
     } finally {
       setRunningAction(null);
       setTimeout(() => setResult(null), 4000);
@@ -53,7 +53,7 @@ export function QuickActionsBar({ _t }: QuickActionsBarProps) {
     },
     {
       id: 'open-n8n',
-      icon: _ExternalLink,
+      icon: ExternalLink,
       label: t.openN8n,
       color: 'text-orange-400 border-orange-500/20 hover:bg-orange-500/10',
       onClick: () => {
@@ -79,7 +79,7 @@ export function QuickActionsBar({ _t }: QuickActionsBarProps) {
 
   return (
     <div data-cc-id="automations.quickActions">
-      <h3 className="mb-2 text-sm font-semibold text-slate-200">{_t.quickActions}</h3>
+      <h3 className="mb-2 text-sm font-semibold text-slate-200">{t.quickActions}</h3>
       <div className="flex flex-wrap items-center gap-2">
       {actions.map((a) => {
         const Icon = a.icon;

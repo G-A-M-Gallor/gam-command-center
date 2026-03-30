@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { _X } from "lucide-react";
+import { X } from "lucide-react";
 import { EMOJI_OPTIONS, type FolderDefinition } from "./FolderRegistry";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 interface FolderCreatorProps {
   onClose: () => void;
@@ -14,8 +14,8 @@ interface FolderCreatorProps {
 export function FolderCreator({ onClose }: FolderCreatorProps) {
   const { addFolder, widgetPositions, widgetSizes } = useWidgets();
   const { language } = useSettings();
-  const _t = getTranslations(language);
-  const ft = (_t as unknown as Record<string, Record<string, string>>).folders;
+  const t = getTranslations(language);
+  const ft = (t as unknown as Record<string, Record<string, string>>).folders;
 
   const [nameHe, setNameHe] = useState("");
   const [nameEn, setNameEn] = useState("");

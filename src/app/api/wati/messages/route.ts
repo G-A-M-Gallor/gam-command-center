@@ -22,7 +22,7 @@ const GetMessagesSchema = z.object({
   pageNumber: z.number().optional().default(1),
 });
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { action, ...data } = body;
@@ -57,21 +57,21 @@ export async function POST(_request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return Response.json(
-        { error: 'Invalid _request data', details: error.issues },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }
 
     return Response.json(
-      { error: 'Failed to process WATI message _request' },
+      { error: 'Failed to process WATI message request' },
       { status: 500 }
     );
   }
 }
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const url = new URL(_request.url);
+    const url = new URL(request.url);
     const phone = url.searchParams.get('phone');
     const pageSize = parseInt(url.searchParams.get('pageSize') ?? '50');
     const pageNumber = parseInt(url.searchParams.get('pageNumber') ?? '1');

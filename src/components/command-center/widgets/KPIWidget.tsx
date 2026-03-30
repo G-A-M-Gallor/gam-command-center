@@ -11,7 +11,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
 
@@ -24,7 +24,7 @@ interface KPIData {
 
 export function KPIPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [data, setData] = useState<KPIData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -129,7 +129,7 @@ export function KPIPanel() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          {_t.widgets.kpiQuickMetrics}
+          {t.widgets.kpiQuickMetrics}
         </span>
         <button
           type="button"
@@ -170,12 +170,12 @@ export function KPIPanel() {
 
 export function KPIBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   if (size < 2) return null;
 
   return (
     <span className="truncate text-xs text-slate-400">
-      {_t.widgets.kpiBar}
+      {t.widgets.kpiBar}
     </span>
   );
 }

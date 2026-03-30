@@ -364,8 +364,8 @@ export default function GAMLanding() {
           </div>
 
           <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginTop:36,animation:"fadeUp .8s ease .5s both"}}>
-            {["✓ ייעוץ ראשוני חינם","✓ ליווי עד סגירה","✓ 12 שנות ניסיון","✓ זמינות 24/7"].map((_t,i)=>(
-              <span key={i} className="stat-badge">{_t}</span>
+            {["✓ ייעוץ ראשוני חינם","✓ ליווי עד סגירה","✓ 12 שנות ניסיון","✓ זמינות 24/7"].map((t,i)=>(
+              <span key={i} className="stat-badge">{t}</span>
             ))}
           </div>
         </div>
@@ -430,7 +430,7 @@ export default function GAMLanding() {
             <h2 style={{fontSize:"clamp(24px,4vw,38px)",fontWeight:900,color:"var(--ds-text)"}}>4,000+ לקוחות מרוצים</h2>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:12}}>
-            {TESTIMONIALS.map((_t,i)=>(
+            {TESTIMONIALS.map((t,i)=>(
               <div key={i} className="testimonial-card">
                 <div style={{fontSize:26,color:"var(--ds-accent)",opacity:.5,marginBottom:8}}>&ldquo;</div>
                 <p style={{fontSize:13,color:"var(--ds-text-soft)",lineHeight:1.7,marginBottom:14}}>{t.text}</p>

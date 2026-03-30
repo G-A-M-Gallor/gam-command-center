@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import type { JSONContent } from "@tiptap/react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import {
   fetchDocTemplate,
   updateDocTemplate,
@@ -18,8 +18,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Tag,
-  _X,
-  _Plus,
+  X,
+  Plus,
   ChevronDown,
   PanelRightOpen,
   PanelRightClose,
@@ -86,9 +86,9 @@ function generateFieldId(): string {
 
 export default function DocumentTemplateEditorPage() {
   const { id } = useParams<{ id: string }>();
-  const _router = useRouter();
+  const router = useRouter();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const dt = t.docTemplates;
   const df = t.docFields;
   const isRtl = language === "he";
@@ -206,7 +206,7 @@ export default function DocumentTemplateEditorPage() {
 
   const handleRemoveTag = useCallback(
     (tag: string) => {
-      const newTags = tags.filter((_t) => t !== tag);
+      const newTags = tags.filter((t) => t !== tag);
       setTags(newTags);
       saveMetadata({ tags: newTags });
     },
@@ -282,7 +282,7 @@ export default function DocumentTemplateEditorPage() {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
       </div>
     );
   }
@@ -378,7 +378,7 @@ export default function DocumentTemplateEditorPage() {
         </button>
 
         {saveState === "saving" && (
-          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
         )}
         {saveState === "saved" && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
         {saveState === "error" && <AlertCircle className="h-4 w-4 text-red-400" />}
@@ -417,7 +417,7 @@ export default function DocumentTemplateEditorPage() {
               />
               {tagInput.trim() && (
                 <button onClick={handleAddTag} className="text-slate-500 hover:text-slate-300">
-                  <_Plus className="h-3 w-3" />
+                  <Plus className="h-3 w-3" />
                 </button>
               )}
             </div>
@@ -554,7 +554,7 @@ function FieldCard({
 
       {/* Expanded edit form */}
       {isEditing && (
-        <div className="space-y-2 border-_t border-slate-700/50 px-2.5 py-2.5">
+        <div className="space-y-2 border-t border-slate-700/50 px-2.5 py-2.5">
           {/* Label */}
           <div>
             <label className="mb-0.5 block text-[10px] text-slate-500">{df.label}</label>

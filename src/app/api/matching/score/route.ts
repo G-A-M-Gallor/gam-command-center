@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/api/auth";
 import { matchingScoreSchema } from "@/lib/api/schemas";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
@@ -16,11 +16,11 @@ function getServiceClient() {
   );
 }
 
-export async function POST(_request: NextRequest) {
-  const rl = checkRateLimit(_request, RATE_LIMITS.ai);
+export async function POST(request: NextRequest) {
+  const rl = checkRateLimit(request, RATE_LIMITS.ai);
   if (rl.limited) return rl.response;
 
-  const { error: authError } = await requireAuth(_request);
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -30,7 +30,7 @@ export async function POST(_request: NextRequest) {
     const parsed = matchingScoreSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid _request", details: parsed.error.flatten() },
+        { error: "Invalid request", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
@@ -123,7 +123,7 @@ export async function POST(_request: NextRequest) {
     // Extract target profiles
     const targetProfiles = (targets as NoteRecord[])
       .map((note) => {
-        const et = entityTypes.find((_t) => t.slug === note.entity_type);
+        const et = entityTypes.find((t) => t.slug === note.entity_type);
         if (!et) return null;
         return extractMatchProfile(note, et, globalFields);
       })

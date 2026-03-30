@@ -7,7 +7,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth';
 import { importExecuteSchema } from '@/lib/api/schemas';
-import { _createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { buildImportRows, validateImport } from '@/lib/import/validator';
 import { executeImport } from '@/lib/import/importer';
 import type { GlobalField } from '@/lib/entities/types';
@@ -20,9 +20,9 @@ function getServiceClient() {
   );
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   // Auth check
-  const { _user, error: authError } = await requireAuth(_request);
+  const { user, error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -102,7 +102,7 @@ export async function POST(_request: Request) {
         dryRun: false,
       },
       importRows,
-      _user!.id,
+      user!.id,
       logData.id,
     );
 

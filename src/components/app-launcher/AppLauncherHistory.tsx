@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { _X, _Clock, Database, History, _ExternalLink } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { X, Clock, Database, History, ExternalLink } from "lucide-react";
+import { getTranslations } from "@/lib/i18n";
 import { APP_DATA_REGISTRY, hasAppData } from "@/lib/app-launcher/appDataRegistry";
 import { fetchRecentRecords, type RecentRecord } from "@/lib/app-launcher/appDataQueries";
 import type { LauncherItem } from "@/lib/app-launcher/types";
@@ -33,7 +33,7 @@ function formatTimestamp(ts: string | number, language: "he" | "en" | "ru"): str
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    const _t = getTranslations(language);
+    const t = getTranslations(language);
 
     if (diffMins < 1) return t.appLauncher.justNow;
     if (diffMins < 60) return t.appLauncher.minutesAgo.replace("{minutes}", diffMins.toString());
@@ -48,8 +48,8 @@ function formatTimestamp(ts: string | number, language: "he" | "en" | "ru"): str
 }
 
 export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
-  const _router = useRouter();
-  const _t = getTranslations(language);
+  const router = useRouter();
+  const t = getTranslations(language);
   const [activeTab, setActiveTab] = useState<Tab>("entities");
   const [records, setRecords] = useState<RecentRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -115,7 +115,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
         <div className="flex items-center gap-2">
-          <_Clock className="h-4 w-4 text-purple-400" />
+          <Clock className="h-4 w-4 text-purple-400" />
           <h3 className="text-sm font-semibold text-slate-200 truncate max-w-[180px]">
             {appLabel}
           </h3>
@@ -125,7 +125,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
           onClick={onClose}
           className="rounded-lg p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-300 transition-colors"
         >
-          <_X className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </button>
       </div>
 
@@ -165,7 +165,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
           /* Supabase records */
           loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-purple-500/30 border-_t-purple-500" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-purple-500/30 border-t-purple-500" />
             </div>
           ) : records.length === 0 ? (
             <EmptyState language={language} type="entities" />
@@ -205,7 +205,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
 
       {/* Footer */}
       {selectedItem?.href && (
-        <div className="border-_t border-white/[0.06] p-3">
+        <div className="border-t border-white/[0.06] p-3">
           <button
             type="button"
             onClick={() => handleNavigate(selectedItem.href!)}
@@ -258,7 +258,7 @@ function RecordItem({
 }
 
 function EmptyState({ language, type }: { language: "he" | "en" | "ru"; type: "entities" | "history" }) {
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
       {type === "entities" ? (

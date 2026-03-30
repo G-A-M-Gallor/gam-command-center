@@ -50,7 +50,7 @@ export function OptimizedImage({
     setIsLoading(false);
   };
 
-  // For dynamic data URLs (_user uploads, camera, signatures), use regular img
+  // For dynamic data URLs (user uploads, camera, signatures), use regular img
   if (src.startsWith('data:') || src.startsWith('blob:')) {
     return (
       <img

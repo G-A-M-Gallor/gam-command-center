@@ -66,10 +66,10 @@ interface RoadmapTask {
 function buildRoadmap(tasks: NotionTask[]) {
   // Group by Layer
   const layerGroups = new Map<string, NotionTask[]>();
-  for (const _t of tasks) {
+  for (const t of tasks) {
     const layer = t.layer || "Unassigned";
     if (!layerGroups.has(layer)) layerGroups.set(layer, []);
-    layerGroups.get(layer)!.push(_t);
+    layerGroups.get(layer)!.push(t);
   }
 
   // Sort layers by key (0, 1, 2...)
@@ -80,18 +80,18 @@ function buildRoadmap(tasks: NotionTask[]) {
 
     // Group by Type within layer
     const typeGroups = new Map<string, NotionTask[]>();
-    for (const _t of layerTasks) {
+    for (const t of layerTasks) {
       const type = t.type || "Other";
       if (!typeGroups.has(type)) typeGroups.set(type, []);
-      typeGroups.get(type)!.push(_t);
+      typeGroups.get(type)!.push(t);
     }
 
     const types: RoadmapType[] = [...typeGroups.entries()].map(([type, typeTasks], tIdx) => {
       const rTasks: RoadmapTask[] = typeTasks.map(t => ({
         id: t.id,
         name: t.task,
-        status: statusToKey(_t.status),
-        _pct: statusToPct(_t.status),
+        status: statusToKey(t.status),
+        _pct: statusToPct(t.status),
         priority: t.priority,
         effort: t.effort,
         owner: t.owner,
@@ -99,12 +99,12 @@ function buildRoadmap(tasks: NotionTask[]) {
       }));
 
       const typePct = rTasks.length > 0
-        ? Math.round(rTasks.reduce((a, _t) => a + t._pct, 0) / rTasks.length)
+        ? Math.round(rTasks.reduce((a, t) => a + t._pct, 0) / rTasks.length)
         : 0;
 
-      const doneCount = rTasks.filter(t => _t._pct === 100).length;
+      const doneCount = rTasks.filter(t => t._pct === 100).length;
       const typeStatus = doneCount === rTasks.length ? "done"
-        : rTasks.some(t => _t.status === "in-progress") ? "in-progress"
+        : rTasks.some(t => t.status === "in-progress") ? "in-progress"
         : "backlog";
 
       return {
@@ -117,12 +117,12 @@ function buildRoadmap(tasks: NotionTask[]) {
     });
 
     const goalPct = layerTasks.length > 0
-      ? Math.round(layerTasks.reduce((a, _t) => a + statusToPct(_t.status), 0) / layerTasks.length)
+      ? Math.round(layerTasks.reduce((a, t) => a + statusToPct(t.status), 0) / layerTasks.length)
       : 0;
 
-    const doneCount = layerTasks.filter(t => _t.status === "Done").length;
+    const doneCount = layerTasks.filter(t => t.status === "Done").length;
     const goalStatus = doneCount === layerTasks.length ? "done"
-      : layerTasks.some(t => _t.status === "In Progress") ? "in-progress"
+      : layerTasks.some(t => t.status === "In Progress") ? "in-progress"
       : "backlog";
 
     return {
@@ -138,8 +138,8 @@ function buildRoadmap(tasks: NotionTask[]) {
   return {
     goals,
     totalTasks: tasks.length,
-    doneCount: tasks.filter(t => _t.status === "Done").length,
-    inProgressCount: tasks.filter(t => _t.status === "In Progress").length,
+    doneCount: tasks.filter(t => t.status === "Done").length,
+    inProgressCount: tasks.filter(t => t.status === "In Progress").length,
     fetchedAt: new Date().toISOString(),
   };
 }
@@ -149,7 +149,7 @@ export async function GET() {
     const tasks = await getMyTasks();
     const roadmap = buildRoadmap(tasks);
     return NextResponse.json(roadmap, {
-      _headers: {
+      headers: {
         "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },
     });

@@ -9,13 +9,13 @@ export async function register() {
 
 export const onRequestError = async (
   err: { digest: string } & Error,
-  _request: {
+  request: {
     path: string;
     method: string;
-    _headers: { [key: string]: string };
+    headers: { [key: string]: string };
   },
-  _context: { routerKind: string; routePath: string; routeType: string; renderSource: string },
+  context: { routerKind: string; routePath: string; routeType: string; renderSource: string },
 ) => {
   const Sentry = await import("@sentry/nextjs");
-  Sentry.captureRequestError(err, _request, _context);
+  Sentry.captureRequestError(err, request, context);
 };

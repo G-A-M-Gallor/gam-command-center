@@ -91,7 +91,7 @@ export function useBottomDock() {
     items,
     isOpen,
     editMode,
-    _setEditMode,
+    setEditMode,
     toggle,
     close,
     addItem,

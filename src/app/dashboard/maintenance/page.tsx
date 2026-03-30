@@ -2,18 +2,18 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import {
   Activity,
   AlertTriangle,
   CheckCircle2,
-  _Clock,
+  Clock,
   Gauge,
   Play,
   RefreshCw,
   Settings,
-  _Shield,
+  Shield,
   TrendingUp,
   Wrench,
   Key,
@@ -161,7 +161,7 @@ function ReportsTable({ reports }: { reports: CleanupReport[] }) {
               const status = report.summary.failed === 0 ? 'good' : 'warning';
 
               return (
-                <tr key={index} className="border-_t border-white/[0.06]">
+                <tr key={index} className="border-t border-white/[0.06]">
                   <td className="px-4 py-3 text-sm text-slate-300">
                     {date.toLocaleDateString('he-IL')} {date.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
                   </td>
@@ -414,7 +414,7 @@ export default function MaintenancePage() {
             value={stats.lastAudit.value}
             subtitle="סריקה מלאה"
             status={stats.lastAudit.status}
-            icon={_Clock}
+            icon={Clock}
           />
           <StatsCard
             title="הבאה מתוזמנת"

@@ -1,4 +1,4 @@
-import { _createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import type { DocRecord, DocTemplate, DocVersion, DocShare } from "./schema";
 
 // Re-export types so existing consumers can keep importing from here
@@ -32,9 +32,9 @@ export async function createDocument(title: string): Promise<DocRecord | null> {
   const supabase = createClient();
 
   // Get authenticated user — refuse to create with a fake ID
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user?.id) {
-    console.error("createDocument: no authenticated user — cannot create document without a real _user ID");
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) {
+    console.error("createDocument: no authenticated user — cannot create document without a real user ID");
     return null;
   }
 
@@ -47,7 +47,7 @@ export async function createDocument(title: string): Promise<DocRecord | null> {
     .maybeSingle();
 
   if (!existing?.workspace_id || !existing?.entity_id) {
-    console.error("createDocument: no existing records found to derive workspace_id/entity_id — cannot create document without workspace _context");
+    console.error("createDocument: no existing records found to derive workspace_id/entity_id — cannot create document without workspace context");
     return null;
   }
 
@@ -56,7 +56,7 @@ export async function createDocument(title: string): Promise<DocRecord | null> {
     .insert({
       workspace_id: existing.workspace_id,
       entity_id: existing.entity_id,
-      created_by: _user.id,
+      created_by: user.id,
       title,
       content: { type: "doc", content: [{ type: "paragraph" }] },
       record_type: "document",
@@ -97,7 +97,7 @@ export async function updateDocument(
     // Fire-and-forget: trigger background embedding generation
     fetch("/api/embeddings/generate", {
       method: "POST",
-      _headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ document_id: id }),
     }).catch(() => { /* no-op */ });
   }
@@ -123,7 +123,7 @@ export async function duplicateDocument(sourceId: string): Promise<DocRecord | n
   if (!source) return null;
 
   // Use current user as owner of the duplicate
-  const { data: { _user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   const createdBy = user?.id || source.created_by;
 
   // Create duplicate record
@@ -190,8 +190,8 @@ export async function createStoryNote(card: {
 }): Promise<DocRecord | null> {
   const supabase = createClient();
 
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user?.id) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) return null;
 
   // Get workspace context from an existing record
   const { data: existing } = await supabase
@@ -209,7 +209,7 @@ export async function createStoryNote(card: {
     .insert({
       workspace_id: existing.workspace_id,
       entity_id: existing.entity_id,
-      created_by: _user.id,
+      created_by: user.id,
       title: truncatedTitle,
       content: {
         type: "doc",
@@ -249,8 +249,8 @@ export async function createBookmarkNote(bookmark: {
 }): Promise<DocRecord | null> {
   const supabase = createClient();
 
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user?.id) return null;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) return null;
 
   const { data: existing } = await supabase
     .from("vb_records")
@@ -269,7 +269,7 @@ export async function createBookmarkNote(bookmark: {
     .insert({
       workspace_id: existing.workspace_id,
       entity_id: existing.entity_id,
-      created_by: _user.id,
+      created_by: user.id,
       title: truncatedTitle,
       content: {
         type: "doc",
@@ -444,7 +444,7 @@ export async function createShareLink(documentId: string, expiresInDays?: number
 
   if (existing) return existing as DocShare;
 
-  const { data: { _user } } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const expiresAt = expiresInDays
     ? new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000).toISOString()
@@ -454,7 +454,7 @@ export async function createShareLink(documentId: string, expiresInDays?: number
     .from("doc_shares")
     .insert({
       document_id: documentId,
-      created_by: _user?.id || null,
+      created_by: user?.id || null,
       expires_at: expiresAt,
     })
     .select("*")

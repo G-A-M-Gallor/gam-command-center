@@ -14,7 +14,7 @@ const planPage = {
   realtimeConnecting: "Подключение...",
   realtimeDisconnected: "Отключено",
   phase1Name: "Базовая инфраструктура",
-  phase1Desc: "Sidebar, Layout, _Layers, Settings, Automations",
+  phase1Desc: "Sidebar, Layout, Layers, Settings, Automations",
   phase2Name: "Редактор документов",
   phase2Desc: "Canvas Editor с системой полей и шаблонами",
   phase3Name: "Карта историй",

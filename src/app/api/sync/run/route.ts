@@ -9,15 +9,15 @@ import type { TriggerType } from '@/lib/sync/types';
  * POST /api/sync/run — Manual trigger from admin UI
  * Auth: CRON_SECRET or JWT
  */
-export async function GET(_request: Request) {
-  return handleSyncRun(_request);
+export async function GET(request: Request) {
+  return handleSyncRun(request);
 }
 
-export async function POST(_request: Request) {
-  return handleSyncRun(_request);
+export async function POST(request: Request) {
+  return handleSyncRun(request);
 }
 
-async function handleSyncRun(_request: Request) {
+async function handleSyncRun(request: Request) {
   // Auth: either CRON_SECRET or JWT
   const cronSecret =
     request.headers.get('x-cron-secret') ||
@@ -27,7 +27,7 @@ async function handleSyncRun(_request: Request) {
   let triggerType: TriggerType = 'scheduled';
 
   if (!isVercelCron) {
-    const { error: authError } = await requireAuth(_request);
+    const { error: authError } = await requireAuth(request);
     if (authError) {
       return NextResponse.json({ error: authError }, { status: 401 });
     }

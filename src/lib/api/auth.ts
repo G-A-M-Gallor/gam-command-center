@@ -1,4 +1,4 @@
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import type { User } from "@supabase/supabase-js";
 
@@ -19,10 +19,10 @@ type AuthResult = AuthSuccess | AuthError;
  * Returns the authenticated user or an error message.
  *
  * Usage in API routes:
- *   const { _user, error } = await requireAuth(_request);
+ *   const { user, error } = await requireAuth(request);
  *   if (error) return Response.json({ error }, { status: 401 });
  */
-export async function requireAuth(_request: Request): Promise<AuthResult> {
+export async function requireAuth(request: Request): Promise<AuthResult> {
   const authHeader = request.headers.get("authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -47,15 +47,15 @@ export async function requireAuth(_request: Request): Promise<AuthResult> {
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   const {
-    data: { _user },
+    data: { user },
     error,
   } = await supabase.auth.getUser(token);
 
-  if (error || !_user) {
+  if (error || !user) {
     return { user: null, error: "Invalid or expired token" };
   }
 
-  return { _user, error: null };
+  return { user, error: null };
 }
 
 /**
@@ -64,17 +64,17 @@ export async function requireAuth(_request: Request): Promise<AuthResult> {
  * Falls back to allowing all authenticated users when no roles are configured.
  *
  * Usage in API routes:
- *   const { _user, error } = await requireAdmin(_request);
+ *   const { user, error } = await requireAdmin(request);
  *   if (error) return Response.json({ error }, { status: 403 });
  */
-export async function requireAdmin(_request: Request): Promise<AuthResult> {
-  const result = await requireAuth(_request);
+export async function requireAdmin(request: Request): Promise<AuthResult> {
+  const result = await requireAuth(request);
 
   if (result.error) {
     return result;
   }
 
-  const _user = result.user!;
+  const user = result.user!;
   const role = user.app_metadata?.role;
 
   if (role !== 'admin') {
@@ -89,10 +89,10 @@ export async function requireAdmin(_request: Request): Promise<AuthResult> {
  * Accepts a list of allowed roles.
  */
 export async function requireRole(
-  _request: Request,
+  request: Request,
   allowedRoles: string[],
 ): Promise<AuthResult> {
-  const result = await requireAuth(_request);
+  const result = await requireAuth(request);
 
   if (result.error) {
     return result;
@@ -121,12 +121,12 @@ export async function requireRole(
 export async function getUserId(): Promise<string> {
   const supabase = await createServerClient();
   const {
-    data: { _user },
+    data: { user },
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !_user) {
-    console.log('Auth warning:', authError?.message || 'No _user');
+  if (authError || !user) {
+    console.log('Auth warning:', authError?.message || 'No user');
     return 'demo-user-123'; // Demo user for development
   }
 

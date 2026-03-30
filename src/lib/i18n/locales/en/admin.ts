@@ -182,7 +182,7 @@ const admin = {
   smMitigation: "Mitigation",
   smImplSequence: "Implementation Sequence",
   smMlpSubtitle: "The Product Users Love",
-  smMlpKpis: "KPIs: Daily active usage >80%, Document creation <2min, AI sessions >10/week/_user, Satisfaction >4/5",
+  smMlpKpis: "KPIs: Daily active usage >80%, Document creation <2min, AI sessions >10/week/user, Satisfaction >4/5",
   smVerificationTitle: "Verification Per Tier",
   smVerifyWs: "Login → dashboard renders → projects visible",
   smVerifyMvp: "All 12 pages work, CRUD on all tables, AI streams, realtime syncs",

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Pencil } from "lucide-react";
-import type { _Language } from "@/contexts/SettingsContext";
+import type { Language } from "@/contexts/SettingsContext";
 import type { FieldSlot, FieldActionType } from "./entityCard.types";
 import { EntityCardField } from "./EntityCardField";
 
@@ -19,7 +19,7 @@ interface Props {
   onFieldChange?: (metaKey: string, value: string) => void;
 }
 
-export function EntityCardBack({ fields, meta, language, _compact, onAction, onFieldChange }: Props) {
+export function EntityCardBack({ fields, meta, language, compact, onAction, onFieldChange }: Props) {
   const sorted = [...fields].sort((a, b) => a.priority - b.priority);
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Record<string, string>>({});
@@ -90,7 +90,7 @@ export function EntityCardBack({ fields, meta, language, _compact, onAction, onF
               slot={slot}
               value={meta[slot.metaKey]}
               language={language}
-              compact={_compact}
+              compact={compact}
               onAction={onAction}
             />
             {/* Pencil icon on hover for editable fields */}
@@ -121,7 +121,7 @@ function EditingField({
   onCancel,
 }: {
   slot: FieldSlot;
-  language: _Language;
+  language: Language;
   value: string;
   onChange: (val: string) => void;
   onSave: () => void;

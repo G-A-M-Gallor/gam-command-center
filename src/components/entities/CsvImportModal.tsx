@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useMemo } from 'react';
-import { Upload, FileSpreadsheet, ArrowRight, ArrowLeft, Check, _X, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, FileSpreadsheet, ArrowRight, ArrowLeft, Check, X, AlertCircle, Loader2 } from 'lucide-react';
 import { createNote } from '@/lib/supabase/entityQueries';
 import type { GlobalField } from '@/lib/entities/types';
 
@@ -85,10 +85,10 @@ function parseCsv(text: string): CsvData & { error?: string } {
   }
 
   const delimiter = detectDelimiter(lines[0]);
-  const _headers = parseCsvLine(lines[0], delimiter);
+  const headers = parseCsvLine(lines[0], delimiter);
   const rows = lines.slice(1).map(l => parseCsvLine(l, delimiter));
 
-  return { _headers, rows, delimiter, fileName: '' };
+  return { headers, rows, delimiter, fileName: '' };
 }
 
 // ─── i18n helper ────────────────────────────────────
@@ -201,7 +201,7 @@ function getT(language: string): Record<string, string> {
 // ─── Component ──────────────────────────────────────
 
 export function CsvImportModal({ open, onClose, entityType, fields, language, onImportComplete }: CsvImportModalProps) {
-  const _t = getT(language);
+  const t = getT(language);
   const isRtl = language === 'he';
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
 
@@ -217,9 +217,9 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Auto-map CSV headers to fields
-  const autoMap = useCallback((_headers: string[], availableFields: GlobalField[]): FieldMapping => {
+  const autoMap = useCallback((headers: string[], availableFields: GlobalField[]): FieldMapping => {
     const result: FieldMapping = {};
-    for (let i = 0; i < _headers.length; i++) {
+    for (let i = 0; i < headers.length; i++) {
       const h = headers[i].toLowerCase().trim();
       // Try matching meta_key
       const byKey = availableFields.find(f => f.meta_key.toLowerCase() === h);
@@ -255,22 +255,22 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
         const text = e.target?.result as string;
         const parsed = parseCsv(text);
         if (parsed.error === 'no_data') {
-          setError(_t.noData);
+          setError(t.noData);
           return;
         }
         const data: CsvData = {
-          headers: parsed._headers,
+          headers: parsed.headers,
           rows: parsed.rows,
           delimiter: parsed.delimiter,
           fileName: file.name,
         };
         setCsvData(data);
-        setMapping(autoMap(data._headers, fields));
+        setMapping(autoMap(data.headers, fields));
       } catch {
-        setError(_t.parseError);
+        setError(t.parseError);
       }
     };
-    reader.onerror = () => setError(_t.parseError);
+    reader.onerror = () => setError(t.parseError);
     reader.readAsText(file);
   }, [autoMap, fields, t]);
 
@@ -335,7 +335,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
       let title = '';
       const meta: Record<string, unknown> = {};
 
-      for (let i = 0; i < csvData._headers.length; i++) {
+      for (let i = 0; i < csvData.headers.length; i++) {
         const mk = mapping[i];
         if (!mk) continue;
         const value = row[i] ?? '';
@@ -443,7 +443,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                 {s < step ? <Check size={13} /> : s}
               </div>
               <span className={`text-xs ${s === step ? 'text-slate-200' : 'text-slate-500'}`}>
-                {s === 1 ? t.step1 : s === 2 ? t.step2 : _t.step3}
+                {s === 1 ? t.step1 : s === 2 ? t.step2 : t.step3}
               </span>
               {s < 3 && <div className={`w-8 h-px ${s < step ? 'bg-emerald-600/50' : 'bg-white/[0.08]'}`} />}
             </div>
@@ -482,7 +482,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                     <p className="text-sm font-medium text-emerald-300">{t.fileSelected}</p>
                     <p className="text-xs text-slate-400 mt-1">{csvData.fileName}</p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {csvData.rows.length} {t.rows} &middot; {csvData._headers.length} {_t.csvColumn.toLowerCase()}
+                      {csvData.rows.length} {t.rows} &middot; {csvData.headers.length} {t.csvColumn.toLowerCase()}
                     </p>
                   </>
                 ) : (
@@ -490,7 +490,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                     <Upload size={36} className={`mb-3 ${dragOver ? 'text-purple-400' : 'text-slate-500'}`} />
                     <p className="text-sm text-slate-300">{dragOver ? t.dropHere : t.uploadDesc}</p>
                     <button className="mt-3 rounded-lg bg-white/[0.06] px-4 py-1.5 text-xs text-slate-300 hover:bg-white/[0.1] transition-colors">
-                      {_t.browse}
+                      {t.browse}
                     </button>
                   </>
                 )}
@@ -509,7 +509,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
           {step === 2 && csvData && (
             <div className="space-y-3">
               <p className="text-xs text-slate-500 mb-3">
-                {mappedCount} / {csvData._headers.length} {_t.mapFields.toLowerCase()}
+                {mappedCount} / {csvData.headers.length} {t.mapFields.toLowerCase()}
               </p>
 
               <div className="space-y-2">
@@ -567,7 +567,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
 
                         {isAutoMapped && (
                           <span className="flex-shrink-0 rounded bg-purple-600/20 px-1.5 py-0.5 text-[10px] text-purple-300">
-                            {_t.autoMapped}
+                            {t.autoMapped}
                           </span>
                         )}
                       </div>
@@ -579,7 +579,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
               {!hasTitleMapping && (
                 <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-4 py-2.5 text-xs text-amber-300">
                   <AlertCircle size={14} />
-                  {_t.noTitleWarning}
+                  {t.noTitleWarning}
                 </div>
               )}
             </div>
@@ -605,7 +605,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                         </thead>
                         <tbody>
                           {previewRows.map((row, ri) => (
-                            <tr key={ri} className="border-_t border-white/[0.04]">
+                            <tr key={ri} className="border-t border-white/[0.04]">
                               {mappedHeaders.map(h => (
                                 <td key={h.index} className="px-3 py-2 text-slate-300 max-w-[200px] truncate">
                                   {row[h.index] || '—'}
@@ -620,7 +620,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
 
                   {csvData.rows.length > 5 && (
                     <p className="text-[11px] text-slate-500 text-center">
-                      +{csvData.rows.length - 5} {_t.rows}
+                      +{csvData.rows.length - 5} {t.rows}
                     </p>
                   )}
                 </>
@@ -631,7 +631,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                 <div className="space-y-3 py-4">
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 size={18} className="text-purple-400 animate-spin" />
-                    <span className="text-sm text-slate-300">{_t.importing}</span>
+                    <span className="text-sm text-slate-300">{t.importing}</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden">
                     <div
@@ -661,7 +661,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                   </p>
                   <p className="text-xs text-slate-500">
                     {progress.done - progress.failed} {t.imported}
-                    {progress.failed > 0 && ` / ${progress.failed} ${_t.failed}`}
+                    {progress.failed > 0 && ` / ${progress.failed} ${t.failed}`}
                   </p>
                 </div>
               )}
@@ -719,7 +719,7 @@ export function CsvImportModal({ open, onClose, entityType, fields, language, on
                 className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-500 transition-colors"
               >
                 <Upload size={14} />
-                {t.importButton} {csvData.rows.length} {_t.rows}
+                {t.importButton} {csvData.rows.length} {t.rows}
               </button>
             )}
           </div>

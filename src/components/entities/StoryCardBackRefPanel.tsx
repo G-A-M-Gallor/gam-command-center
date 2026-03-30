@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Map, ChevronDown, ChevronRight, _ExternalLink } from 'lucide-react';
+import { Map, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { fetchStoryCardsForEntity } from '@/lib/supabase/storyCardQueries';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 
 export function StoryCardBackRefPanel({ noteId }: Props) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const te = t.entities;
 
   const [expanded, setExpanded] = useState(true);
@@ -49,7 +49,7 @@ export function StoryCardBackRefPanel({ noteId }: Props) {
       </button>
 
       {expanded && (
-        <div className="border-_t border-white/[0.06] px-3 py-2 space-y-1.5">
+        <div className="border-t border-white/[0.06] px-3 py-2 space-y-1.5">
           {loading ? (
             <div className="flex flex-col gap-1.5">
               {[80, 65].map((w, i) => (
@@ -68,7 +68,7 @@ export function StoryCardBackRefPanel({ noteId }: Props) {
                   <div className="truncate">{c.cardText}</div>
                   <div className="truncate text-[10px] text-slate-500">{c.projectName}</div>
                 </div>
-                <_ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />
+                <ExternalLink className="h-3 w-3 shrink-0 text-slate-600" />
               </a>
             ))
           )}

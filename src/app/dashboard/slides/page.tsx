@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { SlideCanvas } from "@/components/slides/SlideCanvas";
 import { SlideToolbar } from "@/components/slides/SlideToolbar";
@@ -10,9 +10,9 @@ import { SlidePresenter } from "@/components/slides/SlidePresenter";
 
 export default function SlidesPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
-  const slidesT = (_t as any).slides as Record<string, string> | undefined;
+  const slidesT = (t as any).slides as Record<string, string> | undefined;
   const st = slidesT || {};
 
   return (

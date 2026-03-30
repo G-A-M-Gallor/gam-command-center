@@ -30,7 +30,7 @@ export async function GET() {
     const buffer = Buffer.concat(chunks);
 
     return new NextResponse(buffer, {
-      _headers: {
+      headers: {
         "Content-Type": "application/zip",
         "Content-Disposition": "attachment; filename=vclip-extension.zip",
         "Content-Length": String(buffer.length),

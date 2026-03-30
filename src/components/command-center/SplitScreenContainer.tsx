@@ -3,8 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSplitScreen } from "@/lib/hooks/useSplitScreen";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
-import { _X, GripVertical } from "lucide-react";
+import { getTranslations } from "@/lib/i18n";
+import { X, GripVertical } from "lucide-react";
 
 const RATIO_KEY = "cc-split-ratio";
 const MIN_RATIO = 20;
@@ -24,7 +24,7 @@ interface SplitScreenContainerProps {
 export function SplitScreenContainer({ children }: SplitScreenContainerProps) {
   const split = useSplitScreen();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const trayT = t.tray as Record<string, string>;
 
   const [ratio, setRatio] = useState(50);

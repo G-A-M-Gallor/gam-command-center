@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { commSendSchema } from "@/lib/api/schemas";
 import { sendTextMessage, sendTemplateMessage } from "@/lib/wati/client";
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 
 function getServiceClient() {
   return createClient(
@@ -15,8 +15,8 @@ function getServiceClient() {
  * POST /api/comms/send
  * Send a WhatsApp message via WATI and log to comm_messages.
  */
-export async function POST(_request: NextRequest) {
-  const { _user, error: authError } = await requireAuth(_request);
+export async function POST(request: NextRequest) {
+  const { user, error: authError } = await requireAuth(request);
   if (authError) return NextResponse.json({ error: authError }, { status: 401 });
 
   try {
@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest) {
     const parsed = commSendSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid _request", details: parsed.error.flatten() },
+        { error: "Invalid request", details: parsed.error.flatten() },
         { status: 400 },
       );
     }

@@ -103,7 +103,7 @@ function useGraphData(blocks: LayoutBlock[], mainEntityId?: string) {
 }
 
 export function VNoteGraphView({ blocks, mainEntityId, selectedBlockId, onSelectBlock }: Props) {
-  const _router = useRouter();
+  const router = useRouter();
   const { nodes, edges } = useGraphData(blocks, mainEntityId);
 
   // Highlight selected node

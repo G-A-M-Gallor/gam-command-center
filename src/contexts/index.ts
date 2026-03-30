@@ -13,7 +13,7 @@ export { DashboardModeProvider, useDashboardMode } from './DashboardModeContext'
 // Settings context exports
 export { SettingsProvider, useSettings } from './SettingsContext';
 export type {
-  _Language,
+  Language,
   SidebarPosition,
   SidebarVisibility,
   AccentColor,

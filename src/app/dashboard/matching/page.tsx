@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search, ChevronDown, AlertCircle, Users, Briefcase, MapPin,
-  Wrench, RefreshCw, SlidersHorizontal, _X, Loader2,
+  Wrench, RefreshCw, SlidersHorizontal, X, Loader2,
   UserPlus, CheckCircle2, Phone, Calendar, XCircle,
-  _Star, Mail, _ExternalLink, ListChecks, Minus,
+  Star, Mail, ExternalLink, ListChecks, Minus,
   ThumbsDown, UserX, Ban, Eye, ChevronUp,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -177,9 +177,7 @@ interface SavedState {
 }
 
 function savePageState(s: SavedState) {
-  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {
-    // Ignore errors
-  }
+  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
 }
 
 function loadPageState(): SavedState | null {
@@ -214,8 +212,8 @@ function ScoreBadge({ score, size = 56 }: { score: number; size?: number }) {
   );
 }
 
-function statusLabel(status: string, _t: typeof L.he) {
-  return (_t as Record<string, string>)[`status_${status}`] || status;
+function statusLabel(status: string, t: typeof L.he) {
+  return (t as Record<string, string>)[`status_${status}`] || status;
 }
 
 function statusDef(status: string) {
@@ -225,7 +223,7 @@ function statusDef(status: string) {
 // ─── Candidate Card ──────────────────────────────────────
 function CandidateCard({
   score, meta, title, onView, onToggleShortlist, onRemoveFromList, onExclude,
-  shortlistStatus, _t, _compact,
+  shortlistStatus, t, compact,
 }: {
   score: MatchScoreRow;
   meta: Record<string, unknown> | null;
@@ -294,10 +292,10 @@ function CandidateCard({
       {/* Meta + action buttons */}
       <div className="flex items-center gap-2 border-t border-slate-700/30 px-4 py-2 text-[11px] text-slate-400">
         {experience !== undefined && (
-          <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{experience} {_t.years}</span>
+          <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{experience} {t.years}</span>
         )}
         {hourlyRate !== undefined && (
-          <span>₪{hourlyRate}/{_t.hourlyRate.includes("שעתי") ? "שעה" : "hr"}</span>
+          <span>₪{hourlyRate}/{t.hourlyRate.includes("שעתי") ? "שעה" : "hr"}</span>
         )}
         {availFrom && !compact && (
           <span className="text-[10px] text-slate-500">{availFrom.slice(5)} → {availTo?.slice(5) || "..."}</span>
@@ -314,7 +312,7 @@ function CandidateCard({
             </button>
           ) : (
             <span className={`flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-medium ${sd!.color}/10 text-slate-300`}>
-              {statusLabel(shortlistStatus!, _t)}
+              {statusLabel(shortlistStatus!, t)}
             </span>
           )}
           {/* Remove from list */}
@@ -377,7 +375,7 @@ function TierHeader({
 }
 
 // ─── Position Summary (expandable) ───────────────────────
-function PositionSummary({ entity, _t, isRtl }: { entity: NoteRecord; _t: typeof L.he; isRtl: boolean }) {
+function PositionSummary({ entity, t, isRtl }: { entity: NoteRecord; t: typeof L.he; isRtl: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const meta = entity.meta || {};
   const skills = (meta.required_skills as string[]) || (meta.skills as string[]) || [];
@@ -441,7 +439,7 @@ function PositionSummary({ entity, _t, isRtl }: { entity: NoteRecord; _t: typeof
 
       {/* Expanded details */}
       {expanded && (
-        <div className="mt-3 space-y-2 border-_t border-slate-700/30 pt-3">
+        <div className="mt-3 space-y-2 border-t border-slate-700/30 pt-3">
           {description && (
             <div>
               <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{isRtl ? "תיאור" : "Description"}</span>
@@ -450,7 +448,7 @@ function PositionSummary({ entity, _t, isRtl }: { entity: NoteRecord; _t: typeof
           )}
           {notes && (
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{_t.notes}</span>
+              <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{t.notes}</span>
               <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">{notes}</p>
             </div>
           )}
@@ -474,7 +472,7 @@ function PositionSummary({ entity, _t, isRtl }: { entity: NoteRecord; _t: typeof
 
 // ─── Slide-Over Panel ────────────────────────────────────
 function CandidateSlideOver({
-  score, meta, title, onClose, onNavigate, shortlistStatus, onStatusChange, onRemove, _t, isRtl,
+  score, meta, title, onClose, onNavigate, shortlistStatus, onStatusChange, onRemove, t, isRtl,
 }: {
   score: MatchScoreRow;
   meta: Record<string, unknown> | null;
@@ -512,11 +510,11 @@ function CandidateSlideOver({
         <div className="shrink-0 flex items-center justify-between border-b border-slate-700/40 px-5 py-3.5">
           <h2 className="text-sm font-semibold text-slate-100">{t.candidateProfile}</h2>
           <div className="flex items-center gap-1">
-            <button type="button" onClick={onNavigate} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer" title={_t.openEntity}>
-              <_ExternalLink className="h-4 w-4" />
+            <button type="button" onClick={onNavigate} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer" title={t.openEntity}>
+              <ExternalLink className="h-4 w-4" />
             </button>
             <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors cursor-pointer">
-              <_X className="h-4 w-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -579,7 +577,7 @@ function CandidateSlideOver({
           <div className="px-5 py-4 border-b border-slate-700/40 space-y-4">
             {skills.length > 0 && (
               <div>
-                <h4 className="text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-2">{_t.skills}</h4>
+                <h4 className="text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-2">{t.skills}</h4>
                 <div className="flex flex-wrap gap-1.5">
                   {skills.map((s) => <span key={s} className="rounded-md bg-slate-700/40 px-2.5 py-1 text-xs text-slate-300">{s}</span>)}
                 </div>
@@ -601,25 +599,25 @@ function CandidateSlideOver({
               {experience !== undefined && (
                 <div className="rounded-lg bg-slate-800/40 p-3">
                   <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{t.experience}</span>
-                  <span className="text-sm font-medium text-slate-200">{experience} {_t.years}</span>
+                  <span className="text-sm font-medium text-slate-200">{experience} {t.years}</span>
                 </div>
               )}
               {hourlyRate !== undefined && (
                 <div className="rounded-lg bg-slate-800/40 p-3">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{_t.hourlyRate}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{t.hourlyRate}</span>
                   <span className="text-sm font-medium text-slate-200">₪{hourlyRate}</span>
                 </div>
               )}
               {availFrom && (
                 <div className="rounded-lg bg-slate-800/40 p-3 col-span-2">
-                  <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{_t.availability}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-1">{t.availability}</span>
                   <span className="text-sm font-medium text-slate-200">{availFrom} → {availTo || "..."}</span>
                 </div>
               )}
             </div>
             {(description || notes) && (
               <div>
-                <h4 className="text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-2">{_t.notes}</h4>
+                <h4 className="text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-2">{t.notes}</h4>
                 <p className="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">{description || notes}</p>
               </div>
             )}
@@ -640,7 +638,7 @@ function CandidateSlideOver({
                       className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all cursor-pointer ${
                         isActive ? `${s.color} text-white shadow-lg` : "bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                       }`}>
-                      <Icon className="h-3.5 w-3.5" />{statusLabel(key, _t)}
+                      <Icon className="h-3.5 w-3.5" />{statusLabel(key, t)}
                     </button>
                   );
                 })}
@@ -659,7 +657,7 @@ function CandidateSlideOver({
                       className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all cursor-pointer ${
                         isActive ? `${s.color} text-white shadow-lg` : "bg-slate-800/40 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                       }`}>
-                      <Icon className="h-3.5 w-3.5" />{statusLabel(key, _t)}
+                      <Icon className="h-3.5 w-3.5" />{statusLabel(key, t)}
                     </button>
                   );
                 })}
@@ -670,7 +668,7 @@ function CandidateSlideOver({
               {shortlistStatus && (
                 <button type="button" onClick={onRemove}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs text-red-400 bg-red-500/5 hover:bg-red-500/10 transition-colors cursor-pointer">
-                  <Minus className="h-3.5 w-3.5" />{_t.removeFromList}
+                  <Minus className="h-3.5 w-3.5" />{t.removeFromList}
                 </button>
               )}
               <button type="button" onClick={() => onStatusChange("excluded")}
@@ -692,8 +690,8 @@ function CandidateSlideOver({
 // ═══════════════════════════════════════════════════════════
 export default function MatchingPage() {
   const { language } = useSettings();
-  const _router = useRouter();
-  const _t = language === "he" ? L.he : L.en;
+  const router = useRouter();
+  const t = language === "he" ? L.he : L.en;
   const isRtl = language === "he";
 
   const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
@@ -706,7 +704,7 @@ export default function MatchingPage() {
   const [scores, setScores] = useState<MatchScoreRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingEntities, setLoadingEntities] = useState(false);
-  const [_profile, setProfile] = useState<MatchProfile | null>(null);
+  const [profile, setProfile] = useState<MatchProfile | null>(null);
   const [matchError, setMatchError] = useState<string | null>(null);
   const [minScore, setMinScore] = useState(0);
   const [candidateSearch, setCandidateSearch] = useState("");
@@ -755,14 +753,12 @@ export default function MatchingPage() {
       if (!token) { setLoading(false); return; }
       const res = await fetch("/api/matching/score", {
         method: "POST",
-        _headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ source_id: entity.id, target_type: tType || undefined, limit: 50, force_refresh: false }),
       });
       const data = await res.json();
       if (res.ok && data.scores) { setScores(data.scores); await loadTargetDetails(data.scores); await loadShortlist(entity.id); }
-    } catch {
-    // Ignore errors
-  }
+    } catch {}
     setLoading(false);
   }, [loadTargetDetails, loadShortlist]);
 
@@ -831,7 +827,7 @@ export default function MatchingPage() {
       if (!token) { setLoading(false); return; }
       const res = await fetch("/api/matching/score", {
         method: "POST",
-        _headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ source_id: selectedEntity.id, target_type: targetType || undefined, limit: 50, force_refresh: forceRefresh }),
       });
       const data = await res.json();
@@ -916,7 +912,7 @@ export default function MatchingPage() {
   const slideOverScore = slideOverTargetId ? scores.find((s) => s.target_id === slideOverTargetId) : null;
 
   // ── Card renderer helper ──
-  const renderCard = (score: MatchScoreRow, _compact = false) => (
+  const renderCard = (score: MatchScoreRow, compact = false) => (
     <CandidateCard
       key={score.id || `${score.source_id}-${score.target_id}`}
       score={score}
@@ -927,8 +923,8 @@ export default function MatchingPage() {
       onRemoveFromList={() => removeFromShortlist(score.target_id)}
       onExclude={() => updateStatus(score.target_id, "excluded")}
       shortlistStatus={shortlist.get(score.target_id)?.status ?? null}
-      t={_t}
-      compact={_compact}
+      t={t}
+      compact={compact}
     />
   );
 
@@ -987,10 +983,10 @@ export default function MatchingPage() {
           ) : !selectedType ? (
             <div className="flex flex-col items-center justify-center py-12 text-center px-4">
               <Briefcase className="h-8 w-8 text-slate-700 mb-2" />
-              <span className="text-xs text-slate-500">{_t.selectPosition}</span>
+              <span className="text-xs text-slate-500">{t.selectPosition}</span>
             </div>
           ) : filteredEntities.length === 0 ? (
-            <div className="flex items-center justify-center py-8"><span className="text-xs text-slate-500">{_t.noResults}</span></div>
+            <div className="flex items-center justify-center py-8"><span className="text-xs text-slate-500">{t.noResults}</span></div>
           ) : (
             <div className="p-2 space-y-0.5">
               {filteredEntities.map((entity) => {
@@ -1018,7 +1014,7 @@ export default function MatchingPage() {
         </div>
 
         {selectedEntity && (
-          <div className="shrink-0 border-_t border-slate-700/40 p-3">
+          <div className="shrink-0 border-t border-slate-700/40 p-3">
             <button type="button" onClick={() => findMatches(false)} disabled={loading}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--cc-accent-500)] px-4 py-2.5 text-sm font-medium text-white transition-all hover:bg-[var(--cc-accent-400)] disabled:opacity-50 cursor-pointer">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
@@ -1051,7 +1047,7 @@ export default function MatchingPage() {
                   </button>
                 )}
               </div>
-              <PositionSummary entity={selectedEntity} t={_t} isRtl={isRtl} />
+              <PositionSummary entity={selectedEntity} t={t} isRtl={isRtl} />
             </div>
 
             {matchError && (
@@ -1103,14 +1099,14 @@ export default function MatchingPage() {
                 <div className="flex flex-col items-center justify-center py-16 text-center">
                   <Search className="h-10 w-10 text-slate-700 mb-3" />
                   <h3 className="text-sm font-medium text-slate-400 mb-1">{!matchError ? t.findMatches : t.noResults}</h3>
-                  <p className="text-xs text-slate-600 max-w-sm">{_t.noResultsDesc}</p>
+                  <p className="text-xs text-slate-600 max-w-sm">{t.noResultsDesc}</p>
                 </div>
               ) : (
                 <>
                   {/* ── TIER 1: Advancing ── */}
                   {tier1.length > 0 && (
                     <div className="mb-4">
-                      <TierHeader icon={CheckCircle2} title={t.tierAdvancing} desc={_t.tierAdvancingDesc}
+                      <TierHeader icon={CheckCircle2} title={t.tierAdvancing} desc={t.tierAdvancingDesc}
                         count={tier1.length} color="bg-emerald-600" collapsed={!!collapsedTiers.t1} onToggle={() => toggleTier("t1")} />
                       {!collapsedTiers.t1 && (
                         <>
@@ -1126,7 +1122,7 @@ export default function MatchingPage() {
                   {/* ── TIER 2: Pending / Potential ── */}
                   {tier2.length > 0 && (
                     <div className="mb-4">
-                      <TierHeader icon={_Star} title={t.tierPending} desc={_t.tierPendingDesc}
+                      <TierHeader icon={Star} title={t.tierPending} desc={t.tierPendingDesc}
                         count={tier2.length} color="bg-slate-600" collapsed={!!collapsedTiers.t2} onToggle={() => toggleTier("t2")} />
                       {!collapsedTiers.t2 && (
                         <>
@@ -1142,7 +1138,7 @@ export default function MatchingPage() {
                   {/* ── UNREVIEWED: Not in any list ── */}
                   {unreviewed.length > 0 && (
                     <div className="mb-4">
-                      <TierHeader icon={Users} title={t.tierUnreviewed} desc={_t.tierUnreviewedDesc}
+                      <TierHeader icon={Users} title={t.tierUnreviewed} desc={t.tierUnreviewedDesc}
                         count={unreviewed.length} color="bg-slate-700" collapsed={!!collapsedTiers.unrev} onToggle={() => toggleTier("unrev")} />
                       {!collapsedTiers.unrev && (
                         <>
@@ -1158,7 +1154,7 @@ export default function MatchingPage() {
                   {/* ── TIER 3: Not advancing ── */}
                   {tier3.length > 0 && (
                     <div className="mb-4">
-                      <TierHeader icon={XCircle} title={t.tierRejected} desc={_t.tierRejectedDesc}
+                      <TierHeader icon={XCircle} title={t.tierRejected} desc={t.tierRejectedDesc}
                         count={tier3.length} color="bg-red-600/80" collapsed={!!collapsedTiers.t3} onToggle={() => toggleTier("t3")} />
                       {!collapsedTiers.t3 && (
                         <>
@@ -1174,7 +1170,7 @@ export default function MatchingPage() {
                   {/* ── EXCLUDED: Hidden by default ── */}
                   {excluded.length > 0 && (
                     <div className="mb-4">
-                      <TierHeader icon={Ban} title={_t.status_excluded} desc={`${excluded.length}`}
+                      <TierHeader icon={Ban} title={t.status_excluded} desc={`${excluded.length}`}
                         count={excluded.length} color="bg-slate-800" collapsed={collapsedTiers.excl !== false} onToggle={() => toggleTier("excl")} />
                       {collapsedTiers.excl === false && (
                         <>
@@ -1196,7 +1192,7 @@ export default function MatchingPage() {
               <Users className="h-8 w-8 text-slate-600" />
             </div>
             <h2 className="text-lg font-medium text-slate-300 mb-1.5">{t.noPositionSelected}</h2>
-            <p className="text-sm text-slate-600 max-w-md leading-relaxed">{_t.noPositionDesc}</p>
+            <p className="text-sm text-slate-600 max-w-md leading-relaxed">{t.noPositionDesc}</p>
           </div>
         )}
       </div>
@@ -1212,7 +1208,7 @@ export default function MatchingPage() {
           shortlistStatus={shortlist.get(slideOverTargetId)?.status ?? null}
           onStatusChange={(status) => updateStatus(slideOverTargetId, status)}
           onRemove={() => { removeFromShortlist(slideOverTargetId); setSlideOverTargetId(null); }}
-          t={_t}
+          t={t}
           isRtl={isRtl}
         />
       )}

@@ -5,7 +5,7 @@
 // ===================================================
 
 import { useState, useEffect } from "react";
-import { BookOpen, Wrench, Users, _ExternalLink, Mail, Globe } from "lucide-react";
+import { BookOpen, Wrench, Users, ExternalLink, Mail, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTeam } from "@/lib/pm-queries";
 
@@ -189,7 +189,7 @@ function ToolsStackSection() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-white">{tool.name}</h4>
-                  <_ExternalLink className="w-4 h-4 text-slate-400" />
+                  <ExternalLink className="w-4 h-4 text-slate-400" />
                 </div>
                 <p className="text-sm text-purple-400 mb-2">{tool.role}</p>
                 <p className="text-sm text-slate-400">{tool.usage}</p>

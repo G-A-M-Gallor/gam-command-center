@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { _Clock, Sparkles } from "lucide-react";
+import { Clock, Sparkles } from "lucide-react";
 
 const labels = {
   he: { title: "בקרוב", subtitle: "העמוד הזה בפיתוח ויהיה זמין בקרוב", back: "חזרה לדשבורד" },

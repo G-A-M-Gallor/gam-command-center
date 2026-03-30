@@ -6,8 +6,8 @@ import { rssFeedCreateSchema } from '@/lib/api/schemas';
 /**
  * GET /api/rss/feeds — list all feeds
  */
-export async function GET(_request: Request) {
-  const { error: authError } = await requireAuth(_request);
+export async function GET(request: Request) {
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -29,8 +29,8 @@ export async function GET(_request: Request) {
 /**
  * POST /api/rss/feeds — add a custom feed
  */
-export async function POST(_request: Request) {
-  const { _user, error: authError } = await requireAuth(_request);
+export async function POST(request: Request) {
+  const { user, error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -45,7 +45,7 @@ export async function POST(_request: Request) {
   const parsed = rssFeedCreateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message || 'Invalid _request' },
+      { error: parsed.error.issues[0]?.message || 'Invalid request' },
       { status: 400 },
     );
   }
@@ -58,7 +58,7 @@ export async function POST(_request: Request) {
       title: parsed.data.title,
       keywords: parsed.data.keywords,
       is_default: false,
-      created_by: _user!.id,
+      created_by: user!.id,
     })
     .select()
     .single();

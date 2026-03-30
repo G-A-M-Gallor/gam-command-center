@@ -25,7 +25,7 @@ export function useCamera() {
       });
       streamRef.current = stream;
       // Stop tracks immediately — we just needed permission
-      stream.getTracks().forEach((_t) => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
       setPermission("granted");
       return true;
@@ -57,7 +57,7 @@ export function useCamera() {
       const ctx = canvas.getContext("2d");
       ctx?.drawImage(video, 0, 0);
 
-      stream.getTracks().forEach((_t) => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
 
       const url = canvas.toDataURL("image/jpeg", 0.85);

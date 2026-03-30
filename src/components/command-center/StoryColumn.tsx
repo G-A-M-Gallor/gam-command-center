@@ -6,7 +6,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { _Plus, _Layers, Trash2 } from 'lucide-react';
+import { Plus, Layers, Trash2 } from 'lucide-react';
 import { EpicCard, FeatureCard, StoryCard } from './StoryCard';
 import type { StoryCard as StoryCardType, EnrichedEntityLink } from '@/lib/supabase/storyCardQueries';
 
@@ -76,7 +76,7 @@ function FeatureGroupSection({
   entityLinks,
   onLinkEntity,
   onUnlinkEntity,
-  _t,
+  t,
 }: {
   featureGroup: FeatureGroup;
   colIndex: number;
@@ -87,7 +87,7 @@ function FeatureGroupSection({
   entityLinks?: StoryColumnProps['entityLinks'];
   onLinkEntity?: StoryColumnProps['onLinkEntity'];
   onUnlinkEntity?: StoryColumnProps['onUnlinkEntity'];
-  t: StoryColumnProps['_t'];
+  t: StoryColumnProps['t'];
 }) {
   const [expanded, setExpanded] = useState(true);
   const { feature, stories } = featureGroup;
@@ -102,7 +102,7 @@ function FeatureGroupSection({
           onDelete={onDeleteCard}
           expanded={expanded}
           onToggle={() => setExpanded((v) => !v)}
-          t={_t}
+          t={t}
         />
       )}
 
@@ -118,7 +118,7 @@ function FeatureGroupSection({
             linkedEntities={entityLinks?.[story.id]}
             onLinkEntity={onLinkEntity}
             onUnlinkEntity={onUnlinkEntity}
-            _t={_t}
+            t={t}
           />
         ))}
 
@@ -151,7 +151,7 @@ export function StoryColumn({
   entityLinks,
   onLinkEntity,
   onUnlinkEntity,
-  _t,
+  t,
 }: StoryColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: `column-${colIndex}` });
 
@@ -174,7 +174,7 @@ export function StoryColumn({
       {/* Epic header */}
       <div className="group/col relative px-2 pt-2">
         {epic ? (
-          <EpicCard card={epic} onUpdate={onUpdateCard} onDelete={onDeleteCard} _t={_t} />
+          <EpicCard card={epic} onUpdate={onUpdateCard} onDelete={onDeleteCard} t={t} />
         ) : (
           <div className="rounded-lg border border-dashed border-slate-700/50 px-3 py-2 text-center text-xs text-slate-500">
             —
@@ -184,7 +184,7 @@ export function StoryColumn({
         <button
           type="button"
           onClick={() => {
-            if (window.confirm(_t.deleteColumnConfirm)) {
+            if (window.confirm(t.deleteColumnConfirm)) {
               onDeleteColumn(colIndex);
             }
           }}
@@ -213,7 +213,7 @@ export function StoryColumn({
               entityLinks={entityLinks}
               onLinkEntity={onLinkEntity}
               onUnlinkEntity={onUnlinkEntity}
-              _t={_t}
+              t={t}
             />
           ))}
         </SortableContext>
@@ -221,7 +221,7 @@ export function StoryColumn({
         {/* Card count */}
         {totalStories > 0 && (
           <div className="text-center text-[10px] text-slate-600">
-            {totalStories} {_t.cardCount}
+            {totalStories} {t.cardCount}
           </div>
         )}
       </div>

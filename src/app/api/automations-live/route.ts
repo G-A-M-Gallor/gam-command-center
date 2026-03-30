@@ -3,16 +3,16 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/api/auth'
 
 // GET /api/automations-live - List all automations with stats
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { _user, error: authError } = await requireAuth(_request)
-    if (authError || !_user) {
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const supabase = createServiceClient()
 
-    const { searchParams } = new URL(_request.url)
+    const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const category = searchParams.get('category')
     const folder = searchParams.get('folder')
@@ -40,7 +40,7 @@ export async function GET(_request: NextRequest) {
         running_now,
         runs_today
       `)
-      .eq('automations.created_by', _user.id)
+      .eq('automations.created_by', user.id)
 
     // Apply filters
     if (status) {
@@ -73,10 +73,10 @@ export async function GET(_request: NextRequest) {
 }
 
 // POST /api/automations-live - Create new automation
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { _user, error: authError } = await requireAuth(_request)
-    if (authError || !_user) {
+    const { user, error: authError } = await requireAuth(request)
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -111,7 +111,7 @@ export async function POST(_request: NextRequest) {
         trigger_config,
         tags,
         folder_id,
-        created_by: _user.id,
+        created_by: user.id,
         status: 'draft'
       })
       .select()

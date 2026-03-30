@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import type { GridCell as GridCellType, CellAddress } from "@/lib/grid/types";
 import { getCellDisplayValue } from "@/lib/grid/gridHelpers";
-import { _ExternalLink, Image as ImageIcon } from "lucide-react";
+import { ExternalLink, Image as ImageIcon } from "lucide-react";
 
 interface GridCellProps {
   addr: CellAddress;

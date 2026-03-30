@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { _X, RotateCcw } from "lucide-react";
+import { X, RotateCcw } from "lucide-react";
 import { useShellPrefs, SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 interface ShellPrefsPanelProps {
   onClose: () => void;
@@ -26,7 +26,7 @@ const DEFAULTS = {
 export function ShellPrefsPanel({ onClose, anchorRef }: ShellPrefsPanelProps) {
   const [prefs, setPrefs, updatePref] = useShellPrefs();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const sp = t.shellPrefs as Record<string, string>;
   const panelRef = useRef<HTMLDivElement>(null);
 

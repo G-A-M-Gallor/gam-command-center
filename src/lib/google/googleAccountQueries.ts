@@ -1,4 +1,4 @@
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { encrypt, decrypt } from "./crypto";
 
 interface EncryptedBlob {

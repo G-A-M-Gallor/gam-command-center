@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Play, Pause, RotateCcw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const STATE_KEY = "cc-timer-state";
@@ -120,7 +120,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function TimerPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   const [state, setState] = useState<TimerState>(DEFAULT_STATE);
   const settings = loadSettings();
@@ -279,7 +279,7 @@ export function TimerPanel() {
             className="flex h-9 items-center gap-1.5 rounded-lg bg-slate-700 px-4 text-sm text-slate-200 transition-colors hover:bg-slate-600"
           >
             <Pause className="h-3.5 w-3.5" />
-            {_t.widgets.timerPause}
+            {t.widgets.timerPause}
           </button>
         ) : (
           <button
@@ -312,7 +312,7 @@ export function TimerPanel() {
 
 export function TimerBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [, setTick] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 

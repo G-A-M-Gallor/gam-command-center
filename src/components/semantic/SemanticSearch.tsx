@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Loader2, BookOpen, _Star } from 'lucide-react';
+import { Search, Loader2, BookOpen, Star } from 'lucide-react';
 
 interface SearchResult {
   id: string;
@@ -40,7 +40,7 @@ export default function SemanticSearch() {
     try {
       const response = await fetch('/api/semantic/search', {
         method: 'POST',
-        _headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: query.trim(),
           max_results: 8,
@@ -143,7 +143,7 @@ export default function SemanticSearch() {
 
               {/* Similarity Score */}
               <div className="flex items-center gap-2">
-                <_Star className={`w-4 h-4 ${getSimilarityColor(result.similarity)}`} />
+                <Star className={`w-4 h-4 ${getSimilarityColor(result.similarity)}`} />
                 <span className={`text-sm font-medium ${getSimilarityColor(result.similarity)}`}>
                   {getSimilarityLabel(result.similarity)} ({(result.similarity * 100).toFixed(0)}%)
                 </span>

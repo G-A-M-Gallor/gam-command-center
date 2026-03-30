@@ -9,18 +9,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
-  _Clock,
+  Clock,
   User,
   Bot,
   Zap,
   FileSignature,
   Database,
-  _X,
+  X,
   Loader2,
 } from "lucide-react";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 
 interface AuditEntry {
@@ -72,7 +72,7 @@ const ACTOR_TYPE_OPTIONS = [
 
 export default function AuditPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const al = t.auditLog;
   const isRtl = language === "he";
 
@@ -193,7 +193,7 @@ export default function AuditPage() {
               onClick={clearFilters}
               className="flex items-center gap-1 rounded-lg border border-slate-700 px-2 py-1.5 text-xs text-slate-400 hover:border-slate-600 hover:text-slate-300"
             >
-              <_X className="h-3 w-3" />
+              <X className="h-3 w-3" />
               {al.clearFilters}
             </button>
           )}
@@ -376,7 +376,7 @@ function TableRow({
       >
         <td className="px-3 py-2.5">
           <div className="flex items-center gap-1.5 text-slate-400">
-            <_Clock className="h-3 w-3 shrink-0 text-slate-600" />
+            <Clock className="h-3 w-3 shrink-0 text-slate-600" />
             <span className="text-xs">
               {formatTimestamp(entry.changed_at, language)}
             </span>

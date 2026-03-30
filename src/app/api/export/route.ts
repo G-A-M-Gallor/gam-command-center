@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { exportSchema } from "@/lib/api/schemas";
 
 const EXPORT_LIMIT = 10_000;
@@ -79,8 +79,8 @@ function translateStatus(val: unknown): string {
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
 
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -158,7 +158,7 @@ export async function GET(req: NextRequest) {
 
   return new NextResponse(csv, {
     status: 200,
-    _headers: {
+    headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": `attachment; filename="${filename}"`,
     },

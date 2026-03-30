@@ -1,4 +1,4 @@
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { workManagerExecuteSchema } from "@/lib/api/schemas";
@@ -74,7 +74,7 @@ async function handleUpdateStatus(
     .update({ status: newStatus, updated_at: new Date().toISOString() })
     .eq("id", project.id);
 
-  if (updateError) throw new Error(`Failed to _update status: ${updateError.message}`);
+  if (updateError) throw new Error(`Failed to update status: ${updateError.message}`);
 
   return {
     project_id: project.id,
@@ -100,7 +100,7 @@ async function handleAddNote(
       mode: "note",
       messages: JSON.stringify([
         {
-          role: "_user",
+          role: "user",
           content: noteContent,
           timestamp: Date.now(),
           meta: { title, added_by: userId },
@@ -184,13 +184,13 @@ async function handleCreateEntity(
 
 // ─── Route Handler ──────────────────────────────────────────
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   // Rate limit
-  const rl = checkRateLimit(_request, RATE_LIMITS.workManager);
+  const rl = checkRateLimit(request, RATE_LIMITS.workManager);
   if (rl.limited) return rl.response;
 
   // Auth
-  const authResult = await requireAuth(_request);
+  const authResult = await requireAuth(request);
   if (authResult.error !== null) {
     return NextResponse.json(
       { error: authResult.error },
@@ -215,7 +215,7 @@ export async function POST(_request: Request) {
   const parsed = workManagerExecuteSchema.safeParse(rawBody);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid _request", details: parsed.error.flatten() },
+      { error: "Invalid request", details: parsed.error.flatten() },
       { status: 400 }
     );
   }

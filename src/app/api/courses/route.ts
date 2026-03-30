@@ -93,7 +93,7 @@ export async function GET() {
 /**
  * POST /api/courses — Create new course
  */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const userId = await getUserId();
 

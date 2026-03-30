@@ -2,7 +2,7 @@
  * Rate limiting for API routes.
  *
  * Uses in-memory sliding window per IP. On Vercel serverless, each instance
- * has its own map — this provides per-instance protection (enough for single-_user
+ * has its own map — this provides per-instance protection (enough for single-user
  * internal app). For multi-instance protection, Vercel Firewall dashboard rules
  * are the additional layer.
  */
@@ -37,8 +37,8 @@ export const RATE_LIMITS = {
   webhook: { name: "webhook", limit: 100, windowSeconds: 60 } as RateLimitConfig,
 } as const;
 
-function getClientIp(_request: Request): string {
-  const _headers = request.headers;
+function getClientIp(request: Request): string {
+  const headers = request.headers;
   // Vercel sets x-forwarded-for; take the first (client) IP
   const forwarded = headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
@@ -52,10 +52,10 @@ function getClientIp(_request: Request): string {
  * Returns { limited: false } if OK, or a 429 Response if rate limited.
  */
 export function checkRateLimit(
-  _request: Request,
+  request: Request,
   config: RateLimitConfig
 ): { limited: false } | { limited: true; response: Response } {
-  const ip = getClientIp(_request);
+  const ip = getClientIp(request);
   const key = `${config.name}:${ip}`;
 
   if (!limiters.has(config.name)) {

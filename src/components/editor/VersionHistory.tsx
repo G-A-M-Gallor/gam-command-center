@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { _X, RotateCcw, _Clock } from "lucide-react";
+import { X, RotateCcw, Clock } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import {
   fetchVersions,
   restoreVersion,
@@ -24,7 +24,7 @@ export function VersionHistory({
   onRestore,
 }: VersionHistoryProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
   const et = t.editor;
   const localeMap = { he: "he-IL", en: "en-US", ru: "ru-RU" } as const;
@@ -64,21 +64,21 @@ export function VersionHistory({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
         <div className="flex items-center gap-2">
-          <_Clock size={16} className="text-slate-400" />
+          <Clock size={16} className="text-slate-400" />
           <h3 className="text-sm font-semibold text-slate-100">{et.versionHistory}</h3>
         </div>
         <button
           onClick={onClose}
           className="rounded p-1 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
         >
-          <_X size={16} />
+          <X size={16} />
         </button>
       </div>
 
       {/* Versions list */}
       <div className="flex-1 overflow-y-auto p-3">
         {loading && (
-          <p className="text-center text-sm text-slate-500 py-4">{_t.common.loading}</p>
+          <p className="text-center text-sm text-slate-500 py-4">{t.common.loading}</p>
         )}
 
         {!loading && versions.length === 0 && (

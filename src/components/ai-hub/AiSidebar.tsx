@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import {
-  _Plus, Trash2, AlertTriangle, BookOpen, Search, _X,
+  Plus, Trash2, AlertTriangle, BookOpen, Search, X,
 } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { getUsagePercent, isOverBudget, isNearBudget } from "@/lib/ai/tokenTracker";
 import type { AIMode } from "@/lib/ai/prompts";
 import { MODE_ICONS, MODE_COLORS } from "./types";
@@ -13,7 +13,7 @@ import type { Conversation } from "./types";
 // ─── Mode Selector ──────────────────────────────────────────────
 
 function ModeSelector({
-  mode, onModeChange, _t,
+  mode, onModeChange, t,
 }: {
   mode: AIMode;
   onModeChange: (m: AIMode) => void;
@@ -57,7 +57,7 @@ function ModeSelector({
 
 // ─── Token Usage Bar ────────────────────────────────────────────
 
-function TokenUsageBar({ _t }: { _t: ReturnType<typeof _getTranslations> }) {
+function TokenUsageBar({ t }: { t: ReturnType<typeof getTranslations> }) {
   const [percent, setPercent] = useState(0);
   const near = isNearBudget();
   const over = isOverBudget();
@@ -73,7 +73,7 @@ function TokenUsageBar({ _t }: { _t: ReturnType<typeof _getTranslations> }) {
   return (
     <div className="px-3 py-2.5" data-cc-id="aihub.token-bar">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[10px] text-slate-500">{_t.aiHub.tokenUsage}</span>
+        <span className="text-[10px] text-slate-500">{t.aiHub.tokenUsage}</span>
         <span className={`text-[10px] font-medium ${over ? "text-red-400" : near ? "text-amber-400" : "text-slate-500"}`}>
           {percent}%
         </span>
@@ -87,13 +87,13 @@ function TokenUsageBar({ _t }: { _t: ReturnType<typeof _getTranslations> }) {
       {over && (
         <p className="mt-1.5 text-[10px] text-red-400 flex items-center gap-1">
           <AlertTriangle size={10} />
-          {_t.aiHub.tokenBudgetExceeded}
+          {t.aiHub.tokenBudgetExceeded}
         </p>
       )}
       {near && !over && (
         <p className="mt-1.5 text-[10px] text-amber-400 flex items-center gap-1">
           <AlertTriangle size={10} />
-          {_t.aiHub.tokenBudgetWarning}
+          {t.aiHub.tokenBudgetWarning}
         </p>
       )}
     </div>
@@ -103,7 +103,7 @@ function TokenUsageBar({ _t }: { _t: ReturnType<typeof _getTranslations> }) {
 // ─── Conversation List ──────────────────────────────────────────
 
 function ConversationList({
-  conversations, activeId, onSelect, onDelete, searchQuery, _t,
+  conversations, activeId, onSelect, onDelete, searchQuery, t,
 }: {
   conversations: Conversation[];
   activeId: string | null;
@@ -122,7 +122,7 @@ function ConversationList({
   if (filtered.length === 0) {
     return (
       <p className="px-3 py-4 text-center text-xs text-slate-600">
-        {searchQuery ? t.common.noResults : _t.aiHub.noConversations}
+        {searchQuery ? t.common.noResults : t.aiHub.noConversations}
       </p>
     );
   }
@@ -197,7 +197,7 @@ interface AiSidebarProps {
 
 export function AiSidebar({
   mode, onModeChange, conversations, activeId, onSelect, onDelete,
-  onNewChat, onKnowledgeOpen, isMobile, _t,
+  onNewChat, onKnowledgeOpen, isMobile, t,
 }: AiSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -212,12 +212,12 @@ export function AiSidebar({
     >
       {/* Mode selector */}
       <div className="border-b border-slate-700/50 p-3">
-        <ModeSelector mode={mode} onModeChange={onModeChange} t={_t} />
+        <ModeSelector mode={mode} onModeChange={onModeChange} t={t} />
       </div>
 
       {/* Token usage bar */}
       <div className="border-b border-slate-700/50">
-        <TokenUsageBar t={_t} />
+        <TokenUsageBar t={t} />
       </div>
 
       {/* Knowledge base button */}
@@ -269,7 +269,7 @@ export function AiSidebar({
           onSelect={onSelect}
           onDelete={onDelete}
           searchQuery={searchQuery}
-          t={_t}
+          t={t}
         />
       </div>
 

@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Wifi, WifiOff } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useShortcuts } from '@/contexts/ShortcutsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import dynamic from 'next/dynamic';
 import { PageHeader } from '@/components/command-center/PageHeader';
 
@@ -58,7 +58,7 @@ function makeDemoCards(): StoryCard[] {
   const epics = ['תכנון', 'פיתוח', 'בדיקות', 'הפצה'];
   const epicColors = ['purple', 'blue', 'emerald', 'amber'];
 
-  // Per-column: features and their stories (stories _grouped by feature index)
+  // Per-column: features and their stories (stories grouped by feature index)
   const columnData: { features: string[]; stories: [string, number][] }[] = [
     {
       features: ['ניתוח'],
@@ -152,12 +152,12 @@ function makeDemoCards(): StoryCard[] {
 function StoryMapContent() {
   const { language } = useSettings();
   const { setCurrentScope } = useShortcuts();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   // Memoize storyMap translations so StoryBoard memo works effectively
   const storyMapT = useMemo(() => t.storyMap, [t.storyMap]);
   const isRtl = language === 'he';
   const searchParams = useSearchParams();
-  const _router = useRouter();
+  const router = useRouter();
 
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [selectedProject, setSelectedProjectState] = useState<string>(
@@ -292,7 +292,7 @@ function StoryMapContent() {
     return () => {
       clearTimeout(timer);
       // Clear pending debounce timers to prevent stale writes after project switch
-      timers.forEach((_t) => clearTimeout(_t));
+      timers.forEach((t) => clearTimeout(t));
       timers.clear();
       unsubscribeFromStoryCards(channel);
       channelRef.current = null;
@@ -576,7 +576,7 @@ function StoryMapContent() {
         router.push(`/dashboard/editor?id=${note.id}`);
       }
     },
-    [isDemo, _router, handleUpdateCard]
+    [isDemo, router, handleUpdateCard]
   );
 
   // ── Entity link/unlink callbacks ───────────────────
@@ -742,7 +742,7 @@ function StoryMapContent() {
               className="cursor-help rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs text-amber-400"
               title={t.storyMap.demoModeHint}
             >
-              ⚠️ {_t.storyMap.demoMode}
+              ⚠️ {t.storyMap.demoMode}
             </span>
           )}
 
@@ -758,7 +758,7 @@ function StoryMapContent() {
                 ? <><Wifi size={11} /> {t.storyMap.realtimeConnected}</>
                 : realtimeStatus === 'connecting'
                   ? <><Wifi size={11} /> {t.storyMap.realtimeConnecting}</>
-                  : <><WifiOff size={11} /> {_t.storyMap.realtimeDisconnected}</>
+                  : <><WifiOff size={11} /> {t.storyMap.realtimeDisconnected}</>
               }
             </span>
           )}

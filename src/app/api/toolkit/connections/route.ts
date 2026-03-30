@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * MCP Connections API — /api/toolkit/connections
@@ -13,10 +13,10 @@ export async function GET() {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

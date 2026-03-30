@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { MatchScoreRow } from "@/lib/matching/types";
 
 interface MatchCardProps {
@@ -18,7 +18,7 @@ export function MatchCard({
   onClick,
 }: MatchCardProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const mt = t.matching as Record<string, string>;
 
   const total = score.total_score;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * MCP Discovery API — /api/toolkit/discover-mcps
@@ -36,7 +36,7 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
     // Method 1: List available MCP resources to find live servers
     const response = await fetch('/api/mcp/list-resources', {
       method: 'POST',
-      _headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json' }
     });
 
     if (response.ok) {
@@ -62,22 +62,22 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
           if (testResource) {
             const healthResponse = await fetch('/api/mcp/read-resource', {
               method: 'POST',
-              _headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 server: testResource.server,
                 uri: testResource.uri
               })
             });
 
-            const _latency = Date.now() - startTime;
+            const latency = Date.now() - startTime;
             const isHealthy = healthResponse.ok;
 
-            const mcpInfo = createMcpInfo(serverName, serverResources, isHealthy, _latency);
+            const mcpInfo = createMcpInfo(serverName, serverResources, isHealthy, latency);
             discoveredMcps.push(mcpInfo);
           }
         } catch (_error) {
-          const _latency = Date.now() - startTime;
-          const mcpInfo = createMcpInfo(serverName, serverResources, false, _latency);
+          const latency = Date.now() - startTime;
+          const mcpInfo = createMcpInfo(serverName, serverResources, false, latency);
           discoveredMcps.push(mcpInfo);
         }
       }
@@ -122,7 +122,7 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
   return discoveredMcps;
 }
 
-function createMcpInfo(serverName: string, resources: McpResource[], isHealthy: boolean, _latency: number): LiveMcpInfo {
+function createMcpInfo(serverName: string, resources: McpResource[], isHealthy: boolean, latency: number): LiveMcpInfo {
   const platform = serverName.includes('claude.ai') ? 'claude.ai' : 'Claude Code';
 
   // Determine category and emoji based on server name and resources
@@ -157,8 +157,8 @@ function createMcpInfo(serverName: string, resources: McpResource[], isHealthy: 
     name: serverName,
     server: serverName,
     platform,
-    health_status: isHealthy ? (_latency > 2000 ? 'timeout' : 'healthy') : 'unhealthy',
-    latency_ms: _latency,
+    health_status: isHealthy ? (latency > 2000 ? 'timeout' : 'healthy') : 'unhealthy',
+    latency_ms: latency,
     description: `${category} integration via ${platform}`,
     capabilities: resources.map(r => r.name || 'basic_operation').slice(0, 5),
     category,
@@ -218,10 +218,10 @@ export async function POST() {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

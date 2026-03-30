@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import type { NoteRecord, GlobalField } from '@/lib/entities/types';
 
 interface Props {
@@ -24,7 +24,7 @@ const MONTHS: Record<string, string[]> = {
 };
 
 export function CalendarView({ notes, fields, language, entityType }: Props) {
-  const _t = getTranslations(language as 'he' | 'en' | 'ru');
+  const t = getTranslations(language as 'he' | 'en' | 'ru');
   const te = t.entities;
   const isRtl = language === 'he';
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
@@ -93,7 +93,7 @@ export function CalendarView({ notes, fields, language, entityType }: Props) {
         </button>
       </div>
 
-      {/* Day _headers */}
+      {/* Day headers */}
       <div className="grid grid-cols-7 gap-px mb-1">
         {days.map(d => (
           <div key={d} className="text-center text-[10px] font-medium text-slate-500 py-1">

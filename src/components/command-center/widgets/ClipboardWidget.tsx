@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Copy, Trash2, _X } from "lucide-react";
+import { Copy, Trash2, X } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const STORAGE_KEY = "cc-clipboard-history";
@@ -32,7 +32,7 @@ function saveItems(items: ClipboardItem[]) {
 
 export function ClipboardPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [items, setItems] = useState<ClipboardItem[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -83,14 +83,14 @@ export function ClipboardPanel() {
             className="flex items-center gap-1 rounded px-2 py-1 text-xs text-slate-500 transition-colors hover:bg-slate-700/50 hover:text-slate-400"
           >
             <Trash2 className="h-3 w-3" />
-            {_t.widgets.clearAll}
+            {t.widgets.clearAll}
           </button>
         </div>
       )}
 
       {items.length === 0 ? (
         <p className="py-4 text-center text-sm text-slate-500">
-          {_t.widgets.noClipboardItems}
+          {t.widgets.noClipboardItems}
         </p>
       ) : (
         <div className="space-y-0.5">
@@ -114,7 +114,7 @@ export function ClipboardPanel() {
                 >
                   {copiedId === item.id ? (
                     <span className="text-[10px] text-emerald-400">
-                      {_t.widgets.copied}
+                      {t.widgets.copied}
                     </span>
                   ) : (
                     <Copy className="h-3 w-3" />
@@ -139,7 +139,7 @@ export function ClipboardPanel() {
 
 export function ClipboardBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [items, setItems] = useState<ClipboardItem[]>([]);
 
   // Listen for copy events within the app and store them
@@ -175,7 +175,7 @@ export function ClipboardBarContent({ size }: { size: WidgetSize }) {
     if (items.length === 0) return null;
     return (
       <span className="text-xs text-slate-400">
-        {items.length} {_t.widgets.clipboardItems}
+        {items.length} {t.widgets.clipboardItems}
       </span>
     );
   }

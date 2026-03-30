@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getConfig, getContacts } from '@/lib/wati/client';
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   const checks = {
     config: false,
     api_connection: false,

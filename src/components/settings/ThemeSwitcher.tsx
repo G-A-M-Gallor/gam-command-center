@@ -4,12 +4,12 @@ import { useCallback } from 'react'
 import { DARK_THEMES, LIGHT_THEMES, applyTheme, type ThemePalette } from '@/lib/themes'
 import { useThemeStore } from '@/lib/theme-store'
 import { useSettings } from '@/contexts/SettingsContext'
-import { _getTranslations } from '@/lib/i18n'
+import { getTranslations } from '@/lib/i18n'
 
 export function ThemeSwitcher() {
   const { activeThemeId, setTheme } = useThemeStore()
   const { language } = useSettings()
-  const _t = getTranslations(language)
+  const t = getTranslations(language)
 
   const handlePreview = useCallback((themeId: string) => {
     applyTheme(themeId)
@@ -24,7 +24,7 @@ export function ThemeSwitcher() {
       {/* Dark themes */}
       <div>
         <h4 className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-500">
-          {_t.settings.darkThemes}
+          {t.settings.darkThemes}
         </h4>
         <div className="grid grid-cols-2 gap-2.5">
           {DARK_THEMES.map((theme) => (

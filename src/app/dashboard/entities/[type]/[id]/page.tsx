@@ -5,10 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import {
   ArrowLeft, ArrowRight, ChevronRight, Loader2,
   Power, PowerOff, Trash2, Lock,
-  Type, CircleDot, UserCircle, Calendar, _Clock,
+  Type, CircleDot, UserCircle, Calendar, Clock,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import {
   fetchNote, fetchEntityTypes, fetchGlobalFields, updateNoteTitle,
   deactivateNote, reactivateNote, deleteNote,
@@ -39,9 +39,9 @@ import type { NoteRecord, EntityType, GlobalField } from '@/lib/entities/types';
 
 export default function EntityDetailPage() {
   const params = useParams();
-  const _router = useRouter();
+  const router = useRouter();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const te = t.entities;
   const isRtl = language === 'he';
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
@@ -73,7 +73,7 @@ export default function EntityDetailPage() {
         setNote(noteData);
         setTitle(noteData.title);
       }
-      const et = types.find(t => _t.slug === entityTypeSlug);
+      const et = types.find(t => t.slug === entityTypeSlug);
       if (et) setEtInfo(et);
       setFields(globalFields);
       setLoading(false);
@@ -246,7 +246,7 @@ export default function EntityDetailPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {SYSTEM_FIELDS.map(sf => {
             const IconMap: Record<string, React.ElementType> = {
-              Type, CircleDot, UserCircle, Calendar, _Clock,
+              Type, CircleDot, UserCircle, Calendar, Clock,
             };
             const SfIcon = IconMap[sf.icon] ?? Type;
             const raw = note[sf.noteField as keyof NoteRecord];

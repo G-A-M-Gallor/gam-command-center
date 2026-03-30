@@ -23,7 +23,7 @@ export interface ActionResult {
 export type ActionHandler = (
   noteIds: string[],
   entityType: string,
-  _context: ActionContext,
+  context: ActionContext,
 ) => Promise<ActionResult>;
 
 // ─── Handler implementations ──────────────────────────
@@ -49,7 +49,7 @@ async function handleReactivate(noteIds: string[]): Promise<ActionResult> {
 async function handleExportCsv(
   noteIds: string[],
   _entityType: string,
-  _context: ActionContext,
+  context: ActionContext,
 ): Promise<ActionResult> {
   const { fields, notes } = context;
   const targetNotes = noteIds.length > 0
@@ -59,7 +59,7 @@ async function handleExportCsv(
   if (targetNotes.length === 0) return { success: false, message: 'No notes to export' };
 
   // Build CSV
-  const _headers = ['title', ...fields.map(f => f.meta_key)];
+  const headers = ['title', ...fields.map(f => f.meta_key)];
   const rows = targetNotes.map(note => {
     const cells = [
       `"${note.title.replace(/"/g, '""')}"`,
@@ -85,7 +85,7 @@ async function handleExportCsv(
   return { success: true };
 }
 
-async function handleOpenInAi(noteIds: string[], _entityType: string, _context: ActionContext): Promise<ActionResult> {
+async function handleOpenInAi(noteIds: string[], _entityType: string, context: ActionContext): Promise<ActionResult> {
   const note = context.notes.find(n => n.id === noteIds[0]);
   if (!note) return { success: false };
 
@@ -109,7 +109,7 @@ async function handleSendNotification(noteIds: string[]): Promise<ActionResult> 
   return { success: true };
 }
 
-async function handleSendWhatsapp(noteIds: string[], _entityType: string, _context: ActionContext): Promise<ActionResult> {
+async function handleSendWhatsapp(noteIds: string[], _entityType: string, context: ActionContext): Promise<ActionResult> {
   const note = context.notes.find(n => n.id === noteIds[0]);
   if (!note) return { success: false };
 
@@ -169,7 +169,7 @@ export async function executeAction(
   action: ActionButton,
   noteIds: string[],
   entityType: string,
-  _context: ActionContext,
+  context: ActionContext,
 ): Promise<ActionResult> {
   const handlerType = action.handler_type ?? 'builtin';
 
@@ -177,7 +177,7 @@ export async function executeAction(
   if (handlerType === 'builtin') {
     const handler = ACTION_HANDLERS[action.id];
     if (!handler) return { success: false, message: `No handler for ${action.id}` };
-    return handler(noteIds, entityType, _context);
+    return handler(noteIds, entityType, context);
   }
 
   const note = context.notes.find(n => n.id === noteIds[0]);
@@ -230,7 +230,7 @@ export async function executeAction(
     try {
       const res = await fetch(cfg.url, {
         method: 'POST',
-        _headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       return { success: res.ok, message: res.ok ? undefined : `Webhook failed: ${res.status}` };

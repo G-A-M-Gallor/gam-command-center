@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { supabase } from "@/lib/supabaseClient";
 import {
@@ -14,13 +14,13 @@ import {
   PenTool,
   CheckCircle2,
   Archive,
-  _Clock,
+  Clock,
   XCircle,
-  _Plus,
+  Plus,
   Search,
   RefreshCw,
   LayoutTemplate,
-  _X,
+  X,
   BarChart3,
   ChevronDown,
   ChevronUp,
@@ -78,7 +78,7 @@ const COLUMNS: { status: ColumnStatus; i18nKey: string; icon: React.ElementType;
 
 export default function DocumentsPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const dp = t.documentsPage;
   const isRtl = language === "he";
 
@@ -313,7 +313,7 @@ export default function DocumentsPage() {
 
 // ── Analytics Panel ──────────────────────────────────────────
 
-function AnalyticsPanel({ submissions, dp }: { submissions: Submission[]; dp: ReturnType<typeof _getTranslations>["documentsPage"] }) {
+function AnalyticsPanel({ submissions, dp }: { submissions: Submission[]; dp: ReturnType<typeof getTranslations>["documentsPage"] }) {
   const total = submissions.length;
   const signed = submissions.filter((s) => s.status === "signed").length;
   const sent = submissions.filter((s) => ["sent", "viewed", "partially_signed"].includes(s.status)).length;
@@ -426,7 +426,7 @@ function AnalyticsPanel({ submissions, dp }: { submissions: Submission[]; dp: Re
 
 // ── Submission Card ──────────────────────────────────────────
 
-function SubmissionCard({ submission: sub, dp, language }: { submission: Submission; dp: ReturnType<typeof _getTranslations>["documentsPage"]; language: string }) {
+function SubmissionCard({ submission: sub, dp, language }: { submission: Submission; dp: ReturnType<typeof getTranslations>["documentsPage"]; language: string }) {
   const isExpired = sub.expires_at && new Date(sub.expires_at) < new Date();
 
   return (
@@ -495,7 +495,7 @@ function TemplatePicker({
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const _router = useRouter();
+  const router = useRouter();
   const [templates, setTemplates] = useState<DocumentTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState<string | null>(null);
@@ -548,7 +548,7 @@ function TemplatePicker({
             className="flex w-full items-center gap-3 rounded-lg border border-dashed border-slate-700 p-3 text-start transition-colors hover:border-slate-600 hover:bg-slate-800/30 disabled:opacity-50"
           >
             {creating === "blank" ? (
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
             ) : (
               <FileText className="h-5 w-5 shrink-0 text-slate-400" />
             )}
@@ -563,7 +563,7 @@ function TemplatePicker({
         <div className="max-h-72 overflow-y-auto p-3">
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
             </div>
           ) : templates.length === 0 ? (
             <div className="py-6 text-center text-sm text-slate-500">
@@ -582,7 +582,7 @@ function TemplatePicker({
                   className="flex w-full items-center gap-3 rounded-lg border border-slate-800 p-3 text-start transition-colors hover:border-slate-700 hover:bg-slate-800/50 disabled:opacity-50"
                 >
                   {creating === tpl.id ? (
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-_t-purple-400" />
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-600 border-t-purple-400" />
                   ) : (
                     <LayoutTemplate className="h-5 w-5 shrink-0 text-purple-400" />
                   )}
@@ -610,7 +610,7 @@ function TemplatePicker({
 
 // ── Helpers ──────────────────────────────────────────────────
 
-function formatRelative(iso: string, dp: ReturnType<typeof _getTranslations>["documentsPage"], language: string): string {
+function formatRelative(iso: string, dp: ReturnType<typeof getTranslations>["documentsPage"], language: string): string {
   const diff = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diff / 60_000);
   if (mins < 1) return dp.now;

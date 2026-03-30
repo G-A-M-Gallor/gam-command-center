@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
 import {
-  Store, Search, _ExternalLink, CheckCircle2, Zap,
+  Store, Search, ExternalLink, CheckCircle2, Zap,
 } from "lucide-react";
 
 // ─── App Catalog ────────────────────────────────────────

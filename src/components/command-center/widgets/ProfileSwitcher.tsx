@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check, _Plus } from "lucide-react";
+import { ChevronDown, Check, Plus } from "lucide-react";
 import { useWidgets, BUILTIN_PROFILES } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 export function ProfileSwitcher() {
   const {
@@ -14,7 +14,7 @@ export function ProfileSwitcher() {
     saveProfile,
   } = useWidgets();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const s = t.settings as Record<string, string>;
 
   const [open, setOpen] = useState(false);
@@ -58,17 +58,17 @@ export function ProfileSwitcher() {
           style={{ borderRadius: "var(--cc-radius-lg)" }}
         >
           <div className="p-1">
-            {allProfiles.map((_profile) => {
+            {allProfiles.map((profile) => {
               const name = profile.nameKey
-                ? (s[profile.nameKey] || _profile.name)
+                ? (s[profile.nameKey] || profile.name)
                 : profile.name;
               const isActive = profile.id === activeProfileId;
               return (
                 <button
-                  key={_profile.id}
+                  key={profile.id}
                   type="button"
                   onClick={() => {
-                    loadProfile(_profile.id);
+                    loadProfile(profile.id);
                     setOpen(false);
                   }}
                   className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-xs transition-colors ${
@@ -85,7 +85,7 @@ export function ProfileSwitcher() {
                   <span className="flex-1 truncate text-start">{name}</span>
                   {profile.builtIn && (
                     <span className="rounded bg-slate-600 px-1 py-0.5 text-[9px] text-slate-400">
-                      {_t.widgets.storeSystemWidget ? "built-in" : "built-in"}
+                      {t.widgets.storeSystemWidget ? "built-in" : "built-in"}
                     </span>
                   )}
                 </button>

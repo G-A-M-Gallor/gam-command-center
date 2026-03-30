@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 // Only these emails can access the dashboard
 const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || "")
@@ -7,8 +7,8 @@ const ALLOWED_EMAILS = (process.env.ALLOWED_EMAILS || "")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
 
-export async function GET(_request: Request) {
-  const { searchParams, origin } = new URL(_request.url);
+export async function GET(request: Request) {
+  const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const mode = searchParams.get("mode"); // "register" skips ALLOWED_EMAILS
 
@@ -19,7 +19,7 @@ export async function GET(_request: Request) {
     if (!error) {
       // Check allowlist — skip for registration flow
       if (mode !== "register") {
-        const { data: { _user } } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
         const email = user?.email?.toLowerCase() || "";
 
         if (ALLOWED_EMAILS.length > 0 && !ALLOWED_EMAILS.includes(email)) {

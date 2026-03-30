@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { commentCreateSchema, commentUpdateSchema, reactionSchema } from "@/lib/api/schemas";
 import { logActivityServer } from "@/lib/supabase/activityLogger";
 import { notifyUser } from "@/lib/supabase/notifyUser";
@@ -19,11 +19,11 @@ interface RouteContext {
 
 // ─── GET ──────────────────────────────────────────────────────
 
-export async function GET(_request: Request, _context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   try {
     const supabase = await createClient();
-    const { data: { _user } } = await supabase.auth.getUser();
-    if (!_user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -51,11 +51,11 @@ export async function GET(_request: Request, _context: RouteContext) {
 
 // ─── POST ─────────────────────────────────────────────────────
 
-export async function POST(_request: Request, _context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
   try {
     const supabase = await createClient();
-    const { data: { _user } } = await supabase.auth.getUser();
-    if (!_user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -90,7 +90,7 @@ export async function POST(_request: Request, _context: RouteContext) {
       .insert({
         entity_type: type,
         record_id: recordId,
-        user_id: _user.id,
+        user_id: user.id,
         content,
         parent_id: resolvedParentId,
         mentions: mentions || [],
@@ -105,7 +105,7 @@ export async function POST(_request: Request, _context: RouteContext) {
 
     // Log to activity feed (fire-and-forget)
     logActivityServer(recordId, 'comment', {
-      actorId: _user.id,
+      actorId: user.id,
       noteText: content.slice(0, 200),
     }).catch(() => { /* no-op */ });
 
@@ -137,11 +137,11 @@ export async function POST(_request: Request, _context: RouteContext) {
 
 // ─── PATCH ────────────────────────────────────────────────────
 
-export async function PATCH(_request: Request, _context: RouteContext) {
+export async function PATCH(request: Request, context: RouteContext) {
   try {
     const supabase = await createClient();
-    const { data: { _user } } = await supabase.auth.getUser();
-    if (!_user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -169,7 +169,7 @@ export async function PATCH(_request: Request, _context: RouteContext) {
         .eq("id", commentId)
         .single();
 
-      if (!existing || existing.user_id !== _user.id) {
+      if (!existing || existing.user_id !== user.id) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
@@ -215,10 +215,10 @@ export async function PATCH(_request: Request, _context: RouteContext) {
       const reactions = (comment.reactions || {}) as Record<string, string[]>;
       const users = reactions[emoji] || [];
 
-      if (action === "add" && !users.includes(_user.id)) {
+      if (action === "add" && !users.includes(user.id)) {
         reactions[emoji] = [...users, user.id];
       } else if (action === "remove") {
-        reactions[emoji] = users.filter(u => u !== _user.id);
+        reactions[emoji] = users.filter(u => u !== user.id);
         if (reactions[emoji].length === 0) delete reactions[emoji];
       }
 
@@ -235,7 +235,7 @@ export async function PATCH(_request: Request, _context: RouteContext) {
       return NextResponse.json({ data });
     }
 
-    return NextResponse.json({ error: "Nothing to _update" }, { status: 400 });
+    return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Internal server error" },
@@ -246,11 +246,11 @@ export async function PATCH(_request: Request, _context: RouteContext) {
 
 // ─── DELETE ───────────────────────────────────────────────────
 
-export async function DELETE(_request: Request, _context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const supabase = await createClient();
-    const { data: { _user } } = await supabase.auth.getUser();
-    if (!_user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -268,7 +268,7 @@ export async function DELETE(_request: Request, _context: RouteContext) {
       .eq("id", commentId)
       .single();
 
-    if (!existing || existing.user_id !== _user.id) {
+    if (!existing || existing.user_id !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

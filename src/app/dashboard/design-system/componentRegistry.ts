@@ -139,7 +139,7 @@ export const componentRegistry: ComponentEntry[] = [
     id: 'story-board',
     name: 'StoryBoard',
     nameHe: 'לוח סיפור',
-    description: 'Phase 3 story map board container. Manages columns, drag _context, and epic/story hierarchy.',
+    description: 'Phase 3 story map board container. Manages columns, drag context, and epic/story hierarchy.',
     descriptionHe: 'מכולת לוח מפת סיפור שלב 3. מנהל עמודות, הקשר גרירה והיררכיית אפיק/סיפור.',
     category: 'navigation',
     filePath: 'components/command-center/StoryBoard.tsx',

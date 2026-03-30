@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { _createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { workManagerSchema } from "@/lib/api/schemas";
@@ -162,7 +162,7 @@ async function persistSessionContext(supabase: SupabaseClient, userId: string, c
       { onConflict: "user_id,context_key" }
     );
   } catch {
-    // Non-critical — don't fail the _request
+    // Non-critical — don't fail the request
   }
 }
 
@@ -194,7 +194,7 @@ ${sessionContext.open_projects.length > 0
 
 ### משימות פתוחות
 ${sessionContext.open_tasks.length > 0
-  ? sessionContext.open_tasks.map((_t) => `- [${t.priority}] ${t.title} — ${t.assignee}`).join("\n")
+  ? sessionContext.open_tasks.map((t) => `- [${t.priority}] ${t.title} — ${t.assignee}`).join("\n")
   : "- אין משימות פתוחות כרגע"}
 
 ### החלטות אחרונות
@@ -212,12 +212,12 @@ ${sessionContext.last_decisions.length > 0
 
 // ─── Route Handler ──────────────────────────────────────────
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   // Rate limit — Work Manager runs multi-agent chains
-  const rl = checkRateLimit(_request, RATE_LIMITS.workManager);
+  const rl = checkRateLimit(request, RATE_LIMITS.workManager);
   if (rl.limited) return rl.response;
 
-  const authResult = await requireAuth(_request);
+  const authResult = await requireAuth(request);
   if (authResult.error !== null) {
     return new Response(
       JSON.stringify({ error: authResult.error }),
@@ -248,7 +248,7 @@ export async function POST(_request: Request) {
   const parsed = workManagerSchema.safeParse(rawBody);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid _request", details: parsed.error.flatten() },
+      { error: "Invalid request", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
@@ -295,7 +295,7 @@ export async function POST(_request: Request) {
       : messages;
 
   const apiMessages = trimmedMessages.map((m) => ({
-    role: m.role as "_user" | "assistant",
+    role: m.role as "user" | "assistant",
     content: m.content,
   }));
 
@@ -383,7 +383,7 @@ export async function POST(_request: Request) {
     });
 
     return new Response(readable, {
-      _headers: {
+      headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",

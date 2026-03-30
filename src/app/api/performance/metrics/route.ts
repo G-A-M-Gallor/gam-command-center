@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { _headers } from 'next/headers';
+import { headers } from 'next/headers';
 import os from 'os';
 
 interface PerformanceMetrics {
@@ -261,8 +261,8 @@ async function generateRealMetrics(): Promise<PerformanceMetrics> {
 let metricsHistory: PerformanceMetrics[] = [];
 const MAX_HISTORY = 100;
 
-export async function GET(_request: NextRequest) {
-  const { searchParams } = new URL(_request.url);
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
   const type = searchParams.get('type') || 'current';
 
   try {
@@ -377,7 +377,7 @@ let realWebVitals: ClientVitalsData[] = [];
 const MAX_VITALS = 1000;
 
 // POST endpoint for receiving real performance data from client
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const clientData = await request.json();
 

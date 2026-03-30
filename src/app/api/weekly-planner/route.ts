@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * GET /api/weekly-planner — load items + templates
@@ -15,8 +15,8 @@ export async function GET() {
     const supabase = await createClient();
 
     // Verify user session — return empty when unauthenticated
-    const { data: { _user } } = await supabase.auth.getUser();
-    if (!_user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ items: [], templates: [], persisted: false });
     }
 
@@ -40,13 +40,13 @@ export async function GET() {
   }
 }
 
-export async function PUT(_request: Request) {
+export async function PUT(request: Request) {
   try {
     const supabase = await createClient();
 
     // Verify user session
-    const { data: { _user } } = await supabase.auth.getUser();
-    if (!_user) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return NextResponse.json({ saved: false, error: "Unauthorized" }, { status: 401 });
     }
 

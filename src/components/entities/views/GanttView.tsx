@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { updateNoteMeta } from '@/lib/supabase/entityQueries';
-import { _getTranslations } from '@/lib/i18n';
-import type { _Language } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, GlobalField, TemplateConfig } from '@/lib/entities/types';
 
 interface Props {
@@ -61,7 +61,7 @@ interface GanttBar {
 
 export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
-  const _t = getTranslations(language as _Language);
+  const t = getTranslations(language as Language);
   const [zoom, setZoom] = useState<ZoomLevel>('week');
   const svgRef = useRef<SVGSVGElement>(null);
   const [dragging, setDragging] = useState<{ noteId: string; edge: 'start' | 'end'; initialX: number; initialDate: Date } | null>(null);
@@ -160,7 +160,7 @@ export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
   if (sortedBars.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-sm text-slate-500">
-        {_t.entities.noGanttDataDisplay}
+        {t.entities.noGanttDataDisplay}
       </div>
     );
   }
@@ -169,7 +169,7 @@ export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
     <div className="rounded-lg border border-white/[0.06] overflow-hidden" dir="ltr">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06] bg-white/[0.02]">
-        <span className="text-[10px] text-slate-500 me-1">{_t.entities.ganttZoom}:</span>
+        <span className="text-[10px] text-slate-500 me-1">{t.entities.ganttZoom}:</span>
         {(['day', 'week', 'month'] as ZoomLevel[]).map(z => (
           <button
             key={z}

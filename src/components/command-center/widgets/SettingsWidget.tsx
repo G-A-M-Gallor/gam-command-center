@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useWidgets, type HoverDelay } from "@/contexts/WidgetContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 // --- Panel content (dropdown) ---
@@ -12,7 +12,7 @@ import type { WidgetSize } from "./WidgetRegistry";
 export function SettingsPanel() {
   const { language } = useSettings();
   const { hoverDelay, setHoverDelay } = useWidgets();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   const DELAY_OPTIONS: { value: HoverDelay; display: string }[] = [
     { value: "none", display: t.widgets.none },
@@ -29,7 +29,7 @@ export function SettingsPanel() {
       {/* Hover Delay */}
       <div>
         <label className="mb-1.5 block text-xs font-medium text-slate-400">
-          {_t.widgets.hoverDelay}
+          {t.widgets.hoverDelay}
         </label>
         <div className="flex flex-wrap gap-1">
           {DELAY_OPTIONS.map((opt) => (

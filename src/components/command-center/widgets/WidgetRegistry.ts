@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { Settings, Search, Bot, _Plus, Pin, Calendar, CalendarDays, Bell, _Clock, ClipboardList, MessageCircle, Users, BarChart3, _ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare, Mail, Inbox } from "lucide-react";
+import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, ClipboardList, MessageCircle, Users, BarChart3, ExternalLink, Keyboard, Rss, TrendingUp, Sparkles, ListTodo, MessagesSquare, Mail, Inbox } from "lucide-react";
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
@@ -158,7 +158,7 @@ export const widgetRegistry: WidgetDefinition[] = [
   },
   {
     id: "quick-create",
-    icon: _Plus,
+    icon: Plus,
     label: { he: "יצירה מהירה", en: "Quick Create", ru: "Быстрое создание" },
     description: {
       he: "צור מסמך או ישות חדשה",
@@ -226,7 +226,7 @@ export const widgetRegistry: WidgetDefinition[] = [
   },
   {
     id: "timer",
-    icon: _Clock,
+    icon: Clock,
     label: { he: "טיימר", en: "Timer", ru: "Таймер" },
     description: {
       he: "טיימר פומודורו לניהול זמן",
@@ -503,7 +503,7 @@ export const widgetRegistry: WidgetDefinition[] = [
   },
   {
     id: "shortcuts",
-    icon: _ExternalLink,
+    icon: ExternalLink,
     label: { he: "קיצורים", en: "Quick Links", ru: "Ссылки" },
     description: {
       he: "לינקים מהירים לאוריגמי, Notion, WATI, n8n",

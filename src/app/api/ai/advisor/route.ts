@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const advisorChatSchema = z.object({
   messages: z.array(z.object({
-    role: z.enum(["_user", "assistant"]),
+    role: z.enum(["user", "assistant"]),
     content: z.string(),
     timestamp: z.number().optional(),
   })),
@@ -15,11 +15,11 @@ const advisorChatSchema = z.object({
   stream: z.boolean().default(true),
 });
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // Authentication
-    const authResult = await requireAuth(_request);
-    if (authResult.error || !authResult._user) {
+    const authResult = await requireAuth(request);
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -28,7 +28,7 @@ export async function POST(_request: NextRequest) {
 
     // Rate limiting
     const rateLimitResult = checkRateLimit(
-      _request,
+      request,
       RATE_LIMITS.ai
     );
 
@@ -102,7 +102,7 @@ export async function POST(_request: NextRequest) {
       });
 
       return new Response(stream, {
-        _headers: {
+        headers: {
           "Content-Type": "text/plain; charset=utf-8",
           "Cache-Control": "no-cache",
           "Connection": "keep-alive",
@@ -121,7 +121,7 @@ export async function POST(_request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid _request format", details: error.issues },
+        { error: "Invalid request format", details: error.issues },
         { status: 400 }
       );
     }
@@ -137,7 +137,7 @@ export async function POST(_request: NextRequest) {
 export async function OPTIONS() {
   return new Response(null, {
     status: 200,
-    _headers: {
+    headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",

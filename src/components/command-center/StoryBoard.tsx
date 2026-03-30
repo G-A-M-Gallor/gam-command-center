@@ -13,7 +13,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { _Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { StoryColumn } from './StoryColumn';
 import type { FeatureGroup } from './StoryColumn';
 import { StoryCardOverlay } from './StoryCard';
@@ -85,7 +85,7 @@ export const StoryBoard = memo(function StoryBoard({
   entityLinks,
   onLinkEntity,
   onUnlinkEntity,
-  _t,
+  t,
 }: StoryBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -246,8 +246,8 @@ export const StoryBoard = memo(function StoryBoard({
           onClick={onAddEpic}
           className="flex items-center gap-1.5 rounded-lg border border-dashed border-purple-500/30 px-4 py-2 text-sm text-purple-400 transition-colors hover:border-purple-500/50 hover:bg-purple-500/5"
         >
-          <_Plus className="h-4 w-4" />
-          {_t.addEpic}
+          <Plus className="h-4 w-4" />
+          {t.addEpic}
         </button>
       </div>
     );
@@ -277,7 +277,7 @@ export const StoryBoard = memo(function StoryBoard({
             entityLinks={entityLinks}
             onLinkEntity={onLinkEntity}
             onUnlinkEntity={onUnlinkEntity}
-            _t={_t}
+            t={t}
           />
         ))}
 

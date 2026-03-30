@@ -5,7 +5,7 @@
 // ===================================================
 
 import { useState, useMemo } from "react";
-import { Search, Filter, _Plus, Calendar, _Clock, User, Flag } from "lucide-react";
+import { Search, Filter, Plus, Calendar, Clock, User, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAllTasks, useActiveSprints, useQuickCapture } from "@/lib/pm-queries";
 import { statusColor, priorityColor, sortByPriority } from "@/lib/pm-utils";
@@ -257,7 +257,7 @@ export function TasksScreen({ className }: TasksScreenProps) {
                       )}
                       {task.estimated_hours && (
                         <div className="flex items-center gap-2 text-slate-400">
-                          <_Clock className="w-3 h-3" />
+                          <Clock className="w-3 h-3" />
                           <span>{task.estimated_hours}h</span>
                         </div>
                       )}

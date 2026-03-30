@@ -21,7 +21,7 @@ const updateCourseSchema = z.object({
  * GET /api/courses/[id] — Get specific course
  */
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -50,7 +50,7 @@ export async function GET(
  * PUT /api/courses/[id] — Update course
  */
 export async function PUT(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -78,7 +78,7 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { error: "Failed to _update course" },
+      { error: "Failed to update course" },
       { status: 500 }
     );
   }
@@ -88,7 +88,7 @@ export async function PUT(
  * DELETE /api/courses/[id] — Delete course
  */
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

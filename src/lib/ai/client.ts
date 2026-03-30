@@ -38,7 +38,7 @@ export async function streamChat({
   try {
     response = await fetch("/api/ai/chat", {
       method: "POST",
-      _headers: {
+      headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
@@ -121,7 +121,7 @@ export async function streamWorkManager({
   try {
     response = await fetch("/api/work-manager", {
       method: "POST",
-      _headers: {
+      headers: {
         "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },

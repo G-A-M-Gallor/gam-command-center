@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { _ExternalLink, MessageCircle, Maximize2, Minimize2 } from 'lucide-react';
+import { ExternalLink, MessageCircle, Maximize2, Minimize2 } from 'lucide-react';
 
 interface WATIEmbedWidgetProps {
   className?: string;

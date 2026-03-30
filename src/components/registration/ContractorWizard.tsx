@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  _Layers, Building2, FileCheck, Upload, MapPin, ClipboardCheck,
+  Layers, Building2, FileCheck, Upload, MapPin, ClipboardCheck,
   ChevronLeft, ChevronRight, Check, AlertCircle, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { _getTranslations } from "@/lib/i18n";
-import type { _Language } from "@/contexts/SettingsContext";
+import { getTranslations } from "@/lib/i18n";
+import type { Language } from "@/contexts/SettingsContext";
 
 // ─── Types ─────────────────────────────────────────
 
@@ -98,7 +98,7 @@ export default function ContractorWizard() {
   const [error, setError] = useState("");
   const [confirmationNumber, setConfirmationNumber] = useState("");
 
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const ct = t.contractor;
   const isRtl = language === "he";
   const l = (obj: { he: string; en: string }) => obj[language === "he" ? "he" : "en"];
@@ -119,7 +119,7 @@ export default function ContractorWizard() {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [data]);
 
-  const _update = useCallback((patch: Partial<WizardData>) => {
+  const update = useCallback((patch: Partial<WizardData>) => {
     setData((prev) => ({ ...prev, ...patch }));
   }, []);
 
@@ -164,7 +164,7 @@ export default function ContractorWizard() {
     try {
       const res = await fetch("/api/contractor/submit", {
         method: "POST",
-        _headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
@@ -239,7 +239,7 @@ export default function ContractorWizard() {
         {/* Header */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-500/20">
-            <_Layers className="h-6 w-6 text-orange-400" />
+            <Layers className="h-6 w-6 text-orange-400" />
           </div>
           <div className="text-center">
             <h1 className="text-lg font-semibold text-slate-100">{ct.wizardTitle}</h1>
@@ -247,7 +247,7 @@ export default function ContractorWizard() {
           </div>
         </div>
 
-        {/* _Language Toggle */}
+        {/* Language Toggle */}
         <div className="flex justify-center">
           <button
             type="button"
@@ -413,7 +413,7 @@ export default function ContractorWizard() {
                 </ReviewSection>
                 <ReviewSection title={ct.stepLicense}>
                   <ReviewRow label={ct.licenseNumber} value={data.contractor_license_number} />
-                  <ReviewRow label={ct.classificationTier} value={CLASSIFICATION_TIERS.find((_t) => t.value === data.contractor_classification)?.[language === "he" ? "label" : "label"]?.en || data.contractor_classification} />
+                  <ReviewRow label={ct.classificationTier} value={CLASSIFICATION_TIERS.find((t) => t.value === data.contractor_classification)?.[language === "he" ? "label" : "label"]?.en || data.contractor_classification} />
                   <ReviewRow label={ct.classificationCategory} value={data.classification_category.map((c) => CATEGORIES.find((cat) => cat.value === c)?.[language === "he" ? "label" : "label"]?.en || c).join(", ")} />
                 </ReviewSection>
                 <ReviewSection title={ct.stepServiceArea}>

@@ -45,7 +45,7 @@ const pages = {
   },
   settings: {
     title: "Settings",
-    description: "_Language, theme & brand profile",
+    description: "Language, theme & brand profile",
   },
   automations: {
     title: "Automation Hub",

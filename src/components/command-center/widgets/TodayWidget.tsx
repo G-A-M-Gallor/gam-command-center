@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CalendarDays, _Clock, Bell, RefreshCw } from "lucide-react";
+import { CalendarDays, Clock, Bell, RefreshCw } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 interface EventItem {
@@ -38,7 +38,7 @@ function getFormattedDate(language: string): string {
 
 const typeIcons = {
   meeting: CalendarDays,
-  deadline: _Clock,
+  deadline: Clock,
   reminder: Bell,
 };
 
@@ -50,7 +50,7 @@ const typeColors = {
 
 export function TodayPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,11 +77,11 @@ export function TodayPanel() {
       {loading ? (
         <div className="flex items-center justify-center gap-2 py-4 text-sm text-slate-500">
           <RefreshCw size={14} className="animate-spin" />
-          {_t.widgets.todayLoading}
+          {t.widgets.todayLoading}
         </div>
       ) : events.length === 0 ? (
         <div className="py-4 text-center text-sm text-slate-500">
-          {_t.widgets.todayNoEvents}
+          {t.widgets.todayNoEvents}
         </div>
       ) : (
         <div className="space-y-1.5">

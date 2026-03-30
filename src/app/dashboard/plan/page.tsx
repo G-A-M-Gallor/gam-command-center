@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations, loc } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { routes } from "@/app/dashboard/admin/data";
-import { Check, _Clock, Circle, ChevronDown, ChevronUp, Wifi, WifiOff, FileText } from "lucide-react";
+import { Check, Clock, Circle, ChevronDown, ChevronUp, Wifi, WifiOff, FileText } from "lucide-react";
 import {
   getPlanPhases,
   updatePlanPhase,
@@ -33,7 +33,7 @@ const STATUS_CYCLE: PhaseStatus[] = ["planned", "in-progress", "complete"];
 
 const STATUS_CONFIG: Record<PhaseStatus, { icon: React.ElementType; color: string; bg: string; border: string }> = {
   complete:      { icon: Check,  color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
-  "in-progress": { icon: _Clock,  color: "text-blue-400",    bg: "bg-blue-500/10",    border: "border-blue-500/30" },
+  "in-progress": { icon: Clock,  color: "text-blue-400",    bg: "bg-blue-500/10",    border: "border-blue-500/30" },
   planned:       { icon: Circle, color: "text-slate-500",    bg: "bg-slate-500/10",   border: "border-slate-500/30" },
 };
 
@@ -41,7 +41,7 @@ const STATUS_CONFIG: Record<PhaseStatus, { icon: React.ElementType; color: strin
 
 export default function PlanPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const pp = t.planPage;
   const [phases, setPhases] = useState<PhaseData[]>([]);
   const [expandedPhase, setExpandedPhase] = useState<number | null>(null);
@@ -130,7 +130,7 @@ export default function PlanPage() {
     const timers = debounceTimers.current;
     return () => {
       clearTimeout(timer);
-      timers.forEach((_t) => clearTimeout(_t));
+      timers.forEach((t) => clearTimeout(t));
       timers.clear();
       unsubscribeFromPlanPhases(channel);
       channelRef.current = null;
@@ -291,7 +291,7 @@ export default function PlanPage() {
                     {/* Expanded routes list + notes */}
                     {isExpanded && (
                       <>
-                        <div className="border-_t border-slate-700/50 px-4 py-3">
+                        <div className="border-t border-slate-700/50 px-4 py-3">
                           <h4 className="text-xs text-slate-500 uppercase mb-2">{pp.phaseRoutes}</h4>
                           {pRoutes.length === 0 ? (
                             <p className="text-xs text-slate-600 italic">{pp.noRoutes}</p>

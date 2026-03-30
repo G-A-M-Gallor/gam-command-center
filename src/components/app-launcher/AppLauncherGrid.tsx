@@ -6,7 +6,7 @@ import { DndContext, PointerSensor, TouchSensor, useSensor, useSensors, useDropp
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useAppLauncher } from "@/lib/app-launcher/useAppLauncher";
 import { GRID_COLS, GRID_ROWS } from "@/lib/app-launcher/constants";
 import type { LauncherItem, LauncherFolder } from "@/lib/app-launcher/types";
@@ -37,9 +37,9 @@ function GridCell({ row, col, page, children }: { row: number; col: number; page
 }
 
 export function AppLauncherGrid() {
-  const _router = useRouter();
+  const router = useRouter();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const tabsT = t.tabs as Record<string, string>;
 
   const launcher = useAppLauncher();
@@ -93,12 +93,12 @@ export function AppLauncherGrid() {
     (item: LauncherItem) => {
       if (item.type === "page") {
         const key = item.id.replace("page:", "");
-        const pagesT = (_t.pages || {}) as Record<string, { title?: string; description?: string }>;
+        const pagesT = (t.pages || {}) as Record<string, { title?: string; description?: string }>;
         return pagesT[key]?.description || item.description?.[language] || "";
       }
       return item.description?.[language] || item.description?.en || "";
     },
-    [_t, language]
+    [t, language]
   );
 
   // Launch an item

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { _Clock, _ExternalLink, RefreshCw, Loader2, Play, CheckCircle2, XCircle } from 'lucide-react';
-import { _createClient } from '@/lib/supabase/client';
+import { Clock, ExternalLink, RefreshCw, Loader2, Play, CheckCircle2, XCircle } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 interface ScheduledJobsPanelProps {
   t: Record<string, string>;
@@ -69,7 +69,7 @@ function timeAgo(dateStr: string): string {
 
 const supabaseClient = createClient();
 
-export function ScheduledJobsPanel({ _t }: ScheduledJobsPanelProps) {
+export function ScheduledJobsPanel({ t }: ScheduledJobsPanelProps) {
   const [showIframe, setShowIframe] = useState(false);
   const [runningJob, setRunningJob] = useState<string | null>(null);
   const [cronHistory, setCronHistory] = useState<Record<string, CronHistoryEntry>>({});
@@ -115,7 +115,7 @@ export function ScheduledJobsPanel({ _t }: ScheduledJobsPanelProps) {
       const token = session?.access_token;
       await fetch('/api/automations/run-job', {
         method: 'POST',
-        _headers: {
+        headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
@@ -137,7 +137,7 @@ export function ScheduledJobsPanel({ _t }: ScheduledJobsPanelProps) {
       {/* pg_cron section */}
       <div>
         <div className="mb-3 flex items-center gap-2">
-          <_Clock className="h-4 w-4 text-purple-400" />
+          <Clock className="h-4 w-4 text-purple-400" />
           <h3 className="text-sm font-semibold text-slate-200">{t.pgCronJobs}</h3>
         </div>
 
@@ -148,7 +148,7 @@ export function ScheduledJobsPanel({ _t }: ScheduledJobsPanelProps) {
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.jobName}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.schedule}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.status}</th>
-                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{_t.lastRun || 'Last Run'}</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.lastRun || 'Last Run'}</th>
                 <th className="w-20 px-4 py-2.5" />
               </tr>
             </thead>
@@ -173,7 +173,7 @@ export function ScheduledJobsPanel({ _t }: ScheduledJobsPanelProps) {
                           : 'bg-slate-500/15 text-slate-400'
                       }`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${job.active ? 'bg-emerald-400' : 'bg-slate-400'}`} />
-                        {job.active ? t.active : _t.paused}
+                        {job.active ? t.active : t.paused}
                       </span>
                     </td>
                     <td className="px-4 py-2.5">
@@ -187,7 +187,7 @@ export function ScheduledJobsPanel({ _t }: ScheduledJobsPanelProps) {
                           <span className="font-mono text-slate-500">{timeAgo(lastRun.start_time)}</span>
                         </span>
                       ) : (
-                        <span className="text-[10px] text-slate-600">{_t.lastRunNever || 'Never'}</span>
+                        <span className="text-[10px] text-slate-600">{t.lastRunNever || 'Never'}</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5">

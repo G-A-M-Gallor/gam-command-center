@@ -94,7 +94,7 @@ function FieldGroup({
                 slot={slot}
                 value={value ?? "—"}
                 language="he"
-                _compact
+                compact
               />
             );
           })}
@@ -158,18 +158,18 @@ export function VNoteEntityView({ entity }: Props) {
     return (
       <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-4">
         <div className="flex items-center justify-center py-6">
-          <div className="w-4 h-4 border-2 border-purple-500 border-_t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     );
   }
 
   // Group fields by category
-  const _grouped = new Map<FieldCategory, GlobalField[]>();
+  const grouped = new Map<FieldCategory, GlobalField[]>();
   if (globalFields && globalFields.length > 0) {
     for (const gf of globalFields) {
       const cat = (gf.category ?? "general") as FieldCategory;
-      if (!_grouped.has(cat)) grouped.set(cat, []);
+      if (!grouped.has(cat)) grouped.set(cat, []);
       grouped.get(cat)!.push(gf);
     }
   }
@@ -210,7 +210,7 @@ export function VNoteEntityView({ entity }: Props) {
                 );
               })
             : // No sections — group by category
-              Array.from(_grouped.entries())
+              Array.from(grouped.entries())
                 .sort(([a], [b]) => {
                   const order: FieldCategory[] = [
                     "general", "contact", "business", "project",

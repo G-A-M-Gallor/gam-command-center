@@ -14,7 +14,7 @@ const planPage = {
   realtimeConnecting: "מתחבר...",
   realtimeDisconnected: "מנותק",
   phase1Name: "תשתית ליבה",
-  phase1Desc: "Sidebar, Layout, _Layers, Settings, Automations",
+  phase1Desc: "Sidebar, Layout, Layers, Settings, Automations",
   phase2Name: "עורך מסמכים",
   phase2Desc: "Canvas Editor עם מערכת שדות ותבניות",
   phase3Name: "מפת סיפורים",

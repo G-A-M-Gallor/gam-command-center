@@ -3,11 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  _Plus, Search, Grid3X3, List, FileText, Copy, Trash2, Upload,
+  Plus, Search, Grid3X3, List, FileText, Copy, Trash2, Upload,
   LayoutTemplate, SortAsc, SortDesc, Link2,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import {
   fetchDocuments,
   createDocument,
@@ -30,9 +30,9 @@ interface DocumentListViewProps {
 }
 
 export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
-  const _router = useRouter();
+  const router = useRouter();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
   const et = t.editor;
   const localeMap = { he: "he-IL", en: "en-US", ru: "ru-RU" } as const;
@@ -261,7 +261,7 @@ export function DocumentListView({ onOpenDoc }: DocumentListViewProps) {
           <div className="text-2xl mb-2">📝</div>
           <p className="text-sm text-slate-500">
             {search
-              ? _t.common.noResults
+              ? t.common.noResults
               : et.noDocumentsYet}
           </p>
         </div>

@@ -3,12 +3,12 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Pencil, _X, Lock, Unlock, PanelLeft, _PanelTop, EyeOff, _Star } from "lucide-react";
+import { Pencil, X, Lock, Unlock, PanelLeft, PanelTop, EyeOff, Star } from "lucide-react";
 import { createPortal } from "react-dom";
 import type { WidgetDefinition, WidgetSize } from "./WidgetRegistry";
 import { useWidgets } from "@/contexts/WidgetContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { IconDisplay } from "@/components/ui/IconPicker";
 import { SIDE_PANEL_OPEN_EVENT } from "./UniversalSidePanel";
@@ -141,7 +141,7 @@ interface WidgetWrapperProps {
   locked?: boolean;
   /** Callback to toggle lock state */
   onToggleLock?: (widgetId: string) => void;
-  /** Custom icon value (emoji / "lucide:_X" / "img:url") */
+  /** Custom icon value (emoji / "lucide:X" / "img:url") */
   customIcon?: string;
 }
 
@@ -157,7 +157,7 @@ export function WidgetWrapper({
 }: WidgetWrapperProps) {
   const { widgetSizes, hoverDelay, widgetLabels, displayMode } = useWidgets();
   const { language, sidebarPosition, sidebarVisibility } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
 
@@ -399,7 +399,7 @@ export function WidgetWrapper({
               ? "bg-amber-600/90 text-white"
               : "bg-slate-700 text-slate-400 opacity-0 group-hover:opacity-100"
           }`}
-          title={locked ? (_t.smartBar?.unlockWidget || "Unlock") : (_t.smartBar?.lockWidget || "Lock")}
+          title={locked ? (t.smartBar?.unlockWidget || "Unlock") : (t.smartBar?.lockWidget || "Lock")}
         >
           {locked ? <Lock size={9} /> : <Unlock size={9} />}
         </button>

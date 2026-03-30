@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { _Star } from 'lucide-react';
-import { _getTranslations } from '@/lib/i18n';
+import { Star } from 'lucide-react';
+import { getTranslations } from '@/lib/i18n';
 import type { NoteRecord, GlobalField, I18nLabel, TemplateConfig } from '@/lib/entities/types';
 
 interface Props {
@@ -41,7 +41,7 @@ interface TimelineGroup {
 }
 
 export function TimelineView({ notes, fields, language, timelineConfig }: Props) {
-  const _t = getTranslations(language as 'he' | 'en' | 'ru');
+  const t = getTranslations(language as 'he' | 'en' | 'ru');
   const te = t.entities;
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
   const isRtl = language === 'he';
@@ -64,7 +64,7 @@ export function TimelineView({ notes, fields, language, timelineConfig }: Props)
 
     items.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    const _grouped: TimelineGroup[] = [];
+    const grouped: TimelineGroup[] = [];
     let currentLabel = '';
 
     for (const item of items) {
@@ -126,7 +126,7 @@ export function TimelineView({ notes, fields, language, timelineConfig }: Props)
                       style={{ left: 0 }}
                     >
                       {item.isMilestone ? (
-                        <_Star size={14} fill={color} stroke={color} />
+                        <Star size={14} fill={color} stroke={color} />
                       ) : (
                         <div
                           className="w-2.5 h-2.5 rounded-full border-2 border-slate-800"

@@ -3,9 +3,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import {
   Maximize2, Minimize2, Network, Frame, History,
-  _Star, _ExternalLink, Loader2, GripVertical,
-  _Plus, _X, ChevronDown, FolderOpen, FileText,
-  _Layers, Puzzle, StickyNote, PenTool,
+  Star, ExternalLink, Loader2, GripVertical,
+  Plus, X, ChevronDown, FolderOpen, FileText,
+  Layers, Puzzle, StickyNote, PenTool,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 const VCanvas = dynamic(
@@ -24,7 +24,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '@/lib/supabaseClient';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import type { I18nLabel } from '@/lib/entities/types';
 
 // ─── Types ────────────────────────────────────────────
@@ -109,7 +109,7 @@ async function saveBlocksToMeta(noteId: string, blocks: CanvasBlock[]): Promise<
 const BLOCK_TYPE_ICONS: Record<CanvasBlock['type'], React.ElementType> = {
   folder: FolderOpen,
   field: FileText,
-  field_group: _Layers,
+  field_group: Layers,
   plugin: Puzzle,
   note: StickyNote,
 };
@@ -169,7 +169,7 @@ function DraggableBlock({
 function FolderBlockContent({ noteId, l }: { noteId: string; l: Record<string, string> }) {
   const [items, setItems] = useState<{ id: string; title: string; entityType: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
-  const _router = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -250,10 +250,10 @@ function BlockBody({
 // ─── Main Component ──────────────────────────────────
 
 export function EntityCanvas({ noteId, entityType, language, meta = {}, fields = [] }: Props) {
-  const _router = useRouter();
+  const router = useRouter();
   const { language: settingsLang } = useSettings();
   const lang: 'he' | 'en' | 'ru' = (language || settingsLang) === 'he' ? 'he' : (language || settingsLang) === 'ru' ? 'ru' : 'en';
-  const _t = getTranslations(lang);
+  const t = getTranslations(lang);
   const l = t.entities.entityCanvas as Record<string, string>;
   const isRtl = lang === 'he';
 
@@ -410,7 +410,7 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
   const BLOCK_TYPES: { key: CanvasBlock['type']; icon: React.ElementType }[] = [
     { key: 'folder', icon: FolderOpen },
     { key: 'field', icon: FileText },
-    { key: 'field_group', icon: _Layers },
+    { key: 'field_group', icon: Layers },
     { key: 'note', icon: StickyNote },
     { key: 'plugin', icon: Puzzle },
   ];
@@ -590,7 +590,7 @@ export function EntityCanvas({ noteId, entityType, language, meta = {}, fields =
       {mode === 'whiteboard' && (
         <VCanvas
           persistenceKey={`entity_${noteId}`}
-          _context="entity"
+          context="entity"
           mode="vNote"
           language={lang as 'he' | 'en' | 'ru'}
           className={expanded ? 'h-[600px]' : 'h-[320px]'}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import {
   BookOpen, ChevronDown, ChevronRight, Hash, Database, Link2,
-  CheckCircle2, Circle, ArrowRight, _ExternalLink,
+  CheckCircle2, Circle, ArrowRight, ExternalLink,
 } from 'lucide-react';
 
 type GuideStep = {
@@ -288,7 +288,7 @@ export function EntitySetupGuide({ lang, completedFields, completedTypes, comple
 
       {/* Steps */}
       {open && (
-        <div className="border-_t border-blue-500/10 px-4 py-3 space-y-2">
+        <div className="border-t border-blue-500/10 px-4 py-3 space-y-2">
           {GUIDE_STEPS.map(step => {
             const done = stepDone(step.id);
             const expanded = expandedStep === step.id;
@@ -315,7 +315,7 @@ export function EntitySetupGuide({ lang, completedFields, completedTypes, comple
                 </button>
 
                 {expanded && (
-                  <div className="px-3 pb-3 ps-10 border-_t border-white/[0.04]" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <div className="px-3 pb-3 ps-10 border-t border-white/[0.04]" dir={isRtl ? 'rtl' : 'ltr'}>
                     <ul className="space-y-1.5 mt-2">
                       {step.details[lang].map((detail, i) => (
                         <li key={i} className="flex items-start gap-2 text-[11px] text-slate-400">
@@ -329,7 +329,7 @@ export function EntitySetupGuide({ lang, completedFields, completedTypes, comple
                         href={step.link}
                         className="inline-flex items-center gap-1 mt-2 text-[10px] text-blue-400 hover:text-blue-300 transition-colors"
                       >
-                        <_ExternalLink size={10} />
+                        <ExternalLink size={10} />
                         {{ he: 'פתח', en: 'Open', ru: 'Открыть' }[lang]}
                       </a>
                     )}

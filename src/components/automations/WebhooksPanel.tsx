@@ -67,7 +67,7 @@ const WEBHOOKS: WebhookDef[] = [
   },
 ];
 
-export function WebhooksPanel({ _t }: WebhooksPanelProps) {
+export function WebhooksPanel({ t }: WebhooksPanelProps) {
   const [copiedPath, setCopiedPath] = useState<string | null>(null);
   const [expandedPayload, setExpandedPayload] = useState<string | null>(null);
 
@@ -82,7 +82,7 @@ export function WebhooksPanel({ _t }: WebhooksPanelProps) {
     <div data-cc-id="automations.webhooks">
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-slate-200">{t.webhooks}</h3>
-        <p className="text-xs text-slate-500">{_t.webhooksDesc}</p>
+        <p className="text-xs text-slate-500">{t.webhooksDesc}</p>
       </div>
 
       <div className="space-y-3">
@@ -98,7 +98,7 @@ export function WebhooksPanel({ _t }: WebhooksPanelProps) {
                 </div>
                 <div className="mt-1.5 flex items-center gap-3 text-[11px] text-slate-500">
                   <span>{t.source}: <span className="text-slate-400">{wh.source}</span></span>
-                  <span>{t.purpose}: <span className="text-slate-400">{_t[wh.purposeKey]}</span></span>
+                  <span>{t.purpose}: <span className="text-slate-400">{t[wh.purposeKey]}</span></span>
                 </div>
               </div>
 
@@ -109,12 +109,12 @@ export function WebhooksPanel({ _t }: WebhooksPanelProps) {
                 {copiedPath === wh.path ? (
                   <>
                     <Check className="h-3 w-3 text-emerald-400" />
-                    {_t.copied}
+                    {t.copied}
                   </>
                 ) : (
                   <>
                     <Copy className="h-3 w-3" />
-                    {_t.copyUrl}
+                    {t.copyUrl}
                   </>
                 )}
               </button>
@@ -127,9 +127,9 @@ export function WebhooksPanel({ _t }: WebhooksPanelProps) {
                   className="flex items-center gap-1 text-[10px] text-slate-500 transition-colors hover:text-slate-300"
                 >
                   {expandedPayload === wh.path ? (
-                    <><ChevronUp className="h-3 w-3" /> {_t.hidePayload}</>
+                    <><ChevronUp className="h-3 w-3" /> {t.hidePayload}</>
                   ) : (
-                    <><ChevronDown className="h-3 w-3" /> {_t.showPayload}</>
+                    <><ChevronDown className="h-3 w-3" /> {t.showPayload}</>
                   )}
                 </button>
 

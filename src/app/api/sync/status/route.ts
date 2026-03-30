@@ -7,8 +7,8 @@ import { createServiceClient } from '@/lib/supabase/server';
  * Auth: JWT required
  * Returns sync status for the current user's tenant.
  */
-export async function GET(_request: Request) {
-  const { error: authError } = await requireAuth(_request);
+export async function GET(request: Request) {
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }

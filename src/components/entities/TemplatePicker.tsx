@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  FileText, _Plus, Search, _X, _ExternalLink, Link2, Unlink, Loader2,
+  FileText, Plus, Search, X, ExternalLink, Link2, Unlink, Loader2,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import {
   fetchLinkedTemplates, linkTemplate, unlinkTemplate,
   searchTemplates, createTemplate,
@@ -18,7 +18,7 @@ interface Props {
 
 export function TemplatePicker({ noteId }: Props) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const te = t.entities;
   const isRtl = language === 'he';
 
@@ -203,7 +203,7 @@ export function TemplatePicker({ noteId }: Props) {
                   className="shrink-0 rounded p-1 text-slate-600 hover:text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity"
                   title={te.openFullEditor}
                 >
-                  <_ExternalLink size={10} />
+                  <ExternalLink size={10} />
                 </a>
                 <button
                   onClick={() => handleUnlink(tmpl.id)}

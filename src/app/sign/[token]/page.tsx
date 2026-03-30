@@ -1,4 +1,4 @@
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { jwtVerify } from "jose";
 import { SigningFlow } from "./SigningFlow";

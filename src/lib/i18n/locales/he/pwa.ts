@@ -35,7 +35,7 @@ const pwa = {
   templateAi: "תגובת AI",
   templateTitle: "כותרת",
   templateBody: "תוכן",
-  templateVars: "משתנים: {{project}}, {{_user}}, {{date}}",
+  templateVars: "משתנים: {{project}}, {{user}}, {{date}}",
   notifPreferences: "העדפות התראות",
   notifWhatsapp: "WhatsApp",
   notifPhone: "שיחות",

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Mail, Send, Eye, MousePointerClick, AlertTriangle, Loader2 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import type { WidgetSize } from '@/components/command-center/widgets/WidgetRegistry';
 
 interface EmailStats {
@@ -46,7 +46,7 @@ function useEmailStats() {
 
 export function EmailStatsPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const e = t.email as Record<string, string>;
   const { stats, loading } = useEmailStats();
 

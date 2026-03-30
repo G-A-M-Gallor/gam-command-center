@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { pushSubscribeSchema } from "@/lib/api/schemas";
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -23,7 +23,7 @@ export async function POST(_request: Request) {
 
   const { endpoint, keys } = parsed.data;
 
-  // Upsert subscription (one per _user+endpoint)
+  // Upsert subscription (one per user+endpoint)
   const { error } = await supabase
     .from("push_subscriptions")
     .upsert(
@@ -32,7 +32,7 @@ export async function POST(_request: Request) {
         endpoint,
         p256dh: keys.p256dh,
         auth: keys.auth,
-        email: _user.email || null,
+        email: user.email || null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id,endpoint" }
@@ -45,10 +45,10 @@ export async function POST(_request: Request) {
   return NextResponse.json({ ok: true });
 }
 
-export async function DELETE(_request: Request) {
+export async function DELETE(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -67,7 +67,7 @@ export async function DELETE(_request: Request) {
   await supabase
     .from("push_subscriptions")
     .delete()
-    .eq("user_id", _user.id)
+    .eq("user_id", user.id)
     .eq("endpoint", endpoint);
 
   return NextResponse.json({ ok: true });

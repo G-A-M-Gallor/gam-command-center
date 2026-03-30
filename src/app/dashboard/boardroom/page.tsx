@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Loader2, Send, _Plus } from "lucide-react";
+import { Loader2, Send, Plus } from "lucide-react";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations, loc } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import {
   PERSONAS,
@@ -27,7 +27,7 @@ interface ResponseState {
 
 export default function BoardRoomPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const br = t.boardroom as Record<string, string>;
   const isRtl = language === "he";
 
@@ -231,7 +231,7 @@ export default function BoardRoomPage() {
                   onClick={reset}
                   className="flex items-center gap-1.5 rounded-lg border border-slate-700/50 px-3 py-1.5 text-xs text-slate-500 transition-colors hover:border-slate-600 hover:text-slate-300"
                 >
-                  <_Plus className="h-3 w-3" />
+                  <Plus className="h-3 w-3" />
                   {br.newQuestion}
                 </button>
               </div>
@@ -405,7 +405,7 @@ function ResponseCard({
             style={{ color: persona.color }}
           >
             <Loader2 className="h-3 w-3 animate-spin" />
-            {_getTranslations(language as "he" | "en" | "ru").boardroom.thinking}
+            {getTranslations(language as "he" | "en" | "ru").boardroom.thinking}
           </div>
         )}
       </div>

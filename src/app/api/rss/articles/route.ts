@@ -6,13 +6,13 @@ import { createServiceClient } from '@/lib/supabase/server';
  * GET /api/rss/articles — paginated article list
  * Query params: feed_id, is_read, is_starred, limit, offset
  */
-export async function GET(_request: Request) {
-  const { error: authError } = await requireAuth(_request);
+export async function GET(request: Request) {
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
 
-  const url = new URL(_request.url);
+  const url = new URL(request.url);
   const feedId = url.searchParams.get('feed_id');
   const isRead = url.searchParams.get('is_read');
   const isStarred = url.searchParams.get('is_starred');
@@ -44,8 +44,8 @@ export async function GET(_request: Request) {
  * PATCH /api/rss/articles — mark articles read/starred
  * Body: { ids: number[], is_read?: boolean, is_starred?: boolean }
  */
-export async function PATCH(_request: Request) {
-  const { error: authError } = await requireAuth(_request);
+export async function PATCH(request: Request) {
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -62,7 +62,7 @@ export async function PATCH(_request: Request) {
   }
 
   if (body.ids.length > 200) {
-    return NextResponse.json({ error: 'Maximum 200 ids per _request' }, { status: 400 });
+    return NextResponse.json({ error: 'Maximum 200 ids per request' }, { status: 400 });
   }
 
   const updates: Record<string, boolean> = {};

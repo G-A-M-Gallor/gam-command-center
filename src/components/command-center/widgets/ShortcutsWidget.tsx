@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { _X, Search, ChevronDown, ChevronUp, Trash2, Bot, Loader2 } from "lucide-react";
+import { X, Search, ChevronDown, ChevronUp, Trash2, Bot, Loader2 } from "lucide-react";
 import { useShortcuts, type ResolvedShortcut } from "@/contexts/ShortcutsContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { formatComboForDisplay, isMac } from "@/lib/shortcuts/shortcutEngine";
 import { SHORTCUT_CATEGORIES, type ShortcutCategory } from "@/lib/shortcuts/shortcutRegistry";
 import type { WidgetSize } from "./WidgetRegistry";
@@ -13,7 +13,7 @@ import type { WidgetSize } from "./WidgetRegistry";
 
 export function ShortcutsPanel({ onClose }: { onClose: () => void }) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const wt = t.widgets;
   const { shortcuts, toggleShortcut, deleteCustomShortcut, resetToDefaults } = useShortcuts();
 
@@ -45,7 +45,7 @@ export function ShortcutsPanel({ onClose }: { onClose: () => void }) {
   }, [shortcuts, tab, query]);
 
   // Group by category
-  const _grouped = useMemo(() => {
+  const grouped = useMemo(() => {
     const map = new Map<ShortcutCategory, ResolvedShortcut[]>();
     for (const sc of filtered) {
       const existing = map.get(sc.category) || [];
@@ -67,7 +67,7 @@ export function ShortcutsPanel({ onClose }: { onClose: () => void }) {
       }
     }
     return ids;
-  }, [_grouped, collapsedCategories]);
+  }, [grouped, collapsedCategories]);
 
   // Keyboard navigation: Escape, ↑↓, Space
   useEffect(() => {
@@ -353,7 +353,7 @@ function ShortcutRow({
       {/* Reserved badge */}
       {shortcut.isReserved && (
         <span className="shrink-0 rounded bg-amber-900/40 px-1.5 py-0.5 text-[9px] text-amber-400/80">
-          {_getTranslations(language).widgets.shortcutsReserved}
+          {getTranslations(language).widgets.shortcutsReserved}
         </span>
       )}
 
@@ -410,7 +410,7 @@ const AI_STUB_RESPONSES: Record<string, { combo: string; label: { he: string; en
 };
 
 function AiSuggestionBar({ language }: { language: "he" | "en" | "ru" }) {
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const wt = t.widgets;
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -449,7 +449,7 @@ function AiSuggestionBar({ language }: { language: "he" | "en" | "ru" }) {
   );
 
   return (
-    <div className="border-_t border-slate-700 px-4 py-3">
+    <div className="border-t border-slate-700 px-4 py-3">
       <form onSubmit={handleSubmit} className="flex items-center gap-2 rounded-lg bg-slate-700/50 px-3 py-2">
         {loading ? (
           <Loader2 className="h-4 w-4 shrink-0 animate-spin text-[var(--cc-accent-400)]" />

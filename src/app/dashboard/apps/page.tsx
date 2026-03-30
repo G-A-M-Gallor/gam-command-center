@@ -14,7 +14,7 @@ import {
   getStatusBadge,
 } from "@/lib/hooks/useAppsRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 // ── Status config ────────────────────────────────────────
 
@@ -179,7 +179,7 @@ function SectionBlock({
 
 export default function AppsPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const { sections, allApps, isLoading } = useAppsRegistry();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<AppStatus | null>(null);
@@ -211,7 +211,7 @@ export default function AppsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-100">
-            {(_t.tabs as Record<string, string>).apps || "All Apps"}
+            {(t.tabs as Record<string, string>).apps || "All Apps"}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
             {allApps.length} {t.apps.apps} &middot; {sections.length} {t.apps.sections}
@@ -272,7 +272,7 @@ export default function AppsPage() {
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-20">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-500/30 border-_t-purple-500" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-purple-500/30 border-t-purple-500" />
         </div>
       )}
 
@@ -296,7 +296,7 @@ export default function AppsPage() {
       {!isLoading && sections.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <span className="text-3xl">📱</span>
-          <p className="text-sm text-slate-500">{_t.apps.noApps}</p>
+          <p className="text-sm text-slate-500">{t.apps.noApps}</p>
         </div>
       )}
     </div>

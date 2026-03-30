@@ -11,9 +11,9 @@ import {
   Minus,
   Calendar,
   ChevronRight,
-  _Plus,
+  Plus,
   ArrowRight,
-  _Clock,
+  Clock,
   AlertCircle,
   RefreshCw,
   FileSignature,
@@ -23,7 +23,7 @@ import {
   AlertTriangle as AlertTriangleIcon,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchEntityTypes } from "@/lib/supabase/entityQueries";
 import { PageHeader } from "@/components/command-center/PageHeader";
@@ -60,10 +60,10 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const d = t.dashboardHome;
   const dc = t.docControl;
-  const _router = useRouter();
+  const router = useRouter();
   const isRtl = language === "he";
 
   const [data, setData] = useState<DashboardData | null>(null);
@@ -187,7 +187,7 @@ export default function DashboardPage() {
   ];
 
   const quickActions = [
-    { label: d.newProject, icon: _Plus, href: "/dashboard/layers" },
+    { label: d.newProject, icon: Plus, href: "/dashboard/layers" },
     { label: d.newDocument, icon: FileText, href: "/dashboard/editor" },
     { label: d.storyMap, icon: Activity, href: "/dashboard/story-map" },
   ];
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                 <div className="space-y-1.5">
                   {data!.todayEvents.slice(0, 5).map((ev, i) => (
                     <div key={i} className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-slate-700/30 transition-colors">
-                      <_Clock size={12} className="shrink-0 text-cyan-400" />
+                      <Clock size={12} className="shrink-0 text-cyan-400" />
                       <span className="shrink-0 text-xs font-medium text-[var(--cc-accent-400)]">
                         {ev.time}
                       </span>

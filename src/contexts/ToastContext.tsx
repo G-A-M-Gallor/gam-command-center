@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { CheckCircle2, AlertTriangle, Info, XCircle, _X } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Info, XCircle, X } from "lucide-react";
 import { useSettings } from "./SettingsContext";
 
 // ─── Types ──────────────────────────────────────────────────────
@@ -113,7 +113,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const { sidebarPosition } = useSettings();
 
   const dismiss = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((_t) => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
     const timer = timersRef.current.get(id);
     if (timer) {
       clearTimeout(timer);
@@ -161,8 +161,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               isRight ? "right-4" : "left-4",
             ].join(" ")}
           >
-            {toasts.map((_t) => (
-              <ToastItem key={_t.id} item={_t} onDismiss={dismiss} />
+            {toasts.map((t) => (
+              <ToastItem key={t.id} item={t} onDismiss={dismiss} />
             ))}
           </div>,
           document.body

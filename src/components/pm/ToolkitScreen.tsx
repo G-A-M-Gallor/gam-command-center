@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Copy, _ExternalLink, Search, MessageSquare, ChevronDown, ChevronUp, ArrowRight, Send, RefreshCw } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { Copy, ExternalLink, Search, MessageSquare, ChevronDown, ChevronUp, ArrowRight, Send, RefreshCw } from "lucide-react";
+import { getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card } from "@/components/ui/Card";
 
@@ -296,7 +296,7 @@ export default function ToolkitScreen() {
   };
 
   // Count calculations
-  const toolsHealthyCount = tools.filter(t => _t.status === "installed").length;
+  const toolsHealthyCount = tools.filter(t => t.status === "installed").length;
   const toolsCount = tools.length;
 
 
@@ -310,7 +310,7 @@ export default function ToolkitScreen() {
 
   // Get unique categories and statuses
   const categories = Array.from(new Set(
-    activeTab === "tools" ? tools.map(t => _t.category) :
+    activeTab === "tools" ? tools.map(t => t.category) :
     activeTab === "automations" ? automations.map(a => a.type) :
     activeTab === "cloud-mcps" ? claudeAiMcps.map(m => m.settings.category).filter(Boolean) :
     activeTab === "terminal-mcps" ? claudeCodeMcps.map(m => m.settings.category).filter(Boolean) :
@@ -320,7 +320,7 @@ export default function ToolkitScreen() {
   ));
 
   const statuses = Array.from(new Set(
-    activeTab === "tools" ? tools.map(t => _t.status) :
+    activeTab === "tools" ? tools.map(t => t.status) :
     activeTab === "cloud-mcps" ? claudeAiMcps.map(m => m.health_status) :
     activeTab === "terminal-mcps" ? claudeCodeMcps.map(m => m.health_status) :
     activeTab === "automations" ? automations.map(a => a.status) :
@@ -401,7 +401,7 @@ export default function ToolkitScreen() {
                       // Sync MCPs
                       const mcpResponse = await fetch('/api/toolkit/sync-live', {
                         method: 'POST',
-                        _headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'application/json' },
                         credentials: 'include'
                       });
 
@@ -421,7 +421,7 @@ export default function ToolkitScreen() {
                       try {
                         const autoResponse = await fetch('/api/toolkit/sync-automations', {
                           method: 'POST',
-                          _headers: { 'Content-Type': 'application/json' },
+                          headers: { 'Content-Type': 'application/json' },
                           credentials: 'include'
                         });
 
@@ -606,7 +606,7 @@ export default function ToolkitScreen() {
                       </div>
 
                       {expandedTool === tool.id && (
-                        <div className="mt-4 pt-4 border-_t border-slate-700">
+                        <div className="mt-4 pt-4 border-t border-slate-700">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <h4 className="text-sm font-medium text-slate-300 mb-2">פקודת התקנה:</h4>
@@ -779,7 +779,7 @@ export default function ToolkitScreen() {
                       </div>
 
                       {automation.status === "broken" && automation.how_to_fix && (
-                        <div className="mt-4 pt-4 border-_t border-red-500/20">
+                        <div className="mt-4 pt-4 border-t border-red-500/20">
                           <h5 className="text-sm font-medium text-red-300 mb-2">איך לתקן:</h5>
                           <p className="text-sm text-red-400">{automation.how_to_fix}</p>
                         </div>
@@ -1334,7 +1334,7 @@ export default function ToolkitScreen() {
                   <div
                     key={message.id}
                     className={`p-3 rounded-lg text-sm ${
-                      message.role === "_user"
+                      message.role === "user"
                         ? "bg-purple-500/20 text-purple-100 mr-8"
                         : "bg-slate-700/50 text-slate-300 ml-8"
                     }`}

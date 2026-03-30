@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, _ExternalLink } from 'lucide-react';
+import { ClipboardCheck, ExternalLink } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { PageHeader } from '@/components/command-center/PageHeader';
 import { getOverallScore } from '@/lib/audit/checks';
 import type { Phase } from './types';
@@ -31,7 +31,7 @@ function StatCard({ label, value, color, suffix }: { label: string; value: numbe
 
 export default function AdminDevLogPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === 'he';
   const ta = t.admin;
 

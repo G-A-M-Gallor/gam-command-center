@@ -14,8 +14,8 @@ import {
   Mail,
   Phone,
   Calendar,
-  _Clock,
-  _Star,
+  Clock,
+  Star,
   Heart,
   Bell,
   Lock,
@@ -24,9 +24,9 @@ import {
   EyeOff,
   Edit,
   Trash2,
-  _Plus,
+  Plus,
   Minus,
-  _X,
+  X,
   ChevronDown,
   ChevronUp,
   ChevronLeft,
@@ -59,10 +59,10 @@ import {
   CheckCircle,
   XCircle,
   Zap,
-  _Shield,
+  Shield,
   Key,
   Link,
-  _ExternalLink,
+  ExternalLink,
   Share2,
   Send,
   MessageSquare,
@@ -75,7 +75,7 @@ import {
   Server,
   Code,
   Terminal,
-  _Monitor,
+  Monitor,
   Smartphone,
   Wifi,
   Battery,
@@ -85,7 +85,7 @@ import {
   Thermometer,
   Droplets,
   Wind,
-  _Layers,
+  Layers,
   Grid,
   List,
   BarChart2,
@@ -309,7 +309,7 @@ const ICONS: IconEntry[] = [
   { name: "ChevronUp", icon: ChevronUp, category: "navigation" },
   { name: "ChevronLeft", icon: ChevronLeft, category: "navigation" },
   { name: "ChevronRight", icon: ChevronRight, category: "navigation" },
-  { name: "ExternalLink", icon: _ExternalLink, category: "navigation" },
+  { name: "ExternalLink", icon: ExternalLink, category: "navigation" },
   { name: "Menu", icon: Menu, category: "navigation" },
   // Communication
   { name: "Mail", icon: Mail, category: "communication" },
@@ -333,9 +333,9 @@ const ICONS: IconEntry[] = [
   { name: "Settings", icon: Settings, category: "interface" },
   { name: "Edit", icon: Edit, category: "interface" },
   { name: "Trash2", icon: Trash2, category: "interface" },
-  { name: "Plus", icon: _Plus, category: "interface" },
+  { name: "Plus", icon: Plus, category: "interface" },
   { name: "Minus", icon: Minus, category: "interface" },
-  { name: "X", icon: _X, category: "interface" },
+  { name: "X", icon: X, category: "interface" },
   { name: "Eye", icon: Eye, category: "interface" },
   { name: "EyeOff", icon: EyeOff, category: "interface" },
   { name: "Filter", icon: Filter, category: "interface" },
@@ -367,7 +367,7 @@ const ICONS: IconEntry[] = [
   { name: "PieChart", icon: PieChart, category: "data" },
   { name: "TrendingUp", icon: TrendingUp, category: "data" },
   { name: "Activity", icon: Activity, category: "data" },
-  { name: "Layers", icon: _Layers, category: "data" },
+  { name: "Layers", icon: Layers, category: "data" },
   { name: "Grid", icon: Grid, category: "data" },
   { name: "List", icon: List, category: "data" },
   // Status
@@ -377,7 +377,7 @@ const ICONS: IconEntry[] = [
   { name: "AlertCircle", icon: AlertCircle, category: "status" },
   { name: "Info", icon: Info, category: "status" },
   { name: "HelpCircle", icon: HelpCircle, category: "status" },
-  { name: "Star", icon: _Star, category: "status" },
+  { name: "Star", icon: Star, category: "status" },
   { name: "Heart", icon: Heart, category: "status" },
   { name: "Zap", icon: Zap, category: "status" },
   { name: "Target", icon: Target, category: "status" },
@@ -399,15 +399,15 @@ const ICONS: IconEntry[] = [
   { name: "ShoppingCart", icon: ShoppingCart, category: "business" },
   { name: "Gift", icon: Gift, category: "business" },
   { name: "Calendar", icon: Calendar, category: "business" },
-  { name: "Clock", icon: _Clock, category: "business" },
+  { name: "Clock", icon: Clock, category: "business" },
   // Tools
   { name: "Lock", icon: Lock, category: "tools" },
   { name: "Unlock", icon: Unlock, category: "tools" },
   { name: "Key", icon: Key, category: "tools" },
-  { name: "Shield", icon: _Shield, category: "tools" },
+  { name: "Shield", icon: Shield, category: "tools" },
   { name: "Code", icon: Code, category: "tools" },
   { name: "Terminal", icon: Terminal, category: "tools" },
-  { name: "Monitor", icon: _Monitor, category: "tools" },
+  { name: "Monitor", icon: Monitor, category: "tools" },
   { name: "Smartphone", icon: Smartphone, category: "tools" },
   { name: "Wifi", icon: Wifi, category: "tools" },
   { name: "Battery", icon: Battery, category: "tools" },
@@ -761,7 +761,7 @@ type TabId = "icons" | "symbols" | "emojis" | "favorites";
 export default function IconLibraryPage() {
   const { language } = useSettings();
   const isRtl = language === "he";
-  const _t = labels[language] || labels.en;
+  const t = labels[language] || labels.en;
 
   const [tab, setTab] = useState<TabId>("icons");
   const [search, setSearch] = useState("");
@@ -892,7 +892,7 @@ export default function IconLibraryPage() {
       {/* ─── Header ──────────────────────────────────────────── */}
       <div className="shrink-0 border-b border-slate-700/60 bg-slate-900/80 px-6 py-4">
         <h1 className="text-xl font-semibold text-slate-100">{t.title}</h1>
-        <p className="mt-1 text-sm text-slate-400">{_t.subtitle}</p>
+        <p className="mt-1 text-sm text-slate-400">{t.subtitle}</p>
 
         {/* Tabs + Search + Color */}
         <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -960,7 +960,7 @@ export default function IconLibraryPage() {
             {[...iconsByCategory.entries()].map(([category, icons]) => (
               <div key={category}>
                 <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">
-                  {(_t.categories as Record<string, string>)[category] || category}
+                  {(t.categories as Record<string, string>)[category] || category}
                 </h2>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
                   {icons.map((entry) => {
@@ -1017,7 +1017,7 @@ export default function IconLibraryPage() {
             {[...symbolsByCategory.entries()].map(([category, symbols]) => (
               <div key={category}>
                 <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">
-                  {(_t.categories as Record<string, string>)[category] || category}
+                  {(t.categories as Record<string, string>)[category] || category}
                 </h2>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-2">
                   {symbols.map((entry) => {
@@ -1065,7 +1065,7 @@ export default function IconLibraryPage() {
             {[...emojisByCategory.entries()].map(([category, emojis]) => (
               <div key={category}>
                 <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">
-                  {(_t.categories as Record<string, string>)[category] || category}
+                  {(t.categories as Record<string, string>)[category] || category}
                 </h2>
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
                   {emojis.map((entry) => {
@@ -1110,14 +1110,14 @@ export default function IconLibraryPage() {
           <div className="space-y-6">
             {favorites.size === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <_Star className="h-10 w-10 text-slate-700 mb-3" />
+                <Star className="h-10 w-10 text-slate-700 mb-3" />
                 <p className="text-sm text-slate-500">{language === "he" ? "אין מועדפים עדיין — לחצו על הכוכב ליד כל פריט" : language === "ru" ? "Нет избранных — нажмите звёздочку у элемента" : "No favorites yet — click the star on any item"}</p>
               </div>
             ) : (
               <>
                 {favoriteIcons.length > 0 && (
                   <div>
-                    <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">{_t.tabs.icons}</h2>
+                    <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">{t.tabs.icons}</h2>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(100px,1fr))] gap-2">
                       {favoriteIcons.map((entry) => {
                         const Icon = entry.icon;
@@ -1138,7 +1138,7 @@ export default function IconLibraryPage() {
                 )}
                 {favoriteSymbols.length > 0 && (
                   <div>
-                    <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">{_t.tabs.symbols}</h2>
+                    <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">{t.tabs.symbols}</h2>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-2">
                       {favoriteSymbols.map((entry) => {
                         const id = `sym-${entry.name}`;
@@ -1158,7 +1158,7 @@ export default function IconLibraryPage() {
                 )}
                 {favoriteEmojis.length > 0 && (
                   <div>
-                    <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">{_t.tabs.emojis}</h2>
+                    <h2 className="mb-3 text-sm font-medium text-slate-400 uppercase tracking-wider">{t.tabs.emojis}</h2>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2">
                       {favoriteEmojis.map((entry) => {
                         const id = `emo-${entry.name}`;

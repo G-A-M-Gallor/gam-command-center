@@ -88,7 +88,7 @@ const authLabels: Record<string, { label: string; key: 'authPublic' | 'authRequi
   admin: { label: '', key: 'authAdmin', color: 'text-red-400' },
 };
 
-export function ApiEndpointsPanel({ _t }: ApiEndpointsPanelProps) {
+export function ApiEndpointsPanel({ t }: ApiEndpointsPanelProps) {
   const [testResults, setTestResults] = useState<Record<string, 'ok' | 'fail' | 'loading'>>({});
 
   const handleTry = async (path: string) => {
@@ -122,7 +122,7 @@ export function ApiEndpointsPanel({ _t }: ApiEndpointsPanelProps) {
               <tr className="border-b border-slate-700/50 bg-slate-800/30">
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.method}</th>
                 <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.path}</th>
-                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{_t.auth}</th>
+                <th className="px-4 py-2.5 text-left font-medium text-slate-500">{t.auth}</th>
                 <th className="w-16 px-4 py-2.5 text-left font-medium text-slate-500" />
               </tr>
             </thead>
@@ -143,7 +143,7 @@ export function ApiEndpointsPanel({ _t }: ApiEndpointsPanelProps) {
                     <td className="px-4 py-2 font-mono text-slate-300">{ep.path}</td>
                     <td className="px-4 py-2">
                       <span className={`text-[10px] font-medium ${authInfo.color}`}>
-                        {_t[authInfo.key]}
+                        {t[authInfo.key]}
                       </span>
                     </td>
                     <td className="px-4 py-2">
@@ -160,7 +160,7 @@ export function ApiEndpointsPanel({ _t }: ApiEndpointsPanelProps) {
                           ) : testState === 'fail' ? (
                             <XCircle className="h-3 w-3 text-red-400" />
                           ) : (
-                            _t.tryIt
+                            t.tryIt
                           )}
                         </button>
                       )}

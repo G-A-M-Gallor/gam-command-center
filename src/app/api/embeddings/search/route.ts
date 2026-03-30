@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { embedQuery } from "@/lib/ai/embeddings";
 import { requireAuth } from "@/lib/api/auth";
 import { embeddingsSearchSchema } from "@/lib/api/schemas";
@@ -11,9 +11,9 @@ function getServiceClient() {
   );
 }
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   // Authenticate the request
-  const { error: authError } = await requireAuth(_request);
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest) {
     const parsed = embeddingsSearchSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid _request", details: parsed.error.flatten() },
+        { error: "Invalid request", details: parsed.error.flatten() },
         { status: 400 }
       );
     }

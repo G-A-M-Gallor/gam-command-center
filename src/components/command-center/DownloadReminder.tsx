@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { _X, Globe, _Monitor, Smartphone } from "lucide-react";
+import { X, Globe, Monitor, Smartphone } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 const REMINDER_KEY = "cc-download-reminder-last";
 const REMINDER_INTERVAL_MS = 10 * 24 * 60 * 60 * 1000; // 10 days
@@ -37,9 +37,7 @@ function shouldShowReminder(): boolean {
 function dismissReminder() {
   try {
     localStorage.setItem(REMINDER_KEY, String(Date.now()));
-  } catch {
-    // Ignore errors
-  }
+  } catch {}
 }
 
 // ─── Popup (center screen, every 10 days) ───────────────
@@ -47,7 +45,7 @@ function dismissReminder() {
 export function DownloadReminderPopup() {
   const [show, setShow] = useState(false);
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const dl = t.downloads as Record<string, string>;
 
   useEffect(() => {
@@ -74,7 +72,7 @@ export function DownloadReminderPopup() {
 
   const platforms = [
     { key: "website", icon: Globe, href: DOWNLOAD_LINKS.website },
-    { key: "desktop", icon: _Monitor, href: DOWNLOAD_LINKS.desktop },
+    { key: "desktop", icon: Monitor, href: DOWNLOAD_LINKS.desktop },
     { key: "android", icon: Smartphone, href: DOWNLOAD_LINKS.android },
     { key: "iphone", icon: Smartphone, href: DOWNLOAD_LINKS.iphone },
   ];

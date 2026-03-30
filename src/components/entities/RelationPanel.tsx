@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Link2, _Plus, _X, Search, ChevronDown, ChevronRight, Loader2,
+  Link2, Plus, X, Search, ChevronDown, ChevronRight, Loader2,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import {
   fetchEntityConnections, fetchNoteRelations, fetchNoteInfoBatch,
   createNoteRelation, deleteNoteRelation, searchNotes,
@@ -39,7 +39,7 @@ interface RelationGroup {
 
 export function RelationPanel({ noteId, entityType }: RelationPanelProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === 'he';
   const lang = (language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en') as keyof I18nLabel;
   const te = t.entities;
@@ -201,7 +201,7 @@ export function RelationPanel({ noteId, entityType }: RelationPanelProps) {
       </button>
 
       {expanded && (
-        <div className="border-_t border-white/[0.04]">
+        <div className="border-t border-white/[0.04]">
           {loading ? (
             <div className="flex items-center justify-center py-4">
               <Loader2 size={14} className="animate-spin text-slate-500" />
@@ -317,7 +317,7 @@ export function RelationPanel({ noteId, entityType }: RelationPanelProps) {
                           </div>
                         )}
                         {searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
-                          <p className="text-[10px] text-slate-600 px-1">{_t.common.noResults}</p>
+                          <p className="text-[10px] text-slate-600 px-1">{t.common.noResults}</p>
                         )}
                       </div>
                     )}

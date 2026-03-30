@@ -8,7 +8,7 @@ import {
   PenTool,
   Filter,
   Bot,
-  _Star,
+  Star,
 } from "lucide-react";
 
 // ─── Scope & Category ───────────────────────────────────────
@@ -41,7 +41,7 @@ export const SHORTCUT_CATEGORIES: CategoryDefinition[] = [
   { id: "editing", label: { he: "עריכה", en: "Editing", ru: "Редактирование" }, icon: PenTool },
   { id: "filtering", label: { he: "סינון", en: "Filtering", ru: "Фильтрация" }, icon: Filter },
   { id: "ai", label: { he: "AI", en: "AI", ru: "AI" }, icon: Bot },
-  { id: "custom", label: { he: "מותאם אישית", en: "Custom", ru: "Пользовательские" }, icon: _Star },
+  { id: "custom", label: { he: "מותאם אישית", en: "Custom", ru: "Пользовательские" }, icon: Star },
 ];
 
 // ─── Shortcut Types ─────────────────────────────────────────

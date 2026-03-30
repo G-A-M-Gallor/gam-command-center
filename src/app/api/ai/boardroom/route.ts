@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { _createClient } from "@supabase/supabase-js";
+import { createClient } from "@supabase/supabase-js";
 import { requireAuth } from "@/lib/api/auth";
 import { boardRoomSchema } from "@/lib/api/schemas";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/api/rate-limit";
@@ -61,11 +61,11 @@ async function checkAndUpdateBudget(
   return { allowed: true, remaining: Math.max(DAILY_TOKEN_LIMIT - newTotal, 0) };
 }
 
-export async function POST(_request: Request) {
-  const rl = checkRateLimit(_request, RATE_LIMITS.ai);
+export async function POST(request: Request) {
+  const rl = checkRateLimit(request, RATE_LIMITS.ai);
   if (rl.limited) return rl.response;
 
-  const authResult = await requireAuth(_request);
+  const authResult = await requireAuth(request);
   if (authResult.error !== null) {
     return new Response(
       JSON.stringify({ error: authResult.error }),
@@ -96,7 +96,7 @@ export async function POST(_request: Request) {
   const parsed = boardRoomSchema.safeParse(rawBody);
   if (!parsed.success) {
     return new Response(
-      JSON.stringify({ error: "Invalid _request", details: parsed.error.flatten() }),
+      JSON.stringify({ error: "Invalid request", details: parsed.error.flatten() }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
@@ -129,7 +129,7 @@ export async function POST(_request: Request) {
       model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
       system: systemPrompt,
-      messages: [{ role: "_user", content: question }],
+      messages: [{ role: "user", content: question }],
     });
 
     const encoder = new TextEncoder();
@@ -180,7 +180,7 @@ export async function POST(_request: Request) {
     });
 
     return new Response(readable, {
-      _headers: {
+      headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",

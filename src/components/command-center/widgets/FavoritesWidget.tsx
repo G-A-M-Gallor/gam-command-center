@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  _X,
-  _Plus,
-  _Layers,
+  X,
+  Plus,
+  Layers,
   FileEdit,
   Map,
   Grid3X3,
@@ -17,7 +17,7 @@ import {
   GripVertical,
   } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import type { WidgetSize } from "./WidgetRegistry";
 
 const FAVORITES_KEY = "cc-favorites";
@@ -29,7 +29,7 @@ export interface FavoriteItem {
 }
 
 const routeIcons: Record<string, typeof Layers> = {
-  "/dashboard/layers": _Layers,
+  "/dashboard/layers": Layers,
   "/dashboard/editor": FileEdit,
   "/dashboard/story-map": Map,
   "/dashboard/functional-map": Grid3X3,
@@ -71,8 +71,8 @@ export function toggleFavorite(href: string, label: string) {
 
 export function FavoritesPanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
-  const _router = useRouter();
+  const t = getTranslations(language);
+  const router = useRouter();
   const pathname = usePathname();
 
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
@@ -151,7 +151,7 @@ export function FavoritesPanel() {
     <div className="space-y-2">
       {favorites.length === 0 ? (
         <p className="py-4 text-center text-sm text-slate-500">
-          {_t.widgets.noFavorites}
+          {t.widgets.noFavorites}
         </p>
       ) : (
         <div className="space-y-0.5">

@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/api/auth';
 import { parseFile } from '@/lib/import/parser';
 import { autoMapColumns } from '@/lib/import/mapper';
-import { _createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import type { GlobalField } from '@/lib/entities/types';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -22,9 +22,9 @@ function getServiceClient() {
   );
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   // Auth check
-  const { error: authError } = await requireAuth(_request);
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }

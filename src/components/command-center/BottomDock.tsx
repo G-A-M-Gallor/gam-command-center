@@ -3,11 +3,11 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "next/navigation";
-import { _Plus, _X, Minus, Search, Pin, PinOff, Settings } from "lucide-react";
+import { Plus, X, Minus, Search, Pin, PinOff, Settings } from "lucide-react";
 import { NAV_GROUPS, type NavItem } from "./Sidebar";
 import { widgetRegistry } from "./widgets/WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useBottomDock, type DockItem } from "@/lib/hooks/useBottomDock";
 import { useShellPrefs } from "@/lib/hooks/useShellPrefs";
 
@@ -117,7 +117,7 @@ function DockIcon({
   onDragOver?: (e: React.DragEvent, index: number) => void;
   onDrop?: (index: number) => void;
 }) {
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const tabs = t.tabs as Record<string, string>;
 
   let Icon: React.ElementType | null = null;
@@ -258,7 +258,7 @@ function DockAddPicker({
 }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const tabs = t.tabs as Record<string, string>;
 
   useEffect(() => { inputRef.current?.focus(); }, []);
@@ -306,7 +306,7 @@ function DockAddPicker({
     <div className="fixed inset-0 z-[9999] flex items-end justify-center">
       <button type="button" onClick={onClose} className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-label="Close" />
       <div
-        className="relative z-10 mx-auto w-full max-w-xl max-h-[65vh] overflow-hidden rounded-t-3xl border-_t border-white/10"
+        className="relative z-10 mx-auto w-full max-w-xl max-h-[65vh] overflow-hidden rounded-t-3xl border-t border-white/10"
         style={{
           background: "rgba(15, 23, 42, 0.92)",
           backdropFilter: "blur(24px) saturate(1.8)",
@@ -430,7 +430,7 @@ interface BottomDockProps {
 }
 
 export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight = "0px" }: BottomDockProps) {
-  const _router = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
   const { language } = useSettings();
   const dock = useBottomDock();
@@ -452,9 +452,7 @@ export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight
         const parsed = JSON.parse(raw);
         if (parsed.dockPinned) setPinned(true);
       }
-    } catch {
-    // Ignore errors
-  }
+    } catch {}
   }, []);
 
   // Auto-hide: debounced trigger with hysteresis to prevent flickering
@@ -556,7 +554,7 @@ export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight
         if (!pinned) handleClose();
       }
     },
-    [dock, _router, pinned, handleClose],
+    [dock, router, pinned, handleClose],
   );
 
   // Check if a page is active

@@ -21,8 +21,8 @@ export function useBreakpoint(): Breakpoint {
       setBreakpoint(getBreakpoint(window.innerWidth));
     }
     update();
-    window.addEventListener("resize", _update);
-    return () => window.removeEventListener("resize", _update);
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
   return breakpoint;

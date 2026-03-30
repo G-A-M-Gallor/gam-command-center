@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useCallback, useMemo } from 'react';
-import { _X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { resolveActions } from '@/lib/entities/resolveActions';
 import { executeAction } from '@/lib/entities/actionHandlers';
 import { resolveActionIcon } from '@/lib/entities/actionIconMap';
 import { bulkUpdateMeta } from '@/lib/supabase/entityQueries';
 import { useAuth } from '@/contexts/AuthContext';
-import { _getTranslations } from '@/lib/i18n';
-import type { _Language } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { NoteRecord, TemplateConfig, GlobalField, ActionButton } from '@/lib/entities/types';
 import { BulkFieldUpdateModal } from './BulkFieldUpdateModal';
 
@@ -33,10 +33,10 @@ interface Props {
 export function EntityActionBar({
   selectedIds, notes, entityType, templateConfig, language, fields, onRefresh, onClearSelection,
 }: Props) {
-  const _t = getTranslations(language as _Language);
+  const t = getTranslations(language as Language);
   const ta = t.entities.actions;
   const isRtl = language === 'he';
-  const { canPerformAction, _user } = useAuth();
+  const { canPerformAction, user } = useAuth();
   const [confirming, setConfirming] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [showBulkFieldUpdate, setShowBulkFieldUpdate] = useState(false);
@@ -99,22 +99,22 @@ export function EntityActionBar({
     const fieldKey = statusField?.meta_key ?? 'status';
     await bulkUpdateMeta([...selectedIds], { [fieldKey]: statusValue }, {
       trackActivity: true,
-      actorId: _user?.id ?? null,
+      actorId: user?.id ?? null,
     });
     setShowBulkStatus(false);
     onRefresh();
     onClearSelection();
-  }, [selectedIds, statusField, _user, onRefresh, onClearSelection]);
+  }, [selectedIds, statusField, user, onRefresh, onClearSelection]);
 
   const handleBulkAssignApply = useCallback(async (assignee: string) => {
     await bulkUpdateMeta([...selectedIds], { assignee }, {
       trackActivity: true,
-      actorId: _user?.id ?? null,
+      actorId: user?.id ?? null,
     });
     setShowBulkAssign(false);
     onRefresh();
     onClearSelection();
-  }, [selectedIds, _user, onRefresh, onClearSelection]);
+  }, [selectedIds, user, onRefresh, onClearSelection]);
 
   if (globalActions.length === 0 && bulkActions.length === 0) return null;
 

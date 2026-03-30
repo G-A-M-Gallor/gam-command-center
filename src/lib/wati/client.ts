@@ -20,10 +20,10 @@ async function watiRequest<T>(path: string, options?: RequestInit): Promise<T> {
   const { baseUrl, token } = getConfig();
   const res = await fetch(`${baseUrl}${path}`, {
     ...options,
-    _headers: {
+    headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
-      ...options?._headers,
+      ...options?.headers,
     },
   });
 

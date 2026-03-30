@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useFocusTrap } from "@/lib/hooks/useFocusTrap";
 
 interface ConfirmDialogProps {
@@ -26,7 +26,7 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
 
   const trapRef = useFocusTrap<HTMLDivElement>({ onEscape: onCancel, enabled: open });
@@ -47,7 +47,7 @@ export function ConfirmDialog({
           <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
           <p className="mt-2 text-sm text-slate-400">{message}</p>
         </div>
-        <div className="flex items-center justify-end gap-2 border-_t border-slate-700 px-5 py-3">
+        <div className="flex items-center justify-end gap-2 border-t border-slate-700 px-5 py-3">
           <button
             onClick={onCancel}
             className="rounded-lg px-3 py-1.5 text-sm text-slate-400 transition-colors hover:bg-slate-700 hover:text-slate-200"

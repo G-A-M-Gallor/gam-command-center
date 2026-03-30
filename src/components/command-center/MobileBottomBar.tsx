@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import {
   Grid3X3,
   Menu,
-  _X,
+  X,
   Circle,
   Pencil,
   MoreHorizontal,
@@ -16,9 +16,9 @@ import {
 import { NAV_GROUPS, type NavItem } from "./Sidebar";
 import { widgetRegistry } from "./widgets/WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useMobileBottomBar, type BottomBarSlot } from "@/lib/hooks/useMobileBottomBar";
-import type { _Language } from "@/contexts/SettingsContext";
+import type { Language } from "@/contexts/SettingsContext";
 
 // ─── Helpers ────────────────────────────────────────────
 
@@ -49,9 +49,9 @@ function FullNavSheet({
   onWidgetPanelOpen: () => void;
   language: Language;
 }) {
-  const _router = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const tabs = t.tabs as Record<string, string>;
   const bb = t.bottomBar as Record<string, string>;
 
@@ -64,7 +64,7 @@ function FullNavSheet({
         aria-label={bb.closeMenu}
       />
       <div
-        className="relative z-10 w-full max-h-[80vh] overflow-y-auto rounded-t-2xl bg-slate-800 border-_t border-slate-700"
+        className="relative z-10 w-full max-h-[80vh] overflow-y-auto rounded-t-2xl bg-slate-800 border-t border-slate-700"
         style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
       >
         {/* Header */}
@@ -84,7 +84,7 @@ function FullNavSheet({
           <div key={group.id}>
             <div className="px-4 pt-3 pb-1">
               <span className="text-[10px] uppercase tracking-wider text-slate-500 font-medium">
-                {(_t.sidebar as Record<string, string>)[group.labelKey] || group.labelKey}
+                {(t.sidebar as Record<string, string>)[group.labelKey] || group.labelKey}
               </span>
             </div>
             {group.items.map((item) => {
@@ -149,7 +149,7 @@ interface SlotPickerProps {
 }
 
 function SlotPicker({ onSelect, onClose, language }: SlotPickerProps) {
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const bb = t.bottomBar as Record<string, string>;
   const tabs = t.tabs as Record<string, string>;
 
@@ -164,7 +164,7 @@ function SlotPicker({ onSelect, onClose, language }: SlotPickerProps) {
       />
       {/* Sheet */}
       <div
-        className="relative z-10 w-full max-h-[70vh] overflow-y-auto rounded-t-2xl bg-slate-800 border-_t border-slate-700"
+        className="relative z-10 w-full max-h-[70vh] overflow-y-auto rounded-t-2xl bg-slate-800 border-t border-slate-700"
         style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
       >
         {/* Header */}
@@ -260,12 +260,12 @@ interface MobileBottomBarProps {
 
 export function MobileBottomBar({ sidebarOpen, onSidebarToggle, onWidgetPanelOpen }: MobileBottomBarProps) {
   const pathname = usePathname();
-  const _router = useRouter();
+  const router = useRouter();
   const { language, skinConfig } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const bb = t.bottomBar as Record<string, string>;
   const tabs = t.tabs as Record<string, string>;
-  const { slots, editMode, _setEditMode, setSlot } = useMobileBottomBar();
+  const { slots, editMode, setEditMode, setSlot } = useMobileBottomBar();
   const [pickerIndex, setPickerIndex] = useState<0 | 1 | 2 | null>(null);
   const [fullNavOpen, setFullNavOpen] = useState(false);
 
@@ -318,7 +318,7 @@ export function MobileBottomBar({ sidebarOpen, onSidebarToggle, onWidgetPanelOpe
         onWidgetPanelOpen();
       }
     }
-  }, [editMode, slots, _router, onWidgetPanelOpen]);
+  }, [editMode, slots, router, onWidgetPanelOpen]);
 
   // ── Render a middle slot ───────────────────────────────
   const renderSlot = (index: 0 | 1 | 2) => {
@@ -475,7 +475,7 @@ export function MobileBottomBar({ sidebarOpen, onSidebarToggle, onWidgetPanelOpe
     return (
       <>
         <div
-          className="fixed bottom-0 left-0 right-0 z-[60] border-_t border-slate-700 bg-slate-800"
+          className="fixed bottom-0 left-0 right-0 z-[60] border-t border-slate-700 bg-slate-800"
           style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
         >
           <div className="flex h-14 items-stretch">
@@ -555,7 +555,7 @@ export function MobileBottomBar({ sidebarOpen, onSidebarToggle, onWidgetPanelOpe
   return (
     <>
       <div
-        className="fixed bottom-0 left-0 right-0 z-[60] border-_t border-slate-700 bg-slate-800"
+        className="fixed bottom-0 left-0 right-0 z-[60] border-t border-slate-700 bg-slate-800"
         style={{ paddingBottom: "var(--safe-area-bottom, 0px)" }}
         onTouchStart={handleLongPressStart}
         onTouchEnd={handleLongPressEnd}

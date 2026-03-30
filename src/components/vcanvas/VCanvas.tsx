@@ -42,9 +42,7 @@ function loadScene(key: string): ExcalidrawData | null {
 function saveScene(key: string, scene: ExcalidrawData): void {
   try {
     localStorage.setItem(STORAGE_KEY_PREFIX + key, JSON.stringify(scene));
-  } catch {
-    // Ignore errors
-  }
+  } catch {}
 }
 
 // ─── Language Map ────────────────────────────────────
@@ -72,7 +70,7 @@ interface Props {
   className?: string;
 }
 
-export function VCanvas({ persistenceKey, _context, mode, language, className = "h-full" }: Props) {
+export function VCanvas({ persistenceKey, context, mode, language, className = "h-full" }: Props) {
   const [initialData, setInitialData] = useState<ExcalidrawData | null>(null);
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

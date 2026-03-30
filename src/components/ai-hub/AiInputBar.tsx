@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import {
-  Send, Square, _X, Image as ImageIcon, Reply,
+  Send, Square, X, Image as ImageIcon, Reply,
 } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { isOverBudget } from "@/lib/ai/tokenTracker";
 import { ChatToolbar } from "@/components/command-center/ChatToolbar";
 import type { AIMode } from "@/lib/ai/prompts";
@@ -63,7 +63,7 @@ function fileToAttachment(file: File): Promise<ImageAttachment> {
 export function AiInputBar({
   input, onInputChange, onSend, onStop, isStreaming, mode, atLimit,
   replyingTo, onCancelReply, attachments, onAddAttachment, onRemoveAttachment,
-  onAtTrigger, textareaRef, _t, isRtl, language,
+  onAtTrigger, textareaRef, t, isRtl, language,
 }: AiInputBarProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -158,7 +158,7 @@ export function AiInputBar({
   return (
     <div
       data-cc-id="aihub.input"
-      className={`border-_t border-slate-700/50 px-4 py-3 transition-colors ${isDragOver ? "bg-[var(--cc-accent-600-10)]" : ""}`}
+      className={`border-t border-slate-700/50 px-4 py-3 transition-colors ${isDragOver ? "bg-[var(--cc-accent-600-10)]" : ""}`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -262,7 +262,7 @@ export function AiInputBar({
             type="button"
             onClick={onStop}
             className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white transition-colors hover:bg-red-500"
-            title={_t.aiHub.stopGeneration}
+            title={t.aiHub.stopGeneration}
           >
             <Square size={13} />
           </button>

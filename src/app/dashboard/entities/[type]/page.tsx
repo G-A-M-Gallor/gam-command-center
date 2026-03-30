@@ -3,12 +3,12 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  _Plus, Search, Filter, Table2, Kanban, List, Calendar as CalendarIcon,
-  ArrowUpDown, ChevronDown, _X,
-  GanttChart, _Clock, Eye, EyeOff, Bookmark, Save, Trash2, Upload,
+  Plus, Search, Filter, Table2, Kanban, List, Calendar as CalendarIcon,
+  ArrowUpDown, ChevronDown, X,
+  GanttChart, Clock, Eye, EyeOff, Bookmark, Save, Trash2, Upload,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import {
   fetchEntityTypes, fetchGlobalFields, fetchNotes, createNote,
   fetchFieldGroups,
@@ -32,7 +32,7 @@ const VIEW_ICONS: Record<ViewType, React.ElementType> = {
   list: List,
   calendar: CalendarIcon,
   gantt: GanttChart,
-  timeline: _Clock,
+  timeline: Clock,
 };
 
 const SAVED_VIEWS_KEY = 'cc-saved-views';
@@ -50,11 +50,11 @@ function persistSavedViews(entitySlug: string, views: SavedView[]) {
 
 export default function EntityViewPage() {
   const params = useParams();
-  const _router = useRouter();
+  const router = useRouter();
   const entitySlug = params.type as string;
 
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === 'he';
   const te = t.entities;
   const lang = language === 'he' ? 'he' : language === 'ru' ? 'ru' : 'en';
@@ -93,7 +93,7 @@ export default function EntityViewPage() {
         fetchGlobalFields(),
         fetchFieldGroups(),
       ]);
-      const et = types.find(t => _t.slug === entitySlug);
+      const et = types.find(t => t.slug === entitySlug);
       if (et) {
         setEntityType(et);
         setView(et.default_view);

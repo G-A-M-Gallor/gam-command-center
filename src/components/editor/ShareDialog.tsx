@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { _X, Link2, Copy, Check, Unlink } from "lucide-react";
+import { X, Link2, Copy, Check, Unlink } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import {
   createShareLink,
   revokeShareLink,
@@ -25,7 +25,7 @@ interface ShareDialogProps {
 
 export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
   const et = t.editor;
   const localeMap = { he: "he-IL", en: "en-US", ru: "ru-RU" } as const;
@@ -85,7 +85,7 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
             onClick={onClose}
             className="rounded p-1.5 text-slate-400 hover:bg-slate-700 hover:text-slate-200"
           >
-            <_X size={16} />
+            <X size={16} />
           </button>
         </div>
 

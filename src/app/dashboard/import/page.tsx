@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Upload, Columns, Eye, Play, History } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchEntityTypes, fetchGlobalFields } from "@/lib/supabase/entityQueries";
 import { buildImportRows, validateImport } from "@/lib/import/validator";
@@ -26,7 +26,7 @@ const STEPS: { key: Step; icon: React.ElementType }[] = [
 
 export default function ImportPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const it = t.importEngine;
 
   // ─── State ──────────────────────────────────────────
@@ -83,7 +83,7 @@ export default function ImportPage() {
       const token = sessionData?.session?.access_token;
       const res = await fetch("/api/import/parse", {
         method: "POST",
-        _headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
 
@@ -125,7 +125,7 @@ export default function ImportPage() {
       const token = sessionData?.session?.access_token;
       const res = await fetch("/api/import/execute", {
         method: "POST",
-        _headers: {
+        headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
@@ -291,7 +291,7 @@ export default function ImportPage() {
 
           {/* Navigation footer */}
           {step !== "import" && (
-            <div className="shrink-0 flex items-center justify-between border-_t border-slate-700/50 px-6 py-3">
+            <div className="shrink-0 flex items-center justify-between border-t border-slate-700/50 px-6 py-3">
               <button
                 type="button"
                 onClick={handleBack}

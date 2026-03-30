@@ -9,8 +9,8 @@ const DEFAULT_MIN: VBlockSize = { width: 120, height: 80 };
 const DEFAULT_MAX: VBlockSize = { width: 1200, height: 900 };
 
 function computeMode(size: VBlockSize): VBlockMode {
-  const { _compact, standard, expanded } = VBLOCK_BREAKPOINTS;
-  if (size.width <= compact.maxWidth && size.height <= _compact.maxHeight) return "compact";
+  const { compact, standard, expanded } = VBLOCK_BREAKPOINTS;
+  if (size.width <= compact.maxWidth && size.height <= compact.maxHeight) return "compact";
   if (size.width <= standard.maxWidth && size.height <= standard.maxHeight) return "standard";
   if (size.width <= expanded.maxWidth && size.height <= expanded.maxHeight) return "expanded";
   return "expanded"; // fullscreen is set explicitly

@@ -51,12 +51,12 @@ export function hslToRgb(h: number, s: number, l: number): { r: number; g: numbe
     return { r: v, g: v, b: v };
   }
 
-  const hue2rgb = (p: number, q: number, _t: number) => {
-    if (_t < 0) t += 1;
-    if (_t > 1) t -= 1;
-    if (_t < 1 / 6) return p + (q - p) * 6 * t;
-    if (_t < 1 / 2) return q;
-    if (_t < 2 / 3) return p + (q - p) * (2 / 3 - _t) * 6;
+  const hue2rgb = (p: number, q: number, t: number) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
     return p;
   };
 

@@ -1,7 +1,7 @@
 import { getDecryptedTokens } from "./googleAccountQueries";
 import { refreshAccessToken } from "./oauth";
 import { encrypt } from "./crypto";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Returns a valid access token for a Google account.

@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   MessageCircle, UserCircle, Send, Bot, StopCircle,
-  RotateCcw, ChevronDown, Sparkles, _Clock
+  RotateCcw, ChevronDown, Sparkles, Clock
 } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
 // Using dedicated advisor API route
 import { PERSONAS, getPersonaById } from "@/lib/ai/personas";
@@ -20,10 +20,10 @@ interface AdvisorChatProps {
 export function AdvisorChat({
   selectedPersonaId,
   className,
-  _compact = false
+  compact = false
 }: AdvisorChatProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   const [selectedPersona, setSelectedPersona] = useState(
     selectedPersonaId ? getPersonaById(selectedPersonaId) : PERSONAS[0]
@@ -73,7 +73,7 @@ export function AdvisorChat({
     try {
       const response = await fetch('/api/ai/advisor', {
         method: 'POST',
-        _headers: {
+        headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -218,7 +218,7 @@ export function AdvisorChat({
         <div className="flex items-center gap-3">
           <Bot className={`${compact ? 'w-4 h-4' : 'w-5 h-5'} text-purple-400`} />
           <div>
-            <h3 className={`font-medium text-slate-200 ${_compact ? 'text-sm' : 'text-base'}`}>
+            <h3 className={`font-medium text-slate-200 ${compact ? 'text-sm' : 'text-base'}`}>
               יועץ AI
             </h3>
             {selectedPersona && (
@@ -246,7 +246,7 @@ export function AdvisorChat({
         {messages.length === 0 && (
           <div className="text-center text-slate-400 mt-8">
             <Sparkles className="w-8 h-8 mx-auto mb-3 text-purple-400" />
-            <p className={_compact ? 'text-sm' : 'text-base'}>
+            <p className={compact ? 'text-sm' : 'text-base'}>
               שאל את {selectedPersona?.name.he} כל שאלה
             </p>
             <p className="text-xs mt-1 text-slate-500">
@@ -259,7 +259,7 @@ export function AdvisorChat({
           <div
             key={index}
             className={`flex gap-3 ${
-              message.role === "_user" ? "justify-end" : "justify-start"
+              message.role === "user" ? "justify-end" : "justify-start"
             }`}
           >
             {message.role === "assistant" && (
@@ -301,7 +301,7 @@ export function AdvisorChat({
               <Bot className="w-4 h-4 text-purple-400 animate-pulse" />
             </div>
             <div className="max-w-[80%] rounded-lg p-3 bg-slate-800 text-slate-200 border border-slate-700">
-              <p className={`whitespace-pre-wrap ${_compact ? 'text-sm' : 'text-base'}`}>
+              <p className={`whitespace-pre-wrap ${compact ? 'text-sm' : 'text-base'}`}>
                 {streamingContent}
                 <span className="animate-pulse">|</span>
               </p>
@@ -333,7 +333,7 @@ export function AdvisorChat({
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center gap-2"
             >
               <StopCircle className="w-4 h-4" />
-              {!_compact && "עצור"}
+              {!compact && "עצור"}
             </button>
           ) : (
             <button

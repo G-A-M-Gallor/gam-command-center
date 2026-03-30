@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
-import { _getTranslations } from '@/lib/i18n';
-import type { _Language } from '@/contexts/SettingsContext';
+import { getTranslations } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import type { EntityType, EntityConnection } from '@/lib/entities/types';
 
 interface Props {
@@ -13,14 +13,14 @@ interface Props {
 
 export function ConnectionDiagram({ types, connections, language }: Props) {
   const lang = language === 'he' ? 'he' : 'en';
-  const tr = getTranslations(language as _Language);
+  const tr = getTranslations(language as Language);
 
   const mermaid = useMemo(() => {
     const lines = ['graph LR'];
 
-    for (const _t of types) {
+    for (const t of types) {
       const label = t.label[lang] || t.slug;
-      lines.push(`  ${t.slug}["${_t.icon} ${label}"]`);
+      lines.push(`  ${t.slug}["${t.icon} ${label}"]`);
     }
 
     for (const c of connections) {
@@ -49,7 +49,7 @@ export function ConnectionDiagram({ types, connections, language }: Props) {
       {/* Visual nodes */}
       <div className="flex flex-wrap gap-6 justify-center py-4">
         {types.map(t => {
-          const typeConns = connections.filter(c => c.source_type === t.slug || c.target_type === _t.slug);
+          const typeConns = connections.filter(c => c.source_type === t.slug || c.target_type === t.slug);
           return (
             <div
               key={t.slug}
@@ -57,7 +57,7 @@ export function ConnectionDiagram({ types, connections, language }: Props) {
               style={{ borderColor: `${t.color}40` }}
             >
               <span className="text-xl">{t.icon}</span>
-              <span className="text-xs font-medium text-slate-300">{t.label[lang] || _t.slug}</span>
+              <span className="text-xs font-medium text-slate-300">{t.label[lang] || t.slug}</span>
               <span className="text-[9px] text-slate-500">{typeConns.length} {tr.entities.linksCount}</span>
             </div>
           );
@@ -67,8 +67,8 @@ export function ConnectionDiagram({ types, connections, language }: Props) {
       {/* Connection list */}
       <div className="space-y-1">
         {connections.map(c => {
-          const sourceType = types.find(t => _t.slug === c.source_type);
-          const targetType = types.find(t => _t.slug === c.target_type);
+          const sourceType = types.find(t => t.slug === c.source_type);
+          const targetType = types.find(t => t.slug === c.target_type);
           return (
             <div key={c.id} className="flex items-center gap-2 text-xs text-slate-400 px-2">
               <span style={{ color: sourceType?.color ?? undefined }}>

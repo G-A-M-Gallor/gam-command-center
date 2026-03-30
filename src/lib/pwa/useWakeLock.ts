@@ -9,7 +9,7 @@ export function useWakeLock() {
   const isSupported =
     typeof navigator !== "undefined" && "wakeLock" in navigator;
 
-  const _request = useCallback(async () => {
+  const request = useCallback(async () => {
     if (!isSupported) return false;
     try {
       const sentinel = await navigator.wakeLock.request("screen");
@@ -41,7 +41,7 @@ export function useWakeLock() {
     } else {
       await request();
     }
-  }, [isActive, _request, release]);
+  }, [isActive, request, release]);
 
   // Release on unmount
   useEffect(() => {
@@ -50,5 +50,5 @@ export function useWakeLock() {
     };
   }, []);
 
-  return { isActive, isSupported, _request, release, toggle };
+  return { isActive, isSupported, request, release, toggle };
 }

@@ -289,7 +289,7 @@ export default function VideoPromptPage() {
             {/* Transitions */}
             <PillGroup
               label="Transitions"
-              options={transitionOptions.map(t => ({ value: String(_t.value), label: t.label }))}
+              options={transitionOptions.map(t => ({ value: String(t.value), label: t.label }))}
               selected={String(selectedTransitions)}
               onSelect={v => setSelectedTransitions(Number(v))}
               accent={accent}
@@ -360,7 +360,7 @@ export default function VideoPromptPage() {
             )}
 
             {prompt && (
-              <div className="mt-4 flex items-center justify-between border-_t pt-4" style={{ borderColor: borderDefault }}>
+              <div className="mt-4 flex items-center justify-between border-t pt-4" style={{ borderColor: borderDefault }}>
                 <span className="text-xs opacity-40">{prompt.length} characters</span>
                 <div className="flex gap-2">
                   <button

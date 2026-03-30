@@ -11,9 +11,9 @@ const brainSearchSchema = z.object({
   filter_domain: z.string().optional(),
 });
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   // Authenticate the request
-  const { error: authError } = await requireAuth(_request);
+  const { error: authError } = await requireAuth(request);
   if (authError) {
     return NextResponse.json({ error: authError }, { status: 401 });
   }
@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest) {
     const parsed = brainSearchSchema.safeParse(rawBody);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid _request", details: parsed.error.flatten() },
+        { error: "Invalid request", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
@@ -37,7 +37,7 @@ export async function POST(_request: NextRequest) {
 
     const semanticResponse = await fetch(`${supabaseUrl}/functions/v1/semantic-query`, {
       method: 'POST',
-      _headers: {
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${supabaseAnonKey}`,
         'apikey': supabaseAnonKey,

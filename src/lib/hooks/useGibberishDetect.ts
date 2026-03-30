@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { detectGibberish, toHebrew, toEnglish, replaceFullText } from "@/lib/gibberish";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/contexts/ToastContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 const DEBOUNCE_MS = 1200;
 const COOLDOWN_MS = 30_000;
@@ -50,7 +50,7 @@ export function useGibberishDetect() {
         const result = detectGibberish(text);
         if (!result) return;
 
-        const _t = getTranslations(language);
+        const t = getTranslations(language);
         const message =
           result.direction === "to_hebrew"
             ? `${t.settings.gibberishMeantHebrew} "${result.preview}"`
@@ -65,7 +65,7 @@ export function useGibberishDetect() {
           message,
           duration: 6000,
           action: {
-            label: _t.settings.gibberishConvert,
+            label: t.settings.gibberishConvert,
             onClick: () => {
               const converter = result.direction === "to_hebrew" ? toHebrew : toEnglish;
               replaceFullText(el, converter);

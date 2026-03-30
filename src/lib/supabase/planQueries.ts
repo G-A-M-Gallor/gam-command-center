@@ -1,4 +1,4 @@
-import { _createClient } from './client';
+import { createClient } from './client';
 
 export interface PlanPhase {
   phase: number;

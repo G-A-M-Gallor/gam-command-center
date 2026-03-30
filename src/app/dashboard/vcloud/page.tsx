@@ -13,7 +13,7 @@ import {
   UserCircle,
   Upload,
   Trash2,
-  _ExternalLink,
+  ExternalLink,
   Search,
   RefreshCw,
   Grid3x3,
@@ -21,10 +21,10 @@ import {
   Copy,
   Check,
   FileIcon,
-  _Clock,
+  Clock,
   HardDrive,
   Eye,
-  _X,
+  X,
   Film,
   BookOpen,
 } from "lucide-react";
@@ -76,7 +76,7 @@ export default function VCloudPage() {
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const tabConfig = TABS.find((_t) => t.key === activeTab)!;
+  const tabConfig = TABS.find((t) => t.key === activeTab)!;
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -152,9 +152,7 @@ export default function VCloudPage() {
       if (res.ok) {
         setFiles((prev) => prev.filter((f) => f.id !== fileId));
       }
-    } catch {
-    // Ignore errors
-  }
+    } catch {}
   };
 
   const copyUrl = (url: string, id: string) => {
@@ -420,7 +418,7 @@ export default function VCloudPage() {
                       </span>
                       {file.duration_seconds ? (
                         <span className="flex items-center gap-1">
-                          <_Clock className="h-3 w-3" />
+                          <Clock className="h-3 w-3" />
                           {Math.floor(file.duration_seconds / 60)}:{String(file.duration_seconds % 60).padStart(2, "0")}
                         </span>
                       ) : null}

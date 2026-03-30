@@ -10,21 +10,21 @@ const parser = new Parser({ timeout: 10_000 });
  * POST /api/rss/sync — Manual trigger
  * Auth: JWT or CRON_SECRET
  */
-export async function GET(_request: Request) {
-  return handleRssSync(_request);
+export async function GET(request: Request) {
+  return handleRssSync(request);
 }
 
-export async function POST(_request: Request) {
-  return handleRssSync(_request);
+export async function POST(request: Request) {
+  return handleRssSync(request);
 }
 
-async function handleRssSync(_request: Request) {
+async function handleRssSync(request: Request) {
   // Auth: either JWT or CRON_SECRET
   const cronSecret = request.headers.get('x-cron-secret') || request.headers.get('authorization')?.replace('Bearer ', '');
   const isVercelCron = process.env.CRON_SECRET && cronSecret === process.env.CRON_SECRET;
 
   if (!isVercelCron) {
-    const { error: authError } = await requireAuth(_request);
+    const { error: authError } = await requireAuth(request);
     if (authError) {
       return NextResponse.json({ error: authError }, { status: 401 });
     }

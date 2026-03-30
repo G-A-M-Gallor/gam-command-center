@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MoreHorizontal } from "lucide-react";
 import { widgetRegistry } from "./widgets/WidgetRegistry";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 interface OverflowMenuProps {
   widgetIds: string[];
@@ -15,7 +15,7 @@ export function OverflowMenu({ widgetIds, onWidgetClick }: OverflowMenuProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
 
   // Close on click outside or Escape
   useEffect(() => {
@@ -59,7 +59,7 @@ export function OverflowMenu({ widgetIds, onWidgetClick }: OverflowMenuProps) {
       {open && (
         <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-lg border border-slate-700 bg-slate-800 py-1 shadow-xl">
           <div className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
-            {_t.smartBar?.overflow || "More widgets"} ({widgetIds.length})
+            {t.smartBar?.overflow || "More widgets"} ({widgetIds.length})
           </div>
           {widgetIds.map((widgetId) => {
             const widget = widgetRegistry.find((w) => w.id === widgetId);

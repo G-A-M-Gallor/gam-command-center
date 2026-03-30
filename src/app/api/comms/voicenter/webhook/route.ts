@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { _createClient } from "@supabase/supabase-js";
-import { _findEntityByPhone } from "@/lib/wati/sync";
+import { createClient } from "@supabase/supabase-js";
+import { findEntityByPhone } from "@/lib/wati/sync";
 import { sendCommPush } from "@/lib/push/sendCommPush";
 
 function getServiceClient() {
@@ -15,7 +15,7 @@ function getServiceClient() {
  * Receives CDR (Call Detail Record) webhooks from Voicenter.
  * Auth via VOICENTER_WEBHOOK_SECRET header.
  */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // Verify webhook secret — always required
     const secret = process.env.VOICENTER_WEBHOOK_SECRET;

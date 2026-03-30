@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { Webhook } from "svix";
 
 // Resend webhook events for email tracking
@@ -20,7 +20,7 @@ interface ResendWebhookPayload {
   };
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
   const body = await request.text();
 
@@ -30,7 +30,7 @@ export async function POST(_request: Request) {
     const svixSignature = request.headers.get("svix-signature");
     const svixTimestamp = request.headers.get("svix-timestamp");
     if (!svixId || !svixSignature || !svixTimestamp) {
-      return NextResponse.json({ error: "Missing webhook _headers" }, { status: 401 });
+      return NextResponse.json({ error: "Missing webhook headers" }, { status: 401 });
     }
     try {
       const wh = new Webhook(webhookSecret);

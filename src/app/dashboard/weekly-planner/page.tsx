@@ -1,13 +1,13 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { WeeklyPlannerPanel } from "@/components/command-center/widgets/WeeklyPlannerWidget";
 
 export default function WeeklyPlannerPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
 
   return (

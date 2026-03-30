@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Course Lessons API — /api/courses/[id]/lessons
@@ -8,16 +8,16 @@ import { _createClient } from "@/lib/supabase/server";
  */
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
     const {
-      data: { _user },
+      data: { user },
     } = await supabase.auth.getUser();
 
-    if (!_user) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

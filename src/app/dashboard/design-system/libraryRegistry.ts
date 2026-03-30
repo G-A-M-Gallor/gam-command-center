@@ -151,10 +151,10 @@ function twentyFirst(
 
 const SHADCN_COMPONENTS: LibraryComponentEntry[] = [
   shadcn("accordion", "Accordion", "layout", "רכיב מתקפל להצגת תוכן", "Collapsible content sections", ["collapse", "expand"]),
-  shadcn("alert", "Alert", "feedback", "הודעה חשובה למשתמש", "Important message for the _user", ["message", "warning"]),
+  shadcn("alert", "Alert", "feedback", "הודעה חשובה למשתמש", "Important message for the user", ["message", "warning"]),
   shadcn("alert-dialog", "Alert Dialog", "overlay", "דיאלוג אישור עם פעולה הרסנית", "Confirmation dialog for destructive actions", ["confirm", "modal"]),
   shadcn("aspect-ratio", "Aspect Ratio", "layout", "שומר יחס גובה-רוחב קבוע", "Maintains a fixed aspect ratio", ["image", "video"]),
-  shadcn("avatar", "Avatar", "data-display", "תמונת פרופיל עם fallback", "Profile image with fallback", ["_user", "_profile"]),
+  shadcn("avatar", "Avatar", "data-display", "תמונת פרופיל עם fallback", "Profile image with fallback", ["user", "profile"]),
   shadcn("badge", "Badge", "data-display", "תווית סטטוס קטנה", "Small status label", ["tag", "label", "status"]),
   shadcn("breadcrumb", "Breadcrumb", "navigation", "נתיב ניווט היררכי", "Hierarchical navigation path", ["path", "trail"]),
   shadcn("button", "Button", "button", "כפתור אינטראקטיבי עם גרסאות", "Interactive button with variants", ["action", "click"]),
@@ -164,7 +164,7 @@ const SHADCN_COMPONENTS: LibraryComponentEntry[] = [
   shadcn("checkbox", "Checkbox", "input", "תיבת סימון", "Toggle checkbox", ["check", "toggle"]),
   shadcn("collapsible", "Collapsible", "layout", "אזור מתקפל פשוט", "Simple collapsible area", ["expand", "collapse"]),
   shadcn("command", "Command", "input", "פלטת פקודות — Cmd+K", "Command palette — Cmd+K", ["search", "palette", "cmdk"]),
-  shadcn("context-menu", "Context Menu", "overlay", "תפריט קליק ימני", "Right-click _context menu", ["menu", "right-click"]),
+  shadcn("context-menu", "Context Menu", "overlay", "תפריט קליק ימני", "Right-click context menu", ["menu", "right-click"]),
   shadcn("data-table", "Data Table", "data-display", "טבלת נתונים מתקדמת עם מיון וסינון", "Advanced data table with sorting and filtering", ["table", "grid", "sort"]),
   shadcn("date-picker", "Date Picker", "input", "בוחר תאריך עם לוח שנה", "Date picker with calendar", ["date", "calendar"]),
   shadcn("dialog", "Dialog", "overlay", "חלון מודאלי", "Modal dialog window", ["modal", "popup"]),

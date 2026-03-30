@@ -3,12 +3,12 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { _Layers, Mail, Lock, Eye, EyeOff, Github, KeyRound, type LucideProps } from "lucide-react";
-import { _createClient } from "@/lib/supabase/client";
+import { Layers, Mail, Lock, Eye, EyeOff, Github, KeyRound, type LucideProps } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { _getTranslations } from "@/lib/i18n";
-import type { _Language } from "@/contexts/SettingsContext";
+import { getTranslations } from "@/lib/i18n";
+import type { Language } from "@/contexts/SettingsContext";
 
 // ─── Brand SVG Icons ──────────────────────────────────────
 
@@ -82,7 +82,7 @@ export default function LoginPage() {
 type AuthTab = "password" | "otp";
 
 function LoginForm() {
-  const _router = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const rawRedirect = searchParams.get("redirect") || "/dashboard";
   // Prevent open redirect — only allow relative paths starting with /
@@ -104,7 +104,7 @@ function LoginForm() {
   const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const supabase = createClient();
 
   useEffect(() => {
@@ -116,7 +116,7 @@ function LoginForm() {
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam === "unauthorized") {
-      setError(_t.auth.unauthorized);
+      setError(t.auth.unauthorized);
     }
   }, [searchParams, t.auth.unauthorized]);
 
@@ -131,7 +131,7 @@ function LoginForm() {
     });
 
     if (signInError) {
-      setError(_t.auth.invalidCredentials);
+      setError(t.auth.invalidCredentials);
       setLoading(false);
       return;
     }
@@ -143,7 +143,7 @@ function LoginForm() {
   async function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!email) {
-      setError(_t.auth.email);
+      setError(t.auth.email);
       return;
     }
     setError("");
@@ -155,7 +155,7 @@ function LoginForm() {
     });
 
     if (otpError) {
-      setError(_t.auth.invalidCredentials);
+      setError(t.auth.invalidCredentials);
       setLoading(false);
       return;
     }
@@ -178,7 +178,7 @@ function LoginForm() {
     });
 
     if (verifyError) {
-      setError(_t.auth.invalidCode);
+      setError(t.auth.invalidCode);
       setLoading(false);
       return;
     }
@@ -211,7 +211,7 @@ function LoginForm() {
 
   async function handleForgotPassword() {
     if (!email) {
-      setError(_t.auth.email);
+      setError(t.auth.email);
       return;
     }
     setError("");
@@ -284,7 +284,7 @@ function LoginForm() {
           <form onSubmit={handleSignIn} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-400">
-                {_t.auth.email}
+                {t.auth.email}
               </label>
               <Input
                 type="email"
@@ -335,7 +335,7 @@ function LoginForm() {
             )}
 
             {resetSent && (
-              <p className="text-xs text-emerald-400">{_t.auth.resetSent}</p>
+              <p className="text-xs text-emerald-400">{t.auth.resetSent}</p>
             )}
 
             <Button
@@ -354,7 +354,7 @@ function LoginForm() {
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-slate-400">
-                {_t.auth.email}
+                {t.auth.email}
               </label>
               <Input
                 type="email"
@@ -387,7 +387,7 @@ function LoginForm() {
         {tab === "otp" && otpSent && (
           <div className="space-y-4">
             <p className="text-center text-sm text-emerald-400">
-              {_t.auth.codeSent}
+              {t.auth.codeSent}
             </p>
             <p className="text-center text-xs text-slate-500">{email}</p>
 

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  _X,
+  X,
   Search,
   Maximize2,
   Minimize2,
@@ -13,10 +13,10 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
-  _Plus,
+  Plus,
 } from 'lucide-react';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { Input } from '@/components/ui/Input';
 import {
   fieldTypes,
@@ -42,7 +42,7 @@ interface FieldLibraryProps {
   onClose: () => void;
   sidebarPosition: 'left' | 'right';
   onFieldSelect?: (fieldType: FieldTypeId) => void;
-  /** Anchor top position in px (default: 92 for EditToolbar _context) */
+  /** Anchor top position in px (default: 92 for EditToolbar context) */
   anchorTop?: number;
 }
 
@@ -52,7 +52,7 @@ const FLOATING_POS_KEY = 'cc-field-library-float-pos';
 // ─── Component ───────────────────────────────────────
 export function FieldLibrary({ onClose, sidebarPosition, onFieldSelect, anchorTop = 92 }: FieldLibraryProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const fl = t.fieldLibrary;
   const [query, setQuery] = useState('');
   const [catalogTab, setCatalogTab] = useState<CatalogTab>('existing');

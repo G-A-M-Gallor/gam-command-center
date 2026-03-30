@@ -30,8 +30,8 @@ function stripHtmlTags(html: string): string {
   return text;
 }
 
-export async function POST(_request: Request) {
-  const auth = await requireAuth(_request);
+export async function POST(request: Request) {
+  const auth = await requireAuth(request);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
 
   let rawBody: unknown;
@@ -44,7 +44,7 @@ export async function POST(_request: Request) {
   const parsed = fetchUrlSchema.safeParse(rawBody);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid _request", details: parsed.error.flatten() },
+      { error: "Invalid request", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
@@ -59,7 +59,7 @@ export async function POST(_request: Request) {
 
   try {
     const res = await fetch(url, {
-      _headers: {
+      headers: {
         "User-Agent": "Mozilla/5.0 (compatible; GAM-CC-Bot/1.0)",
         Accept: "text/html,application/xhtml+xml,text/plain",
       },

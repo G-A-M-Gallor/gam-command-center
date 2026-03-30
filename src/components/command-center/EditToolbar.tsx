@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { FormInput, Palette, Layout } from 'lucide-react';
 import { useDashboardMode } from '@/contexts/DashboardModeContext';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import { FieldLibrary } from './fields/FieldLibrary';
 
 type LibraryTab = 'fields' | 'templates' | 'styles';
@@ -12,7 +12,7 @@ type LibraryTab = 'fields' | 'templates' | 'styles';
 export function EditToolbar() {
   const { editMode } = useDashboardMode();
   const { language, sidebarPosition } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [activeTab, setActiveTab] = useState<LibraryTab | null>(null);
 
   if (!editMode) return null;
@@ -54,7 +54,7 @@ export function EditToolbar() {
                 <span>{tab.label[language]}</span>
                 {!tab.enabled && (
                   <span className="rounded bg-slate-700 px-1 py-0.5 text-[10px] text-slate-500">
-                    {_t.widgets.soon}
+                    {t.widgets.soon}
                   </span>
                 )}
               </button>

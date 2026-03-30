@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Fetches Origami entity list.
@@ -9,8 +9,8 @@ import { _createClient } from "@/lib/supabase/server";
 export async function GET() {
   // Verify user session via cookie
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ entities: [], connected: false });
   }
 
@@ -23,7 +23,7 @@ export async function GET() {
 
   try {
     const res = await fetch(`${baseUrl}/api/v1/entities`, {
-      _headers: {
+      headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },

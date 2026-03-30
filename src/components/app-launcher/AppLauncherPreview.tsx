@@ -1,13 +1,13 @@
 "use client";
 
-import { _X, _ExternalLink, Maximize2, PanelLeft, _Layers, CreditCard } from "lucide-react";
+import { X, ExternalLink, Maximize2, PanelLeft, Layers, CreditCard } from "lucide-react";
 import type { LauncherItem, LaunchMode } from "@/lib/app-launcher/types";
 import { LAUNCH_MODE_LABELS } from "@/lib/app-launcher/constants";
 import type { LucideIcon } from "lucide-react";
 
 const LAUNCH_MODE_ICONS: Record<LaunchMode, LucideIcon> = {
   "full-page": Maximize2,
-  popup: _Layers,
+  popup: Layers,
   "side-panel": PanelLeft,
   "blur-card": CreditCard,
 };
@@ -33,7 +33,7 @@ export function AppLauncherPreview({
   language,
   labelOverride,
   descriptionOverride,
-  _compact = false,
+  compact = false,
 }: Props) {
   const Icon = item.icon;
   const label = labelOverride || item.label[language] || item.label.en;
@@ -52,7 +52,7 @@ export function AppLauncherPreview({
           onClick={onClose}
           className="rounded-lg p-1 text-slate-500 hover:bg-white/[0.06] hover:text-slate-300 transition-colors"
         >
-          <_X className="h-4 w-4" />
+          <X className="h-4 w-4" />
         </button>
       </div>
 
@@ -67,7 +67,7 @@ export function AppLauncherPreview({
                 : "bg-white/[0.06] border-white/[0.08]"
               }`}
           >
-            <Icon className={`${_compact ? "h-6 w-6" : "h-9 w-9"} text-slate-200`} />
+            <Icon className={`${compact ? "h-6 w-6" : "h-9 w-9"} text-slate-200`} />
           </div>
 
           <h2 className="text-base font-bold text-slate-100">{label}</h2>

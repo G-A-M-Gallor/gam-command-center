@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RefreshCw, _ExternalLink } from "lucide-react";
+import { RefreshCw, ExternalLink } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import type { WidgetSize } from "./WidgetRegistry";
 import Link from "next/link";
@@ -55,7 +55,7 @@ function emptyCounts(): StageCounts {
 // ─── Panel (expanded dropdown) ───────────────────────────
 export function LeadsPipelinePanel() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [counts, setCounts] = useState<StageCounts | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -69,17 +69,17 @@ export function LeadsPipelinePanel() {
 
       if (error) throw error;
 
-      const _grouped = emptyCounts();
+      const grouped = emptyCounts();
       for (const row of data || []) {
         const stage = (row.meta as Record<string, unknown>)?.pipeline_stage as string | undefined;
-        if (stage && stage in _grouped) {
+        if (stage && stage in grouped) {
           grouped[stage as PipelineStage]++;
         } else {
           // Records without a stage count as "lead"
           grouped.lead++;
         }
       }
-      setCounts(_grouped);
+      setCounts(grouped);
     } catch {
       setCounts(emptyCounts());
     }
@@ -106,7 +106,7 @@ export function LeadsPipelinePanel() {
           </span>
           {!loading && counts && (
             <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[10px] font-semibold text-blue-400">
-              {totalActive} {_t.widgets.activeLeads}
+              {totalActive} {t.widgets.activeLeads}
             </span>
           )}
         </div>
@@ -132,7 +132,7 @@ export function LeadsPipelinePanel() {
             <div key={stage} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <span className={`font-medium ${colors.text}`}>
-                  {_t.widgets[i18nKey]}
+                  {t.widgets[i18nKey]}
                 </span>
                 <span className="text-slate-500 tabular-nums">
                   {loading ? (
@@ -174,7 +174,7 @@ export function LeadsPipelinePanel() {
 // ─── Bar content (collapsed widget in TopBar) ────────────
 export function LeadsPipelineBarContent({ size }: { size: WidgetSize }) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
@@ -197,7 +197,7 @@ export function LeadsPipelineBarContent({ size }: { size: WidgetSize }) {
 
   return (
     <span className="truncate text-xs text-slate-400">
-      {total !== null ? `${total} ${t.widgets.activeLeads}` : _t.widgets.leadsPipelineBar}
+      {total !== null ? `${total} ${t.widgets.activeLeads}` : t.widgets.leadsPipelineBar}
     </span>
   );
 }

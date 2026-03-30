@@ -102,7 +102,7 @@ export function EntityContentEditor({ noteId, language }: Props) {
 
       {/* Editor */}
       {!collapsed && content && (
-        <div className="border-_t border-white/[0.04] px-1 py-1 min-h-[120px]">
+        <div className="border-t border-white/[0.04] px-1 py-1 min-h-[120px]">
           <TiptapEditor
             content={content}
             onChange={handleChange}

@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { _createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { emailTemplateSchema } from "@/lib/api/schemas";
 
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const url = new URL(_request.url);
+  const url = new URL(request.url);
   const category = url.searchParams.get("category");
   const engine = url.searchParams.get("engine");
   const tenant_id = url.searchParams.get("tenant_id");
@@ -32,10 +32,10 @@ export async function GET(_request: Request) {
   return NextResponse.json({ templates: data || [] });
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -64,10 +64,10 @@ export async function POST(_request: Request) {
   return NextResponse.json({ template: data }, { status: 201 });
 }
 
-export async function PUT(_request: Request) {
+export async function PUT(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -98,20 +98,20 @@ export async function PUT(_request: Request) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: "Failed to _update template" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to update template" }, { status: 500 });
   }
 
   return NextResponse.json({ template: data });
 }
 
-export async function DELETE(_request: Request) {
+export async function DELETE(request: Request) {
   const supabase = await createClient();
-  const { data: { _user } } = await supabase.auth.getUser();
-  if (!_user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const url = new URL(_request.url);
+  const url = new URL(request.url);
   const id = url.searchParams.get("id");
   if (!id) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });

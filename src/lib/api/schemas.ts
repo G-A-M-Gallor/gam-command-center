@@ -14,7 +14,7 @@ const aiImageSchema = z.object({
 const aiChatMessageSchema = z.object({
   role: z
     .enum(["user", "assistant"], {
-      error: 'role must be "_user" or "assistant" — "system" is not allowed',
+      error: 'role must be "user" or "assistant" — "system" is not allowed',
     }),
   content: z.string().min(1, "Message content cannot be empty").max(10_000, "Message content exceeds 10,000 character limit"),
   images: z.array(aiImageSchema).max(5, "Maximum 5 images per message").optional(),
@@ -24,7 +24,7 @@ export const aiChatSchema = z.object({
   messages: z
     .array(aiChatMessageSchema)
     .min(1, "At least one message is required")
-    .max(50, "Maximum 50 messages per _request"),
+    .max(50, "Maximum 50 messages per request"),
   mode: z.enum(VALID_MODES, {
     error: `Invalid mode — must be one of: ${VALID_MODES.join(", ")}`,
   }),
@@ -91,7 +91,7 @@ export const pushSendSchema = z.object({
   body: z.string().max(500).optional().default(""),
   url: z.string().optional().default("/dashboard"),
   tag: z.string().optional(),
-  userId: z.string().uuid().optional(), // target specific _user, or all if omitted
+  userId: z.string().uuid().optional(), // target specific user, or all if omitted
 });
 
 export type PushSendInput = z.infer<typeof pushSendSchema>;
@@ -173,7 +173,7 @@ export const workManagerSchema = z.object({
   messages: z
     .array(aiChatMessageSchema)
     .min(1, "At least one message is required")
-    .max(50, "Maximum 50 messages per _request"),
+    .max(50, "Maximum 50 messages per request"),
   session_id: z.string().min(1, "session_id is required"),
   user_id: z.string().uuid("user_id must be a valid UUID"),
   current_view: z
@@ -220,7 +220,7 @@ export type EntityUpdateInput = z.infer<typeof entityUpdateSchema>;
 
 export const entityDeleteSchema = z.union([
   z.object({ id: z.string().uuid("id must be a valid UUID") }),
-  z.object({ ids: z.array(z.string().uuid("each id must be a valid UUID")).min(1, "at least one id is required").max(100, "maximum 100 ids per _request") }),
+  z.object({ ids: z.array(z.string().uuid("each id must be a valid UUID")).min(1, "at least one id is required").max(100, "maximum 100 ids per request") }),
 ]);
 
 export type EntityDeleteInput = z.infer<typeof entityDeleteSchema>;

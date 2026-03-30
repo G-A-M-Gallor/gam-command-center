@@ -76,7 +76,7 @@ export default function VBlockTestPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-100">vBlock Shell — דף בדיקה</h1>
         <p className="text-sm text-slate-400 mt-1">
-          בדיקת resize, _context menu, fullscreen, flip card, RTL
+          בדיקת resize, context menu, fullscreen, flip card, RTL
         </p>
       </div>
 
@@ -84,7 +84,7 @@ export default function VBlockTestPage() {
       <StoryMap
         blocks={MOCK_STORY_BLOCKS}
         onStepClick={(blockId) =>
-          handleEvent({ type: "block._context.action", blockId, actionId: "story-map-click" })
+          handleEvent({ type: "block.context.action", blockId, actionId: "story-map-click" })
         }
       />
 
@@ -98,7 +98,7 @@ export default function VBlockTestPage() {
           onEvent={handleEvent}
           onFullscreen="expand"
           showSettings
-          onSettings={() => handleEvent({ type: "block.settings.opened", blockId: "test-_compact" })}
+          onSettings={() => handleEvent({ type: "block.settings.opened", blockId: "test-compact" })}
         >
           {({ mode }) => (
             <div className="flex items-center justify-center h-full p-2">
@@ -185,14 +185,14 @@ export default function VBlockTestPage() {
               label: "ייצוא PNG",
               icon: "🖼",
               onClick: () =>
-                handleEvent({ type: "block._context.action", blockId: "test-large", actionId: "export-png" }),
+                handleEvent({ type: "block.context.action", blockId: "test-large", actionId: "export-png" }),
             },
             {
               id: "share",
               label: "שתף",
               icon: "🔗",
               onClick: () =>
-                handleEvent({ type: "block._context.action", blockId: "test-large", actionId: "share" }),
+                handleEvent({ type: "block.context.action", blockId: "test-large", actionId: "share" }),
             },
           ]}
         >
@@ -207,7 +207,7 @@ export default function VBlockTestPage() {
                   {size.width}×{size.height}px
                 </p>
                 <p className="text-xs text-slate-500">
-                  קליק ימני → _context menu מותאם
+                  קליק ימני → context menu מותאם
                 </p>
               </div>
             </div>

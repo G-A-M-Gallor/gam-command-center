@@ -7,11 +7,11 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  _Clock,
+  Clock,
   Loader2,
-  _ExternalLink,
+  ExternalLink,
 } from 'lucide-react';
-import { _createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import { fetchFeeds, fetchArticles, type RssFeed, type RssArticle } from '@/lib/supabase/rssQueries';
 
 const supabase = createClient();
@@ -71,7 +71,7 @@ export function RssFeedsPanel({ rssT }: RssFeedsPanelProps) {
       const { data: { session } } = await supabase.auth.getSession();
       await fetch('/api/rss/sync', {
         method: 'POST',
-        _headers: { Authorization: `Bearer ${session?.access_token || ''}` },
+        headers: { Authorization: `Bearer ${session?.access_token || ''}` },
       });
       await load();
     } catch {

@@ -5,5 +5,5 @@
  * All 165 consumers import from "@/lib/i18n" — this path still works.
  * The actual translations live in src/lib/i18n/locales/
  */
-export { _getTranslations, loc, loadNamespaces } from "./i18n/index";
+export { getTranslations, loc, loadNamespaces } from "./i18n/index";
 export type { Translations, TranslationKey } from "./i18n/types";

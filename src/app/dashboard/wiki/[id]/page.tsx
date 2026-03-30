@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Trash2, _Plus, _X, Loader2, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Trash2, Plus, X, Loader2, Check } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
@@ -29,9 +29,9 @@ const WIKI_CATEGORIES = ["sales", "ops", "tech", "people", "products"] as const;
 
 export default function WikiDetailPage() {
   const params = useParams();
-  const _router = useRouter();
+  const router = useRouter();
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
   const wikiT = t.wiki as any;
   const tw = wikiT as Record<string, string>;
@@ -99,7 +99,7 @@ export default function WikiDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-_t-[var(--cc-accent-400)]" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-600 border-t-[var(--cc-accent-400)]" />
       </div>
     );
   }

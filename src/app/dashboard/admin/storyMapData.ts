@@ -2,7 +2,7 @@ import type {
   UserJourneyStep, ReleaseTier, MLPTier, RiskEntry,
 } from './types';
 
-// ─── User Journey Steps (_X-Axis) ────────────────────────
+// ─── User Journey Steps (X-Axis) ────────────────────────
 
 export const userJourneySteps: UserJourneyStep[] = [
   // ── Step 1: Authenticate ──

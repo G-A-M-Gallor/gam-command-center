@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Check, _X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Check, X, Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import type { WorkAction } from "@/lib/work-manager/parseAction";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 const ACTION_TYPE_LABELS: Record<string, Record<string, string>> = {
   create_task: { he: "יצירת משימה", en: "Create Task", ru: "Создать задачу" },
@@ -26,7 +26,7 @@ interface ActionPreviewProps {
 export function ActionPreview({ action, lang, onConfirm, onCancel }: ActionPreviewProps) {
   const [status, setStatus] = useState<ExecutionStatus>("idle");
   const [resultMessage, setResultMessage] = useState<string>("");
-  const _t = getTranslations(lang);
+  const t = getTranslations(lang);
 
   const typeLabel = ACTION_TYPE_LABELS[action.type]?.[lang] || action.type;
   const isRtl = lang === "he";
@@ -38,18 +38,18 @@ export function ActionPreview({ action, lang, onConfirm, onCancel }: ActionPrevi
       const result = await onConfirm();
       if (result.success) {
         setStatus("success");
-        setResultMessage(result.message || _t.aiHub.actionSuccess);
+        setResultMessage(result.message || t.aiHub.actionSuccess);
         // Auto-dismiss after 3s on success
         setTimeout(() => {
           onCancel(); // dismiss the preview
         }, 3000);
       } else {
         setStatus("error");
-        setResultMessage(result.message || _t.aiHub.actionError);
+        setResultMessage(result.message || t.aiHub.actionError);
       }
     } catch (err) {
       setStatus("error");
-      setResultMessage(err instanceof Error ? err.message : _t.aiHub.actionError);
+      setResultMessage(err instanceof Error ? err.message : t.aiHub.actionError);
     }
   };
 
@@ -112,8 +112,8 @@ export function ActionPreview({ action, lang, onConfirm, onCancel }: ActionPrevi
             onClick={onCancel}
             className="inline-flex items-center gap-1.5 rounded-md border border-slate-600 px-3 py-1.5 text-xs font-medium text-slate-400 transition-colors hover:bg-slate-700/50 hover:text-slate-300"
           >
-            <_X size={12} />
-            {_t.aiHub.actionCancel}
+            <X size={12} />
+            {t.aiHub.actionCancel}
           </button>
         </div>
       )}
@@ -122,7 +122,7 @@ export function ActionPreview({ action, lang, onConfirm, onCancel }: ActionPrevi
       {status === "executing" && (
         <div className="flex items-center gap-2 text-xs text-slate-400">
           <Loader2 size={14} className="animate-spin text-amber-400" />
-          <span>{_t.aiHub.actionExecuting}</span>
+          <span>{t.aiHub.actionExecuting}</span>
         </div>
       )}
 
@@ -131,7 +131,7 @@ export function ActionPreview({ action, lang, onConfirm, onCancel }: ActionPrevi
         <div className="flex items-center gap-2 text-xs text-emerald-400">
           <Check size={14} />
           <span>{t.aiHub.actionSuccess}</span>
-          {resultMessage && resultMessage !== _t.aiHub.actionSuccess && (
+          {resultMessage && resultMessage !== t.aiHub.actionSuccess && (
             <span className="text-slate-400">— {resultMessage}</span>
           )}
         </div>
@@ -149,7 +149,7 @@ export function ActionPreview({ action, lang, onConfirm, onCancel }: ActionPrevi
             className="inline-flex items-center gap-1.5 rounded-md border border-slate-600 px-2.5 py-1 text-xs font-medium text-slate-400 transition-colors hover:bg-slate-700/50 hover:text-slate-300"
           >
             <RefreshCw size={11} />
-            {_t.aiHub.actionRetry}
+            {t.aiHub.actionRetry}
           </button>
         </div>
       )}

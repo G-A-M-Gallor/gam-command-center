@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Zap } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { streamChat, streamWorkManager } from "@/lib/ai/client";
 import { addUsage, isOverBudget } from "@/lib/ai/tokenTracker";
@@ -55,15 +55,15 @@ const pageKeys: Record<string, string> = {
   "/dashboard/plan": "plan",
 };
 
-function getPageLabel(pathname: string, _t: ReturnType<typeof _getTranslations>): string {
+function getPageLabel(pathname: string, t: ReturnType<typeof getTranslations>): string {
   const key = pageKeys[pathname];
-  if (key && key in _t.tabs) return t.tabs[key as keyof typeof t.tabs];
+  if (key && key in t.tabs) return t.tabs[key as keyof typeof t.tabs];
   return pathname.split("/").pop() || "Dashboard";
 }
 
 function mergeConversations(
   local: Conversation[],
-  cloud: { id: string; mode: string; messages: { role: "_user" | "assistant"; content: string; timestamp: number }[]; title?: string | null; total_tokens_input: number; total_tokens_output: number; created_at: string; updated_at: string }[]
+  cloud: { id: string; mode: string; messages: { role: "user" | "assistant"; content: string; timestamp: number }[]; title?: string | null; total_tokens_input: number; total_tokens_output: number; created_at: string; updated_at: string }[]
 ): Conversation[] {
   const localMap = new Map(local.map((c) => [c.id, c]));
   for (const cc of cloud) {
@@ -89,7 +89,7 @@ function mergeConversations(
 
 export default function AIHubPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const pathname = usePathname();
   const isRtl = language === "he";
 
@@ -142,7 +142,7 @@ export default function AIHubPage() {
       setActiveId(loaded[0].id);
       setMode(loaded[0].mode);
     }
-    setContexts([getPageLabel(pathname, _t)]);
+    setContexts([getPageLabel(pathname, t)]);
 
     loadFromSupabase().then((cloudConvos) => {
       if (cloudConvos.length > 0) {
@@ -177,7 +177,7 @@ export default function AIHubPage() {
     [conversations, activeId]
   );
   const messages = useMemo(() => activeConvo?.messages ?? [], [activeConvo]);
-  const currentPageLabel = getPageLabel(pathname, _t);
+  const currentPageLabel = getPageLabel(pathname, t);
   const currentModel = MODE_MODELS[mode];
   const modelLabel = MODEL_LABELS[currentModel] || currentModel;
 
@@ -406,7 +406,7 @@ export default function AIHubPage() {
         knowledgeUrls.map(async (url) => {
           const res = await fetch("/api/ai/fetch-url", {
             method: "POST",
-            _headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ url }),
           });
           if (!res.ok) return null;
@@ -583,7 +583,7 @@ export default function AIHubPage() {
             onNewChat={createNewChat}
             onKnowledgeOpen={() => setKnowledgeOpen(true)}
             isMobile={isMobile}
-            t={_t}
+            t={t}
           />
         )}
 
@@ -627,7 +627,7 @@ export default function AIHubPage() {
           onNewChat={createNewChat}
           cloudStatus={cloudStatus}
           textareaRef={textareaRef}
-          t={_t}
+          t={t}
           isRtl={isRtl}
           language={language}
         />
@@ -637,7 +637,7 @@ export default function AIHubPage() {
           isOpen={docPanelOpen}
           onClose={() => { setDocPanelOpen(false); setDocContext(null); }}
           onDocChange={setDocContext}
-          t={_t}
+          t={t}
         />
       </div>
 
@@ -646,7 +646,7 @@ export default function AIHubPage() {
         isOpen={knowledgeOpen}
         onClose={() => setKnowledgeOpen(false)}
         mode={mode}
-        t={_t}
+        t={t}
       />
     </div>
   );

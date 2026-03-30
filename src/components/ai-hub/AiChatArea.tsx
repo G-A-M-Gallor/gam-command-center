@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import {
-  _Plus, _X, PanelLeftClose, PanelLeftOpen, PanelRightClose, FileText, Sparkles, UserCircle, ChevronDown,
+  Plus, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, FileText, Sparkles, UserCircle, ChevronDown,
   ClipboardList, HardHat, ShoppingCart, SearchCheck,
-  Calculator, Receipt, Scale, _Shield, Users, Megaphone,
+  Calculator, Receipt, Scale, Shield, Users, Megaphone,
   Handshake, Code2, LineChart, Crown, AlertTriangle, Rocket,
   PenLine, Languages,
 } from "lucide-react";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { MAX_CONVERSATION_MESSAGES, MODE_MODELS, type AIMode } from "@/lib/ai/prompts";
 import { PERSONAS, PERSONA_DOMAINS, getPersonaById } from "@/lib/ai/personas";
 import { AiMessage, StreamingMessage, TypingIndicator } from "./AiMessage";
@@ -78,7 +78,7 @@ interface AiChatAreaProps {
   language: "he" | "en" | "ru";
 }
 
-function getSuggestions(mode: AIMode, _t: ReturnType<typeof _getTranslations>): string[] {
+function getSuggestions(mode: AIMode, t: ReturnType<typeof getTranslations>): string[] {
   switch (mode) {
     case "chat":
       return [t.aiHub.suggestChatStatus, t.aiHub.suggestChatSummarize];
@@ -95,7 +95,7 @@ function getSuggestions(mode: AIMode, _t: ReturnType<typeof _getTranslations>): 
 
 // Mode Tab Bar
 function ModeTabBar({
-  mode, onModeChange, onNewChat, _t,
+  mode, onModeChange, onNewChat, t,
 }: {
   mode: AIMode;
   onModeChange: (m: AIMode) => void;
@@ -157,7 +157,7 @@ const PERSONA_ICON_MAP: Record<string, typeof ClipboardList> = {
   Calculator,
   Receipt,
   Scale,
-  _Shield,
+  Shield,
   Users,
   Megaphone,
   Handshake,
@@ -177,7 +177,7 @@ function getPersonaIcon(iconName: string) {
 // ─── Persona Selector ────────────────────────────────────────────
 
 function PersonaSelector({
-  selectedPersona, onPersonaChange, _t, language,
+  selectedPersona, onPersonaChange, t, language,
 }: {
   selectedPersona: string | null;
   onPersonaChange: (id: string | null) => void;
@@ -238,7 +238,7 @@ function PersonaSelector({
         <div className="absolute top-full start-0 z-50 mt-1.5 w-[320px] max-h-[400px] overflow-y-auto rounded-xl border border-slate-700/50 bg-slate-800/95 shadow-xl backdrop-blur-md">
           {/* Header */}
           <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-700/50 bg-slate-800/95 px-3 py-2 backdrop-blur-md">
-            <span className="text-[12px] font-medium text-slate-300">{_t.aiHub.selectPersona}</span>
+            <span className="text-[12px] font-medium text-slate-300">{t.aiHub.selectPersona}</span>
             {persona && (
               <button
                 type="button"
@@ -303,7 +303,7 @@ export function AiChatArea(props: AiChatAreaProps) {
     selectedPersona, onPersonaChange,
     mentionOpen, onMentionOpen, onMentionClose, onMentionSelect,
     dismissedActions, onDismissAction, onNewChat, cloudStatus,
-    textareaRef, _t, isRtl, language,
+    textareaRef, t, isRtl, language,
   } = props;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -312,7 +312,7 @@ export function AiChatArea(props: AiChatAreaProps) {
   const currentModel = MODE_MODELS[mode];
   const modelLabel = MODEL_LABELS[currentModel] || currentModel;
   const atLimit = messages.length >= MAX_CONVERSATION_MESSAGES;
-  const suggestions = getSuggestions(mode, _t);
+  const suggestions = getSuggestions(mode, t);
 
   // Scroll to bottom
   useEffect(() => {
@@ -342,7 +342,7 @@ export function AiChatArea(props: AiChatAreaProps) {
           {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
         </button>
         <div className="flex-1 px-3 py-2">
-          <ModeTabBar mode={mode} onModeChange={onModeChange} onNewChat={onNewChat} _t={_t} />
+          <ModeTabBar mode={mode} onModeChange={onModeChange} onNewChat={onNewChat} t={t} />
         </div>
         <button
           onClick={onToggleDocPanel}
@@ -363,7 +363,7 @@ export function AiChatArea(props: AiChatAreaProps) {
         {mode === "work" && (
           <span className="inline-flex items-center gap-1 text-[10px] text-amber-400">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-            {_t.aiHub.workConnected}
+            {t.aiHub.workConnected}
           </span>
         )}
         {cloudStatus === "saving" && <span className="text-[10px] text-slate-500">{t.aiHub.savingToCloud}</span>}
@@ -374,7 +374,7 @@ export function AiChatArea(props: AiChatAreaProps) {
       {/* Context bar */}
       <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-700/50 px-4 py-2">
         <span className="text-[11px] font-medium text-slate-500">
-          {t.aiHub._context}:
+          {t.aiHub.context}:
         </span>
         {contexts.map((ctx) => (
           <span
@@ -400,7 +400,7 @@ export function AiChatArea(props: AiChatAreaProps) {
         <PersonaSelector
           selectedPersona={selectedPersona}
           onPersonaChange={onPersonaChange}
-          t={_t}
+          t={t}
           language={language}
         />
         <button
@@ -436,7 +436,7 @@ export function AiChatArea(props: AiChatAreaProps) {
             <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-${modeColor}-500/10 shadow-lg shadow-${modeColor}-500/5`}>
               <ModeIcon size={28} className={`text-${modeColor}-400`} />
             </div>
-            <p className="text-sm text-slate-500">{_t.aiHub.emptyChat}</p>
+            <p className="text-sm text-slate-500">{t.aiHub.emptyChat}</p>
           </div>
         )}
 
@@ -455,7 +455,7 @@ export function AiChatArea(props: AiChatAreaProps) {
             onReply={onReply}
             onRegenerate={i === messages.length - 1 && msg.role === "assistant" ? onRegenerate : undefined}
             isLast={i === messages.length - 1}
-            t={_t}
+            t={t}
           />
         ))}
 
@@ -471,14 +471,14 @@ export function AiChatArea(props: AiChatAreaProps) {
 
         {/* Typing indicator */}
         {isStreaming && !streamingContent && (
-          <TypingIndicator _t={_t} />
+          <TypingIndicator t={t} />
         )}
 
         {/* Conversation limit warning */}
         {atLimit && (
           <div className="mb-4 flex items-center justify-center">
             <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
-              {_t.aiHub.conversationLimit}
+              {t.aiHub.conversationLimit}
             </p>
           </div>
         )}
@@ -492,7 +492,7 @@ export function AiChatArea(props: AiChatAreaProps) {
           isOpen={mentionOpen}
           onClose={onMentionClose}
           onSelect={onMentionSelect}
-          t={_t}
+          t={t}
         />
       </div>
 
@@ -512,7 +512,7 @@ export function AiChatArea(props: AiChatAreaProps) {
         onRemoveAttachment={onRemoveAttachment}
         onAtTrigger={onMentionOpen}
         textareaRef={textareaRef}
-        t={_t}
+        t={t}
         isRtl={isRtl}
         language={language}
       />

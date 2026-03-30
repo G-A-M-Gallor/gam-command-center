@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  Mail, _Shield, _ExternalLink, KeyRound, UserPlus, Link2, Lock,
+  Mail, Shield, ExternalLink, KeyRound, UserPlus, Link2, Lock,
   Smartphone, ShieldCheck, ShieldOff, Fingerprint,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 const SUPABASE_TEMPLATES_URL =
   "https://supabase.com/dashboard/project/qdnreijwcptghwoaqlny/auth/templates";
@@ -41,7 +41,7 @@ const TEMPLATE_VARIABLES = [
   { variable: "{{ .Email }}", descKey: "varEmail" },
 ];
 
-function TemplateCard({ template, _t }: { template: TemplateInfo; _t: ReturnType<typeof _getTranslations> }) {
+function TemplateCard({ template, t }: { template: TemplateInfo; t: ReturnType<typeof getTranslations> }) {
   const et = t.emailTemplates;
   return (
     <div className="flex items-start gap-3 rounded-lg bg-slate-800/50 p-3">
@@ -62,7 +62,7 @@ function TemplateCard({ template, _t }: { template: TemplateInfo; _t: ReturnType
 
 export function EmailTemplatesTab() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const et = t.emailTemplates;
   const isRtl = language === "he";
 
@@ -96,7 +96,7 @@ export function EmailTemplatesTab() {
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {AUTH_TEMPLATES.map((tpl) => (
-            <TemplateCard key={tpl.titleKey} template={tpl} _t={_t} />
+            <TemplateCard key={tpl.titleKey} template={tpl} t={t} />
           ))}
         </div>
       </div>
@@ -109,7 +109,7 @@ export function EmailTemplatesTab() {
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           {SECURITY_TEMPLATES.map((tpl) => (
-            <TemplateCard key={tpl.titleKey} template={tpl} _t={_t} />
+            <TemplateCard key={tpl.titleKey} template={tpl} t={t} />
           ))}
         </div>
       </div>

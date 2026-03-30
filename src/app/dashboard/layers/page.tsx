@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { QuickStats } from "@/components/hub/QuickStats";
 import { ActivityFeed } from "@/components/hub/ActivityFeed";
 import { QuickAccessGrid } from "@/components/hub/QuickAccessGrid";
@@ -53,7 +53,7 @@ interface ContextMenuState {
 
 export default function HubPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const hub = t.hub as Record<string, string>;
 
   // Quick stats
@@ -178,7 +178,7 @@ export default function HubPage() {
           openTasks={openTasks}
           aiConversations={aiConversations}
           loading={statsLoading}
-          _t={hub}
+          t={hub}
         />
 
         {/* Activity Feed + BI Charts */}

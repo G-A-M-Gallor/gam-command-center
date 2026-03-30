@@ -1,7 +1,7 @@
 "use client";
 
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import { GridCanvas } from "@/components/grid/GridCanvas";
 import { GridToolbar } from "@/components/grid/GridToolbar";
@@ -9,9 +9,9 @@ import { SheetTabs } from "@/components/grid/SheetTabs";
 
 export default function GridPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
-  const gridT = (_t as any).grid as Record<string, string> | undefined;
+  const gridT = (t as any).grid as Record<string, string> | undefined;
   const gt = gridT || {};
 
   return (

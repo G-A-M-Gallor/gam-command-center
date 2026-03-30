@@ -5,7 +5,7 @@
 // ===================================================
 
 import { useState, useEffect, useRef } from "react";
-import { _Plus, Send, _X } from "lucide-react";
+import { Plus, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuickCapture, useActiveSprints } from "@/lib/pm-queries";
 import { QUICK_CAPTURE_TYPES, PRIORITIES, type QuickCaptureType } from "@/lib/pm-types";
@@ -118,19 +118,19 @@ export function QuickCapture({ className, showAsFAB = false }: QuickCaptureProps
           <form onSubmit={handleSubmit} className="p-4 space-y-4">
             {/* Type selector */}
             <div className="flex gap-2">
-              {QUICK_CAPTURE_TYPES.map((_t) => (
+              {QUICK_CAPTURE_TYPES.map((t) => (
                 <button
-                  key={_t}
+                  key={t}
                   type="button"
-                  onClick={() => setType(_t)}
+                  onClick={() => setType(t)}
                   className={cn(
                     "px-3 py-1 text-sm rounded-md transition-colors",
-                    type === _t
+                    type === t
                       ? "bg-purple-600 text-white"
                       : "bg-slate-800 text-slate-300 hover:bg-slate-700"
                   )}
                 >
-                  {_t}
+                  {t}
                 </button>
               ))}
             </div>

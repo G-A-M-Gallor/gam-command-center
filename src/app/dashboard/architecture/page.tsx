@@ -9,12 +9,12 @@ import {
   type AppDefinition, type WidgetDefinition, type AppCategory,
 } from "@/lib/app-catalog";
 import {
-  Search, ChevronRight, _ExternalLink, _Layers, Code,
+  Search, ChevronRight, ExternalLink, Layers, Code,
   LayoutDashboard, Database, FileCheck, BookOpen, Sparkles, Map,
   Network, Video, CalendarDays, Lightbulb, MessageSquare, Mail,
-  Rss, _Shield, Compass, GitBranch, Palette, Zap, Settings, Lock,
-  Radio, Cloud, Grid3x3, Presentation, FileText, _Monitor, Building2,
-  Cog, Globe, ArrowRight, _Star, Bot, _Plus, Bell, _Clock,
+  Rss, Shield, Compass, GitBranch, Palette, Zap, Settings, Lock,
+  Radio, Cloud, Grid3x3, Presentation, FileText, Monitor, Building2,
+  Cog, Globe, ArrowRight, Star, Bot, Plus, Bell, Clock,
   ClipboardList, Calendar, TrendingUp, MessageCircle, BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -22,12 +22,12 @@ import type { LucideIcon } from "lucide-react";
 // ─── Icon Map ───────────────────────────────────────────
 
 const ICON_MAP: Record<string, LucideIcon> = {
-  LayoutDashboard, Grid3x3, Layers3: _Layers, FileText, Database, FileCheck,
+  LayoutDashboard, Grid3x3, Layers3: Layers, FileText, Database, FileCheck,
   BookOpen, Sparkles, Map, Network, Video, CalendarDays, Lightbulb,
-  MessageSquare, Mail, Rss, _Shield, Compass, GitBranch, Palette,
+  MessageSquare, Mail, Rss, Shield, Compass, GitBranch, Palette,
   Zap, Settings, Lock, Radio, Cloud, Grid3X3: Grid3x3, Presentation,
-  Search, Bot, _Plus, _Star, Calendar, Bell, _Clock, ClipboardList,
-  TrendingUp, MessageCircle, BarChart3, _Monitor, Building2, Cog, Globe,
+  Search, Bot, Plus, Star, Calendar, Bell, Clock, ClipboardList,
+  TrendingUp, MessageCircle, BarChart3, Monitor, Building2, Cog, Globe,
 };
 
 function renderIcon(name: string, className: string = "") {
@@ -487,7 +487,7 @@ function MermaidDiagram({ definition }: { definition: string }) {
 // ─── Tool Stack ─────────────────────────────────────────
 
 const TOOL_STACK = [
-  { name: "Next.js + Vercel", icon: _Monitor, gradient: ["#6366f1", "#818cf8"], role: "Dashboard, editor, forms, viz", roleHe: "דשבורד, עורך, טפסים, ויזואליזציה" },
+  { name: "Next.js + Vercel", icon: Monitor, gradient: ["#6366f1", "#818cf8"], role: "Dashboard, editor, forms, viz", roleHe: "דשבורד, עורך, טפסים, ויזואליזציה" },
   { name: "Supabase", icon: Database, gradient: ["#10b981", "#34d399"], role: "Mirror tables, Auth, Realtime, CRUD", roleHe: "טבלאות מראה, Auth, Realtime, CRUD" },
   { name: "Origami CRM", icon: Building2, gradient: ["#3b82f6", "#60a5fa"], role: "Clients, entities, statuses, pipeline", roleHe: "לקוחות, ישויות, סטטוסים, צנרת" },
   { name: "Notion", icon: BookOpen, gradient: ["#f59e0b", "#fbbf24"], role: "Specs, procedures, decisions, roadmap", roleHe: "מפרטים, נהלים, החלטות, מפת דרכים" },
@@ -500,7 +500,7 @@ const TOOL_STACK = [
 
 export default function ArchitecturePage() {
   const { language } = useSettings();
-  const _router = useRouter();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<AppCategory | "all">("all");
   const [selectedApp, setSelectedApp] = useState<AppDefinition | null>(null);

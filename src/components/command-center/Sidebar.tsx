@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Activity,
-  _Layers,
+  Layers,
   FileEdit,
   Map,
   Grid3X3,
@@ -24,12 +24,12 @@ import {
   Upload,
   Sparkles,
   Settings,
-  _Shield,
-  _X,
+  Shield,
+  X,
   List,
   LayoutGrid,
   AlignJustify,
-  _Star,
+  Star,
   Download,
   Database,
   BookOpen,
@@ -54,7 +54,7 @@ import {
   GripVertical,
   RotateCcw,
   BarChart3,
-  _Plus,
+  Plus,
   Trash2,
   Cpu,
   Cloud,
@@ -81,8 +81,8 @@ import {
   UserCircle,
   Film,
   Search,
-  _Clock,
-  _Monitor,
+  Clock,
+  Monitor,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -92,7 +92,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { SIDEBAR_MIN_WIDTH, SIDEBAR_MAX_WIDTH } from "@/lib/hooks/useShellPrefs";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import { useSidebarCustomization } from "@/lib/sidebar/useSidebarCustomization";
@@ -397,7 +397,7 @@ export const NAV_GROUPS: NavGroup[] = [
         children: [
           { href: "/dashboard/entities/fields", key: "entityFields", icon: ListTree, status: "active" },
           { href: "/dashboard/design-system", key: "designSystem", icon: Palette, status: "active" },
-          { href: "/dashboard/entities/field-templates", key: "fieldTemplates", icon: _Layers, status: "coming-soon" },
+          { href: "/dashboard/entities/field-templates", key: "fieldTemplates", icon: Layers, status: "coming-soon" },
           { href: "/dashboard/icon-library", key: "iconLibrary", icon: Sparkles, status: "active" },
           { href: "/dashboard/vcloud?tab=courses", key: "courses", icon: GraduationCap, status: "active" },
         ],
@@ -466,8 +466,8 @@ export const NAV_GROUPS: NavGroup[] = [
           { href: "/dashboard/roadmap", key: "roadmap", icon: Compass, status: "active" },
           { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
           { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
-          { href: "/dashboard/admin", key: "admin", icon: _Shield, status: "active" },
-          { href: "/dashboard/server-health", key: "serverHealth", icon: _Monitor, status: "active" },
+          { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
+          { href: "/dashboard/server-health", key: "serverHealth", icon: Monitor, status: "active" },
           { href: "/dashboard/maintenance", key: "maintenance", icon: Wrench, status: "active" },
           { href: "/dashboard/audit", key: "audit", icon: ClipboardList, status: "active" },
         ],
@@ -496,19 +496,15 @@ function loadFilter(): SidebarFilter {
   try {
     const v = localStorage.getItem(FILTER_KEY);
     if (v === "me" || v === "team" || v === "hidden" || v === "favorites") return v;
-  } catch {
-    // Ignore errors
-  }
+  } catch {}
   return "me";
 }
 
 function loadViewMode(): ViewMode {
   try {
     const v = localStorage.getItem(VIEW_MODE_KEY);
-    if (v === "grid" || v === "_compact" || v === "apps") return v;
-  } catch {
-    // Ignore errors
-  }
+    if (v === "grid" || v === "compact" || v === "apps") return v;
+  } catch {}
   return "list";
 }
 
@@ -544,9 +540,9 @@ export function Sidebar({
   onWidthChange,
 }: SidebarProps = {}) {
   const pathname = usePathname();
-  const { language, sidebarPosition, sidebarVisibility, _brandProfile } = useSettings();
-  const { _user, _signOut, permissions } = useAuth();
-  const _t = getTranslations(language);
+  const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
+  const { user, signOut, permissions } = useAuth();
+  const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
   const { allApps } = useAppsRegistry();
@@ -560,7 +556,7 @@ export function Sidebar({
   // userMenuRef removed — handled by WorkspaceSwitcher
   const socialMenuRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
-  const [_navTop, setNavTop] = useState(120);
+  const [navTop, setNavTop] = useState(120);
   const [indicatorStyle, setIndicatorStyle] = useState<{ top: number; height: number } | null>(null);
 
   const [filter, setFilter] = useState<SidebarFilter>("me");
@@ -574,9 +570,7 @@ export function Sidebar({
     try {
       const v = localStorage.getItem("cc-sidebar-folders");
       if (v) setOpenFolders(new Set(JSON.parse(v)));
-    } catch {
-    // Ignore errors
-  }
+    } catch {}
   }, []);
   const [folderMode, setFolderMode] = useState<boolean>(true);
 
@@ -585,16 +579,14 @@ export function Sidebar({
     try {
       const v = localStorage.getItem(FOLDER_MODE_KEY);
       if (v === "flat") setFolderMode(false);
-    } catch {
-    // Ignore errors
-  }
+    } catch {}
   }, []);
 
   // ── Sidebar customization (reorder, hide, folders, usage tracking) ──
   const {
     customization, editMode, reorder, createFolder: createCustomFolder, deleteFolder,
     moveToFolder: moveItemToFolder, removeFromFolder, toggleHide, trackUsage,
-    toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, _setEditMode,
+    toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, setEditMode,
     updateItem, clearItem,
     toggleSection, renameSection, createSection: createCustomSection, deleteSection, isSectionEmpty,
     moveItemToSection, removeItemFromSection, updateSection: updateSectionOverride,
@@ -655,9 +647,7 @@ export function Sidebar({
     setOpenFolders((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
-      try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {
-    // Ignore errors
-  }
+      try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
       return next;
     });
   }, []);
@@ -665,9 +655,7 @@ export function Sidebar({
   const handleFolderModeToggle = useCallback(() => {
     setFolderMode((prev) => {
       const next = !prev;
-      try { localStorage.setItem(FOLDER_MODE_KEY, next ? "folders" : "flat"); } catch {
-    // Ignore errors
-  }
+      try { localStorage.setItem(FOLDER_MODE_KEY, next ? "folders" : "flat"); } catch {}
       return next;
     });
   }, []);
@@ -725,12 +713,12 @@ export function Sidebar({
   const isAppsView = viewMode === "apps";
   const isCollapsed = isAppsView ? false : isFloat ? !hovered : isHoverReveal ? !hovered : false;
   const onRight = sidebarPosition === "right";
-  const _expandedWidth = isAppsView ? APPS_VIEW_WIDTH : isMobile ? MOBILE_WIDTH : (customWidth ?? FULL_WIDTH);
+  const expandedWidth = isAppsView ? APPS_VIEW_WIDTH : isMobile ? MOBILE_WIDTH : (customWidth ?? FULL_WIDTH);
 
   // Resize drag state
   const [resizing, setResizing] = useState(false);
   const resizeStartX = useRef(0);
-  const resizeStartW = useRef(_expandedWidth);
+  const resizeStartW = useRef(expandedWidth);
 
   useEffect(() => {
     if (!resizing) return;
@@ -763,16 +751,12 @@ export function Sidebar({
   // ── Filter + view handlers ────────────────────────────
   const handleFilterChange = (f: SidebarFilter) => {
     setFilter(f);
-    try { localStorage.setItem(FILTER_KEY, f); } catch {
-    // Ignore errors
-  }
+    try { localStorage.setItem(FILTER_KEY, f); } catch {}
   };
 
   const handleViewModeChange = (v: ViewMode) => {
     setViewMode(v);
-    try { localStorage.setItem(VIEW_MODE_KEY, v); } catch {
-    // Ignore errors
-  }
+    try { localStorage.setItem(VIEW_MODE_KEY, v); } catch {}
   };
 
   // ── Compute filtered groups (uses customization engine) ─
@@ -874,9 +858,7 @@ export function Sidebar({
             if (prev.has(entry.key)) return prev;
             const next = new Set(prev);
             next.add(entry.key);
-            try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {
-    // Ignore errors
-  }
+            try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
             return next;
           });
         }
@@ -952,7 +934,7 @@ export function Sidebar({
         isHidden ? `transition-transform duration-200 ease-out ${translateClass}` : ""
       }`}
       style={{
-        width: isCollapsed ? STRIP_WIDTH : _expandedWidth,
+        width: isCollapsed ? STRIP_WIDTH : expandedWidth,
         maxWidth: isMobile ? "100vw" : undefined,
         height: "calc(100vh - 48px)",
         ...(!onRight ? { left: 48 } : {}),
@@ -969,7 +951,7 @@ export function Sidebar({
         {isFloating && !isFloat && onClose && (
           <div className="flex justify-end px-2 pt-2">
             <button type="button" onClick={onClose} className="rounded p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close sidebar">
-              <_X className="h-4 w-4" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         )}
@@ -1010,11 +992,11 @@ export function Sidebar({
         {/* Workspace Switcher — replaces old user menu */}
         {user && !isAppsView && (
           <WorkspaceSwitcher
-            _user={_user}
+            user={user}
             isCollapsed={isCollapsed}
             onRight={onRight}
-            _expandedWidth={_expandedWidth}
-            _navTop={_navTop}
+            expandedWidth={expandedWidth}
+            navTop={navTop}
           />
         )}
 
@@ -1161,7 +1143,7 @@ export function Sidebar({
 
           return (
           <nav className="flex flex-1 flex-col overflow-hidden">
-            {/* Top controls — _compact filter + view toggle */}
+            {/* Top controls — compact filter + view toggle */}
             <div className="shrink-0 px-1.5 pt-2 pb-1 space-y-1.5">
               {/* Filter icons row */}
               <div className="flex items-center justify-center">
@@ -1171,7 +1153,7 @@ export function Sidebar({
                       me: UserIcon,
                       team: Users,
                       hidden: EyeOff,
-                      favorites: _Star,
+                      favorites: Star,
                     };
                     const FilterIcon = filterIcons[tab.id];
                     return (
@@ -1217,7 +1199,7 @@ export function Sidebar({
             {recentItems.length > 0 && (
               <div className="px-1.5 pt-1.5 pb-0.5">
                 <div className="flex items-center gap-1 px-1 mb-1">
-                  <_Clock className="h-2.5 w-2.5 text-slate-600" />
+                  <Clock className="h-2.5 w-2.5 text-slate-600" />
                   <span className="text-[9px] text-slate-600 font-medium">אחרונים</span>
                 </div>
                 <div className="space-y-0.5 max-h-36 overflow-y-auto scrollbar-none">
@@ -1385,7 +1367,7 @@ export function Sidebar({
             <SortableSectionDiv id={`section:${group.id}`} editMode={editMode}>
               {/* Group label / divider — now interactive toggle */}
               {gi > 0 && isCollapsed && (
-                <div className="mx-2 my-2 border-_t border-slate-700/30" />
+                <div className="mx-2 my-2 border-t border-slate-700/30" />
               )}
               {!isCollapsed && (viewMode === "list" || viewMode === "grid") && (
                 <div className={`${gi === 0 ? "pt-1 pb-1" : "pt-3 pb-1"} ${viewMode === "grid" ? "px-1" : "px-2"}`}>
@@ -1534,7 +1516,7 @@ export function Sidebar({
                       })
                       .map(({ href, key: itemKey, icon: DefaultIcon }) => {
                       const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
-                      const rawLabel = (_t.tabs as Record<string, string>)[itemKey];
+                      const rawLabel = (t.tabs as Record<string, string>)[itemKey];
                       const gridLabel = resolveLabel(itemKey, rawLabel);
                       const GridIcon = resolveIcon(itemKey, DefaultIcon);
                       const isFav = favHrefs.has(href);
@@ -1593,7 +1575,7 @@ export function Sidebar({
                 </div>
               ) : (
                 /* Items — List & Compact views */
-                <div className={viewMode === "_compact" && !isCollapsed ? "space-y-0" : "space-y-0.5"}>
+                <div className={viewMode === "compact" && !isCollapsed ? "space-y-0" : "space-y-0.5"}>
                   {/* Flatten folders when folderMode is off */}
                   {(folderMode
                     ? group.items
@@ -1606,7 +1588,7 @@ export function Sidebar({
                     // ── Folder rendering (only when folderMode is on) ──
                     if (isFolder(entry)) {
                       const { href, key, icon: DefaultFolderIcon, children } = entry;
-                      const rawFolderLabel = (_t.tabs as Record<string, string>)[key];
+                      const rawFolderLabel = (t.tabs as Record<string, string>)[key];
                       const folderLabel = resolveLabel(key, rawFolderLabel);
                       const FolderIcon = resolveIcon(key, DefaultFolderIcon);
                       const isOpen = openFolders.has(key);
@@ -1706,7 +1688,7 @@ export function Sidebar({
                             <div className={`${onRight ? "pr-3" : "pl-3"} ${viewMode === "compact" ? "" : "mt-0.5"}`}>
                               {children.map(({ href: cHref, key: cKey, icon: CIcon }) => {
                                 const cActive = pathname === cHref || pathname.startsWith(cHref + "/");
-                                const cLabel = (_t.tabs as Record<string, string>)[cKey];
+                                const cLabel = (t.tabs as Record<string, string>)[cKey];
                                 const cFav = favHrefs.has(cHref);
                                 return (
                                   <div key={cHref} className="group/child relative">
@@ -1714,7 +1696,7 @@ export function Sidebar({
                                       href={cHref}
                                       onClick={shouldCloseOnNav ? onClose : undefined}
                                       data-active={cActive || undefined}
-                                      className={`relative z-10 flex items-center gap-2.5 rounded-md ${viewMode === "_compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-[13px]"} transition-colors ${
+                                      className={`relative z-10 flex items-center gap-2.5 rounded-md ${viewMode === "compact" ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-[13px]"} transition-colors ${
                                         onRight ? "flex-row-reverse" : ""
                                       } ${
                                         cActive
@@ -1750,7 +1732,7 @@ export function Sidebar({
                     // ── Regular item rendering ──
                     const { href, key, icon: Icon } = entry;
                     const isActive = href === "/dashboard" ? pathname === "/dashboard" : (pathname === href || pathname.startsWith(href + "/"));
-                    const label = (_t.tabs as Record<string, string>)[key];
+                    const label = (t.tabs as Record<string, string>)[key];
 
                     // ── Collapsed item ──
                     if (isCollapsed) {
@@ -1795,7 +1777,7 @@ export function Sidebar({
                     }
 
                     // ── Compact item ──
-                    if (viewMode === "_compact") {
+                    if (viewMode === "compact") {
                       const isFav = favHrefs.has(href);
                       const isItemHidden = customization.hiddenItems.includes(key);
                       const compactLabel = resolveLabel(key, label);
@@ -2051,7 +2033,7 @@ export function Sidebar({
 
         {/* Footer — Downloads + Social */}
         {!isCollapsed && !isAppsView && (
-          <footer ref={socialMenuRef} data-cc-id="sidebar.footer" className="relative shrink-0 border-_t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
+          <footer ref={socialMenuRef} data-cc-id="sidebar.footer" className="relative shrink-0 border-t border-slate-700/50 px-2 py-1.5 flex items-center gap-1">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
@@ -2060,7 +2042,7 @@ export function Sidebar({
               }`}
             >
               <Download className="h-3 w-3 shrink-0" />
-              {(_t.downloads as Record<string, string>).title}
+              {(t.downloads as Record<string, string>).title}
             </button>
             <div className="h-3 w-px bg-slate-700/50" />
             <button
@@ -2071,7 +2053,7 @@ export function Sidebar({
               }`}
             >
               <Globe className="h-3 w-3 shrink-0" />
-              {(_t.downloads as Record<string, string>).gamOnline}
+              {(t.downloads as Record<string, string>).gamOnline}
             </button>
 
             {/* Social links popup */}
@@ -2088,7 +2070,7 @@ export function Sidebar({
               >
                 <div className="px-3 py-2 border-b border-slate-700/50">
                   <span className="text-[10px] uppercase tracking-wider text-slate-600 font-medium">
-                    {(_t.downloads as Record<string, string>).gamOnline}
+                    {(t.downloads as Record<string, string>).gamOnline}
                   </span>
                 </div>
                 <div className="flex items-center justify-center gap-2 px-3 py-3">
@@ -2111,12 +2093,12 @@ export function Sidebar({
           </footer>
         )}
         {isCollapsed && (
-          <footer className="shrink-0 border-_t border-slate-700/50 p-1 flex flex-col items-center gap-0.5">
+          <footer className="shrink-0 border-t border-slate-700/50 p-1 flex flex-col items-center gap-0.5">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("cc-show-download-reminder"))}
               className="group relative rounded p-1.5 text-slate-600 transition-colors hover:bg-slate-800 hover:text-slate-400"
-              title={(_t.downloads as Record<string, string>).title}
+              title={(t.downloads as Record<string, string>).title}
             >
               <Download className="h-3.5 w-3.5" />
               <span
@@ -2124,7 +2106,7 @@ export function Sidebar({
                   onRight ? "right-full mr-2" : "left-full ml-2"
                 } rounded-md bg-slate-800 border border-slate-700 px-2 py-1 text-xs text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50`}
               >
-                {(_t.downloads as Record<string, string>).title}
+                {(t.downloads as Record<string, string>).title}
               </span>
             </button>
           </footer>

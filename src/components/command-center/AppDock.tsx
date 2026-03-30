@@ -3,22 +3,22 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
-  Search, Bot, _Plus, Pin, Calendar, CalendarDays, Bell, _Clock,
+  Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock,
   ClipboardList, Settings, MessageCircle, Users, BarChart3,
   Rss, TrendingUp, Mail,
-  GripVertical, _X, LayoutDashboard, FileEdit, Map, _Layers, Grid3X3,
-  Palette, Compass, Zap, _Shield, BookOpen, MessagesSquare,
+  GripVertical, X, LayoutDashboard, FileEdit, Map, Layers, Grid3X3,
+  Palette, Compass, Zap, Shield, BookOpen, MessagesSquare,
   FileSignature, Gauge, Globe, Video, Image, Phone, Contact,
   Activity, PieChart, Calculator, Terminal, Filter, History,
-  Camera, Mic, Download, _Star, EyeOff, Eye,
-  _ExternalLink, Copy, ArrowUpToLine, ArrowDownToLine, Pencil, Trash2 as Trash2Icon,
-  PanelLeft, _PanelTop, SquareSplitHorizontal,
+  Camera, Mic, Download, Star, EyeOff, Eye,
+  ExternalLink, Copy, ArrowUpToLine, ArrowDownToLine, Pencil, Trash2 as Trash2Icon,
+  PanelLeft, PanelTop, SquareSplitHorizontal,
   // Icon picker extras
   Home, Heart, Bookmark, Tag, Hash, AtSign, Link, Send, Share2,
   Folder, FolderOpen, File, FileText, FilePlus, FileCheck,
   Lock, Unlock, Key, Fingerprint, ShieldCheck,
   Wifi, Bluetooth, Cloud, CloudUpload, CloudDownload,
-  _Monitor, Smartphone, Tablet, Laptop, Cpu, HardDrive, Server, Database,
+  Monitor, Smartphone, Tablet, Laptop, Cpu, HardDrive, Server, Database,
   Code, GitBranch, GitPullRequest, GitMerge, GitCommit,
   Play, Pause, SkipForward, Volume2, Music, Headphones,
   Sun, Moon, CloudSun, Thermometer, Droplets, Wind,
@@ -50,7 +50,7 @@ import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } 
 import { CSS } from "@dnd-kit/utilities";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useWidgets } from "@/contexts/WidgetContext";
-import { _getTranslations } from "@/lib/i18n";
+import { getTranslations } from "@/lib/i18n";
 
 // ─── Icon Library ───────────────────────────────────────
 
@@ -71,7 +71,7 @@ const ICON_LIBRARY: IconCategory[] = [
     key: "general", he: "כללי", en: "General",
     icons: [
       { name: "Home", icon: Home }, { name: "Search", icon: Search }, { name: "Settings", icon: Settings },
-      { name: "Plus", icon: _Plus }, { name: "Star", icon: _Star }, { name: "Heart", icon: Heart },
+      { name: "Plus", icon: Plus }, { name: "Star", icon: Star }, { name: "Heart", icon: Heart },
       { name: "Bookmark", icon: Bookmark }, { name: "Pin", icon: Pin }, { name: "Tag", icon: Tag },
       { name: "Hash", icon: Hash }, { name: "AtSign", icon: AtSign }, { name: "Link", icon: Link },
       { name: "Flag", icon: Flag }, { name: "Target", icon: Target }, { name: "Crosshair", icon: Crosshair },
@@ -153,7 +153,7 @@ const ICON_LIBRARY: IconCategory[] = [
   {
     key: "devices", he: "מכשירים", en: "Devices",
     icons: [
-      { name: "Monitor", icon: _Monitor }, { name: "Laptop", icon: Laptop },
+      { name: "Monitor", icon: Monitor }, { name: "Laptop", icon: Laptop },
       { name: "Smartphone", icon: Smartphone }, { name: "Tablet", icon: Tablet },
       { name: "Wifi", icon: Wifi }, { name: "Bluetooth", icon: Bluetooth },
       { name: "Cloud", icon: Cloud },
@@ -172,7 +172,7 @@ const ICON_LIBRARY: IconCategory[] = [
   {
     key: "security", he: "אבטחה", en: "Security",
     icons: [
-      { name: "Shield", icon: _Shield }, { name: "ShieldCheck", icon: ShieldCheck },
+      { name: "Shield", icon: Shield }, { name: "ShieldCheck", icon: ShieldCheck },
       { name: "Lock", icon: Lock }, { name: "Unlock", icon: Unlock },
       { name: "Key", icon: Key }, { name: "Fingerprint", icon: Fingerprint },
       { name: "Eye", icon: Eye }, { name: "EyeOff", icon: EyeOff },
@@ -185,13 +185,13 @@ const ICON_LIBRARY: IconCategory[] = [
       { name: "Pencil", icon: Pencil }, { name: "PenTool", icon: PenTool },
       { name: "Eraser", icon: Eraser }, { name: "Highlighter", icon: Highlighter },
       { name: "Pipette", icon: Pipette }, { name: "Scissors", icon: Scissors },
-      { name: "Layers", icon: _Layers }, { name: "Grid3X3", icon: Grid3X3 },
+      { name: "Layers", icon: Layers }, { name: "Grid3X3", icon: Grid3X3 },
     ],
   },
   {
     key: "time", he: "זמן", en: "Time",
     icons: [
-      { name: "Clock", icon: _Clock }, { name: "Calendar", icon: Calendar },
+      { name: "Clock", icon: Clock }, { name: "Calendar", icon: Calendar },
       { name: "CalendarDays", icon: CalendarDays }, { name: "History", icon: History },
       { name: "Bell", icon: Bell }, { name: "Zap", icon: Zap },
     ],
@@ -309,7 +309,7 @@ const CATEGORIES: { key: string; he: string; en: string }[] = [
 const ALL_DOCK_ITEMS: DockItem[] = [
   // ── Pages ──
   { id: "dashboard", icon: LayoutDashboard, label: { he: "דאשבורד", en: "Dashboard" }, color: "from-blue-500 to-blue-600", category: "pages", href: "/dashboard" },
-  { id: "entities", icon: _Layers, label: { he: "ישויות", en: "Entities" }, color: "from-purple-500 to-purple-600", category: "pages", href: "/dashboard/entities" },
+  { id: "entities", icon: Layers, label: { he: "ישויות", en: "Entities" }, color: "from-purple-500 to-purple-600", category: "pages", href: "/dashboard/entities" },
   { id: "matching", icon: TrendingUp, label: { he: "שיבוץ", en: "Matching" }, color: "from-emerald-500 to-emerald-600", category: "pages", href: "/dashboard/matching" },
   { id: "ai-hub", icon: Bot, label: { he: "מרכז AI", en: "AI Hub" }, color: "from-violet-500 to-violet-600", category: "pages", href: "/dashboard/ai-hub" },
   { id: "editor", icon: FileEdit, label: { he: "עורך", en: "Editor" }, color: "from-amber-500 to-amber-600", category: "pages", href: "/dashboard/editor" },
@@ -322,10 +322,10 @@ const ALL_DOCK_ITEMS: DockItem[] = [
   { id: "feeds", icon: Rss, label: { he: "עדכונים", en: "Feeds" }, color: "from-orange-400 to-orange-500", category: "pages", href: "/dashboard/feeds" },
   { id: "automations", icon: Zap, label: { he: "אוטומציות", en: "Automations" }, color: "from-yellow-500 to-yellow-600", category: "pages", href: "/dashboard/automations" },
   { id: "settings-page", icon: Settings, label: { he: "הגדרות", en: "Settings" }, color: "from-gray-400 to-gray-500", category: "pages", href: "/dashboard/settings" },
-  { id: "admin", icon: _Shield, label: { he: "אדמין", en: "Admin" }, color: "from-red-500 to-red-600", category: "pages", href: "/dashboard/admin" },
+  { id: "admin", icon: Shield, label: { he: "אדמין", en: "Admin" }, color: "from-red-500 to-red-600", category: "pages", href: "/dashboard/admin" },
   // ── Widgets ──
   { id: "w-search", icon: Search, label: { he: "חיפוש", en: "Search" }, color: "from-blue-400 to-cyan-500", category: "widgets", action: "search" },
-  { id: "w-quick-create", icon: _Plus, label: { he: "יצירה מהירה", en: "Quick Create" }, color: "from-green-500 to-emerald-500", category: "widgets", action: "quick-create" },
+  { id: "w-quick-create", icon: Plus, label: { he: "יצירה מהירה", en: "Quick Create" }, color: "from-green-500 to-emerald-500", category: "widgets", action: "quick-create" },
   { id: "w-favorites", icon: Pin, label: { he: "מועדפים", en: "Favorites" }, color: "from-amber-400 to-amber-500", category: "widgets", action: "favorites" },
   { id: "w-notifications", icon: Bell, label: { he: "התראות", en: "Notifications" }, color: "from-red-400 to-red-500", category: "widgets", action: "notifications" },
   { id: "w-clipboard", icon: ClipboardList, label: { he: "לוח הדבקות", en: "Clipboard" }, color: "from-lime-500 to-lime-600", category: "widgets", action: "clipboard" },
@@ -341,7 +341,7 @@ const ALL_DOCK_ITEMS: DockItem[] = [
   { id: "w-piechart", icon: PieChart, label: { he: "תרשים עוגה", en: "Pie Chart" }, color: "from-violet-400 to-violet-500", category: "data", action: "pie-chart" },
   // ── Tools ──
   { id: "w-today", icon: Calendar, label: { he: "היום", en: "Today" }, color: "from-sky-500 to-sky-600", category: "tools", action: "today" },
-  { id: "w-timer", icon: _Clock, label: { he: "טיימר", en: "Timer" }, color: "from-fuchsia-500 to-fuchsia-600", category: "tools", action: "timer" },
+  { id: "w-timer", icon: Clock, label: { he: "טיימר", en: "Timer" }, color: "from-fuchsia-500 to-fuchsia-600", category: "tools", action: "timer" },
   { id: "w-planner", icon: CalendarDays, label: { he: "סדר שבועי", en: "Weekly Planner" }, color: "from-indigo-400 to-indigo-500", category: "tools", action: "weekly-planner" },
   { id: "w-gcal", icon: CalendarDays, label: { he: "יומן", en: "Calendar" }, color: "from-blue-500 to-blue-600", category: "tools", action: "google-calendar" },
   { id: "w-calculator", icon: Calculator, label: { he: "מחשבון", en: "Calculator" }, color: "from-slate-400 to-slate-500", category: "tools", action: "calculator" },
@@ -508,7 +508,7 @@ function widgetIdToDockId(widgetId: string): string | null {
 export function AppDock({ topOffset = 48 }: AppDockProps) {
   const { language } = useSettings();
   const { setWidgetPlacement, widgetPlacements } = useWidgets();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const lang = language === "he" ? "he" : "en";
 
   const [dockIds, setDockIds] = useState<string[]>([]);
@@ -846,7 +846,7 @@ export function AppDock({ topOffset = 48 }: AppDockProps) {
         if (ctxItem.href) {
           specialActions.push({
             label: lang === "he" ? "פתח בטאב חדש" : "Open in new tab",
-            icon: _ExternalLink,
+            icon: ExternalLink,
             onClick: () => { window.open(ctxItem.href!, "_blank"); setCtxMenu(null); },
           });
           specialActions.push({
@@ -1212,7 +1212,7 @@ export function AppDock({ topOffset = 48 }: AppDockProps) {
                 const favs = filtered.filter(i => favoriteIds.has(i.id));
                 const rest = filtered.filter(i => !favoriteIds.has(i.id));
 
-                const _grouped = CATEGORIES
+                const grouped = CATEGORIES
                   .map((cat) => ({
                     ...cat,
                     items: rest.filter((i) => i.category === cat.key),
@@ -1224,7 +1224,7 @@ export function AppDock({ topOffset = 48 }: AppDockProps) {
                     {favs.length > 0 && !storeCategory && (
                       <div className="mb-3">
                         <div className="flex items-center gap-1 text-[9px] font-semibold uppercase tracking-widest text-amber-500/70 px-1 mb-1.5">
-                          <_Star className="h-2.5 w-2.5" />
+                          <Star className="h-2.5 w-2.5" />
                           {lang === "he" ? "מועדפים" : "Favorites"}
                         </div>
                         <div className="grid grid-cols-2 gap-1.5">
@@ -1399,7 +1399,7 @@ export function AppDock({ topOffset = 48 }: AppDockProps) {
 
             {/* Reset button */}
             {iconOverrides[iconPickerFor] && (
-              <div className="border-_t border-slate-700/40 px-4 py-2 shrink-0">
+              <div className="border-t border-slate-700/40 px-4 py-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => {

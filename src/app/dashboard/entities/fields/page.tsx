@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  _Plus, Search, Edit3, Trash2, ChevronDown, ChevronRight,
+  Plus, Search, Edit3, Trash2, ChevronDown, ChevronRight,
   Hash, Type, Calendar as CalendarIcon, CheckSquare, List, Link as LinkIcon,
-  Mail, Phone, Users, Tag, Combine, Lock, GitMerge, _X, GripVertical, LayoutGrid,
-  Info, Eye, Palette, _Shield, Table2, CreditCard,
+  Mail, Phone, Users, Tag, Combine, Lock, GitMerge, X, GripVertical, LayoutGrid,
+  Info, Eye, Palette, Shield, Table2, CreditCard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -16,7 +16,7 @@ import { PageHeader } from '@/components/command-center/PageHeader';
 import { ConfirmDialog } from '@/components/command-center/ConfirmDialog';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { useSettings } from '@/contexts/SettingsContext';
-import { _getTranslations } from '@/lib/i18n';
+import { getTranslations } from '@/lib/i18n';
 import {
   fetchGlobalFields, createGlobalField, updateGlobalField, deleteGlobalField,
   getFieldUsage, generateMetaKey, mergeField,
@@ -219,7 +219,7 @@ function SortableFieldRow(props: FieldRowProps & { dragEnabled: boolean }) {
   );
 }
 
-/* ─── Plain field row (used in _grouped view — no DndContext) ─── */
+/* ─── Plain field row (used in grouped view — no DndContext) ─── */
 
 function PlainFieldRow(props: FieldRowProps) {
   const isSystem = props.field.category === 'system';
@@ -271,7 +271,7 @@ function FieldCard({
               {field.label[lang] || field.meta_key}
             </span>
             {isSystem && <Lock size={10} className="text-amber-400 shrink-0" />}
-            {field.read_only && <_Shield size={10} className="text-blue-400 shrink-0" />}
+            {field.read_only && <Shield size={10} className="text-blue-400 shrink-0" />}
           </div>
           <code className="text-[10px] text-slate-500">{field.meta_key}</code>
         </div>
@@ -328,7 +328,7 @@ function FieldCard({
 
       {/* Expanded info panel */}
       {showInfo && (
-        <div className="mt-3 pt-3 border-_t border-white/[0.06] space-y-2 animate-in fade-in duration-200">
+        <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2 animate-in fade-in duration-200">
           <div>
             <span className="text-[10px] font-medium text-slate-500">{(te as { fieldPurpose: string }).fieldPurpose}</span>
             <p className="text-[11px] text-slate-300 mt-0.5">{field.description[lang] || field.description.en || field.description.he || '—'}</p>
@@ -376,7 +376,7 @@ function FieldCard({
 
 export default function FieldLibraryPage() {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === 'he';
   const te = t.entities;
 
@@ -397,7 +397,7 @@ export default function FieldLibraryPage() {
     return 'list';
   });
   const [groupByCategory, setGroupByCategory] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('cc-fields-_grouped') === 'true';
+    if (typeof window !== 'undefined') return localStorage.getItem('cc-fields-grouped') === 'true';
     return false;
   });
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
@@ -555,7 +555,7 @@ export default function FieldLibraryPage() {
   const toggleGroupByCategory = () => {
     setGroupByCategory(prev => {
       const next = !prev;
-      localStorage.setItem('cc-fields-_grouped', String(next));
+      localStorage.setItem('cc-fields-grouped', String(next));
       return next;
     });
   };
@@ -708,7 +708,7 @@ export default function FieldLibraryPage() {
           {([
             { mode: 'list' as ViewMode, icon: List, label: te.viewList },
             { mode: 'cards' as ViewMode, icon: CreditCard, label: te.viewCards },
-            { mode: '_compact' as ViewMode, icon: Table2, label: te.viewCompact },
+            { mode: 'compact' as ViewMode, icon: Table2, label: te.viewCompact },
           ]).map(({ mode, icon: ModeIcon, label }) => (
             <button
               key={mode}
@@ -768,7 +768,7 @@ export default function FieldLibraryPage() {
         </div>
       ) : fields.length === 0 ? (
         <div className="py-16 text-center">
-          <_Plus size={36} className="mx-auto text-slate-700 mb-3" />
+          <Plus size={36} className="mx-auto text-slate-700 mb-3" />
           <p className="text-sm text-slate-400">{te.noFieldsYet}</p>
           <button
             onClick={() => { setShowCreate(true); setEditingId(null); setDraft(newFieldDefaults()); }}
@@ -863,7 +863,7 @@ export default function FieldLibraryPage() {
           </table>
         </div>
       ) : viewMode === 'list' && groupByCategory && groupedFields ? (
-        /* ── List view — _grouped ── */
+        /* ── List view — grouped ── */
         <div className="space-y-4">
           {CATEGORIES.filter(cat => groupedFields[cat]?.length).map(cat => {
             const catFields = groupedFields[cat];

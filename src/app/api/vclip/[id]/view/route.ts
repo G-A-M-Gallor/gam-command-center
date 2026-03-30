@@ -7,7 +7,7 @@ import { randomUUID } from "crypto";
  * Tracks a view event. Called by the player page.
  */
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -18,7 +18,7 @@ export async function POST(
     const supabase = createServiceClient();
 
     const token = viewer_token || randomUUID();
-    const ua = request.headers.get("_user-agent") || "";
+    const ua = request.headers.get("user-agent") || "";
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
     // Detect device type from UA

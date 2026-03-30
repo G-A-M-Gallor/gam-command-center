@@ -44,7 +44,7 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
   return dotProduct / (magnitudeA * magnitudeB);
 }
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const { query, max_results = 10, threshold = 0.3 }: SearchRequestBody = await request.json();
 

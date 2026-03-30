@@ -22,7 +22,7 @@ export async function embedText(text: string): Promise<number[]> {
 
   const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: "POST",
-    _headers: {
+    headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
@@ -66,7 +66,7 @@ export async function embedQuery(text: string): Promise<number[]> {
 
   const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
     method: "POST",
-    _headers: {
+    headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

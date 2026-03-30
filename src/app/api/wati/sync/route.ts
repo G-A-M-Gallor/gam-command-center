@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import { syncWatiMessages, _findEntityByPhone } from '@/lib/wati/sync';
+import { syncWatiMessages, findEntityByPhone } from '@/lib/wati/sync';
 import { getConfig, getContacts, getMessages } from '@/lib/wati/client';
-import { _createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     // Verify WATI is configured
     getConfig();
@@ -59,7 +59,7 @@ export async function GET(_request: NextRequest) {
   }
 }
 
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
     const { phone, limit = 50 } = body;

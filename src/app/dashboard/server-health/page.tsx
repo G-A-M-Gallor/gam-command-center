@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { ServerHealthDashboard } from "@/components/server/ServerHealthDashboard";
-import { _Monitor, RefreshCw } from "lucide-react";
+import { Monitor, RefreshCw } from "lucide-react";
 
 export default function ServerHealthPage() {
   return (
@@ -61,7 +61,7 @@ export default function ServerHealthPage() {
 
           <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-slate-200 mb-3 flex items-center gap-2">
-              <_Monitor className="w-5 h-5 text-emerald-400" />
+              <Monitor className="w-5 h-5 text-emerald-400" />
               שירותים
             </h3>
             <ul className="space-y-2 text-sm text-slate-400">

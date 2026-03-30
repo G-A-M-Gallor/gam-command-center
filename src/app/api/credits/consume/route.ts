@@ -12,10 +12,10 @@ import { creditConsumeSchema } from '@/lib/api/schemas';
  * Deducts credits for an action. Used by internal services and
  * external API consumers (metered billing).
  */
-export async function POST(_request: Request) {
-  const auth = await requireAuth(_request);
+export async function POST(request: Request) {
+  const auth = await requireAuth(request);
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: 401 });
-  const _user = auth.user!;
+  const user = auth.user!;
 
   const raw = await request.json();
   const parsed = creditConsumeSchema.safeParse(raw);
@@ -32,7 +32,7 @@ export async function POST(_request: Request) {
     const { data: wu } = await supabase
       .from('vb_workspace_users')
       .select('workspace_id')
-      .eq('user_id', _user.id)
+      .eq('user_id', user.id)
       .eq('is_active', true)
       .limit(1)
       .single();
@@ -47,7 +47,7 @@ export async function POST(_request: Request) {
     workspaceId: wsId,
     action,
     quantity,
-    userId: _user.id,
+    userId: user.id,
     idempotencyKey,
   });
 

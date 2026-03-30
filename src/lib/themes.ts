@@ -75,7 +75,7 @@ export const ALL_THEMES: ThemePalette[] = [...DARK_THEMES, ...LIGHT_THEMES]
 export const DEFAULT_THEME_ID = 'default-slate'
 
 export function getThemeById(id: string): ThemePalette {
-  return ALL_THEMES.find((_t) => t.id === id) ?? ALL_THEMES.find((_t) => t.id === DEFAULT_THEME_ID)!
+  return ALL_THEMES.find((t) => t.id === id) ?? ALL_THEMES.find((t) => t.id === DEFAULT_THEME_ID)!
 }
 
 function hexToRgb(hex: string): [number, number, number] | null {

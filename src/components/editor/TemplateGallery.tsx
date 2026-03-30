@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { _X, FileText, Briefcase, Code2, BarChart3, File, Pencil, Trash2, Check } from "lucide-react";
+import { X, FileText, Briefcase, Code2, BarChart3, File, Pencil, Trash2, Check } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { _getTranslations, loc } from "@/lib/i18n";
+import { getTranslations, loc } from "@/lib/i18n";
 import { fetchTemplates, createTemplate, updateTemplate, deleteTemplate, type DocTemplate } from "@/lib/supabase/editorQueries";
 import { ConfirmDialog } from "@/components/command-center/ConfirmDialog";
 import type { JSONContent } from "@tiptap/react";
@@ -363,7 +363,7 @@ export function TemplateGallery({
   currentTitle,
 }: TemplateGalleryProps) {
   const { language } = useSettings();
-  const _t = getTranslations(language);
+  const t = getTranslations(language);
   const isRtl = language === "he";
   const et = t.editor;
 
@@ -405,7 +405,7 @@ export function TemplateGallery({
     const ok = await updateTemplate(id, { name: editName, name_he: editName });
     if (ok) {
       setCustomTemplates((prev) =>
-        prev.map((_t) => (t.id === id ? { ..._t, name: editName, name_he: editName } : _t))
+        prev.map((t) => (t.id === id ? { ...t, name: editName, name_he: editName } : t))
       );
     }
     setEditingId(null);
@@ -415,7 +415,7 @@ export function TemplateGallery({
     if (!deleteTarget) return;
     const ok = await deleteTemplate(deleteTarget);
     if (ok) {
-      setCustomTemplates((prev) => prev.filter((_t) => t.id !== deleteTarget));
+      setCustomTemplates((prev) => prev.filter((t) => t.id !== deleteTarget));
     }
     setDeleteTarget(null);
   };
@@ -433,8 +433,8 @@ export function TemplateGallery({
   if (!open) return null;
 
   const allTemplates = [
-    ...BUILTIN_TEMPLATES.map((_t) => ({ ..._t, isBuiltin: true })),
-    ...customTemplates.map((_t) => ({
+    ...BUILTIN_TEMPLATES.map((t) => ({ ...t, isBuiltin: true })),
+    ...customTemplates.map((t) => ({
       id: t.id,
       name: t.name,
       name_he: t.name_he || t.name,
@@ -442,12 +442,12 @@ export function TemplateGallery({
       category: t.category,
       description: t.description || "",
       description_he: t.description_he || t.description || "",
-      content: _t.content as JSONContent,
+      content: t.content as JSONContent,
       isBuiltin: false,
     })),
   ];
 
-  const categories = [...new Set(allTemplates.map((_t) => t.category))];
+  const categories = [...new Set(allTemplates.map((t) => t.category))];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -480,7 +480,7 @@ export function TemplateGallery({
         {/* Template grid by category */}
         <div className="p-5 space-y-6">
           {categories.map((cat) => {
-            const catTemplates = allTemplates.filter((_t) => t.category === cat);
+            const catTemplates = allTemplates.filter((t) => t.category === cat);
             const CatIcon = CATEGORY_ICONS[cat] || FileText;
             const categoryLabels: Record<string, string> = {
               management: et.categoryManagement,

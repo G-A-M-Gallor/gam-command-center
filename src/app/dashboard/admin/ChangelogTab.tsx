@@ -2,12 +2,12 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
-  CheckCircle2, AlertCircle, Circle, Search, _X, Hash, Network, FileCode,
-  GitCommit, Rocket, RefreshCw, Loader2, ClipboardCheck, _ExternalLink,
+  CheckCircle2, AlertCircle, Circle, Search, X, Hash, Network, FileCode,
+  GitCommit, Rocket, RefreshCw, Loader2, ClipboardCheck, ExternalLink,
   ChevronDown, ChevronLeft, ChevronRight,
 } from 'lucide-react';
-import { _getTranslations, loc } from '@/lib/i18n';
-import type { _Language } from '@/contexts/SettingsContext';
+import { getTranslations, loc } from '@/lib/i18n';
+import type { Language } from '@/contexts/SettingsContext';
 import { Button, Input, Badge } from '@/components/ui';
 import ChangelogToolbar from './ChangelogToolbar';
 import type {
@@ -50,7 +50,7 @@ function PhaseBadge({ phase }: { phase: Phase }) {
   );
 }
 
-function ChecklistDots({ entryId, ta }: { entryId: string; ta: ReturnType<typeof _getTranslations>['admin'] }) {
+function ChecklistDots({ entryId, ta }: { entryId: string; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [expanded, setExpanded] = useState(false);
   const checklist = CHANGELOG_CHECKLISTS[entryId];
   const score = getChecklistScore(checklist);
@@ -106,7 +106,7 @@ function ChecklistDots({ entryId, ta }: { entryId: string; ta: ReturnType<typeof
             );
           })}
           {checklist.reviewedBy && (
-            <div className="mt-1.5 border-_t border-white/[0.04] pt-1.5 text-[10px] text-slate-600">
+            <div className="mt-1.5 border-t border-white/[0.04] pt-1.5 text-[10px] text-slate-600">
               {ta.reviewedBy} {checklist.reviewedBy} · {checklist.reviewedDate}
             </div>
           )}
@@ -116,7 +116,7 @@ function ChecklistDots({ entryId, ta }: { entryId: string; ta: ReturnType<typeof
   );
 }
 
-function ChecklistSummary({ isRtl, ta }: { isRtl: boolean; ta: ReturnType<typeof _getTranslations>['admin'] }) {
+function ChecklistSummary({ isRtl, ta }: { isRtl: boolean; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [open, setOpen] = useState(false);
   const overall = getOverallChecklistScoreFromEntries(changelogEntries);
 
@@ -181,7 +181,7 @@ function ChecklistSummary({ isRtl, ta }: { isRtl: boolean; ta: ReturnType<typeof
   );
 }
 
-function ChangelogCard({ entry, language, ta }: { entry: ChangelogEntry; isRtl?: boolean; language: _Language; ta: ReturnType<typeof _getTranslations>['admin'] }) {
+function ChangelogCard({ entry, language, ta }: { entry: ChangelogEntry; isRtl?: boolean; language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const statusColors: Record<FeatureStatus, { bg: string; text: string; label: string; icon: React.ElementType }> = {
     working: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', label: ta.working, icon: CheckCircle2 },
     'not-verified': { bg: 'bg-amber-500/10', text: 'text-amber-400', label: ta.notVerified, icon: AlertCircle },
@@ -222,7 +222,7 @@ function ChangelogCard({ entry, language, ta }: { entry: ChangelogEntry; isRtl?:
         </div>
         {entry.route && (
           <a href={entry.route} className="inline-flex items-center gap-1 rounded bg-white/5 px-2 py-0.5 text-[10px] text-slate-400 transition-colors hover:text-slate-200" dir="ltr">
-            <_ExternalLink size={10} />
+            <ExternalLink size={10} />
             {entry.route}
           </a>
         )}
@@ -339,7 +339,7 @@ function generateMermaidDiagram(entries: ChangelogEntry[], routeData: typeof rou
   return lines.join('\n');
 }
 
-function MermaidDiagram({ definition, ta }: { definition: string; ta: ReturnType<typeof _getTranslations>['admin'] }) {
+function MermaidDiagram({ definition, ta }: { definition: string; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -396,7 +396,7 @@ function MermaidDiagram({ definition, ta }: { definition: string; ta: ReturnType
 
 // ─── Main Export ──────────────────────────────────────────
 
-export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; language: _Language; ta: ReturnType<typeof _getTranslations>['admin'] }) {
+export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; language: Language; ta: ReturnType<typeof getTranslations>['admin'] }) {
   const [changelogSearch, setChangelogSearch] = useState('');
   const [clSortBy, setClSortBy] = useState<SortField>('date');
   const [clSortDir, setClSortDir] = useState<'asc' | 'desc'>('desc');
@@ -438,7 +438,7 @@ export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; 
     try {
       const res = await fetch('/api/git/commit', {
         method: 'POST',
-        _headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: commitMsg.trim() }),
       });
       const data = await res.json();
@@ -463,7 +463,7 @@ export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; 
     try {
       const res = await fetch('/api/git/deploy', {
         method: 'POST',
-        _headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: commitMsg.trim() || undefined }),
       });
       const data = await res.json();
@@ -722,7 +722,7 @@ export default function ChangelogTab({ isRtl, language, ta }: { isRtl: boolean; 
             </div>
             {changelogSearch && relatedMatches.length > 0 && (
               <>
-                <div className="my-4 border-_t border-white/[0.06]" />
+                <div className="my-4 border-t border-white/[0.06]" />
                 <div className="mb-2 flex items-center gap-2 text-xs font-medium text-blue-400">
                   <Network size={12} />
                   {ta.relatedConnected} ({relatedMatches.length})
