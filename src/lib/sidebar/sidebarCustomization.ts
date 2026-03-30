@@ -128,7 +128,9 @@ export function loadCustomization(language?: string): SidebarCustomization {
         return { ...defaultCustomization(), ...parsed };
       }
     }
-  } catch {}
+  } catch {
+    // Ignore localStorage parse errors - use default customization
+  }
   return defaultCustomization();
 }
 
@@ -136,7 +138,9 @@ export function saveCustomization(data: SidebarCustomization, language?: string)
   try {
     localStorage.setItem(storageKey(language), JSON.stringify(data));
     window.dispatchEvent(new Event(EVENT_NAME));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 export { EVENT_NAME as CUSTOMIZATION_EVENT };

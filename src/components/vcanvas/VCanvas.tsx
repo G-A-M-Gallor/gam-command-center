@@ -42,7 +42,9 @@ function loadScene(key: string): ExcalidrawData | null {
 function saveScene(key: string, scene: ExcalidrawData): void {
   try {
     localStorage.setItem(STORAGE_KEY_PREFIX + key, JSON.stringify(scene));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 // ─── Language Map ────────────────────────────────────

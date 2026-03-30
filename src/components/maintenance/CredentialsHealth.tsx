@@ -159,7 +159,7 @@ function ServiceCard({ service, onTest, showCredential, onToggleCredential }: {
   );
 }
 
-export default function CredentialsHealth({}: CredentialsHealthProps) {
+export default function CredentialsHealth({ isRtl }: CredentialsHealthProps) {
   const [services, setServices] = useState<ApiService[]>(initialServices);
   const [checking, setChecking] = useState(false);
   const [showCredentials, setShowCredentials] = useState<Record<string, boolean>>({});

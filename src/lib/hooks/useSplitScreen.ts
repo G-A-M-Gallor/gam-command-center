@@ -25,14 +25,18 @@ function load(): SplitState {
       const parsed = JSON.parse(raw);
       return { ...EMPTY, ...parsed };
     }
-  } catch {}
+  } catch {
+    // Ignore localStorage parse errors - use defaults
+  }
   return { ...EMPTY };
 }
 
 function save(state: SplitState) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: state }));
 }
 

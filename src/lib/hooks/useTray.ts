@@ -19,14 +19,18 @@ function load(): TrayItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch {
+    // Ignore localStorage parse errors - use empty array
+  }
   return [];
 }
 
 function save(items: TrayItem[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
   window.dispatchEvent(new CustomEvent(EVENT_NAME, { detail: items }));
 }
 

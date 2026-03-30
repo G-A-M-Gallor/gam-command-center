@@ -32,14 +32,18 @@ function loadSlots(): MiddleSlots {
         return parsed as MiddleSlots;
       }
     }
-  } catch {}
+  } catch {
+    // Ignore localStorage parse errors - use default slots
+  }
   return [...DEFAULT_SLOTS];
 }
 
 function saveSlots(slots: MiddleSlots) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 // ─── Hook ───────────────────────────────────────────────

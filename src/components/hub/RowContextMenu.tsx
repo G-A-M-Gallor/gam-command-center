@@ -35,7 +35,9 @@ export function loadColorRules(): ColorRule[] {
 export function saveColorRules(rules: ColorRule[]) {
   try {
     localStorage.setItem(COLOR_RULES_KEY, JSON.stringify(rules));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 // ─── Context Menu ───────────────────────────────────

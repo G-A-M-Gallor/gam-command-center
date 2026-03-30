@@ -101,13 +101,17 @@ export function loadFeatures(context: CanvasContext): CanvasFeatures {
 export function saveFeatures(context: CanvasContext, features: CanvasFeatures): void {
   try {
     localStorage.setItem(`${STORAGE_KEY}:${context}`, JSON.stringify(features));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 /** Reset features for a context to defaults */
 export function resetFeatures(context: CanvasContext): CanvasFeatures {
   try {
     localStorage.removeItem(`${STORAGE_KEY}:${context}`);
-  } catch {}
+  } catch {
+    // Ignore localStorage remove errors - not critical for functionality
+  }
   return DEFAULT_FEATURES[context];
 }

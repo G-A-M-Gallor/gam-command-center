@@ -12,7 +12,8 @@ export default [
       'build/**',
       'next-env.d.ts',
       'public/sw.js',
-      'node_modules/**'
+      'node_modules/**',
+      'vercel-cron/**'
     ]
   },
   js.configs.recommended,
