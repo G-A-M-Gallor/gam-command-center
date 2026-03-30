@@ -177,7 +177,11 @@ interface SavedState {
 }
 
 function savePageState(s: SavedState) {
-  try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch {}
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  } catch {
+    // Ignore sessionStorage errors - not critical for functionality
+  }
 }
 
 function loadPageState(): SavedState | null {
@@ -758,7 +762,9 @@ export default function MatchingPage() {
       });
       const data = await res.json();
       if (res.ok && data.scores) { setScores(data.scores); await loadTargetDetails(data.scores); await loadShortlist(entity.id); }
-    } catch {}
+    } catch {
+      // Ignore API errors - user will see loading state complete
+    }
     setLoading(false);
   }, [loadTargetDetails, loadShortlist]);
 

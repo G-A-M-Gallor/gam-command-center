@@ -8,7 +8,7 @@ import type { ColumnMapping, ValidationError, ImportRow } from './types';
 // ─── Validation Patterns ─────────────────────────────
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[\+]?[\d\s\-\(\)]{7,20}$/;
+const PHONE_RE = /^[+]?[\d\s-()]{7,20}$/;
 const URL_RE = /^https?:\/\/.+/i;
 
 // ─── Per-Row Validation ──────────────────────────────

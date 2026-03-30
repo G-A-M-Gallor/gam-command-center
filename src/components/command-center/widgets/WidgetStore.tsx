@@ -58,7 +58,9 @@ function saveStoreState(patch: Partial<PersistedStoreState>) {
   try {
     const prev = loadStoreState();
     localStorage.setItem(STORE_STATE_KEY, JSON.stringify({ ...prev, ...patch }));
-  } catch {}
+  } catch {
+    // Ignore localStorage save errors - not critical for functionality
+  }
 }
 
 // ─── Category Config ────────────────────────────────────

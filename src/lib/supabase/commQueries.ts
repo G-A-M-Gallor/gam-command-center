@@ -10,17 +10,29 @@ import type { CommMessage, CommTemplate, ChannelFilter } from '@/lib/wati/types'
 // ─── Fetch Messages ─────────────────────────────────
 
 export async function fetchCommMessages(
-  entityId: string,
+  entityId: string | null,
   filters?: { channel?: ChannelFilter },
   cursor?: string | null,
   limit = 50,
 ): Promise<{ data: CommMessage[]; nextCursor: string | null }> {
+  // Handle invalid or null entityId
+  if (!entityId || entityId === 'null' || entityId === 'undefined') {
+    return { data: [], nextCursor: null };
+  }
+
   let query = supabase
     .from('comm_messages')
     .select('*')
-    .eq('entity_id', entityId)
     .order('created_at', { ascending: false })
     .limit(limit);
+
+  // If entityId starts with 'phone_', query by phone instead
+  if (entityId.startsWith('phone_')) {
+    const phone = entityId.replace('phone_', '');
+    query = query.eq('entity_phone', phone);
+  } else {
+    query = query.eq('entity_id', entityId);
+  }
 
   if (filters?.channel && filters.channel !== 'all') {
     query = query.eq('channel', filters.channel);

@@ -45,7 +45,7 @@ export function WATIPanel() {
     window.dispatchEvent(
       new CustomEvent("cc-open-comms-panel", {
         detail: {
-          entityId: msg.entity_id,
+          entityId: msg.entity_id || `phone_${msg.entity_phone}`, // Use phone as fallback ID
           entityName: msg.sender_name ?? msg.entity_phone ?? "WhatsApp",
           phone: msg.entity_phone,
         },

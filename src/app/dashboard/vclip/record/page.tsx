@@ -107,7 +107,9 @@ export default function RecordPage() {
         if (cameraPreviewRef.current) {
           cameraPreviewRef.current.srcObject = stream;
         }
-      } catch {}
+      } catch {
+        // Ignore camera access errors - user can still record without camera
+      }
     })();
     return () => {
       if (stream) stream.getTracks().forEach((t) => t.stop());
@@ -160,7 +162,9 @@ export default function RecordPage() {
           cameraVideo.srcObject = camStream;
           cameraVideo.muted = true;
           await cameraVideo.play();
-        } catch {}
+        } catch {
+          // Ignore camera video setup errors - recording can continue
+        }
       }
 
       // Bubble position

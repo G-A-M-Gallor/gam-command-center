@@ -37,7 +37,9 @@ function loadCanvasList(): CanvasEntry[] {
 function saveCanvasList(list: CanvasEntry[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch {}
+  } catch {
+    // Ignore localStorage errors - not critical for functionality
+  }
 }
 
 function deleteCanvasStorage(id: string) {
@@ -47,7 +49,9 @@ function deleteCanvasStorage(id: string) {
     for (const key of keys) {
       if (key.includes(id)) localStorage.removeItem(key);
     }
-  } catch {}
+  } catch {
+    // Ignore localStorage errors - not critical for functionality
+  }
 }
 
 // ─── i18n labels ─────────────────────────────────────

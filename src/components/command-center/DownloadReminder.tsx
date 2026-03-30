@@ -37,7 +37,9 @@ function shouldShowReminder(): boolean {
 function dismissReminder() {
   try {
     localStorage.setItem(REMINDER_KEY, String(Date.now()));
-  } catch {}
+  } catch {
+    // Ignore localStorage errors - reminder will show again later
+  }
 }
 
 // ─── Popup (center screen, every 10 days) ───────────────

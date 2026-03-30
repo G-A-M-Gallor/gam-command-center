@@ -13,7 +13,7 @@ import type { ParsedColumn, ColumnMapping, DetectedFieldType } from './types';
 // ─── Type Detection ──────────────────────────────────
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[\+]?[\d\s\-\(\)]{7,20}$/;
+const PHONE_RE = /^[+]?[\d\s-()]{7,20}$/;
 const URL_RE = /^https?:\/\/.+/i;
 const BOOLEAN_VALUES = new Set(['true', 'false', 'yes', 'no', 'כן', 'לא', '1', '0', 'да', 'нет']);
 const DATE_PATTERNS = [

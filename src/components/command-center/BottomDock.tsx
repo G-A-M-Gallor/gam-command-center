@@ -452,7 +452,9 @@ export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight
         const parsed = JSON.parse(raw);
         if (parsed.dockPinned) setPinned(true);
       }
-    } catch {}
+    } catch {
+      // Ignore localStorage parse errors - use default settings
+    }
   }, []);
 
   // Auto-hide: debounced trigger with hysteresis to prevent flickering

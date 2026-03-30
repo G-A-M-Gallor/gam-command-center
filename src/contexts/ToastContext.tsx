@@ -57,7 +57,7 @@ const typeConfig: Record<ToastType, { icon: typeof CheckCircle2; color: string; 
 
 // ─── Single Toast ───────────────────────────────────────────────
 
-function ToastItem({
+function ToastComponent({
   item,
   onDismiss,
 }: {
@@ -162,7 +162,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             ].join(" ")}
           >
             {toasts.map((t) => (
-              <ToastItem key={t.id} item={t} onDismiss={dismiss} />
+              <ToastComponent key={t.id} item={t} onDismiss={dismiss} />
             ))}
           </div>,
           document.body

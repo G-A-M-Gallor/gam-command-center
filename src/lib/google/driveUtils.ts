@@ -64,11 +64,11 @@ export class DriveUtils {
 
   extractLessonNumber(filename: string): number {
     const patterns = [
-      /^(\d+)[\s\-\.]/,           // "01 - title"
-      /lesson[\s\-]*(\d+)/i,      // "lesson 05"
+      /^(\d+)[\s-.]/,           // "01 - title"
+      /lesson[\s-]*(\d+)/i,      // "lesson 05"
       /^(\d+)/,                   // Just number at start
-      /chapter[\s\-]*(\d+)/i,     // "chapter 3"
-      /part[\s\-]*(\d+)/i,        // "part 7"
+      /chapter[\s-]*(\d+)/i,     // "chapter 3"
+      /part[\s-]*(\d+)/i,        // "part 7"
     ];
 
     for (const pattern of patterns) {

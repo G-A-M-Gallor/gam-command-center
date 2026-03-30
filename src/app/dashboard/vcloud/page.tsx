@@ -152,7 +152,9 @@ export default function VCloudPage() {
       if (res.ok) {
         setFiles((prev) => prev.filter((f) => f.id !== fileId));
       }
-    } catch {}
+    } catch {
+      // Ignore API errors - file deletion may have failed
+    }
   };
 
   const copyUrl = (url: string, id: string) => {

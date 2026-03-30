@@ -89,7 +89,9 @@ export default function VClipPage() {
       if (res.ok) {
         setClips((prev) => prev.filter((c) => c.id !== clipId));
       }
-    } catch {}
+    } catch {
+      // Ignore API errors - clip deletion may have failed
+    }
   };
 
   const filtered = clips.filter(

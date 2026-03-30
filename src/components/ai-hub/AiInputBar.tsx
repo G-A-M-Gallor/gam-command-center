@@ -181,7 +181,6 @@ export function AiInputBar({
         <div className="mb-2 flex flex-wrap gap-2">
           {attachments.map((att, i) => (
             <div key={i} className="group/img relative">
-              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
               <img
                 src={att.preview}
                 alt=""

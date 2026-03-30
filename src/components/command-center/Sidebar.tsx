@@ -496,7 +496,9 @@ function loadFilter(): SidebarFilter {
   try {
     const v = localStorage.getItem(FILTER_KEY);
     if (v === "me" || v === "team" || v === "hidden" || v === "favorites") return v;
-  } catch {}
+  } catch {
+    // Ignore localStorage errors - use default filter
+  }
   return "me";
 }
 
@@ -504,7 +506,9 @@ function loadViewMode(): ViewMode {
   try {
     const v = localStorage.getItem(VIEW_MODE_KEY);
     if (v === "grid" || v === "compact" || v === "apps") return v;
-  } catch {}
+  } catch {
+    // Ignore localStorage errors - use default view mode
+  }
   return "list";
 }
 
@@ -570,7 +574,9 @@ export function Sidebar({
     try {
       const v = localStorage.getItem("cc-sidebar-folders");
       if (v) setOpenFolders(new Set(JSON.parse(v)));
-    } catch {}
+    } catch {
+      // Ignore localStorage parse errors - use default folders
+    }
   }, []);
   const [folderMode, setFolderMode] = useState<boolean>(true);
 
@@ -579,7 +585,9 @@ export function Sidebar({
     try {
       const v = localStorage.getItem(FOLDER_MODE_KEY);
       if (v === "flat") setFolderMode(false);
-    } catch {}
+    } catch {
+      // Ignore localStorage errors - use default folder mode
+    }
   }, []);
 
   // ── Sidebar customization (reorder, hide, folders, usage tracking) ──
@@ -647,7 +655,11 @@ export function Sidebar({
     setOpenFolders((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
-      try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
+      try {
+        localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next]));
+      } catch {
+        // Ignore localStorage save errors - not critical for functionality
+      }
       return next;
     });
   }, []);
@@ -655,7 +667,11 @@ export function Sidebar({
   const handleFolderModeToggle = useCallback(() => {
     setFolderMode((prev) => {
       const next = !prev;
-      try { localStorage.setItem(FOLDER_MODE_KEY, next ? "folders" : "flat"); } catch {}
+      try {
+        localStorage.setItem(FOLDER_MODE_KEY, next ? "folders" : "flat");
+      } catch {
+        // Ignore localStorage save errors - not critical for functionality
+      }
       return next;
     });
   }, []);
@@ -751,12 +767,20 @@ export function Sidebar({
   // ── Filter + view handlers ────────────────────────────
   const handleFilterChange = (f: SidebarFilter) => {
     setFilter(f);
-    try { localStorage.setItem(FILTER_KEY, f); } catch {}
+    try {
+      localStorage.setItem(FILTER_KEY, f);
+    } catch {
+      // Ignore localStorage errors - not critical for functionality
+    }
   };
 
   const handleViewModeChange = (v: ViewMode) => {
     setViewMode(v);
-    try { localStorage.setItem(VIEW_MODE_KEY, v); } catch {}
+    try {
+      localStorage.setItem(VIEW_MODE_KEY, v);
+    } catch {
+      // Ignore localStorage save errors - not critical for functionality
+    }
   };
 
   // ── Compute filtered groups (uses customization engine) ─
@@ -858,7 +882,11 @@ export function Sidebar({
             if (prev.has(entry.key)) return prev;
             const next = new Set(prev);
             next.add(entry.key);
-            try { localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next])); } catch {}
+            try {
+              localStorage.setItem("cc-sidebar-folders", JSON.stringify([...next]));
+            } catch {
+              // Ignore localStorage save errors - not critical for functionality
+            }
             return next;
           });
         }

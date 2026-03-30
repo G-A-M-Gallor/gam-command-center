@@ -1418,7 +1418,6 @@ function PWATab() {
           {camera.photoUrl && (
             <div className="space-y-2">
               <label className="text-[10px] font-medium text-slate-400">{p.photoPreview}</label>
-              {/* eslint-disable-next-line @next/next/no-img-element -- dynamic data URL */}
               <img src={camera.photoUrl} alt="Captured" className="max-h-48 rounded-lg border border-slate-700" />
               <Button size="sm" variant="ghost" icon={Trash} onClick={camera.clearPhoto}>
                 {p.clearPhoto}

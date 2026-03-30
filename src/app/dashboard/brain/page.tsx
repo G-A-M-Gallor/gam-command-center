@@ -391,25 +391,27 @@ export default function BrainHealthDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    placeholder="הכנס שאלה או מושג לחיפוש..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && searchBrain()}
-                    className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-                  />
-                  <Button
-                    onClick={searchBrain}
-                    disabled={searching}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
-                    {searching ? (
-                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                    ) : (
-                      <Search className="h-4 w-4" />
-                    )}
-                  </Button>
+                <div className="flex justify-center mb-4">
+                  <div className="flex gap-2 w-full max-w-2xl">
+                    <Input
+                      placeholder="הכנס שאלה או מושג לחיפוש..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && searchBrain()}
+                      className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                    />
+                    <Button
+                      onClick={searchBrain}
+                      disabled={searching}
+                      className="bg-purple-600 hover:bg-purple-700"
+                    >
+                      {searching ? (
+                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
                 {searchResults.length > 0 && (
@@ -417,10 +419,10 @@ export default function BrainHealthDashboard() {
                     <h3 className="text-lg font-semibold text-white">
                       נמצאו {searchResults.length} תוצאות
                     </h3>
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="space-y-3 max-h-[calc(100vh-320px)] overflow-y-auto">
                       {searchResults.map((result) => (
-                        <div key={result.id} className="p-4 bg-slate-700 rounded-md">
-                          <div className="flex items-center gap-2 mb-2">
+                        <div key={result.id} className="p-4 bg-slate-700 rounded-md" dir="rtl">
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
                             <Badge intent="outline" className="text-xs">
                               ציון: {(result.smart_score * 100).toFixed(1)}%
                             </Badge>
@@ -438,13 +440,13 @@ export default function BrainHealthDashboard() {
                                 href={result.source_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-blue-400 hover:text-blue-300 mr-auto"
+                                className="text-xs text-blue-400 hover:text-blue-300 ms-auto"
                               >
                                 🔗 מקור
                               </a>
                             )}
                           </div>
-                          <p className="text-sm text-slate-300">{result.content}</p>
+                          <p className="text-sm text-slate-300 leading-relaxed">{result.content}</p>
                         </div>
                       ))}
                     </div>

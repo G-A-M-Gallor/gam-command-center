@@ -591,7 +591,6 @@ function StepSign({
             {uploadedSig ? (
               <div className="space-y-2">
                 <div className="flex justify-center rounded-lg border border-slate-700 bg-white p-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={uploadedSig} alt="חתימה" className="max-h-32" />
                 </div>
                 <button
