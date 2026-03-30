@@ -203,7 +203,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     // Fire-and-forget activity log
     if (data?.id) {
-      logActivityServer(data.id, 'created', { actorId: user.id }).catch(() => {});
+      logActivityServer(data.id, 'created', { actorId: user.id }).catch(() => { /* no-op */ });
     }
 
     return NextResponse.json({ data }, { status: 201 });
@@ -315,7 +315,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         ? (existing.meta as Record<string, unknown>) : {};
       logPromises.push(logMetaChanges(id, oldMeta, meta, user.id));
     }
-    Promise.all(logPromises).catch(() => {});
+    Promise.all(logPromises).catch(() => { /* no-op */ });
 
     return NextResponse.json({ data });
   } catch (err) {
@@ -377,7 +377,7 @@ export async function DELETE(request: Request, context: RouteContext) {
         data.map((d: { id: string }) =>
           logActivityServer(d.id, 'deleted', { actorId: user.id })
         )
-      ).catch(() => {});
+      ).catch(() => { /* no-op */ });
     }
 
     return NextResponse.json({

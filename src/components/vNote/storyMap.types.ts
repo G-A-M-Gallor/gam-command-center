@@ -22,7 +22,6 @@ export interface LayoutBlock {
   entityType?: string;
   entityId?: string;
   storyMapConfig?: StoryMapConfig;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

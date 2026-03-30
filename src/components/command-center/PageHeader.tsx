@@ -238,7 +238,6 @@ export function PageHeader({ pageKey, children }: PageHeaderProps) {
   const [pinned, setPinned] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setPinned(isFavorite(href));
     const sync = () => setPinned(isFavorite(href));
     window.addEventListener("cc-favorites-change", sync);

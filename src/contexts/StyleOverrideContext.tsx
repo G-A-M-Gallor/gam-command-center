@@ -57,11 +57,11 @@ const defaultState: StyleOverrideState = {
   personalOverrides: {},
   viewMode: "custom",
   textHistory: {},
-  setElementStyle: () => {},
-  resetElement: () => {},
-  resetAll: () => {},
-  setViewMode: () => {},
-  clearTextHistory: () => {},
+  setElementStyle: () => { /* no-op */ },
+  resetElement: () => { /* no-op */ },
+  resetAll: () => { /* no-op */ },
+  setViewMode: () => { /* no-op */ },
+  clearTextHistory: () => { /* no-op */ },
 };
 
 const StyleOverrideContext = createContext<StyleOverrideState>(defaultState);
@@ -137,7 +137,6 @@ export function StyleOverrideProvider({ children }: { children: React.ReactNode 
       const raw = localStorage.getItem(STORAGE_KEYS.personal);
       if (raw) {
         const parsed = JSON.parse(raw);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
         setPersonalOverrides(parsed);
         overridesRef.current = parsed;
       }

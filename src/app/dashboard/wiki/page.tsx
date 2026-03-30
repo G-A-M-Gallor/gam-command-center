@@ -25,7 +25,6 @@ export default function WikiPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const isRtl = language === "he";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wikiT = t.wiki as any;
   const tw = wikiT as Record<string, string>;
   const catLabels = wikiT.categories as Record<string, string>;

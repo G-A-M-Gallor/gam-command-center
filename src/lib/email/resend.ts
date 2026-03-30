@@ -7,8 +7,6 @@
 import { Resend } from "resend";
 import { render } from "@react-email/components";
 import type { ReactElement } from "react";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = { from: (table: string) => any };
 
 let _resend: Resend | null = null;

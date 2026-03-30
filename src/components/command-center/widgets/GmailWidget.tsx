@@ -64,7 +64,7 @@ export function GmailPanel() {
           setSelectedAccountId(active[0].id);
         }
       })
-      .catch(() => {})
+      .catch(() => { /* no-op */ })
       .finally(() => {
         setLoading(false);
       });
@@ -226,7 +226,7 @@ export function GmailBarContent({ size }: { size: WidgetSize }) {
         );
         if (acc) setAccountId(acc.id);
       })
-      .catch(() => {});
+      .catch(() => { /* no-op */ });
   }, []);
 
   useEffect(() => {
@@ -239,7 +239,7 @@ export function GmailBarContent({ size }: { size: WidgetSize }) {
           const count = (data.messages || []).filter((m: GmailMessage) => m.isUnread).length;
           setUnread(count);
         })
-        .catch(() => {});
+        .catch(() => { /* no-op */ });
     };
 
     fetchUnread();

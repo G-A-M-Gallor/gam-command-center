@@ -681,7 +681,6 @@ export function Sidebar({
 
   // Hydrate from localStorage + listen for cross-component favorites sync
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setFilter(loadFilter());
     setViewMode(loadViewMode());
     setFavHrefs(new Set(loadFavorites().map((f) => f.href)));
@@ -870,7 +869,6 @@ export function Sidebar({
   // ── Sliding active indicator measurement ─────────────
   useEffect(() => {
     if (isCollapsed || !navRef.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setIndicatorStyle(null);
       return;
     }

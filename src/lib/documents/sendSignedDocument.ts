@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 import { appendCertificatePage } from "./certificatePage";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = { from: (table: string) => any; storage: any };
 
 let _resend: Resend | null = null;

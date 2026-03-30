@@ -72,8 +72,6 @@ export function ActivityFeed({ noteId, language, hideCommentInput }: Props) {
     setEntries(data);
     setLoading(false);
   }, [noteId]);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { load(); }, [load]);
 
   const handleAddComment = async () => {

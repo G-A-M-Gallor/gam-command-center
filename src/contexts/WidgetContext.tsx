@@ -145,31 +145,31 @@ const defaultState: WidgetState = {
   widgetPlacements: {},
   hoverDelay: 0.5,
   folders: [],
-  setWidgetPosition: () => {},
-  setWidgetPositions: () => {},
-  setWidgetSize: () => {},
-  setWidgetPlacement: () => {},
-  setHoverDelay: () => {},
-  addFolder: () => {},
-  updateFolder: () => {},
-  removeFolder: () => {},
+  setWidgetPosition: () => { /* no-op */ },
+  setWidgetPositions: () => { /* no-op */ },
+  setWidgetSize: () => { /* no-op */ },
+  setWidgetPlacement: () => { /* no-op */ },
+  setHoverDelay: () => { /* no-op */ },
+  addFolder: () => { /* no-op */ },
+  updateFolder: () => { /* no-op */ },
+  removeFolder: () => { /* no-op */ },
   profiles: [],
   activeProfileId: null,
-  saveProfile: () => {},
-  loadProfile: () => {},
-  deleteProfile: () => {},
-  renameProfile: () => {},
-  updateProfileSnapshot: () => {},
+  saveProfile: () => { /* no-op */ },
+  loadProfile: () => { /* no-op */ },
+  deleteProfile: () => { /* no-op */ },
+  renameProfile: () => { /* no-op */ },
+  updateProfileSnapshot: () => { /* no-op */ },
   widgetLabels: {},
-  setWidgetLabel: () => {},
-  clearWidgetLabel: () => {},
+  setWidgetLabel: () => { /* no-op */ },
+  clearWidgetLabel: () => { /* no-op */ },
   widgetIcons: {},
-  setWidgetIcon: () => {},
-  clearWidgetIcon: () => {},
+  setWidgetIcon: () => { /* no-op */ },
+  clearWidgetIcon: () => { /* no-op */ },
   displayMode: "normal",
-  setDisplayMode: () => {},
+  setDisplayMode: () => { /* no-op */ },
   widgetPanelModes: {},
-  setWidgetPanelMode: () => {},
+  setWidgetPanelMode: () => { /* no-op */ },
 };
 
 const WidgetContext = createContext<WidgetState>(defaultState);
@@ -240,7 +240,6 @@ export function WidgetProvider({ children }: { children: React.ReactNode }) {
   const [widgetIcons, setWidgetIconsState] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setWidgetPositionsState(
       parseJson<Record<string, number>>(
         localStorage.getItem(STORAGE_KEYS.positions),

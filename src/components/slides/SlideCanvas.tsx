@@ -96,7 +96,6 @@ export function SlideCanvas() {
       >
         {/* Background image */}
         {slide.backgroundImage && (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={slide.backgroundImage}
             alt=""

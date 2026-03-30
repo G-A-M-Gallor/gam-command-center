@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     // Send push notification for inbound calls
     if (direction === "inbound") {
-      sendCommPush(supabase, row).catch(() => {});
+      sendCommPush(supabase, row).catch(() => { /* no-op */ });
     }
 
     return NextResponse.json({ success: true });

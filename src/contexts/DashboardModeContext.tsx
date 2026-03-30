@@ -11,9 +11,9 @@ interface DashboardModeState {
 
 const defaultState: DashboardModeState = {
   editMode: false,
-  setEditMode: () => {},
+  setEditMode: () => { /* no-op */ },
   guideMode: false,
-  setGuideMode: () => {},
+  setGuideMode: () => { /* no-op */ },
 };
 
 const DashboardModeContext = createContext<DashboardModeState>(defaultState);

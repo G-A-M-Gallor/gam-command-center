@@ -261,8 +261,6 @@ function formatDate(iso: string): string {
 function truncate(str: string, max: number): string {
   return str.length > max ? str.slice(0, max) + "..." : str;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function drawField(page: PDFPage, boldFont: PDFFont, font: PDFFont, label: string, value: string, x: number, y: number, labelColor: Color, valueColor: Color): number {
   page.drawText(`${label}:`, { x, y, size: 9, font: boldFont, color: labelColor });
   y -= 13;
@@ -270,14 +268,10 @@ function drawField(page: PDFPage, boldFont: PDFFont, font: PDFFont, label: strin
   y -= 16;
   return y;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function drawSmallField(page: PDFPage, font: PDFFont, text: string, x: number, y: number, color: Color): number {
   page.drawText(text, { x, y, size: 8, font, color });
   return y - 11;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
   const words = text.split(" ");
   const lines: string[] = [];

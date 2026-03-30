@@ -17,7 +17,6 @@ const GROUP_TO_CATEGORY: Record<string, LauncherCategory> = {
 import { Circle } from "lucide-react";
 
 // Resolve icon component — pass through if valid, fallback to Circle
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getIcon(icon: any): React.ComponentType<{ className?: string }> {
   if (!icon) return Circle;
   return icon;

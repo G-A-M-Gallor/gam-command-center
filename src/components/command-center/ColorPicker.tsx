@@ -32,7 +32,6 @@ export function ColorPicker({
   useEffect(() => {
     if (value && value !== currentHex) {
       const hsl = hexToHsl(value);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setHue(hsl.h);
       setSat(hsl.s);
       setLit(hsl.l);
@@ -42,7 +41,6 @@ export function ColorPicker({
 
   // Update hex input + notify parent
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setHexInput(currentHex);
     onChange(currentHex);
   }, [hue, sat, lit, currentHex, onChange]);

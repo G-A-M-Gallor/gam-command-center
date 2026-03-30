@@ -140,8 +140,6 @@ export async function GET(req: NextRequest) {
 
   const headerRow = Object.values(columns).map(escapeCsvValue).join(",");
   const keys = Object.keys(columns);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows = (data as any[]).map((row: Record<string, unknown>) =>
     keys
       .map((key) => {

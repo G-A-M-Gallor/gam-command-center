@@ -21,7 +21,11 @@ export async function DELETE(
       .single();
 
     if (file?.storage_url) {
-      try { await del(file.storage_url); } catch {}
+      try {
+        await del(file.storage_url);
+      } catch (_error) {
+        // Ignore storage deletion errors
+      }
     }
 
     await supabase.from("vcloud_files").delete().eq("id", id);

@@ -45,7 +45,6 @@ export function TeamPanel() {
 
   useEffect(() => {
     // TODO: Replace with Supabase Realtime presence when available
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setTeam(DEMO_TEAM);
   }, []);
 

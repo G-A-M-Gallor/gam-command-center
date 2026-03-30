@@ -221,7 +221,6 @@ export function WidgetWrapper({
   // Close panel while dragging
   useEffect(() => {
     if (isDragging && panelOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setPanelOpen(false);
     }
   }, [isDragging, panelOpen]);
@@ -238,7 +237,6 @@ export function WidgetWrapper({
   useEffect(() => {
     const saved = localStorage.getItem(savedPresetKey);
     if (saved && saved in PANEL_PRESETS) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setPanelPreset(saved as PanelPreset);
     }
   }, [savedPresetKey]);
@@ -246,7 +244,6 @@ export function WidgetWrapper({
   // Calculate panel position when it opens or sidebar changes
   useEffect(() => {
     if (!panelOpen || !wrapperRef.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setPanelPos(null);
       return;
     }

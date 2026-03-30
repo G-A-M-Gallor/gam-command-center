@@ -68,7 +68,7 @@ export default function WatchPage() {
           watch_duration_seconds: watchDuration || 0,
           watch_percentage: watchPct || 0,
         }),
-      }).catch(() => {});
+      }).catch(() => { /* no-op */ });
     },
     [id]
   );

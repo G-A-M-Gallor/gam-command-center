@@ -100,7 +100,6 @@ export function AiMessage({
         {message.images && message.images.length > 0 && (
           <div className="mb-2 flex flex-wrap gap-2">
             {message.images.map((img, i) => (
-              // eslint-disable-next-line @next/next/no-img-element -- dynamic data URL
               <img
                 key={i}
                 src={`data:${img.mediaType};base64,${img.base64}`}

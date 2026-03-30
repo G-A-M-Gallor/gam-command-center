@@ -144,7 +144,6 @@ export function WeeklyPlannerProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     const localItems = loadJson<WeeklyItem[]>(ITEMS_KEY, []);
     const localTemplates = loadJson<WeeklyTemplate[]>(TEMPLATES_KEY, []);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setItems(localItems);
     setTemplates(localTemplates);
     setMounted(true);

@@ -792,7 +792,6 @@ function BrandTab() {
             title={t.brand.uploadLogo}
           >
             {brandProfile.logoDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- dynamic data URL
               <img
                 src={brandProfile.logoDataUrl}
                 alt="Logo"
@@ -1139,7 +1138,6 @@ function PWATab() {
 
   // Notification templates
   const [templates, setTemplates] = useState<NotificationTemplates>(DEFAULT_TEMPLATES);
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { setTemplates(loadTemplates()); }, []);
 
   const updateTemplate = useCallback(
@@ -1671,7 +1669,7 @@ function QRScannerModal({ onClose, onResult }: { onClose: () => void; onResult: 
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText) => {
             onResult(decodedText);
-            scanner.stop().catch(() => {});
+            scanner.stop().catch(() => { /* no-op */ });
           },
           () => { /* ignore scan failures */ }
         );
@@ -1687,10 +1685,9 @@ function QRScannerModal({ onClose, onResult }: { onClose: () => void; onResult: 
       cancelled = true;
       if (html5QrRef.current) {
         const s = html5QrRef.current as { stop: () => Promise<void> };
-        s.stop().catch(() => {});
+        s.stop().catch(() => { /* no-op */ });
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

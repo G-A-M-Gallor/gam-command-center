@@ -50,7 +50,6 @@ export function useMobileBottomBar() {
 
   // Hydrate from localStorage
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setSlotsState(loadSlots());
   }, []);
 

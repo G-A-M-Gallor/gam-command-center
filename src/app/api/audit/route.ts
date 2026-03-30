@@ -81,8 +81,6 @@ interface QueryParams {
   to: string | null;
   search: string | null;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchSystemAuditData(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("audit_log")
@@ -98,8 +96,6 @@ async function fetchSystemAuditData(supabase: SupabaseClient, params: QueryParam
   const { data } = await query;
   return data || [];
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchDocumentAuditData(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("document_audit_log")
@@ -116,8 +112,6 @@ async function fetchDocumentAuditData(supabase: SupabaseClient, params: QueryPar
   const { data } = await query;
   return data || [];
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchSystemAudit(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("audit_log")
@@ -136,8 +130,6 @@ async function fetchSystemAudit(supabase: SupabaseClient, params: QueryParams) {
   const entries = (data || []).map((r: Record<string, unknown>) => ({ ...r, _source: "system" }));
   return NextResponse.json({ entries, total: count, page: Math.floor(params.offset / params.limit) + 1, limit: params.limit });
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function fetchDocumentAudit(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("document_audit_log")

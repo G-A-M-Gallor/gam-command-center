@@ -91,7 +91,6 @@ export function AppStorePanel({ onClose }: AppStorePanelProps) {
 
   useEffect(() => {
     searchRef.current?.focus();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setLocks(loadLocks());
   }, []);
 

@@ -135,7 +135,7 @@ function generateClients() {
       start_date: c.start_date,
       end_date: c.end_date,
       phone: `05${rand(0, 4)}${rand(1000000, 9999999)}`,
-      email: `demo@${c.name.split("—")[0].trim().replace(/[\[\]דוגמה ]/g, "").trim().toLowerCase()}.co.il`,
+      email: `demo@${c.name.split("—")[0].trim().replace(/[[\]דוגמה ]/g, "").trim().toLowerCase()}.co.il`,
     },
   }));
 }

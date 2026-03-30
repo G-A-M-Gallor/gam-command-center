@@ -212,7 +212,6 @@ function StoryMapContent() {
   // ── Load cards when project changes ────────────────
   useEffect(() => {
     if (!selectedProject) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setCards(makeDemoCards());
       setIsDemo(true);
       setRealtimeStatus('disconnected');
@@ -239,7 +238,6 @@ function StoryMapContent() {
       if (channelRef.current) {
         unsubscribeFromStoryCards(channelRef.current);
         channelRef.current = null;
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
         setRealtimeStatus('disconnected');
       }
       return;

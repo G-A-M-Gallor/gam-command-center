@@ -59,7 +59,11 @@ export async function DELETE(
 
     // Delete from Blob storage
     if (clip?.storage_url) {
-      try { await del(clip.storage_url); } catch {}
+      try {
+        await del(clip.storage_url);
+      } catch (_error) {
+        // Ignore storage deletion errors
+      }
     }
 
     // Delete from Supabase (views cascade)

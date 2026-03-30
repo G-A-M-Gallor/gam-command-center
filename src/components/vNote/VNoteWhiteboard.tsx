@@ -4,9 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 // Excalidraw types
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExcalidrawElement = any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AppState = any;
 
 interface Props {
@@ -45,7 +43,6 @@ async function saveWhiteboardData(
 }
 
 export function VNoteWhiteboard({ entityId }: Props) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [Excalidraw, setExcalidraw] = useState<any>(null);
   const [initialData, setInitialData] = useState<{
     elements: ExcalidrawElement[];
@@ -53,7 +50,6 @@ export function VNoteWhiteboard({ entityId }: Props) {
   } | null>(null);
   const [loaded, setLoaded] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const excalidrawRef = useRef<any>(null);
 
   // Load Excalidraw dynamically

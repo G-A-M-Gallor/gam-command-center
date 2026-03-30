@@ -74,7 +74,7 @@ export function CalendarPanel() {
           setSelectedAccountId(active[0].id);
         }
       })
-      .catch(() => {})
+      .catch(() => { /* no-op */ })
       .finally(() => {
         setLoading(false);
       });
@@ -251,7 +251,7 @@ export function CalendarBarContent({ size }: { size: WidgetSize }) {
         );
         if (acc) setAccountId(acc.id);
       })
-      .catch(() => {});
+      .catch(() => { /* no-op */ });
   }, []);
 
   useEffect(() => {
@@ -270,7 +270,7 @@ export function CalendarBarContent({ size }: { size: WidgetSize }) {
             setNextEvent(null);
           }
         })
-        .catch(() => {});
+        .catch(() => { /* no-op */ });
     };
 
     fetchNext();

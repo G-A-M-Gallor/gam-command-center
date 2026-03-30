@@ -36,7 +36,6 @@ export function IconDisplay({
     }
     case 'image':
       return (
-        // eslint-disable-next-line @next/next/no-img-element -- dynamic data URL
         <img
           src={parsed.value}
           alt=""

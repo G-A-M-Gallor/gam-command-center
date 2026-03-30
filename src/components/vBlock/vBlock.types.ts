@@ -25,7 +25,6 @@ export type VBlockEvent =
   | { type: "block.fullscreen.requested"; blockId: string }
   | { type: "block.fullscreen.exited"; blockId: string }
   | { type: "block.context.action"; blockId: string; actionId: string }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | { type: "block.content.updated"; blockId: string; data?: any };
 
 export interface VBlockFlipConfig {

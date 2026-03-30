@@ -444,8 +444,6 @@ function formatDate(iso: string): string {
     timeZone: "Asia/Jerusalem",
   });
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
   const words = text.split(" ");
   const lines: string[] = [];

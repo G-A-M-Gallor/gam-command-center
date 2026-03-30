@@ -79,7 +79,6 @@ export function BulkActionBar({
 
   // Reset confirm state on selection change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setConfirmAction(null);
   }, [count]);
 

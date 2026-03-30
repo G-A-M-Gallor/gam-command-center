@@ -80,7 +80,6 @@ export function FavoritesPanel() {
   const dragOver = useRef<number | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setFavorites(loadFavorites());
     const sync = () => setFavorites(loadFavorites());
     window.addEventListener("cc-favorites-change", sync);

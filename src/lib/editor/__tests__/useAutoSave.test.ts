@@ -449,7 +449,6 @@ describe('useAutoSave', () => {
 
       // The update call should have used content2
       expect(mockUpdate).toHaveBeenCalled();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updateCallArg = (mockUpdate.mock.calls as any)[0]?.[0];
       expect(updateCallArg?.content).toEqual(content2);
 

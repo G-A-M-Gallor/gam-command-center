@@ -143,7 +143,6 @@ export function SlideElementComponent({
 
       case "image":
         return element.src ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={element.src}
             alt=""

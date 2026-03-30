@@ -651,14 +651,12 @@ export default function FunctionalMapPage() {
       .then((data) => {
         if (data.length > 0) setCells(data);
       })
-      .catch(() => {})
+      .catch(() => { /* no-op */ })
       .finally(() => setLoaded(true));
   }, []);
 
   useEffect(() => {
     if (!loaded) return;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setRealtimeStatus("connecting");
 
     const channel = subscribeFunctionalMap({

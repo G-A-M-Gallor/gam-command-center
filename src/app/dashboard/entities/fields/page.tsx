@@ -438,8 +438,6 @@ export default function FieldLibraryPage() {
     setFields(data);
     setLoading(false);
   }, []);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadFields(); }, [loadFields]);
 
   useEffect(() => {

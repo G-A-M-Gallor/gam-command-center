@@ -11,7 +11,6 @@ const SignatureCanvas = dynamic(
     ssr: false,
     loading: () => <div className="h-40 rounded-lg border border-slate-700 bg-slate-900 animate-pulse" />,
   },
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ) as any;
 
 // ── Types ────────────────────────────────────────────────────
@@ -80,7 +79,6 @@ export function SigningFlow({
   const [sigMode, setSigMode] = useState<SignatureMode>("draw");
   const [typedSig, setTypedSig] = useState("");
   const [uploadedSig, setUploadedSig] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sigCanvasRef = useRef<any>(null);
 
   // Submission state
@@ -481,7 +479,6 @@ function StepSign({
   typedSig: string; setTypedSig: (v: string) => void;
   uploadedSig: string | null;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sigCanvasRef: React.RefObject<any>;
   clearSignature: () => void;
   canSubmit: boolean;
@@ -734,7 +731,6 @@ function renderSnapshotToHtml(
 }
 
 function renderNode(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   node: any,
   fieldValues: Record<string, unknown>,
 ): string {

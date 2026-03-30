@@ -42,7 +42,6 @@ export function AiKnowledgeDialog({ isOpen, onClose, mode, t }: AiKnowledgeDialo
 
   useEffect(() => {
     if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setUrls(loadKnowledgeUrls());
       setNewUrl("");
       setError(null);

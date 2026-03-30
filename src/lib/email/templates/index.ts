@@ -15,8 +15,6 @@ export { BaseLayout } from "./BaseLayout";
 export { OtpEmail, WelcomeEmail, ResetPasswordEmail, CaseUpdateEmail };
 export { DocumentReadyEmail, MeetingReminderEmail, InvoiceEmail };
 export { NewMessageEmail, MonthlySummaryEmail };
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type TemplateComponent = (props: any) => ReactElement;
 
 const TEMPLATES: Record<string, TemplateComponent> = {

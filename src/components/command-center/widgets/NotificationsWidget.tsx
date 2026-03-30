@@ -145,7 +145,7 @@ export function NotificationsPanel() {
     fetch("/api/push/preferences")
       .then((r) => r.json())
       .then((d) => { if (d.preferences) setPrefs(d.preferences); })
-      .catch(() => {});
+      .catch(() => { /* no-op */ });
   }, [pushState]);
 
   const togglePref = useCallback(async (key: string) => {
@@ -211,7 +211,6 @@ export function NotificationsPanel() {
 
   // Supabase Realtime subscription for live notifications
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let channel: any = null;
     import("@/lib/supabaseClient").then(({ supabase }) => {
       channel = supabase
@@ -240,12 +239,12 @@ export function NotificationsPanel() {
           }
         )
         .subscribe();
-    }).catch(() => {});
+    }).catch(() => { /* no-op */ });
     return () => {
       if (channel) {
         import("@/lib/supabaseClient").then(({ supabase }) => {
           supabase.removeChannel(channel);
-        }).catch(() => {});
+        }).catch(() => { /* no-op */ });
       }
     };
   }, []);
@@ -261,7 +260,7 @@ export function NotificationsPanel() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
-      }).catch(() => {});
+      }).catch(() => { /* no-op */ });
     },
     [items]
   );
@@ -274,7 +273,7 @@ export function NotificationsPanel() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ markAllRead: true }),
-    }).catch(() => {});
+    }).catch(() => { /* no-op */ });
   }, [items]);
 
   const unreadCount = items.filter((n) => !n.read).length;

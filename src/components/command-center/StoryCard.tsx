@@ -629,7 +629,6 @@ export function StoryCard({ card, onUpdate, onDelete, onOpenNote, linkedEntities
 
   // Sync notes text when card prop changes (realtime)
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setNotesText(card.notes || '');
   }, [card.notes]);
 

@@ -127,19 +127,16 @@ export default function AIHubPage() {
   // ─── Effects ────────────────────────────────────────────────
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (!isMobile) setSidebarOpen(true);
   }, [isMobile]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (isMobile) setSidebarOpen(false);
   }, [isMobile]);
 
   // Load conversations on mount
   useEffect(() => {
     const loaded = loadConversationsLocal();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setConversations(loaded);
     if (loaded.length > 0) {
       setActiveId(loaded[0].id);

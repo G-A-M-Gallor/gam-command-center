@@ -219,8 +219,6 @@ export default function EmailTemplateDesignerPage() {
     setTemplates(data);
     setLoading(false);
   }, [filterCategory]);
-
-  /* eslint-disable react-hooks/set-state-in-effect -- initial data load */
   useEffect(() => {
     loadTemplates();
   }, [loadTemplates]);

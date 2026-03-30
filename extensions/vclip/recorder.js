@@ -57,7 +57,9 @@ async function init() {
   try {
     const stored = await chrome.storage.local.get(["vclip_prefs"]);
     if (stored.vclip_prefs) prefs = { ...prefs, ...stored.vclip_prefs };
-  } catch {}
+  } catch (_error) {
+    // Ignore storage errors
+  }
 
   // Start camera preview if enabled
   if (prefs.enableCamera) {

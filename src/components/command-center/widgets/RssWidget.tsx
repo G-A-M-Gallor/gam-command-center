@@ -112,9 +112,9 @@ export function RssBarContent({ size }: { size: WidgetSize }) {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    fetchUnreadCount().then(setUnread).catch(() => {});
+    fetchUnreadCount().then(setUnread).catch(() => { /* no-op */ });
     const interval = setInterval(() => {
-      fetchUnreadCount().then(setUnread).catch(() => {});
+      fetchUnreadCount().then(setUnread).catch(() => { /* no-op */ });
     }, 5 * 60 * 1000); // refresh every 5 min
     return () => clearInterval(interval);
   }, []);

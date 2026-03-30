@@ -12,8 +12,6 @@ export default function SlidesPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const isRtl = language === "he";
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const slidesT = (t as any).slides as Record<string, string> | undefined;
   const st = slidesT || {};
 

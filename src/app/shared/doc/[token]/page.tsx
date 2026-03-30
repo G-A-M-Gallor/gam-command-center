@@ -58,8 +58,6 @@ export default async function SharedDocPage({
     </div>
   );
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function renderTiptapToHtml(node: any): string {
   if (!node) return "";
 

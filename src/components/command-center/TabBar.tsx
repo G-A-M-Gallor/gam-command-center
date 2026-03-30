@@ -35,7 +35,9 @@ export function TabBar({ contentMarginLeft, contentMarginRight, topbarHover = fa
       try {
         const raw = localStorage.getItem(RECENT_PAGES_KEY);
         if (raw) setPages(JSON.parse(raw));
-      } catch {}
+      } catch (_error) {
+        // Ignore localStorage errors
+      }
     };
     load();
 
@@ -58,7 +60,9 @@ export function TabBar({ contentMarginLeft, contentMarginRight, topbarHover = fa
       if (href === pathname && updated.length > 0) {
         router.push(updated[0].href);
       }
-    } catch {}
+    } catch (_error) {
+      // Ignore navigation errors
+    }
   };
 
   if (pages.length === 0) return null;

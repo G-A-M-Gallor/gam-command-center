@@ -337,7 +337,6 @@ export default function VCloudPage() {
                   {/* Preview area */}
                   <div className="relative flex h-28 items-center justify-center bg-slate-800/30">
                     {isImage ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={file.storage_url}
                         alt={file.name}

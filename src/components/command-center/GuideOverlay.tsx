@@ -123,7 +123,6 @@ export function GuideOverlay() {
 
   useEffect(() => {
     if (!guideMode) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setTooltip((prev) => ({ ...prev, visible: false }));
       currentTarget.current = null;
       return;

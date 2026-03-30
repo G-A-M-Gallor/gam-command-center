@@ -30,7 +30,6 @@ export type { Translations, TranslationKey };
 // Pick the right language variant from a bilingual/trilingual data object.
 
 export function loc<T = string>(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- loc() needs to accept any object shape
   obj: Record<string, any>,
   field: string,
   language: Language,

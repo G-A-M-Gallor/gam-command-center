@@ -37,8 +37,6 @@ export function TemplatePicker({ noteId }: Props) {
     setLinked(templates);
     setLoading(false);
   }, [noteId]);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadLinked(); }, [loadLinked]);
 
   const handleSearch = useCallback(async (q: string) => {

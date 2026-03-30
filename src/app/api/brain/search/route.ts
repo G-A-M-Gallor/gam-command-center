@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { query, max_results, match_threshold, filter_source_type, filter_domain } = parsed.data;
+    const { query, max_results, match_threshold: _match_threshold, filter_source_type, filter_domain } = parsed.data;
 
     // Call semantic-query v3 Edge Function
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

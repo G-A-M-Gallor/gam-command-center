@@ -106,7 +106,6 @@ export default function ContractorWizard() {
   // Load from sessionStorage
   useEffect(() => {
     const stored = localStorage.getItem("cc-language") as Language | null;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (stored) setLanguage(stored);
 
     const saved = sessionStorage.getItem(STORAGE_KEY);

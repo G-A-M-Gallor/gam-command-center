@@ -10,8 +10,6 @@ import type { CommMessage } from "@/lib/wati/types";
 const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:admin@gam.co.il";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClient = { from: (table: string) => any };
 
 const CHANNEL_LABELS: Record<string, { he: string; en: string }> = {

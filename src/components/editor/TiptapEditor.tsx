@@ -251,8 +251,6 @@ function StatusBar({
   const wordCount = useMemo(() => text.split(/\s+/).filter(Boolean).length, [text]);
   const charCount = text.length;
   const readingTime = Math.ceil(wordCount / 200);
-
-  /* eslint-disable react-hooks/purity -- Date.now() for relative time display */
   const relativeTime = useMemo(() => {
     if (!lastSavedAt) return '';
     const diff = Math.round((Date.now() - lastSavedAt.getTime()) / 1000);

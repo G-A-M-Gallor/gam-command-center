@@ -13,7 +13,6 @@ function NumberTicker({ value, visible, suffix = "" }: { value: string; visible:
   useEffect(() => {
     if (!visible) return;
     const target = parseFloat(numericPart.replace(/,/g, ""));
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (isNaN(target)) { setDisplay(value); return; }
     const duration = 1800;
     const steps = 40;
@@ -294,7 +293,6 @@ export default function GAMLanding() {
 
   useEffect(() => {
     const saved = localStorage.getItem("gam-skin") as SkinId | null;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (saved && SKINS.some(s => s.id === saved)) setSkinId(saved);
   }, []);
 

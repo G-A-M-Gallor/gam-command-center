@@ -475,8 +475,6 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
       setLinkedNotes(map);
     }
   }, [noteId]);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { loadRelations(); }, [loadRelations]);
 
   const trackActivity = etInfo?.template_config?.track_activity ?? false;

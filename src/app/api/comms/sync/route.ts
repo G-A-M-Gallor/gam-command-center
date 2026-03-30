@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         supabase,
         "סנכרון WATI הושלם",
         `${totalSynced} הודעות חדשות מ-${contactsSynced} אנשי קשר`,
-      ).catch(() => {});
+      ).catch(() => { /* no-op */ });
     }
 
     return NextResponse.json({

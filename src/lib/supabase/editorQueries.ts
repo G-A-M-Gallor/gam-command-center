@@ -99,7 +99,7 @@ export async function updateDocument(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ document_id: id }),
-    }).catch(() => {});
+    }).catch(() => { /* no-op */ });
   }
 
   return true;

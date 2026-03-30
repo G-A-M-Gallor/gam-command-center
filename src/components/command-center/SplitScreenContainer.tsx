@@ -52,7 +52,11 @@ export function SplitScreenContainer({ children }: SplitScreenContainerProps) {
     };
     const handleUp = () => {
       setDragging(false);
-      try { localStorage.setItem(RATIO_KEY, String(ratio)); } catch {}
+      try {
+        localStorage.setItem(RATIO_KEY, String(ratio));
+      } catch (_error) {
+        // Ignore localStorage errors
+      }
     };
     document.addEventListener("mousemove", handleMove);
     document.addEventListener("mouseup", handleUp);

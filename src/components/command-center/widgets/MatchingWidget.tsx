@@ -68,7 +68,6 @@ export function MatchingPanel() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     fetchRecentMatches();
   }, []);
 

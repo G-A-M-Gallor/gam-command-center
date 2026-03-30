@@ -11,8 +11,6 @@ export default function GridPage() {
   const { language } = useSettings();
   const t = getTranslations(language);
   const isRtl = language === "he";
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gridT = (t as any).grid as Record<string, string> | undefined;
   const gt = gridT || {};
 

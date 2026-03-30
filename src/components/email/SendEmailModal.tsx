@@ -61,7 +61,7 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
     fetch('/api/email/templates')
       .then((r) => r.json())
       .then((d) => { if (d.templates) setTemplates(d.templates); })
-      .catch(() => {});
+      .catch(() => { /* no-op */ });
 
     fetch('/api/email/tenants')
       .then((r) => r.json())
@@ -71,7 +71,7 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
           if (d.tenants.length > 0) setTenantId(d.tenants[0].id);
         }
       })
-      .catch(() => {});
+      .catch(() => { /* no-op */ });
   }, []);
 
   // When template changes, update subject + variable fields
@@ -91,7 +91,6 @@ export function SendEmailModal({ onClose, onSent, entityId, entityEmail, entityN
       }
       setVariables(vars);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateId, templates]);
 
   const selectedTemplate = templates.find((t) => t.id === templateId);

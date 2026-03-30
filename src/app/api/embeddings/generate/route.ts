@@ -16,8 +16,6 @@ function getServiceClient() {
 function md5(text: string): string {
   return createHash("md5").update(text).digest("hex");
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function embedDocument(supabase: SupabaseClient<any>, docId: string) {
   const { data: doc } = await supabase
     .from("vb_records")

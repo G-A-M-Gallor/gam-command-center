@@ -142,24 +142,24 @@ const defaultSettings: Settings = {
   navColor: "",
   gibberishDetect: true,
   skinConfig: DEFAULT_SKIN_CONFIG,
-  setLanguage: () => {},
-  setSidebarPosition: () => {},
-  setSidebarVisibility: () => {},
-  setAccentColor: () => {},
-  setFontFamily: () => {},
-  setBorderRadius: () => {},
-  setDensity: () => {},
-  setBrandProfile: () => {},
-  setCustomAccentHex: () => {},
-  setSavedColors: () => {},
-  setArchivedColors: () => {},
-  setAccentEffect: () => {},
-  setNavColor: () => {},
-  setGibberishDetect: () => {},
-  setSkinConfig: () => {},
-  setShellSkin: () => {},
-  setContentSkin: () => {},
-  setMobileNavSkin: () => {},
+  setLanguage: () => { /* no-op */ },
+  setSidebarPosition: () => { /* no-op */ },
+  setSidebarVisibility: () => { /* no-op */ },
+  setAccentColor: () => { /* no-op */ },
+  setFontFamily: () => { /* no-op */ },
+  setBorderRadius: () => { /* no-op */ },
+  setDensity: () => { /* no-op */ },
+  setBrandProfile: () => { /* no-op */ },
+  setCustomAccentHex: () => { /* no-op */ },
+  setSavedColors: () => { /* no-op */ },
+  setArchivedColors: () => { /* no-op */ },
+  setAccentEffect: () => { /* no-op */ },
+  setNavColor: () => { /* no-op */ },
+  setGibberishDetect: () => { /* no-op */ },
+  setSkinConfig: () => { /* no-op */ },
+  setShellSkin: () => { /* no-op */ },
+  setContentSkin: () => { /* no-op */ },
+  setMobileNavSkin: () => { /* no-op */ },
 };
 
 const ACCENT_COLORS: AccentColor[] = ["purple", "blue", "emerald", "amber", "rose", "cyan", "brand", "custom"];
@@ -202,8 +202,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const storedFont = localStorage.getItem(STORAGE_KEYS.fontFamily) as FontFamily | null;
     const storedRadius = localStorage.getItem(STORAGE_KEYS.borderRadius) as BorderRadius | null;
     const storedDensity = localStorage.getItem(STORAGE_KEYS.density) as Density | null;
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (storedLang === "he" || storedLang === "en" || storedLang === "ru") setLanguageState(storedLang);
     if (storedPos === "right" || storedPos === "left") setSidebarPositionState(storedPos);
     if (storedVis === "visible" || storedVis === "float" || storedVis === "hidden") setSidebarVisibilityState(storedVis);

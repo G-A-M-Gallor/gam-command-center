@@ -4,7 +4,6 @@ import { Settings, Search, Bot, Plus, Pin, Calendar, CalendarDays, Bell, Clock, 
 import dynamic from "next/dynamic";
 
 // ─── Lazy-loaded widget panels (code-split per widget) ──────
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const SearchPanel = dynamic(() => import("./SearchWidget").then((m) => ({ default: m.SearchPanel })), { ssr: false }) as ComponentType<any>;
 const SearchBarContent = dynamic(() => import("./SearchWidget").then((m) => ({ default: m.SearchBarContent })), { ssr: false }) as ComponentType<any>;
 

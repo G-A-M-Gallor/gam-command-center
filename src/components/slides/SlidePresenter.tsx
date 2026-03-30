@@ -30,7 +30,7 @@ export function SlidePresenter({ t }: SlidePresenterProps) {
     });
     return () => {
       if (document.fullscreenElement) {
-        document.exitFullscreen?.().catch(() => {});
+        document.exitFullscreen?.().catch(() => { /* no-op */ });
       }
     };
   }, [isPresenting]);
@@ -93,7 +93,6 @@ export function SlidePresenter({ t }: SlidePresenterProps) {
         }}
       >
         {slide.backgroundImage && (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={slide.backgroundImage}
             alt=""
@@ -121,8 +120,8 @@ export function SlidePresenter({ t }: SlidePresenterProps) {
                 element={el}
                 isSelected={false}
                 scale={1}
-                onSelect={() => {}}
-                onUpdate={() => {}}
+                onSelect={() => { /* no-op */ }}
+                onUpdate={() => { /* no-op */ }}
               />
             ))}
         </div>

@@ -129,12 +129,12 @@ interface ShortcutsState {
 const defaultState: ShortcutsState = {
   shortcuts: [],
   currentScope: "global",
-  setCurrentScope: () => {},
-  toggleShortcut: () => {},
-  addCustomShortcut: () => {},
-  deleteCustomShortcut: () => {},
+  setCurrentScope: () => { /* no-op */ },
+  toggleShortcut: () => { /* no-op */ },
+  addCustomShortcut: () => { /* no-op */ },
+  deleteCustomShortcut: () => { /* no-op */ },
   checkConflict: () => ({ hasConflict: false, conflictWith: null }),
-  resetToDefaults: () => {},
+  resetToDefaults: () => { /* no-op */ },
 };
 
 const ShortcutsContext = createContext<ShortcutsState>(defaultState);
@@ -153,7 +153,6 @@ export function ShortcutsProvider({ children }: { children: React.ReactNode }) {
 
   // Load overrides on mount
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setOverrides(loadOverrides());
     setMounted(true);
   }, []);

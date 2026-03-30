@@ -36,8 +36,6 @@ export async function fetchRecentRecords(
 
     const { data, error } = await query;
     if (error || !data) return [];
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data as any[]).map((row) => ({
       id: String(row.id ?? ""),
       title: String(row[config.titleField] ?? "ללא כותרת"),

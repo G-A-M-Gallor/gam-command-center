@@ -610,7 +610,7 @@ export default function CommsPage() {
         setEmailSends(res.sends || []);
         setEmailCursor(res.nextCursor || null);
       })
-      .catch(() => {});
+      .catch(() => { /* no-op */ });
   }, []);
 
   // Search debounce

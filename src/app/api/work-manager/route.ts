@@ -362,7 +362,7 @@ export async function POST(request: Request) {
               total_tokens_output: usageData.output_tokens,
             },
             { onConflict: "id" }
-          ).then(() => {}, () => {});
+          ).then(() => { /* no-op */ }, () => { /* no-op */ });
 
           controller.enqueue(
             encoder.encode(

@@ -79,7 +79,6 @@ function CanvasEditorInner({ recordId }: CanvasEditorProps) {
   const { saveState, lastSavedAt, saveNow, queueSave } = useAutoSave({ recordId });
 
   // Version auto-save refs
-  // eslint-disable-next-line react-hooks/purity -- initial ref value only set once
   const lastVersionSaveRef = useRef<number>(Date.now());
   const versionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 

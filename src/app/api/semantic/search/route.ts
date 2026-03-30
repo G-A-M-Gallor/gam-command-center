@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         try {
           if (typeof item.embedding === 'string') {
             // Remove brackets and split by comma
-            const cleanStr = item.embedding.replace(/[\[\]]/g, '');
+            const cleanStr = item.embedding.replace(/[[\]]/g, '');
             itemEmbedding = cleanStr.split(',').map(x => parseFloat(x.trim()));
           } else if (Array.isArray(item.embedding)) {
             itemEmbedding = item.embedding;

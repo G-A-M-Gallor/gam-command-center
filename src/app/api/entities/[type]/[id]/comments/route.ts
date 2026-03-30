@@ -107,7 +107,7 @@ export async function POST(request: Request, context: RouteContext) {
     logActivityServer(recordId, 'comment', {
       actorId: user.id,
       noteText: content.slice(0, 200),
-    }).catch(() => {});
+    }).catch(() => { /* no-op */ });
 
     // Notify @mentioned users (fire-and-forget)
     if (mentions && mentions.length > 0) {
@@ -123,7 +123,7 @@ export async function POST(request: Request, context: RouteContext) {
             actionUrl,
           })
         )
-      ).catch(() => {});
+      ).catch(() => { /* no-op */ });
     }
 
     return NextResponse.json({ data }, { status: 201 });

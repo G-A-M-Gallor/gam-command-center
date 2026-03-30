@@ -142,8 +142,6 @@ export default function DashboardPage() {
     }
     setLoading(false);
   }, []);
-
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
   useEffect(() => { load(); }, [load]);
 
   const HealthIcon = !data ? Minus : data.avgHealth >= 70 ? TrendingUp : data.avgHealth >= 40 ? Minus : TrendingDown;

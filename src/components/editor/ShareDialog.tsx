@@ -37,7 +37,6 @@ export function ShareDialog({ documentId, open, onClose }: ShareDialogProps) {
 
   useEffect(() => {
     if (!open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setShare(null);
       setCopied(false);
       setExpiryDays(undefined);

@@ -210,7 +210,6 @@ function PersonaSelector({
   }, [open]);
 
   const persona = selectedPersona ? getPersonaById(selectedPersona) : null;
-  /* eslint-disable react-hooks/static-components -- dynamic icon from persona config */
   const personaIcon = useMemo(() => {
     const Icon = persona ? getPersonaIcon(persona.icon) : UserCircle;
     return <Icon size={12} />;

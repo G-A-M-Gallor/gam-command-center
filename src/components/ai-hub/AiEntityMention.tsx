@@ -46,7 +46,6 @@ export function AiEntityMention({ isOpen, onClose, onSelect, t }: AiEntityMentio
 
   useEffect(() => {
     if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
       setQuery("");
       setResults([]);
       setRecent(getRecentMentions());

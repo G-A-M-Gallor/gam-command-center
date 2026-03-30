@@ -143,8 +143,6 @@ function ContextMenu({
     } else {
       if (x + rect.width > vw - 8) adjustedX = x - rect.width;
     }
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setPosition({
       top: Math.max(8, adjustedY),
       left: Math.max(8, adjustedX),

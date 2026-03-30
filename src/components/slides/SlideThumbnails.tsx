@@ -62,7 +62,6 @@ export function SlideThumbnails({ t }: SlideThumbnailsProps) {
               }}
             >
               {slide.backgroundImage && (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={slide.backgroundImage}
                   alt=""
@@ -85,8 +84,8 @@ export function SlideThumbnails({ t }: SlideThumbnailsProps) {
                     element={el}
                     isSelected={false}
                     scale={THUMBNAIL_SCALE}
-                    onSelect={() => {}}
-                    onUpdate={() => {}}
+                    onSelect={() => { /* no-op */ }}
+                    onUpdate={() => { /* no-op */ }}
                   />
                 ))}
               </div>

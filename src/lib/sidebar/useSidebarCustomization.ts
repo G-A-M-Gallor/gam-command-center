@@ -186,7 +186,6 @@ export function useSidebarCustomization(language?: string) {
       saveCustomization(next, language);
       setEditMode(false);
     },
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [language]);
 
   return { customization: data, editMode, ...actions };
