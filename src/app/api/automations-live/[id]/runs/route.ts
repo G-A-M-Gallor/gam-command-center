@@ -1,9 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/api/auth'
+import type { AutomationRun, AutomationRunStep } from '@/types/automations'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface RouteParams {
   params: Promise<{ id: string }>
+}
+
+// Database record types (raw from Supabase)
+interface DbAutomationRun {
+  id: string;
+  status: string;
+  started_at: string;
+  completed_at?: string;
+  duration_ms?: number;
+  trigger_source?: string;
+  triggered_by?: string;
+  automation_run_steps?: DbAutomationRunStep[];
+}
+
+interface DbAutomationRunStep {
+  id: string;
+  step_name: string;
+  status: string;
+  started_at?: string;
+  completed_at?: string;
+  duration_ms?: number;
+  error_message?: string;
+  output_data?: unknown;
+}
+
+interface DbNode {
+  id: string;
+  node_id: string;
+  title: string;
+  type: string;
 }
 
 // GET /api/automations-live/[id]/runs - Get automation runs
@@ -76,7 +108,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     if (error) throw error
 
     // Transform data to match frontend interface
-    const transformedRuns = runs?.map((run: any) => ({
+    const transformedRuns = runs?.map((run: DbAutomationRun) => ({
       id: run.id,
       automationName: automation.name,
       status: run.status,
@@ -85,7 +117,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       duration: run.duration_ms,
       triggerSource: run.trigger_source || 'Unknown',
       triggeredBy: run.triggered_by,
-      steps: run.automation_run_steps?.map((step: any) => ({
+      steps: run.automation_run_steps?.map((step: DbAutomationRunStep) => ({
         id: step.id,
         name: step.step_name,
         status: step.status,
@@ -185,7 +217,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Create run steps for each node
     if (nodes && nodes.length > 0) {
-      const steps = nodes.map((node: any) => ({
+      const steps = nodes.map((node: DbNode) => ({
         run_id: run.id,
         node_id: node.node_id,
         step_name: node.title,
@@ -222,7 +254,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 }
 
 // Simulate automation execution (replace with real execution engine)
-async function simulateAutomationExecution(runId: string, supabase: any) {
+async function simulateAutomationExecution(runId: string, supabase: SupabaseClient) {
   try {
     // Update run status to running
     await supabase

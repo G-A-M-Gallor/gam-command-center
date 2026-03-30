@@ -19,12 +19,14 @@ type PageKey =
   | "storyMap"
   | "functionalMap"
   | "aiHub"
+  | "aiAdvisors"
   | "designSystem"
   | "architecture"
   | "plan"
   | "settings"
   | "automations"
   | "admin"
+  | "serverHealth"
   | "entities"
   | "entityFields"
   | "entityTypes"
@@ -51,6 +53,7 @@ const pageRoutes: Record<PageKey, string> = {
   storyMap: "/dashboard/story-map",
   functionalMap: "/dashboard/functional-map",
   aiHub: "/dashboard/ai-hub",
+  aiAdvisors: "/dashboard/advisors",
   designSystem: "/dashboard/design-system",
   architecture: "/dashboard/architecture",
   plan: "/dashboard/plan",
@@ -60,6 +63,7 @@ const pageRoutes: Record<PageKey, string> = {
   settings: "/dashboard/settings",
   automations: "/dashboard/automations",
   admin: "/dashboard/admin",
+  serverHealth: "/dashboard/server-health",
   wiki: "/dashboard/wiki",
   grid: "/dashboard/grid",
   slides: "/dashboard/slides",

@@ -27,6 +27,10 @@ const pages = {
     title: "AI Hub",
     description: "AI assistant with 5 work modes — Chat, Analyze, Write, Decompose & Work Manager",
   },
+  aiAdvisors: {
+    title: "AI Advisors",
+    description: "18 expert advisors across different domains — persona selection and direct chat",
+  },
   designSystem: {
     title: "Design System",
     description: "Design gallery — view, edit & inspire",
@@ -54,6 +58,10 @@ const pages = {
   admin: {
     title: "Dev Log",
     description: "System overview, components & version tracking",
+  },
+  serverHealth: {
+    title: "Server Health",
+    description: "Real-time server health monitoring — system resources, Docker containers & services",
   },
   entities: {
     title: "Entities",

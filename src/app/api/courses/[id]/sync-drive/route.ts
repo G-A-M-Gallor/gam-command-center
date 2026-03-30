@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { getCourseById } from "@/lib/courses/courseQueries";
 import { getUserId } from "@/lib/api/auth";
 
@@ -71,10 +70,10 @@ export async function POST(
       lessons: demoLessons
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Drive sync error:", error);
     return NextResponse.json(
-      { error: "Failed to sync with Drive", details: error.message },
+      { error: "Failed to sync with Drive", details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

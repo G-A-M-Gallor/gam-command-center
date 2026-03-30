@@ -75,7 +75,7 @@ export async function retryWithBackoff<T>(
   config: Partial<RetryConfig> = {}
 ): Promise<T> {
   const finalConfig = { ...DEFAULT_RETRY_CONFIG, ...config };
-  let lastError: any;
+  let lastError: unknown;
 
   for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
     try {
@@ -135,7 +135,7 @@ export interface HealthStatus {
   isHealthy: boolean;
   lastCheck: number;
   consecutiveFailures: number;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
 }
 
 export class HealthChecker {
@@ -146,7 +146,7 @@ export class HealthChecker {
     details: {},
   };
 
-  async check(checkFn: () => Promise<any>): Promise<HealthStatus> {
+  async check(checkFn: () => Promise<unknown>): Promise<HealthStatus> {
     try {
       const result = await checkFn();
       this.status = {

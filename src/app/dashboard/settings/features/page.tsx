@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
-import { PageHeader } from "@/components/command-center/PageHeader";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { FEATURE_LABELS } from "@/lib/vcanvas/canvasConfig";
 import type { CanvasFeatures } from "@/lib/vcanvas/canvasConfig";

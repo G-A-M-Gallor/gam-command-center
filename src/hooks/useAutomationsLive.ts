@@ -1,5 +1,23 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import type { Automation, AutomationRun } from '@/types/automations'
+
+interface AutomationRecord {
+  [key: string]: unknown;
+}
+
+interface AutomationRunRecord {
+  [key: string]: unknown;
+}
+
+interface AutomationStepRecord {
+  [key: string]: unknown;
+}
+
+interface AutomationDetail extends LiveAutomation {
+  workflow?: Automation;
+}
 
 export interface LiveAutomation {
   id: string
@@ -147,7 +165,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
           schema: 'public',
           table: 'automations'
         },
-        (payload: any) => {
+        (payload: RealtimePostgresChangesPayload<AutomationRecord>) => {
           console.log('Automation changed:', payload)
           fetchAutomations() // Refresh on any change
         }
@@ -163,7 +181,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
           schema: 'public',
           table: 'automation_runs'
         },
-        (payload: any) => {
+        (payload: RealtimePostgresChangesPayload<AutomationRunRecord>) => {
           console.log('Run changed:', payload)
           // Update stats in real-time
           fetchAutomations()
@@ -191,7 +209,7 @@ export function useAutomationsLive(options: UseAutomationsOptions = {}): UseAuto
 
 // Hook for individual automation with workflow
 export function useAutomationLive(id: string) {
-  const [automation, setAutomation] = useState<any>(null)
+  const [automation, setAutomation] = useState<AutomationDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -216,7 +234,7 @@ export function useAutomationLive(id: string) {
     }
   }
 
-  const updateWorkflow = async (workflow: any) => {
+  const updateWorkflow = async (workflow: Partial<Automation>) => {
     try {
       const response = await fetch(`/api/automations-live/${id}`, {
         method: 'PUT',
@@ -252,7 +270,7 @@ export function useAutomationLive(id: string) {
 
 // Hook for automation runs
 export function useAutomationRuns(automationId: string) {
-  const [runs, setRuns] = useState<any[]>([])
+  const [runs, setRuns] = useState<AutomationRun[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [total, setTotal] = useState(0)
@@ -322,7 +340,7 @@ export function useAutomationRuns(automationId: string) {
           table: 'automation_runs',
           filter: `automation_id=eq.${automationId}`
         },
-        (payload: any) => {
+        (payload: RealtimePostgresChangesPayload<AutomationRunRecord>) => {
           console.log('Run updated:', payload)
           fetchRuns()
         }
@@ -333,7 +351,7 @@ export function useAutomationRuns(automationId: string) {
           schema: 'public',
           table: 'automation_run_steps'
         },
-        (payload: any) => {
+        (payload: RealtimePostgresChangesPayload<AutomationStepRecord>) => {
           console.log('Step updated:', payload)
           fetchRuns()
         }

@@ -136,8 +136,7 @@ export default function PlanPage() {
       channelRef.current = null;
       setRealtimeStatus('disconnected');
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phases.length > 0]);
+  }, [phases.length]);
 
   const handleToggleStatus = useCallback(async (phaseNum: number) => {
     setPhases((prev) => {

@@ -9,6 +9,16 @@ import { createClient } from "@/lib/supabase/server";
 
 const WORKSPACE_ID = "3ecaf990-43ef-4b91-9956-904a8b97b851";
 
+interface MCPConnection {
+  id: string;
+  name: string;
+  settings: string | { platform: string; [key: string]: unknown };
+  workspace_id: string;
+  health_status?: string;
+  health_latency_ms?: number | null;
+  health_last_check?: string;
+}
+
 interface HealthCheckResult {
   id: string;
   name: string;
@@ -17,7 +27,7 @@ interface HealthCheckResult {
   error?: string;
 }
 
-async function checkMcpHealth(mcp: any): Promise<HealthCheckResult> {
+async function checkMcpHealth(mcp: MCPConnection): Promise<HealthCheckResult> {
   const startTime = Date.now();
 
   try {

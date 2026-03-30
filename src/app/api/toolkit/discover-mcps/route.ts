@@ -9,6 +9,13 @@ import { createClient } from "@/lib/supabase/server";
 
 const WORKSPACE_ID = "3ecaf990-43ef-4b91-9956-904a8b97b851";
 
+interface McpResource {
+  server: string;
+  uri: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
 interface LiveMcpInfo {
   name: string;
   server: string;
@@ -37,7 +44,7 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
       console.log('Found MCP resources:', resources.length);
 
       // Group by server
-      const serverMap = new Map<string, any[]>();
+      const serverMap = new Map<string, McpResource[]>();
       for (const resource of resources) {
         if (!serverMap.has(resource.server)) {
           serverMap.set(resource.server, []);
@@ -68,7 +75,7 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
             const mcpInfo = createMcpInfo(serverName, serverResources, isHealthy, latency);
             discoveredMcps.push(mcpInfo);
           }
-        } catch (error) {
+        } catch (_error) {
           const latency = Date.now() - startTime;
           const mcpInfo = createMcpInfo(serverName, serverResources, false, latency);
           discoveredMcps.push(mcpInfo);
@@ -77,7 +84,8 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
     }
 
     // Method 2: Check for function-based MCPs (tools that start with mcp__)
-    const toolFunctions = (global as any).availableTools || [];
+    const globalWithTools = global as unknown as { availableTools?: string[] };
+    const toolFunctions = globalWithTools.availableTools || [];
     const mcpTools = toolFunctions.filter((tool: string) => tool.startsWith('mcp__'));
 
     for (const toolName of mcpTools) {
@@ -114,7 +122,7 @@ async function discoverLiveMcps(): Promise<LiveMcpInfo[]> {
   return discoveredMcps;
 }
 
-function createMcpInfo(serverName: string, resources: any[], isHealthy: boolean, latency: number): LiveMcpInfo {
+function createMcpInfo(serverName: string, resources: McpResource[], isHealthy: boolean, latency: number): LiveMcpInfo {
   const platform = serverName.includes('claude.ai') ? 'claude.ai' : 'Claude Code';
 
   // Determine category and emoji based on server name and resources

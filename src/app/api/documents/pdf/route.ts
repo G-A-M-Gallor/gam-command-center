@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFPage, PDFFont, Color } from "pdf-lib";
 import { appendCertificatePage } from "@/lib/documents/certificatePage";
 import { documentPdfSchema } from "@/lib/api/schemas";
 import type { DocumentSubmission, DocumentSubmitter } from "@/lib/supabase/schema";
@@ -404,12 +404,9 @@ function extractTextBlocks(node: TiptapNode): TextBlock[] {
 // ── Helpers ─────────────────────────────────────────────────
 
 function addFooter(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  page: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  font: any,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  color: any,
+  page: PDFPage,
+  font: PDFFont,
+  color: Color,
   margin: number,
   contentWidth: number,
   docName: string,
@@ -449,7 +446,7 @@ function formatDate(iso: string): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function wrapText(text: string, font: any, fontSize: number, maxWidth: number): string[] {
+function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
   const words = text.split(" ");
   const lines: string[] = [];
   let currentLine = "";

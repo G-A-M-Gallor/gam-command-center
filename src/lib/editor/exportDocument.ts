@@ -1,5 +1,19 @@
 import type { JSONContent } from "@tiptap/react";
 
+// ─── DOCX Types (for dynamic import) ──────────────────────────
+
+type DocxElement = object; // Base type for DOCX elements
+type DocxParagraph = DocxElement;
+type DocxTextRun = DocxElement;
+
+interface DocxAPI {
+  Document: new (options: object) => DocxElement;
+  Paragraph: new (options: object) => DocxParagraph;
+  TextRun: new (options: object) => DocxTextRun;
+  HeadingLevel: Record<string, unknown>;
+  AlignmentType: Record<string, unknown>;
+}
+
 // ─── HTML Export ────────────────────────────────────────────
 
 export function exportToHTML(content: JSONContent, title: string): string {
@@ -232,15 +246,10 @@ function tiptapJsonToMarkdown(node: JSONContent, depth = 0): string {
 
 function tiptapJsonToDocxParagraphs(
   node: JSONContent,
-  docx: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Document: any; Paragraph: any; TextRun: any; HeadingLevel: any; AlignmentType: any;
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any[] {
+  docx: DocxAPI
+): DocxParagraph[] {
   const { Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any[] = [];
+  const result: DocxParagraph[] = [];
 
   function walkNode(n: JSONContent) {
     if (!n) return;
@@ -300,10 +309,8 @@ function tiptapJsonToDocxParagraphs(
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function getTextRuns(node: JSONContent): any[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const runs: any[] = [];
+  function getTextRuns(node: JSONContent): DocxTextRun[] {
+    const runs: DocxTextRun[] = [];
     function walk(n: JSONContent) {
       if (n.type === "text") {
         const marks = n.marks || [];

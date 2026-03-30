@@ -145,8 +145,12 @@ export default function DocumentDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    // Avoid synchronous setState cascade by deferring to next tick
+    const timer = setTimeout(() => {
+      fetchAll();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   // ── Realtime ──────────────────────────────────────────
   useEffect(() => {
@@ -194,7 +198,11 @@ export default function DocumentDetailPage() {
   // Initialize editor content from submission
   useEffect(() => {
     if (submission?.content_snapshot && typeof submission.content_snapshot === "object") {
-      setEditorContent(submission.content_snapshot as JSONContent);
+      // Defer to avoid cascading setState
+      const timer = setTimeout(() => {
+        setEditorContent(submission.content_snapshot as JSONContent);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [submission]);
 
@@ -1057,7 +1065,7 @@ function ViewsTab({ views, dc }: { views: DocumentView[]; dc: Record<string, str
     return <EmptyState icon={Eye} message={dc.noViews} />;
   }
 
-  const currentTime = Date.now();
+  const currentTime = useMemo(() => Date.now(), []);
 
   return (
     <div className="space-y-2">

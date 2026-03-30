@@ -288,6 +288,17 @@ export interface KPITrigger {
   to_value?: string;
 }
 
+// ─── Priority Aliases ──────────────────────────────
+// Allow templates to define custom priority levels
+export interface PriorityAlias {
+  value: string;           // internal value like 'p0', 'hot', 'emergency'
+  label: I18nLabel;       // display name like 'P0 Blocker', 'Hot Lead'
+  color: string;          // hex color like '#dc2626'
+  description?: I18nLabel; // optional tooltip text
+  icon?: string;          // optional lucide icon name
+  sort_order: number;     // for ordering (lower = higher priority)
+}
+
 export interface TemplateConfig {
   layout: {
     meta_columns: 1 | 2 | 3;
@@ -312,6 +323,7 @@ export interface TemplateConfig {
   track_kpi_events: boolean;
   kpi_triggers?: KPITrigger[];
   action_buttons?: ActionButton[];
+  priority_aliases?: PriorityAlias[];  // Override global priority field options
 }
 
 export function defaultTemplateConfig(views: ViewType[] = ['table', 'board', 'list']): TemplateConfig {

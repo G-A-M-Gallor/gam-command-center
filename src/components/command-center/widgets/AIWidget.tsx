@@ -125,7 +125,7 @@ function ChatContent({ compact = false }: ChatContentProps) {
     setMessages(loadMessages());
     const label = getPageLabel(pathname, t);
     setContexts([label]);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname, t]);
 
   // Listen for prefill events from other components (e.g. Library tab)
   useEffect(() => {

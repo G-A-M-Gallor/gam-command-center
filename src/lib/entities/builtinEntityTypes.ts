@@ -5,7 +5,7 @@
 // It defines which fields to show, not what the note IS.
 // A note can wear multiple lenses.
 
-import type { EntityTypeInsert, EntityConnectionInsert, TemplateConfig, ActionButton } from './types';
+import type { EntityTypeInsert, EntityConnectionInsert, TemplateConfig, ActionButton, PriorityAlias } from './types';
 import { BUILTIN_ACTIONS } from './actionRegistry';
 
 // ─── Helpers ─────────────────────────────────────────
@@ -15,6 +15,158 @@ function pickActions(...ids: string[]): ActionButton[] {
     .map(id => BUILTIN_ACTIONS[id])
     .filter((a): a is ActionButton => !!a);
 }
+
+// ─── Priority Aliases ──────────────────────────────────
+
+const devTaskPriorities: PriorityAlias[] = [
+  {
+    value: 'p0',
+    label: { he: 'P0 Blocker', en: 'P0 Blocker', ru: 'P0 Блокер' },
+    color: '#dc2626',
+    description: { he: 'חוסם את כל הפיתוח', en: 'Blocks all development', ru: 'Блокирует разработку' },
+    icon: 'AlertTriangle',
+    sort_order: 1,
+  },
+  {
+    value: 'p1',
+    label: { he: 'P1 Critical', en: 'P1 Critical', ru: 'P1 Критичный' },
+    color: '#ea580c',
+    description: { he: 'קריטי לשחרור', en: 'Critical for release', ru: 'Критично для релиза' },
+    icon: 'AlertCircle',
+    sort_order: 2,
+  },
+  {
+    value: 'p2',
+    label: { he: 'P2 High', en: 'P2 High', ru: 'P2 Высокий' },
+    color: '#ca8a04',
+    description: { he: 'עדיפות גבוהה', en: 'High priority', ru: 'Высокий приоритет' },
+    icon: 'ArrowUp',
+    sort_order: 3,
+  },
+  {
+    value: 'p3',
+    label: { he: 'P3 Medium', en: 'P3 Medium', ru: 'P3 Средний' },
+    color: '#65a30d',
+    description: { he: 'עדיפות בינונית', en: 'Medium priority', ru: 'Средний приоритет' },
+    icon: 'Minus',
+    sort_order: 4,
+  },
+  {
+    value: 'p4',
+    label: { he: 'P4 Low', en: 'P4 Low', ru: 'P4 Низкий' },
+    color: '#6b7280',
+    description: { he: 'עדיפות נמוכה', en: 'Low priority', ru: 'Низкий приоритет' },
+    icon: 'ArrowDown',
+    sort_order: 5,
+  },
+];
+
+const dealPriorities: PriorityAlias[] = [
+  {
+    value: 'hot',
+    label: { he: 'לידים חמים 🔥', en: 'Hot Leads 🔥', ru: 'Горячие лиды 🔥' },
+    color: '#dc2626',
+    description: { he: 'מוכנים לסגירה עכשיו', en: 'Ready to close now', ru: 'Готовы к закрытию' },
+    icon: 'Flame',
+    sort_order: 1,
+  },
+  {
+    value: 'warm',
+    label: { he: 'לידים חמימים', en: 'Warm Leads', ru: 'Теплые лиды' },
+    color: '#ea580c',
+    description: { he: 'מעוניינים וצריכים טיפוח', en: 'Interested and need nurturing', ru: 'Заинтересованы' },
+    icon: 'Zap',
+    sort_order: 2,
+  },
+  {
+    value: 'qualified',
+    label: { he: 'מוכשרים', en: 'Qualified', ru: 'Квалифицированы' },
+    color: '#ca8a04',
+    description: { he: 'עברו את הכשרת הליד', en: 'Passed lead qualification', ru: 'Прошли квалификацию' },
+    icon: 'CheckCircle',
+    sort_order: 3,
+  },
+  {
+    value: 'cold',
+    label: { he: 'לידים קרים', en: 'Cold Leads', ru: 'Холодные лиды' },
+    color: '#0891b2',
+    description: { he: 'דורשים טיפוח ארוך טווח', en: 'Require long-term nurturing', ru: 'Требуют долгосрочного развития' },
+    icon: 'Snowflake',
+    sort_order: 4,
+  },
+  {
+    value: 'unqualified',
+    label: { he: 'לא מתאימים', en: 'Unqualified', ru: 'Неквалифицированы' },
+    color: '#6b7280',
+    description: { he: 'לא עומדים בקריטריונים', en: 'Do not meet criteria', ru: 'Не соответствуют критериям' },
+    icon: 'X',
+    sort_order: 5,
+  },
+];
+
+const supportTicketPriorities: PriorityAlias[] = [
+  {
+    value: 'emergency',
+    label: { he: 'חירום', en: 'Emergency', ru: 'Экстренная' },
+    color: '#dc2626',
+    description: { he: 'מערכת לא פועלת', en: 'System is down', ru: 'Система не работает' },
+    icon: 'Siren',
+    sort_order: 1,
+  },
+  {
+    value: 'urgent',
+    label: { he: 'דחוף', en: 'Urgent', ru: 'Срочная' },
+    color: '#ea580c',
+    description: { he: 'פונקציה קריטית לא עובדת', en: 'Critical function not working', ru: 'Критическая функция не работает' },
+    icon: 'AlertTriangle',
+    sort_order: 2,
+  },
+  {
+    value: 'high',
+    label: { he: 'גבוה', en: 'High', ru: 'Высокая' },
+    color: '#ca8a04',
+    description: { he: 'בעיה משמעותית', en: 'Significant issue', ru: 'Значительная проблема' },
+    icon: 'ArrowUp',
+    sort_order: 3,
+  },
+  {
+    value: 'normal',
+    label: { he: 'רגיל', en: 'Normal', ru: 'Обычная' },
+    color: '#65a30d',
+    description: { he: 'בעיה סטנדרטית', en: 'Standard issue', ru: 'Стандартная проблема' },
+    icon: 'Minus',
+    sort_order: 4,
+  },
+  {
+    value: 'low',
+    label: { he: 'נמוך', en: 'Low', ru: 'Низкая' },
+    color: '#6b7280',
+    description: { he: 'שאלה או בקשת פיצ׳ר', en: 'Question or feature request', ru: 'Вопрос или запрос функции' },
+    icon: 'HelpCircle',
+    sort_order: 5,
+  },
+];
+
+const supportTicketTemplate: TemplateConfig = {
+  layout: {
+    meta_columns: 2,
+    field_order: ['status', 'priority', 'assignee', 'severity', 'category', 'reporter', 'due_date', 'resolution_time', 'tags'],
+    sections: [
+      { key: 'triage', label: { he: 'טריאז׳', en: 'Triage', ru: 'Сортировка' }, field_refs: ['status', 'priority', 'assignee', 'severity'] },
+      { key: 'details', label: { he: 'פרטים', en: 'Details', ru: 'Детали' }, field_refs: ['category', 'reporter', 'due_date', 'resolution_time'] },
+    ],
+  },
+  available_views: ['board', 'table', 'list'],
+  board_config: { group_field: 'status', card_fields: ['priority', 'assignee', 'severity', 'due_date'] },
+  track_activity: true,
+  track_kpi_events: true,
+  kpi_triggers: [
+    { event_type: 'status_change', field_key: 'status' },
+    { event_type: 'field_change', field_key: 'priority' },
+  ],
+  action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
+  priority_aliases: supportTicketPriorities,
+};
 
 // ─── Template Configs ────────────────────────────────
 
@@ -38,6 +190,7 @@ const devTaskTemplate: TemplateConfig = {
     { event_type: 'field_change', field_key: 'story_points' },
   ],
   action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'open_in_ai', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
+  priority_aliases: devTaskPriorities,
 };
 
 const dealTemplate: TemplateConfig = {
@@ -59,6 +212,7 @@ const dealTemplate: TemplateConfig = {
     { event_type: 'field_change', field_key: 'deal_value' },
   ],
   action_buttons: pickActions('change_status', 'deactivate', 'reactivate', 'send_whatsapp', 'call_log', 'export_csv', 'bulk_field_update', 'bulk_status_change', 'bulk_assign'),
+  priority_aliases: dealPriorities,
 };
 
 const leadTemplate: TemplateConfig = {

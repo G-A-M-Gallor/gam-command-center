@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
 import os from 'os';
 
@@ -67,9 +66,21 @@ interface PerformanceMetrics {
   };
 }
 
+// Web Vitals types
+interface WebVitalEntry {
+  name: 'FCP' | 'LCP' | 'CLS' | 'INP' | 'FID' | 'TTFB';
+  value: number;
+}
+
+interface ClientVitalsData {
+  vitals: WebVitalEntry[];
+  timestamp: string;
+  url?: string;
+  userAgent?: string;
+}
+
 // Get real system metrics
 function getSystemMetrics() {
-  const memUsage = process.memoryUsage();
   const totalMemory = os.totalmem();
   const freeMemory = os.freemem();
   const usedMemory = totalMemory - freeMemory;
@@ -91,10 +102,7 @@ function getSystemMetrics() {
 }
 
 // Get geographic info from headers
-function getGeographicData(headersList: Headers) {
-  const country = headersList.get('x-vercel-ip-country') || 'IL';
-  const region = headersList.get('x-vercel-ip-country-region') || 'TA';
-  const city = headersList.get('x-vercel-ip-city') || 'Tel Aviv';
+function getGeographicData() {
 
   // Mock users data - in production would come from analytics
   const israellUsers = 45;
@@ -126,8 +134,6 @@ function getGeographicData(headersList: Headers) {
 // Get real API performance from Supabase logs
 async function getApiMetrics() {
   try {
-    const supabase = await createClient();
-
     // Query recent API calls from audit logs or create a simple tracking table
     // For now, we'll use mock data with some real calculation elements
 
@@ -184,12 +190,12 @@ async function getApiMetrics() {
 }
 
 // Generate real-time performance data with actual system metrics
-async function generateRealMetrics(headersList: Headers): Promise<PerformanceMetrics> {
+async function generateRealMetrics(): Promise<PerformanceMetrics> {
   const now = new Date().toISOString();
 
   // Get real system data
   const systemMetrics = getSystemMetrics();
-  const geographicData = getGeographicData(headersList);
+  const geographicData = getGeographicData();
   const apiMetrics = await getApiMetrics();
 
   // Try to get real Web Vitals data
@@ -262,8 +268,7 @@ export async function GET(request: NextRequest) {
   try {
     if (type === 'current') {
       // Return current metrics with real system data
-      const headersList = await headers();
-      const metrics = await generateRealMetrics(headersList);
+      const metrics = await generateRealMetrics();
 
       // Store in history
       metricsHistory.unshift(metrics);
@@ -286,8 +291,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (type === 'summary') {
-      const headersList = await headers();
-      const latest = metricsHistory[0] || await generateRealMetrics(headersList);
+      const latest = metricsHistory[0] || await generateRealMetrics();
       const summary = {
         performanceScore: calculatePerformanceScore(latest),
         healthStatus: getHealthStatus(latest),
@@ -369,7 +373,7 @@ function getCriticalIssues(metrics: PerformanceMetrics): string[] {
 }
 
 // Store for real Web Vitals data from clients
-let realWebVitals: any[] = [];
+let realWebVitals: ClientVitalsData[] = [];
 const MAX_VITALS = 1000;
 
 // POST endpoint for receiving real performance data from client
@@ -398,8 +402,6 @@ export async function POST(request: NextRequest) {
 
     // Optionally store in database
     try {
-      const supabase = await createClient();
-
       // Could create a performance_metrics table
       // await supabase.from('performance_metrics').insert({
       //   data: clientData,
@@ -434,12 +436,12 @@ function getLatestRealWebVitals() {
 
   // Convert to our format, supporting both INP (new) and FID (legacy)
   const webVitalsData = {
-    fcp: vitals.find((v: any) => v.name === 'FCP')?.value || null,
-    lcp: vitals.find((v: any) => v.name === 'LCP')?.value || null,
-    cls: vitals.find((v: any) => v.name === 'CLS')?.value || null,
-    inp: vitals.find((v: any) => v.name === 'INP')?.value || null,
-    fid: vitals.find((v: any) => v.name === 'FID')?.value || null, // Keep for backward compatibility
-    ttfb: vitals.find((v: any) => v.name === 'TTFB')?.value || null,
+    fcp: vitals.find((v: WebVitalEntry) => v.name === 'FCP')?.value || null,
+    lcp: vitals.find((v: WebVitalEntry) => v.name === 'LCP')?.value || null,
+    cls: vitals.find((v: WebVitalEntry) => v.name === 'CLS')?.value || null,
+    inp: vitals.find((v: WebVitalEntry) => v.name === 'INP')?.value || null,
+    fid: vitals.find((v: WebVitalEntry) => v.name === 'FID')?.value || null, // Keep for backward compatibility
+    ttfb: vitals.find((v: WebVitalEntry) => v.name === 'TTFB')?.value || null,
   };
 
   return webVitalsData;

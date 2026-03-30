@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   Compass,
@@ -24,7 +24,6 @@ import {
   Eye,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import {
   routes,
@@ -190,7 +189,6 @@ function DraggableBlock({
 
 export default function ControlCenterPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
   const isRtl = language === "he";
 
   const [editing, setEditing] = useState(false);
@@ -233,7 +231,6 @@ export default function ControlCenterPage() {
     });
   }, []);
 
-  const handleDone = useCallback(() => setEditing(false), []);
 
   const allRoutes = useMemo(() => [...routes, ...standalonePages], []);
 

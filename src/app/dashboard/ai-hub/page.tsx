@@ -129,7 +129,7 @@ export default function AIHubPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     if (!isMobile) setSidebarOpen(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isMobile]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
@@ -160,7 +160,7 @@ export default function AIHubPage() {
     }).catch(() => {
       setCloudStatus("offline");
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pathname, t]);
 
   useEffect(() => {
     textareaRef.current?.focus();

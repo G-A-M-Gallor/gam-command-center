@@ -14,8 +14,9 @@ import {
   searchNotes, fetchFieldGroups, fetchNoteInfoBatch,
   fetchStakeholders,
 } from '@/lib/supabase/entityQueries';
-import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel } from '@/lib/entities/types';
+import type { GlobalField, EntityType, NoteRecord, NoteRelation, FieldGroup, I18nLabel, TemplateConfig } from '@/lib/entities/types';
 import { UNIVERSAL_FIELD_KEYS } from '@/lib/entities/builtinFields';
+import { getPriorityOptions } from '@/lib/entities/priorityAliases';
 
 interface Props {
   noteId: string;
@@ -107,13 +108,14 @@ function safeMathEval(expr: string): number {
 
 // ─── Field Value Editor ──────────────────────────────
 function FieldEditor({
-  field, value, lang, onChange, readOnly, fieldColor, meta,
+  field, value, lang, onChange, readOnly, fieldColor, meta, templateConfig,
 }: {
   field: GlobalField; value: unknown; lang: string;
   onChange: (val: unknown) => void;
   readOnly?: boolean;
   fieldColor?: string | null;
   meta?: Record<string, unknown>;
+  templateConfig?: TemplateConfig | null;
 }) {
   const colorStyle = fieldColor ? { borderColor: fieldColor, boxShadow: `0 0 0 1px ${fieldColor}20` } : {};
   const readOnlyClass = readOnly ? 'opacity-60 pointer-events-none' : '';
@@ -155,7 +157,7 @@ function FieldEditor({
           className={`w-full rounded border border-white/[0.08] bg-white/[0.03] px-2 py-1.5 text-xs text-slate-300 ${readOnlyClass}`}
         >
           <option value="">—</option>
-          {field.options.map(o => (
+          {getPriorityOptions(field, templateConfig).map(o => (
             <option key={o.value} value={o.value}>{o.label[lang as keyof I18nLabel] || o.value}</option>
           ))}
         </select>
@@ -599,6 +601,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
                               readOnly={field.read_only}
                               fieldColor={fc}
                               meta={meta}
+                              templateConfig={etInfo?.template_config}
                             />
                           </div>
                         );
@@ -634,6 +637,7 @@ export function NoteMeta({ noteId, entityType, meta, onMetaChange, hideSidebar, 
                       readOnly={field.read_only}
                       fieldColor={fc}
                       meta={meta}
+                      templateConfig={etInfo?.template_config}
                     />
                   </div>
                 );

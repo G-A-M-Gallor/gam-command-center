@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
 import {
   Plug, Plus, Trash2, ExternalLink, CheckCircle2, XCircle, RefreshCw,
-  Globe, Database, Mail, MessageSquare, Calendar, FileText, Webhook,
+  Globe,
 } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────
@@ -52,7 +51,6 @@ function saveConnections(connections: Connection[]) {
 
 export default function IntegrationsPage() {
   const { language } = useSettings();
-  const t = getTranslations(language);
   const isRtl = language === "he";
 
   const [connections, setConnections] = useState<Connection[]>([]);
@@ -62,7 +60,11 @@ export default function IntegrationsPage() {
   const [newUrl, setNewUrl] = useState("");
 
   useEffect(() => {
-    setConnections(loadConnections());
+    // Defer to avoid cascading setState
+    const timer = setTimeout(() => {
+      setConnections(loadConnections());
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const addConnection = () => {

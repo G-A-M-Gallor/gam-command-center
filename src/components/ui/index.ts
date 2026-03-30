@@ -5,3 +5,4 @@ export { Skeleton, SkeletonCard } from "./Skeleton";
 export { Tooltip } from "./Tooltip";
 export { Dialog } from "./Dialog";
 export { Select, type SelectSize } from "./Select";
+export { OptimizedImage } from "./OptimizedImage";

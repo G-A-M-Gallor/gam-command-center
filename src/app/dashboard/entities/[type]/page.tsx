@@ -637,6 +637,7 @@ export default function EntityViewPage() {
         selectedIds={selectedIds}
         entityType={entitySlug}
         fields={fields}
+        templateConfig={entityType?.template_config}
         language={language}
         onClearSelection={() => setSelectedIds(new Set())}
         onRefresh={loadNotes}

@@ -489,6 +489,16 @@ export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight
     if (dock.isOpen || pinned) setTriggerVisible(true);
   }, [dock.isOpen, pinned]);
 
+  // Close with genie-out animation
+  const handleClose = useCallback(() => {
+    if (pinned) return;
+    setClosing(true);
+    setTimeout(() => {
+      setClosing(false);
+      dock.close();
+    }, 350);
+  }, [dock, pinned]);
+
   // Close on Escape
   useEffect(() => {
     if (!dock.isOpen) return;
@@ -500,18 +510,7 @@ export function BottomDock({ autoHide = false, contentLeft = "0px", contentRight
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dock.isOpen, showPicker, pinned]);
-
-  // Close with genie-out animation
-  const handleClose = useCallback(() => {
-    if (pinned) return;
-    setClosing(true);
-    setTimeout(() => {
-      setClosing(false);
-      dock.close();
-    }, 350);
-  }, [dock, pinned]);
+  }, [dock.isOpen, showPicker, pinned, handleClose]);
 
   // Toggle pin
   const togglePin = useCallback(() => {

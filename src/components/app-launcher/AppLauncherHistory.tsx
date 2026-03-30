@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { X, Clock, Database, History, ExternalLink } from "lucide-react";
+import { getTranslations } from "@/lib/i18n";
 import { APP_DATA_REGISTRY, hasAppData } from "@/lib/app-launcher/appDataRegistry";
 import { fetchRecentRecords, type RecentRecord } from "@/lib/app-launcher/appDataQueries";
 import type { LauncherItem } from "@/lib/app-launcher/types";
@@ -23,7 +24,7 @@ interface Props {
 
 type Tab = "entities" | "history";
 
-function formatTimestamp(ts: string | number, language: string): string {
+function formatTimestamp(ts: string | number, language: "he" | "en" | "ru"): string {
   try {
     const date = new Date(ts);
     const now = new Date();
@@ -32,11 +33,15 @@ function formatTimestamp(ts: string | number, language: string): string {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return language === "he" ? "עכשיו" : "just now";
-    if (diffMins < 60) return language === "he" ? `לפני ${diffMins} דק׳` : `${diffMins}m ago`;
-    if (diffHours < 24) return language === "he" ? `לפני ${diffHours} שע׳` : `${diffHours}h ago`;
-    if (diffDays < 7) return language === "he" ? `לפני ${diffDays} ימים` : `${diffDays}d ago`;
-    return date.toLocaleDateString(language === "he" ? "he-IL" : "en-US", { month: "short", day: "numeric" });
+    const t = getTranslations(language);
+
+    if (diffMins < 1) return t.appLauncher.justNow;
+    if (diffMins < 60) return t.appLauncher.minutesAgo.replace("{minutes}", diffMins.toString());
+    if (diffHours < 24) return t.appLauncher.hoursAgo.replace("{hours}", diffHours.toString());
+    if (diffDays < 7) return t.appLauncher.daysAgo.replace("{days}", diffDays.toString());
+
+    const locale = language === "he" ? "he-IL" : language === "ru" ? "ru-RU" : "en-US";
+    return date.toLocaleDateString(locale, { month: "short", day: "numeric" });
   } catch {
     return "";
   }
@@ -44,6 +49,7 @@ function formatTimestamp(ts: string | number, language: string): string {
 
 export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
   const router = useRouter();
+  const t = getTranslations(language);
   const [activeTab, setActiveTab] = useState<Tab>("entities");
   const [records, setRecords] = useState<RecentRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -100,10 +106,9 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
     router.push(href);
   };
 
-  const isHe = language === "he";
   const appLabel = selectedItem
     ? selectedItem.label[language] || selectedItem.label.en
-    : isHe ? "כל האפליקציות" : "All Apps";
+    : t.appLauncher.allApps;
 
   return (
     <div className="flex h-full w-64 shrink-0 flex-col border-e border-white/[0.06] bg-slate-900/80 backdrop-blur-lg animate-in slide-in-from-left-4 duration-200">
@@ -137,7 +142,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
             }`}
           >
             <Database className="h-3 w-3" />
-            {isHe ? "ישויות" : "Records"}
+            {t.appLauncher.entities}
           </button>
           <button
             type="button"
@@ -149,7 +154,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
             }`}
           >
             <History className="h-3 w-3" />
-            {isHe ? "היסטוריה" : "History"}
+            {t.appLauncher.history}
           </button>
         </div>
       )}
@@ -207,7 +212,7 @@ export function AppLauncherHistory({ selectedItem, onClose, language }: Props) {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2 text-xs font-medium text-slate-400 hover:bg-white/[0.08] hover:text-slate-200 transition-colors"
           >
             <ExternalLink className="h-3.5 w-3.5" />
-            {isHe ? `פתח ${appLabel}` : `Open ${appLabel}`}
+            {t.appLauncher.openApp.replace("{appName}", appLabel)}
           </button>
         </div>
       )}
@@ -252,8 +257,8 @@ function RecordItem({
   );
 }
 
-function EmptyState({ language, type }: { language: string; type: "entities" | "history" }) {
-  const isHe = language === "he";
+function EmptyState({ language, type }: { language: "he" | "en" | "ru"; type: "entities" | "history" }) {
+  const t = getTranslations(language);
   return (
     <div className="flex flex-col items-center justify-center py-16 px-4">
       {type === "entities" ? (
@@ -262,10 +267,7 @@ function EmptyState({ language, type }: { language: string; type: "entities" | "
         <History className="h-8 w-8 text-slate-700 mb-3" />
       )}
       <p className="text-xs text-slate-600">
-        {type === "entities"
-          ? (isHe ? "אין רשומות" : "No records")
-          : (isHe ? "אין היסטוריה" : "No history")
-        }
+        {type === "entities" ? t.appLauncher.noRecords : t.appLauncher.noHistory}
       </p>
     </div>
   );

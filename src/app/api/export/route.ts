@@ -4,8 +4,7 @@ import { exportSchema } from "@/lib/api/schemas";
 
 const EXPORT_LIMIT = 10_000;
 
-const SUPPORTED_TABLES = ["document_submissions", "vb_records", "document_audit_log"] as const;
-type SupportedTable = (typeof SUPPORTED_TABLES)[number];
+type SupportedTable = "document_submissions" | "vb_records" | "document_audit_log";
 
 const COLUMN_HEADERS: Record<SupportedTable, Record<string, string>> = {
   document_submissions: {

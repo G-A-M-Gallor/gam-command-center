@@ -214,7 +214,7 @@ export default function AppsPage() {
             {(t.tabs as Record<string, string>).apps || "All Apps"}
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            {allApps.length} {isHe ? "אפליקציות" : "apps"} &middot; {sections.length} {isHe ? "קטגוריות" : "sections"}
+            {allApps.length} {t.apps.apps} &middot; {sections.length} {t.apps.sections}
           </p>
         </div>
 
@@ -225,7 +225,7 @@ export default function AppsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={isHe ? "חפש אפליקציה..." : "Search apps..."}
+            placeholder={t.apps.searchPlaceholder}
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 outline-none"
           />
         </div>
@@ -242,16 +242,16 @@ export default function AppsPage() {
               : "text-slate-500 hover:text-slate-300 bg-slate-800/50"
           }`}
         >
-          {isHe ? "הכל" : "All"} ({allApps.filter((a) => a.status !== "hidden").length})
+          {t.apps.all} ({allApps.filter((a) => a.status !== "hidden").length})
         </button>
         {STATUS_FILTER_ORDER.map((status) => {
           const count = statusCounts[status] || 0;
           if (count === 0) return null;
           const colors = STATUS_COLORS[status];
-          const label = status === "built" ? (isHe ? "בנוי" : "Built")
-            : status === "in-progress" ? (isHe ? "בפיתוח" : "In Progress")
-            : status === "planned" ? (isHe ? "מתוכנן" : "Planned")
-            : (isHe ? "רעיון" : "Idea");
+          const label = status === "built" ? t.apps.status.built
+            : status === "in-progress" ? t.apps.status.inProgress
+            : status === "planned" ? t.apps.status.planned
+            : t.apps.status.idea;
           return (
             <button
               key={status}
@@ -296,7 +296,7 @@ export default function AppsPage() {
       {!isLoading && sections.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <span className="text-3xl">📱</span>
-          <p className="text-sm text-slate-500">{isHe ? "אין אפליקציות ברישום" : "No apps in registry"}</p>
+          <p className="text-sm text-slate-500">{t.apps.noApps}</p>
         </div>
       )}
     </div>

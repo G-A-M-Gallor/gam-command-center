@@ -27,6 +27,10 @@ const pages = {
     title: "מרכז AI",
     description: "עוזר AI עם 5 מצבי עבודה — צ'אט, ניתוח, כתיבה, פירוק ומנהל עבודה",
   },
+  aiAdvisors: {
+    title: "יועצי AI",
+    description: "18 יועצים מומחים בתחומים שונים — בחירת פרסונה וצ'אט ישיר",
+  },
   designSystem: {
     title: "מערכת עיצוב",
     description: "גלריית עיצובים — צפייה, עריכה והשראה",
@@ -54,6 +58,10 @@ const pages = {
   admin: {
     title: "לוג פיתוח",
     description: "סקירת מערכת, קומפוננטות ומעקב גרסאות",
+  },
+  serverHealth: {
+    title: "מצב השרת",
+    description: "ניטור מצב השרת בזמן אמת — משאבי מערכת, Docker containers ושירותים",
   },
   entities: {
     title: "ישויות",

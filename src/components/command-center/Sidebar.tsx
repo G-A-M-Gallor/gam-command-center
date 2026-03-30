@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Activity,
@@ -26,7 +26,6 @@ import {
   Settings,
   Shield,
   X,
-  LogOut,
   List,
   LayoutGrid,
   AlignJustify,
@@ -37,7 +36,6 @@ import {
   Sheet,
   Presentation,
   Globe,
-  ChevronDown,
   User as UserIcon,
   Settings as SettingsIcon,
   CircleDot,
@@ -76,6 +74,7 @@ import {
   MessageSquareCode,
   Plug,
   Cable,
+  RefreshCw,
   Image,
   Video,
   AudioLines,
@@ -83,6 +82,7 @@ import {
   Film,
   Search,
   Clock,
+  Monitor,
 } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
@@ -97,7 +97,6 @@ import { useBreakpoint } from "@/lib/hooks/useBreakpoint";
 import { loadFavorites, saveFavorites } from "./widgets/FavoritesWidget";
 import { useSidebarCustomization } from "@/lib/sidebar/useSidebarCustomization";
 import { buildDisplayGroups } from "@/lib/sidebar/sidebarCustomization";
-import type { ItemCustomization } from "@/lib/sidebar/sidebarCustomization";
 import { useAppsRegistry, getAppStatusByRoute, getStatusBadge, type AppRecord } from "@/lib/hooks/useAppsRegistry";
 import { useRecentItems, deleteRecentItem } from "@/lib/hooks/useRecentItems";
 import { SidebarContextMenu } from "./SidebarContextMenu";
@@ -152,6 +151,7 @@ const APP_GRADIENTS: Record<string, [string, string]> = {
   integrations:    ["#6366f1", "#818cf8"],
   myConnections:   ["#6366f1", "#818cf8"],
   appStore:        ["#3b82f6", "#60a5fa"],
+  sync:            ["#10b981", "#34d399"],
   vault:           ["#64748b", "#94a3b8"],
   vaultPasswords:  ["#64748b", "#94a3b8"],
   vaultSecrets:    ["#475569", "#64748b"],
@@ -160,6 +160,7 @@ const APP_GRADIENTS: Record<string, [string, string]> = {
   plan:            ["#3b82f6", "#60a5fa"],
   architecture:    ["#64748b", "#94a3b8"],
   admin:           ["#64748b", "#94a3b8"],
+  serverHealth:    ["#10b981", "#34d399"],
   audit:           ["#f59e0b", "#fbbf24"],
   import:          ["#10b981", "#34d399"],
   bookmarks:       ["#f59e0b", "#fbbf24"],
@@ -340,7 +341,8 @@ export const NAV_GROUPS: NavGroup[] = [
         status: "active",
         children: [
           { href: "/dashboard/ai-hub", key: "cliAi", icon: Bot, status: "active" },
-          { href: "/dashboard/boardroom", key: "aiAdvisors", icon: Users, status: "active" },
+          { href: "/dashboard/advisors", key: "aiAdvisors", icon: Users, status: "active" },
+          { href: "/dashboard/boardroom", key: "boardroom", icon: Users, status: "active" },
           { href: "/dashboard/agents", key: "agents", icon: Cpu, status: "coming-soon" },
           { href: "/dashboard/ai-knowledge", key: "aiKnowledge", icon: BookMarked, status: "coming-soon" },
           { href: "/dashboard/brain", key: "semanticBrain", icon: BrainCircuit, status: "active" },
@@ -434,6 +436,7 @@ export const NAV_GROUPS: NavGroup[] = [
         children: [
           { href: "/dashboard/integrations", key: "myConnections", icon: Cable, status: "active" },
           { href: "/dashboard/integrations/store", key: "appStore", icon: Store, status: "active" },
+          { href: "/dashboard/sync", key: "sync", icon: RefreshCw, status: "active" },
         ],
       },
       {
@@ -464,6 +467,7 @@ export const NAV_GROUPS: NavGroup[] = [
           { href: "/dashboard/plan", key: "plan", icon: Calendar, status: "active" },
           { href: "/dashboard/architecture", key: "architecture", icon: Network, status: "active" },
           { href: "/dashboard/admin", key: "admin", icon: Shield, status: "active" },
+          { href: "/dashboard/server-health", key: "serverHealth", icon: Monitor, status: "active" },
           { href: "/dashboard/maintenance", key: "maintenance", icon: Wrench, status: "active" },
           { href: "/dashboard/audit", key: "audit", icon: ClipboardList, status: "active" },
         ],
@@ -536,7 +540,6 @@ export function Sidebar({
   onWidthChange,
 }: SidebarProps = {}) {
   const pathname = usePathname();
-  const router = useRouter();
   const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
   const { user, signOut, permissions } = useAuth();
   const t = getTranslations(language);

@@ -2,6 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { embedQuery } from "@/lib/ai/embeddings";
 
+interface SearchRequestBody {
+  query: string;
+  max_results?: number;
+  threshold?: number;
+}
+
+interface SemanticMemoryRecord {
+  id: string;
+  source_id: string;
+  content: string;
+  source_type: string;
+  domain: string;
+  embedding: string | number[] | null;
+}
+
+interface CourseMetadata {
+  name: string;
+  description: string;
+  platform: string;
+  language: string;
+  status: string;
+  tags: string[];
+}
+
+interface EnrichedSearchResult {
+  id: string;
+  course_id: string;
+  content: string;
+  similarity: number;
+  course: CourseMetadata | null;
+}
+
 // Calculate cosine similarity between two vectors
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
   const dotProduct = vecA.reduce((sum, a, i) => sum + a * vecB[i], 0);
@@ -14,7 +46,7 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const { query, max_results = 10, threshold = 0.3 } = await request.json();
+    const { query, max_results = 10, threshold = 0.3 }: SearchRequestBody = await request.json();
 
     if (!query || typeof query !== 'string') {
       return NextResponse.json(
@@ -32,12 +64,12 @@ export async function POST(request: NextRequest) {
       .from('semantic_memory')
       .select('id, source_id, content, source_type, domain, embedding')
       .eq('source_type', 'course')
-      .not('embedding', 'is', null);
+      .not('embedding', 'is', null) as { data: SemanticMemoryRecord[] | null; error: unknown };
 
     if (error) {
       console.error('Database error:', error);
       return NextResponse.json(
-        { error: 'Search failed', details: error.message },
+        { error: 'Search failed', details: error instanceof Error ? error.message : 'Unknown database error' },
         { status: 500 }
       );
     }
@@ -87,13 +119,13 @@ export async function POST(request: NextRequest) {
       .slice(0, max_results);
 
     // Enrich results with course metadata
-    const enrichedResults = await Promise.all(
-      results.map(async (result) => {
+    const enrichedResults: EnrichedSearchResult[] = await Promise.all(
+      results.map(async (result): Promise<EnrichedSearchResult> => {
         const { data: course } = await supabase
           .from('cc_courses')
           .select('name, description, platform, language, status, tags')
           .eq('id', result.source_id)
-          .single();
+          .single() as { data: CourseMetadata | null };
 
         return {
           id: result.id,
@@ -111,10 +143,10 @@ export async function POST(request: NextRequest) {
       total: enrichedResults.length
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Semantic search error:', error);
     return NextResponse.json(
-      { error: 'Search failed', details: error.message },
+      { error: 'Search failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

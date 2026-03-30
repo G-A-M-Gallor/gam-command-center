@@ -5,15 +5,79 @@
 // ===================================================
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Target, Smartphone, FolderOpen, Folder, Zap, CheckSquare, User } from "lucide-react";
+import { ChevronDown, ChevronRight, Target, Smartphone, FolderOpen, Folder, Zap, CheckSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MiniProgressBar } from "./ProgressBar";
 import { useGoals, useApps, usePortfolios, useProjects, useSprints, useAllTasks } from "@/lib/pm-queries";
 import { calcAppProgress, calcSprintVelocity } from "@/lib/pm-utils";
 import { statusColor, priorityColor } from "@/lib/pm-utils";
+import type { PmGoal, PmApp, PmPortfolio, PmProject, PmSprint, PmTask } from "@/lib/pm-types";
 
 interface HierarchyScreenProps {
   className?: string;
+}
+
+interface NodeCommonProps {
+  isExpanded: (nodeId: string) => boolean;
+  toggleExpanded: (nodeId: string) => void;
+  selectedTask: string | null;
+  setSelectedTask: (taskId: string) => void;
+}
+
+interface GoalNodeProps extends NodeCommonProps {
+  goal: PmGoal;
+  apps: PmApp[];
+  portfolios: PmPortfolio[];
+  projects: PmProject[];
+  sprints: PmSprint[];
+  tasks: PmTask[];
+}
+
+interface AppNodeProps extends NodeCommonProps {
+  app: PmApp;
+  portfolios: PmPortfolio[];
+  projects: PmProject[];
+  sprints: PmSprint[];
+  tasks: PmTask[];
+}
+
+interface PortfolioNodeProps extends NodeCommonProps {
+  portfolio: PmPortfolio;
+  projects: PmProject[];
+  sprints: PmSprint[];
+  tasks: PmTask[];
+}
+
+interface ProjectNodeProps extends NodeCommonProps {
+  project: PmProject;
+  sprints: PmSprint[];
+  tasks: PmTask[];
+}
+
+interface SprintNodeProps extends NodeCommonProps {
+  sprint: PmSprint;
+  tasks: PmTask[];
+}
+
+interface TaskNodeProps {
+  task: PmTask;
+  selectedTask: string | null;
+  setSelectedTask: (taskId: string) => void;
+}
+
+interface UnlinkedSectionProps {
+  apps: PmApp[];
+  portfolios: PmPortfolio[];
+  projects: PmProject[];
+  sprints: PmSprint[];
+  tasks: PmTask[];
+  selectedTask: string | null;
+  setSelectedTask: (taskId: string) => void;
+}
+
+interface TaskDrawerProps {
+  task: PmTask;
+  onClose: () => void;
 }
 
 export function HierarchyScreen({ className }: HierarchyScreenProps) {
@@ -68,8 +132,6 @@ export function HierarchyScreen({ className }: HierarchyScreenProps) {
             projects={projects}
             sprints={sprints}
             tasks={tasks}
-            isExpanded={isExpanded}
-            toggleExpanded={toggleExpanded}
             selectedTask={selectedTask}
             setSelectedTask={setSelectedTask}
           />
@@ -87,8 +149,8 @@ export function HierarchyScreen({ className }: HierarchyScreenProps) {
   );
 }
 
-function GoalNode({ goal, apps, portfolios, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: any) {
-  const goalApps = apps.filter((app: any) => app.goal_notion_id === goal.notion_id);
+function GoalNode({ goal, apps, portfolios, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: GoalNodeProps) {
+  const goalApps = apps.filter((app: PmApp) => app.goal_notion_id === goal.notion_id);
   const nodeId = `goal-${goal.id}`;
 
   return (
@@ -111,7 +173,7 @@ function GoalNode({ goal, apps, portfolios, projects, sprints, tasks, isExpanded
 
       {isExpanded(nodeId) && goalApps.length > 0 && (
         <div className="mr-6 space-y-2">
-          {goalApps.map((app: any) => (
+          {goalApps.map((app: PmApp) => (
             <AppNode
               key={app.id}
               app={app}
@@ -131,8 +193,8 @@ function GoalNode({ goal, apps, portfolios, projects, sprints, tasks, isExpanded
   );
 }
 
-function AppNode({ app, portfolios, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: any) {
-  const appPortfolios = portfolios.filter((p: any) => p.app_notion_id === app.notion_id);
+function AppNode({ app, portfolios, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: AppNodeProps) {
+  const appPortfolios = portfolios.filter((p: PmPortfolio) => p.app_notion_id === app.notion_id);
   const progress = calcAppProgress(app.notion_id, projects);
   const nodeId = `app-${app.id}`;
 
@@ -154,7 +216,7 @@ function AppNode({ app, portfolios, projects, sprints, tasks, isExpanded, toggle
 
       {isExpanded(nodeId) && appPortfolios.length > 0 && (
         <div className="mr-6 space-y-2">
-          {appPortfolios.map((portfolio: any) => (
+          {appPortfolios.map((portfolio: PmPortfolio) => (
             <PortfolioNode
               key={portfolio.id}
               portfolio={portfolio}
@@ -173,8 +235,8 @@ function AppNode({ app, portfolios, projects, sprints, tasks, isExpanded, toggle
   );
 }
 
-function PortfolioNode({ portfolio, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: any) {
-  const portfolioProjects = projects.filter((p: any) => p.portfolio_notion_id === portfolio.notion_id);
+function PortfolioNode({ portfolio, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: PortfolioNodeProps) {
+  const portfolioProjects = projects.filter((p: PmProject) => p.portfolio_notion_id === portfolio.notion_id);
   const nodeId = `portfolio-${portfolio.id}`;
 
   return (
@@ -198,7 +260,7 @@ function PortfolioNode({ portfolio, projects, sprints, tasks, isExpanded, toggle
 
       {isExpanded(nodeId) && portfolioProjects.length > 0 && (
         <div className="mr-6 space-y-2">
-          {portfolioProjects.map((project: any) => (
+          {portfolioProjects.map((project: PmProject) => (
             <ProjectNode
               key={project.id}
               project={project}
@@ -216,8 +278,8 @@ function PortfolioNode({ portfolio, projects, sprints, tasks, isExpanded, toggle
   );
 }
 
-function ProjectNode({ project, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: any) {
-  const projectSprints = sprints.filter((s: any) => s.project_notion_id === project.notion_id);
+function ProjectNode({ project, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: ProjectNodeProps) {
+  const projectSprints = sprints.filter((s: PmSprint) => s.project_notion_id === project.notion_id);
   const nodeId = `project-${project.id}`;
 
   return (
@@ -243,7 +305,7 @@ function ProjectNode({ project, sprints, tasks, isExpanded, toggleExpanded, sele
 
       {isExpanded(nodeId) && projectSprints.length > 0 && (
         <div className="mr-6 space-y-2">
-          {projectSprints.map((sprint: any) => (
+          {projectSprints.map((sprint: PmSprint) => (
             <SprintNode
               key={sprint.id}
               sprint={sprint}
@@ -260,8 +322,8 @@ function ProjectNode({ project, sprints, tasks, isExpanded, toggleExpanded, sele
   );
 }
 
-function SprintNode({ sprint, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: any) {
-  const sprintTasks = tasks.filter((t: any) => t.sprint_notion_id === sprint.notion_id);
+function SprintNode({ sprint, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: SprintNodeProps) {
+  const sprintTasks = tasks.filter((t: PmTask) => t.sprint_notion_id === sprint.notion_id);
   const velocity = calcSprintVelocity(sprint);
   const nodeId = `sprint-${sprint.id}`;
 
@@ -286,7 +348,7 @@ function SprintNode({ sprint, tasks, isExpanded, toggleExpanded, selectedTask, s
 
       {isExpanded(nodeId) && sprintTasks.length > 0 && (
         <div className="mr-6 space-y-1">
-          {sprintTasks.map((task: any) => (
+          {sprintTasks.map((task: PmTask) => (
             <TaskNode
               key={task.id}
               task={task}
@@ -300,7 +362,7 @@ function SprintNode({ sprint, tasks, isExpanded, toggleExpanded, selectedTask, s
   );
 }
 
-function TaskNode({ task, selectedTask, setSelectedTask }: any) {
+function TaskNode({ task, selectedTask, setSelectedTask }: TaskNodeProps) {
   const isSelected = selectedTask === task.id;
 
   return (
@@ -323,12 +385,12 @@ function TaskNode({ task, selectedTask, setSelectedTask }: any) {
   );
 }
 
-function UnlinkedSection({ apps, portfolios, projects, sprints, tasks, isExpanded, toggleExpanded, selectedTask, setSelectedTask }: any) {
-  const unlinkedApps = apps.filter((app: any) => !app.goal_notion_id);
-  const unlinkedPortfolios = portfolios.filter((p: any) => !p.app_notion_id);
-  const unlinkedProjects = projects.filter((p: any) => !p.portfolio_notion_id);
-  const unlinkedSprints = sprints.filter((s: any) => !s.project_notion_id);
-  const unlinkedTasks = tasks.filter((t: any) => !t.sprint_notion_id);
+function UnlinkedSection({ apps, portfolios, projects, sprints, tasks, selectedTask, setSelectedTask }: UnlinkedSectionProps) {
+  const unlinkedApps = apps.filter((app: PmApp) => !app.goal_notion_id);
+  const unlinkedPortfolios = portfolios.filter((p: PmPortfolio) => !p.app_notion_id);
+  const unlinkedProjects = projects.filter((p: PmProject) => !p.portfolio_notion_id);
+  const unlinkedSprints = sprints.filter((s: PmSprint) => !s.project_notion_id);
+  const unlinkedTasks = tasks.filter((t: PmTask) => !t.sprint_notion_id);
 
   const hasUnlinked = unlinkedApps.length || unlinkedPortfolios.length || unlinkedProjects.length || unlinkedSprints.length || unlinkedTasks.length;
 
@@ -341,7 +403,7 @@ function UnlinkedSection({ apps, portfolios, projects, sprints, tasks, isExpande
       {unlinkedTasks.length > 0 && (
         <div className="space-y-1">
           <h4 className="text-sm text-slate-500">משימות</h4>
-          {unlinkedTasks.slice(0, 10).map((task: any) => (
+          {unlinkedTasks.slice(0, 10).map((task: PmTask) => (
             <TaskNode
               key={task.id}
               task={task}
@@ -358,7 +420,7 @@ function UnlinkedSection({ apps, portfolios, projects, sprints, tasks, isExpande
   );
 }
 
-function TaskDrawer({ task, onClose }: any) {
+function TaskDrawer({ task, onClose }: TaskDrawerProps) {
   return (
     <div className="fixed inset-y-0 left-0 z-50 w-96 bg-slate-900 border-r border-slate-700 shadow-2xl">
       <div className="p-4 border-b border-slate-700">

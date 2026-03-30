@@ -30,66 +30,66 @@ interface WorkspaceSection {
   items: WorkspaceItem[];
 }
 
-function getWorkspaceSections(lang: "he" | "en" | "ru"): WorkspaceSection[] {
-  const isHe = lang === "he";
+function getWorkspaceSections(lang: "he" | "en" | "ru", t: any): WorkspaceSection[] {
+  const ws = t.workspaceSwitcher;
   return [
     {
-      label: isHe ? "אישי" : "Personal",
+      label: ws.sections.personal,
       items: [
         {
           id: "personal",
           icon: User,
           gradient: "from-blue-500 to-cyan-500",
-          name: isHe ? "vBrain — פרופיל אישי" : "vBrain — Personal",
-          desc: isHe ? "כלים בסיסיים, פרופיל, הגדרות" : "Basic tools, profile, settings",
+          name: ws.workspaces.personal.name,
+          desc: ws.workspaces.personal.desc,
         },
       ],
     },
     {
-      label: isHe ? "עסקי" : "Business",
+      label: ws.sections.business,
       items: [
         {
           id: "gam-business",
           icon: Briefcase,
           gradient: "from-purple-500 to-indigo-500",
-          name: isHe ? "G.A.M שירותי בניין" : "G.A.M Construction",
-          desc: isHe ? "דף עסקי — 12 חברי צוות" : "Business page — 12 members",
-          badge: { label: isHe ? "בעלים" : "Owner", class: "bg-purple-500/15 text-purple-400" },
+          name: ws.workspaces.gamBusiness.name,
+          desc: ws.workspaces.gamBusiness.desc,
+          badge: { label: ws.badges.owner, class: "bg-purple-500/15 text-purple-400" },
         },
         {
           id: "gallor",
           icon: Briefcase,
           gradient: "from-indigo-500 to-indigo-400",
-          name: isHe ? "גלאור יזמות" : "Gallor Ventures",
-          desc: isHe ? "דף עסקי — 3 חברי צוות" : "Business page — 3 members",
-          badge: { label: isHe ? "בעלים" : "Owner", class: "bg-purple-500/15 text-purple-400" },
+          name: ws.workspaces.gallor.name,
+          desc: ws.workspaces.gallor.desc,
+          badge: { label: ws.badges.owner, class: "bg-purple-500/15 text-purple-400" },
         },
       ],
     },
     {
-      label: isHe ? "קבוצות" : "Groups",
+      label: ws.sections.groups,
       items: [
         {
           id: "groups",
           icon: Users,
           gradient: "from-amber-500 to-red-500",
-          name: isHe ? "קבוצות vBrain" : "vBrain Groups",
-          desc: isHe ? "מרחבי עבודה שיתופיים" : "Collaborative workspaces",
+          name: ws.workspaces.groups.name,
+          desc: ws.workspaces.groups.desc,
           disabled: true,
-          badge: { label: isHe ? "בקרוב" : "Soon", class: "bg-slate-500/20 text-slate-500 italic" },
+          badge: { label: ws.badges.soon, class: "bg-slate-500/20 text-slate-500 italic" },
         },
       ],
     },
     {
-      label: isHe ? "ניהול פלטפורמה" : "Platform",
+      label: ws.sections.platform,
       items: [
         {
           id: "vbrain-office",
           icon: Building2,
           gradient: "from-emerald-500 to-emerald-600",
-          name: "vBrain Office",
-          desc: isHe ? "בק-אופיס — ניהול הפלטפורמה" : "Back-office — platform management",
-          badge: { label: isHe ? "אדמין" : "Admin", class: "bg-red-500/15 text-red-400" },
+          name: ws.workspaces.vbrainOffice.name,
+          desc: ws.workspaces.vbrainOffice.desc,
+          badge: { label: ws.badges.admin, class: "bg-red-500/15 text-red-400" },
         },
       ],
     },
@@ -100,23 +100,23 @@ function getWorkspaceSections(lang: "he" | "en" | "ru"): WorkspaceSection[] {
           id: "command-center",
           icon: Settings,
           gradient: "from-pink-500 to-purple-500",
-          name: "Command Center",
-          desc: isHe ? "ניהול מערכת מלא" : "Full system control",
+          name: ws.workspaces.commandCenter.name,
+          desc: ws.workspaces.commandCenter.desc,
         },
         {
           id: "gam-tools",
           icon: Wrench,
           gradient: "from-orange-500 to-amber-500",
-          name: isHe ? "Gallor GAM כלים" : "Gallor GAM Tools",
-          desc: isHe ? "כלים פנימיים של GAM" : "GAM internal tools",
+          name: ws.workspaces.gamTools.name,
+          desc: ws.workspaces.gamTools.desc,
           notif: true,
         },
         {
           id: "gam-site",
           icon: Globe,
           gradient: "from-cyan-500 to-blue-500",
-          name: "GAM.co.il",
-          desc: isHe ? "ניהול אתר GAM" : "GAM website management",
+          name: ws.workspaces.gamSite.name,
+          desc: ws.workspaces.gamSite.desc,
         },
       ],
     },
@@ -147,7 +147,7 @@ export function WorkspaceSwitcher({ user, isCollapsed, onRight, expandedWidth, n
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [dropPos, setDropPos] = useState<{ top: number; left: number; width: number }>({ top: 0, left: 0, width: 280 });
 
-  const sections = getWorkspaceSections(lang as "he" | "en" | "ru");
+  const sections = getWorkspaceSections(lang as "he" | "en" | "ru", t);
   const activeItem = sections.flatMap(s => s.items).find(i => i.id === activeWs);
 
   // Compute dropdown position from trigger rect

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
 import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/Button";
@@ -22,13 +21,19 @@ interface BrainStats {
   memories_last_24h: number;
 }
 
-interface MemoryChunk {
+interface BrainSearchResult {
   id: string;
   content: string;
-  metadata: Record<string, unknown>;
-  similarity?: number;
-  created_at: string;
-  chunk_index: number;
+  source_type: string;
+  source_id: string;
+  source_url?: string;
+  domain: string;
+  memory_type: string;
+  importance: number;
+  freshness: number;
+  vec_similarity: number;
+  keyword_rank: number;
+  smart_score: number;
 }
 
 interface ProjectMemory {
@@ -49,32 +54,17 @@ interface Alert {
 
 export default function BrainHealthDashboard() {
   const { language } = useSettings();
-  const t = getTranslations(language);
   const isRtl = language === 'he';
   const [stats, setStats] = useState<BrainStats | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<MemoryChunk[]>([]);
+  const [searchResults, setSearchResults] = useState<BrainSearchResult[]>([]);
   const [recentMemories, setRecentMemories] = useState<ProjectMemory[]>([]);
   const [latestSummary, setLatestSummary] = useState<ProjectMemory | null>(null);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
 
-  // Load brain statistics
-  useEffect(() => {
-    loadBrainStats();
-    loadRecentMemories();
-    loadLatestSummary();
-  }, []);
-
-  // Load alerts when stats change
-  useEffect(() => {
-    if (stats) {
-      loadAlerts();
-    }
-  }, [stats]);
-
-  const loadBrainStats = async () => {
+  const loadBrainStats = useCallback(async () => {
     try {
       // Get total chunks and active chunks
       const { data: chunksData } = await supabase
@@ -122,9 +112,9 @@ export default function BrainHealthDashboard() {
     } catch (error) {
       console.error('Error loading brain stats:', error);
     }
-  };
+  }, []);
 
-  const loadRecentMemories = async () => {
+  const loadRecentMemories = useCallback(async () => {
     try {
       const { data } = await supabase
         .from('project_memory')
@@ -136,9 +126,9 @@ export default function BrainHealthDashboard() {
     } catch (error) {
       console.error('Error loading recent memories:', error);
     }
-  };
+  }, []);
 
-  const loadLatestSummary = async () => {
+  const loadLatestSummary = useCallback(async () => {
     try {
       const { data } = await supabase
         .from('project_memory')
@@ -151,7 +141,7 @@ export default function BrainHealthDashboard() {
     } catch (error) {
       console.error('Error loading latest summary:', error);
     }
-  };
+  }, []);
 
   const loadAlerts = useCallback(async () => {
     const alertsList: Alert[] = [];
@@ -190,15 +180,31 @@ export default function BrainHealthDashboard() {
 
     setSearching(true);
     try {
-      // Use the existing search_brain RPC
-      const { data, error } = await supabase.rpc('search_brain', {
-        query_text: searchQuery,
-        match_threshold: 0.3,
-        match_count: 20
+      // Get session token for API authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      // Use semantic-query v3 via brain search API
+      const response = await fetch('/api/brain/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          max_results: 20,
+          match_threshold: 0.3,
+        }),
       });
 
-      if (error) throw error;
-      setSearchResults(data || []);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Search failed');
+      }
+
+      const data = await response.json();
+      setSearchResults(data.results || []);
     } catch (error) {
       console.error('Error searching brain:', error);
     } finally {
@@ -223,6 +229,20 @@ export default function BrainHealthDashboard() {
       case 'info': return <Activity className="h-4 w-4 text-blue-500" />;
     }
   };
+
+  // Load brain statistics
+  useEffect(() => {
+    loadBrainStats();
+    loadRecentMemories();
+    loadLatestSummary();
+  }, [loadBrainStats, loadRecentMemories, loadLatestSummary]);
+
+  // Load alerts when stats change
+  useEffect(() => {
+    if (stats) {
+      loadAlerts();
+    }
+  }, [stats, loadAlerts]);
 
   if (loading) {
     return (
@@ -402,14 +422,27 @@ export default function BrainHealthDashboard() {
                         <div key={result.id} className="p-4 bg-slate-700 rounded-md">
                           <div className="flex items-center gap-2 mb-2">
                             <Badge intent="outline" className="text-xs">
-                              דיוק: {((result.similarity || 0) * 100).toFixed(1)}%
+                              ציון: {(result.smart_score * 100).toFixed(1)}%
+                            </Badge>
+                            <Badge intent="outline" className="text-xs bg-blue-600">
+                              {result.source_type}
+                            </Badge>
+                            <Badge intent="outline" className="text-xs bg-purple-600">
+                              {result.domain}
                             </Badge>
                             <span className="text-xs text-slate-400">
-                              Chunk #{result.chunk_index}
+                              חשיבות: {result.importance}
                             </span>
-                            <span className="text-xs text-slate-400 mr-auto">
-                              {formatDate(result.created_at)}
-                            </span>
+                            {result.source_url && (
+                              <a
+                                href={result.source_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-400 hover:text-blue-300 mr-auto"
+                              >
+                                🔗 מקור
+                              </a>
+                            )}
                           </div>
                           <p className="text-sm text-slate-300">{result.content}</p>
                         </div>

@@ -38,14 +38,14 @@ export function ColorPicker({
       setLit(hsl.l);
       setHexInput(value);
     }
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value, currentHex]);
 
   // Update hex input + notify parent
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     setHexInput(currentHex);
     onChange(currentHex);
-  }, [hue, sat, lit]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hue, sat, lit, currentHex, onChange]);
 
   const handleHexChange = useCallback((text: string) => {
     setHexInput(text);

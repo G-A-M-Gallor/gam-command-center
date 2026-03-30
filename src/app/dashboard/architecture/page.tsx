@@ -3,19 +3,18 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
 import {
   APP_CATALOG, WIDGET_CATALOG, CATEGORY_META,
   type AppDefinition, type WidgetDefinition, type AppCategory,
 } from "@/lib/app-catalog";
 import {
-  Search, ChevronRight, ExternalLink, Layers, Code, Puzzle,
+  Search, ChevronRight, ExternalLink, Layers, Code,
   LayoutDashboard, Database, FileCheck, BookOpen, Sparkles, Map,
   Network, Video, CalendarDays, Lightbulb, MessageSquare, Mail,
   Rss, Shield, Compass, GitBranch, Palette, Zap, Settings, Lock,
   Radio, Cloud, Grid3x3, Presentation, FileText, Monitor, Building2,
-  Cog, Globe, ArrowRight, Filter, Eye, Star, Bot, Plus, Bell, Clock,
+  Cog, Globe, ArrowRight, Star, Bot, Plus, Bell, Clock,
   ClipboardList, Calendar, TrendingUp, MessageCircle, BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -31,8 +30,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
   TrendingUp, MessageCircle, BarChart3, Monitor, Building2, Cog, Globe,
 };
 
-function getIcon(name: string): LucideIcon {
-  return ICON_MAP[name] || LayoutDashboard;
+function renderIcon(name: string, className: string = "") {
+  const IconComponent = ICON_MAP[name] || LayoutDashboard;
+  return <IconComponent className={className} />;
 }
 
 // ─── App Card ───────────────────────────────────────────
@@ -46,7 +46,6 @@ function AppCard({
   language: "he" | "en" | "ru";
   onClick: () => void;
 }) {
-  const Icon = getIcon(app.iconName);
   const [from, to] = app.gradient;
   const lang = language === "ru" ? "en" : language;
 
@@ -66,7 +65,7 @@ function AppCard({
             boxShadow: `0 4px 12px ${from}30`,
           }}
         >
-          <Icon className="h-5.5 w-5.5 text-white" />
+          {renderIcon(app.iconName, "h-5.5 w-5.5 text-white")}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -142,7 +141,6 @@ function WidgetCard({
   widget: WidgetDefinition;
   language: "he" | "en" | "ru";
 }) {
-  const Icon = getIcon(widget.iconName);
   const [from, to] = widget.gradient;
   const lang = language === "ru" ? "en" : language;
 
@@ -155,7 +153,7 @@ function WidgetCard({
           boxShadow: `0 3px 8px ${from}25`,
         }}
       >
-        <Icon className="h-4 w-4 text-white" />
+        {renderIcon(widget.iconName, "h-4 w-4 text-white")}
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium text-slate-200">{widget.name[lang]}</div>
@@ -237,7 +235,6 @@ function AppDetailDrawer({
   onClose: () => void;
   onNavigate: (href: string) => void;
 }) {
-  const Icon = getIcon(app.iconName);
   const [from, to] = app.gradient;
   const lang = language === "ru" ? "en" : language;
 
@@ -268,7 +265,7 @@ function AppDetailDrawer({
                 boxShadow: `0 6px 20px ${from}40`,
               }}
             >
-              <Icon className="h-7 w-7 text-white" />
+              {renderIcon(app.iconName, "h-7 w-7 text-white")}
             </div>
             <div className="min-w-0 flex-1">
               <h2 className="text-lg font-bold text-white">{app.name[lang]}</h2>
@@ -504,7 +501,6 @@ const TOOL_STACK = [
 export default function ArchitecturePage() {
   const { language } = useSettings();
   const router = useRouter();
-  const t = getTranslations(language);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<AppCategory | "all">("all");
   const [selectedApp, setSelectedApp] = useState<AppDefinition | null>(null);

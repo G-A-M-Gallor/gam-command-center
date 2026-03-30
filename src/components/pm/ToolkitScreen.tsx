@@ -5,7 +5,6 @@ import { Copy, ExternalLink, Search, MessageSquare, ChevronDown, ChevronUp, Arro
 import { getTranslations } from "@/lib/i18n";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Card } from "@/components/ui/Card";
-import { PageHeader } from "@/components/command-center/PageHeader";
 
 interface Tool {
   id: string;
@@ -83,7 +82,6 @@ export default function ToolkitScreen() {
   const [mcps, setMcps] = useState<McpConnection[]>([]);
   const [filteredMcps, setFilteredMcps] = useState<McpConnection[]>([]);
   const [mcpsLoading, setMcpsLoading] = useState(false);
-  const [expandedMcp, setExpandedMcp] = useState<string | null>(null);
 
   // Sync state
   const [isSyncing, setIsSyncing] = useState(false);
@@ -93,7 +91,6 @@ export default function ToolkitScreen() {
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [filteredAutomations, setFilteredAutomations] = useState<Automation[]>([]);
   const [automationsLoading, setAutomationsLoading] = useState(false);
-  const [expandedAutomation, setExpandedAutomation] = useState<string | null>(null);
 
   // AI Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -102,7 +99,6 @@ export default function ToolkitScreen() {
   const [chatOpen, setChatOpen] = useState(false);
 
   const { language } = useSettings();
-  const t = getTranslations(language).toolkit;
   const isRtl = language === "he";
 
   // Load data functions
@@ -229,7 +225,7 @@ export default function ToolkitScreen() {
     }
   };
 
-  const getHealthCircle = (healthStatus: string, isTimeout: boolean = false) => {
+  const getHealthCircle = (healthStatus: string) => {
     const baseClasses = "w-3 h-3 rounded-full";
     switch (healthStatus) {
       case "healthy":
@@ -303,8 +299,6 @@ export default function ToolkitScreen() {
   const toolsHealthyCount = tools.filter(t => t.status === "installed").length;
   const toolsCount = tools.length;
 
-  const mcpsHealthyCount = mcps.filter(m => m.health_status === "healthy").length;
-  const mcpsCount = mcps.length;
 
   const automationsActiveCount = automations.filter(a => a.status === "active").length;
   const automationsBrokenCount = automations.filter(a => a.status === "broken").length;
@@ -683,7 +677,7 @@ export default function ToolkitScreen() {
                   claudeAiMcps.map((mcp) => (
                     <Card key={mcp.id}>
                       <div className="flex items-center gap-4">
-                        <div className={getHealthCircle(mcp.health_status, mcp.health_status === "timeout")} />
+                        <div className={getHealthCircle(mcp.health_status)} />
                         <div className="text-2xl">{mcp.settings.emoji || "🤖"}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">
@@ -720,7 +714,7 @@ export default function ToolkitScreen() {
                       className={mcp.name.includes("n8n") ? "border-red-500/30 bg-red-500/5" : ""}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={getHealthCircle(mcp.health_status, mcp.health_status === "timeout")} />
+                        <div className={getHealthCircle(mcp.health_status)} />
                         <div className="text-2xl">{mcp.settings.emoji || "💻"}</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-3 mb-1">

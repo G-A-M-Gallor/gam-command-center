@@ -66,9 +66,8 @@ export function GmailPanel() {
       })
       .catch(() => {})
       .finally(() => {
-        if (accounts.length === 0) setLoading(false);
+        setLoading(false);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load messages when account selected

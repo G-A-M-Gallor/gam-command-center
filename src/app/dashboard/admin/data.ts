@@ -3,7 +3,7 @@ import {
   Bot, Palette, Network, Calendar, Zap, Rss, Upload, Settings, Globe, Code2,
   Shield, HelpCircle, BookOpen, Brain, Users, Compass, MessagesSquare, MessageCircle, FileSignature,
   Inbox, Star, ArrowRight, PauseCircle, AlertTriangle, Snowflake, XCircle,
-  Loader2, Mail, Gauge, Film, CalendarDays, Pencil, Wrench, GraduationCap,
+  Loader2, Mail, Gauge, Film, CalendarDays, Pencil, Wrench, GraduationCap, Monitor,
 } from 'lucide-react';
 import type {
   WorkflowStatus, RouteEntry, WidgetEntry, ContextEntry,
@@ -312,6 +312,17 @@ export const routes: RouteEntry[] = [
     descriptionEn: 'System registry — routes, widgets, contexts, changelog, dev checklist, stats',
     components: [],
     contexts: ['SettingsContext'], visible: true, sidebarTab: true,
+  },
+  {
+    id: 'server-health', path: '/dashboard/server-health', name: 'Server Health', nameHe: 'מצב השרת', icon: Monitor,
+    phase: 1, status: 'active', version: '1.0.0', addedDate: '2026-03-30',
+    descriptionHe: 'ניטור מצב השרת בזמן אמת — משאבי מערכת, Docker containers, שירותים פעילים',
+    descriptionEn: 'Real-time server health monitoring — system resources, Docker containers, active services',
+    components: [
+      { id: 'server-health-dashboard', name: 'ServerHealthDashboard', file: 'components/server/ServerHealthDashboard.tsx', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: [], visible: true, sidebarTab: true,
+    connectedTo: ['admin', 'maintenance'],
   },
   {
     id: 'maintenance', path: '/dashboard/maintenance', name: 'Code Maintenance', nameHe: 'תחזוקת קוד', icon: Wrench,

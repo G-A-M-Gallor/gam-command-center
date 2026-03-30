@@ -1721,7 +1721,11 @@ export default function SettingsPage() {
   useEffect(() => {
     const tab = searchParams.get("tab");
     if (tab && TAB_KEYS.some((t) => t.tab === tab)) {
-      setActiveTab(tab as SettingsTab);
+      // Defer to avoid cascading setState
+      const timer = setTimeout(() => {
+        setActiveTab(tab as SettingsTab);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [searchParams]);
 

@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, PDFPage, PDFFont, Color } from "pdf-lib";
 
 /**
  * Appends a Certificate Page as the last page of a signed PDF.
@@ -263,7 +263,7 @@ function truncate(str: string, max: number): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function drawField(page: any, boldFont: any, font: any, label: string, value: string, x: number, y: number, labelColor: any, valueColor: any): number {
+function drawField(page: PDFPage, boldFont: PDFFont, font: PDFFont, label: string, value: string, x: number, y: number, labelColor: Color, valueColor: Color): number {
   page.drawText(`${label}:`, { x, y, size: 9, font: boldFont, color: labelColor });
   y -= 13;
   page.drawText(value, { x: x + 4, y, size: 8.5, font, color: valueColor });
@@ -272,13 +272,13 @@ function drawField(page: any, boldFont: any, font: any, label: string, value: st
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function drawSmallField(page: any, font: any, text: string, x: number, y: number, color: any): number {
+function drawSmallField(page: PDFPage, font: PDFFont, text: string, x: number, y: number, color: Color): number {
   page.drawText(text, { x, y, size: 8, font, color });
   return y - 11;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function wrapText(text: string, font: any, fontSize: number, maxWidth: number): string[] {
+function wrapText(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
   const words = text.split(" ");
   const lines: string[] = [];
   let currentLine = "";

@@ -76,9 +76,8 @@ export function CalendarPanel() {
       })
       .catch(() => {})
       .finally(() => {
-        if (accounts.length === 0) setLoading(false);
+        setLoading(false);
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadEvents = useCallback(async () => {

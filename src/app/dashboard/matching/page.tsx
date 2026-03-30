@@ -5,12 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   Search, ChevronDown, AlertCircle, Users, Briefcase, MapPin,
   Wrench, RefreshCw, SlidersHorizontal, X, Loader2,
-  UserPlus, CheckCircle2, Phone, Calendar, XCircle, Clock,
+  UserPlus, CheckCircle2, Phone, Calendar, XCircle,
   Star, Mail, ExternalLink, ListChecks, Minus,
   ThumbsDown, UserX, Ban, Eye, ChevronUp,
 } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
-import { getTranslations } from "@/lib/i18n";
 import { supabase } from "@/lib/supabaseClient";
 import { extractMatchProfile } from "@/lib/matching/matchProfiles";
 import type { NoteRecord, EntityType, GlobalField } from "@/lib/entities/types";
@@ -728,6 +727,41 @@ export default function MatchingPage() {
     savePageState({ selectedType, targetType, selectedEntityId: selectedEntity?.id || null, minScore, candidateSearch, searchQuery });
   }, [selectedType, targetType, selectedEntity?.id, minScore, candidateSearch, searchQuery, restoredState]);
 
+  const loadTargetDetails = useCallback(async (scoreList: MatchScoreRow[]) => {
+    const ids = scoreList.map((s) => s.target_id);
+    if (!ids.length) return;
+    const { data: notes } = await supabase.from("vb_records").select("id, title, entity_type, meta").in("id", ids);
+    const titles: Record<string, string> = {};
+    const types: Record<string, string> = {};
+    const metas: Record<string, Record<string, unknown>> = {};
+    for (const n of notes ?? []) { titles[n.id] = n.title; types[n.id] = n.entity_type || ""; metas[n.id] = (n.meta || {}) as Record<string, unknown>; }
+    setTargetTitles(titles); setTargetTypes(types); setTargetMetas(metas);
+  }, []);
+
+  const loadShortlist = useCallback(async (sourceId: string) => {
+    const { data } = await supabase.from("matching_shortlist").select("*").eq("source_id", sourceId);
+    const map = new Map<string, ShortlistEntry>();
+    for (const e of data ?? []) map.set(e.target_id, e as ShortlistEntry);
+    setShortlist(map);
+  }, []);
+
+  const autoFindMatches = useCallback(async (entity: NoteRecord, tType: string) => {
+    setLoading(true); setMatchError(null);
+    try {
+      const { data: sd } = await supabase.auth.getSession();
+      const token = sd?.session?.access_token;
+      if (!token) { setLoading(false); return; }
+      const res = await fetch("/api/matching/score", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ source_id: entity.id, target_type: tType || undefined, limit: 50, force_refresh: false }),
+      });
+      const data = await res.json();
+      if (res.ok && data.scores) { setScores(data.scores); await loadTargetDetails(data.scores); await loadShortlist(entity.id); }
+    } catch {}
+    setLoading(false);
+  }, [loadTargetDetails, loadShortlist]);
+
   // ── Load types + restore ──
   useEffect(() => {
     async function load() {
@@ -765,43 +799,7 @@ export default function MatchingPage() {
       setRestoredState(true);
     }
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const loadTargetDetails = useCallback(async (scoreList: MatchScoreRow[]) => {
-    const ids = scoreList.map((s) => s.target_id);
-    if (!ids.length) return;
-    const { data: notes } = await supabase.from("vb_records").select("id, title, entity_type, meta").in("id", ids);
-    const titles: Record<string, string> = {};
-    const types: Record<string, string> = {};
-    const metas: Record<string, Record<string, unknown>> = {};
-    for (const n of notes ?? []) { titles[n.id] = n.title; types[n.id] = n.entity_type || ""; metas[n.id] = (n.meta || {}) as Record<string, unknown>; }
-    setTargetTitles(titles); setTargetTypes(types); setTargetMetas(metas);
-  }, []);
-
-  const loadShortlist = useCallback(async (sourceId: string) => {
-    const { data } = await supabase.from("matching_shortlist").select("*").eq("source_id", sourceId);
-    const map = new Map<string, ShortlistEntry>();
-    for (const e of data ?? []) map.set(e.target_id, e as ShortlistEntry);
-    setShortlist(map);
-  }, []);
-
-  const autoFindMatches = useCallback(async (entity: NoteRecord, tType: string) => {
-    setLoading(true); setMatchError(null);
-    try {
-      const { data: sd } = await supabase.auth.getSession();
-      const token = sd?.session?.access_token;
-      if (!token) { setLoading(false); return; }
-      const res = await fetch("/api/matching/score", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ source_id: entity.id, target_type: tType || undefined, limit: 50, force_refresh: false }),
-      });
-      const data = await res.json();
-      if (res.ok && data.scores) { setScores(data.scores); await loadTargetDetails(data.scores); await loadShortlist(entity.id); }
-    } catch {}
-    setLoading(false);
-  }, [loadTargetDetails, loadShortlist]);
+  }, [autoFindMatches]);
 
   useEffect(() => {
     if (!restoredState || !selectedType) { setEntities([]); return; }
@@ -931,7 +929,6 @@ export default function MatchingPage() {
   );
 
   const hasResults = scores.length > 0;
-  const hasAnyTiered = tier1.length > 0 || tier2.length > 0 || tier3.length > 0;
 
   return (
     <div dir={isRtl ? "rtl" : "ltr"} data-cc-id="matching.page" className="flex h-[calc(100vh-48px)] bg-slate-900">

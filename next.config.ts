@@ -13,6 +13,37 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Serwist uses webpack — tell Next.js 16 this is intentional
   turbopack: {},
+
+  // Image optimization configuration
+  images: {
+    // Enable optimization for external domains
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+    // Image formats and quality
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Cache optimization
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+  },
   async headers() {
     return [
       {

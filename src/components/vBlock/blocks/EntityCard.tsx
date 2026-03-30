@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useSettings } from "@/contexts/SettingsContext";
 import { EntityCardFront } from "./EntityCardFront";
@@ -119,9 +120,11 @@ export function EntityCard({ entityType, entityId, config, page, mode }: EntityC
       <div className="flex items-center gap-2">
         {/* Avatar or icon */}
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt=""
+            width={32}
+            height={32}
             className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-600"
           />
         ) : (

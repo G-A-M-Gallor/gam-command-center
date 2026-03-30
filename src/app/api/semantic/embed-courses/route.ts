@@ -73,8 +73,8 @@ async function embedCourseContent(courseId: string) {
       if (insertError) throw insertError;
 
       results.push({ id: courseId, type: 'course', status: 'embedded' });
-    } catch (error: any) {
-      results.push({ id: courseId, type: 'course', status: 'error', error: error.message });
+    } catch (error: unknown) {
+      results.push({ id: courseId, type: 'course', status: 'error', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   } else {
     results.push({ id: courseId, type: 'course', status: 'unchanged' });
@@ -130,8 +130,8 @@ async function embedCourseContent(courseId: string) {
         if (lessonInsertError) throw lessonInsertError;
 
         results.push({ id: lesson.id, type: 'lesson', status: 'embedded' });
-      } catch (error: any) {
-        results.push({ id: lesson.id, type: 'lesson', status: 'error', error: error.message });
+      } catch (error: unknown) {
+        results.push({ id: lesson.id, type: 'lesson', status: 'error', error: error instanceof Error ? error.message : 'Unknown error' });
       }
     } else {
       results.push({ id: lesson.id, type: 'lesson', status: 'unchanged' });
@@ -194,10 +194,10 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Semantic embedding error:', error);
     return NextResponse.json(
-      { error: 'Failed to embed courses', details: error.message },
+      { error: 'Failed to embed courses', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

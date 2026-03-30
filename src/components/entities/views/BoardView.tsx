@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import {
   DndContext, PointerSensor, useSensor, useSensors,
   type DragEndEvent,
@@ -43,10 +44,10 @@ function DraggableCard({ note, fields, lang, entityType }: { note: NoteRecord; f
       {...listeners}
       className="rounded-lg border border-white/[0.06] bg-slate-800/80 p-3 cursor-grab active:cursor-grabbing hover:border-white/[0.12] transition-colors"
     >
-      <a href={entityType ? `/dashboard/entities/${entityType}/${note.id}` : `/dashboard/editor/${note.id}`} className="flex items-center gap-1.5 text-sm font-medium text-slate-200 hover:text-purple-300 mb-1">
+      <Link href={entityType ? `/dashboard/entities/${entityType}/${note.id}` : `/dashboard/editor/${note.id}`} className="flex items-center gap-1.5 text-sm font-medium text-slate-200 hover:text-purple-300 mb-1">
         {typeof note.meta.__icon === 'string' && <IconDisplay value={note.meta.__icon} size={14} className="shrink-0" />}
         <span className="truncate">{note.title}</span>
-      </a>
+      </Link>
       {displayFields.map(f => {
         const val = note.meta[f.meta_key];
         if (!val) return null;

@@ -138,7 +138,6 @@ export function GanttView({ notes, onUpdate, language, ganttConfig }: Props) {
     setDragging({ noteId, edge, initialX: clientX, initialDate: date });
   }, []);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragMove = useCallback((_e: React.MouseEvent) => {
     if (!dragging || !svgRef.current) return;
     // Handled via onMouseUp for simplicity

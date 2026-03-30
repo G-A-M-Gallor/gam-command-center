@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useSettings } from "@/contexts/SettingsContext";
 import { getTranslations } from "@/lib/i18n";
 import { PageHeader } from "@/components/command-center/PageHeader";
@@ -146,7 +147,6 @@ export default function DocumentsPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- setState in effect is intentional (data fetching/init)
     fetchData();
   }, [fetchData]);
 
@@ -222,13 +222,13 @@ export default function DocumentsPage() {
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
           </button>
-          <a
+          <Link
             href="/dashboard/documents/templates"
             className="flex items-center gap-1.5 rounded-lg border border-slate-700 px-2.5 py-1.5 text-sm text-slate-400 hover:border-slate-600 hover:text-slate-300"
           >
             <LayoutTemplate className="h-4 w-4" />
             {dt.manageTemplates}
-          </a>
+          </Link>
           <button
             onClick={() => setShowTemplatePicker(true)}
             className="flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-500"
@@ -341,7 +341,7 @@ function AnalyticsPanel({ submissions, dp }: { submissions: Submission[]; dp: Re
   const submitterRate = totalSubmitters > 0 ? Math.round((signedSubmitters / totalSubmitters) * 100) : 0;
 
   // Expiring soon (within 7 days)
-  const now = Date.now();
+  const now = useMemo(() => Date.now(), []);
   const week = 7 * 86400000;
   const expiringSoon = submissions.filter((s) =>
     s.expires_at && new Date(s.expires_at).getTime() > now && new Date(s.expires_at).getTime() < now + week && s.status !== "signed",

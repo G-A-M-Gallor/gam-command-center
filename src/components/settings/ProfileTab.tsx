@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings, type Language } from "@/contexts/SettingsContext";
@@ -174,9 +175,11 @@ export function ProfileTab() {
       {/* Avatar preview */}
       <div className="flex items-center gap-4">
         {form.avatar_url ? (
-          <img
+          <Image
             src={form.avatar_url}
             alt=""
+            width={64}
+            height={64}
             className="h-16 w-16 rounded-full object-cover border-2 border-slate-700"
           />
         ) : (

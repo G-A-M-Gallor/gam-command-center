@@ -5,8 +5,8 @@ import { Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { CanvasContext } from "@/lib/vcanvas/canvasConfig";
 
-// Excalidraw v0.18 requires explicit CSS import for toolbar icons
-import "@excalidraw/excalidraw/index.css";
+// Excalidraw v0.17 does not require explicit CSS import
+// CSS is bundled within the component
 
 const ExcalidrawWrapper = dynamic(
   () => import("@excalidraw/excalidraw").then((mod) => ({ default: mod.Excalidraw })),

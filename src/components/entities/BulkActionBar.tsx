@@ -9,12 +9,14 @@ import { bulkUpdateMeta, deactivateNote, deleteNote } from '@/lib/supabase/entit
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/contexts/ToastContext';
 import type { Language } from '@/contexts/SettingsContext';
-import type { GlobalField } from '@/lib/entities/types';
+import type { GlobalField, TemplateConfig } from '@/lib/entities/types';
+import { getPriorityOptions } from '@/lib/entities/priorityAliases';
 
 interface BulkActionBarProps {
   selectedIds: Set<string>;
   entityType: string;
   fields: GlobalField[];
+  templateConfig?: TemplateConfig | null;
   language: string;
   onClearSelection: () => void;
   onRefresh: () => void;
@@ -23,6 +25,7 @@ interface BulkActionBarProps {
 export function BulkActionBar({
   selectedIds,
   fields,
+  templateConfig,
   language,
   onClearSelection,
   onRefresh,
@@ -235,7 +238,7 @@ export function BulkActionBar({
                       className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-purple-500/50"
                     >
                       <option value="">{tb.enterValue}</option>
-                      {selectedField.options.map(opt => (
+                      {getPriorityOptions(selectedField, templateConfig).map(opt => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label[lang] || opt.label.en}
                         </option>

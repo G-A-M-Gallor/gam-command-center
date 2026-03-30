@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/api/auth";
 import { createServiceClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * GET /api/audit — paginated audit log from both audit_log and document_audit_log
@@ -56,7 +57,12 @@ export async function GET(request: Request) {
     })),
   ];
 
-  combined.sort((a, b) => new Date(b.changed_at).getTime() - new Date(a.changed_at).getTime());
+  combined.sort((a, b) => {
+    const aDate = 'changed_at' in a ? a.changed_at : null;
+    const bDate = 'changed_at' in b ? b.changed_at : null;
+    if (!aDate || !bDate) return 0;
+    return new Date(bDate as string).getTime() - new Date(aDate as string).getTime();
+  });
 
   const total = combined.length;
   const paged = combined.slice(offset, offset + limit);
@@ -77,7 +83,7 @@ interface QueryParams {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function fetchSystemAuditData(supabase: any, params: QueryParams) {
+async function fetchSystemAuditData(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("audit_log")
     .select("*")
@@ -94,7 +100,7 @@ async function fetchSystemAuditData(supabase: any, params: QueryParams) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function fetchDocumentAuditData(supabase: any, params: QueryParams) {
+async function fetchDocumentAuditData(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("document_audit_log")
     .select("*")
@@ -112,7 +118,7 @@ async function fetchDocumentAuditData(supabase: any, params: QueryParams) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function fetchSystemAudit(supabase: any, params: QueryParams) {
+async function fetchSystemAudit(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("audit_log")
     .select("*", { count: "exact" })
@@ -132,7 +138,7 @@ async function fetchSystemAudit(supabase: any, params: QueryParams) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function fetchDocumentAudit(supabase: any, params: QueryParams) {
+async function fetchDocumentAudit(supabase: SupabaseClient, params: QueryParams) {
   let query = supabase
     .from("document_audit_log")
     .select("*", { count: "exact" })

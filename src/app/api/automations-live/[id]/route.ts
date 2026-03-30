@@ -6,6 +6,32 @@ interface RouteParams {
   params: Promise<{ id: string }>
 }
 
+interface WorkflowNode {
+  id: string;
+  type: string;
+  title: string;
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  config?: Record<string, unknown>;
+  inputs?: Record<string, unknown>;
+  outputs?: Record<string, unknown>;
+}
+
+interface WorkflowConnection {
+  id: string;
+  from: string;
+  to: string;
+  fromPort?: string;
+  toPort?: string;
+}
+
+interface WorkflowData {
+  nodes?: WorkflowNode[];
+  connections?: WorkflowConnection[];
+}
+
 // GET /api/automations-live/[id] - Get single automation with workflow
 export async function GET(request: NextRequest, { params }: RouteParams) {
   const { id } = await params
@@ -86,6 +112,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       tags,
       folder_id,
       workflow
+    }: {
+      name?: string;
+      description?: string;
+      category?: string;
+      status?: string;
+      trigger_config?: Record<string, unknown>;
+      tags?: string[];
+      folder_id?: string;
+      workflow?: WorkflowData;
     } = body
 
     // Update automation
@@ -126,7 +161,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const { error: nodesError } = await supabase
           .from('workflow_nodes')
           .insert(
-            workflow.nodes.map((node: any) => ({
+            workflow.nodes.map((node: WorkflowNode) => ({
               automation_id: id,
               node_id: node.id,
               node_type: node.type,
@@ -149,7 +184,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const { error: connectionsError } = await supabase
           .from('workflow_connections')
           .insert(
-            workflow.connections.map((conn: any) => ({
+            workflow.connections.map((conn: WorkflowConnection) => ({
               automation_id: id,
               connection_id: conn.id,
               from_node_id: conn.from,

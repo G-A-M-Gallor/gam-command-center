@@ -5,8 +5,8 @@
 // ===================================================
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import type { LauncherItem, LauncherLayout, LauncherState, GridPosition, LaunchMode, LauncherFolder } from "./types";
-import { GRID_COLS, GRID_ROWS, SLOTS_PER_PAGE } from "./constants";
+import type { LauncherItem, LauncherLayout, GridPosition, LaunchMode, LauncherFolder } from "./types";
+import { GRID_COLS, GRID_ROWS } from "./constants";
 import { buildCatalog } from "./buildCatalog";
 import { loadLayout, saveLayout, generateDefaultLayout, computeTotalPages } from "./layoutStorage";
 
