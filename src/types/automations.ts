@@ -1,5 +1,45 @@
 // Automations (אוטומציות) TypeScript Types
 
+// JSON-compatible value types for automation data
+type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+// Configuration types for different automation components
+interface TriggerConfig {
+  [key: string]: JsonValue;
+}
+
+interface StepConfig {
+  [key: string]: JsonValue;
+}
+
+interface NodeConfig {
+  [key: string]: JsonValue;
+}
+
+interface EdgeData {
+  [key: string]: JsonValue;
+}
+
+interface ConnectionConfig {
+  endpoint?: string;
+  timeout?: number;
+  retries?: number;
+}
+
+interface ConnectionCredentials {
+  apiKey?: string;
+  username?: string;
+  password?: string;
+  token?: string;
+}
+
+interface AuthenticationConfig {
+  token?: string;
+  apiKey?: string;
+  username?: string;
+  password?: string;
+}
+
 export interface Automation {
   id: string
   name: string
@@ -19,7 +59,7 @@ export interface Automation {
 
 export interface AutomationTrigger {
   type: 'webhook' | 'cron' | 'manual' | 'email'
-  config: Record<string, any>
+  config: TriggerConfig
   enabled: boolean
 }
 
@@ -28,7 +68,7 @@ export interface AutomationStep {
   type: 'trigger' | 'action' | 'condition' | 'delay'
   name: string
   description?: string
-  config: Record<string, any>
+  config: StepConfig
   position: { x: number; y: number }
   connections: string[] // IDs של steps מחוברים
   enabled: boolean
@@ -60,8 +100,8 @@ export interface AutomationRunStep {
   startedAt?: Date
   completedAt?: Date
   duration?: number
-  input?: any
-  output?: any
+  input?: JsonValue
+  output?: JsonValue
   error?: string
   logs: AutomationLogEntry[]
 }
@@ -71,7 +111,7 @@ export interface AutomationLogEntry {
   timestamp: Date
   level: 'debug' | 'info' | 'warn' | 'error'
   message: string
-  data?: Record<string, any>
+  data?: Record<string, JsonValue>
   source: string
 }
 
@@ -104,13 +144,13 @@ export interface AutomationVariable {
   name: string
   type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array'
   description: string
-  defaultValue?: any
+  defaultValue?: JsonValue
   required: boolean
   validation?: {
     pattern?: string
     min?: number
     max?: number
-    enum?: any[]
+    enum?: JsonValue[]
   }
 }
 
@@ -118,8 +158,8 @@ export interface AutomationConnection {
   id: string
   name: string
   type: 'api' | 'database' | 'webhook' | 'email' | 'file'
-  config: Record<string, any>
-  credentials: Record<string, any>
+  config: ConnectionConfig
+  credentials: ConnectionCredentials
   lastTested?: Date
   isActive: boolean
   createdAt: Date
@@ -165,7 +205,7 @@ export interface AutomationNode {
   type: AutomationNodeType
   data: {
     label: string
-    config: Record<string, any>
+    config: NodeConfig
     stepId?: string
   }
   position: { x: number; y: number }
@@ -176,7 +216,7 @@ export interface AutomationEdge {
   source: string
   target: string
   type?: string
-  data?: Record<string, any>
+  data?: EdgeData
 }
 
 // Webhook specific types
@@ -188,7 +228,7 @@ export interface WebhookTrigger extends AutomationTrigger {
     headers?: Record<string, string>
     authentication?: {
       type: 'none' | 'bearer' | 'basic' | 'apikey'
-      config: Record<string, any>
+      config: AuthenticationConfig
     }
   }
 }

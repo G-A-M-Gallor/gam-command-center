@@ -2,7 +2,7 @@
 // Import Engine — File Parser (CSV + Excel)
 // ===================================================
 
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import type { ParseResult, ParsedColumn, DetectedFieldType } from './types';
 import { detectColumnType } from './mapper';
 
@@ -95,18 +95,22 @@ function parseCSVText(text: string): string[][] {
  * Parse an Excel buffer (XLSX/XLS) into rows of string arrays.
  * Only reads the first sheet.
  */
-export function parseXLSX(buffer: Buffer, fileName: string): ParseResult {
-  const workbook = XLSX.read(buffer, { type: 'buffer' });
-  const firstSheetName = workbook.SheetNames[0];
-  if (!firstSheetName) {
+export async function parseXLSX(buffer: Buffer, fileName: string): Promise<ParseResult> {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength));
+
+  const firstWorksheet = workbook.worksheets[0];
+  if (!firstWorksheet) {
     throw new Error('Excel file contains no sheets');
   }
 
-  const sheet = workbook.Sheets[firstSheetName];
-  const rawRows: string[][] = XLSX.utils.sheet_to_json(sheet, {
-    header: 1,
-    defval: '',
-    raw: false,
+  const rawRows: string[][] = [];
+  firstWorksheet.eachRow((row, rowNumber) => {
+    const rowValues: string[] = [];
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      rowValues.push(cell.text || '');
+    });
+    rawRows.push(rowValues);
   });
 
   if (rawRows.length === 0) {
@@ -138,7 +142,7 @@ export function parseXLSX(buffer: Buffer, fileName: string): ParseResult {
  * Auto-detect file type and parse.
  * Supports .csv, .xlsx, .xls
  */
-export function parseFile(buffer: Buffer, fileName: string, mimeType: string): ParseResult {
+export async function parseFile(buffer: Buffer, fileName: string, mimeType: string): Promise<ParseResult> {
   // Validate file size
   if (buffer.length > MAX_FILE_SIZE) {
     throw new Error(`File exceeds maximum size of 5MB (got ${(buffer.length / 1024 / 1024).toFixed(1)}MB)`);
@@ -151,7 +155,7 @@ export function parseFile(buffer: Buffer, fileName: string, mimeType: string): P
     mimeType === 'application/vnd.ms-excel';
 
   if (isExcel) {
-    return parseXLSX(buffer, fileName);
+    return await parseXLSX(buffer, fileName);
   }
 
   const isCSV =

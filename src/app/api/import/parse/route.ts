@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // Parse the file
-    const parseResult = parseFile(buffer, file.name, file.type);
+    const parseResult = await parseFile(buffer, file.name, file.type);
 
     // Fetch global fields for auto-mapping
     const supabase = getServiceClient();
