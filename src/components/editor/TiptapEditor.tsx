@@ -261,7 +261,7 @@ function StatusBar({
     const hrs = Math.round(mins / 60);
     return et.timeHoursAgo.replace('{{n}}', String(hrs));
   }, [lastSavedAt, et]);
-  /* eslint-enable react-hooks/purity */
+   
 
   return (
     <div className="gam-editor-statusbar">

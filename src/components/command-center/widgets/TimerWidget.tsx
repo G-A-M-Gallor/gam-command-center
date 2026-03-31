@@ -197,7 +197,7 @@ export function TimerPanel() {
     setState(next);
     saveState(next);
   }, [state, settings]);
-  /* eslint-enable react-hooks/preserve-manual-memoization */
+   
 
   const handlePause = useCallback(() => {
     const remaining = Math.max(0, state.endTime - Date.now());

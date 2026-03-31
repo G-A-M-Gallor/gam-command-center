@@ -222,7 +222,7 @@ export default function EmailTemplateDesignerPage() {
   useEffect(() => {
     loadTemplates();
   }, [loadTemplates]);
-  /* eslint-enable react-hooks/set-state-in-effect */
+   
 
   // ── Select template ────────────────────────────────────
 

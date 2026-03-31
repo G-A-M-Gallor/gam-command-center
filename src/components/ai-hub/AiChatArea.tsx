@@ -214,7 +214,7 @@ function PersonaSelector({
     const Icon = persona ? getPersonaIcon(persona.icon) : UserCircle;
     return <Icon size={12} />;
   }, [persona]);
-  /* eslint-enable react-hooks/static-components */
+   
 
   return (
     <div className="relative" ref={ref}>
