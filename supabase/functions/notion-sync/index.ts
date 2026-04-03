@@ -93,9 +93,9 @@ async function syncProject(page: any) {
     portfolio_url: rel(p["Portfolio"]),
     synced_at:     new Date().toISOString(),
   };
-  const { error } = await supabase.from("roadmap_projects").upsert(row, { onConflict: "notion_url" });
+  const { error } = await supabase.from("projects").upsert(row, { onConflict: "notion_url" });
   if (error) throw error;
-  await log("roadmap_projects", row.notion_url, "upsert", row);
+  await log("projects", row.notion_url, "upsert", row);
 }
 
 // ── SPRINTS ──────────────────────────────────────────────────────
@@ -215,6 +215,34 @@ async function syncCEO(page: any) {
   await log("ceo_intake", row.notion_url, "upsert", row);
 }
 
+// ── SYSTEM INDEX ─────────────────────────────────────────────────
+async function syncSystemIndex(page: any) {
+  const p = page.properties;
+  const connectedTo = text(p["מחובר ל"]) || '';
+  const dependencies = connectedTo ? connectedTo.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+
+  const row = {
+    component_name:       title(p["שם"]),
+    component_type:       sel(p["סוג"]),
+    status:               sel(p["סטטוס"]),
+    health_status:        'active', // Default value
+    path:                 url(p["קישור Command Center"]) || text(p["מיקום ב-Notion"]) || '',
+    dependencies:         dependencies,
+    dependent_on:         text(p["שייך ל-App"]) || null,
+    metadata:             {
+      notion_id: page.id,
+      notion_url: `https://www.notion.so/${page.id.replace(/-/g,"")}`,
+      tags: msel(p["תגיות"]),
+      description: text(p["תיאור"])
+    },
+    notes:                text(p["תיאור"]) || '',
+    updated_at:           new Date().toISOString(),
+  };
+  const { error } = await supabase.from("pm_system_index").upsert(row, { onConflict: "component_name" });
+  if (error) throw error;
+  await log("pm_system_index", `https://www.notion.so/${page.id.replace(/-/g,"")}`, "upsert", row);
+}
+
 // ── DB → handler map ─────────────────────────────────────────────
 const DB_HANDLERS: Record<string, (page: any) => Promise<void>> = {
   "5c763111a2a3492da8cd8b1ee8520610": syncGoal,
@@ -224,6 +252,7 @@ const DB_HANDLERS: Record<string, (page: any) => Promise<void>> = {
   "453d24028c334a9aa6b2c677a109bc05": syncTask,
   "3191236e14584cf081efafee9840460d": syncSubTask,
   "938f1761465b4541aa27e7bc1a327375": syncCEO,
+  "a4cb9b51b0f14c0fa9676c6a125cda44": syncSystemIndex,
 };
 
 // ── MAIN ─────────────────────────────────────────────────────────

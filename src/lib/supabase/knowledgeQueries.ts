@@ -329,7 +329,7 @@ export async function fetchKnowledgeItemRelations(itemId: string): Promise<Knowl
 // ─── Populate Related Data ─────────────────────────────
 
 export async function populateKnowledgeItemRelations(item: KnowledgeItem): Promise<KnowledgeItem> {
-  const [types, departments, streams, useCases, lenses] = await Promise.all([
+  const [_types, departments, streams, useCases, lenses] = await Promise.all([
     fetchKnowledgeTypes(),
     fetchKnowledgeDepartments(),
     fetchKnowledgeStreams(),

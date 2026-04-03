@@ -546,8 +546,8 @@ export function Sidebar({
   onWidthChange,
 }: SidebarProps = {}) {
   const pathname = usePathname();
-  const { language, sidebarPosition, sidebarVisibility, brandProfile } = useSettings();
-  const { user, signOut, permissions } = useAuth();
+  const { language, sidebarPosition, sidebarVisibility, brandProfile: _brandProfile } = useSettings();
+  const { user, signOut: _signOut, permissions } = useAuth();
   const t = getTranslations(language);
   const breakpoint = useBreakpoint();
   const isMobile = breakpoint === "mobile";
@@ -596,10 +596,10 @@ export function Sidebar({
   const {
     customization, editMode, reorder, createFolder: createCustomFolder, deleteFolder,
     moveToFolder: moveItemToFolder, removeFromFolder, toggleHide, trackUsage,
-    toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, setEditMode,
+    toggleAutoSort: handleToggleAutoSort, toggleEditMode, reset: resetSidebarCustom, setEditMode: _setEditMode,
     updateItem, clearItem,
     toggleSection, renameSection, createSection: createCustomSection, deleteSection, isSectionEmpty,
-    moveItemToSection, removeItemFromSection, updateSection: updateSectionOverride,
+    moveItemToSection, removeItemFromSection: _removeItemFromSection, updateSection: updateSectionOverride,
   } = useSidebarCustomization(language);
 
   // Per-item edit popover state

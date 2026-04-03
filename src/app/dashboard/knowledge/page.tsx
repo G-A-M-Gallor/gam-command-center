@@ -20,7 +20,6 @@ import {
   FileText,
   BookOpen,
   Users,
-  Zap,
   X,
   Save,
   Building
@@ -34,7 +33,6 @@ import {
   fetchKnowledgeLenses,
   fetchKnowledgeStats,
   createKnowledgeItem,
-  updateKnowledgeItem,
   deleteKnowledgeItem,
   populateKnowledgeItemRelations,
   type KnowledgeItem,
@@ -149,7 +147,7 @@ export default function KnowledgePage() {
 
   // ── Handlers ─────────────────────────────────────
 
-  const handleFilterChange = useCallback((key: keyof KnowledgeSearchFilters, value: any) => {
+  const handleFilterChange = useCallback((key: keyof KnowledgeSearchFilters, value: string | string[] | undefined) => {
     setFilters(prev => ({
       ...prev,
       [key]: value || undefined
@@ -205,7 +203,7 @@ export default function KnowledgePage() {
     return Object.values(filters).some(v => v !== undefined) || searchTerm.length > 0;
   }, [filters, searchTerm]);
 
-  const statusCounts = useMemo(() => {
+  const _statusCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     items.forEach(item => {
       counts[item.status] = (counts[item.status] || 0) + 1;
@@ -402,17 +400,17 @@ interface FiltersPanelProps {
   types: KnowledgeType[];
   departments: KnowledgeDepartment[];
   streams: KnowledgeStream[];
-  k: any;
+  k: Record<string, any>;
   isRtl: boolean;
-  onFilterChange: (key: keyof KnowledgeSearchFilters, value: any) => void;
+  onFilterChange: (key: keyof KnowledgeSearchFilters, value: string | string[] | undefined) => void;
   sortBy: string;
   sortDirection: string;
-  onSortChange: (sort: any) => void;
-  onSortDirectionChange: (dir: any) => void;
+  onSortChange: (sort: "title" | "confidence" | "created_at" | "updated_at" | "priority") => void;
+  onSortDirectionChange: (dir: "asc" | "desc") => void;
 }
 
 function FiltersPanel({
-  filters, types, departments, streams, k, isRtl, onFilterChange,
+  filters, types, departments, streams: _streams, k, isRtl: _isRtl, onFilterChange,
   sortBy, sortDirection, onSortChange, onSortDirectionChange
 }: FiltersPanelProps) {
   return (
@@ -479,7 +477,7 @@ function FiltersPanel({
         <div className="flex gap-1">
           <select
             value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
+            onChange={(e) => onSortChange(e.target.value as "title" | "confidence" | "created_at" | "updated_at" | "priority")}
             className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-2 py-1.5 text-sm text-slate-200"
           >
             <option value="created_at">{k.sortNewest}</option>
@@ -508,7 +506,7 @@ interface KnowledgeItemCardProps {
   departments: KnowledgeDepartment[];
   streams: KnowledgeStream[];
   isExpanded: boolean;
-  k: any;
+  k: Record<string, any>;
   isRtl: boolean;
   onToggleExpand: (id: string) => void;
   onViewDetails: (item: KnowledgeItem) => void;
@@ -516,12 +514,12 @@ interface KnowledgeItemCardProps {
 }
 
 function KnowledgeItemCard({
-  item, types, departments, streams, isExpanded, k, isRtl,
+  item, types, departments, streams, isExpanded, k, isRtl: _isRtl,
   onToggleExpand, onViewDetails, onDelete
 }: KnowledgeItemCardProps) {
   const type = types.find(t => t.id === item.knowledge_type_id);
   const itemDepartments = departments.filter(d => item.department_ids.includes(d.id));
-  const itemStreams = streams.filter(s => item.stream_ids.includes(s.id));
+  const _itemStreams = streams.filter(s => item.stream_ids.includes(s.id));
 
   const statusColors = {
     draft: "text-slate-400 bg-slate-500/10",
@@ -652,12 +650,12 @@ function KnowledgeItemCard({
 
 interface KnowledgeItemDetailProps {
   item: KnowledgeItem;
-  k: any;
+  k: Record<string, any>;
   isRtl: boolean;
   onClose: () => void;
 }
 
-function KnowledgeItemDetail({ item, k, isRtl, onClose }: KnowledgeItemDetailProps) {
+function KnowledgeItemDetail({ item, k, isRtl: _isRtl, onClose }: KnowledgeItemDetailProps) {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
@@ -775,14 +773,14 @@ interface AddKnowledgeItemModalProps {
   streams: KnowledgeStream[];
   useCases: KnowledgeUseCase[];
   lenses: KnowledgeLens[];
-  k: any;
+  k: Record<string, any>;
   isRtl: boolean;
   onClose: () => void;
   onSaved: () => void;
 }
 
 function AddKnowledgeItemModal({
-  types, departments, streams, useCases, lenses, k, isRtl, onClose, onSaved
+  types, departments: _departments, streams: _streams, useCases: _useCases, lenses: _lenses, k, isRtl, onClose, onSaved
 }: AddKnowledgeItemModalProps) {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
