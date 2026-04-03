@@ -1,4 +1,4 @@
-# GAM Command Center — AI Guide
+# GAM Command Center — AI Guide v3.1
 
 > This file is read by the internal AI assistant on every conversation.
 > It's also read by Claude Code at session start.
@@ -33,11 +33,12 @@ User (Browser / PWA)
   │     ├── 9 React contexts
   │     └── 21 API routes
   │
-  ├── Supabase (DB + Auth + Realtime)
+  ├── Supabase (DB + Auth + Realtime + Edge Functions)
   │     ├── Mirror tables (projects, entities, docs, stories)
   │     ├── RLS policies (hardened)
   │     ├── 49 migrations (triggers, RPCs, views, audit)
-  │     └── Realtime channels (editor, story map, funcmap, plan)
+  │     ├── Realtime channels (editor, story map, funcmap, plan)
+  │     └── Edge Functions: sync-knowledge-sources (business lang, design tokens)
   │
   ├── Claude API (AI)
   │     ├── 4 chat modes: chat, analyze, write, decompose
