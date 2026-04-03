@@ -272,6 +272,23 @@ This applies to: new API routes, new Notion DBs, new Supabase tables, new extern
 - **Required fields:** שם המקור, סוג, רמת חשיבות, תחום, למה חשוב, מחובר ל, סטטוס
 - **When to update:** After every feature that adds/modifies a source. Part of Post-Task Protocol.
 
+### Notion DB Sync Rule — MANDATORY
+
+**When adding new DB to Notion that should sync to Supabase:**
+
+1. **Add handler** to notion-pm-sync Edge Function immediately
+2. **Add entry** to pm_sync_schema table (entity_type, table_name, is_active=true)
+3. **Test sync** with sample data before deployment
+4. **Verify coverage** via daily system checks in vb_functions
+
+**Rule:** Every Notion DB must have corresponding sync handler. No orphan DBs.
+
+**Detection:** `check_sync_coverage` system check runs daily at 05:20
+**Violation:** Silent sync failure → data gaps → operational blind spots
+**Fix:** Add missing handler + schema entry within 24h of detection
+
+**Why this rule:** We discovered that new DBs can be added to Notion without automatic sync setup, causing silent failures where data appears in Notion but never reaches Supabase. This creates dangerous blind spots in operations.
+
 ### Mobile Mode — No Terminal Required
 
 When running from **Claude.ai app or web** (not Claude Code CLI), you have FULL access to Notion but NO access to filesystem/git/build. Operate accordingly:
@@ -406,6 +423,30 @@ CREATE POLICY "example_policy" ON table_name
 4. **Use database roles** for new Sprint 2+3 features only
 5. **Preserve tenant_id and regulatory_sensitivity** logic
 
+### Production Safety Rules — MANDATORY
+
+### Rule 19 — pm_* Tables קיימות ב-Supabase Cloud בלבד
+
+לפני כל CREATE TABLE עם שם שמתחיל ב-pm_:
+```sql
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public' AND table_name LIKE 'pm_%';
+```
+אם קיימות → אל תיצור מחדש.
+
+### Rule 20 — EFs קריטיות לא בריפו המקומי
+
+הפונקציות הבאות קיימות ב-Supabase Cloud בלבד — לא מחפשים בריפו:
+- notion-pm-sync (v19, ACTIVE)
+- daily-functions (v3, ACTIVE)
+
+אם לא מוצא בריפו → בדוק ב-Supabase Dashboard, לא ביצירה מחדש.
+
+### Rule 21 — project_memory Schema מדויק
+
+עמודות: id, type, content, source, created_at
+אין עמודת metadata. כל INSERT חייב להשתמש בעמודות אלה בלבד.
+
 ---
 
 ## What NOT to Build
@@ -483,7 +524,7 @@ No mobile app yet. Features requiring mobile testing:
 ---
 
 ## 🛡️ MATERIAL CHANGE PROTOCOL
-_v3.1 | last_reviewed: 2026-04-03_
+_v3.2 | last_reviewed: 2026-04-03 | last_updated: 2026-04-03 (Production Safety Rules 19-21 added)_
 
 ### TIER 1 — STOP. Generate review block. Wait for "אושר".
 
