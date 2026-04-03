@@ -30,6 +30,7 @@ type PageKey =
   | "entities"
   | "entityFields"
   | "entityTypes"
+  | "knowledge"
   | "wiki"
   | "grid"
   | "slides"
@@ -60,6 +61,7 @@ const pageRoutes: Record<PageKey, string> = {
   entities: "/dashboard/entities",
   entityFields: "/dashboard/entities/fields",
   entityTypes: "/dashboard/entities/types",
+  knowledge: "/dashboard/knowledge",
   settings: "/dashboard/settings",
   automations: "/dashboard/automations",
   admin: "/dashboard/admin",

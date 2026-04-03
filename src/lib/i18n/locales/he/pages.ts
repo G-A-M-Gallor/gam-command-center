@@ -143,5 +143,9 @@ const pages = {
     title: "תחזוקת קוד",
     description: "מערכת ניטור ותחזוקה מקצועית לאיכות קוד",
   },
+  knowledge: {
+    title: "מאגר ידע",
+    description: "ניהול וחיפוש פריטי ידע עסקי — מקור האמת למידע הארגוני",
+  },
 } as const;
 export default pages;

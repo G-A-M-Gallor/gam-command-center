@@ -198,6 +198,20 @@ export const routes: RouteEntry[] = [
     connectedTo: ['entity-view', 'entity-fields'],
   },
   {
+    id: 'knowledge', path: '/dashboard/knowledge', name: 'Knowledge Management', nameHe: 'מאגר ידע', icon: Brain,
+    phase: 2, status: 'active', version: '1.0.0', addedDate: '2026-04-02',
+    descriptionHe: 'מערכת ניהול ידע עסקי — חיפוש ומסננים מתקדמים, סיווג לפי מחלקות וזרמים, רמות ביטחון וגישה',
+    descriptionEn: 'Business knowledge management system — advanced search and filtering, classification by departments and streams, trust levels and visibility',
+    components: [
+      { id: 'knowledge-page', name: 'KnowledgePage', file: 'app/dashboard/knowledge/page.tsx', status: 'active' },
+      { id: 'knowledge-item-card', name: 'KnowledgeItemCard', file: 'app/dashboard/knowledge/page.tsx (inline)', status: 'active' },
+      { id: 'knowledge-item-detail', name: 'KnowledgeItemDetail', file: 'app/dashboard/knowledge/page.tsx (inline)', status: 'active' },
+      { id: 'add-knowledge-modal', name: 'AddKnowledgeItemModal', file: 'app/dashboard/knowledge/page.tsx (inline)', status: 'active' },
+    ],
+    contexts: ['SettingsContext'], supabaseTables: ['knowledge_items', 'knowledge_types', 'knowledge_departments', 'knowledge_streams', 'knowledge_use_cases', 'knowledge_lenses', 'knowledge_relations'], visible: true, sidebarTab: true,
+    connectedTo: ['semantic-memory', 'ai-hub', 'brain'],
+  },
+  {
     id: 'matching', path: '/dashboard/matching', name: 'Matching Engine', nameHe: 'מנוע התאמות', icon: Brain,
     phase: 4, status: 'active', version: '1.0.0', addedDate: '2026-03-11',
     descriptionHe: 'מנוע התאמות AI — סימון תאימות בין ישויות (עובדים, פרויקטים, קבלנים, לידים)',

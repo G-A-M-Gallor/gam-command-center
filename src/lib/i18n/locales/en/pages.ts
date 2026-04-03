@@ -143,5 +143,9 @@ const pages = {
     title: "Code Maintenance",
     description: "Professional code quality monitoring and maintenance system",
   },
+  knowledge: {
+    title: "Knowledge Base",
+    description: "Business knowledge management and search — the source of truth for organizational information",
+  },
 } as const;
 export default pages;
