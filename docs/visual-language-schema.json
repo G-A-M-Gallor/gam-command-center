@@ -1,0 +1,347 @@
+{
+  "version": "1.0",
+  "generated": "2026-04-03",
+  "total_elements": 34,
+  "elements": [
+    {
+      "id": "VL-001",
+      "name": "Process Step",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "round_rectangle",
+      "dsl_syntax": "n1 Process Step flowchart-process 0",
+      "semantic_tags": ["process", "action", "step"]
+    },
+    {
+      "id": "VL-002",
+      "name": "Sub-Process",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "round_rectangle",
+      "dsl_syntax": "n2 Sub-Process flowchart-process 0",
+      "semantic_tags": ["process", "subprocess", "workflow"]
+    },
+    {
+      "id": "VL-003",
+      "name": "User Action",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "round_rectangle",
+      "dsl_syntax": "n3 User Action flowchart-process 0",
+      "semantic_tags": ["user", "action", "interaction"]
+    },
+    {
+      "id": "VL-004",
+      "name": "System Action",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "round_rectangle",
+      "dsl_syntax": "n4 System Action flowchart-process 0",
+      "semantic_tags": ["system", "automated", "action"]
+    },
+    {
+      "id": "VL-005",
+      "name": "Decision Point",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "diamond",
+      "dsl_syntax": "n5 Decision Point flowchart-decision 1",
+      "semantic_tags": ["decision", "choice", "branch"]
+    },
+    {
+      "id": "VL-006",
+      "name": "Data Source",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "cylinder",
+      "dsl_syntax": "n6 Data Source flowchart-data 2",
+      "semantic_tags": ["data", "source", "input"]
+    },
+    {
+      "id": "VL-007",
+      "name": "External System",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n7 External System flowchart-process 0",
+      "semantic_tags": ["external", "system", "integration"]
+    },
+    {
+      "id": "VL-008",
+      "name": "Supabase Table",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "cylinder",
+      "dsl_syntax": "n8 Supabase Table flowchart-data 2",
+      "semantic_tags": ["database", "table", "storage"]
+    },
+    {
+      "id": "VL-009",
+      "name": "Notion Page",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n9 Notion Page flowchart-data 2",
+      "semantic_tags": ["notion", "page", "document"]
+    },
+    {
+      "id": "VL-010",
+      "name": "Notion DB",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "cylinder",
+      "dsl_syntax": "n10 Notion DB flowchart-data 2",
+      "semantic_tags": ["notion", "database", "collection"]
+    },
+    {
+      "id": "VL-011",
+      "name": "Edge Function",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n11 Edge Function flowchart-process 0",
+      "semantic_tags": ["function", "serverless", "edge"]
+    },
+    {
+      "id": "VL-012",
+      "name": "API Call",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "parallelogram",
+      "dsl_syntax": "n12 API Call flowchart-process 0",
+      "semantic_tags": ["api", "call", "request"]
+    },
+    {
+      "id": "VL-013",
+      "name": "File/Doc",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n13 File/Doc flowchart-data 2",
+      "semantic_tags": ["file", "document", "storage"]
+    },
+    {
+      "id": "VL-014",
+      "name": "Queue",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n14 Queue flowchart-data 2",
+      "semantic_tags": ["queue", "buffer", "async"]
+    },
+    {
+      "id": "VL-015",
+      "name": "Cache",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n15 Cache flowchart-data 2",
+      "semantic_tags": ["cache", "memory", "temporary"]
+    },
+    {
+      "id": "VL-016",
+      "name": "Condition True",
+      "color_family": "green",
+      "hex": "#79e49b",
+      "meaning": "Logic & Decisions",
+      "miro_shape": "diamond",
+      "dsl_syntax": "n16 Condition True flowchart-decision 1",
+      "semantic_tags": ["condition", "true", "positive"]
+    },
+    {
+      "id": "VL-017",
+      "name": "Condition False",
+      "color_family": "green",
+      "hex": "#79e49b",
+      "meaning": "Logic & Decisions",
+      "miro_shape": "diamond",
+      "dsl_syntax": "n17 Condition False flowchart-decision 1",
+      "semantic_tags": ["condition", "false", "negative"]
+    },
+    {
+      "id": "VL-018",
+      "name": "Loop",
+      "color_family": "green",
+      "hex": "#79e49b",
+      "meaning": "Logic & Decisions",
+      "miro_shape": "hexagon",
+      "dsl_syntax": "n18 Loop flowchart-process 0",
+      "semantic_tags": ["loop", "iteration", "repeat"]
+    },
+    {
+      "id": "VL-019",
+      "name": "Parallel Branch",
+      "color_family": "green",
+      "hex": "#79e49b",
+      "meaning": "Logic & Decisions",
+      "miro_shape": "diamond",
+      "dsl_syntax": "n19 Parallel Branch flowchart-decision 1",
+      "semantic_tags": ["parallel", "branch", "fork"]
+    },
+    {
+      "id": "VL-020",
+      "name": "Data Transform",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "parallelogram",
+      "dsl_syntax": "n20 Data Transform flowchart-process 0",
+      "semantic_tags": ["transform", "convert", "process"]
+    },
+    {
+      "id": "VL-021",
+      "name": "Start",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "oval",
+      "dsl_syntax": "n21 Start flowchart-terminator 3",
+      "semantic_tags": ["start", "begin", "entry"]
+    },
+    {
+      "id": "VL-022",
+      "name": "End",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "oval",
+      "dsl_syntax": "n22 End flowchart-terminator 3",
+      "semantic_tags": ["end", "finish", "exit"]
+    },
+    {
+      "id": "VL-023",
+      "name": "Connector",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "c n1 - n2",
+      "semantic_tags": ["connector", "link", "flow"]
+    },
+    {
+      "id": "VL-024",
+      "name": "Frame/Container",
+      "color_family": "black",
+      "hex": "#1a1a1a",
+      "meaning": "Structure & Organization",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "cluster c1 \"Container\" n1 n2",
+      "semantic_tags": ["container", "frame", "group"]
+    },
+    {
+      "id": "VL-025",
+      "name": "Group",
+      "color_family": "black",
+      "hex": "#1a1a1a",
+      "meaning": "Structure & Organization",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "cluster c2 \"Group\" n3 n4",
+      "semantic_tags": ["group", "collection", "set"]
+    },
+    {
+      "id": "VL-026",
+      "name": "Comment/Note",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n26 Comment/Note flowchart-process 0",
+      "semantic_tags": ["comment", "note", "annotation"]
+    },
+    {
+      "id": "VL-027",
+      "name": "Section Header",
+      "color_family": "black",
+      "hex": "#1a1a1a",
+      "meaning": "Structure & Organization",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n27 Section Header flowchart-process 0",
+      "semantic_tags": ["header", "title", "section"]
+    },
+    {
+      "id": "VL-028",
+      "name": "Title Block",
+      "color_family": "black",
+      "hex": "#1a1a1a",
+      "meaning": "Structure & Organization",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n28 Title Block flowchart-process 0",
+      "semantic_tags": ["title", "block", "header"]
+    },
+    {
+      "id": "VL-029",
+      "name": "Swimlane",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "cluster c3 \"Swimlane\" n5 n6",
+      "semantic_tags": ["swimlane", "lane", "division"]
+    },
+    {
+      "id": "VL-030",
+      "name": "Legend",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n30 Legend flowchart-process 0",
+      "semantic_tags": ["legend", "key", "reference"]
+    },
+    {
+      "id": "VL-031",
+      "name": "Divider",
+      "color_family": "black",
+      "hex": "#1a1a1a",
+      "meaning": "Structure & Organization",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n31 Divider flowchart-process 0",
+      "semantic_tags": ["divider", "separator", "boundary"]
+    },
+    {
+      "id": "VL-032",
+      "name": "Trigger Event",
+      "color_family": "blue",
+      "hex": "#a0c4fb",
+      "meaning": "Processes & Work",
+      "miro_shape": "oval",
+      "dsl_syntax": "n32 Trigger Event flowchart-terminator 3",
+      "semantic_tags": ["trigger", "event", "signal"]
+    },
+    {
+      "id": "VL-033",
+      "name": "Timestamp",
+      "color_family": "gray",
+      "hex": "#d6d6d6",
+      "meaning": "Navigation & Annotations",
+      "miro_shape": "rectangle",
+      "dsl_syntax": "n33 Timestamp flowchart-data 2",
+      "semantic_tags": ["timestamp", "time", "date"]
+    },
+    {
+      "id": "VL-034",
+      "name": "Schema",
+      "color_family": "red",
+      "hex": "#ffadad",
+      "meaning": "Data & Storage",
+      "miro_shape": "cylinder",
+      "dsl_syntax": "n34 Schema flowchart-data 2",
+      "semantic_tags": ["schema", "structure", "definition"]
+    }
+  ]
+}
