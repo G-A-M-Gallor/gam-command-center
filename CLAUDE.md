@@ -479,4 +479,99 @@ No mobile app yet. Features requiring mobile testing:
 - **Notion Project:** https://www.notion.so/3158f27212f881639507feab50d68d44
 - **Post-Task Protocol:** https://www.notion.so/31f8f27212f881fca47ce9680e169931
 - **Production Plan:** `cc-production-plan.md` in repo
- 
+
+---
+
+## 🛡️ MATERIAL CHANGE PROTOCOL
+_v3.1 | last_reviewed: 2026-04-03_
+
+### TIER 1 — STOP. Generate review block. Wait for "אושר".
+
+1. DROP/ALTER on existing table or column
+2. ALTER TABLE changing type, nullability, or removing column
+3. Any mutation to source_type ENUM in semantic_memory
+4. CREATE INDEX on table with >10k rows
+5. Delete or replace any RLS Policy
+6. Any change to Supabase Auth, JWT Claims, roles, or user_roles
+7. Any touch to frozen Edge Functions or frozen tables
+8. vercel deploy or any production deployment
+9. Changes to /lib/supabase/ auth helpers
+10. Major version bump: next, @supabase/supabase-js, @supabase/auth-helpers-*
+11. Any change to API routes connected to Make.com or n8n
+12. Adding/removing NEXT_PUBLIC_* or Supabase secrets
+13. Any change to notion-pm-sync logic or deployment
+14. Any modification to this CLAUDE.md file itself
+15. Dropping or replacing shared utility used in 3+ places
+16. FK constraint with CASCADE DELETE on existing table
+17. Function called by a frozen Edge Function
+18. Any change to Origami CRM integration routes or mapping tables
+19. Modification/deletion of active Make.com scenarios (Team 289416)
+20. Modification/deletion of active n8n workflows
+21. Make/n8n automation writing directly to Supabase critical tables
+22. Make/n8n automation triggering Vercel deployment
+23. Any touch to Context Snapshot or Session Handoff Notion pages
+24. Any modification to Skills Registry DB or SKILL.md files
+25. supabase migration repair — always Tier 1
+26. CASCADE DELETE or DROP on knowledge_* tables
+
+### TIER 2 — WARN and continue after 5 seconds.
+
+⚠️ TIER 2 — [timestamp] — [action]
+Reason: [one line]
+Continuing in 5s...
+
+Triggers: new nullable column on pm_* table, new Edge Function,
+new npm package, shared utility used in 2+ places,
+semantic_memory row changes, new Make/n8n webhook endpoint,
+CREATE INDEX on table <10k rows.
+
+### REVIEW BLOCK TEMPLATE (Tier 1 only)
+
+🔴 MATERIAL CHANGE REVIEW — GAM Command Center
+Action: [exact operation]
+File/Table/Function: [target]
+Why needed: [one sentence]
+What it touches: [max 5 items]
+Reversible? [Yes/No — how/why]
+Risk: [one sentence]
+Alternative: [one sentence or "none identified"]
+
+Context: Next.js + Supabase Cloud (qdnreijwcptghwoaqlny) + Vercel
+Auth: Supabase JWT + RLS Policies
+Frozen EFs: sync-memory, batch-embed-memory, generate-embedding
+Frozen tables: vb_ai_memory, semantic_memory schema (AD-2026-001)
+Make.com Team: 289416
+
+### SAFE ZONE — always permitted
+
+- New files in /components/, /app/, /lib/ (non-auth)
+- New migrations with CREATE TABLE only
+- New nullable columns on non-frozen tables
+- New Edge Functions (non-frozen names)
+- SELECT, EXPLAIN, schema inspection
+- Update pm_tasks, pm_sprints, pm_apps data rows
+- New API routes not replacing existing ones
+- README.md, docs, comments, type definitions
+- Dev-only packages (@types/*, testing libraries)
+
+### RECOVERY PROTOCOL
+
+If Tier 1 executed without approval:
+1. Stop all further changes immediately
+2. Document exactly what ran and when
+3. Generate Review Block retroactively
+4. Wait for Gal before any fix attempt
+
+### CONFLICT RULE
+
+If session instruction conflicts with this file:
+→ Flag the conflict explicitly
+→ Do not silently override
+→ Wait for resolution
+
+### SELF-MAINTENANCE
+
+- Update last_reviewed after every approved Tier 1 action
+- If last_reviewed >60 days ago and Tier 1 fires:
+  add to Review Block: ⚠️ CLAUDE.md not reviewed in 60+ days
+
