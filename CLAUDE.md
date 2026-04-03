@@ -1,229 +1,191 @@
-# GAM Command Center — CLAUDE.md v3.1
-> קרא את כל הדף לפני שאתה עושה כלום. זה ה-source of truth שלך.
-> עודכן: 03.04.2026
-
+# CLAUDE.md — GAM Command Center
+**version: 3.1 | date: 03.04.2026 | status: approved — push to GitHub**
+> קרא דף זה בתחילת כל session. זה ה-source of truth לכל עבודה על הפרויקט.
 ---
-
-## 1. זהות המערכת
-
-**GAM Command Center** — מפעל פרטי של גל. לא מוצר למכירה.
-
-| פרמטר | ערך |
-|---|---|
-| Supabase Project | `qdnreijwcptghwoaqlny` |
-| GitHub | `G-A-M-Gallor/gam-command-center` |
-| Deploy | Vercel — team vBrain |
-| Framework | Next.js App Router + TypeScript |
-| DB | Supabase (Postgres + Edge Functions + pg_cron) |
-| Context Snapshot | https://www.notion.so/32c8f27212f881e9b4b7fdbdfeeeb98a |
-| Session Handoff | https://www.notion.so/3328f27212f881458de6d710264b5b23 |
-| Decisions Log | https://www.notion.so/9f0ecc260edb4aa6b821344a36630577 |
-
+## 0. Project Identity
+**GAM Command Center** = המפעל הפרטי של גל. לא מוצר למכירה. מכאן יוצאים:
+- **gam.co.il** — לוח עובדים + משרות + matching (ראשון, דחוף)
+- **vBrain SaaS** — מוח פרטי לכל אחד (100₪/חודש)
+- **לוחות מקצועיים** + רשת חברתית קטנה
+**הצוות:** גל + AI (Claude.ai, Claude Code, Scout). Hani (Origami), Ido (infra).
 ---
-
+## 1. Stack (נעול)
+| רכיב | בחירה |
+|------|--------|
+| Framework | Next.js App Router |
+| DB | Supabase (qdnreijwcptghwoaqlny) |
+| Deploy | Vercel (team vBrain) |
+| Auth | OTP 019 SMS + Resend magic link |
+| Automations | Supabase native (pg_cron + Edge Functions) |
+| Source of Truth | Notion → Supabase sync |
+| Repo | G-A-M-Gallor/gam-command-center |
+| AI | Claude.ai • Claude Code + Scout |
+---
 ## 2. 5 עקרונות שלא לשבור
-
-1. **Config over Code** — לוח/App חדש = שורה ב-DB. ללא קוד.
-2. **Tenant-First** — כל טבלה יש `tenant_id` / `workspace_id`.
-3. **Rendering Separation** — Data / Logic / UI / Design = שכבות נפרדות.
-4. **DB-First** — Schema drives code. לא הפוך.
-5. **Change-Friendly** — שינוי = עדכון config/Notion, לא שכתוב קוד.
-
+1. **Config over Code** — לוח חדש = שורה ב-DB. ללא קוד.
+2. **Tenant-First** — כל טבלה יש `tenant_id`.
+3. **DB-First** — כל תוכן חדש = DB. דף = נרטיב בלבד.
+4. **Change-Friendly** — שינוי = עדכון config, לא שכתוב.
+5. **Rendering Separation** — Data / Logic / UI / Design = שכבות נפרדות.
 ---
-
-## 3. Rule 16 — עדכון Task Status (חובה)
-
-כשמסיים משימה — עדכן סטטוס דרך `complete-tasks` Edge Function:
-
-```bash
-curl -X POST \
-  https://qdnreijwcptghwoaqlny.supabase.co/functions/v1/complete-tasks \
-  -H "x-cron-secret: gam-cron-2026-sync-secret-x9k" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "task_ids": ["notion-id-1", "notion-id-2"],
-    "completed_by": "claude-code",
-    "session": "session-name"
-  }'
-```
-
-**כללים:**
-- תמיד להשתמש ב-`complete-tasks` — לא בNotion MCP ישיר לעדכון סטטוס
-- שולח מערך של `notion_id` — הפונקציה מעדכנת Supabase + Notion במקביל
-- מחזירה `{ updated, failed, db_updated }` — לוודא `failed: 0`
-
-לאיתור `notion_id` של טאסק:
-```sql
-SELECT notion_id, title FROM pm_tasks WHERE title ILIKE '%keyword%' AND deleted_at IS NULL;
-```
-
+## 3. AI Operating Rules
+**Rule 1:** קרא Context Snapshot לפני כל session: https://www.notion.so/32c8f27212f881e9b4b7fdbdfeeeb98a
+**Rule 2:** Notion = Source of Truth. לעולם לא Supabase → Notion.
+**Rule 3:** כל sync הוא Notion → Supabase בלבד.
+**Rule 4:** אסור Vercel deploy ללא אישור מפורש מגל.
+**Rule 5:** Supabase migrations + Edge Functions = מותר ללא אישור.
+**Rule 6:** Make.com = חיבורים חיצוניים בלבד. כל לוגיקה פנימית = Supabase.
+**Rule 7:** Error Policy = 3 retries → fail → log → alert.
+**Rule 8:** כל שינוי `.env.local` → גל מעדכן Vercel dashboard בנפרד.
+**Rule 9:** Naming Convention — שם זהה בכל הצדדים (Supabase, Notion, Vercel, GitHub).
+**Rule 10:** לפני יצירת קוד חדש — בדוק אם קיים. אל תיצור duplicate.
+**Rule 11:** כל Edge Function = Deno/TypeScript + error handling + CORS + logs.
+**Rule 12:** כל migration = `IF NOT EXISTS` + rollback comment + descriptive name.
+**Rule 13:** RLS מופעל על כל טבלה. אף פעם לא `USING(true)` בלי סיבה מתועדת.
+**Rule 14:** אסור לכתוב secrets בקוד. הכל דרך `Deno.env.get()` + Supabase Vault.
+**Rule 15:** Session Handoff = תמיד בסיום session עם Claude Code.
+**Rule 16:** Claude Code מעדכן task status בNotion + Supabase בסיום task (הושלם/בהתקדמות/תקוע).
+**Rule 17:** כל App חייב CLAUDE.md — דף ילד בNotion. מסונכרן ל-`pm_apps.claude_md_content` כל 3 דקות.
 ---
-
-## 4. Rule 17 — CLAUDE.md לכל App
-
-כל App ב-Notion חייב דף בן `CLAUDE.md`. מסונכרן אוטומטית ל-`pm_apps.claude_md_content` כל 3 דקות דרך `notion-pm-sync`.
-
+## 4. Material Change Protocol v3.1
+> **מהו Material Change?** שינוי שמשפיע על יציבות, אבטחה, עלויות, או ארכיטקטורה של המערכת.
+### Tier 1 — דורש אישור מפורש מגל לפני ביצוע
+1. כל Vercel deploy
+2. שינוי environment variables ב-Vercel / production
+3. מחיקת טבלה / עמודה עם נתונים
+4. שינוי schema של `semantic_memory` (AD-2026-001)
+5. שינוי או הפעלה מחדש של Frozen Edge Functions (`sync-memory`, `batch-embed-memory`, `generate-embedding`)
+6. כתיבה ל-`vb_ai_memory` (מוקפא — trigger חוסם)
+7. שינוי RLS policies על טבלאות עם נתוני משתמשים
+8. שינוי auth flow (OTP, magic link, JWT)
+9. שינוי `cron_sync_secret` או כל secret קריטי ב-Vault
+10. הוספת source_type חדש ל-`semantic_memory` ENUM
+11. שינוי embedding model (נעול ל-gemini-embedding-001 בלבד)
+12. מחיקת cron job קיים
+13. שינוי Make.com scenarios שמחוברים ל-Fireberry או Origami
+14. כל שינוי במבנה pm_* tables שמשפיע על notion-pm-sync
+15. שינוי Multi-tenant architecture
+### Tier 2 — בצע + עדכן גל מיד אחרי
+1. הוספת cron job חדש
+2. הוספת Edge Function חדשה לproduction
+3. שינוי retention policy של backup או semantic_memory
+4. הוספת webhook חיצוני חדש (Make / n8n)
+5. שינוי Storage bucket permissions
+6. הוספת index חדש על טבלה גדולה (>1000 rows)
+7. שינוי notion-pm-sync logic שמשפיע על pm_sync_schema
+8. Deploy של Workflow OS engine לproduction
+9. הוספת App חדש ל-Apps DB
+### Safe Zone — תמיד OK ללא שאלה
+1. Supabase migration (ADD column, CREATE TABLE IF NOT EXISTS)
+2. Deploy Edge Function חדשה (לא שינוי קיימת)
+3. עדכון תוכן Notion (דפים, DBs, CLAUDE.md)
+4. קריאה מ-Supabase (SELECT בלבד)
+5. עדכון task status ב-Notion / Supabase (Rule 16)
+6. הוספת שורות ל-vb_functions, pm_sync_schema
+7. הוספת records לכל DB config
+8. כתיבה ל-backup_logs, project_memory, semantic_memory (תוכן)
+9. עדכון CLAUDE.md של App
+### Recovery — מה לעשות כשמשהו נשבר
+1. **עצור מיד** — אל תנסה לתקן ללא הבנה מלאה
+2. **תעד** — הכנס ל-`project_memory` עם `source='incident'`
+3. **בדוק backup_logs** — האם יש גיבוי מהיום?
+4. **Flag לגל** — העלה בשיחה הבאה ב-Claude.ai
+5. **אל תמחק** — soft delete בלבד (`deleted_at = now()`)
+6. **Rollback migration** — רק אחרי אישור גל
 ---
-
-## 5. Material Change Protocol — Tier System
-
-### 🔴 Tier 1 — עצור מיד (אל תבצע ללא אישור מפורש מגל)
-
-| # | טריגר | סיבה |
-|---|---|---|
-| 1 | `vercel deploy` / `vercel --prod` | עולה כסף, דורש אישור |
-| 2 | `supabase functions deploy` על פונקציה קיימת ב-production | עלול לדרוס גרסה פעילה |
-| 3 | כל write ל-`vb_ai_memory` | FROZEN — trigger חוסם, אל תנסה |
-| 4 | קריאה לפונקציות קפואות: `sync-memory`, `batch-embed-memory`, `generate-embedding` | מחזירות 403, לא לנסות |
-| 5 | הוספת `source_type` ENUM value חדש ל-`semantic_memory` | דורש migration + Decisions Log entry |
-| 6 | שינוי `embedding_model` מ-`gemini-embedding-001` | AD-2026-001 — נעול |
-| 7 | שינוי `EMBEDDING_DIMS` מ-768 | AD-2026-001 — נעול |
-| 8 | DROP/RENAME על pm_* טבלאות | שובר sync pipeline |
-| 9 | מחיקת bulk מ-`semantic_memory` ללא סיבה מוצהרת | בלתי הפיך |
-| 10 | שינוי schema של `knowledge_sources_config` ללא migration | שובר SE S3 sync |
-
-### 🟠 Tier 2 — התרע לפני ביצוע (ציין בהודעה לגל)
-
-| # | טריגר |
-|---|---|
-| 11 | יצירת Edge Function חדשה |
-| 12 | הוספת pg_cron job חדש |
-| 13 | שינוי שם Vault key |
-| 14 | שינוי התנהגות `notion-pm-sync` |
-| 15 | שינוי `search_brain_smart()` RPC |
-| 16 | שינוי RLS policies על pm_* |
-| 17 | עדכון `complete-tasks` Edge Function |
-| 18 | עדכון `sync-knowledge-sources` Edge Function |
-| 19 | הוספת/הסרת מקור מ-`knowledge_sources_config` |
-| 20 | שינוי Notion integration connections |
-| 21 | שינוי `auto_classify_domains()` |
-| 22 | הוספת טבלה חדשה למשפחת pm_* |
-| 23 | שינוי Session Handoff format |
-| 24 | שינוי chunk_size_policy |
-| 25 | הוספת domain classification חדש |
-
-### ✅ Safe Zone — בצע בחופשיות
-
-- כל `SELECT` query
-- קריאה מ-Notion / Supabase
-- עדכון task status דרך `complete-tasks`
-- יצירת דפים חדשים ב-Notion
-- חיפוש סמנטי דרך `search_brain_smart`
-- יצירת migration חדש (שינוי schema) — מותר, מומלץ
-- deploy Edge Function **חדשה** (לא קיימת) — מותר
-
----
-
-## 6. Infrastructure — Edge Functions
-
-### פעילות ✅
-
-| Function | Version | תפקיד |
-|---|---|---|
-| `notion-pm-sync` | v19 | Notion → Supabase pm_* sync (כל 3 דקות) |
-| `embed-semantic` | v7 | PM tables → Gemini embeddings → semantic_memory |
-| `crawl-notion-pages` | v4 | Notion pages → semantic_memory |
-| `sync-notion-knowledge` | v13 | Notion knowledge sync |
-| `sync-knowledge-sources` | v4 | 17 knowledge sources → semantic_memory (SE S3) |
-| `complete-tasks` | v1 | Rule 16 — bulk task status updater |
-| `cron-health-monitor` | v5 | Health monitoring |
-| `semantic-query` | v3 | POST API לחיפוש סמנטי |
-| `daily-backup` | v1 | גיבוי יומי של 5 טבלאות → storage bucket backups |
-| `restore-backup` | v1 | שחזור מ-backup לפי תאריך |
-
-### קפואות 🔴 (אל תיגע — מחזירות 403)
-
+## 5. Frozen Assets — אסור לגעת
+### Edge Functions (FROZEN — מחזירות 403):
 - `sync-memory`
 - `batch-embed-memory`
 - `generate-embedding`
-
+### Tables (FROZEN):
+- `vb_ai_memory` — trigger חוסם כל כתיבה
+### Schema (נעול):
+- `semantic_memory.source_type` ENUM — 14 ערכים בלבד
+- `semantic_memory.embedding_model` — gemini-embedding-001 בלבד
 ---
-
-## 7. Semantic Memory — AD-2026-001
-
-**מודל יחיד:** `gemini-embedding-001` (768d) — לא לשנות.
-**API key location:** Supabase Vault → `get_secret('gemini_api_key')`
-**Primary search:** `search_brain_smart()` RPC — לא ליצור אלטרנטיבות.
-**`vb_ai_memory`:** FROZEN — trigger חוסם כל write.
-
-### source_type ENUM (14 ערכים — לא לשנות ללא migration)
-`task | sprint | project | app | goal | portfolio | team | knowledge_item | notion_page | claude_md | decision | function | ai_memory | wiki_article | wiki_glossary | course`
-
-### Constraints (NOT NULL)
-- `content_hash` — SHA-256 של content
-- `domain` — DEFAULT 'unclassified'
-- `embedding_model` — חייב להיות `gemini-embedding-001`
-
+## 6. Cron Map (מלא, נוכחי)
+| jobid | שם | לוח זמנים UTC | ישראל |
+|-------|-----|---------------|-------|
+| 34 | daily-backup | 23:23 | 02:23 AM |
+| 21 | cleanup-semantic-memory | 00:17 | 03:17 AM |
+| 11 | cleanup-http-responses | 04:00 | 07:00 AM |
+| 27 | health_check_semantic_memory | 05:00 | 08:00 AM |
+| 13 | GAM PM Sync (Notion→Supabase) | כל 3 דקות | — |
+| 17 | embed-semantic | :11, :43 כל שעה | — |
+| 20 | crawl-notion-pages | :07, :54 כל שעה | — |
+| 24 | auto-classify-domains | :25, :55 כל שעה | — |
+| 25 | update-smart-scores | :35 כל שעה | — |
+| 14 | daily-functions (system checks) | 02:20 | 05:20 AM |
+| 26 | daily-brief | 04:00 | 07:00 AM |
 ---
-
-## 8. pg_cron Jobs
-
-| jobid | שם | לוח זמנים |
-|---|---|---|
-| 13 | GAM Command Center Sync - Tasks | כל 3 דקות |
-| 17 | embed-semantic | :11 ו-:43 כל שעה |
-| 20 | crawl-notion-pages | :07 ו-:54 כל שעה |
-| 24 | auto-classify-domains | :25 ו-:55 כל שעה |
-| 25 | update-smart-scores | :35 כל שעה |
-| 26 | daily-brief | 7:00 ישראל |
-| 27 | health_check_semantic_memory | 05:00 UTC יומי |
-| 33 | knowledge-sources-sync-daily | 05:00 UTC יומי |
-| 34 | daily-backup | 23:23 UTC יומי (02:23 ישראל) |
-
+## 7. Key Edge Functions
+| Function | תפקיד | Auth |
+|----------|--------|------|
+| `daily-backup` | גיבוי יומי 5 טבלאות | x-cron-secret |
+| `restore-backup` | שחזור מגיבוי (dry_run first) | service role |
+| `notion-pm-sync` (v17) | Notion→Supabase sync | x-cron-secret |
+| `embed-semantic` (v7) | PM→embeddings | cron |
+| `crawl-notion-pages` (v4) | Notion pages→embeddings | cron |
+| `semantic-query` (v3) | חיפוש סמנטי API | public |
+| `daily-functions` (v3) | 29 system checks | cron |
+| `auto-classify-domains` (v3) | domain classification | cron |
+| `update-task-status` (v3) | dual-write Notion+Supabase | gam-status-update-2026 |
 ---
-
-## 9. Vault Keys
-
-| שם | תוכן |
-|---|---|
-| `notion_api_key_new` | Notion Integration Token — MCP gam-command-center-push |
-| `cron_sync_secret` | `gam-cron-2026-sync-secret-x9k` |
-| `gemini_api_key` | Gemini embedding-001 API key |
-
+## 8. Vault Keys (שמות — לא ערכים)
+- `notion_api_key_new` — Notion Integration Token
+- `cron_sync_secret` — auth header לcron jobs
+- `gemini_api_key` — Gemini embedding-001
+- `BACKUP_ENCRYPTION_KEY` — AES-256-GCM לגיבויים
+- `BACKUP_ALERT_EMAIL` — התראות גיבוי
 ---
-
-## 10. PM System — Notion Collection IDs
-
-| Entity | Collection ID |
-|---|---|
-| Apps | `fb708d62-c4bf-47e5-a882-2cbc3b330227` |
-| Projects | `109b843c-67e1-4866-923c-fe598c5c01f5` |
-| Sprints | `df56c661-8f2d-4c44-b397-ab7b36ee8934` |
-| Tasks | `0e83150a-1a03-4d63-bb7b-dded95493847` |
-
+## 9. Apps DB (11 Apps)
+| App | תפקיד | סטטוס |
+|-----|--------|-------|
+| 🌐 gam.co.il | אתר ראשי | בפיתוח |
+| 🧠 Scout | AI interface | בפיתוח |
+| 🧰 Site Toolkit | כלי אפיון | בפיתוח |
+| ⚙️ פונקציות | לוגיקה עסקית | בפיתוח |
+| ⭐ המלצות | recommendations | בפיתוח |
+| 🛠️ CC Toolkit | כלים פנימיים | בפיתוח |
+| 🔄 Workflow OS | אוטומציות | בפיתוח |
+| 🧠 Semantic Memory | vBrain engine | פעיל |
+| 📚 CC Courses | קורסים | בפיתוח |
+| 🤖 ChatGPT Integration | AI workstation | בפיתוח |
+| 🎨 Miro Visual Layer | ויזואליזציה | בפיתוח |
 ---
-
-## 11. Recovery Protocol
-
-**אם הפעלת Tier 1 בטעות:**
-1. עצור מיד
-2. תעד מה בוצע בדיוק
-3. אל תנסה לתקן לבד — דווח לגל
-4. לא לכסות — שקיפות מלאה
-
-**אם אין לך CLI / כלי נדרש:**
-- עצור ובקש — אל תנסה לדמות או להמציא
-- ציין בדיוק מה חסר
-
-**אם לא בטוח:**
-- שאל לפני שאתה מבצע
-- "לא בטוח" = Tier 2 לפחות
-
+## 10. Semantic Memory Rules (AD-2026-001)
+- **Unified Search Index:** `semantic_memory` = הטבלה היחידה
+- **450+ active chunks**
+- **Model:** gemini-embedding-001 (768d) — אף מודל אחר אסור
+- **Primary search:** `search_brain_smart()` — לא `search_brain()`
+- **Writers:** embed-semantic v7, crawl-notion-pages v4, ingest-manual v2
+- **Health cron:** job 27, daily 05:00 UTC
+- **Deprecated:** search_tasks(), search_project_memory(), ai.threads/messages
 ---
-
-## 12. Make.com
-
-- Team ID: `289416`
-- ~40 active scenarios
-- **כלל:** Make = External connections בלבד
-- כל לוגיק פנימי → Supabase Edge Functions
-
+## 11. PM Hierarchy
+```javascript
+App → Goal → Portfolio → Project → Sprint → Task
+```
+- כל רמה יודעת את כל הרמות מעליה
+- Sync: Notion → Supabase (pm_* tables), כל 3 דקות
+- 86 מיפויים פעילים ב-pm_sync_schema
+- Rule 16: Claude Code מעדכן status בסיום כל task
 ---
+## 12. Working with This Repo
+```bash
+# Deploy EF
+npx supabase functions deploy FUNCTION_NAME --project-ref qdnreijwcptghwoaqlny
 
-## 13. כללים כלליים
+# Migration
+npx supabase db push --project-ref qdnreijwcptghwoaqlny
 
-- **אין Vercel deploy** ללא אישור מגל
-- **Supabase migrations + Edge Functions** = מותר בלי אישור
-- **DB-First** — schema drives code
-- **No new source_type ENUM** ללא migration + Decisions Log
-- **Notion integrations:** תמיד שני חיבורים — ראשי "MCP gam-command-center-push" + גיבוי "Supabase...task & goals"
+# Secrets
+npx supabase secrets set KEY=value --project-ref qdnreijwcptghwoaqlny
+
+# NEVER
+# npx vercel deploy  ← דורש אישור גל
+```
+---
+*CLAUDE.md v3.1 | 03.04.2026 | GAM Command Center*
+*Material Change Protocol: 15 Tier 1 triggers + 9 Tier 2 + 9 Safe Zone + Recovery*
