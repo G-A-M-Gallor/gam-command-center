@@ -2,7 +2,7 @@
 
 > This file is read by the internal AI assistant on every conversation.
 > It's also read by Claude Code at session start.
-> Last updated: 2026-03-12
+> Last updated: 2026-04-03
 
 ---
 
@@ -12,13 +12,13 @@
 
 - **Repo:** `G-A-M-Gallor/vBrain.io`
 - **Stack:** Next.js 16.1.6 (Turbopack) on Vercel
-- **DB:** Supabase (Auth, Realtime, Storage, 51 migrations)
+- **DB:** Supabase (Auth, Realtime, Storage, 90+ migrations)
 - **AI:** Claude API (5 chat modes + 6 Work Manager agents)
 - **Operational SOT:** Origami CRM (synced via n8n)
 - **Knowledge SOT:** Notion (specs, procedures, roadmap)
 - **Team:** Gal (CEO/architect), Claude (AI dev), n8n (automation)
-- **Scale:** 17 pages, 16 widgets, 26 API routes, 9 contexts, 301 source files
-- **Built in:** 12 days (2026-02-28 → 2026-03-11), 93 commits
+- **Scale:** 17 pages, 16 widgets, 26 API routes, 9 contexts, 310+ source files
+- **Built in:** 34 days (2026-02-28 → 2026-04-03), 95+ commits
 
 ---
 
@@ -91,6 +91,76 @@ Full architecture with data flows: **[memory/ARCHITECTURE.md](memory/ARCHITECTUR
 | Sentry (error tracking, boundaries) | ✅ | `sentry.*.config.ts` |
 | Code Splitting (22 dynamic imports) | ✅ | `WidgetRegistry.ts` |
 | Tests (43 unit tests, vitest) | ✅ | `__tests__/` |
+
+---
+
+## Knowledge App — Sprint 2+3 Implementation
+
+**Complete enterprise knowledge management system** with advanced RBAC, version control, and automation.
+
+### **Core Features (Deployed April 2026):**
+
+| Feature | Status | Migration | Purpose |
+|---------|--------|-----------|---------|
+| **Knowledge Items CRUD** | ✅ | `20260526_knowledge_app_schema_v1.sql` | Basic knowledge management with Hebrew RTL |
+| **Conflicts Management** | ✅ | `20260402_knowledge_sprint_2_3.sql` | Auto-detect duplicates, resolve conflicts |
+| **Version Control** | ✅ | `20260402_knowledge_sprint_2_3.sql` | Full history, diff comparison, rollback |
+| **Hybrid RBAC** | ✅ | `20260402_knowledge_sprint_2_3.sql` | JWT + Database roles, backwards compatible |
+| **Enhanced Search** | ✅ | `20260402_knowledge_sprint_2_3.sql` | Hebrew full-text, suggestions, ranking |
+| **Audit Logging** | ✅ | `20260402_knowledge_sprint_2_3.sql` | Compliance, retention policies, legal hold |
+| **Automation Playbooks** | ✅ | `20260402_knowledge_sprint_2_3.sql` | Quality checks, content review workflows |
+| **Origami Integration** | ✅ | `20260402_knowledge_sprint_2_3.sql` | CRM mapping, bidirectional sync |
+
+### **Database Schema:**
+
+**Existing Tables (v1):**
+- `knowledge_items` — Main knowledge items with Hebrew content
+- `knowledge_departments` — Department classification
+- `knowledge_streams`, `knowledge_use_cases`, `knowledge_lenses` — Taxonomy
+- `knowledge_types`, `knowledge_source_types` — Content classification
+
+**Sprint 2+3 Additions (25+ tables):**
+- `knowledge_conflicts` — Conflict detection and resolution
+- `knowledge_versions` — Complete version history with diffs
+- `user_roles` — Database-based RBAC with scope controls
+- `knowledge_audit_log` — Comprehensive activity logging
+- `knowledge_playbooks` — Automation workflows
+- `knowledge_origami_mapping` — CRM integration layer
+
+### **RBAC Architecture — Hybrid Approach:**
+
+**Backwards Compatibility:** Preserves existing JWT-based roles (`approver`, `owner`, `system_admin`) while adding database-based roles for new features.
+
+```sql
+-- Hybrid RLS Policy Example:
+CREATE POLICY "knowledge_items_select_hybrid" ON knowledge_items
+    USING (
+        -- EXISTING JWT logic (preserved)
+        (jwt_claims->>'user_role' IN ('approver', 'owner', 'system_admin'))
+        OR
+        -- NEW database roles (Sprint 2+3)
+        (user_has_role(auth.uid(), 'super_admin') OR can_access_knowledge_item(auth.uid(), id))
+    );
+```
+
+**Role Hierarchy:**
+- `super_admin` — Full system access
+- `knowledge_admin` — Manage knowledge system
+- `content_manager` — Create/edit content
+- `reviewer` — Review and approve content
+- `contributor` — Create and suggest content
+- `viewer` — Read-only access
+- `external_viewer` — Limited external access
+
+### **Key Files:**
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| **UI Main** | `/dashboard/knowledge/page.tsx` | 900+ line React component |
+| **Queries** | `/lib/supabase/knowledgeQueries.ts` | TypeScript database functions |
+| **i18n** | `/lib/i18n/locales/{he,en,ru}/knowledge.ts` | Hebrew RTL translations |
+| **Migration v1** | `supabase/migrations/20260526_knowledge_app_schema_v1.sql` | Basic schema (31KB) |
+| **Migration Sprint 2+3** | `supabase/migrations/20260402_knowledge_sprint_2_3.sql` | Full implementation (72KB) |
 
 ---
 
@@ -296,6 +366,45 @@ Master document: **https://www.notion.so/31f8f27212f881fca47ce9680e169931**
 | 3 | `connectedTo` array in Mermaid diagram |
 | 4 | Comprehensive `purpose` field |
 | 5 | Conflict review (deps, contexts, localStorage, events) |
+
+### Hybrid RBAC Protocol — Knowledge App
+
+**Sprint 2+3 implemented a hybrid auth approach** that preserves existing JWT-based roles while adding database-based RBAC. **Always maintain backwards compatibility.**
+
+**JWT Roles (existing, preserved):**
+- `system_admin` — Full admin access
+- `approver` — Can approve content
+- `owner` — Content ownership rights
+- `contributor` — Can create/edit content
+
+**Database Roles (new, additive):**
+- `super_admin` — Full system access (maps to `system_admin`)
+- `knowledge_admin` — Knowledge system management (maps to `approver`)
+- `content_manager` — Content creation/editing (maps to `owner`)
+- `contributor` — Basic content contribution
+- `reviewer` — Review and approve workflow
+- `viewer` — Read-only access
+- `external_viewer` — Limited external access
+
+**RLS Policy Pattern:**
+```sql
+-- All policies use OR logic for compatibility:
+CREATE POLICY "example_policy" ON table_name
+    USING (
+        -- EXISTING JWT logic (never remove)
+        (current_setting('request.jwt.claims')::jsonb->>'user_role' IN ('system_admin', 'approver'))
+        OR
+        -- NEW database roles (additive)
+        (user_has_role(auth.uid(), 'super_admin') OR user_has_role(auth.uid(), 'knowledge_admin'))
+    );
+```
+
+**Development Rules:**
+1. **Never replace** existing JWT policies — always extend with OR
+2. **Test backwards compatibility** with existing user roles
+3. **Default to existing access patterns** when in doubt
+4. **Use database roles** for new Sprint 2+3 features only
+5. **Preserve tenant_id and regulatory_sensitivity** logic
 
 ---
 
