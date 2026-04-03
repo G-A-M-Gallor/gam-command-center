@@ -38,7 +38,7 @@ User (Browser / PWA)
   │     ├── RLS policies (hardened)
   │     ├── 49 migrations (triggers, RPCs, views, audit)
   │     ├── Realtime channels (editor, story map, funcmap, plan)
-  │     └── Edge Functions: sync-knowledge-sources (business lang, design tokens)
+  │     └── Edge Functions: sync-knowledge-sources (business lang, design tokens), daily-backup, restore-backup
   │
   ├── Claude API (AI)
   │     ├── 4 chat modes: chat, analyze, write, decompose
@@ -92,6 +92,24 @@ Full architecture with data flows: **[memory/ARCHITECTURE.md](memory/ARCHITECTUR
 | Sentry (error tracking, boundaries) | ✅ | `sentry.*.config.ts` |
 | Code Splitting (22 dynamic imports) | ✅ | `WidgetRegistry.ts` |
 | Tests (43 unit tests, vitest) | ✅ | `__tests__/` |
+| Backup System (daily backups, 30-day retention) | ✅ | `supabase/functions/daily-backup/`, `supabase/functions/restore-backup/` |
+
+### Operational Infrastructure
+
+#### Edge Functions (Active)
+| Function | Version | Purpose |
+|----------|---------|---------|
+| `sync-knowledge-sources` | v3 | Semantic embedding sync with GitHub/Notion sources |
+| `daily-backup` | v1 | גיבוי יומי של 5 טבלאות → storage bucket backups |
+| `restore-backup` | v1 | שחזור מ-backup לפי תאריך |
+| `notion-pm-sync` | v19 | Notion ↔ Supabase bidirectional sync |
+| `complete-tasks` | v1 | Bulk task completion (Rule 16 executor) |
+
+#### pg_cron Jobs (Active)
+| # | Job Name | Schedule | Purpose |
+|---|----------|----------|---------|
+| 34 | daily-backup | 23:23 UTC יומי (02:23 ישראל) | Automated daily backups |
+| — | GAM Command Center Sync - Tasks | 5-minute intervals | Notion-Supabase sync |
 
 ---
 
