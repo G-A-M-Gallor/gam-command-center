@@ -48,8 +48,64 @@
 **Rule 17:** כל App חייב CLAUDE.md — דף ילד בNotion. מסונכרן ל-`pm_apps.claude_md_content` כל 3 דקות.
 **Rule 18:** `semantic_memory` אסורה ב-daily-backup. הטבלה גורמת stack overflow + לא נדרשת לגיבוי.
 ---
+## 3b. Rule 19 — DB לעומת טבלה בדף
+**85% מהטבלאות צריכות להיות DB אמיתי בNotion.** הקריטריון:
+**חובה DB כאשר:**
+- יש יותר מ-5 שורות
+- שורות מתעדכנות בנפרד (סטטוס, בעלות, תאריכים)
+- רוצים לquery מקוד או מSupabase
+- הנתון צריך להיכנס ל-vBrain כ-entity מובנה
+- עתיד multi-tenant (צריך tenant isolation + RLS)
+**טבלה בדף בלבד כאשר:**
+- נתון reference סטטי שלא משתנה (טבלת צבעים, השוואה חד-פעמית)
+- פחות מ-5 שורות ולא יגדל
+- אין סיבה לquery מקוד
+**כלל אצבע:** האם תרצה לעדכן שורה אחת בלי לפתוח את הדף? אם כן → DB.
+---
 ## 4. Material Change Protocol v3.1
 > **מהו Material Change?** שינוי שמשפיע על יציבות, אבטחה, עלויות, או ארכיטקטורה של המערכת.
+
+## Rule 0 — Source of Truth First
+
+### הכלל
+לפני כל טענה על מצב המערכת — בדוק במקור.
+לפני כל הערכת כיסוי / בריאות / אבטחה — הרץ שאילתה.
+אם אין גישה למקור — אמור "אני לא יכול לאמת את זה עכשיו" במקום לנחש.
+
+### מה נחשב "טענה על מצב המערכת"
+- "X עובד / לא עובד"
+- "Y מכוסה / מוגן"
+- "Z אחוז כיסוי / בריאות"
+- "יש/אין מנגנון ש..."
+- "הכל תקין / הכל בסדר"
+- כל הערכה כמותית על מצב המערכת
+
+### מפת מקורות אמת
+| סוג שאלה | מקור אמת | שאילתה |
+|---|---|---|
+| מצב semantic_memory | Supabase SQL | `SELECT source_type, COUNT(*) FROM semantic_memory WHERE is_active=true GROUP BY source_type` |
+| מצב crons / אוטומציות | Supabase SQL | `SELECT jobid, jobname, schedule, active FROM cron.job ORDER BY jobid` |
+| מצב knowledge sources | Supabase SQL | `SELECT source_key, label, is_active, chunks_in_memory, last_synced_at FROM knowledge_sources_config` |
+| מצב אבטחה | Supabase SQL + Notion | RLS status: `SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname='public'` + Risk Registry DB |
+| מצב Apps / PM | Notion API | Fetch Apps DB + pm_apps |
+| מצב Edge Functions | Supabase API | `list_edge_functions` |
+| "האם X קיים / עובד" | SQL + Notion | תמיד בדוק בשני המקורות לפני תשובה |
+
+### Tier
+**Tier 1 — הפרה = מידע מטעה על מצב המערכת.**
+
+### חל על
+- Claude.ai (שיחות רגילות + sessions טכניים)
+- Claude Code (בכל session)
+
+### דוגמאות
+
+❌ שגוי: "semantic_memory מכסה את כל ה-Apps" (בלי בדיקה)
+✅ נכון: מריץ SQL → "semantic_memory מכיל 1,124 chunks ב-16 source types. CLAUDE.md: 192 chunks. Security Risks: 0 chunks — לא מכוסה."
+
+❌ שגוי: "כל ה-crons עובדים תקין" (בלי בדיקה)
+✅ נכון: מריץ SQL → "24 crons פעילים. make_scenarios מוגדר אבל 0 chunks. open_questions מעולם לא סונכרן."
+
 ### Tier 1 — דורש אישור מפורש מגל לפני ביצוע
 1. כל Vercel deploy
 2. שינוי environment variables ב-Vercel / production
@@ -189,4 +245,4 @@ npx supabase secrets set KEY=value --project-ref qdnreijwcptghwoaqlny
 ```
 ---
 *CLAUDE.md v3.2 | 04.04.2026 | GAM Command Center*
-*Material Change Protocol: 15 Tier 1 triggers + 9 Tier 2 + 9 Safe Zone + Recovery*
+*Material Change Protocol: Rule 0 + 15 Tier 1 triggers + 9 Tier 2 + 9 Safe Zone + Recovery*
