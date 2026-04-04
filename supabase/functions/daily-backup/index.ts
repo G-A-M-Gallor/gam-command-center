@@ -18,13 +18,8 @@ const BACKUP_TABLES = [
   { name: "pm_sprints" },
   {
     name: "pm_tasks",
-    selectColumns: ["id", "title", "status", "priority", "effort", "owner", "created_at", "updated_at", "sprint_id", "project_id"]
-  },
-  {
-    name: "semantic_memory",
-    selectColumns: ["id", "content", "source", "source_type", "chunk_index", "created_at", "updated_at"],
-    isSemanticMemory: true,
-    limit: 200
+    selectColumns: ["id", "notion_id", "title", "status", "priority", "created_at"],
+    limit: 100
   },
   { name: "knowledge_items" },
 ];
@@ -59,12 +54,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Authentication check
+    // Authentication check - require either valid cron secret OR valid bearer token
     const cronSecret = req.headers.get('x-cron-secret');
     const authHeader = req.headers.get('authorization');
 
-    if (cronSecret && cronSecret !== CRON_SYNC_SECRET && !authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    const validCronAuth = cronSecret === CRON_SYNC_SECRET;
+    const validBearerAuth = authHeader?.startsWith('Bearer ');
+
+    if (!validCronAuth && !validBearerAuth) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - valid cron secret or bearer token required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -106,6 +104,13 @@ Deno.serve(async (req) => {
           continue;
         }
         console.log(`[daily-backup] Table ${table.name} exists with ${count} rows, proceeding with backup`);
+
+        // Check if this is a large table requiring chunked backup
+        if (table.isSemanticMemory || (count && count > 500)) {
+          console.log(`[daily-backup] Using chunked backup for large table ${table.name} (${count} rows)`);
+          await backupLargeTable(supabase, table, timestamp, result);
+          continue;
+        }
 
         // Debug: Log the columns being selected
         if (table.selectColumns) {
@@ -285,6 +290,101 @@ async function generateChecksum(data: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
   const hashArray = new Uint8Array(hashBuffer);
   return Array.from(hashArray).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function backupLargeTable(supabase: any, table: any, timestamp: string, result: BackupResult): Promise<void> {
+  const CHUNK_SIZE = table.limit || 200;
+  let offset = 0;
+  let totalRows = 0;
+  let allChunks: any[] = [];
+
+  console.log(`[daily-backup] Starting chunked backup for large table: ${table.name}`);
+
+  while (true) {
+    try {
+      // Build query with offset pagination - use created_at for reliable ordering
+      let query = supabase.from(table.name)
+        .select(table.selectColumns ? table.selectColumns.join(',') : '*')
+        .range(offset, offset + CHUNK_SIZE - 1)
+        .order('created_at', { ascending: true });
+
+      const { data: chunk, error } = await query;
+
+      if (error) {
+        console.error(`[daily-backup] Chunked query error for ${table.name} at offset ${offset}:`, error);
+        throw error;
+      }
+
+      if (!chunk || chunk.length === 0) {
+        console.log(`[daily-backup] No more data for ${table.name}, stopping at offset ${offset}`);
+        break;
+      }
+
+      console.log(`[daily-backup] Fetched chunk for ${table.name}: ${chunk.length} rows (offset ${offset})`);
+
+      allChunks.push(...chunk);
+      totalRows += chunk.length;
+      offset += CHUNK_SIZE;
+
+      // Safety limit to prevent infinite loops
+      if (offset > 10000) {
+        console.log(`[daily-backup] Safety limit reached for ${table.name}, stopping at ${offset} rows`);
+        break;
+      }
+
+      // If chunk is smaller than expected, we've reached the end
+      if (chunk.length < CHUNK_SIZE) {
+        console.log(`[daily-backup] Final chunk for ${table.name}: ${chunk.length} < ${CHUNK_SIZE}`);
+        break;
+      }
+
+    } catch (chunkError) {
+      console.error(`[daily-backup] Error processing chunk for ${table.name}:`, chunkError);
+      throw chunkError;
+    }
+  }
+
+  // Prepare backup data
+  let backupData: string;
+  try {
+    const safeData = JSON.parse(JSON.stringify(allChunks));
+    backupData = JSON.stringify(safeData);
+  } catch (serializationError) {
+    console.error(`[daily-backup] JSON serialization error for ${table.name}:`, serializationError);
+    throw serializationError;
+  }
+
+  // Encrypt if encryption key is available
+  if (ENCRYPTION_KEY) {
+    backupData = await encryptData(backupData, ENCRYPTION_KEY);
+  }
+
+  // Upload to storage
+  const fileName = `${timestamp}/${table.name}.json${ENCRYPTION_KEY ? '.enc' : ''}`;
+  const { error: uploadError } = await supabase.storage
+    .from('backups')
+    .upload(fileName, backupData, {
+      contentType: 'application/octet-stream',
+      upsert: true
+    });
+
+  if (uploadError) {
+    console.error(`[daily-backup] Upload error for ${table.name}:`, uploadError);
+    throw uploadError;
+  }
+
+  // Record success
+  result.tables_backed_up.push(table.name);
+  result.storage_paths.push(fileName);
+  result.row_counts[table.name] = totalRows;
+  result.sizes_bytes[table.name] = new Blob([backupData]).size;
+  result.checksums[table.name] = await generateChecksum(backupData);
+
+  if (table.isSemanticMemory) {
+    result.embedding_regen_required = true;
+  }
+
+  console.log(`[daily-backup] Successfully backed up large table ${table.name}: ${totalRows} rows in ${Math.ceil(totalRows / CHUNK_SIZE)} chunks`);
 }
 
 async function cleanupOldBackups(supabase: any) {

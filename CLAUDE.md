@@ -1,5 +1,5 @@
 # CLAUDE.md — GAM Command Center
-**version: 3.1 | date: 03.04.2026 | status: approved — push to GitHub**
+**version: 3.2 | date: 04.04.2026 | status: approved — push to GitHub**
 > קרא דף זה בתחילת כל session. זה ה-source of truth לכל עבודה על הפרויקט.
 ---
 ## 0. Project Identity
@@ -46,6 +46,7 @@
 **Rule 15:** Session Handoff = תמיד בסיום session עם Claude Code.
 **Rule 16:** Claude Code מעדכן task status בNotion + Supabase בסיום task (הושלם/בהתקדמות/תקוע).
 **Rule 17:** כל App חייב CLAUDE.md — דף ילד בNotion. מסונכרן ל-`pm_apps.claude_md_content` כל 3 דקות.
+**Rule 18:** `semantic_memory` אסורה ב-daily-backup. הטבלה גורמת stack overflow + לא נדרשת לגיבוי.
 ---
 ## 4. Material Change Protocol v3.1
 > **מהו Material Change?** שינוי שמשפיע על יציבות, אבטחה, עלויות, או ארכיטקטורה של המערכת.
@@ -122,7 +123,7 @@
 ## 7. Key Edge Functions
 | Function | תפקיד | Auth |
 |----------|--------|------|
-| `daily-backup` | גיבוי יומי 5 טבלאות | x-cron-secret |
+| `daily-backup` | גיבוי יומי 4 טבלאות | x-cron-secret |
 | `restore-backup` | שחזור מגיבוי (dry_run first) | service role |
 | `notion-pm-sync` (v17) | Notion→Supabase sync | x-cron-secret |
 | `embed-semantic` (v7) | PM→embeddings | cron |
@@ -187,5 +188,5 @@ npx supabase secrets set KEY=value --project-ref qdnreijwcptghwoaqlny
 # npx vercel deploy  ← דורש אישור גל
 ```
 ---
-*CLAUDE.md v3.1 | 03.04.2026 | GAM Command Center*
+*CLAUDE.md v3.2 | 04.04.2026 | GAM Command Center*
 *Material Change Protocol: 15 Tier 1 triggers + 9 Tier 2 + 9 Safe Zone + Recovery*
