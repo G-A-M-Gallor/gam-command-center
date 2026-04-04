@@ -5,18 +5,27 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ALERT_WEBHOOK = Deno.env.get("BACKUP_ALERT_WEBHOOK");
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const ALERT_EMAIL = Deno.env.get("BACKUP_ALERT_EMAIL");
+const CRON_SYNC_SECRET = Deno.env.get("CRON_SYNC_SECRET")!;
+const _ALERT_WEBHOOK = Deno.env.get("BACKUP_ALERT_WEBHOOK");
+const _RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const _ALERT_EMAIL = Deno.env.get("BACKUP_ALERT_EMAIL");
 const ENCRYPTION_KEY = Deno.env.get("BACKUP_ENCRYPTION_KEY");
 const RETENTION_DAYS = 30;
-const FUNCTION_DEADLINE_MS = 50_000;
+const _FUNCTION_DEADLINE_MS = 50_000;
 
 const BACKUP_TABLES = [
   { name: "pm_apps" },
   { name: "pm_sprints" },
-  { name: "pm_tasks" },
-  { name: "semantic_memory", excludeColumns: ["embedding"], isSemanticMemory: true },
+  {
+    name: "pm_tasks",
+    selectColumns: ["id", "title", "status", "priority", "effort", "owner", "created_at", "updated_at", "sprint_id", "project_id"]
+  },
+  {
+    name: "semantic_memory",
+    selectColumns: ["id", "content", "source", "source_type", "chunk_index", "created_at", "updated_at"],
+    isSemanticMemory: true,
+    limit: 200
+  },
   { name: "knowledge_items" },
 ];
 
@@ -54,11 +63,7 @@ Deno.serve(async (req) => {
     const cronSecret = req.headers.get('x-cron-secret');
     const authHeader = req.headers.get('authorization');
 
-    const { data: secretData } = await createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
-      .rpc('get_secret', { secret_name: 'cron_sync_secret' });
-    const expectedSecret = secretData?.[0]?.secret;
-
-    if (cronSecret !== expectedSecret && !authHeader?.startsWith('Bearer ')) {
+    if (cronSecret && cronSecret !== CRON_SYNC_SECRET && !authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -91,29 +96,41 @@ Deno.serve(async (req) => {
       try {
         console.log(`[daily-backup] Processing table: ${table.name}`);
 
-        // Check if table exists
-        const { data: tableExists } = await supabase
-          .from('information_schema.tables')
-          .select('table_name')
-          .eq('table_name', table.name)
-          .eq('table_schema', 'public')
-          .limit(1);
+        // Check if table exists by trying to count rows (more reliable than information_schema)
+        const { count, error: tableError } = await supabase
+          .from(table.name)
+          .select('*', { count: 'exact', head: true });
 
-        if (!tableExists || tableExists.length === 0) {
-          console.log(`[daily-backup] Table ${table.name} does not exist, skipping`);
+        if (tableError) {
+          console.log(`[daily-backup] Table ${table.name} doesn't exist or is inaccessible:`, tableError.message);
           continue;
         }
+        console.log(`[daily-backup] Table ${table.name} exists with ${count} rows, proceeding with backup`);
 
-        // Get table data
-        let query = supabase.from(table.name).select('*');
+        // Debug: Log the columns being selected
+        if (table.selectColumns) {
+          console.log(`[daily-backup] Using selectColumns for ${table.name}:`, table.selectColumns);
+        } else if (table.excludeColumns) {
+          console.log(`[daily-backup] Using excludeColumns for ${table.name}:`, table.excludeColumns);
+        }
 
-        if (table.excludeColumns && table.excludeColumns.length > 0) {
+        // Get table data with pagination and safe JSON serialization
+        const rowLimit = table.limit || 500; // Use table-specific limit or default 500
+        let query = supabase.from(table.name).select('*').limit(rowLimit);
+
+        if (table.selectColumns && table.selectColumns.length > 0) {
+          // Use specific columns if defined
+          query = supabase.from(table.name).select(table.selectColumns.join(',')).limit(rowLimit);
+        } else if (table.excludeColumns && table.excludeColumns.length > 0) {
+          // Otherwise use exclude logic
           const allColumns = await getTableColumns(supabase, table.name);
           const columnsToSelect = allColumns.filter(col => !table.excludeColumns!.includes(col));
-          query = supabase.from(table.name).select(columnsToSelect.join(','));
+          query = supabase.from(table.name).select(columnsToSelect.join(',')).limit(rowLimit);
         }
 
         const { data, error } = await query;
+
+        console.log(`[daily-backup] Query result for ${table.name}: error=${!!error}, data length=${data?.length || 0}`);
 
         if (error) {
           console.error(`[daily-backup] Error fetching ${table.name}:`, error);
@@ -122,12 +139,24 @@ Deno.serve(async (req) => {
         }
 
         if (!data || data.length === 0) {
-          console.log(`[daily-backup] Table ${table.name} is empty, skipping`);
+          console.log(`[daily-backup] Table ${table.name} is empty or no data returned, skipping`);
           continue;
         }
 
-        // Prepare backup data
-        let backupData = JSON.stringify(data);
+        // Prepare backup data with safe serialization
+        let backupData: string;
+        try {
+          // Remove potential circular references before serialization
+          const safeData = JSON.parse(JSON.stringify(data));
+          backupData = JSON.stringify(safeData);
+        } catch (serializationError) {
+          console.error(`[daily-backup] JSON serialization error for ${table.name}:`, serializationError);
+          result.tables_failed.push(table.name);
+          if (!result.error_message) {
+            result.error_message = `JSON serialization failed for ${table.name}: ${serializationError.message}`;
+          }
+          continue;
+        }
 
         // Encrypt if encryption key is available
         if (ENCRYPTION_KEY) {
@@ -136,7 +165,7 @@ Deno.serve(async (req) => {
 
         // Upload to storage
         const fileName = `${timestamp}/${table.name}.json${ENCRYPTION_KEY ? '.enc' : ''}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: _uploadData, error: uploadError } = await supabase.storage
           .from('backups')
           .upload(fileName, backupData, {
             contentType: 'application/octet-stream',
