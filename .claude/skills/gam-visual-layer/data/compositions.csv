@@ -1,0 +1,9 @@
+composition_name,layout_pattern,grid_structure,responsive_behavior,rtl_support
+Dashboard Grid,12-column responsive grid,"grid-cols-1 md:grid-cols-2 lg:grid-cols-12","Stacks on mobile, 2-col tablet, 12-col desktop",RTL column reverse
+Command Center,Header + Sidebar + Main + Dock,"h-screen flex flex-col","Fixed header/dock, collapsible sidebar",RTL sidebar on right
+Widget Layout,Flexible widget grid,"grid gap-4 auto-rows-min","Auto-fit widgets by screen size",RTL widget arrangement
+Detail View,Breadcrumb + Header + Tabs + Content,"flex flex-col space-y-4","Scrollable content area",RTL text alignment
+Modal Pattern,Backdrop + Centered Panel,"fixed inset-0 z-50 flex items-center justify-center","Full viewport overlay",RTL panel positioning
+Card Grid,Masonry-style cards,"columns-1 md:columns-2 lg:columns-3","Responsive column count",RTL column flow
+Form Layout,Two-column form sections,"grid grid-cols-1 lg:grid-cols-2 gap-6","Single column mobile",RTL label alignment
+Navigation Tree,Hierarchical menu structure,"space-y-2 nested indentation","Collapsible sections",RTL indentation reverse

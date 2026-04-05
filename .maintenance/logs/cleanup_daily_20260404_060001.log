@@ -1,0 +1,50 @@
+[0;34m🔍 Starting Professional Code Cleanup Audit...[0m
+Report will be saved to: /Users/galmiller/gam-command-center/.maintenance/reports/cleanup_audit_20260404_060001.json
+
+[0;34m📦 DEAD CODE ANALYSIS[0m
+[1;33m⚠️ NPX not available, skipping TypeScript analysis[0m
+
+[0;34m📁 FILE ANALYSIS[0m
+[1;33mChecking large_files...[0m
+[0;31m❌ large_files: Found       10 issues (threshold: 5)[0m
+[1;33mChecking empty_files...[0m
+[0;31m❌ empty_files: Found        1 issues (threshold: 0)[0m
+[1;33mChecking duplicate_files...[0m
+[0;31m❌ duplicate_files: Found        3 issues (threshold: 0)[0m
+
+[0;34m📚 DEPENDENCY ANALYSIS[0m
+[1;33mChecking unused_dependencies...[0m
+[0;32m✅ unused_dependencies:        1 issues (within threshold)[0m
+[1;33mChecking outdated_dependencies...[0m
+[0;32m✅ outdated_dependencies:        1 issues (within threshold)[0m
+
+[0;34m📊 CODE QUALITY METRICS[0m
+[1;33mChecking tech_debt_markers...[0m
+[0;32m✅ tech_debt_markers:        1 issues (within threshold)[0m
+[1;33mChecking eslint_issues...[0m
+[0;32m✅ eslint_issues:        1 issues (within threshold)[0m
+[1;33mChecking typescript_errors...[0m
+[0;31m❌ typescript_errors: Found        1 issues (threshold: 0)[0m
+
+[0;34m🏗️ PROJECT STRUCTURE[0m
+[1;33mChecking deep_nesting...[0m
+[0;32m✅ deep_nesting:        1 issues (within threshold)[0m
+[1;33mChecking naming_violations...[0m
+[0;31m❌ naming_violations: Found      275 issues (threshold: 5)[0m
+
+[0;34m📝 GIT ANALYSIS[0m
+[1;33mChecking git_large_files...[0m
+[0;31m❌ git_large_files: Found        4 issues (threshold: 3)[0m
+[1;33mChecking frequently_changed_files...[0m
+[0;32m✅ frequently_changed_files:        2 issues (within threshold)[0m
+
+[0;34m📋 AUDIT SUMMARY[0m
+Total Checks:       12
+[0;32mPassed:        6[0m
+[0;31mFailed:        6[0m
+
+[1;33m⚠️ Issues found. Review the report: /Users/galmiller/gam-command-center/.maintenance/reports/cleanup_audit_20260404_060001.json[0m
+Run with [0;34m--fix[0m flag to attempt automatic fixes
+
+[0;34m🔧 RUNNING AUTOMATIC FIXES[0m
+[1;33mRemoving empty files...[0m

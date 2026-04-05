@@ -1,0 +1,13 @@
+pattern_name,description,css_classes,use_case,rtl_considerations
+Glass Card,"Glassmorphism effect with backdrop blur","bg-white/10 backdrop-blur-md border border-white/20","Overlay cards, modal panels","RTL text alignment with text-start"
+Gradient Background,"Subtle background gradients","bg-gradient-to-br from-slate-900 to-slate-800","Page backgrounds, hero sections","Gradient direction remains same in RTL"
+Hover Glow,"Primary color glow on hover","hover:shadow-lg hover:shadow-primary/25 transition-shadow","Interactive cards, buttons","No RTL changes needed"
+Stack Layout,"Vertical stacking with spacing","space-y-4 flex flex-col","Form sections, content blocks","RTL reverses flex-row only"
+Grid Auto-fit,"Responsive grid with auto-fit","grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]","Card grids, widget layouts","RTL affects text within grid items"
+Bordered Section,"Subtle borders for separation","border-l-4 border-primary pl-4","Callouts, quotes, important content","RTL uses border-r-4 pr-4 instead"
+Floating Action,"Elevated button with shadow","fixed bottom-4 right-4 z-50 shadow-lg","FAB buttons, quick actions","RTL positions at bottom-4 left-4"
+Status Indicator,"Color-coded status badges","px-2 py-1 rounded-full text-xs font-medium","Status labels, tags","RTL text direction within badge"
+Loading Skeleton,"Animated loading placeholders","animate-pulse bg-slate-700 rounded","Loading states, async content","No RTL changes needed"
+Notification Toast,"Sliding notification panel","fixed top-4 right-4 z-50 transform transition-transform","Alerts, confirmations","RTL positions at top-4 left-4"
+Split Panel,"Two-column layout with divider","grid grid-cols-2 divide-x divide-slate-700","Settings pages, comparisons","RTL reverses column order"
+Tabs Navigation,"Horizontal tab navigation","flex space-x-1 border-b border-slate-700","Page sections, content switching","RTL uses space-x-reverse"

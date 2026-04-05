@@ -1,0 +1,7 @@
+layer_name,z_index_range,purpose,components,usage_context
+Background,z-0 to z-10,"Canvas, backgrounds, base surfaces","bg-slate-900, gradient overlays, texture patterns","Page backgrounds, section dividers"
+Content,z-10 to z-20,"Main content areas, cards, panels","Cards, articles, widget containers, form sections","Dashboard widgets, content blocks"
+Interactive,z-20 to z-30,"Buttons, inputs, hoverable elements","Buttons, form inputs, clickable cards, tabs","User interaction elements"
+Navigation,z-30 to z-40,"Navigation bars, menus, controls","Navbar, sidebar, breadcrumbs, pagination","Site navigation, section controls"
+Overlay,z-40 to z-50,"Modals, dropdowns, tooltips","Modals, dropdown menus, tooltips, popovers","Temporary content overlay"
+Alert,z-50+,"Notifications, alerts, system messages","Toast notifications, error alerts, loading indicators","Critical user feedback"

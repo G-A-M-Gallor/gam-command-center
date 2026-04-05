@@ -1,0 +1,9 @@
+theme_name,primary_color,background_color,surface_color,text_color,context,css_vars
+vBrain Professional,#0ea5e9 sky-500,#0f172a slate-900,#1e293b slate-800,#f1f5f9 slate-100,"Main dashboard theme, professional SaaS","--primary: #0ea5e9; --bg: #0f172a"
+Success Theme,#059669 emerald-600,#064e3b emerald-900,#065f46 emerald-800,#d1fae5 emerald-100,"Success states, positive feedback","--success: #059669; --success-bg: #064e3b"
+Warning Theme,#d97706 amber-600,#451a03 amber-900,#78350f amber-800,#fef3c7 amber-100,"Warning states, caution areas","--warning: #d97706; --warning-bg: #451a03"
+Error Theme,#dc2626 red-600,#450a0a red-900,#7f1d1d red-800,#fee2e2 red-100,"Error states, critical alerts","--error: #dc2626; --error-bg: #450a0a"
+Info Theme,#0ea5e9 sky-500,#0c4a6e sky-900,#075985 sky-800,#e0f2fe sky-100,"Info states, neutral messages","--info: #0ea5e9; --info-bg: #0c4a6e"
+Hebrew Dark,#0ea5e9 sky-500,#0f172a slate-900,#1e293b slate-800,#f1f5f9 slate-100,"Hebrew RTL optimized dark theme","--hebrew-primary: #0ea5e9; direction: rtl"
+Light Mode,#0284c7 sky-600,#ffffff white,#f8fafc slate-50,#1e293b slate-800,"Light theme variant","--primary: #0284c7; --bg: #ffffff"
+High Contrast,#ffffff white,#000000 black,#1f2937 gray-800,#ffffff white,"Accessibility high contrast","--contrast-primary: #ffffff; --contrast-bg: #000000"
